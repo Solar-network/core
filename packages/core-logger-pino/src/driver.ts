@@ -83,10 +83,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @returns {Promise<Contracts.Kernel.Logger>}
      * @memberof PinoLogger
      */
-    public async make(options: {
-        fileRotator: { interval: string };
-        levels: Record<string, string>;
-    }): Promise<Contracts.Kernel.Logger> {
+    public async make(options?: any): Promise<Contracts.Kernel.Logger> {
         this.stream = new PassThrough();
         this.logger = pino(
             {
