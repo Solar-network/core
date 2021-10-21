@@ -2,7 +2,6 @@ import { Container, Contracts, Enums } from "@solar-network/core-kernel";
 import { Blocks, Interfaces, Transactions } from "@solar-network/crypto";
 import { Connection } from "typeorm";
 
-import { DatabaseEvent } from "./events";
 import { Round } from "./models";
 import { BlockRepository } from "./repositories/block-repository";
 import { RoundRepository } from "./repositories/round-repository";
@@ -46,11 +45,11 @@ export class DatabaseService {
     public async disconnect(): Promise<void> {
         this.logger.debug("Disconnecting from database");
 
-        this.events.dispatch(DatabaseEvent.PRE_DISCONNECT);
+        this.events.dispatch(Enums.DatabaseEvent.PreDisconnect);
 
         await this.connection.close();
 
-        this.events.dispatch(DatabaseEvent.POST_DISCONNECT);
+        this.events.dispatch(Enums.DatabaseEvent.PostDisconnect);
         this.logger.debug("Disconnected from database");
     }
 
