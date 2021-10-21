@@ -1,5 +1,4 @@
 import { Container, Contracts, Enums, Providers, Services, Utils } from "@solar-network/core-kernel";
-import { DatabaseInteraction } from "@solar-network/core-state";
 import { Identities, Interfaces, Managers } from "@solar-network/crypto";
 import delay from "delay";
 import { readJSONSync } from "fs-extra";
@@ -20,9 +19,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     @Container.inject(Container.Identifiers.Application)
     public readonly app!: Contracts.Kernel.Application;
 
-    @Container.inject(Container.Identifiers.DatabaseInteraction)
-    private readonly databaseInteraction!: DatabaseInteraction;
-
     @Container.inject(Container.Identifiers.PluginConfiguration)
     @Container.tagged("plugin", "@solar-network/core-p2p")
     private readonly configuration!: Providers.PluginConfiguration;
@@ -41,6 +37,9 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
+
+    @Container.inject(Container.Identifiers.TriggerService)
+    private readonly triggers!: Services.Triggers.Triggers;
 
     public config: any;
     public nextUpdateNetworkStatusScheduled: boolean | undefined;
@@ -650,9 +649,10 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
-        const delegates = (await this.databaseInteraction.getActiveDelegates(roundInfo)).map(
-            (wallet: Contracts.State.Wallet) => wallet.getPublicKey(),
-        );
+        const delegates: (string | undefined)[] = ((await this.triggers.call("getActiveDelegates", {
+            roundInfo,
+        })) as Contracts.State.Wallet[]).map((wallet) => wallet.getPublicKey());
+
         const delegatesOnThisNode: string[] = [];
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {

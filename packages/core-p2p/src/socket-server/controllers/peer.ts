@@ -1,6 +1,6 @@
 import Hapi from "@hapi/hapi";
-import { Container, Contracts, Utils } from "@solar-network/core-kernel";
-import { DatabaseInteraction, DatabaseInterceptor } from "@solar-network/core-state";
+import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
+import { DatabaseInterceptor } from "@solar-network/core-state";
 import { Crypto, Identities, Interfaces } from "@solar-network/crypto";
 import { readJSONSync } from "fs-extra";
 
@@ -14,14 +14,14 @@ export class PeerController extends Controller {
     @Container.inject(Container.Identifiers.PeerRepository)
     private readonly peerRepository!: Contracts.P2P.PeerRepository;
 
-    @Container.inject(Container.Identifiers.DatabaseInteraction)
-    private readonly databaseInteraction!: DatabaseInteraction;
-
     @Container.inject(Container.Identifiers.DatabaseInterceptor)
     private readonly databaseInterceptor!: DatabaseInterceptor;
 
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
+
+    @Container.inject(Container.Identifiers.TriggerService)
+    private readonly triggers!: Services.Triggers.Triggers;
 
     private cachedHeader: Contracts.P2P.PeerPingResponse | undefined;
 
@@ -96,9 +96,9 @@ export class PeerController extends Controller {
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
-        const delegates = (await this.databaseInteraction.getActiveDelegates(roundInfo)).map(
-            (wallet: Contracts.State.Wallet) => wallet.getPublicKey(),
-        );
+        const delegates: (string | undefined)[] = ((await this.triggers.call("getActiveDelegates", {
+            roundInfo,
+        })) as Contracts.State.Wallet[]).map((wallet) => wallet.getPublicKey());
 
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {
