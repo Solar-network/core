@@ -10,7 +10,7 @@
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
         "plugin:@typescript-eslint/recommended",
         "plugin:prettier/recommended",
-        "prettier/@typescript-eslint"
+        "prettier"
     ],
     "rules": {
         "@typescript-eslint/await-thenable": "off",
@@ -29,6 +29,7 @@
         "@typescript-eslint/no-misused-promises": "off",
         "@typescript-eslint/no-namespace": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-unnecessary-type-assertion": "off",
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-argument": "off",
         "@typescript-eslint/no-unsafe-call": "off",
@@ -54,6 +55,6 @@
         ],
         "prettier/prettier": "error",
         "require-atomic-updates": "off",
-        "simple-import-sort/sort": "error"
+        "simple-import-sort/imports": "error"
     }
 }

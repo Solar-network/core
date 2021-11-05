@@ -20,7 +20,7 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
         const milestone = Managers.configManager.getMilestone();
 
-        let dynamicFeesConfiguration;
+        let dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number; } | Record<string, any>;
         const feeStr = Utils.formatSatoshi(transaction.data.fee);
 
         if (milestone.dynamicFees && milestone.dynamicFees.enabled) {
@@ -68,7 +68,7 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
     public async throwIfCannotBroadcast(transaction: Interfaces.ITransaction): Promise<void> {
         const milestone = Managers.configManager.getMilestone();
 
-        let dynamicFeesConfiguration;
+        let dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number; } | Record<string, any>;
         const feeStr = Utils.formatSatoshi(transaction.data.fee);
 
         if (milestone.dynamicFees && milestone.dynamicFees.enabled) {

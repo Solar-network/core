@@ -67,7 +67,7 @@ export abstract class TransactionHandler {
 
     public getMinimumFee(
         transaction: Interfaces.ITransaction,
-        dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number },
+        dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number } | Record<string, any>,
     ): Utils.BigNumber {
         if (dynamicFeesConfiguration && dynamicFeesConfiguration.enabled) {
             const addonBytes: number = dynamicFeesConfiguration.addonBytes[transaction.key];
