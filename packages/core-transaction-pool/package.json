@@ -14,18 +14,15 @@
     "main": "dist/index",
     "types": "dist/index",
     "scripts": {
-        "build": "yarn clean && yarn compile",
-        "build:watch": "yarn clean && yarn compile -w",
-        "build:docs": "../../node_modules/typedoc/bin/typedoc --out docs src",
+        "build": "pnpm clean && pnpm compile",
+        "build:watch": "pnpm clean && pnpm compile -w",
         "clean": "rimraf dist",
-        "compile": "node ../../node_modules/typescript/bin/tsc",
-        "prepublishOnly": "yarn build",
-        "pretest": "bash ../../scripts/pre-test.sh"
+        "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
-        "@solar-network/core-kernel": "3.1.1",
-        "@solar-network/core-transactions": "3.1.1",
-        "@solar-network/crypto": "3.1.1",
+        "@solar-network/core-kernel": "workspace:*",
+        "@solar-network/core-transactions": "workspace:*",
+        "@solar-network/crypto": "workspace:*",
         "better-sqlite3": "7.4.3",
         "fs-extra": "8.1.0",
         "joi": "17.6.0"
@@ -33,8 +30,5 @@
     "devDependencies": {
         "@types/better-sqlite3": "5.4.3",
         "@types/fs-extra": "8.1.2"
-    },
-    "publishConfig": {
-        "access": "public"
     }
 }

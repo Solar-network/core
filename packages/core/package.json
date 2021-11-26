@@ -15,46 +15,33 @@
     "main": "dist/index",
     "types": "dist/index",
     "bin": {
-        "ark": "./bin/run"
+        "solar": "./bin/run"
     },
     "scripts": {
-        "ark": "node ./bin/run",
-        "build": "yarn clean && yarn compile",
-        "build:watch": "yarn clean && yarn compile -w",
-        "build:docs": "../../node_modules/typedoc/bin/typedoc --out docs src",
+        "build": "pnpm clean && pnpm compile",
+        "build:watch": "pnpm clean && pnpm compile -w",
         "clean": "rimraf dist",
         "compile": "node ../../node_modules/typescript/bin/tsc",
         "debug:forger": "node --inspect-brk ./bin/run forger:run",
         "debug:relay": "node --inspect-brk ./bin/run relay:run",
-        "debug:core": "node --inspect-brk ./bin/run core:run",
-        "core:devnet": "cross-env CORE_PATH_CONFIG=./bin/config/devnet yarn ark core:run",
-        "core:mainnet": "cross-env CORE_PATH_CONFIG=./bin/config/mainnet yarn ark core:run",
-        "core:testnet": "cross-env CORE_PATH_CONFIG=./bin/config/testnet yarn ark core:run --env=test",
-        "relay:devnet": "cross-env CORE_PATH_CONFIG=./bin/config/devnet yarn ark relay:run",
-        "relay:mainnet": "cross-env CORE_PATH_CONFIG=./bin/config/mainnet yarn ark relay:run",
-        "relay:testnet": "cross-env CORE_PATH_CONFIG=./bin/config/testnet yarn ark relay:run --env=test",
-        "forger:devnet": "cross-env CORE_PATH_CONFIG=./bin/config/devnet yarn ark forger:run",
-        "forger:mainnet": "cross-env CORE_PATH_CONFIG=./bin/config/mainnet yarn ark forger:run",
-        "forger:testnet": "cross-env CORE_PATH_CONFIG=./bin/config/testnet yarn ark forger:run --env=test",
-        "full:testnet": "cross-env CORE_PATH_CONFIG=./bin/config/testnet yarn ark core:run --networkStart --env=test",
-        "prepublishOnly": "yarn build"
+        "debug:core": "node --inspect-brk ./bin/run core:run"
     },
     "dependencies": {
-        "@solar-network/core-api": "3.1.1",
-        "@solar-network/core-blockchain": "3.1.1",
-        "@solar-network/core-cli": "3.1.1",
-        "@solar-network/core-database": "3.1.1",
-        "@solar-network/core-forger": "3.1.1",
-        "@solar-network/core-kernel": "3.1.1",
-        "@solar-network/core-logger-pino": "3.1.1",
-        "@solar-network/core-p2p": "3.1.1",
-        "@solar-network/core-snapshots": "3.1.1",
-        "@solar-network/core-state": "3.1.1",
-        "@solar-network/core-transaction-pool": "3.1.1",
-        "@solar-network/core-transactions": "3.1.1",
-        "@solar-network/core-webhooks": "3.1.1",
-        "@solar-network/crypto": "3.1.1",
-        "@solar-network/utils": "1.3.2",
+        "@solar-network/core-api": "workspace:*",
+        "@solar-network/core-blockchain": "workspace:*",
+        "@solar-network/core-cli": "workspace:*",
+        "@solar-network/core-database": "workspace:*",
+        "@solar-network/core-forger": "workspace:*",
+        "@solar-network/core-kernel": "workspace:*",
+        "@solar-network/core-logger-pino": "workspace:*",
+        "@solar-network/core-p2p": "workspace:*",
+        "@solar-network/core-snapshots": "workspace:*",
+        "@solar-network/core-state": "workspace:*",
+        "@solar-network/core-transaction-pool": "workspace:*",
+        "@solar-network/core-transactions": "workspace:*",
+        "@solar-network/core-webhooks": "workspace:*",
+        "@solar-network/crypto": "workspace:*",
+        "@solar-network/utils": "workspace:*",
         "argon2": "0.28.2",
         "bip39": "3.0.4",
         "boxen": "5.1.2",
@@ -73,10 +60,10 @@
         "type-fest": "0.21.3",
         "wif": "2.0.6"
     },
+    "devDependencies": {
+        "cross-env": "7.0.3"
+    },
     "peerDependencies": {
         "pm2": "^5.1.0"
-    },
-    "publishConfig": {
-        "access": "public"
     }
 }
