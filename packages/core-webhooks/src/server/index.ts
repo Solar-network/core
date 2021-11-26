@@ -12,6 +12,13 @@ import { Webhook } from "../interfaces";
 import { whitelist } from "./plugins/whitelist";
 import * as schema from "./schema";
 import * as utils from "./utils";
+
+declare module "@hapi/hapi" {
+    interface ServerApplicationState {
+        database: Database;
+    }
+}
+
 /**
  * @export
  * @class Server
@@ -56,7 +63,7 @@ export class Server {
      * @type {HapiServer}
      * @memberof Server
      */
-    private server: HapiServer;
+    private server!: HapiServer;
 
     /**
      * @param {string} name

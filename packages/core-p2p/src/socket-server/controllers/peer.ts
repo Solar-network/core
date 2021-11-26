@@ -6,9 +6,14 @@ import { readJSONSync } from "fs-extra";
 
 import { constants } from "../../constants";
 import { MissingCommonBlockError } from "../../errors";
+import { Socket } from "../../hapi-nes/socket";
 import { getPeerIp } from "../../utils/get-peer-ip";
 import { getPeerConfig } from "../utils/get-peer-config";
 import { Controller } from "./controller";
+
+interface GetPeersRequest extends Hapi.Request {
+    socket: Socket;
+}
 
 export class PeerController extends Controller {
     @Container.inject(Container.Identifiers.PeerRepository)
@@ -25,7 +30,7 @@ export class PeerController extends Controller {
 
     private cachedHeader: Contracts.P2P.PeerPingResponse | undefined;
 
-    public getPeers(request: Hapi.Request, h: Hapi.ResponseToolkit): Contracts.P2P.PeerBroadcast[] {
+    public getPeers(request: GetPeersRequest, h: Hapi.ResponseToolkit): Contracts.P2P.PeerBroadcast[] {
         const peerIp = getPeerIp(request.socket);
 
         return this.peerRepository

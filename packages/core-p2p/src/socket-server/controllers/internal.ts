@@ -99,11 +99,11 @@ export class InternalController extends Controller {
 
         const height = lastBlock.data.height + 1;
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, height);
-        return Crypto.Slots.getSlotNumber(blockTimeLookup, request.payload.timestamp);
+        return Crypto.Slots.getSlotNumber(blockTimeLookup, (request.payload as { timestamp: number }).timestamp);
     }
 
     public async getNetworkState(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<Contracts.P2P.NetworkState> {
-        return await this.peerNetworkMonitor.getNetworkState(!!request.payload.log);
+        return await this.peerNetworkMonitor.getNetworkState(!!(request.payload as { log: boolean }).log);
     }
 
     public syncBlockchain(request: Hapi.Request, h: Hapi.ResponseToolkit): boolean {

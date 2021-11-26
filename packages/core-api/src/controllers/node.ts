@@ -2,7 +2,7 @@ import Hapi from "@hapi/hapi";
 import { Repositories } from "@solar-network/core-database";
 import { Container, Contracts, Providers, Services } from "@solar-network/core-kernel";
 import { Handlers } from "@solar-network/core-transactions";
-import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
+import { Crypto, Managers } from "@solar-network/crypto";
 
 import { PortsResource } from "../resources";
 import { Controller } from "./controller";
@@ -99,13 +99,13 @@ export class NodeController extends Controller {
         };
     }
 
-    public async configurationCrypto(): Promise<{ data: Interfaces.NetworkConfig | undefined }> {
+    public async configurationCrypto(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         return {
             data: Managers.configManager.all(),
         };
     }
 
-    public async fees(request: Hapi.Request): Promise<{ meta: { days: any }; data: {} }> {
+    public async fees(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         // @ts-ignore
         const handlers = this.nullHandlerRegistry.getRegisteredHandlers();
         const handlersKey = {};

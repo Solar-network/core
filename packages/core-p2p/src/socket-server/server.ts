@@ -1,5 +1,5 @@
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
-import { Container, Contracts, Types } from "@solar-network/core-kernel";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { plugin as hapiNesPlugin } from "../hapi-nes";
 import { Socket } from "../hapi-nes/socket";
@@ -56,14 +56,15 @@ export class Server {
      * @returns {Promise<void>}
      * @memberof Server
      */
-    public async initialize(name: string, optionsServer: Types.JsonObject): Promise<void> {
+    public async initialize(name: string, optionsServer: { hostname: string; port: number }): Promise<void> {
         this.name = name;
 
         const address = optionsServer.hostname;
         const port = Number(optionsServer.port);
 
         this.server = new HapiServer({ address, port });
-        this.server.app = this.app;
+        // @ts-ignore
+        this.server.app = this.app; // TODO: Move app under app
         await this.server.register({
             plugin: hapiNesPlugin,
             options: {
@@ -143,6 +144,6 @@ export class Server {
      * @memberof Server
      */
     public async inject(options: string | ServerInjectOptions): Promise<ServerInjectResponse> {
-        await this.server.inject(options);
+        return this.server.inject(options);
     }
 }
