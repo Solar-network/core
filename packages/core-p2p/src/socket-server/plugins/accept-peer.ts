@@ -1,4 +1,3 @@
-import { Server } from "@hapi/hapi";
 import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { getPeerIp } from "../../utils/get-peer-ip";
@@ -14,7 +13,7 @@ export class AcceptPeerPlugin {
     @Container.inject(Container.Identifiers.PeerProcessor)
     private readonly peerProcessor!: Contracts.P2P.PeerProcessor;
 
-    public register(server: Server): void {
+    public register(server) {
         // try to add peer when receiving request on all routes except internal
         const routesConfigByPath = {
             ...this.app.resolve(PeerRoute).getRoutesConfigByPath(),

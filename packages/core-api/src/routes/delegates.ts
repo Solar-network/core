@@ -19,7 +19,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/delegates",
-        handler: (request: Hapi.Request) => controller.index(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.index(request, h),
         options: {
             validate: {
                 query: Joi.object()
@@ -36,7 +36,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/delegates/{id}",
-        handler: (request: Hapi.Request) => controller.show(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.show(request, h),
         options: {
             validate: {
                 params: Joi.object({
@@ -49,7 +49,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/delegates/{id}/voters",
-        handler: (request: Hapi.Request) => controller.voters(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.voters(request, h),
         options: {
             validate: {
                 params: Joi.object({
@@ -66,7 +66,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/delegates/{id}/blocks",
-        handler: (request: Hapi.Request) => controller.blocks(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.blocks(request, h),
         options: {
             validate: {
                 params: Joi.object({

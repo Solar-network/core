@@ -12,7 +12,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/blocks",
-        handler: (request: Hapi.Request) => controller.index(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.index(request, h),
         options: {
             validate: {
                 query: Joi.object({
@@ -34,7 +34,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/blocks/first",
-        handler: (request: Hapi.Request) => controller.first(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.first(request, h),
         options: {
             validate: {
                 query: Joi.object({
@@ -47,7 +47,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/blocks/last",
-        handler: (request: Hapi.Request) => controller.last(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.last(request, h),
         options: {
             validate: {
                 query: Joi.object({
@@ -60,7 +60,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/blocks/{id}",
-        handler: (request: Hapi.Request) => controller.show(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.show(request, h),
         options: {
             validate: {
                 params: Joi.object({
@@ -76,7 +76,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/blocks/{id}/transactions",
-        handler: (request: Hapi.Request) => controller.transactions(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.transactions(request, h),
         options: {
             validate: {
                 params: Joi.object({

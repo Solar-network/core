@@ -7,6 +7,12 @@ import { Interfaces } from "@solar-network/crypto";
 import { TransactionResource, TransactionWithBlockResource } from "../resources";
 import { Controller } from "./controller";
 
+export interface StoreRequest extends Hapi.Request {
+    payload: {
+        transactions: Interfaces.ITransactionData[];
+    };
+}
+
 @Container.injectable()
 export class TransactionsController extends Controller {
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
@@ -54,13 +60,7 @@ export class TransactionsController extends Controller {
         }
     }
 
-    public async store(
-        request: Hapi.Request,
-        h: Hapi.ResponseToolkit,
-    ): Promise<{
-        data: { accept: string[]; broadcast: string[]; excess: string[]; invalid: string[] };
-        errors: { [id: string]: Contracts.TransactionPool.ProcessorError } | undefined;
-    }> {
+    public async store(request: StoreRequest, h: Hapi.ResponseToolkit) {
         const result = await this.processor.process(request.payload.transactions);
         return {
             data: {

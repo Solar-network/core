@@ -1,5 +1,4 @@
 import Boom from "@hapi/boom";
-import { Server } from "@hapi/hapi";
 import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { BlocksRoute } from "../routes/blocks";
@@ -15,7 +14,7 @@ export class CodecPlugin {
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
-    public register(server: Server): void {
+    public register(server): void {
         const allRoutesConfigByPath = {
             ...this.app.resolve(InternalRoute).getRoutesConfigByPath(),
             ...this.app.resolve(PeerRoute).getRoutesConfigByPath(),

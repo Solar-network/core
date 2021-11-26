@@ -8,6 +8,12 @@ import { TooManyTransactionsError } from "../errors";
 import { mapAddr } from "../utils/map-addr";
 import { Controller } from "./controller";
 
+export interface BlockRequest extends Hapi.Request {
+    payload: {
+        block: Buffer;
+    };
+}
+
 export class BlocksController extends Controller {
     @Container.inject(Container.Identifiers.PluginConfiguration)
     @Container.tagged("plugin", "@solar-network/core-p2p")
@@ -24,7 +30,7 @@ export class BlocksController extends Controller {
     private readonly walletRepository!: Contracts.State.WalletRepository;
 
     public async postBlock(
-        request: Hapi.Request,
+        request: BlockRequest,
         h: Hapi.ResponseToolkit,
     ): Promise<{ status: boolean; height: number }> {
         const blockBuffer: Buffer = request.payload.block;

@@ -1,5 +1,6 @@
 import { Repositories } from "@solar-network/core-database";
 import { Container, Contracts, Utils } from "@solar-network/core-kernel";
+import Hapi from "@hapi/hapi";
 
 import { Controller } from "./controller";
 
@@ -14,7 +15,7 @@ export class BlockchainController extends Controller {
     @Container.tagged("state", "blockchain")
     private readonly walletRepository!: Contracts.State.WalletRepository;
 
-    public async index(): Promise<object> {
+    public async index(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         const { data } = this.stateStore.getLastBlock();
 
         const fees = Utils.BigNumber.make(await this.transactionRepository.getFeesBurned());
