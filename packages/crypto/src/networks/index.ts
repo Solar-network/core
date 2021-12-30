@@ -1,1 +1,1 @@
-export * from "@arkecosystem/crypto-networks";
+export * from "@solar-network/crypto-networks";
