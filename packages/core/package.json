@@ -1,7 +1,7 @@
 {
     "name": "@arkecosystem/core",
     "version": "3.0.6",
-    "description": "Core of the ARK Blockchain",
+    "description": "Core of the Solar Network Blockchain",
     "license": "MIT",
     "contributors": [
         "François-Xavier Thoorens <fx@ark.io>",
