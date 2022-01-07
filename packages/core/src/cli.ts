@@ -1,8 +1,6 @@
 import { ApplicationFactory, Commands, Container, Contracts, InputParser, Plugins } from "@solar-network/core-cli";
 import envPaths from "env-paths";
-import { existsSync } from "fs-extra";
-import { platform } from "os";
-import { join, resolve } from "path";
+import { resolve } from "path";
 import { PackageJson } from "type-fest";
 
 type Flags = {
@@ -48,9 +46,6 @@ export class CommandLineInterface {
      * @memberof CommandLineInterface
      */
     public async execute(dirname = __dirname): Promise<void> {
-        // Set NODE_PATHS. Only required for plugins that uses @solar-network as peer dependencies.
-        this.setNodePath();
-
         // Load the package information. Only needed for updates and installations.
         const pkg: PackageJson = require("../package.json");
 
@@ -106,27 +101,6 @@ export class CommandLineInterface {
         commandInstance.register(this.argv);
 
         await commandInstance.run();
-    }
-
-    private setNodePath(): void {
-        /* istanbul ignore next */
-        const delimiter = platform() === "win32" ? ";" : ":";
-
-        if (!process.env.NODE_PATH) {
-            process.env.NODE_PATH = "";
-        }
-
-        const setPathIfExists = (path: string) => {
-            /* istanbul ignore else */
-            if (existsSync(path)) {
-                process.env.NODE_PATH += `${delimiter}${path}`;
-            }
-        };
-
-        setPathIfExists(join(__dirname, "../../../"));
-        setPathIfExists(join(__dirname, "../../../node_modules"));
-
-        require("module").Module._initPaths();
     }
 
     private async detectNetworkAndToken(flags: Flags): Promise<TokenNetworkFlags> {

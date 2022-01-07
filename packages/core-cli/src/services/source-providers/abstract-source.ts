@@ -34,7 +34,7 @@ export abstract class AbstractSource implements Source {
     }
 
     protected async installDependencies(packageName: string): Promise<void> {
-        const subprocess = execa(`yarn`, ["install", "--production"], { cwd: this.getDestPath(packageName) });
+        const subprocess = execa(`pnpm`, ["install", "--production"], { cwd: this.getDestPath(packageName) });
         if (process.argv.includes("-v") || process.argv.includes("-vv")) {
             subprocess.stdout!.pipe(process.stdout);
             subprocess.stderr!.pipe(process.stderr);
