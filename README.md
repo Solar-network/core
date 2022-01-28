@@ -1,5 +1,9 @@
 # Solar Core
 
+<p align="center">
+	<img src="./banner.jpg?sanitize=true" />
+</p>
+
 [![License: MIT](https://badgen.now.sh/badge/license/MIT/green)](https://opensource.org/licenses/MIT)
 
 ## Introduction
