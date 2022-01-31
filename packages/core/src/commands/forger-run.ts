@@ -2,7 +2,7 @@ import { Commands, Container, Contracts, Utils } from "@arkecosystem/core-cli";
 import { Networks } from "@arkecosystem/crypto";
 import Joi from "joi";
 
-import { buildBIP38 } from "../internal/crypto";
+import { checkForPassphrase } from "../internal/crypto";
 
 /**
  * @export
@@ -38,9 +38,7 @@ export class Command extends Commands.Command {
             .setFlag("token", "The name of the token.", Joi.string().default("ark"))
             .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
             .setFlag("env", "", Joi.string().default("production"))
-            .setFlag("bip38", "", Joi.string())
             .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39.", Joi.string())
-            .setFlag("password", "A custom password that encrypts the BIP39. Referred to as BIP38.", Joi.string())
             .setFlag("skipPrompts", "Skip prompts.", Joi.boolean().default(false));
     }
 
@@ -54,10 +52,12 @@ export class Command extends Commands.Command {
         const flags: Contracts.AnyObject = { ...this.getFlags() };
         flags.processType = "forger";
 
+        checkForPassphrase(this.app.getCorePath("config"));
+
         await Utils.buildApplication({
             flags,
             plugins: {
-                "@arkecosystem/core-forger": await buildBIP38(flags, this.app.getCorePath("config")),
+                "@arkecosystem/core-forger": {},
             },
         });
 
