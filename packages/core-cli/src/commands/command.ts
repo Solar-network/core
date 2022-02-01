@@ -1,3 +1,4 @@
+import envPaths from "env-paths";
 import { PackageJson } from "type-fest";
 
 import { ActionFactory } from "../action-factory";
@@ -11,6 +12,7 @@ import { Output } from "../output";
 import { Config, Environment } from "../services";
 import { CommandHelp } from "./command-help";
 import { DiscoverConfig } from "./discover-config";
+import { DiscoverNetwork } from "./discover-network";
 
 /**
  * @export
@@ -319,8 +321,17 @@ export abstract class Command {
      * @memberof Command
      */
     private async detectNetwork(): Promise<void> {
-        if (!this.input.hasFlag("network")) {
-            throw new Error("You'll need to confirm the network to continue");
+        const requiresNetwork: boolean = Object.keys(this.definition.getFlags()).includes("network");
+
+        if (requiresNetwork && !this.input.hasFlag("network")) {
+            this.input.setFlag(
+                "network",
+                await this.app.resolve(DiscoverNetwork).discover(
+                    envPaths(this.input.getFlag("token"), {
+                        suffix: "core",
+                    }).config,
+                ),
+            );
         }
     }
 
