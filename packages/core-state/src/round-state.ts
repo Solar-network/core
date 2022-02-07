@@ -92,10 +92,12 @@ export class RoundState {
                 const wallet = this.walletRepository.createWallet(Identities.Address.fromPublicKey(publicKey));
                 wallet.setPublicKey(publicKey);
 
+                const existingWallet = this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate");
                 const delegate = {
                     voteBalance: Utils.BigNumber.make(balance),
-                    username: this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate.username"),
+                    username: existingWallet.username,
                     round: roundInfo!.round,
+                    rank: existingWallet.rank
                 };
                 AppUtils.assert.defined(delegate.username);
 
