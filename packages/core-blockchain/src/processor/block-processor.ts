@@ -9,6 +9,7 @@ import {
     ExceptionHandler,
     IncompatibleTransactionsHandler,
     InvalidGeneratorHandler,
+    InvalidRewardHandler,
     NonceOutOfOrderHandler,
     UnchainedHandler,
     VerificationFailedHandler,
@@ -78,6 +79,10 @@ export class BlockProcessor {
 
         if (!isValidGenerator) {
             return this.app.resolve<InvalidGeneratorHandler>(InvalidGeneratorHandler).execute(block);
+        }
+
+        if (!(await this.validateReward(block))) {
+            return this.app.resolve<InvalidRewardHandler>(InvalidRewardHandler).execute(block);
         }
 
         const containsForgedTransactions: boolean = await this.checkBlockContainsForgedTransactions(block);
@@ -277,6 +282,25 @@ export class BlockProcessor {
                 block.data.generatorPublicKey
             }) allowed to forge block ${block.data.height.toLocaleString()}`,
         );
+
+        return true;
+    }
+
+    private async validateReward(block: Interfaces.IBlock): Promise<boolean> {
+        const walletRepository = this.app.getTagged<Contracts.State.WalletRepository>(
+            Container.Identifiers.WalletRepository,
+            "state",
+            "blockchain",
+        );
+
+        const generatorWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(block.data.generatorPublicKey);
+
+        const expectedReward = Utils.calculateReward(block.data.height, generatorWallet.getAttribute("delegate.rank"));
+
+        if (!block.data.reward.isEqualTo(expectedReward)) {
+            this.logger.warning(["Invalid block reward:", block.data.reward, "Expected:", expectedReward].join(" "));
+            return false;
+        }
 
         return true;
     }
