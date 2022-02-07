@@ -1,6 +1,6 @@
 import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
 import { NetworkStateStatus } from "@arkecosystem/core-p2p";
-import { Blocks, Interfaces, Managers, Transactions } from "@arkecosystem/crypto";
+import { Blocks, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
 import { Handlers } from "@arkecosystem/core-transactions";
 
 import { Client } from "./client";
@@ -263,7 +263,7 @@ export class ForgerService {
                 height: networkState.getNodeHeight(),
             },
             timestamp: round.timestamp,
-            reward: round.reward,
+            reward: Utils.calculateReward(networkState.getNodeHeight()! + 1, round.currentForger.delegate.rank!),
         });
 
         AppUtils.assert.defined<Interfaces.IBlock>(block);
