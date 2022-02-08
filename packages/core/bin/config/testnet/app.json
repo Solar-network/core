@@ -20,7 +20,10 @@
                 "package": "@arkecosystem/core-transaction-pool"
             },
             {
-                "package": "@arkecosystem/core-p2p"
+                "package": "@arkecosystem/core-p2p",
+                "options": {
+                    "minimumNetworkReach": 3
+                }
             },
             {
                 "package": "@arkecosystem/core-blockchain"
@@ -60,7 +63,10 @@
                 "package": "@arkecosystem/core-transaction-pool"
             },
             {
-                "package": "@arkecosystem/core-p2p"
+                "package": "@arkecosystem/core-p2p",
+                "options": {
+                    "minimumNetworkReach": 3
+                }
             },
             {
                 "package": "@arkecosystem/core-blockchain"
