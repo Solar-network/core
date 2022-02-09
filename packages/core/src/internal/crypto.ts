@@ -21,4 +21,3 @@ export const checkForPassphrase = (config?: string): void => {
         throw new PassphraseNotDetected();
     }
 };
-
