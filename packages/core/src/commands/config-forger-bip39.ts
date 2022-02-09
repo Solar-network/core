@@ -105,7 +105,6 @@ export class Command extends Commands.Command {
 
                     const delegates: Record<string, string | string[]> = require(delegatesConfig);
                     delegates.secrets = [flags.bip39];
-                    delete delegates.bip38;
 
                     writeJSONSync(delegatesConfig, delegates);
                 },

@@ -165,7 +165,6 @@ export class LocalConfigLoader implements ConfigLoader {
             this.loadFromLocation(["delegates.json"]),
             Joi.object({
                 secrets: Joi.array().items(Joi.string()).optional(),
-                bip38: Joi.string().optional(),
             }),
         );
 
