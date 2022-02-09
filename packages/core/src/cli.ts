@@ -56,9 +56,6 @@ export class CommandLineInterface {
         // Create the application we will work with
         this.app = ApplicationFactory.make(new Container.Container(), pkg);
 
-        // Check for updates
-        this.app.get<Contracts.Updater>(Container.Identifiers.Updater).check();
-
         // Parse arguments and flags
         const { args, flags } = InputParser.parseArgv(this.argv);
 

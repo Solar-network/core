@@ -1,7 +1,7 @@
 import { dim, green, reset } from "kleur";
-import latestVersion from "latest-version";
 import * as semver from "semver";
 import { PackageJson } from "type-fest";
+import { sync } from "execa";
 
 import { Application } from "../application";
 import { Confirm, Spinner, Warning } from "../components";
@@ -10,8 +10,6 @@ import { Identifiers, inject, injectable } from "../ioc";
 import { Installer } from "./installer";
 import { ProcessManager } from "./process-manager";
 import * as Contracts from "../contracts";
-
-const ONE_DAY = 1000 * 60 * 60 * 24;
 
 /**
  * @export
@@ -61,13 +59,6 @@ export class Updater implements Contracts.Updater {
 
     /**
      * @private
-     * @type {*}
-     * @memberof Updater
-     */
-    private updateCheckInterval: any = ONE_DAY;
-
-    /**
-     * @private
      * @type {(string | undefined)}
      * @memberof Updater
      */
@@ -81,16 +72,10 @@ export class Updater implements Contracts.Updater {
         this.latestVersion = this.config.get("latestVersion");
 
         if (this.latestVersion) {
-            this.config.forget("latestVersion"); // ? shouldn't it be moved after lastUpdateCheck
-        }
-
-        if (Date.now() - this.config.get<number>("lastUpdateCheck") < this.updateCheckInterval) {
-            return false;
+            this.config.forget("latestVersion");
         }
 
         const latestVersion: string | undefined = await this.getLatestVersion();
-
-        this.config.set("lastUpdateCheck", Date.now());
 
         if (latestVersion === undefined) {
             return false;
@@ -132,13 +117,18 @@ export class Updater implements Contracts.Updater {
 
         spinner.start();
 
-        this.installer.install(this.packageName, this.packageChannel);
+        try {
+            this.installer.install(this.packageName, this.packageChannel);
 
-        if (updateProcessManager) {
-            this.processManager.update();
+            if (updateProcessManager) {
+                this.processManager.update();
+            }
+
+            spinner.succeed();
+        } catch (error) {
+            spinner.fail();
+            throw error;
         }
-
-        spinner.succeed();
 
         return true;
     }
@@ -149,23 +139,30 @@ export class Updater implements Contracts.Updater {
      * @memberof Updater
      */
     public async getLatestVersion(): Promise<string | undefined> {
-        try {
-            const latest: string | undefined = await latestVersion(this.packageName, {
-                version: this.packageChannel,
-            });
 
-            if (semver.lte(latest, this.packageVersion)) {
-                return undefined;
-            }
+        const coreDirectory = __dirname + "/../../../../";
 
-            return latest;
-        } catch {
+        let regex = '"^\\d+.\\d+.\\d+"';
+        if (this.packageChannel === "next") {
+            regex = '"^\\d+.\\d+.\\d+-next.\\d+"';
+        }
+
+        const command = `cd ${coreDirectory} && git tag -l | xargs git tag -d > /dev/null && git fetch --all --tags -fq && git tag --sort=committerdate | grep -Px ${regex} | tail -1`;
+        const { stdout, exitCode } = sync(command, { shell: true });
+
+        if (exitCode !== 0) {
             this.app
                 .get<Warning>(Identifiers.Warning)
                 .render(`We were unable to find any releases for the "${this.packageChannel}" channel.`);
 
             return undefined;
         }
+
+        if (semver.lte(stdout, this.packageVersion)) {
+            return undefined;
+        }
+
+        return stdout;
     }
 
     private get packageName(): string {

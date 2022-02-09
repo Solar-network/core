@@ -82,14 +82,19 @@ export class Command extends Commands.Command {
 
         spinner.start();
 
-        this.installer.install(this.pkg.name!, this.pkg.version!);
+        try {
+            this.installer.install(this.pkg.name!, this.pkg.version!);
 
-        this.processManager.update();
+            this.processManager.update();
 
-        spinner.succeed();
+            spinner.succeed();
 
-        await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
-        await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
-        await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
+            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
+            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+        } catch (error) {
+            spinner.fail();
+            this.components.error(error);
+        }
     }
 }
