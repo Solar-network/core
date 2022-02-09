@@ -141,17 +141,19 @@ export class Updater implements Contracts.Updater {
     public async getLatestVersion(): Promise<string | undefined> {
 
         const coreDirectory = __dirname + "/../../../../";
+
         let regex = '"^\\d+.\\d+.\\d+"';
         if (this.packageChannel === "next") {
             regex = '"^\\d+.\\d+.\\d+-next.\\d+"';
         }
+
         const command = `cd ${coreDirectory} && git tag -l | xargs git tag -d > /dev/null && git fetch --all --tags -fq && git tag --sort=committerdate | grep -Px ${regex} | tail -1`;
         const { stdout, exitCode } = sync(command, { shell: true });
 
         if (exitCode !== 0) {
             this.app
-            .get<Warning>(Identifiers.Warning)
-            .render(`We were unable to find any releases for the "${this.packageChannel}" channel.`);
+                .get<Warning>(Identifiers.Warning)
+                .render(`We were unable to find any releases for the "${this.packageChannel}" channel.`);
 
             return undefined;
         }
