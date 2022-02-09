@@ -63,6 +63,7 @@ export class RoundState {
         const roundInfo = this.getRound(block.data.height);
 
         this.blocksInCurrentRound = await this.getBlocksForRound();
+        await this.calcPreviousActiveDelegates(roundInfo, this.blocksInCurrentRound);
         await this.setForgingDelegatesOfRound(roundInfo);
 
         await this.databaseService.deleteRound(roundInfo.round + 1);
