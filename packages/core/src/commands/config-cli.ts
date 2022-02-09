@@ -51,7 +51,7 @@ export class Command extends Commands.Command {
             .setFlag("token", "The name of the token.", Joi.string())
             .setFlag(
                 "channel",
-                "The NPM registry channel that should be used.",
+                "Whether to install stable (latest) or prerelease (next) versions of Core.",
                 Joi.string().valid(...["next", "latest"]),
             );
     }
@@ -77,17 +77,22 @@ export class Command extends Commands.Command {
 
             this.config.set("channel", newChannel);
 
-            const spinner = this.components.spinner(`Installing ${this.pkg.name}@${newChannel}`);
+            const spinner = this.components.spinner(`Installing ${newChannel}`);
 
             spinner.start();
 
-            this.installer.install(this.pkg.name!, newChannel);
+            try {
+                this.installer.install(this.pkg.name!, newChannel);
 
-            spinner.succeed();
+                spinner.succeed();
 
-            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
-            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
-            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
+                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
+                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+            } catch (error) {
+                spinner.fail();
+                this.components.error(error);
+            }
         }
     }
 }
