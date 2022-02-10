@@ -35,7 +35,7 @@ export const calculateReward = (height: number, rank: number): number => {
     const reward = getReward(height);
 
     if (dynamicReward.enabled) {
-        if (dynamicReward.ranks[rank] !== undefined) {
+        if (typeof dynamicReward.ranks === "object" && typeof dynamicReward.ranks[rank] !== "undefined") {
             return dynamicReward.ranks[rank];
         }
 
