@@ -89,9 +89,15 @@ export class Command extends Commands.Command {
 
             spinner.succeed();
 
-            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
-            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
-            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+            if (this.getFlag("force")) {
+                await this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
+                await this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
+                await this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
+            } else {
+                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
+                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
+                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+            }
         } catch (error) {
             spinner.fail();
             this.components.error(error);
