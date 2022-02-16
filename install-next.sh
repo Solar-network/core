@@ -212,20 +212,49 @@ fi
 
 success "Installed system updates!"
 
-heading "Installing ARK Core..."
+heading "Installing Solar Core..."
 
-while ! yarn global add @arkecosystem/core@next ; do
-    read -p "Installing ARK Core failed, do you want to retry? [y/N]: " choice
-    if [[ ! "$choice" =~ ^(yes|y|Y) ]] ; then
-        exit 1
-    fi
+shopt -s expand_aliases
+alias solar="$HOME/solar-core/packages/core/bin/run $@ --token=solar"
+echo 'alias solar="$HOME/solar-core/packages/core/bin/run $@ --token=solar"' >> ~/.bashrc
+
+rm -rf "$HOME/solar-core"
+git clone "https://github.com/Solar-network/core" "$HOME/solar-core" || FAILED="Y"
+if [ "$FAILED" == "Y" ]; then
+    echo "Failed to fetch core repo with origin 'https://github.com/Solar-network/core'"
+    exit 1
+fi
+
+cd "$HOME/solar-core"
+
+git tag -l | xargs git tag -d >/dev/null
+git fetch --all --tags -f 2>/dev/null
+rm -f node_modules/better-sqlite3/build/Release/better_sqlite3.node
+git reset --hard >/dev/null
+git checkout tags/`git tag --sort=committerdate | grep -Px "^\\d+.\\d+.\\d+-next.\\d+" | tail -1` >/dev/null
+yarn cache clean
+
+YARN_SETUP="N"
+while [ "$YARN_SETUP" == "N" ]; do
+  YARN_SETUP="Y"
+  rm -rf "$HOME/.cache/yarn"
+  yarn setup || YARN_SETUP="N"
 done
+rm -rf "$HOME/.config/@solar"
+rm -rf "$HOME/.config/solar-core"
 
 echo 'export PATH=$(yarn global bin):$PATH' >> ~/.bashrc
 export PATH=$(yarn global bin):$PATH
-ark config:publish --network=devnet
+solar config:publish
 
-success "Installed ARK Core!"
+success "Installed Solar Core!"
+
+heading "Installing Plugins..."
+
+solar plugin:install @alessiodf/rocket-boot && solar rocket:enable --force
+solar plugin:install @alessiodf/round-monitor && solar monitor:enable --disableServer --restartTimeBuffer=45 --force
+
+success "Installed Plugins!"
 
 readNonempty() {
     prompt=${1}
@@ -252,9 +281,9 @@ if [[ "$choice" =~ ^(yes|y|Y) ]]; then
         read -p "Proceed? [y/N]: " choice
     done
 
-    ark env:set --key=CORE_DB_USERNAME --value="${databaseUsername}"
-    ark env:set --key=CORE_DB_PASSWORD --value="${databasePassword}"
-    ark env:set --key=CORE_DB_DATABASE --value="${databaseName}"
+    solar env:set --key=CORE_DB_USERNAME --value="${databaseUsername}"
+    solar env:set --key=CORE_DB_PASSWORD --value="${databasePassword}"
+    solar env:set --key=CORE_DB_DATABASE --value="${databaseName}"
 
     userExists=$(sudo -i -u postgres psql -tAc "SELECT 1 FROM pg_user WHERE usename = '${databaseUsername}'")
     databaseExists=$(sudo -i -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname = '${databaseName}'")

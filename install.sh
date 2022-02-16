@@ -227,6 +227,13 @@ fi
 
 cd "$HOME/solar-core"
 
+git tag -l | xargs git tag -d >/dev/null
+git fetch --all --tags -f 2>/dev/null
+rm -f node_modules/better-sqlite3/build/Release/better_sqlite3.node
+git reset --hard >/dev/null
+git checkout tags/`git tag --sort=committerdate | grep -Px "^\\d+.\\d+.\\d+" | tail -1` >/dev/null
+yarn cache clean
+
 YARN_SETUP="N"
 while [ "$YARN_SETUP" == "N" ]; do
   YARN_SETUP="Y"
