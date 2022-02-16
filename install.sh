@@ -215,7 +215,7 @@ success "Installed system updates!"
 heading "Installing Solar Core..."
 
 shopt -s expand_aliases
-alias ark="$HOME/solar-core/packages/core/bin/run $@ --token=solar"
+alias solar="$HOME/solar-core/packages/core/bin/run $@ --token=solar"
 echo 'alias solar="$HOME/solar-core/packages/core/bin/run $@ --token=solar"' >> ~/.bashrc
 
 rm -rf "$HOME/solar-core"
@@ -238,9 +238,16 @@ rm -rf "$HOME/.config/solar-core"
 
 echo 'export PATH=$(yarn global bin):$PATH' >> ~/.bashrc
 export PATH=$(yarn global bin):$PATH
-ark config:publish
+solar config:publish
 
 success "Installed Solar Core!"
+
+heading "Installing Plugins..."
+
+solar plugin:install @alessiodf/rocket-boot && solar rocket:enable --force
+solar plugin:install @alessiodf/round-monitor && solar monitor:enable --disableServer --restartTimeBuffer=45 --force
+
+success "Installed Plugins!"
 
 readNonempty() {
     prompt=${1}
@@ -267,9 +274,9 @@ if [[ "$choice" =~ ^(yes|y|Y) ]]; then
         read -p "Proceed? [y/N]: " choice
     done
 
-    ark env:set --key=CORE_DB_USERNAME --value="${databaseUsername}"
-    ark env:set --key=CORE_DB_PASSWORD --value="${databasePassword}"
-    ark env:set --key=CORE_DB_DATABASE --value="${databaseName}"
+    solar env:set --key=CORE_DB_USERNAME --value="${databaseUsername}"
+    solar env:set --key=CORE_DB_PASSWORD --value="${databasePassword}"
+    solar env:set --key=CORE_DB_DATABASE --value="${databaseName}"
 
     userExists=$(sudo -i -u postgres psql -tAc "SELECT 1 FROM pg_user WHERE usename = '${databaseUsername}'")
     databaseExists=$(sudo -i -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname = '${databaseName}'")
