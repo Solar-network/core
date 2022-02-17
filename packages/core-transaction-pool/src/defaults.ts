@@ -34,6 +34,6 @@ export const defaults = {
     },
     workerPool: {
         workerCount: 3,
-        cryptoPackages: [{ typeGroup: 2, packageName: "@arkecosystem/core-magistrate-crypto" }],
+        cryptoPackages: [{ typeGroup: 2, packageName: "@solar-network/solar-crypto" }],
     },
 };
