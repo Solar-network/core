@@ -177,7 +177,7 @@ export class ForgerService {
                     const username = this.usernames[this.round.nextForger.publicKey];
 
                     this.logger.info(
-                        `Next forging delegate ${username} (${this.round.nextForger.publicKey}) is active on this node.`,
+                        `Next forging delegate ${username} is active on this node :sparkles:`,
                     );
 
                     await this.client.syncWithNetwork();
@@ -274,7 +274,8 @@ export class ForgerService {
         const prettyName = this.usernames[delegate.publicKey];
 
         if (timeLeftInMs >= minimumMs) {
-            this.logger.info(`Forged new block ${block.data.id} by delegate ${prettyName} :trident:`);
+            this.logger.info(`Delegate ${prettyName} forged a new block at height ${block.data.height.toLocaleString()} with ${AppUtils.pluralize("transaction", block.data.numberOfTransactions, true)} :trident:`);
+            this.logger.debug(`Block has id ${block.data.id}`);
 
             await this.client.broadcastBlock(block);
 

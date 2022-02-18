@@ -77,10 +77,6 @@ export class Client {
      * @memberof Client
      */
     public async broadcastBlock(block: Interfaces.IBlock): Promise<void> {
-        this.logger.debug(
-            `Broadcasting block with ${Utils.pluralize("transaction", block.data.numberOfTransactions, true)} to ${this.host.hostname} :truck:`,
-        );
-
         try {
             await this.emit("p2p.blocks.postBlock", {
                 block: Blocks.Serializer.serializeWithTransactions({
