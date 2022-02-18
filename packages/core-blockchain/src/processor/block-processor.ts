@@ -295,10 +295,10 @@ export class BlockProcessor {
 
         const generatorWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(block.data.generatorPublicKey);
 
-        const expectedReward = Utils.calculateReward(block.data.height, generatorWallet.getAttribute("delegate.rank"));
+        const expectedReward = AppUtils.BigNumber.make(Utils.calculateReward(block.data.height, generatorWallet.getAttribute("delegate.rank")));
 
         if (!block.data.reward.isEqualTo(expectedReward)) {
-            this.logger.warning(["Invalid block reward:", block.data.reward, "Expected:", expectedReward].join(" ") + " :bangbang:");
+            this.logger.warning(`Block rejected as reward was ${Utils.formatSatoshi(block.data.reward)}, should be ${Utils.formatSatoshi(expectedReward)} :bangbang:`);
             return false;
         }
 
