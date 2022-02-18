@@ -192,7 +192,7 @@ export class ForgerService {
                 this.logger.warning(
                     `The NetworkState height (${networkState
                         .getNodeHeight()
-                        ?.toLocaleString()}) and round height (${this.round.lastBlock.height.toLocaleString()}) are out of sync. This indicates delayed blocks on the network.`,
+                        ?.toLocaleString()}) and round height (${this.round.lastBlock.height.toLocaleString()}) are out of sync. This indicates delayed blocks on the network :zzz:`,
                 );
             }
 
@@ -271,10 +271,10 @@ export class ForgerService {
 
         const minimumMs = 2000;
         const timeLeftInMs: number = this.getRoundRemainingSlotTime(round);
-        const prettyName = `${this.usernames[delegate.publicKey]} (${delegate.publicKey})`;
+        const prettyName = this.usernames[delegate.publicKey];
 
         if (timeLeftInMs >= minimumMs) {
-            this.logger.info(`Forged new block ${block.data.id} by delegate ${prettyName}`);
+            this.logger.info(`Forged new block ${block.data.id} by delegate ${prettyName} :trident:`);
 
             await this.client.broadcastBlock(block);
 
@@ -286,10 +286,10 @@ export class ForgerService {
             }
         } else if (timeLeftInMs > 0) {
             this.logger.warning(
-                `Failed to forge new block by delegate ${prettyName}, because there were ${timeLeftInMs}ms left in the current slot (less than ${minimumMs}ms).`,
+                `Failed to forge new block by delegate ${prettyName}, because there were ${timeLeftInMs}ms left in the current slot (less than ${minimumMs}ms) :bangbang:`,
             );
         } else {
-            this.logger.warning(`Failed to forge new block by delegate ${prettyName}, because already in next slot.`);
+            this.logger.warning(`Failed to forge new block by delegate ${prettyName}, because already in next slot :bangbang:`);
         }
     }
 
@@ -308,7 +308,7 @@ export class ForgerService {
         );
         this.logger.debug(
             `Received ${AppUtils.pluralize("transaction", transactions.length, true)} ` +
-                `from the pool containing ${AppUtils.pluralize("transaction", response.poolSize, true)} total`,
+                `from the pool containing ${AppUtils.pluralize("transaction", response.poolSize, true)} total :money_with_wings:`,
         );
         return transactions;
     }
@@ -321,13 +321,13 @@ export class ForgerService {
      */
     public isForgingAllowed(networkState: Contracts.P2P.NetworkState, delegate: Delegate): boolean {
         if (networkState.status === NetworkStateStatus.Unknown) {
-            this.logger.info("Failed to get network state from client. Will not forge.");
+            this.logger.info("Failed to get network state from client. Will not forge :bomb:");
             return false;
         } else if (networkState.status === NetworkStateStatus.ColdStart) {
-            this.logger.info("Skipping slot because of cold start. Will not forge.");
+            this.logger.info("Skipping slot because of cold start. Will not forge :bomb:");
             return false;
         } else if (networkState.status === NetworkStateStatus.BelowMinimumPeers) {
-            this.logger.info("Network reach is not sufficient to get quorum. Will not forge.");
+            this.logger.info("Network reach is not sufficient to get quorum. Will not forge :bomb:");
             return false;
         }
 
@@ -340,7 +340,7 @@ export class ForgerService {
                     "distinct overheight block header",
                     overHeightBlockHeaders.length,
                     true,
-                )}.`,
+                )} :zzz:`,
             );
 
             for (const overHeightBlockHeader of overHeightBlockHeaders) {
@@ -350,14 +350,14 @@ export class ForgerService {
                     const username: string = this.usernames[delegate.publicKey];
 
                     this.logger.warning(
-                        `Possible double forging delegate: ${username} (${delegate.publicKey}) - Block: ${overHeightBlockHeader.id}.`,
+                        `Possible double forging delegate: ${username} (${delegate.publicKey}) - Block: ${overHeightBlockHeader.id} :interrobang:`,
                     );
                 }
             }
         }
 
         if (networkState.getQuorum() < 0.66) {
-            this.logger.info("Not enough quorum to forge next block. Will not forge.");
+            this.logger.info("Not enough quorum to forge next block. Will not forge :bomb:");
             this.logger.debug(`Network State: ${networkState.toJson()}`);
 
             return false;
@@ -400,7 +400,7 @@ export class ForgerService {
                 activeDelegates: this.delegates.map((delegate) => delegate.publicKey),
             });
 
-            this.logger.info(`Forger Manager started.`);
+            this.logger.info(`Forger Manager started`);
         }
 
         this.initialized = true;

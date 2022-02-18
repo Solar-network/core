@@ -63,7 +63,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         if (this.stateStore.getNetworkStart()) {
             this.logger.warning(
-                "ARK Core is launched in Genesis Start mode. This is usually for starting the first node on the blockchain. Unless you know what you are doing, this is likely wrong.",
+                "ARK Core is launched in Genesis Start mode. This is usually for starting the first node on the blockchain. Unless you know what you are doing, this is likely wrong :warning:",
             );
         }
 
@@ -81,7 +81,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                     "block",
                     blocks.length,
                     true,
-                )} from height ${blocks[0].height.toLocaleString()} in queue.`,
+                )} from height ${blocks[0].height.toLocaleString()} in queue :skull:`,
             );
         });
     }
@@ -115,7 +115,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
      * @return {void}
      */
     public async boot(skipStartedCheck = false): Promise<boolean> {
-        this.logger.info("Starting Blockchain Manager");
+        this.logger.info("Starting Blockchain Manager :chains:");
 
         this.stateStore.reset(blockchainMachine);
 
@@ -145,7 +145,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     public async dispose(): Promise<void> {
         if (!this.stopped) {
-            this.logger.info("Stopping Blockchain Manager");
+            this.logger.info("Stopping Blockchain Manager :chains:");
 
             this.stopped = true;
             this.stateStore.clearWakeUpTimeout();
@@ -205,13 +205,13 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             const minimumMs: number = 2000;
             const timeLeftInMs: number = Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup);
             if (currentSlot !== receivedSlot || timeLeftInMs < minimumMs) {
-                this.logger.info(`Discarded block ${block.height.toLocaleString()} because it was received too late.`);
+                this.logger.info(`Discarded block ${block.height.toLocaleString()} because it was received too late :exclamation:`);
                 return;
             }
         }
 
         if (receivedSlot > currentSlot) {
-            this.logger.info(`Discarded block ${block.height.toLocaleString()} because it takes a future slot.`);
+            this.logger.info(`Discarded block ${block.height.toLocaleString()} because it takes a future slot :exclamation:`);
             return;
         }
 
@@ -223,7 +223,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
             this.events.dispatch(Enums.BlockEvent.Received, block);
         } else {
-            this.logger.info(`Block disregarded because blockchain is not ready`);
+            this.logger.info(`Block disregarded because blockchain is not ready :exclamation:`);
 
             this.events.dispatch(Enums.BlockEvent.Disregarded, block);
         }
@@ -352,7 +352,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
             const resetHeight: number = lastBlock.data.height - nblocks;
             this.logger.info(
-                `Removing ${Utils.pluralize("block", nblocks, true)}. Reset to height ${resetHeight.toLocaleString()}`,
+                `Removing ${Utils.pluralize("block", nblocks, true)}. Reset to height ${resetHeight.toLocaleString()} :warning:`,
             );
 
             this.stateStore.setLastDownloadedBlock(lastBlock.data);
@@ -376,7 +376,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             }
         } catch (err) {
             this.logger.error(err.stack);
-            this.logger.warning("Shutting down app, because state might be corrupted");
+            this.logger.warning("Shutting down app, because state might be corrupted :boom:");
             process.exit(1);
         }
     }

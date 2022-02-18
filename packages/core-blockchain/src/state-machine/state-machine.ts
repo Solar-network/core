@@ -50,7 +50,7 @@ export class StateMachine {
             if (action) {
                 setImmediate(() => action.handle());
             } else {
-                this.logger.error(`No action '${actionKey}' found`);
+                this.logger.error(`No action '${actionKey}' found :interrobang:`);
             }
         }
 

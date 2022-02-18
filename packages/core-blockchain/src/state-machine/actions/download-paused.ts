@@ -8,6 +8,6 @@ export class DownloadPaused implements Action {
     private readonly logger!: Contracts.Kernel.Logger;
 
     public async handle(): Promise<void> {
-        this.logger.info("Blockchain download paused");
+        this.logger.info("Blockchain download paused :clock1030:");
     }
 }

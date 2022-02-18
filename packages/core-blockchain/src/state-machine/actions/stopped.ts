@@ -11,6 +11,6 @@ export class Stopped implements Action {
     private readonly logger!: Contracts.Kernel.Logger;
 
     public async handle(): Promise<void> {
-        this.logger.info("The blockchain has been stopped");
+        this.logger.info("The blockchain has been stopped :guitar:");
     }
 }

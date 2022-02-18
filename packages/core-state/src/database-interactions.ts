@@ -138,7 +138,7 @@ export class DatabaseInteraction {
         lastBlock = await getLastBlock();
 
         if (!lastBlock) {
-            this.logger.warning("No block found in database");
+            this.logger.warning("No block found in database :hushed:");
             lastBlock = await this.createGenesisBlock();
         }
 

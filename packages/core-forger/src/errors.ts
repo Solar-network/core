@@ -28,7 +28,7 @@ export class ForgerError extends Error {
  */
 export class RelayCommunicationError extends ForgerError {
     public constructor(endpoint: string, message: string) {
-        super(`Request to ${endpoint} failed, because of '${message}'.`);
+        super(`Request to ${endpoint} failed, because of '${message}' :bangbang:`);
     }
 }
 
@@ -39,6 +39,6 @@ export class RelayCommunicationError extends ForgerError {
  */
 export class HostNoResponseError extends ForgerError {
     public constructor(host: string) {
-        super(`${host} didn't respond. Trying again later.`);
+        super(`${host} didn't respond. Trying again later :sparkler:`);
     }
 }

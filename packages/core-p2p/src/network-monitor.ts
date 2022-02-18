@@ -125,7 +125,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             max = Math.min(peers.length, peerCount);
         }
 
-        this.logger.info(`Checking ${Utils.pluralize("peer", max, true)}`);
+        this.logger.info(`Checking ${Utils.pluralize("peer", max, true)} :telescope:`);
         const peerErrors = {};
 
         // we use Promise.race to cut loose in case some communicator.ping() does not resolve within the delay
@@ -542,7 +542,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
             this.logger.info(`Your NTP connectivity has been verified by ${host}`);
 
-            this.logger.info(`Local clock is off by ${time.t < 0 ? "-" : ""}${prettyMs(Math.abs(time.t))} from NTP`);
+            this.logger.info(`Local clock is off by ${time.t < 0 ? "-" : ""}${prettyMs(Math.abs(time.t))} from NTP :alarm_clock:`);
         } catch (error) {
             this.logger.error(error.message);
         }
@@ -588,7 +588,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         } catch {}
 
         if (!peerList || !peerList.length) {
-            this.app.terminate("No seed peers defined in peers.json");
+            this.app.terminate("No seed peers defined in peers.json :interrobang:");
         }
 
         const peers: Contracts.P2P.Peer[] = peerList.map((peer) => {

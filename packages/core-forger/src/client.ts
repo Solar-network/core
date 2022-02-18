@@ -47,7 +47,7 @@ export class Client {
             connection.connect().catch((e) => {}); // connect promise can fail when p2p is not ready, it's fine it will retry
 
             connection.onError = (e) => {
-                this.logger.error(e.message);
+                this.logger.error(`${e.message} :bangbang:`);
             };
 
             host.socket = connection;
@@ -78,9 +78,7 @@ export class Client {
      */
     public async broadcastBlock(block: Interfaces.IBlock): Promise<void> {
         this.logger.debug(
-            `Broadcasting block ${block.data.height.toLocaleString()} (${block.data.id}) with ${
-                block.data.numberOfTransactions
-            } transactions to ${this.host.hostname}`,
+            `Broadcasting block with ${Utils.pluralize("transaction", block.data.numberOfTransactions, true)} to ${this.host.hostname} :truck:`,
         );
 
         try {
@@ -91,7 +89,7 @@ export class Client {
                 }),
             });
         } catch (error) {
-            this.logger.error(`Broadcast block failed: ${error.message}`);
+            this.logger.error(`Broadcast block failed: ${error.message} :bangbang:`);
         }
     }
 
@@ -107,7 +105,7 @@ export class Client {
         try {
             await this.emit("p2p.internal.syncBlockchain");
         } catch (error) {
-            this.logger.error(`Could not sync check: ${error.message}`);
+            this.logger.error(`Could not sync check: ${error.message} :bangbang:`);
         }
     }
 
@@ -160,14 +158,14 @@ export class Client {
         );
 
         if (!host) {
-            this.logger.error("emitEvent: unable to find any local hosts.");
+            this.logger.error("emitEvent: unable to find any local hosts :bangbang:");
             return;
         }
 
         try {
             await this.emit("p2p.internal.emitEvent", { event, body });
         } catch (error) {
-            this.logger.error(`Failed to emit "${event}" to "${host.hostname}:${host.port}"`);
+            this.logger.error(`Failed to emit "${event}" to "${host.hostname}:${host.port}" :bangbang:`);
         }
     }
 
@@ -190,7 +188,7 @@ export class Client {
         this.logger.debug(
             `No open socket connection to any host: ${JSON.stringify(
                 this.hosts.map((host) => `${host.hostname}:${host.port}`),
-            )}.`,
+            )} :bangbang:`,
         );
 
         throw new HostNoResponseError(this.hosts.map((host) => host.hostname).join());

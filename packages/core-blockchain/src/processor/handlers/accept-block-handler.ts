@@ -33,7 +33,7 @@ export class AcceptBlockHandler implements BlockHandler {
             // Check if we recovered from a fork
             const forkedBlock = this.state.getForkedBlock();
             if (forkedBlock && forkedBlock.data.height === block.data.height) {
-                this.logger.info("Successfully recovered from fork");
+                this.logger.info("Successfully recovered from fork :star2:");
                 this.state.clearForkedBlock();
             }
 
