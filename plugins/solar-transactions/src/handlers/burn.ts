@@ -30,8 +30,10 @@ export class BurnTransactionHandler extends SolarTransactionHandler {
         const milestone = Managers.configManager.getMilestone();
 
         const { data }: Interfaces.ITransaction = transaction;
-        if (data.amount.isLessThan(+milestone.solarTransactions.burn.minimumAmount)) {
-            throw new InsufficientBurnAmountError(data.amount);
+        const minimumAmount = +milestone.solarTransactions.burn.minimumAmount;
+
+        if (data.amount.isLessThan(minimumAmount)) {
+            throw new InsufficientBurnAmountError(data.amount, minimumAmount);
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);
