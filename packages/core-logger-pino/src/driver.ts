@@ -1,6 +1,7 @@
 import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
 import chalk, { Chalk } from "chalk";
 import * as console from "console";
+import { emojify } from "node-emoji";
 import pino, { PrettyOptions } from "pino";
 import PinoPretty from "pino-pretty";
 import pump from "pump";
@@ -245,7 +246,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
             message = inspect(message, { depth: 1 });
         }
 
-        this.logger[level](message);
+        this.logger[level](emojify(message));
     }
 
     /**
