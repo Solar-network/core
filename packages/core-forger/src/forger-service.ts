@@ -129,7 +129,7 @@ export class ForgerService {
             AppUtils.assert.defined<Contracts.P2P.CurrentRound>(this.round);
             timeout = Math.max(0, this.getRoundRemainingSlotTime(this.round));
         } catch (error) {
-            this.logger.warning("Waiting for a responsive host");
+            this.logger.warning("Waiting for a responsive host :hourglass_flowing_sand:");
         } finally {
             this.checkLater(timeout);
         }
@@ -214,7 +214,7 @@ export class ForgerService {
                 if (error.message.includes("blockchain isn't ready") || error.message.includes("App is not ready")) {
                     /* istanbul ignore else */
                     if (this.logAppReady) {
-                        this.logger.info("Waiting for relay to become ready.");
+                        this.logger.info("Waiting for relay to become ready :hourglass_flowing_sand:");
                         this.logAppReady = false;
                     }
                 } else {
@@ -301,7 +301,7 @@ export class ForgerService {
     public async getTransactionsForForging(): Promise<Interfaces.ITransactionData[]> {
         const response = await this.client.getTransactions();
         if (AppUtils.isEmpty(response)) {
-            this.logger.error("Could not get unconfirmed transactions from transaction pool.");
+            this.logger.error("Could not get unconfirmed transactions from transaction pool :warning:");
             return [];
         }
         const transactions = response.transactions.map(
