@@ -77,7 +77,7 @@ export class BlocksController extends Controller {
 
         this.logger.info(`Received new block forged by ${generator} at height ${block.height.toLocaleString()} with ${Utils.formatSatoshi(block.reward)} reward :package:`);
 
-        this.logger.debug(`Block contained ${AppUtils.pluralize(
+        this.logger.debug(`The new block contains ${AppUtils.pluralize(
             "transaction",
             block.numberOfTransactions,
             true,

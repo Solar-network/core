@@ -315,7 +315,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         const msBeforeReCheck = 1000;
         while (await this.outgoingRateLimiter.hasExceededRateLimitNoConsume(peer.ip, event)) {
             this.logger.debug(
-                `Throttling outgoing requests to ${peer.ip}/${event} to avoid triggering their rate limit`,
+                `Throttling outgoing requests to ${peer.ip}/${event} to avoid triggering their rate limit :runner:`,
             );
             await delay(msBeforeReCheck);
         }
@@ -339,18 +339,18 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
         switch (error.name) {
             case SocketErrors.Validation:
-                this.logger.debug(`Socket data validation error (peer ${peer.ip}) : ${error.message}`);
+                this.logger.debug(`Socket data validation error (peer ${peer.ip}) : ${error.message} :warning:`);
                 break;
             case "Error":
                 /* istanbul ignore else */
                 if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                    this.logger.debug(`Response error (peer ${peer.ip}/${event}) : ${error.message}`);
+                    this.logger.debug(`Response error (peer ${peer.ip}/${event}) : ${error.message} :warning:`);
                 }
                 break;
             default:
                 /* istanbul ignore else */
                 if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                    this.logger.debug(`Socket error (peer ${peer.ip}) : ${error.message}`);
+                    this.logger.debug(`Socket error (peer ${peer.ip}) : ${error.message} :warning:`);
                 }
                 /* istanbul ignore else */
                 if (disconnect) {

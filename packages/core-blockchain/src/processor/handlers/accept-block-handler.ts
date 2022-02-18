@@ -57,7 +57,9 @@ export class AcceptBlockHandler implements BlockHandler {
 
             return BlockProcessorResult.Accepted;
         } catch (error) {
-            this.logger.warning(`Refused new block ${JSON.stringify(block.data)}`);
+            this.logger.warning("Refused new block :warning: :warning: :warning:");
+            this.logger.warning(JSON.stringify(block.data));
+
             this.logger.debug(error.stack);
 
             this.blockchain.resetLastDownloadedBlock();

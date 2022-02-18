@@ -117,7 +117,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             return undefined;
         }
 
-        this.log(Severity.DEBUG_EXTRA, "success");
+        this.log(Severity.DEBUG_EXTRA, "success", true);
 
         return new PeerVerificationResult(ourHeight, claimedHeight, highestCommonBlockHeight);
     }
@@ -226,14 +226,14 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
                 this.log(
                     Severity.DEBUG_EXTRA,
                     `success: peer's latest block is the same as our latest ` +
-                        `block (height=${claimedHeight}, id=${claimedState.header.id}). Identical chains.`,
+                        `block (height=${claimedHeight}, id=${claimedState.header.id}). Identical chains.`, true,
                 );
             } else {
                 this.log(
                     Severity.DEBUG_EXTRA,
                     `success: peer's latest block ` +
                         `(height=${claimedHeight}, id=${claimedState.header.id}) is part of our chain. ` +
-                        `Peer is ${pluralize("block", ourHeight - claimedHeight, true)} behind us.`,
+                        `Peer is ${pluralize("block", ourHeight - claimedHeight, true)} behind us.`, true,
                 );
             }
             return true;
@@ -301,7 +301,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
             const msRemaining = this.throwIfPastDeadline(deadline);
 
-            this.log(Severity.DEBUG_EXTRA, `probe for common blocks in range ${rangePrint}`);
+            this.log(Severity.DEBUG_EXTRA, `probe for common blocks in range ${rangePrint}`, null);
 
             const highestCommon = await this.communicator.hasCommonBlocks(
                 this.peer,
@@ -343,7 +343,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         if (highestCommonBlockHeight === undefined) {
             this.log(Severity.INFO, `failure: could not determine a common block`);
         } else {
-            this.log(Severity.DEBUG_EXTRA, `highest common block height: ${highestCommonBlockHeight}`);
+            this.log(Severity.DEBUG_EXTRA, `highest common block height: ${highestCommonBlockHeight}`, null);
         }
 
         return highestCommonBlockHeight;
@@ -518,7 +518,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         if (delegatesByPublicKey[block.data.generatorPublicKey]) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `successfully verified block at height ${height}, signed by ` + block.data.generatorPublicKey,
+                `successfully verified block at height ${height}, signed by ` + block.data.generatorPublicKey, true, 
             );
 
             return true;
@@ -565,8 +565,13 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      * @param {Severity} severity severity of the message, DEBUG_EXTRA messages are only
      * logged if enabled in the environment.
      */
-    private log(severity: Severity, msg: string): void {
-        const fullMsg = `${this.logPrefix} ${msg}`;
+    private log(severity: Severity, msg: string, success: boolean | null = false): void {
+        let fullMsg = `${this.logPrefix} ${msg}`;
+        if (success === true) {
+            fullMsg += " :white_check_mark:";
+        } else if(success === false) {
+            fullMsg += " :no_entry_sign:";
+        }
         switch (severity) {
             case Severity.DEBUG_EXTRA:
                 /* istanbul ignore else */

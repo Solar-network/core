@@ -275,7 +275,7 @@ export class ForgerService {
 
         if (timeLeftInMs >= minimumMs) {
             this.logger.info(`Delegate ${prettyName} forged a new block at height ${block.data.height.toLocaleString()} with ${AppUtils.pluralize("transaction", block.data.numberOfTransactions, true)} :trident:`);
-            this.logger.debug(`Block has id ${block.data.id}`);
+            this.logger.debug(`The id of the new block is ${block.data.id}`);
 
             await this.client.broadcastBlock(block);
 
