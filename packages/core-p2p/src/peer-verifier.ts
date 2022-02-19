@@ -518,7 +518,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         if (delegatesByPublicKey[block.data.generatorPublicKey]) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `successfully verified block at height ${height}, signed by ` + block.data.generatorPublicKey, true, 
+                `successfully verified block at height ${height}, signed by ` + block.data.generatorPublicKey, true,
             );
 
             return true;
