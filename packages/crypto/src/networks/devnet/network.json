@@ -1,0 +1,18 @@
+{
+    "name": "Solar",
+    "messagePrefix": "Solar message:\n",
+    "bip32": {
+        "public": 70617039,
+        "private": 70615956
+    },
+    "pubKeyHash": 30,
+    "nethash": "cb6e16d4da31abd38ffeaf308e2f869a22e4da54f4b4ad1238b21ca7643797b2",
+    "wif": 252,
+    "slip44": 1,
+    "aip20": 0,
+    "client": {
+        "token": "dSXP",
+        "symbol": "dSXP",
+        "explorer": "https://explorer.solar.network/testnet"
+    }
+}
