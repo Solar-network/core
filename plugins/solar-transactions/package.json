@@ -2,6 +2,7 @@
     "name": "@solar-network/solar-transactions",
     "version": "1.0.0",
     "description": "Custom transactions for the Solar Network",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
         "alessiodf <alessiodf@pm.me>",
         "cactus1549 <cactus1549pool@gmail.com>"
