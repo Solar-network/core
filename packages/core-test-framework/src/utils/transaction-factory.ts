@@ -1,8 +1,4 @@
 import { Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import {
-    Builders as MagistrateBuilders,
-    Interfaces as MagistrateInterfaces,
-} from "@arkecosystem/core-magistrate-crypto";
 import { Identities, Interfaces, Managers, Transactions, Types, Utils } from "@arkecosystem/crypto";
 
 import secrets from "../internal/passphrases.json";
@@ -167,70 +163,6 @@ export class TransactionFactory {
         }
 
         this.builder = builder;
-
-        return this;
-    }
-
-    public businessRegistration(
-        businessRegistrationAsset: MagistrateInterfaces.IBusinessRegistrationAsset,
-    ): TransactionFactory {
-        const businessRegistrationBuilder = new MagistrateBuilders.BusinessRegistrationBuilder();
-        businessRegistrationBuilder.businessRegistrationAsset(businessRegistrationAsset);
-
-        this.builder = businessRegistrationBuilder;
-
-        return this;
-    }
-
-    public businessResignation(): TransactionFactory {
-        this.builder = new MagistrateBuilders.BusinessResignationBuilder();
-
-        return this;
-    }
-
-    public businessUpdate(businessUpdateAsset: MagistrateInterfaces.IBusinessUpdateAsset): TransactionFactory {
-        const businessUpdateBuilder = new MagistrateBuilders.BusinessUpdateBuilder();
-        businessUpdateBuilder.businessUpdateAsset(businessUpdateAsset);
-
-        this.builder = businessUpdateBuilder;
-
-        return this;
-    }
-
-    public bridgechainRegistration(
-        bridgechainRegistrationAsset: MagistrateInterfaces.IBridgechainRegistrationAsset,
-    ): TransactionFactory {
-        const bridgechainRegistrationBuilder = new MagistrateBuilders.BridgechainRegistrationBuilder();
-        bridgechainRegistrationBuilder.bridgechainRegistrationAsset(bridgechainRegistrationAsset);
-
-        this.builder = bridgechainRegistrationBuilder;
-
-        return this;
-    }
-
-    public bridgechainResignation(registeredBridgechainId: string): TransactionFactory {
-        const bridgechainResignationBuilder = new MagistrateBuilders.BridgechainResignationBuilder();
-        bridgechainResignationBuilder.bridgechainResignationAsset(registeredBridgechainId);
-
-        this.builder = bridgechainResignationBuilder;
-
-        return this;
-    }
-
-    public bridgechainUpdate(bridgechainUpdateAsset: MagistrateInterfaces.IBridgechainUpdateAsset): TransactionFactory {
-        const bridgechainUpdateBuilder = new MagistrateBuilders.BridgechainUpdateBuilder();
-        bridgechainUpdateBuilder.bridgechainUpdateAsset(bridgechainUpdateAsset);
-
-        this.builder = bridgechainUpdateBuilder;
-
-        return this;
-    }
-
-    public entity(entityAsset: MagistrateInterfaces.IEntityAsset): TransactionFactory {
-        const entityBuilder = new MagistrateBuilders.EntityBuilder();
-        entityBuilder.asset(entityAsset);
-
-        this.builder = entityBuilder;
 
         return this;
     }

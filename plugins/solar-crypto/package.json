@@ -1,0 +1,25 @@
+{
+    "name": "@solar-network/solar-crypto",
+    "version": "1.0.0",
+    "description": "Custom transactions for the Solar Network",
+    "license": "CC-BY-ND-4.0",
+    "contributors": [
+        "alessiodf <alessiodf@pm.me>",
+        "cactus1549 <cactus1549pool@gmail.com>"
+    ],
+    "files": [
+        "dist"
+    ],
+    "main": "dist/index",
+    "types": "dist/index",
+    "scripts": {
+        "build": "yarn clean && tsc",
+        "build:watch": "yarn clean && yarn compile -w",
+        "clean": "rimraf dist",
+        "compile": "node ../../node_modules/typescript/bin/tsc",
+        "prepublishOnly": "yarn build"
+    },
+    "devDependencies": {
+        "@arkecosystem/core": "^3.1.1-next.0"
+    }
+}

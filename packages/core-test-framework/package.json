@@ -28,7 +28,6 @@
         "@arkecosystem/core-database": "3.1.1",
         "@arkecosystem/core-forger": "3.1.1",
         "@arkecosystem/core-kernel": "3.1.1",
-        "@arkecosystem/core-magistrate-crypto": "3.1.1",
         "@arkecosystem/core-p2p": "3.1.1",
         "@arkecosystem/core-state": "3.1.1",
         "@arkecosystem/crypto": "3.1.1",

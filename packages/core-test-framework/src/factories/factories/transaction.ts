@@ -1,17 +1,10 @@
-import {
-    Builders as MagistrateBuilders,
-    Transactions as MagistrateTransactions,
-} from "@arkecosystem/core-magistrate-crypto";
 import { Enums, Identities, Managers, Transactions, Utils } from "@arkecosystem/crypto";
 import bs58 from "bs58";
-import Chance from "chance";
 import { createHash } from "crypto";
 
 import secrets from "../../internal/passphrases.json";
 import { FactoryBuilder } from "../factory-builder";
 import { FactoryFunctionOptions } from "../types";
-
-const chance: Chance = new Chance();
 
 const randomHash = (): string => createHash("sha256").update(Math.random().toString(36).substring(8)).digest("hex");
 
@@ -242,131 +235,6 @@ export const registerMultiPaymentFactory = (factory: FactoryBuilder): void => {
     factory.get("MultiPayment").state("multiSign", multiSign);
 };
 
-export const registerBusinessRegistrationFactory = (factory: FactoryBuilder): void => {
-    try {
-        Transactions.TransactionRegistry.registerTransactionType(
-            MagistrateTransactions.BusinessRegistrationTransaction,
-        );
-    } catch {}
-
-    factory.set("BusinessRegistration", ({ options }) =>
-        applyModifiers(
-            new MagistrateBuilders.BusinessRegistrationBuilder().businessRegistrationAsset({
-                name: options.name || chance.first(),
-                website: options.website || chance.domain(),
-            }),
-            options,
-        ),
-    );
-
-    factory.get("BusinessRegistration").state("sign", sign);
-    factory.get("BusinessRegistration").state("secondSign", secondSign);
-    factory.get("BusinessRegistration").state("multiSign", multiSign);
-};
-
-export const registerBusinessResignationFactory = (factory: FactoryBuilder): void => {
-    try {
-        Transactions.TransactionRegistry.registerTransactionType(MagistrateTransactions.BusinessResignationTransaction);
-    } catch {}
-
-    factory.set("BusinessResignation", ({ options }) =>
-        applyModifiers(new MagistrateBuilders.BusinessResignationBuilder(), options),
-    );
-
-    factory.get("BusinessResignation").state("sign", sign);
-    factory.get("BusinessResignation").state("secondSign", secondSign);
-    factory.get("BusinessResignation").state("multiSign", multiSign);
-};
-
-export const registerBusinessUpdateFactory = (factory: FactoryBuilder): void => {
-    try {
-        Transactions.TransactionRegistry.registerTransactionType(MagistrateTransactions.BusinessUpdateTransaction);
-    } catch {}
-
-    factory.set("BusinessUpdate", ({ options }) =>
-        applyModifiers(
-            new MagistrateBuilders.BusinessUpdateBuilder().businessUpdateAsset({
-                name: options.name || chance.first(),
-                website: options.website || chance.domain(),
-                vat: options.vat,
-                repository: options.repository || chance.domain(),
-            }),
-            options,
-        ),
-    );
-
-    factory.get("BusinessUpdate").state("sign", sign);
-    factory.get("BusinessUpdate").state("secondSign", secondSign);
-    factory.get("BusinessUpdate").state("multiSign", multiSign);
-};
-
-export const registerBridgechainRegistrationFactory = (factory: FactoryBuilder): void => {
-    try {
-        Transactions.TransactionRegistry.registerTransactionType(
-            MagistrateTransactions.BridgechainRegistrationTransaction,
-        );
-    } catch {}
-
-    factory.set("BridgechainRegistration", ({ options }) =>
-        applyModifiers(
-            new MagistrateBuilders.BridgechainRegistrationBuilder().bridgechainRegistrationAsset({
-                name: options.name || chance.first(),
-                seedNodes: options.seedNodes || [chance.ip(), chance.ip(), chance.ip()],
-                genesisHash: options.genesisHash || randomHash(),
-                bridgechainRepository: options.bridgechainRepository || chance.domain(),
-                ports: options.ports || { "@arkecosystem/core-api": chance.port() },
-            }),
-            options,
-        ),
-    );
-
-    factory.get("BridgechainRegistration").state("sign", sign);
-    factory.get("BridgechainRegistration").state("secondSign", secondSign);
-    factory.get("BridgechainRegistration").state("multiSign", multiSign);
-};
-
-export const registerBridgechainResignationFactory = (factory: FactoryBuilder): void => {
-    try {
-        Transactions.TransactionRegistry.registerTransactionType(
-            MagistrateTransactions.BridgechainResignationTransaction,
-        );
-    } catch {}
-
-    factory.set("BridgechainResignation", ({ options }) =>
-        applyModifiers(
-            new MagistrateBuilders.BridgechainResignationBuilder().bridgechainResignationAsset(
-                options.genesisHash || randomHash(),
-            ),
-            options,
-        ),
-    );
-
-    factory.get("BridgechainResignation").state("sign", sign);
-    factory.get("BridgechainResignation").state("secondSign", secondSign);
-    factory.get("BridgechainResignation").state("multiSign", multiSign);
-};
-
-export const registerBridgechainUpdateFactory = (factory: FactoryBuilder): void => {
-    try {
-        Transactions.TransactionRegistry.registerTransactionType(MagistrateTransactions.BridgechainUpdateTransaction);
-    } catch {}
-
-    factory.set("BridgechainUpdate", ({ options }) =>
-        applyModifiers(
-            new MagistrateBuilders.BridgechainUpdateBuilder().bridgechainUpdateAsset({
-                bridgechainId: options.bridgechainId || randomHash(),
-                seedNodes: options.seedNodes || [chance.ip(), chance.ip(), chance.ip()],
-                ports: options.ports || { "@arkecosystem/core-api": chance.port() },
-            }),
-            options,
-        ),
-    );
-
-    factory.get("BridgechainUpdate").state("sign", sign);
-    factory.get("BridgechainUpdate").state("secondSign", secondSign);
-    factory.get("BridgechainUpdate").state("multiSign", multiSign);
-};
-
 export const registerTransactionFactory = (factory: FactoryBuilder): void => {
     registerTransferFactory(factory);
 
@@ -391,16 +259,4 @@ export const registerTransactionFactory = (factory: FactoryBuilder): void => {
     registerHtlcRefundFactory(factory);
 
     registerMultiPaymentFactory(factory);
-
-    registerBusinessRegistrationFactory(factory);
-
-    registerBusinessResignationFactory(factory);
-
-    registerBusinessUpdateFactory(factory);
-
-    registerBridgechainRegistrationFactory(factory);
-
-    registerBridgechainResignationFactory(factory);
-
-    registerBridgechainUpdateFactory(factory);
 };

@@ -48,8 +48,6 @@
         "@arkecosystem/core-forger": "3.1.1",
         "@arkecosystem/core-kernel": "3.1.1",
         "@arkecosystem/core-logger-pino": "3.1.1",
-        "@arkecosystem/core-magistrate-api": "3.1.1",
-        "@arkecosystem/core-magistrate-transactions": "3.1.1",
         "@arkecosystem/core-p2p": "3.1.1",
         "@arkecosystem/core-snapshots": "3.1.1",
         "@arkecosystem/core-state": "3.1.1",
