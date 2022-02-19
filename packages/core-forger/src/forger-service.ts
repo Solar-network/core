@@ -174,10 +174,11 @@ export class ForgerService {
                 AppUtils.assert.defined<string>(this.round.nextForger.publicKey);
 
                 if (this.isActiveDelegate(this.round.nextForger.publicKey)) {
+                    const blocktime = Managers.configManager.getMilestone(this.round.lastBlock.height).blocktime
                     const username = this.usernames[this.round.nextForger.publicKey];
 
                     this.logger.info(
-                        `Next forging delegate ${username} is active on this node :sparkles:`,
+                        `Delegate ${username} is due to forge in ${AppUtils.pluralize("second", blocktime, true)} from now :sparkles:`,
                     );
 
                     await this.client.syncWithNetwork();
