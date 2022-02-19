@@ -16,9 +16,10 @@ export class DelegateSearchService {
 
     public getDelegate(walletAddress: string): DelegateResource | undefined {
         const wallet = this.walletRepository.findByAddress(walletAddress);
+        const supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
 
         if (wallet.hasAttribute("delegate")) {
-            return this.getDelegateResourceFromWallet(wallet);
+            return this.getDelegateResourceFromWallet(wallet, supply);
         } else {
             return undefined;
         }
@@ -34,7 +35,7 @@ export class DelegateSearchService {
         return this.paginationService.getPage(pagination, sorting, this.getDelegates(...criterias));
     }
 
-    private getDelegateResourceFromWallet(wallet: Contracts.State.Wallet): DelegateResource {
+    private getDelegateResourceFromWallet(wallet: Contracts.State.Wallet, supply): DelegateResource {
         AppUtils.assert.defined<string>(wallet.getPublicKey());
 
         const delegateAttribute = wallet.getAttribute("delegate");
@@ -61,7 +62,7 @@ export class DelegateSearchService {
                 last: delegateLastBlock,
             },
             production: {
-                approval: AppUtils.delegateCalculator.calculateApproval(wallet),
+                approval: AppUtils.delegateCalculator.calculateApproval(wallet, supply),
             },
             forged: {
                 fees: delegateAttribute.forgedFees,
@@ -72,8 +73,10 @@ export class DelegateSearchService {
     }
 
     private *getDelegates(...criterias: DelegateCriteria[]): Iterable<DelegateResource> {
+        const supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
+
         for (const wallet of this.walletRepository.allByUsername()) {
-            const delegateResource = this.getDelegateResourceFromWallet(wallet);
+            const delegateResource = this.getDelegateResourceFromWallet(wallet, supply);
 
             if (this.standardCriteriaService.testStandardCriterias(delegateResource, ...criterias)) {
                 yield delegateResource;
