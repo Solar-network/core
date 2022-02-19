@@ -2,7 +2,7 @@
     "name": "@arkecosystem/core-forger",
     "version": "3.1.1",
     "description": "Forger for ARK Core",
-    "license": "MIT",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
         "François-Xavier Thoorens <fx@ark.io>",
         "Kristjan Košič <kristjan@ark.io>",

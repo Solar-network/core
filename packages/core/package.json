@@ -2,7 +2,7 @@
     "name": "@arkecosystem/core",
     "version": "3.1.1-next.0",
     "description": "Core of the Solar Network Blockchain",
-    "license": "MIT",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
         "François-Xavier Thoorens <fx@ark.io>",
         "Kristjan Košič <kristjan@ark.io>",

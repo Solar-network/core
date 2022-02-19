@@ -2,7 +2,7 @@
     "name": "@arkecosystem/core-api",
     "version": "3.1.1",
     "description": "Public API for ARK Core",
-    "license": "MIT",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
         "Kristjan Košič <kristjan@ark.io>",
         "Brian Faust <brian@ark.io>"

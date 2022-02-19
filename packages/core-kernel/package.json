@@ -5,7 +5,7 @@
     "contributors": [
         "Brian Faust <brian@ark.io>"
     ],
-    "license": "MIT",
+    "license": "CC-BY-ND-4.0",
     "main": "dist/index",
     "types": "dist/index",
     "files": [

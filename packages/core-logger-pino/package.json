@@ -2,7 +2,7 @@
     "name": "@arkecosystem/core-logger-pino",
     "version": "3.1.1",
     "description": "Webhooks for ARK Core",
-    "license": "MIT",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
         "Brian Faust <brian@ark.io>"
     ],

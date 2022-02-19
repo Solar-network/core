@@ -2,7 +2,7 @@
     "name": "@arkecosystem/core-state",
     "version": "3.1.1",
     "description": "State Management for ARK Core",
-    "license": "MIT",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
         "Brian Faust <brian@ark.io>",
         "Joshua Noack <joshua@ark.io>"
