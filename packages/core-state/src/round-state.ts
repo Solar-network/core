@@ -134,7 +134,7 @@ export class RoundState {
             this.logger.debug(
                 `Delegate ${delegate.getAttribute(
                     "delegate.username",
-                )} (${delegate.getPublicKey()}) just missed a block.`,
+                )} (${delegate.getPublicKey()}) just missed a block :pensive:`,
             );
 
             this.events.dispatch(Enums.ForgerEvent.Missing, {
@@ -147,7 +147,7 @@ export class RoundState {
         if (height === 1 || AppUtils.roundCalculator.isNewRound(height + 1)) {
             const roundInfo = this.getRound(height + 1);
 
-            this.logger.info(`Starting Round ${roundInfo.round.toLocaleString()}`);
+            this.logger.info(`Starting Round ${roundInfo.round.toLocaleString()} :dove_of_peace:`);
 
             this.detectMissedRound();
 
@@ -169,7 +169,7 @@ export class RoundState {
         const { round, nextRound } = roundInfo;
 
         if (nextRound === round + 1) {
-            this.logger.info(`Back to previous round: ${round.toLocaleString()}`);
+            this.logger.info(`Back to previous round: ${round.toLocaleString()} :back:`);
 
             await this.setForgingDelegatesOfRound(
                 roundInfo,
@@ -192,7 +192,7 @@ export class RoundState {
                 this.logger.debug(
                     `Delegate ${wallet.getAttribute(
                         "delegate.username",
-                    )} (${wallet.getPublicKey()}) just missed a round.`,
+                    )} (${wallet.getPublicKey()}) just missed a round :cold_sweat:`,
                 );
 
                 this.events.dispatch(Enums.RoundEvent.Missed, {

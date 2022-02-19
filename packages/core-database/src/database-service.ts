@@ -39,7 +39,7 @@ export class DatabaseService {
             }
         } catch (error) {
             this.logger.error(error.stack);
-            this.app.terminate("Failed to initialize database service.", error);
+            this.app.terminate("Failed to initialize database service :boom:", error);
         }
     }
 
@@ -252,7 +252,7 @@ export class DatabaseService {
         const hasErrors: boolean = errors.length > 0;
 
         if (hasErrors) {
-            this.logger.error("FATAL: The database is corrupted");
+            this.logger.error("FATAL: The database is corrupted :fire:");
             this.logger.error(JSON.stringify(errors, undefined, 4));
         }
 

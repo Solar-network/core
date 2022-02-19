@@ -106,7 +106,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
 
             /* istanbul ignore next */
             if (!options.lessVerbose || process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                this.logger.debug(`Accepted new peer ${newPeer.ip}:${newPeer.port} (v${newPeer.version})`);
+                this.logger.debug(`Accepted new peer ${newPeer.ip}:${newPeer.port} (v${newPeer.version}) :hugging_face:`);
             }
 
             this.events.dispatch(Enums.PeerEvent.Added, newPeer);

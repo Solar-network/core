@@ -1,6 +1,6 @@
 import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Providers, Utils } from "@arkecosystem/core-kernel";
-import { Blocks, Interfaces, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Providers, Utils as AppUtils } from "@arkecosystem/core-kernel";
+import { Blocks, Interfaces, Managers, Utils } from "@arkecosystem/crypto";
 import Hapi from "@hapi/hapi";
 
 import { constants } from "../../constants";
@@ -18,6 +18,10 @@ export class BlocksController extends Controller {
 
     @Container.inject(Container.Identifiers.DatabaseService)
     private readonly database!: DatabaseService;
+
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
 
     public async postBlock(
         request: Hapi.Request,
@@ -43,7 +47,7 @@ export class BlocksController extends Controller {
             transactions: deserialized.transactions.map((tx) => tx.data),
         };
 
-        const fromForger: boolean = Utils.isWhitelisted(
+        const fromForger: boolean = AppUtils.isWhitelisted(
             this.configuration.getOptional<string[]>("remoteAccess", []),
             request.info.remoteAddress,
         );
@@ -55,20 +59,29 @@ export class BlocksController extends Controller {
 
             const lastDownloadedBlock: Interfaces.IBlockData = this.blockchain.getLastDownloadedBlock();
 
-            const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.height);
+            const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.height);
 
-            if (!Utils.isBlockChained(lastDownloadedBlock, block, blockTimeLookup)) {
+            if (!AppUtils.isBlockChained(lastDownloadedBlock, block, blockTimeLookup)) {
                 return { status: false, height: this.blockchain.getLastHeight() };
             }
         }
 
-        this.logger.info(
-            `Received new block at height ${block.height.toLocaleString()} with ${Utils.pluralize(
-                "transaction",
-                block.numberOfTransactions,
-                true,
-            )} from ${mapAddr(request.info.remoteAddress)}`,
-        );
+        const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
+
+        let generator: string;
+        try {
+            generator = `delegate ${generatorWallet.getAttribute("delegate.username")} (#${generatorWallet.getAttribute("delegate.rank")})`;
+        } catch {
+            generator = "an unknown delegate";
+        }
+
+        this.logger.info(`Received new block forged by ${generator} at height ${block.height.toLocaleString()} with ${Utils.formatSatoshi(block.reward)} reward :package:`);
+
+        this.logger.debug(`The new block contains ${AppUtils.pluralize(
+            "transaction",
+            block.numberOfTransactions,
+            true,
+        )} and was received from ${mapAddr(request.info.remoteAddress)}`);
 
         await this.blockchain.handleIncomingBlock(block, fromForger);
 
@@ -106,7 +119,7 @@ export class BlocksController extends Controller {
         }
 
         this.logger.info(
-            `${mapAddr(request.info.remoteAddress)} has downloaded ${Utils.pluralize(
+            `${mapAddr(request.info.remoteAddress)} has downloaded ${AppUtils.pluralize(
                 "block",
                 blocksToReturn.length,
                 true,

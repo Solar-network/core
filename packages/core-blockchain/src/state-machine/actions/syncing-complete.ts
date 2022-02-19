@@ -14,7 +14,7 @@ export class SyncingComplete implements Action {
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
     public async handle(): Promise<void> {
-        this.logger.info("Blockchain 100% in sync");
+        this.logger.info("Blockchain 100% in sync :100:");
 
         this.blockchain.dispatch("SYNCFINISHED");
     }

@@ -86,7 +86,7 @@ export class InternalController extends Controller {
     }
 
     public syncBlockchain(request: Hapi.Request, h: Hapi.ResponseToolkit): boolean {
-        this.logger.debug("Blockchain sync check WAKEUP requested by forger");
+        this.logger.debug("Blockchain sync check WAKEUP requested by forger :bed:");
 
         this.blockchain.forceWakeup();
 

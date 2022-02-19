@@ -108,7 +108,7 @@ export class BlockProcessor {
 
                 block.verification = block.verify();
             } catch (error) {
-                this.logger.warning(`Failed to verify block, because: ${error.message}`);
+                this.logger.warning(`Failed to verify block, because: ${error.message} :bangbang:`);
                 block.verification.verified = false;
             }
         }
@@ -118,7 +118,7 @@ export class BlockProcessor {
             this.logger.warning(
                 `Block ${block.data.height.toLocaleString()} (${
                     block.data.id
-                }) disregarded because verification failed`,
+                }) disregarded because verification failed :scroll:`,
             );
 
             this.logger.warning(JSON.stringify(block.verification, undefined, 4));
@@ -158,7 +158,7 @@ export class BlockProcessor {
             /* istanbul ignore else */
             if (forgedIds.length > 0) {
                 this.logger.warning(
-                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains already forged transactions`,
+                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains already forged transactions :scroll:`,
                 );
 
                 this.logger.debug(`${JSON.stringify(forgedIds, undefined, 4)}`);
@@ -213,7 +213,7 @@ export class BlockProcessor {
                     `Block { height: ${block.data.height.toLocaleString()}, id: ${block.data.id} } ` +
                         `not accepted: invalid nonce order for sender ${sender}: ` +
                         `preceding nonce: ${nonceBySender[sender].toFixed()}, ` +
-                        `transaction ${data.id} has nonce ${nonce.toFixed()}.`,
+                        `transaction ${data.id} has nonce ${nonce.toFixed()} :bangbang:`,
                 );
                 return true;
             }
@@ -258,7 +258,7 @@ export class BlockProcessor {
             this.logger.debug(
                 `Could not decide if delegate ${generatorUsername} (${
                     block.data.generatorPublicKey
-                }) is allowed to forge block ${block.data.height.toLocaleString()}`,
+                }) is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
             );
         } /* istanbul ignore next */ else if (forgingDelegate.getPublicKey() !== block.data.generatorPublicKey) {
             AppUtils.assert.defined<string>(forgingDelegate.getPublicKey());
@@ -271,7 +271,7 @@ export class BlockProcessor {
             this.logger.warning(
                 `Delegate ${generatorUsername} (${
                     block.data.generatorPublicKey
-                }) not allowed to forge, should be ${forgingUsername} (${forgingDelegate.getPublicKey()})`,
+                }) not allowed to forge, should be ${forgingUsername} (${forgingDelegate.getPublicKey()}) :-1:`,
             );
 
             return false;
@@ -280,7 +280,7 @@ export class BlockProcessor {
         this.logger.debug(
             `Delegate ${generatorUsername} (${
                 block.data.generatorPublicKey
-            }) allowed to forge block ${block.data.height.toLocaleString()}`,
+            }) allowed to forge block ${block.data.height.toLocaleString()} :+1:`,
         );
 
         return true;
@@ -295,10 +295,10 @@ export class BlockProcessor {
 
         const generatorWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(block.data.generatorPublicKey);
 
-        const expectedReward = Utils.calculateReward(block.data.height, generatorWallet.getAttribute("delegate.rank"));
+        const expectedReward = AppUtils.BigNumber.make(Utils.calculateReward(block.data.height, generatorWallet.getAttribute("delegate.rank")));
 
         if (!block.data.reward.isEqualTo(expectedReward)) {
-            this.logger.warning(["Invalid block reward:", block.data.reward, "Expected:", expectedReward].join(" "));
+            this.logger.warning(`Block rejected as reward was ${Utils.formatSatoshi(block.data.reward)}, should be ${Utils.formatSatoshi(expectedReward)} :bangbang:`);
             return false;
         }
 

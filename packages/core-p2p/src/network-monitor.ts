@@ -55,7 +55,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         await this.populateSeedPeers();
 
         if (this.config.skipDiscovery) {
-            this.logger.warning("Skipped peer discovery because the relay is in skip-discovery mode.");
+            this.logger.warning("Skipped peer discovery because the relay is in skip-discovery mode :mag:");
         } else {
             await this.updateNetworkStatus(true);
 
@@ -63,7 +63,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 // @ts-ignore
                 Utils.groupBy(this.repository.getPeers(), (peer) => peer.version),
             )) {
-                this.logger.info(`Discovered ${Utils.pluralize("peer", peers.length, true)} with v${version}.`);
+                this.logger.info(`Discovered ${Utils.pluralize("peer", peers.length, true)} with v${version}`);
             }
         }
 
@@ -80,11 +80,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         if (this.config.networkStart) {
             this.coldStart = true;
-            this.logger.warning("Entering cold start because the relay is in genesis-start mode.");
+            this.logger.warning("Entering cold start because the relay is in genesis-start mode :snowflake:");
         }
 
         if (this.config.disableDiscovery) {
-            this.logger.warning("Skipped peer discovery because the relay is in non-discovery mode.");
+            this.logger.warning("Skipped peer discovery because the relay is in non-discovery mode :mag:");
             return;
         }
 
@@ -93,7 +93,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 await this.cleansePeers();
             }
         } catch (error) {
-            this.logger.error(`Network Status: ${error.message}`);
+            this.logger.error(`Network Status: ${error.message} :warning:`);
         }
 
         let nextRunDelaySeconds = 600;
@@ -103,7 +103,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
             nextRunDelaySeconds = 60;
 
-            this.logger.info(`Couldn't find enough peers. Falling back to seed peers.`);
+            this.logger.info(`Couldn't find enough peers. Falling back to seed peers :fire:`);
         }
 
         this.scheduleUpdateNetworkStatus(nextRunDelaySeconds);
@@ -125,7 +125,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             max = Math.min(peers.length, peerCount);
         }
 
-        this.logger.info(`Checking ${Utils.pluralize("peer", max, true)}`);
+        this.logger.info(`Checking ${Utils.pluralize("peer", max, true)} :telescope:`);
         const peerErrors = {};
 
         // we use Promise.race to cut loose in case some communicator.ping() does not resolve within the delay
@@ -163,7 +163,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         for (const key of Object.keys(peerErrors)) {
             const peerCount = peerErrors[key].length;
-            this.logger.debug(`Removed ${Utils.pluralize("peer", peerCount, true)} because of "${key}"`);
+            this.logger.debug(`Removed ${Utils.pluralize("peer", peerCount, true)} because of "${key}" :wastebasket:`);
         }
 
         if (this.initializing) {
@@ -187,7 +187,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                                 const hisPeers = await this.communicator.getPeers(peer);
                                 return hisPeers || [];
                             } catch (error) {
-                                this.logger.debug(`Failed to get peers from ${peer.ip}: ${error.message}`);
+                                this.logger.debug(`Failed to get peers from ${peer.ip}: ${error.message} :exclamation:`);
                                 return [];
                             }
                         }),
@@ -256,7 +256,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     }
 
     public async refreshPeersAfterFork(): Promise<void> {
-        this.logger.info(`Refreshing ${Utils.pluralize("peer", this.repository.getPeers().length, true)} after fork.`);
+        this.logger.info(`Refreshing ${Utils.pluralize("peer", this.repository.getPeers().length, true)} after fork :fork_and_knife:`);
 
         await this.cleansePeers({ forcePing: true });
     }
@@ -275,7 +275,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             .map((peer) => peer.verificationResult!);
 
         if (verificationResults.length === 0) {
-            this.logger.info("No verified peers available.");
+            this.logger.info("No verified peers available :no_entry_sign:");
 
             return { forked: false };
         }
@@ -299,19 +299,22 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
                 if (blocksToRollback > 5000) {
                     this.logger.info(
-                        `Rolling back 5000/${blocksToRollback} blocks to fork at height ${forkHeight} (${ourPeerCount} vs ${forkPeerCount}).`,
+                        `Rolling back 5000/${blocksToRollback} blocks to fork at height ${forkHeight} (${ourPeerCount} vs ${forkPeerCount}) :repeat:`,
                     );
 
                     return { forked: true, blocksToRollback: 5000 };
                 } else {
                     this.logger.info(
-                        `Rolling back ${blocksToRollback} blocks to fork at height ${forkHeight} (${ourPeerCount} vs ${forkPeerCount}).`,
+                        `Rolling back ${Utils.pluralize("block",
+                            blocksToRollback,
+                            true,
+                        )} to fork at height ${forkHeight} (${ourPeerCount} vs ${forkPeerCount}) :repeat:`,
                     );
 
                     return { forked: true, blocksToRollback };
                 }
             } else {
-                this.logger.debug(`Ignoring fork at height ${forkHeight} (${ourPeerCount} vs ${forkPeerCount}).`);
+                this.logger.debug(`Ignoring fork at height ${forkHeight} (${ourPeerCount} vs ${forkPeerCount}) :fork_and_knife:`);
             }
         }
 
@@ -325,7 +328,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         const peersAll: Contracts.P2P.Peer[] = this.repository.getPeers();
 
         if (peersAll.length === 0) {
-            this.logger.error(`Could not download blocks: we have 0 peers`);
+            this.logger.error(`Could not download blocks: we have 0 peers :bangbang:`);
             return [];
         }
 
@@ -334,7 +337,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         if (peersNotForked.length === 0) {
             this.logger.error(
                 `Could not download blocks: We have ${peersAll.length} peer(s) but all ` +
-                    `of them are on a different chain than us`,
+                    `of them are on a different chain than us :bangbang:`,
             );
             return [];
         }
@@ -410,13 +413,13 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                         }
                     } catch (error) {
                         this.logger.info(
-                            `Failed to download blocks ${blocksRange} from ${peerPrint}: ${error.message}`,
+                            `Failed to download blocks ${blocksRange} from ${peerPrint}: ${error.message} :bangbang:`,
                         );
                     }
 
                     if (someJobFailed) {
                         this.logger.info(
-                            `Giving up on trying to download blocks ${blocksRange}: ` + `another download job failed`,
+                            `Giving up on trying to download blocks ${blocksRange}: ` + `another download job failed :bangbang:`,
                         );
                     }
                 }
@@ -424,7 +427,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 someJobFailed = true;
                 throw new Error(
                     `Could not download blocks ${blocksRange} from any of ${peersToTry.length} ` +
-                        `peer(s). Last attempt returned ${blocks.length} block(s) from peer ${peerPrint}.`,
+                        `peer(s). Last attempt returned ${blocks.length} block(s) from peer ${peerPrint}`,
                 );
             });
 
@@ -451,7 +454,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         for (i = 0; i < chunksToDownload; i++) {
             if (downloadResults[i] === undefined) {
-                this.logger.error(firstFailureMessage);
+                this.logger.error(`${firstFailureMessage} :exclamation:`);
                 break;
             }
             downloadedBlocks = [...downloadedBlocks, ...downloadResults[i]];
@@ -521,7 +524,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             peers = Utils.shuffle(peers).slice(0, Math.floor(peers.length / 2));
         }
 
-        this.logger.debug(`Checking ports of ${Utils.pluralize("peer", peers.length, true)}.`);
+        this.logger.debug(`Checking ports of ${Utils.pluralize("peer", peers.length, true)}`);
 
         Promise.all(peers.map((peer) => this.communicator.pingPorts(peer)));
     }
@@ -530,9 +533,9 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         try {
             const host = await checkDNS(this.app, options);
 
-            this.logger.info(`Your network connectivity has been verified by ${host}`);
+            this.logger.info(`Your network connectivity has been verified by ${host} :white_check_mark:`);
         } catch (error) {
-            this.logger.error(error.message);
+            this.logger.error(`${error.message} :bangbang:`);
         }
     }
 
@@ -540,11 +543,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         try {
             const { host, time } = await checkNTP(this.app, options);
 
-            this.logger.info(`Your NTP connectivity has been verified by ${host}`);
+            this.logger.info(`Your NTP connectivity has been verified by ${host} :white_check_mark:`);
 
-            this.logger.info(`Local clock is off by ${time.t < 0 ? "-" : ""}${prettyMs(Math.abs(time.t))} from NTP`);
+            this.logger.info(`Local clock is off by ${time.t < 0 ? "-" : ""}${prettyMs(Math.abs(time.t))} from NTP :alarm_clock:`);
         } catch (error) {
-            this.logger.error(error.message);
+            this.logger.error(`${error.message} :bangbang:`);
         }
     }
 
@@ -564,7 +567,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     private hasMinimumPeers(): boolean {
         if (this.config.ignoreMinimumNetworkReach) {
-            this.logger.warning("Ignored the minimum network reach because the relay is in seed mode.");
+            this.logger.warning("Ignored the minimum network reach because the relay is in seed mode :exclamation:");
 
             return true;
         }
@@ -588,7 +591,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         } catch {}
 
         if (!peerList || !peerList.length) {
-            this.app.terminate("No seed peers defined in peers.json");
+            this.app.terminate("No seed peers defined in peers.json :interrobang:");
         }
 
         const peers: Contracts.P2P.Peer[] = peerList.map((peer) => {

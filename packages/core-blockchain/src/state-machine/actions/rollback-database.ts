@@ -26,7 +26,7 @@ export class RollbackDatabase implements Action {
     private readonly stateStore!: Contracts.State.StateStore;
 
     public async handle(): Promise<void> {
-        this.logger.info("Trying to restore database integrity");
+        this.logger.info("Trying to restore database integrity :fire_engine:");
 
         let maxBlockRewind = this.configuration.getRequired<number>("databaseRollback.maxBlockRewind");
         let steps = this.configuration.getRequired<number>("databaseRollback.steps");
@@ -60,7 +60,7 @@ export class RollbackDatabase implements Action {
         this.stateStore.setLastStoredBlockHeight(lastBlock.data.height);
 
         this.logger.info(
-            `Database integrity verified again after rollback to height ${lastBlock.data.height.toLocaleString()}`,
+            `Database integrity verified again after rollback to height ${lastBlock.data.height.toLocaleString()} :green_heart:`,
         );
 
         this.blockchain.dispatch("SUCCESS");

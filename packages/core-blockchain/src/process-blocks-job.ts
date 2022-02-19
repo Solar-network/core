@@ -210,7 +210,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
     }
 
     private async handleCorrupted() {
-        this.logger.error("Shutting down app, because state is corrupted");
+        this.logger.error("Shutting down app, because state is corrupted :boom:");
         process.exit(1);
     }
 }

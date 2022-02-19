@@ -33,7 +33,7 @@ export class AcceptBlockHandler implements BlockHandler {
             // Check if we recovered from a fork
             const forkedBlock = this.state.getForkedBlock();
             if (forkedBlock && forkedBlock.data.height === block.data.height) {
-                this.logger.info("Successfully recovered from fork");
+                this.logger.info("Successfully recovered from fork :star2:");
                 this.state.clearForkedBlock();
             }
 
@@ -57,7 +57,9 @@ export class AcceptBlockHandler implements BlockHandler {
 
             return BlockProcessorResult.Accepted;
         } catch (error) {
-            this.logger.warning(`Refused new block ${JSON.stringify(block.data)}`);
+            this.logger.warning("Refused new block :warning: :warning: :warning:");
+            this.logger.warning(JSON.stringify(block.data));
+
             this.logger.debug(error.stack);
 
             this.blockchain.resetLastDownloadedBlock();

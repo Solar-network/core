@@ -17,7 +17,7 @@ export class StartForkRecovery implements Action {
     private readonly networkMonitor!: Contracts.P2P.NetworkMonitor;
 
     public async handle(): Promise<void> {
-        this.logger.info("Starting fork recovery");
+        this.logger.info("Starting fork recovery :fork_and_knife:");
 
         this.blockchain.clearAndStopQueue();
 
@@ -28,7 +28,7 @@ export class StartForkRecovery implements Action {
 
         this.stateStore.setNumberOfBlocksToRollback(0);
 
-        this.logger.info(`Removed ${AppUtils.pluralize("block", blocksToRemove, true)}`);
+        this.logger.info(`Removed ${AppUtils.pluralize("block", blocksToRemove, true)} :wastebasket:`);
 
         await this.networkMonitor.refreshPeersAfterFork();
 

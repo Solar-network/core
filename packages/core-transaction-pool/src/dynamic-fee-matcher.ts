@@ -40,25 +40,25 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
             const minFeeStr = Utils.formatSatoshi(minFeePool);
 
             if (transaction.data.fee.isGreaterThanEqual(minFeePool)) {
-                this.logger.debug(`${transaction} eligible to enter pool (fee ${feeStr} >= ${minFeeStr})`);
+                this.logger.debug(`${transaction} eligible to enter pool (fee ${feeStr} >= ${minFeeStr}) :money_with_wings:`);
                 return;
             }
 
-            this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} < ${minFeeStr})`);
+            this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} < ${minFeeStr}) :zap:`);
             throw new TransactionFeeToLowError(transaction);
         } else {
             const staticFeeStr = Utils.formatSatoshi(transaction.staticFee);
 
             if (transaction.data.fee.isEqualTo(transaction.staticFee)) {
-                this.logger.debug(`${transaction} eligible to enter pool (fee ${feeStr} = ${staticFeeStr})`);
+                this.logger.debug(`${transaction} eligible to enter pool (fee ${feeStr} = ${staticFeeStr}) :money_with_wings:`);
                 return;
             }
             if (transaction.data.fee.isLessThan(transaction.staticFee)) {
-                this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} < ${staticFeeStr})`);
+                this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} < ${staticFeeStr}) :zap:`);
                 throw new TransactionFeeToLowError(transaction);
             }
 
-            this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} > ${staticFeeStr})`);
+            this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} > ${staticFeeStr}) :zap:`);
             throw new TransactionFeeToHighError(transaction);
         }
     }
@@ -83,11 +83,11 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
             const minFeeStr = Utils.formatSatoshi(minFeeBroadcast);
 
             if (transaction.data.fee.isGreaterThanEqual(minFeeBroadcast)) {
-                this.logger.debug(`${transaction} eligible for broadcast (fee ${feeStr} >= ${minFeeStr})`);
+                this.logger.debug(`${transaction} eligible for broadcast (fee ${feeStr} >= ${minFeeStr}) :earth_africa:`);
                 return;
             }
 
-            this.logger.notice(`${transaction} not eligible for broadcast (fee ${feeStr} < ${minFeeStr})`);
+            this.logger.notice(`${transaction} not eligible for broadcast (fee ${feeStr} < ${minFeeStr}) :zap:`);
             throw new TransactionFeeToLowError(transaction);
         } else {
             const staticFeeStr = Utils.formatSatoshi(transaction.staticFee);
@@ -97,11 +97,11 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
                 return;
             }
             if (transaction.data.fee.isLessThan(transaction.staticFee)) {
-                this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} < ${staticFeeStr})`);
+                this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} < ${staticFeeStr}) :zap:`);
                 throw new TransactionFeeToLowError(transaction);
             }
 
-            this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} > ${staticFeeStr})`);
+            this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} > ${staticFeeStr}) :zap:`);
             throw new TransactionFeeToHighError(transaction);
         }
     }
