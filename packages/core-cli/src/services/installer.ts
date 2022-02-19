@@ -23,7 +23,7 @@ export class Installer {
             gitTag = getLastTag('"^\\d+.\\d+.\\d+-next.\\d+"');
         }
 
-        const command = `cd ${coreDirectory} && git tag -l | xargs git tag -d && git fetch --all --tags -f && rm -f node_modules/better-sqlite3/build/Release/better_sqlite3.node && git reset --hard && git checkout tags/${gitTag} && yarn cache clean && yarn setup`;
+        const command = `cd ${coreDirectory} && git tag -l | xargs git tag -d && git fetch --all --tags -f && rm -f node_modules/better-sqlite3/build/Release/better_sqlite3.node yarn.lock && git reset --hard && git checkout tags/${gitTag} && yarn cache clean && yarn setup`;
         const { stderr, exitCode } = sync(command, { shell: true });
 
         if (exitCode !== 0) {
