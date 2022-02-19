@@ -2,7 +2,6 @@
     "name": "@solar-network/solar-crypto",
     "version": "1.0.0",
     "description": "Custom transactions for the Solar Network",
-    "license": "MIT",
     "contributors": [
         "alessiodf <alessiodf@pm.me>",
         "cactus1549 <cactus1549pool@gmail.com>"
