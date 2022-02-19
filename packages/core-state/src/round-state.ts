@@ -134,7 +134,7 @@ export class RoundState {
             this.logger.debug(
                 `Delegate ${delegate.getAttribute(
                     "delegate.username",
-                )} (${delegate.getPublicKey()}) just missed a block.`,
+                )} (${delegate.getPublicKey()}) just missed a block :pensive:`,
             );
 
             this.events.dispatch(Enums.ForgerEvent.Missing, {
@@ -192,7 +192,7 @@ export class RoundState {
                 this.logger.debug(
                     `Delegate ${wallet.getAttribute(
                         "delegate.username",
-                    )} (${wallet.getPublicKey()}) just missed a round.`,
+                    )} (${wallet.getPublicKey()}) just missed a round :cold_sweat:`,
                 );
 
                 this.events.dispatch(Enums.RoundEvent.Missed, {
