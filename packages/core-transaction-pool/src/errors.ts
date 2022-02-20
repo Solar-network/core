@@ -81,7 +81,7 @@ export class TransactionFailedToApplyError extends Contracts.TransactionPool.Poo
 
 export class TransactionFailedToVerifyError extends Contracts.TransactionPool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
-        super(`${transaction} didn't passed verification`, "ERR_BAD_DATA");
+        super(`${transaction} failed signature verification check`, "ERR_BAD_DATA");
     }
 }
 
