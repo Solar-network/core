@@ -955,7 +955,7 @@ export class Command extends Commands.Command {
     }
 
     private signBlock(block, keys: Interfaces.IKeyPair): string {
-        return Crypto.Hash.signECDSA(this.getHash(block), keys);
+        return Crypto.Hash.signSchnorr(this.getHash(block), keys);
     }
 
     private getHash(block): Buffer {

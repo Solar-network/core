@@ -13,7 +13,7 @@ export class BlockFactory {
         const payloadHash: Buffer = Serializer.serialize(data, false);
         const hash: Buffer = HashAlgorithms.sha256(payloadHash);
 
-        data.blockSignature = Hash.signECDSA(hash, keys);
+        data.blockSignature = Hash.signSchnorr(hash, keys);
         data.id = Block.getId(data);
 
         return this.fromData(data);

@@ -144,7 +144,7 @@ export class Block implements IBlock {
             throw new Error();
         }
 
-        return Hash.verifyECDSA(hash, this.data.blockSignature, this.data.generatorPublicKey);
+        return Hash.verifySchnorr(hash, this.data.blockSignature, this.data.generatorPublicKey);
     }
 
     public toJson(): IBlockJson {
