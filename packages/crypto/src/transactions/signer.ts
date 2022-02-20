@@ -10,8 +10,7 @@ export class Signer {
         }
 
         const hash: Buffer = Utils.toHash(transaction, options);
-        const signature: string =
-            transaction.version && transaction.version > 1 ? Hash.signSchnorr(hash, keys) : Hash.signECDSA(hash, keys);
+        const signature: string = Hash.signSchnorr(hash, keys);
 
         if (!transaction.signature && !options.excludeMultiSignature) {
             transaction.signature = signature;
@@ -22,8 +21,7 @@ export class Signer {
 
     public static secondSign(transaction: ITransactionData, keys: IKeyPair): string {
         const hash: Buffer = Utils.toHash(transaction, { excludeSecondSignature: true });
-        const signature: string =
-            transaction.version && transaction.version > 1 ? Hash.signSchnorr(hash, keys) : Hash.signECDSA(hash, keys);
+        const signature: string = Hash.signSchnorr(hash, keys);
 
         if (!transaction.secondSignature) {
             transaction.secondSignature = signature;
