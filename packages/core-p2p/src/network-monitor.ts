@@ -2,6 +2,7 @@ import { Container, Contracts, Enums, Providers, Services, Utils } from "@arkeco
 import { Interfaces } from "@arkecosystem/crypto";
 import delay from "delay";
 import prettyMs from "pretty-ms";
+import { gt, lt } from "semver";
 
 import { NetworkState } from "./network-state";
 import { Peer } from "./peer";
@@ -59,11 +60,21 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         } else {
             await this.updateNetworkStatus(true);
 
+            const ourVersion = this.app.version();
+
             for (const [version, peers] of Object.entries(
                 // @ts-ignore
                 Utils.groupBy(this.repository.getPeers(), (peer) => peer.version),
             )) {
-                this.logger.info(`Discovered ${Utils.pluralize("peer", peers.length, true)} with v${version}`);
+                let discovery = `Discovered ${Utils.pluralize("peer", peers.length, true)} with v${version}`;
+
+                if (gt(version, ourVersion)) {
+                    discovery += " :eyes:";
+                } else if (lt(version, ourVersion)) {
+                    discovery += " :zzz:";
+                }
+
+                this.logger.info(discovery);
             }
         }
 
