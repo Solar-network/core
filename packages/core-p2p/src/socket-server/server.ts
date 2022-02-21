@@ -8,6 +8,7 @@ import { CodecPlugin } from "./plugins/codec";
 import { IsAppReadyPlugin } from "./plugins/is-app-ready";
 import { RateLimitPlugin } from "./plugins/rate-limit";
 import { ValidatePlugin } from "./plugins/validate";
+import { VersionPlugin } from "./plugins/version";
 import { WhitelistForgerPlugin } from "./plugins/whitelist-forger";
 import { BlocksRoute } from "./routes/blocks";
 import { InternalRoute } from "./routes/internal";
@@ -81,6 +82,7 @@ export class Server {
         // onPostAuth
         this.app.resolve(CodecPlugin).register(this.server);
         this.app.resolve(ValidatePlugin).register(this.server);
+        this.app.resolve(VersionPlugin).register(this.server);
         this.app.resolve(IsAppReadyPlugin).register(this.server);
 
         // onPreHandler
