@@ -101,6 +101,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
             const verifyTimeout = this.configuration.getRequired<number>("verifyTimeout");
 
             await this.communicator.ping(newPeer, verifyTimeout);
+            await this.communicator.pingPorts(newPeer);
 
             this.repository.setPeer(newPeer);
 
