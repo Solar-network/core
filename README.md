@@ -4,8 +4,6 @@
 	<img src="./banner.jpg?sanitize=true" />
 </p>
 
-[![License: MIT](https://badgen.now.sh/badge/license/MIT/green)](https://opensource.org/licenses/MIT)
-
 ## Introduction
 
 > This repository contains all plugins that make up the Solar Core.
@@ -16,4 +14,4 @@ This project exists thanks to all the people who [contribute](../../contributors
 
 ## License
 
-[MIT](LICENSE) © [ARK Ecosystem](https://ark.io)
+Please read the separate [LICENSE](LICENSE) file for details.
