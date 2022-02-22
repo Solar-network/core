@@ -123,8 +123,9 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     public async cleansePeers({
         fast = false,
         forcePing = false,
+        log = true,
         peerCount,
-    }: { fast?: boolean; forcePing?: boolean; peerCount?: number } = {}): Promise<void> {
+    }: { fast?: boolean; forcePing?: boolean; log?: boolean; peerCount?: number } = {}): Promise<void> {
         let peers = this.repository.getPeers();
         let max = peers.length;
 
@@ -136,7 +137,9 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             max = Math.min(peers.length, peerCount);
         }
 
-        this.logger.info(`Checking ${Utils.pluralize("peer", max, true)} :telescope:`);
+        if (log) {
+            this.logger.info(`Checking ${Utils.pluralize("peer", max, true)} :telescope:`);
+        }
         const peerErrors = {};
 
         // we use Promise.race to cut loose in case some communicator.ping() does not resolve within the delay
@@ -260,8 +263,8 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         return medians[Math.floor(medians.length / 2)] || 0;
     }
 
-    public async getNetworkState(): Promise<Contracts.P2P.NetworkState> {
-        await this.cleansePeers({ fast: true, forcePing: true });
+    public async getNetworkState(log: boolean = true): Promise<Contracts.P2P.NetworkState> {
+        await this.cleansePeers({ fast: true, forcePing: true, log });
 
         return await NetworkState.analyze(this, this.repository);
     }

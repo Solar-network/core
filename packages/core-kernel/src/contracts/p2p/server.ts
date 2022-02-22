@@ -27,6 +27,14 @@ export interface ForgingTransactions {
     count: number;
 }
 
+export interface Status {
+    state: {
+        header: {
+            timestamp: number
+        }
+    };
+}
+
 export interface UnconfirmedTransactions {
     transactions: string[];
     poolSize: number;

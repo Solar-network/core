@@ -18,15 +18,17 @@ export interface NetworkMonitor {
     cleansePeers({
         fast,
         forcePing,
+        log,
         peerCount,
     }?: {
         fast?: boolean;
         forcePing?: boolean;
+        log?: boolean;
         peerCount?: number;
     }): Promise<void>;
     discoverPeers(initialRun?: boolean): Promise<boolean>;
     getNetworkHeight(): number;
-    getNetworkState(): Promise<NetworkState>;
+    getNetworkState(log?: boolean): Promise<NetworkState>;
     refreshPeersAfterFork(): Promise<void>;
     checkNetworkHealth(): Promise<NetworkStatus>;
     downloadBlocksFromHeight(fromBlockHeight: number, maxParallelDownloads?: number): Promise<Interfaces.IBlockData[]>;
