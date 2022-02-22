@@ -1,7 +1,7 @@
 # Solar Core
 
 <p align="center">
-	<img src="./banner.jpg?sanitize=true" />
+	<img src="./banner.png" />
 </p>
 
 ## Introduction

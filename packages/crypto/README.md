@@ -1,7 +1,7 @@
-# ARK - Crypto
+# Solar Core - Crypto
 
 <p align="center">
-    <img src="./banner.png?sanitize=true" />
+    <img src="../../banner.png" />
 </p>
 
 ## Documentation
@@ -18,4 +18,4 @@ This project exists thanks to all the people who [contribute](../../../../contri
 
 ## License
 
-[MIT](LICENSE) © [ARK Ecosystem](https://ark.io)
+Please read the separate [LICENSE](../../LICENSE) file for details.

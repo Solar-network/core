@@ -1,7 +1,7 @@
-# ARK Core - Database - Interface
+# Solar Core - Database - Interface
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/ARKEcosystem/core/master/banner.png" />
+    <img src="../../banner.png" />
 </p>
 
 ## Documentation
@@ -18,4 +18,4 @@ This project exists thanks to all the people who [contribute](../../../../contri
 
 ## License
 
-[MIT](LICENSE) © [ARK Ecosystem](https://ark.io)
+Please read the separate [LICENSE](../../LICENSE) file for details.
