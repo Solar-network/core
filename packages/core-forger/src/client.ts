@@ -15,6 +15,15 @@ const MAX_PAYLOAD_CLIENT = 20 * 1024 * 1024; // allow large value of max payload
 export class Client {
     /**
      * @private
+     * @type {Contracts.Kernel.Application}
+     * @memberof ForgerService
+     */
+
+    @Container.inject(Container.Identifiers.Application)
+    private readonly app!: Contracts.Kernel.Application;
+
+    /**
+     * @private
      * @type {Contracts.Kernel.Logger}
      * @memberof Client
      */
@@ -115,14 +124,22 @@ export class Client {
         return this.emit<Contracts.P2P.CurrentRound>("p2p.internal.getCurrentRound");
     }
 
-    public async getNetworkState(): Promise<Contracts.P2P.NetworkState> {
+    public async getNetworkState(log: boolean): Promise<Contracts.P2P.NetworkState> {
         try {
             return NetworkState.parse(
-                await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", {}, 4000),
+                await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", { log }, 4000),
             );
         } catch (err) {
             return new NetworkState(NetworkStateStatus.Unknown);
         }
+    }
+
+    /**
+     * @returns {Promise<Contracts.P2P.Status>}
+     * @memberof Client
+     */
+    public async getStatus(): Promise<Contracts.P2P.Status> {
+        return await this.emit<Contracts.P2P.Status>("p2p.peer.getStatus", { headers: { version: this.app.version() }}, 2000);
     }
 
     /**
@@ -226,6 +243,7 @@ export class Client {
             "p2p.internal.getNetworkState": Codecs.getNetworkState,
             "p2p.internal.syncBlockchain": Codecs.syncBlockchain,
             "p2p.blocks.postBlock": Codecs.postBlock,
+            "p2p.peer.getStatus": Codecs.getStatus,
         };
 
         return codecs[event];

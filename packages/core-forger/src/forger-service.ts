@@ -1,13 +1,13 @@
 import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
 import { NetworkStateStatus } from "@arkecosystem/core-p2p";
-import { Blocks, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
 import { Handlers } from "@arkecosystem/core-transactions";
+import { Blocks, Crypto, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
+import delay from "delay";
 
 import { Client } from "./client";
 import { HostNoResponseError, RelayCommunicationError } from "./errors";
 import { Delegate } from "./interfaces";
 
-// todo: review the implementation - quite a mess right now with quite a few responsibilities
 @Container.injectable()
 export class ForgerService {
     /**
@@ -78,6 +78,20 @@ export class ForgerService {
 
     /**
      * @private
+     * @type {number}
+     * @memberof ForgerService
+     */
+    private lastSlot!: number;
+
+    /**
+     * @private
+     * @type {(Interfaces.ITransactionData[])}
+     * @memberof ForgerService
+     */
+    private transactions;
+
+    /**
+     * @private
      * @type {boolean}
      * @memberof ForgerService
      */
@@ -127,7 +141,7 @@ export class ForgerService {
         try {
             await this.loadRound();
             AppUtils.assert.defined<Contracts.P2P.CurrentRound>(this.round);
-            timeout = Math.max(0, this.getRoundRemainingSlotTime(this.round));
+            timeout = 0;
         } catch (error) {
             this.logger.warning("Waiting for a responsive host :hourglass_flowing_sand:");
         } finally {
@@ -161,11 +175,6 @@ export class ForgerService {
 
             AppUtils.assert.defined<Contracts.P2P.CurrentRound>(this.round);
 
-            if (!this.round.canForge) {
-                // basically looping until we lock at beginning of next slot
-                return this.checkLater(200);
-            }
-
             AppUtils.assert.defined<string>(this.round.currentForger.publicKey);
 
             const delegate: Delegate | undefined = this.isActiveDelegate(this.round.currentForger.publicKey);
@@ -174,11 +183,15 @@ export class ForgerService {
                 AppUtils.assert.defined<string>(this.round.nextForger.publicKey);
 
                 if (this.isActiveDelegate(this.round.nextForger.publicKey)) {
-                    const blocktime = Managers.configManager.getMilestone(this.round.lastBlock.height).blocktime
+                    const blocktime = Managers.configManager.getMilestone(this.round.lastBlock.height).blocktime;
                     const username = this.usernames[this.round.nextForger.publicKey];
 
                     this.logger.info(
-                        `Delegate ${username} is due to forge in ${AppUtils.pluralize("second", blocktime, true)} from now :sparkles:`,
+                        `Delegate ${username} is due to forge in ${AppUtils.pluralize(
+                            "second",
+                            blocktime,
+                            true,
+                        )} from now :sparkles:`,
                     );
 
                     await this.client.syncWithNetwork();
@@ -187,25 +200,9 @@ export class ForgerService {
                 return this.checkLater(this.getRoundRemainingSlotTime(this.round));
             }
 
-            const networkState: Contracts.P2P.NetworkState = await this.client.getNetworkState();
-
-            if (networkState.getNodeHeight() !== this.round.lastBlock.height) {
-                this.logger.warning(
-                    `The NetworkState height (${networkState
-                        .getNodeHeight()
-                        ?.toLocaleString()}) and round height (${this.round.lastBlock.height.toLocaleString()}) are out of sync. This indicates delayed blocks on the network :zzz:`,
-                );
-            }
-
-            if (
-                await this.app
-                    .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-                    .call("isForgingAllowed", { forgerService: this, delegate, networkState })
-            ) {
-                await this.app
-                    .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-                    .call("forgeNewBlock", { forgerService: this, delegate, round: this.round, networkState });
-            }
+            await this.app
+                .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
+                .call("forgeNewBlock", { forgerService: this, delegate, firstAttempt: true, round: this.round });
 
             this.logAppReady = true;
 
@@ -213,7 +210,6 @@ export class ForgerService {
         } catch (error) {
             if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
                 if (error.message.includes("blockchain isn't ready") || error.message.includes("App is not ready")) {
-                    /* istanbul ignore else */
                     if (this.logAppReady) {
                         this.logger.info("Waiting for relay to become ready :hourglass_flowing_sand:");
                         this.logAppReady = false;
@@ -247,52 +243,123 @@ export class ForgerService {
      */
     public async forgeNewBlock(
         delegate: Delegate,
+        firstAttempt: boolean,
         round: Contracts.P2P.CurrentRound,
-        networkState: Contracts.P2P.NetworkState,
     ): Promise<void> {
-        AppUtils.assert.defined<number>(networkState.getNodeHeight());
-        Managers.configManager.setHeight(networkState.getNodeHeight()!);
+        setImmediate(async () => {
+            const minimumMs = 2000;
+            try {
+                const networkState: Contracts.P2P.NetworkState = await this.client.getNetworkState(firstAttempt);
 
-        const transactions: Interfaces.ITransactionData[] = await this.getTransactionsForForging();
+                if (networkState.getNodeHeight() !== round.lastBlock.height) {
+                    this.logger.warning(
+                        `The NetworkState height (${networkState
+                            .getNodeHeight()
+                            ?.toLocaleString()}) and round height (${round.lastBlock.height.toLocaleString()}) are out of sync. This indicates delayed blocks on the network :zzz:`,
+                    );
+                }
 
-        const block: Interfaces.IBlock | undefined = delegate.forge(transactions, {
-            previousBlock: {
-                id: networkState.getLastBlockId(),
-                idHex: Managers.configManager.getMilestone().block.idFullSha256
-                    ? networkState.getLastBlockId()
-                    : Blocks.Block.toBytesHex(networkState.getLastBlockId()),
-                height: networkState.getNodeHeight(),
-            },
-            timestamp: round.timestamp,
-            reward: Utils.calculateReward(networkState.getNodeHeight()! + 1, round.currentForger.delegate.rank!),
-        });
+                AppUtils.assert.defined<number>(networkState.getNodeHeight());
+                AppUtils.assert.defined<string>(delegate.publicKey);
 
-        AppUtils.assert.defined<Interfaces.IBlock>(block);
-        AppUtils.assert.defined<string>(delegate.publicKey);
+                Managers.configManager.setHeight(networkState.getNodeHeight()!);
 
-        const minimumMs = 2000;
-        const timeLeftInMs: number = this.getRoundRemainingSlotTime(round);
-        const prettyName = this.usernames[delegate.publicKey];
+                const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(
+                    this.app,
+                    networkState.getNodeHeight()!,
+                );
 
-        if (timeLeftInMs >= minimumMs) {
-            this.logger.info(`Delegate ${prettyName} forged a new block at height ${block.data.height.toLocaleString()} with ${AppUtils.pluralize("transaction", block.data.numberOfTransactions, true)} :trident:`);
-            this.logger.debug(`The id of the new block is ${block.data.id}`);
+                const roundSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup, round.timestamp);
+                let currentSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup);
 
-            await this.client.broadcastBlock(block);
+                let { state } = await this.client.getStatus();
+                let lastBlockSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup, state.header.timestamp);
 
-            this.lastForgedBlock = block;
-            this.client.emitEvent(Enums.BlockEvent.Forged, block.data);
+                if (lastBlockSlot === currentSlot || delegate.publicKey !== round.currentForger.publicKey) {
+                    return;
+                }
 
-            for (const transaction of transactions) {
-                this.client.emitEvent(Enums.TransactionEvent.Forged, transaction);
+                if (
+                    await this.app
+                        .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
+                        .call("isForgingAllowed", { forgerService: this, delegate, networkState })
+                ) {
+                    if (this.lastSlot !== roundSlot && currentSlot === roundSlot) {
+                        this.lastSlot = roundSlot;
+                        this.transactions = await this.getTransactionsForForging();
+                    }
+
+                    const block: Interfaces.IBlock | undefined = delegate.forge(this.transactions, {
+                        previousBlock: {
+                            id: networkState.getLastBlockId(),
+                            idHex: Managers.configManager.getMilestone().block.idFullSha256
+                                ? networkState.getLastBlockId()
+                                : Blocks.Block.toBytesHex(networkState.getLastBlockId()),
+                            height: networkState.getNodeHeight(),
+                        },
+                        timestamp: round.timestamp,
+                        reward: Utils.calculateReward(
+                            networkState.getNodeHeight()! + 1,
+                            round.currentForger.delegate.rank!,
+                        ),
+                    });
+
+                    const timeLeftInMs: number = this.getRoundRemainingSlotTime(round);
+
+                    const prettyName = this.usernames[delegate.publicKey];
+
+                    currentSlot = Crypto.Slots.getSlotNumber(blockTimeLookup);
+
+                    state = (await this.client.getStatus()).state;
+                    lastBlockSlot = Crypto.Slots.getSlotNumber(blockTimeLookup, state.header.timestamp);
+
+                    if (
+                        timeLeftInMs >= minimumMs &&
+                        currentSlot === roundSlot &&
+                        delegate.publicKey === round.currentForger.publicKey
+                    ) {
+                        AppUtils.assert.defined<Interfaces.IBlock>(block);
+                        if (Crypto.Slots.getSlotNumber(blockTimeLookup, block.data.timestamp) !== lastBlockSlot) {
+                            this.logger.info(
+                                `Delegate ${prettyName} forged a new block at height ${block.data.height.toLocaleString()} with ${AppUtils.pluralize(
+                                    "transaction",
+                                    block.data.numberOfTransactions,
+                                    true,
+                                )} :trident:`,
+                            );
+
+                            await this.client.broadcastBlock(block);
+
+                            this.lastForgedBlock = block;
+                            this.client.emitEvent(Enums.BlockEvent.Forged, block.data);
+
+                            for (const transaction of this.transactions) {
+                                this.client.emitEvent(Enums.TransactionEvent.Forged, transaction);
+                            }
+                        }
+                    } else if (timeLeftInMs > 0) {
+                        this.logger.warning(
+                            `Failed to forge new block by delegate ${prettyName}, because there were ${timeLeftInMs}ms left in the current slot (less than ${minimumMs}ms) :bangbang:`,
+                        );
+                    } else {
+                        this.logger.warning(
+                            `Failed to forge new block by delegate ${prettyName}, because already in next slot :bangbang:`,
+                        );
+                    }
+                }
+            } catch (error) {
+                if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
+                    this.logger.warning(error.message);
+                } else {
+                    this.logger.error(error.stack);
+                }
             }
-        } else if (timeLeftInMs > 0) {
-            this.logger.warning(
-                `Failed to forge new block by delegate ${prettyName}, because there were ${timeLeftInMs}ms left in the current slot (less than ${minimumMs}ms) :bangbang:`,
-            );
-        } else {
-            this.logger.warning(`Failed to forge new block by delegate ${prettyName}, because already in next slot :bangbang:`);
-        }
+            await delay(1000);
+
+            await this.loadRound();
+
+            return this.forgeNewBlock(delegate, false, this.round!);
+        });
     }
 
     /**
@@ -310,7 +377,11 @@ export class ForgerService {
         );
         this.logger.debug(
             `Received ${AppUtils.pluralize("transaction", transactions.length, true)} ` +
-                `from the pool containing ${AppUtils.pluralize("transaction", response.poolSize, true)} total :money_with_wings:`,
+                `from the pool containing ${AppUtils.pluralize(
+                    "transaction",
+                    response.poolSize,
+                    true,
+                )} total :money_with_wings:`,
         );
         return transactions;
     }

@@ -23,7 +23,7 @@ export const buildRateLimiter = (options) =>
                     endpoint: "p2p.peer.getPeers",
                 },
                 {
-                    rateLimit: 2,
+                    rateLimit: 9,
                     endpoint: "p2p.peer.getStatus",
                 },
                 {
