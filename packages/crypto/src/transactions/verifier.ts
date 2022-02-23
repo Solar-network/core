@@ -115,11 +115,6 @@ export class Verifier {
     }
 
     private static internalVerifySignature(hash: Buffer, signature: string, publicKey: string): boolean {
-        const isSchnorr = Buffer.from(signature, "hex").byteLength === 64;
-        if (isSchnorr) {
-            return Hash.verifySchnorr(hash, signature, publicKey);
-        }
-
-        return Hash.verifyECDSA(hash, signature, publicKey);
+        return Hash.verifySchnorr(hash, signature, publicKey);
     }
 }

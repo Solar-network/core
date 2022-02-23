@@ -10,7 +10,7 @@
             "maxTransactions": 150,
             "maxPayload": 2097152
         },
-        "epoch": "2021-12-23T00:00:00.000Z",
+        "epoch": "2022-02-24T00:00:00.000Z",
         "fees": {
             "staticFees": {
                 "transfer": 10000000,
@@ -29,14 +29,19 @@
         "vendorFieldLength": 255,
         "multiPaymentLimit": 256,
         "aip11": true,
-        "aip37": true
+        "aip37": true,
+        "solarTransactions": {
+            "burn": {
+                "minimumAmount": 2000000
+            }
+        }
     },
     {
-        "height": 75600,
+        "height": 54,
         "reward": 1000000000
     },
     {
-        "height": 532598,
+        "height": 107,
         "dynamicReward": {
             "enabled": true,
             "ranks": {
@@ -93,14 +98,6 @@
                 "51": 1300000000,
                 "52": 1312500000,
                 "53": 1325000000
-            }
-        }
-    },
-    {
-        "height": 555000,
-        "solarTransactions": {
-            "burn": {
-                "minimumAmount": 2000000
             }
         }
     }

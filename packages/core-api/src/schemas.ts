@@ -182,7 +182,7 @@ export const blockCriteriaSchemas = {
     payloadLength: orNumericCriteria(Joi.number().integer().min(0)),
     payloadHash: orEqualCriteria(Joi.string().hex()),
     generatorPublicKey: orEqualCriteria(Joi.string().hex().length(66)),
-    blockSignature: orEqualCriteria(Joi.string().hex()),
+    blockSignature: orEqualCriteria(Joi.string().hex().length(128)),
 };
 
 export const transactionCriteriaSchemas = {

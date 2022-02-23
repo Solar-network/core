@@ -40,7 +40,7 @@ export class Deserializer {
         // Deserialize type specific parts
         instance.deserialize(buff);
 
-        this.deserializeSignatures(data, buff);
+        this.deserializeSchnorr(data, buff);
 
         if (data.version) {
             if (
@@ -93,63 +93,6 @@ export class Deserializer {
         }
     }
 
-    private static deserializeSignatures(transaction: ITransactionData, buf: ByteBuffer): void {
-        if (transaction.version === 1) {
-            this.deserializeECDSA(transaction, buf);
-        } else {
-            this.deserializeSchnorrOrECDSA(transaction, buf);
-        }
-    }
-
-    private static deserializeSchnorrOrECDSA(transaction: ITransactionData, buf: ByteBuffer): void {
-        if (this.detectSchnorr(buf)) {
-            this.deserializeSchnorr(transaction, buf);
-        } else {
-            this.deserializeECDSA(transaction, buf);
-        }
-    }
-
-    private static deserializeECDSA(transaction: ITransactionData, buf: ByteBuffer): void {
-        const currentSignatureLength = (): number => {
-            buf.jump(1);
-            const length = buf.readUInt8();
-
-            buf.jump(-2);
-            return length + 2;
-        };
-
-        // Signature
-        if (buf.getRemainderLength()) {
-            const signatureLength: number = currentSignatureLength();
-            transaction.signature = buf.readBuffer(signatureLength).toString("hex");
-        }
-
-        const beginningMultiSignature = () => {
-            const marker: number = buf.readUInt8();
-
-            buf.jump(-1);
-
-            return marker === 255;
-        };
-
-        // Second Signature
-        if (buf.getRemainderLength() && !beginningMultiSignature()) {
-            const secondSignatureLength: number = currentSignatureLength();
-            transaction.secondSignature = buf.readBuffer(secondSignatureLength).toString("hex");
-        }
-
-        // Multi Signatures
-        if (buf.getRemainderLength() && beginningMultiSignature()) {
-            buf.jump(1);
-            const multiSignature: string = buf.readBuffer(buf.getRemainderLength()).toString("hex");
-            transaction.signatures = [multiSignature];
-        }
-
-        if (buf.getRemainderLength()) {
-            throw new InvalidTransactionBytesError("signature buffer not exhausted");
-        }
-    }
-
     private static deserializeSchnorr(transaction: ITransactionData, buf: ByteBuffer): void {
         const canReadNonMultiSignature = () => {
             return (
@@ -187,27 +130,6 @@ export class Deserializer {
                 throw new InvalidTransactionBytesError("signature buffer not exhausted");
             }
         }
-    }
-
-    private static detectSchnorr(buf: ByteBuffer): boolean {
-        const remaining: number = buf.getRemainderLength();
-
-        // `signature` / `secondSignature`
-        if (remaining === 64 || remaining === 128) {
-            return true;
-        }
-
-        // `signatures` of a multi signature transaction (type != 4)
-        if (remaining % 65 === 0) {
-            return true;
-        }
-
-        // only possiblity left is a type 4 transaction with and without a `secondSignature`.
-        if ((remaining - 64) % 65 === 0 || (remaining - 128) % 65 === 0) {
-            return true;
-        }
-
-        return false;
     }
 
     private static getByteBuffer(serialized: Buffer | string): ByteBuffer {

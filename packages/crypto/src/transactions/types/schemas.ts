@@ -30,16 +30,16 @@ export const transactionBaseSchema: Record<string, any> = {
         amount: { bignumber: { minimum: 1, bypassGenesis: true } },
         fee: { bignumber: { minimum: 0, bypassGenesis: true } },
         senderPublicKey: { $ref: "publicKey" },
-        signature: { $ref: "alphanumeric" },
-        secondSignature: { $ref: "alphanumeric" },
-        signSignature: { $ref: "alphanumeric" },
+        signature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
+        secondSignature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
+        signSignature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
         signatures: {
             type: "array",
             minItems: 1,
             maxItems: 16,
             additionalItems: false,
             uniqueItems: true,
-            items: { allOf: [{ minLength: 130, maxLength: 130 }, { $ref: "alphanumeric" }] },
+            items: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
         },
     },
 };
@@ -184,7 +184,7 @@ export const multiSignature = extend(transactionBaseSchema, {
             maxItems: { $data: "1/asset/multiSignature/publicKeys/length" },
             additionalItems: false,
             uniqueItems: true,
-            items: { allOf: [{ minLength: 130, maxLength: 130 }, { $ref: "alphanumeric" }] },
+            items: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
         },
     },
 });
@@ -237,7 +237,7 @@ export const multiSignatureLegacy = extend(transactionBaseSchemaNoSignatures, {
             minItems: 1,
             maxItems: 1,
             additionalItems: false,
-            items: { $ref: "alphanumeric" },
+            items: { $ref: "hex" },
         },
     },
 });

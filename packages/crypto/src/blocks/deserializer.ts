@@ -69,18 +69,7 @@ export class Deserializer {
         block.payloadLength = buf.readUint32();
         block.payloadHash = buf.readBytes(32).toString("hex");
         block.generatorPublicKey = buf.readBytes(33).toString("hex");
-
-        const signatureLength = (): number => {
-            buf.mark();
-
-            const lengthHex: string = buf.skip(1).readBytes(1).toString("hex");
-
-            buf.reset();
-
-            return parseInt(lengthHex, 16) + 2;
-        };
-
-        block.blockSignature = buf.readBytes(signatureLength()).toString("hex");
+        block.blockSignature = buf.readBytes(64).toString("hex");
     }
 
     private static deserializeTransactions(

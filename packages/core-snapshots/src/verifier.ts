@@ -41,7 +41,7 @@ export class Verifier {
             const bytes = Blocks.Serializer.serialize(block.data, false);
             const hash = Crypto.HashAlgorithms.sha256(bytes);
 
-            isVerified = Crypto.Hash.verifyECDSA(hash, blockEntity.blockSignature, blockEntity.generatorPublicKey);
+            isVerified = Crypto.Hash.verifySchnorr(hash, blockEntity.blockSignature, blockEntity.generatorPublicKey);
         } catch (err) {
             throw new Exceptions.BlockVerifyException(blockEntity.id, err.message);
         }
