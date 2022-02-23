@@ -22,9 +22,9 @@ class QuorumDetails {
     public peersOverHeight = 0;
 
     /**
-     * All overheight block headers grouped by id.
+     * All overheight block headers.
      */
-    public peersOverHeightBlockHeaders: { [id: string]: any } = {};
+    public peersOverHeightBlockHeaders: { [ip: string]: any } = {};
 
     /**
      * The following properties are not mutual exclusive for a peer
@@ -148,8 +148,12 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         return this.quorumDetails.getQuorum();
     }
 
-    public getOverHeightBlockHeaders(): { [id: string]: any } {
+    public getOverHeightBlockHeaders(): { [ip: string]: any } {
         return Object.values(this.quorumDetails.peersOverHeightBlockHeaders);
+    }
+
+    public setOverHeightBlockHeaders(overHeightBlockHeaders): void {
+        this.quorumDetails.peersOverHeightBlockHeaders = overHeightBlockHeaders;
     }
 
     public toJson(): string {
@@ -166,18 +170,20 @@ export class NetworkState implements Contracts.P2P.NetworkState {
     }
 
     private update(peer: Contracts.P2P.Peer, currentSlot: number): void {
-        Utils.assert.defined<number>(peer.state.height);
         Utils.assert.defined<number>(this.nodeHeight);
-        if (peer.state.height > this.nodeHeight) {
-            this.quorumDetails.peersNoQuorum++;
-            this.quorumDetails.peersOverHeight++;
-            this.quorumDetails.peersOverHeightBlockHeaders[peer.state.header.id] = peer.state.header;
-        } else {
-            if (peer.isForked()) {
+
+        if (typeof peer.state.header === "object" && typeof peer.state.header.height === "number") {
+            if (peer.state.header.height > this.nodeHeight) {
                 this.quorumDetails.peersNoQuorum++;
-                this.quorumDetails.peersForked++;
+                this.quorumDetails.peersOverHeight++;
+                this.quorumDetails.peersOverHeightBlockHeaders[peer.ip] = peer.state.header;
             } else {
-                this.quorumDetails.peersQuorum++;
+                if (peer.isForked()) {
+                    this.quorumDetails.peersNoQuorum++;
+                    this.quorumDetails.peersForked++;
+                } else {
+                    this.quorumDetails.peersQuorum++;
+                }
             }
         }
 
