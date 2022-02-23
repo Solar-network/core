@@ -404,14 +404,27 @@ export class ForgerService {
             return false;
         }
 
-        const overHeightBlockHeaders: Array<{
-            [id: string]: any;
-        }> = networkState.getOverHeightBlockHeaders();
-        if (overHeightBlockHeaders.length > 0) {
+        const removeDuplicateBlockHeaders = (blockHeaders) => {
+            let lastSeen;
+            const sortedHeaders = blockHeaders.sort((a, b) => (a.id > b.id ? 1 : a.id < b.id ? -1 : 0));
+
+            return sortedHeaders.reduce((sum, block) => {
+                if (lastSeen !== block.id) {
+                    sum.push(block);
+                }
+                lastSeen = block.id;
+                return sum;
+            }, []);
+        };
+
+        const overHeightBlockHeaders: Array<{ [ip: string]: any }> = networkState.getOverHeightBlockHeaders();
+        const distinctOverHeightBlockHeaders: Array<{ [ip: string]: any }> = removeDuplicateBlockHeaders(overHeightBlockHeaders);
+
+        if (distinctOverHeightBlockHeaders.length > 0) {
             this.logger.info(
                 `Detected ${AppUtils.pluralize(
                     "distinct overheight block header",
-                    overHeightBlockHeaders.length,
+                    distinctOverHeightBlockHeaders.length,
                     true,
                 )} :zzz:`,
             );
@@ -420,16 +433,26 @@ export class ForgerService {
                 if (overHeightBlockHeader.generatorPublicKey === delegate.publicKey) {
                     AppUtils.assert.defined<string>(delegate.publicKey);
 
-                    const username: string = this.usernames[delegate.publicKey];
-
-                    this.logger.warning(
-                        `Possible double forging delegate: ${username} (${delegate.publicKey}) - Block: ${overHeightBlockHeader.id} :interrobang:`,
-                    );
+                    try {
+                        const { verified } = Blocks.BlockFactory.fromData(overHeightBlockHeader as Interfaces.IBlockData)!.verification;
+                        if (verified) {
+                            this.logger.warning(
+                                `Delegate ${
+                                    this.usernames[delegate.publicKey]
+                                } already forged a block. Will not forge :bomb:`,
+                            );
+                            return false;
+                        }
+                    } catch {
+                        //
+                    }
                 }
             }
         }
 
         if (networkState.getQuorum() < 0.66) {
+            networkState.setOverHeightBlockHeaders(distinctOverHeightBlockHeaders);
+
             this.logger.info("Not enough quorum to forge next block. Will not forge :bomb:");
             this.logger.debug(`Network State: ${networkState.toJson()}`);
 
