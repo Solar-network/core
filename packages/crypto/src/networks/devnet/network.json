@@ -13,6 +13,6 @@
     "client": {
         "token": "dSXP",
         "symbol": "dSXP",
-        "explorer": "https://explorer.solar.network/testnet"
+        "explorer": "https://dexplorer.solar.network"
     }
 }

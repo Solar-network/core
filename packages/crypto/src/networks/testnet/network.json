@@ -13,6 +13,6 @@
     "client": {
         "token": "tSXP",
         "symbol": "tSXP",
-        "explorer": "https://explorer.solar.network/testnet"
+        "explorer": "http://127.0.0.1"
     }
 }
