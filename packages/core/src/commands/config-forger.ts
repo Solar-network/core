@@ -25,7 +25,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Configure the forging delegate.";
+    public description: string = "Configure the forging delegate";
 
     /**
      * Configure the console command.
@@ -35,9 +35,9 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39.", Joi.string())
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39", Joi.string())
             .setFlag("skipValidation", "Skip BIP39 mnemonic validation", Joi.boolean().default(false));
     }
 

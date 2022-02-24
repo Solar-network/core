@@ -14,6 +14,7 @@ export interface CurrentRound {
     current: number;
     reward: string;
     timestamp: number;
+    allDelegates: DelegateWallet[];
     delegates: DelegateWallet[];
     currentForger: DelegateWallet;
     nextForger: DelegateWallet;

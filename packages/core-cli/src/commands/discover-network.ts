@@ -18,14 +18,14 @@ export class DiscoverNetwork {
      */
     public async discover(path: string, usePrompts: boolean = true): Promise<string> {
         if (!existsSync(path)) {
-            throw new Error(`The [${path}] directory does not exist.`);
+            throw new Error(`The [${path}] directory does not exist`);
         }
 
         const folders: string[] = readdirSync(path).filter((folder) => this.isValidNetwork(folder));
 
         if (!folders || folders.length === 0) {
             throw new Error(
-                'We were unable to detect a network configuration. Please run "ark config:publish" and try again.',
+                'Unable to detect a network configuration. Please run "ark config:publish" and try again',
             );
         }
 
@@ -63,11 +63,11 @@ export class DiscoverNetwork {
         ]);
 
         if (!response.confirm) {
-            throw new Error("You'll need to confirm the network to continue.");
+            throw new Error("You'll need to confirm the network to continue");
         }
 
         if (!this.isValidNetwork(response.network)) {
-            throw new Error(`The given network "${response.network}" is not valid.`);
+            throw new Error(`The given network "${response.network}" is not valid`);
         }
 
         return response.network;

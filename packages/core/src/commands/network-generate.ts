@@ -134,7 +134,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Generates a new network configuration.";
+    public description: string = "Generates a new network configuration";
 
     /**
      * Indicates whether the command requires a network to be present.
@@ -146,84 +146,84 @@ export class Command extends Commands.Command {
 
     /*eslint-disable */
     private flagSettings: Flag[] = [
-        { name: "network", description: "The name of the network.", schema: Joi.string(), promptType: "text" },
+        { name: "network", description: "The name of the network", schema: Joi.string(), promptType: "text" },
         {
             name: "premine",
-            description: "The number of pre-mined tokens.",
+            description: "The number of pre-mined tokens",
             schema: Joi.alternatives().try(Joi.string(), Joi.number()),
             promptType: "text",
             default: "12500000000000000",
         },
         {
             name: "delegates",
-            description: "The number of delegates to generate.",
+            description: "The number of delegates to generate",
             schema: Joi.number(),
             promptType: "number",
             default: 51,
         },
         {
             name: "blocktime",
-            description: "The network blocktime.",
+            description: "The network blocktime",
             schema: Joi.number(),
             promptType: "number",
             default: 8,
         },
         {
             name: "maxTxPerBlock",
-            description: "The maximum number of transactions per block.",
+            description: "The maximum number of transactions per block",
             schema: Joi.number(),
             promptType: "number",
             default: 150,
         },
         {
             name: "maxBlockPayload",
-            description: "The maximum payload length by block.",
+            description: "The maximum payload length by block",
             schema: Joi.number(),
             promptType: "number",
             default: 2097152,
         },
         {
             name: "rewardHeight",
-            description: "The height at which delegate block reward starts.",
+            description: "The height at which delegate block reward starts",
             schema: Joi.number(),
             promptType: "number",
             default: 75600,
         },
         {
             name: "rewardAmount",
-            description: "The number of the block reward per forged block.",
+            description: "The number of the block reward per forged block",
             schema: Joi.alternatives().try(Joi.string(), Joi.number()),
             promptType: "number",
             default: "200000000",
         },
         {
             name: "pubKeyHash",
-            description: "The public key hash.",
+            description: "The public key hash",
             schema: Joi.number(),
             promptType: "number",
             default: 30,
         },
         {
             name: "wif",
-            description: "The WIF (Wallet Import Format) that should be used.",
+            description: "The WIF (Wallet Import Format) that should be used",
             schema: Joi.number(),
             promptType: "number",
         },
         {
             name: "token",
-            description: "The name that is attributed to the token on the network.",
+            description: "The name that is attributed to the token on the network",
             schema: Joi.string(),
             promptType: "text",
         },
         {
             name: "symbol",
-            description: "The character that is attributed to the token on the network.",
+            description: "The character that is attributed to the token on the network",
             schema: Joi.string(),
             promptType: "text",
         },
         {
             name: "explorer",
-            description: "The URL that hosts the network explorer.",
+            description: "The URL that hosts the network explorer",
             schema: Joi.string(),
             promptType: "text",
         },
@@ -237,11 +237,11 @@ export class Command extends Commands.Command {
 
         {
             name: "epoch",
-            description: "Start time of the network.",
+            description: "Start time of the network",
             schema: Joi.date(),
             default: new Date(Date.now()).toISOString().slice(0, 11) + "00:00:00.000Z",
         },
-        { name: "htlcEnabled", description: "Enable HTLC transactions.", schema: Joi.boolean() },
+        { name: "htlcEnabled", description: "Enable HTLC transactions", schema: Joi.boolean() },
         {
             name: "vendorFieldLength",
             description: "The maximum length of transaction's vendor field",
@@ -252,142 +252,142 @@ export class Command extends Commands.Command {
         // Static fee
         {
             name: "feeStaticTransfer",
-            description: "Fee for transfer transactions.",
+            description: "Fee for transfer transactions",
             schema: Joi.number(),
             default: 10000000,
         },
         {
             name: "feeStaticSecondSignature",
-            description: "Fee for second signature transactions.",
+            description: "Fee for second signature transactions",
             schema: Joi.number(),
             default: 500000000,
         },
         {
             name: "feeStaticDelegateRegistration",
-            description: "Fee for delegate registration transactions.",
+            description: "Fee for delegate registration transactions",
             schema: Joi.number(),
             default: 2500000000,
         },
-        { name: "feeStaticVote", description: "Fee for vote transactions.", schema: Joi.number(), default: 100000000 },
+        { name: "feeStaticVote", description: "Fee for vote transactions", schema: Joi.number(), default: 100000000 },
         {
             name: "feeStaticMultiSignature",
-            description: "Fee for multi signature transactions.",
+            description: "Fee for multisignature transactions",
             schema: Joi.number(),
             default: 500000000,
         },
-        { name: "feeStaticIpfs", description: "Fee for ipfs transactions.", schema: Joi.number(), default: 500000000 },
+        { name: "feeStaticIpfs", description: "Fee for ipfs transactions", schema: Joi.number(), default: 500000000 },
         {
             name: "feeStaticMultiPayment",
-            description: "Fee for multi payment transactions.",
+            description: "Fee for multipayment transactions",
             schema: Joi.number(),
             default: 10000000,
         },
         {
             name: "feeStaticDelegateResignation",
-            description: "Fee for delegate resignation transactions.",
+            description: "Fee for delegate resignation transactions",
             schema: Joi.number(),
             default: 2500000000,
         },
         {
             name: "feeStaticHtlcLock",
-            description: "Fee for HTLC lock transactions.",
+            description: "Fee for HTLC lock transactions",
             schema: Joi.number(),
             default: 10000000,
         },
         {
             name: "feeStaticHtlcClaim",
-            description: "Fee for HTLC claim transactions.",
+            description: "Fee for HTLC claim transactions",
             schema: Joi.number(),
             default: 0,
         },
         {
             name: "feeStaticHtlcRefund",
-            description: "Fee for HTLC refund transactions.",
+            description: "Fee for HTLC refund transactions",
             schema: Joi.number(),
             default: 0,
         },
 
         // Dynamic fee
         { name: "feeDynamicEnabled", description: "Dynamic fee enabled", schema: Joi.boolean() },
-        { name: "feeDynamicMinFeePool", description: "Minimum dynamic fee to enter the pool.", schema: Joi.number() },
-        { name: "feeDynamicMinFeeBroadcast", description: "Minimum dynamic fee to broadcast.", schema: Joi.number() },
+        { name: "feeDynamicMinFeePool", description: "Minimum dynamic fee to enter the pool", schema: Joi.number() },
+        { name: "feeDynamicMinFeeBroadcast", description: "Minimum dynamic fee to broadcast", schema: Joi.number() },
         {
             name: "feeDynamicBytesTransfer",
-            description: "Dynamic fee for transfer transactions.",
+            description: "Dynamic fee for transfer transactions",
             schema: Joi.number(),
         },
         {
             name: "feeDynamicBytesSecondSignature",
-            description: "Dynamic fee for second signature transactions.",
+            description: "Dynamic fee for second signature transactions",
             schema: Joi.number(),
         },
         {
             name: "feeDynamicBytesDelegateRegistration",
-            description: "Dynamic fee for delegate registration transactions.",
+            description: "Dynamic fee for delegate registration transactions",
             schema: Joi.number(),
         },
-        { name: "feeDynamicBytesVote", description: "Dynamic fee for vote transactions.", schema: Joi.number() },
+        { name: "feeDynamicBytesVote", description: "Dynamic fee for vote transactions", schema: Joi.number() },
         {
             name: "feeDynamicBytesMultiSignature",
-            description: "Dynamic fee for multi signature transactions.",
+            description: "Dynamic fee for multisignature transactions",
             schema: Joi.number(),
         },
-        { name: "feeDynamicBytesIpfs", description: "Dynamic fee for IPFS transactions.", schema: Joi.number() },
+        { name: "feeDynamicBytesIpfs", description: "Dynamic fee for IPFS transactions", schema: Joi.number() },
         {
             name: "feeDynamicBytesMultiPayment",
-            description: "Dynamic fee for multi payment transactions.",
+            description: "Dynamic fee for multipayment transactions",
             schema: Joi.number(),
         },
         {
             name: "feeDynamicBytesDelegateResignation",
-            description: "Dynamic fee for delegate registration transactions.",
+            description: "Dynamic fee for delegate registration transactions",
             schema: Joi.number(),
         },
         {
             name: "feeDynamicBytesHtlcLock",
-            description: "Dynamic fee for HTLC lock transactions.",
+            description: "Dynamic fee for HTLC lock transactions",
             schema: Joi.number(),
         },
         {
             name: "feeDynamicBytesHtlcClaim",
-            description: "Dynamic fee for HTLC claim transactions.",
+            description: "Dynamic fee for HTLC claim transactions",
             schema: Joi.number(),
         },
         {
             name: "feeDynamicBytesHtlcRefund",
-            description: "Dynamic fee for HTLC refund transactions.",
+            description: "Dynamic fee for HTLC refund transactions",
             schema: Joi.number(),
         },
 
         // Env
-        { name: "coreDBHost", description: "Core database host.", schema: Joi.string(), default: "localhost" },
-        { name: "coreDBPort", description: "Core database port.", schema: Joi.number(), default: 5432 },
-        { name: "coreDBUsername", description: "Core database username.", schema: Joi.string() },
-        { name: "coreDBPassword", description: "Core database password.", schema: Joi.string() },
-        { name: "coreDBDatabase", description: "Core database database.", schema: Joi.string() },
+        { name: "coreDBHost", description: "Core database host", schema: Joi.string(), default: "localhost" },
+        { name: "coreDBPort", description: "Core database port", schema: Joi.number(), default: 5432 },
+        { name: "coreDBUsername", description: "Core database username", schema: Joi.string() },
+        { name: "coreDBPassword", description: "Core database password", schema: Joi.string() },
+        { name: "coreDBDatabase", description: "Core database database", schema: Joi.string() },
 
-        { name: "coreP2PPort", description: "Core P2P port.", schema: Joi.number(), default: 4000 },
-        { name: "coreAPIPort", description: "Core API port.", schema: Joi.number(), default: 4003 },
-        { name: "coreWebhooksPort", description: "Core Webhooks port.", schema: Joi.number(), default: 4004 },
-        { name: "coreMonitorPort", description: "Core Webhooks port.", schema: Joi.number(), default: 4005 },
+        { name: "coreP2PPort", description: "Core P2P port", schema: Joi.number(), default: 4000 },
+        { name: "coreAPIPort", description: "Core API port", schema: Joi.number(), default: 4003 },
+        { name: "coreWebhooksPort", description: "Core Webhooks port", schema: Joi.number(), default: 4004 },
+        { name: "coreMonitorPort", description: "Core Webhooks port", schema: Joi.number(), default: 4005 },
 
         // Peers
         {
             name: "peers",
-            description: "Peers IP addresses (and ports), separated with comma.",
+            description: "Peers IP addresses (and ports), separated by commas",
             schema: Joi.string().allow(""),
             default: "127.0.0.1",
         },
 
         // General
-        { name: "configPath", description: "Configuration path.", schema: Joi.string() },
+        { name: "configPath", description: "Configuration path", schema: Joi.string() },
         {
             name: "overwriteConfig",
-            description: "Overwrite existing configuration.",
+            description: "Overwrite existing configuration",
             schema: Joi.boolean(),
             default: false,
         },
-        { name: "force", description: "Skip prompts and use given flags.", schema: Joi.boolean(), default: false },
+        { name: "force", description: "Skip prompts and use given flags", schema: Joi.boolean(), default: false },
     ];
     /*eslint-enable */
 
@@ -465,7 +465,7 @@ export class Command extends Commands.Command {
         };
 
         if (!response.confirm) {
-            throw new Error("You'll need to confirm the input to continue.");
+            throw new Error("You'll need to confirm the input to continue");
         }
 
         for (const flag of this.flagSettings.filter((flag) => flag.promptType)) {
@@ -481,7 +481,7 @@ export class Command extends Commands.Command {
                 continue;
             }
 
-            throw new Error(`Flag ${flag.name} is required.`);
+            throw new Error(`Flag ${flag.name} is required`);
         }
 
         await this.generateNetwork(options);
@@ -500,15 +500,15 @@ export class Command extends Commands.Command {
 
         await this.components.taskList([
             {
-                title: `Prepare directories.`,
+                title: `Prepare directories`,
                 task: async () => {
                     if (!flags.overwriteConfig) {
                         if (existsSync(coreConfigDest)) {
-                            throw new Error(`${coreConfigDest} already exists.`);
+                            throw new Error(`${coreConfigDest} already exists`);
                         }
 
                         if (existsSync(cryptoConfigDest)) {
-                            throw new Error(`${cryptoConfigDest} already exists.`);
+                            throw new Error(`${cryptoConfigDest} already exists`);
                         }
                     }
 
@@ -517,13 +517,13 @@ export class Command extends Commands.Command {
                 },
             },
             {
-                title: "Persist genesis wallet to genesis-wallet.json in core config path.",
+                title: "Persist genesis wallet to genesis-wallet.json in core config path",
                 task: async () => {
                     writeJSONSync(resolve(coreConfigDest, "genesis-wallet.json"), genesisWallet, { spaces: 4 });
                 },
             },
             {
-                title: "Generate crypto network configuration.",
+                title: "Generate crypto network configuration",
                 task: async () => {
                     const genesisBlock = this.generateCryptoGenesisBlock(genesisWallet, delegates, flags);
 
@@ -556,7 +556,7 @@ export class Command extends Commands.Command {
                 },
             },
             {
-                title: "Generate Core network configuration.",
+                title: "Generate Core network configuration",
                 task: async () => {
                     writeJSONSync(resolve(coreConfigDest, "peers.json"), this.generatePeers(flags), { spaces: 4 });
 

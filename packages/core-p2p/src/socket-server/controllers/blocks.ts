@@ -125,7 +125,7 @@ export class BlocksController extends Controller {
                 "block",
                 blocksToReturn.length,
                 true,
-            )} from height ${reqBlockHeight.toLocaleString()}`,
+            )} from height ${reqBlockHeight.toLocaleString()} :floppy_disk:`,
         );
 
         return blocksToReturn;

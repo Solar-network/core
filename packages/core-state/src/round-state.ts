@@ -132,9 +132,7 @@ export class RoundState {
             const delegate: Contracts.State.Wallet = this.forgingDelegates[missedSlot % this.forgingDelegates.length];
 
             this.logger.debug(
-                `Delegate ${delegate.getAttribute(
-                    "delegate.username",
-                )} (${delegate.getPublicKey()}) just missed a block :pensive:`,
+                `Delegate ${delegate.getAttribute("delegate.username")} just missed a block :pensive:`,
             );
 
             this.events.dispatch(Enums.ForgerEvent.Missing, {
@@ -190,9 +188,7 @@ export class RoundState {
                 const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegate.getPublicKey()!);
 
                 this.logger.debug(
-                    `Delegate ${wallet.getAttribute(
-                        "delegate.username",
-                    )} (${wallet.getPublicKey()}) just missed a round :cold_sweat:`,
+                    `Delegate ${wallet.getAttribute("delegate.username")} just missed a round :cold_sweat:`,
                 );
 
                 this.events.dispatch(Enums.RoundEvent.Missed, {

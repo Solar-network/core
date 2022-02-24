@@ -226,14 +226,14 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
                 this.log(
                     Severity.DEBUG_EXTRA,
                     `success: peer's latest block is the same as our latest ` +
-                        `block (height=${claimedHeight}, id=${claimedState.header.id}). Identical chains.`, true,
+                        `block (height=${claimedHeight}, id=${claimedState.header.id}). Identical chains`, true,
                 );
             } else {
                 this.log(
                     Severity.DEBUG_EXTRA,
                     `success: peer's latest block ` +
                         `(height=${claimedHeight}, id=${claimedState.header.id}) is part of our chain. ` +
-                        `Peer is ${pluralize("block", ourHeight - claimedHeight, true)} behind us.`, true,
+                        `Peer is ${pluralize("block", ourHeight - claimedHeight, true)} behind us`, true,
                 );
             }
             return true;
@@ -244,7 +244,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             `peer's latest block (height=${claimedHeight}, id=${claimedState.header.id}), is different than the ` +
                 `block at the same height in our chain (id=${ourBlockAtHisHeight.id}). Peer has ` +
                 (claimedHeight < ourHeight ? `a shorter and` : `an equal-height but`) +
-                ` different chain.`,
+                ` different chain`,
         );
 
         return false;

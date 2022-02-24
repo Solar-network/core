@@ -55,7 +55,7 @@ export class DatabaseInteraction {
             await this.initializeLastBlock();
         } catch (error) {
             this.logger.error(error.stack);
-            this.app.terminate("Failed to initialize database service.", error);
+            this.app.terminate("Failed to initialize database service", error);
         }
     }
 
@@ -127,7 +127,7 @@ export class DatabaseInteraction {
                     await this.databaseService.deleteBlocks([block]);
                     tries--;
                 } else {
-                    this.app.terminate("Unable to deserialize last block from database.", error);
+                    this.app.terminate("Unable to deserialize last block from database", error);
                     throw new Error("Terminated (unreachable)");
                 }
 

@@ -31,7 +31,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Update the Database configuration.";
+    public description: string = "Update the Database configuration";
 
     /**
      * @private
@@ -48,13 +48,13 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("host", "The host address of the database.", Joi.string())
-            .setFlag("port", "The port of the database.", Joi.number())
-            .setFlag("database", "The name of the database.", Joi.string())
-            .setFlag("username", "The name of the database user.", Joi.string())
-            .setFlag("password", "The password of the database user.", Joi.string());
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("host", "The host address of the database", Joi.string())
+            .setFlag("port", "The port of the database", Joi.number())
+            .setFlag("database", "The name of the database", Joi.string())
+            .setFlag("username", "The name of the database user", Joi.string())
+            .setFlag("password", "The password of the database user", Joi.string());
     }
 
     /**
@@ -85,7 +85,7 @@ export class Command extends Commands.Command {
                 message: "What port do you want to use?",
                 initial: 5432,
                 validate: /* istanbul ignore next */ (value) =>
-                    value < 1 || value > 65535 ? `The port must be in the range of 1-65535.` : true,
+                    value < 1 || value > 65535 ? `The port must be in the range of 1-65535` : true,
             },
             {
                 type: "text",
@@ -113,7 +113,7 @@ export class Command extends Commands.Command {
         ]);
 
         if (!response.confirm) {
-            this.components.fatal("You'll need to confirm the input to continue.");
+            this.components.fatal("You'll need to confirm the input to continue");
         }
 
         this.environment.updateVariables(envFile, this.confirm(response));

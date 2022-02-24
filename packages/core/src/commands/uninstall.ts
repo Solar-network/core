@@ -21,7 +21,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Completely uninstalls the Core installation."; //Will edit further when we add flags etc
+    public description: string = "Completely uninstalls the Core installation"; // Will edit further when we add flags etc
 
     /**
      * Execute the console command.
@@ -30,6 +30,6 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        this.components.fatal("This command has not been implemented.");
+        this.components.fatal("This command has not been implemented");
     }
 }

@@ -41,7 +41,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             this.filesystem.setSnapshot(options.blocks);
 
             if (!(await this.filesystem.snapshotExists())) {
-                this.logger.error(`Snapshot ${options.blocks} of network ${options.network} does not exist.`);
+                this.logger.error(`Snapshot ${options.blocks} of network ${options.network} does not exist`);
                 return;
             }
 
@@ -50,7 +50,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
                 meta = await this.filesystem.readMetaData();
             } catch (e) {
                 this.logger.error(
-                    `Metadata for snapshot ${options.blocks} of network ${options.network} are not valid.`,
+                    `Metadata for snapshot ${options.blocks} of network ${options.network} are not valid`,
                 );
                 return;
             }
@@ -69,7 +69,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
                 )}, ${Utils.pluralize("round", meta!.rounds.count, true)}`,
             );
         } catch (err) {
-            this.logger.error(`RESTORE failed.`);
+            this.logger.error(`RESTORE failed`);
         }
     }
 
@@ -83,7 +83,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             this.filesystem.setSnapshot(options.blocks);
 
             if (!(await this.filesystem.snapshotExists())) {
-                this.logger.error(`Snapshot ${options.blocks} of network ${options.network} does not exist.`);
+                this.logger.error(`Snapshot ${options.blocks} of network ${options.network} does not exist`);
                 return;
             }
 
@@ -92,16 +92,16 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
                 meta = await this.filesystem.readMetaData();
             } catch (e) {
                 this.logger.error(
-                    `Metadata for snapshot ${options.blocks} of network ${options.network} are not valid.`,
+                    `Metadata for snapshot ${options.blocks} of network ${options.network} are not valid`,
                 );
             }
 
             this.database.init(meta!.codec, meta!.skipCompression);
 
             await this.database.verify(meta!);
-            this.logger.info(`VERIFICATION is successful.`);
+            this.logger.info(`VERIFICATION is successful`);
         } catch (err) {
-            this.logger.error(`VERIFICATION failed.`);
+            this.logger.error(`VERIFICATION failed`);
             this.logger.error(err.stack);
         }
     }
@@ -111,7 +111,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             this.logger.info("Running ROLLBACK");
 
             if (!height || height <= 0) {
-                this.logger.error(`Rollback height ${height.toLocaleString()} is invalid.`);
+                this.logger.error(`Rollback height ${height.toLocaleString()} is invalid`);
                 return;
             }
 
@@ -123,7 +123,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
 
             if (height >= currentHeight) {
                 this.logger.error(
-                    `Rollback height ${height.toLocaleString()} is greater than the current height ${currentHeight.toLocaleString()}.`,
+                    `Rollback height ${height.toLocaleString()} is greater than the current height ${currentHeight.toLocaleString()}`,
                 );
                 return;
             }

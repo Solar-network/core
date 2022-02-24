@@ -22,7 +22,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Stop the Relay process.";
+    public description: string = "Stop the Relay process";
 
     /**
      * Configure the console command.
@@ -32,8 +32,8 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("daemon", "Stop the Relay process or daemon.", Joi.boolean());
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("daemon", "Stop the Relay process or daemon", Joi.boolean());
     }
 
     /**

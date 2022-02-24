@@ -46,7 +46,7 @@ export class PluginManager implements Contracts.PluginManager {
             }
         }
 
-        throw new Error(`The given package [${pkg}] is neither a git nor a npm package.`);
+        throw new Error(`The given package [${pkg}] is neither a git nor a npm package`);
     }
 
     public async update(token: string, network: string, pkg: string): Promise<void> {
@@ -57,7 +57,7 @@ export class PluginManager implements Contracts.PluginManager {
         const directory: string = join(paths.data, pkg);
 
         if (!existsSync(directory)) {
-            throw new Error(`The package [${pkg}] does not exist.`);
+            throw new Error(`The package [${pkg}] does not exist`);
         }
 
         if (existsSync(`${directory}/.git`)) {
@@ -71,7 +71,7 @@ export class PluginManager implements Contracts.PluginManager {
         const directory: string = join(this.getPluginsPath(token, network), pkg);
 
         if (!existsSync(directory)) {
-            throw new Error(`The package [${pkg}] does not exist.`);
+            throw new Error(`The package [${pkg}] does not exist`);
         }
 
         removeSync(directory);

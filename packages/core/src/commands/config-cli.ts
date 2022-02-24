@@ -30,7 +30,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Update the CLI configuration.";
+    public description: string = "Update the CLI configuration";
 
     /**
      * Indicates whether the command requires a network to be present.
@@ -48,10 +48,10 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string())
+            .setFlag("token", "The name of the token", Joi.string())
             .setFlag(
                 "channel",
-                "Whether to install stable (latest) or prerelease (next) versions of Core.",
+                "Whether to install stable (latest) or prerelease (next) versions of Core",
                 Joi.string().valid(...["next", "latest"]),
             );
     }
@@ -72,7 +72,7 @@ export class Command extends Commands.Command {
             const oldChannel: string = this.config.get("channel");
 
             if (oldChannel === newChannel) {
-                this.components.fatal(`You are already on the "${newChannel}" channel.`);
+                this.components.fatal(`Already on the "${newChannel}" channel`);
             }
 
             this.config.set("channel", newChannel);

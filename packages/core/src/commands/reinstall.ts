@@ -50,7 +50,7 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public configure(): void {
-        this.definition.setFlag("force", "Force a reinstall.", Joi.boolean());
+        this.definition.setFlag("force", "Force a reinstall", Joi.boolean());
     }
 
     /**
@@ -69,7 +69,7 @@ export class Command extends Commands.Command {
             return this.performInstall();
         }
 
-        this.components.fatal("You'll need to confirm the reinstall to continue.");
+        this.components.fatal("You'll need to confirm the reinstall to continue");
     }
 
     /**

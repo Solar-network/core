@@ -25,7 +25,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Run the Forger process in foreground. Exiting the process will stop it from running.";
+    public description: string = "Run the Forger process in the foreground";
 
     /**
      * Configure the console command.
@@ -35,11 +35,11 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setFlag("env", "", Joi.string().default("production"))
-            .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39.", Joi.string())
-            .setFlag("skipPrompts", "Skip prompts.", Joi.boolean().default(false));
+            .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39", Joi.string())
+            .setFlag("skipPrompts", "Skip prompts", Joi.boolean().default(false));
     }
 
     /**

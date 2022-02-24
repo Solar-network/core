@@ -26,7 +26,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Updates a package and any packages that it depends on.";
+    public description: string = "Updates a package and any packages that it depends on";
 
     /**
      * Configure the console command.
@@ -36,9 +36,9 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
-            .setArgument("package", "The name of the package.", Joi.string().required());
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setArgument("package", "The name of the package", Joi.string().required());
     }
 
     /**

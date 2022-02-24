@@ -56,7 +56,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         await this.populateSeedPeers();
 
         if (this.config.skipDiscovery) {
-            this.logger.warning("Skipped peer discovery because the relay is in skip-discovery mode :mag:");
+            this.logger.warning("Skipped peer discovery because the relay is in skip-discovery mode :see_no_evil:");
         } else {
             await this.updateNetworkStatus(true);
 
@@ -526,7 +526,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 "peer",
                 peers.length,
                 true,
-            )}`,
+            )} :satellite_antenna:`,
         );
 
         await Promise.all(peers.map((peer) => this.communicator.postBlock(peer, block)));

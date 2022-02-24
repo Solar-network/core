@@ -4,7 +4,7 @@ import { AssertionException } from "../exceptions/runtime";
 
 const assertType = (condition: boolean, description: string): asserts condition => {
     if (!condition) {
-        throw new AssertionException(`Expected value which is "${description}".`);
+        throw new AssertionException(`Expected value which is "${description}"`);
     }
 };
 

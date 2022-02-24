@@ -31,7 +31,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Set the value of an environment variable.";
+    public description: string = "Set the value of an environment variable";
 
     /**
      * Configure the console command.
@@ -41,16 +41,16 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setFlag(
                 "key",
-                "The environment variable that you wish to set.",
+                "The environment variable that you wish to set",
                 Joi.alternatives().try(Joi.string(), Joi.number()).required(),
             )
             .setFlag(
                 "value",
-                "The value that you wish to set the environment variable to.",
+                "The value that you wish to set the environment variable to",
                 Joi.alternatives().try(Joi.string(), Joi.number()).required(),
             );
     }

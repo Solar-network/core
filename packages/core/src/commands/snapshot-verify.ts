@@ -25,7 +25,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Check validity of specified snapshot.";
+    public description: string = "Check validity of specified snapshot";
 
     /**
      * Configure the console command.
@@ -35,9 +35,9 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("blocks", "Blocks to verify, correlates to folder name.", Joi.string().required());
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("blocks", "Blocks to verify, correlates to folder name", Joi.string().required());
     }
 
     /**

@@ -109,7 +109,7 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
         const data: Interfaces.ITransactionData = transaction.data;
 
         if (Utils.isException(data)) {
-            this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}.`);
+            this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}`);
         }
 
         await this.throwIfCannotBeApplied(transaction, sender);

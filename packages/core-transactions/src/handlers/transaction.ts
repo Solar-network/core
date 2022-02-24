@@ -97,7 +97,7 @@ export abstract class TransactionHandler {
         const data: Interfaces.ITransactionData = transaction.data;
 
         if (Utils.isException(data)) {
-            this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}.`);
+            this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}`);
         }
 
         await this.throwIfCannotBeApplied(transaction, sender);
@@ -223,7 +223,7 @@ export abstract class TransactionHandler {
             }
         }
 
-        // Prevent legacy multi signatures from being used
+        // Prevent legacy multisignatures from being used
         const isMultiSignatureRegistration: boolean =
             transaction.type === Enums.TransactionType.MultiSignature &&
             transaction.typeGroup === Enums.TransactionTypeGroup.Core;
@@ -234,7 +234,7 @@ export abstract class TransactionHandler {
         if (sender.hasMultiSignature()) {
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-            // Ensure the database wallet already has a multi signature, in case we checked a pool wallet.
+            // Ensure the database wallet already has a multisignature, in case we checked a pool wallet.
             const dbSender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
                 transaction.data.senderPublicKey,
             );

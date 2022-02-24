@@ -17,5 +17,5 @@ export const checkDNS = async (app: Contracts.Kernel.Application, hosts: string[
         }
     }
 
-    return Promise.reject(new Error("Please check your network connectivity, couldn't connect to any host."));
+    return Promise.reject(new Error("Please check your network connectivity, couldn't connect to any host"));
 };

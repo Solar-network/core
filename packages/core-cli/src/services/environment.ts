@@ -48,7 +48,7 @@ export class Environment {
      */
     public updateVariables(envFile: string, variables: Record<string, string | number>): void {
         if (!existsSync(envFile)) {
-            throw new Error(`No environment file found at ${envFile}.`);
+            throw new Error(`No environment file found at ${envFile}`);
         }
 
         const env: object = parseFileSync(envFile);

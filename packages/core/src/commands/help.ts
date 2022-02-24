@@ -23,7 +23,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Displays detailed information on all commands available via CLI.";
+    public description: string = "Displays detailed information on all commands available via CLI";
 
     /**
      * Indicates whether the command requires a network to be present.
@@ -65,7 +65,7 @@ export class Command extends Commands.Command {
 
             for (const signature of signatures) {
                 commandsAsString.push(
-                    `  ${signature.padEnd(longestSignature, " ")}        ${commands[signature].description}`,
+                    `  ${signature.padEnd(longestSignature, " ")}        ${commands[signature].description.replace(/\.$/, "")}`,
                 );
             }
         }
@@ -79,7 +79,7 @@ ${blue().bold("Usage")}
   command [arguments] [flags]
 
 ${blue().bold("Flags")}
-  --help              Display the corresponding help message.
+  --help              Display the corresponding help message
   --quiet             Do not output any message
 
 ${blue().bold("Arguments")}

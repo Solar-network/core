@@ -23,7 +23,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Run the Relay process in foreground. Exiting the process will stop it from running.";
+    public description: string = "Run the Relay process in the foreground";
 
     /**
      * Configure the console command.
@@ -33,14 +33,14 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setFlag("env", "", Joi.string().default("production"))
-            .setFlag("networkStart", "Indicate that this is the first start of seeds.", Joi.boolean())
-            .setFlag("disableDiscovery", "Permanently disable all peer discovery.", Joi.boolean())
-            .setFlag("skipDiscovery", "Skip the initial peer discovery.", Joi.boolean())
-            .setFlag("ignoreMinimumNetworkReach", "Ignore the minimum network reach on start.", Joi.boolean())
-            .setFlag("launchMode", "The mode the relay will be launched in (seed only at the moment).", Joi.string());
+            .setFlag("networkStart", "Indicate that this is the first start of seeds", Joi.boolean())
+            .setFlag("disableDiscovery", "Permanently disable all peer discovery", Joi.boolean())
+            .setFlag("skipDiscovery", "Skip the initial peer discovery", Joi.boolean())
+            .setFlag("ignoreMinimumNetworkReach", "Ignore the minimum network reach on start", Joi.boolean())
+            .setFlag("launchMode", "The mode the relay will be launched in (seed only at the moment)", Joi.string());
     }
 
     /**

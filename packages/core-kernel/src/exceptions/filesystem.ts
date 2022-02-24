@@ -14,7 +14,7 @@ export class FileException extends RuntimeException {}
  */
 export class AccessDenied extends FileException {
     public constructor(path: string) {
-        super(`The file ${path} could not be accessed.`);
+        super(`The file ${path} could not be accessed`);
     }
 }
 
@@ -36,6 +36,6 @@ export class DirectoryCannotBeFound extends FileException {
      * @memberof DirectoryCannotBeFound
      */
     public constructor(value: string) {
-        super(`Directory [${value}] could not be found.`);
+        super(`Directory [${value}] could not be found`);
     }
 }

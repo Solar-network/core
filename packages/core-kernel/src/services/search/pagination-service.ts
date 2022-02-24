@@ -29,7 +29,7 @@ export class PaginationService {
 
     public getTop<T>(sorting: Sorting, count: number, items: Iterable<T>): T[] {
         if (count < 0) {
-            throw new RangeError(`Count should be greater or equal than zero.`);
+            throw new RangeError(`Count should be greater or equal than zero`);
         }
 
         if (count === 0) {

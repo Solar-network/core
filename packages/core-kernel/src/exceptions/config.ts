@@ -66,6 +66,6 @@ export class NetworkCannotBeDetermined extends ConfigurationException {
      * @memberof NetworkCannotBeDetermined
      */
     public constructor() {
-        super("Unable to discover application token or network.");
+        super("Unable to discover application token or network");
     }
 }

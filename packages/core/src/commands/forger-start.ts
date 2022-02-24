@@ -26,7 +26,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Start the Forger process.";
+    public description: string = "Start the Forger process as a daemon";
 
     /**
      * Configure the console command.
@@ -36,17 +36,17 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setFlag("env", "", Joi.string().default("production"))
-            .setFlag("networkStart", "Indicate that this is the first start of seeds.", Joi.boolean())
-            .setFlag("disableDiscovery", "Permanently disable all peer discovery.", Joi.boolean())
-            .setFlag("skipDiscovery", "Skip the initial peer discovery.", Joi.boolean())
-            .setFlag("ignoreMinimumNetworkReach", "Ignore the minimum network reach on start.", Joi.boolean())
-            .setFlag("launchMode", "The mode the relay will be launched in (seed only at the moment).", Joi.string())
-            .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39.", Joi.string())
-            .setFlag("daemon", "Start the Forger process as a daemon.", Joi.boolean().default(true))
-            .setFlag("skipPrompts", "Skip prompts.", Joi.boolean().default(false));
+            .setFlag("networkStart", "Indicate that this is the first start of seeds", Joi.boolean())
+            .setFlag("disableDiscovery", "Permanently disable all peer discovery", Joi.boolean())
+            .setFlag("skipDiscovery", "Skip the initial peer discovery", Joi.boolean())
+            .setFlag("ignoreMinimumNetworkReach", "Ignore the minimum network reach on start", Joi.boolean())
+            .setFlag("launchMode", "The mode the relay will be launched in (seed only at the moment)", Joi.string())
+            .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39", Joi.string())
+            .setFlag("daemon", "Start the Forger process as a daemon", Joi.boolean().default(true))
+            .setFlag("skipPrompts", "Skip prompts", Joi.boolean().default(false));
     }
 
     /**

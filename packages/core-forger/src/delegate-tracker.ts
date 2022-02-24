@@ -88,7 +88,6 @@ export class DelegateTracker {
             blockTimeLookup,
         );
 
-        // Determine Next Forgers...
         const nextForgers: string[] = [];
         for (let i = 0; i <= maxDelegates; i++) {
             const delegate: string | undefined =
@@ -109,7 +108,6 @@ export class DelegateTracker {
             );
         }
 
-        // Determine Next Forger Usernames...
         this.logger.debug(
             `Next Forgers: ${JSON.stringify(
                 nextForgers.slice(0, 5).map((publicKey: string) => this.getUsername(publicKey)),
@@ -128,19 +126,19 @@ export class DelegateTracker {
             }
 
             if (indexInNextForgers === 0) {
-                this.logger.debug(`${this.getUsername(delegate.publicKey)} will forge next.`);
+                this.logger.debug(`${this.getUsername(delegate.publicKey)} will forge next`);
             } else if (indexInNextForgers <= maxDelegates - forgingInfo.nextForger) {
                 this.logger.debug(
                     `${this.getUsername(delegate.publicKey)} will forge in ${Utils.prettyTime(
                         indexInNextForgers * blockTime * 1000,
-                    )}.`,
+                    )}`,
                 );
             } else {
-                this.logger.debug(`${this.getUsername(delegate.publicKey)} has already forged.`);
+                this.logger.debug(`${this.getUsername(delegate.publicKey)} has already forged`);
             }
         }
 
-        this.logger.debug(`Round ${round.round} will end in ${Utils.prettyTime(secondsToNextRound * 1000)}.`);
+        this.logger.debug(`Round ${round.round} will end in ${Utils.prettyTime(secondsToNextRound * 1000)}`);
     }
 
     /**

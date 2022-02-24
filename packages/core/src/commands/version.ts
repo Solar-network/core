@@ -22,7 +22,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Display the current installed version of Core.";
+    public description: string = "Display the current installed version of Core";
 
     /**
      * Indicates whether the command requires a network to be present.

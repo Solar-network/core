@@ -81,12 +81,12 @@ export class Listener {
             });
 
             this.logger.debug(
-                `Webhooks Job ${webhook.id} completed! Event [${webhook.event}] has been transmitted to [${webhook.target}] with a status of [${statusCode}].`,
+                `Webhooks job ${webhook.id} completed! Event [${webhook.event}] has been transmitted to [${webhook.target}] with a status of [${statusCode}] :white_check_mark:`,
             );
 
             await this.dispatchWebhookEvent(start, webhook, payload);
         } catch (error) {
-            this.logger.error(`Webhooks Job ${webhook.id} failed: ${error.message}`);
+            this.logger.error(`Webhooks job ${webhook.id} failed: ${error.message} :x:`);
 
             await this.dispatchWebhookEvent(start, webhook, payload, error);
         }

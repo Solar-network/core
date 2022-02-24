@@ -21,7 +21,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         this.app.bind(Container.Identifiers.DatabaseConnection).toConstantValue(await this.connect());
 
-        logger.debug("Connection established.");
+        logger.debug("Connection established");
 
         this.app.bind(Container.Identifiers.DatabaseRoundRepository).toConstantValue(this.getRoundRepository());
 

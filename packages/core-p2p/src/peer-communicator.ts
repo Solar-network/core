@@ -200,7 +200,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
         if (!peerBlocks || !peerBlocks.length) {
             this.logger.debug(
-                `Peer ${peer.ip} did not return any blocks via height ${fromBlockHeight.toLocaleString()}.`,
+                `Peer ${peer.ip} did not return any blocks via height ${fromBlockHeight.toLocaleString()} :see_no_evil:`,
             );
             return [];
         }
@@ -240,7 +240,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     private validateReply(peer: Contracts.P2P.Peer, reply: any, endpoint: string): boolean {
         const schema = replySchemas[endpoint];
         if (schema === undefined) {
-            this.logger.error(`Can't validate reply from "${endpoint}": none of the predefined schemas matches.`);
+            this.logger.error(`Cannot validate reply from "${endpoint}": none of the predefined schemas matches :bangbang:`);
             return false;
         }
 

@@ -27,6 +27,10 @@ export class InternalController extends Controller {
     @Container.inject(Container.Identifiers.TransactionPoolCollator)
     private readonly collator!: Contracts.TransactionPool.Collator;
 
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
+
     public async acceptNewPeer(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<void> {
         return this.peerProcessor.validateAndAcceptPeer({
             ip: (request.payload as any).ip,
@@ -57,6 +61,13 @@ export class InternalController extends Controller {
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
         const reward = Managers.configManager.getMilestone(height).reward;
+        const allDelegates: Contracts.P2P.DelegateWallet[] = (
+            await this.walletRepository.allByUsername()
+        ).map((wallet) => ({
+            ...wallet.getData(),
+            delegate: wallet.getAttribute("delegate"),
+        }));
+
         const delegates: Contracts.P2P.DelegateWallet[] = (
             await this.databaseInteraction.getActiveDelegates(roundInfo)
         ).map((wallet) => ({
@@ -73,6 +84,7 @@ export class InternalController extends Controller {
             current: roundInfo.round,
             reward,
             timestamp: forgingInfo.blockTimestamp,
+            allDelegates,
             delegates,
             currentForger: delegates[forgingInfo.currentForger],
             nextForger: delegates[forgingInfo.nextForger],

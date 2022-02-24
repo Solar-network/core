@@ -293,7 +293,7 @@ export class Application implements Contracts.Kernel.Application {
     public enableMaintenance(): void {
         writeFileSync(this.tempPath("maintenance"), JSON.stringify({ time: +new Date() }));
 
-        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now in maintenance mode.");
+        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now in maintenance mode");
 
         this.get<Contracts.Kernel.EventDispatcher>(Identifiers.EventDispatcherService).dispatch(
             "kernel.maintenance",
@@ -307,7 +307,7 @@ export class Application implements Contracts.Kernel.Application {
     public disableMaintenance(): void {
         removeSync(this.tempPath("maintenance"));
 
-        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now live.");
+        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now live");
 
         this.get<Contracts.Kernel.EventDispatcher>(Identifiers.EventDispatcherService).dispatch(
             "kernel.maintenance",
@@ -467,7 +467,7 @@ export class Application implements Contracts.Kernel.Application {
         ).allLoadedProviders();
 
         for (const serviceProvider of serviceProviders.reverse()) {
-            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).debug(`Disposing ${serviceProvider.name()}...`);
+            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).debug(`Disposing ${serviceProvider.name()}`);
 
             try {
                 await serviceProvider.dispose();

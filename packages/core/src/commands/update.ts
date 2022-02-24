@@ -31,7 +31,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Update the Core installation.";
+    public description: string = "Update the Core installation";
 
     /**
      * Configure the console command.
@@ -41,13 +41,13 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("force", "Force an update.", Joi.boolean().default(false))
-            .setFlag("updateProcessManager", "Update process manager.", Joi.boolean())
-            .setFlag("restart", "Restart all running processes.", Joi.boolean())
-            .setFlag("restartCore", "Restart the Core process.", Joi.boolean())
-            .setFlag("restartRelay", "Restart the Relay process.", Joi.boolean())
-            .setFlag("restartForger", "Restart the Forger process.", Joi.boolean());
+            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("force", "Force an update", Joi.boolean().default(false))
+            .setFlag("updateProcessManager", "Update process manager", Joi.boolean())
+            .setFlag("restart", "Restart all running processes", Joi.boolean())
+            .setFlag("restartCore", "Restart the Core process", Joi.boolean())
+            .setFlag("restartRelay", "Restart the Relay process", Joi.boolean())
+            .setFlag("restartForger", "Restart the Forger process", Joi.boolean());
     }
 
     /**

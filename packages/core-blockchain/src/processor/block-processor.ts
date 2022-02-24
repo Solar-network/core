@@ -256,9 +256,7 @@ export class BlockProcessor {
 
         if (!forgingDelegate) {
             this.logger.debug(
-                `Could not decide if delegate ${generatorUsername} (${
-                    block.data.generatorPublicKey
-                }) is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
+                `Could not decide if delegate ${generatorUsername} is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
             );
         } /* istanbul ignore next */ else if (forgingDelegate.getPublicKey() !== block.data.generatorPublicKey) {
             AppUtils.assert.defined<string>(forgingDelegate.getPublicKey());
@@ -269,18 +267,14 @@ export class BlockProcessor {
             const forgingUsername: string = forgingWallet.getAttribute("delegate.username");
 
             this.logger.warning(
-                `Delegate ${generatorUsername} (${
-                    block.data.generatorPublicKey
-                }) not allowed to forge, should be ${forgingUsername} (${forgingDelegate.getPublicKey()}) :-1:`,
+                `Delegate ${generatorUsername} is not allowed to forge in this slot, should be ${forgingUsername} :-1:`,
             );
 
             return false;
         }
 
         this.logger.debug(
-            `Delegate ${generatorUsername} (${
-                block.data.generatorPublicKey
-            }) allowed to forge block ${block.data.height.toLocaleString()} :+1:`,
+            `Delegate ${generatorUsername} is allowed to forge block ${block.data.height.toLocaleString()} :+1:`,
         );
 
         return true;

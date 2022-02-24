@@ -125,7 +125,7 @@ export class StateBuilder {
 
                 if (!whitelistedNegativeBalances) {
                     logNegativeBalance(wallet, "balance", wallet.getBalance());
-                    throw new Error("Non-genesis wallet with negative balance.");
+                    throw new Error("Non-genesis wallet with negative balance");
                 }
 
                 const allowedNegativeBalance = wallet
@@ -134,7 +134,7 @@ export class StateBuilder {
 
                 if (!allowedNegativeBalance) {
                     logNegativeBalance(wallet, "balance", wallet.getBalance());
-                    throw new Error("Non-genesis wallet with negative balance.");
+                    throw new Error("Non-genesis wallet with negative balance");
                 }
             }
 
@@ -143,7 +143,7 @@ export class StateBuilder {
 
                 if (voteBalance.isLessThan(0)) {
                     logNegativeBalance(wallet, "vote balance", voteBalance);
-                    throw new Error("Wallet with negative vote balance.");
+                    throw new Error("Wallet with negative vote balance");
                 }
             }
         }

@@ -120,11 +120,11 @@ export class ServiceProviderRepository {
      */
     public alias(name: string, alias: string): void {
         if (this.aliases.has(alias)) {
-            throw new InvalidArgumentException(`The alias [${alias}] is already in use.`);
+            throw new InvalidArgumentException(`The alias [${alias}] is already in use`);
         }
 
         if (!this.serviceProviders.has(name)) {
-            throw new InvalidArgumentException(`The service provider [${name}] is unknown.`);
+            throw new InvalidArgumentException(`The service provider [${name}] is unknown`);
         }
 
         this.aliases.set(alias, name);

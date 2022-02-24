@@ -19,7 +19,7 @@ export class HDWallet {
      */
     public static fromKeys(keys: IKeyPair, chainCode: Buffer): BIP32Interface {
         if (!keys.compressed) {
-            throw new TypeError("BIP32 only allows compressed keys.");
+            throw new TypeError("BIP32 only allows compressed keys");
         }
 
         return fromPrivateKey(Buffer.from(keys.privateKey, "hex"), chainCode, configManager.get("network"));

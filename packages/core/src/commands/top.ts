@@ -32,7 +32,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "List all Core daemons.";
+    public description: string = "List all Core daemons";
 
     /**
      * Indicates whether the command requires a network to be present.
@@ -49,7 +49,7 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public configure(): void {
-        this.definition.setFlag("token", "The name of the token.", Joi.string().default("ark"));
+        this.definition.setFlag("token", "The name of the token", Joi.string().default("ark"));
     }
 
     /**
@@ -64,7 +64,7 @@ export class Command extends Commands.Command {
         ).filter((p: Contracts.ProcessDescription) => p.name.startsWith(this.getFlag("token")));
 
         if (!processes || !Object.keys(processes).length) {
-            this.components.fatal("No processes are running.");
+            this.components.fatal("No processes are running");
         }
 
         this.components.table(["ID", "Name", "Version", "Status", "Uptime", "CPU", "RAM"], (table) => {

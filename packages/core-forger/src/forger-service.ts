@@ -36,6 +36,20 @@ export class ForgerService {
 
     /**
      * @private
+     * @type {Delegate[]}
+     * @memberof ForgerService
+     */
+    private activeDelegates: Delegate[] = [];
+
+    /**
+     * @private
+     * @type {{ [key: string]: string }}
+     * @memberof ForgerService
+     */
+    private allUsernames: { [key: string]: string } = {};
+
+    /**
+     * @private
      * @type {Client}
      * @memberof ForgerService
      */
@@ -54,6 +68,13 @@ export class ForgerService {
      * @memberof ForgerService
      */
     private usernames: { [key: string]: string } = {};
+
+    /**
+     * @private
+     * @type {Delegate[]}
+     * @memberof ForgerService
+     */
+    private inactiveDelegates: Delegate[] = [];
 
     /**
      * @private
@@ -135,7 +156,9 @@ export class ForgerService {
             this.handlerProvider.registerHandlers();
         }
 
-        this.delegates = delegates;
+        this.delegates = delegates.filter((value, index, self) => {
+            return index === self.findIndex((delegate) => delegate.publicKey === value.publicKey);
+        });
 
         let timeout: number = 2000;
         try {
@@ -480,6 +503,14 @@ export class ForgerService {
     private async loadRound(): Promise<void> {
         this.round = await this.client.getRound();
 
+        this.allUsernames = this.round.allDelegates.reduce((acc, wallet) => {
+            AppUtils.assert.defined<string>(wallet.publicKey);
+
+            return Object.assign(acc, {
+                [wallet.publicKey]: wallet.delegate.username,
+            });
+        }, {});
+
         this.usernames = this.round.delegates.reduce((acc, wallet) => {
             AppUtils.assert.defined<string>(wallet.publicKey);
 
@@ -487,6 +518,21 @@ export class ForgerService {
                 [wallet.publicKey]: wallet.delegate.username,
             });
         }, {});
+
+        const oldActiveDelegates: Delegate[] = this.activeDelegates;
+        const oldInactiveDelegates: Delegate[] = this.inactiveDelegates;
+
+        this.activeDelegates = this.delegates.filter((delegate) => {
+            AppUtils.assert.defined<string>(delegate.publicKey);
+
+            return this.usernames.hasOwnProperty(delegate.publicKey);
+        });
+
+        this.inactiveDelegates = this.delegates.filter((delegate) => {
+            AppUtils.assert.defined<string>(delegate.publicKey);
+
+            return !this.activeDelegates.includes(delegate);
+        });
 
         if (!this.initialized) {
             this.printLoadedDelegates();
@@ -496,7 +542,44 @@ export class ForgerService {
                 activeDelegates: this.delegates.map((delegate) => delegate.publicKey),
             });
 
-            this.logger.info(`Forger Manager started`);
+            this.logger.info(`Forger Manager started :hammer:`);
+        } else {
+            const newlyActiveDelegates = this.activeDelegates
+                .map((delegate) => delegate.publicKey)
+                .filter(
+                    (activeDelegate) =>
+                        !oldActiveDelegates.map((oldDelegate) => oldDelegate.publicKey).includes(activeDelegate),
+                )
+                .map((publicKey) => this.usernames[publicKey]);
+            const newlyInactiveDelegates = this.inactiveDelegates
+                .map((delegate) => delegate.publicKey)
+                .filter(
+                    (inactiveDelegate) =>
+                        !oldInactiveDelegates.map((oldDelegate) => oldDelegate.publicKey).includes(inactiveDelegate),
+                )
+                .map((publicKey) => (this.allUsernames[publicKey] ? this.allUsernames[publicKey] : publicKey));
+
+            if (newlyActiveDelegates.length === 1) {
+                this.logger.info(`Delegate ${newlyActiveDelegates[0]} is now in an active forging position :tada:`);
+            } else if (newlyActiveDelegates.length > 1) {
+                this.logger.info(
+                    `Delegates ${newlyActiveDelegates
+                        .join(", ")
+                        .replace(/,(?=[^,]*$)/, " and")} are now in active forging positions :tada:`,
+                );
+            }
+
+            if (newlyInactiveDelegates.length === 1) {
+                this.logger.info(
+                    `Delegate ${newlyInactiveDelegates[0]} is no longer in an active forging position :cry:`,
+                );
+            } else if (newlyInactiveDelegates.length > 1) {
+                this.logger.info(
+                    `Delegates ${newlyInactiveDelegates
+                        .join(", ")
+                        .replace(/,(?=[^,]*$)/, " and")} are no longer in active forging positions :cry:`,
+                );
+            }
         }
 
         this.initialized = true;
@@ -516,35 +599,27 @@ export class ForgerService {
      * @memberof ForgerService
      */
     private printLoadedDelegates(): void {
-        const activeDelegates: Delegate[] = this.delegates.filter((delegate) => {
-            AppUtils.assert.defined<string>(delegate.publicKey);
-
-            return this.usernames.hasOwnProperty(delegate.publicKey);
-        });
-
-        if (activeDelegates.length > 0) {
+        if (this.activeDelegates.length > 0) {
             this.logger.info(
-                `Loaded ${AppUtils.pluralize("active delegate", activeDelegates.length, true)}: ${activeDelegates
+                `Loaded ${AppUtils.pluralize("active delegate", this.activeDelegates.length, true)}: ${this.activeDelegates
                     .map(({ publicKey }) => {
                         AppUtils.assert.defined<string>(publicKey);
 
-                        return `${this.usernames[publicKey]} (${publicKey})`;
+                        return `${this.usernames[publicKey]}`;
                     })
                     .join(", ")}`,
             );
         }
 
-        if (this.delegates.length > activeDelegates.length) {
-            const inactiveDelegates: (string | undefined)[] = this.delegates
-                .filter((delegate) => !activeDelegates.includes(delegate))
-                .map((delegate) => delegate.publicKey);
-
+        if (this.delegates.length > this.activeDelegates.length) {
             this.logger.info(
-                `Loaded ${AppUtils.pluralize(
-                    "inactive delegate",
-                    inactiveDelegates.length,
-                    true,
-                )}: ${inactiveDelegates.join(", ")}`,
+                `Loaded ${AppUtils.pluralize("inactive delegate", this.inactiveDelegates.length, true)}: ${this.inactiveDelegates
+                    .map(({ publicKey }) => {
+                        AppUtils.assert.defined<string>(publicKey);
+
+                        return `${this.allUsernames[publicKey] ? this.allUsernames[publicKey] : `unregistered delegate (public key: ${publicKey})`}`;
+                    })
+                    .join(", ")}`,
             );
         }
     }

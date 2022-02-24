@@ -105,7 +105,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
 
                 if (blockSlot > currentSlot) {
                     this.logger.error(
-                        `Discarded block ${block.height.toLocaleString()} because it takes a future slot.`,
+                        `Discarded block ${block.height.toLocaleString()} because it takes a future slot :crystal_ball:`,
                     );
                     break;
                 }

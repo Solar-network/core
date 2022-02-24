@@ -41,7 +41,7 @@ export class SuggestCommand {
 
         const suggestion: string = minBy(signatures, (c) => Levenshtein.get(signature, c));
 
-        this.app.get<any>(Identifiers.Warning).render(`${red(signature)} is not a ${context.bin} command.`);
+        this.app.get<any>(Identifiers.Warning).render(`${red(signature)} is not a ${context.bin} command`);
 
         if (
             await this.app
@@ -53,7 +53,7 @@ export class SuggestCommand {
             return suggestion;
         }
 
-        this.app.get<any>(Identifiers.Info).render(`Run ${blue("ark help")} for a list of available commands.`);
+        this.app.get<any>(Identifiers.Info).render(`Run ${blue("ark help")} for a list of available commands`);
 
         return undefined;
     }

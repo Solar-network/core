@@ -22,6 +22,6 @@ export const checkNTP = (
             }
         }
 
-        reject(new Error("Please check your NTP connectivity, couldn't connect to any host."));
+        reject(new Error("Please check your NTP connectivity, couldn't connect to any host"));
     });
 };

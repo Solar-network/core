@@ -35,7 +35,7 @@ export class CommandHelp {
         let helpMessage: string = `${this.app.get<AppHeader>(Identifiers.AppHeader).render()}
 
 ${blue().bold("Description")}
-${command.description}`;
+${command.description.replace(/\.$/, "")}`;
 
         const args: string = this.buildArguments(command);
 
@@ -70,7 +70,7 @@ ${flags}`;
 
         const output: string[] = [];
         for (let i = 0; i < options.length; i++) {
-            output.push(`${options[i].padEnd(longestProperty, " ")}    ${descriptions[i]}`);
+            output.push(`${options[i].padEnd(longestProperty, " ")}    ${descriptions[i].replace(/\.$/, "")}`);
         }
 
         return output.join("\n");
@@ -92,7 +92,7 @@ ${flags}`;
 
         const output: string[] = [];
         for (let i = 0; i < options.length; i++) {
-            output.push(`--${options[i].padEnd(longestProperty, " ")}    ${descriptions[i]}`);
+            output.push(`--${options[i].padEnd(longestProperty, " ")}    ${descriptions[i].replace(/\.$/, "")}`);
         }
 
         return output.join("\n");
@@ -111,7 +111,7 @@ ${flags}`;
 
         for (const option of Object.keys(properties)) {
             options.push(option);
-            descriptions.push(properties[option].description);
+            descriptions.push(properties[option].description.replace(/\.$/, ""));
         }
 
         return {

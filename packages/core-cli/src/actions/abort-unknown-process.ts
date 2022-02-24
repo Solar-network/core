@@ -22,7 +22,7 @@ export class AbortUnknownProcess {
      */
     public execute(processName: string): void {
         if (this.processManager.isUnknown(processName)) {
-            throw new Error(`The "${processName}" process has entered an unknown state.`);
+            throw new Error(`The "${processName}" process has entered an unknown state`);
         }
     }
 }

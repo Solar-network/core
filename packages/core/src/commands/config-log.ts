@@ -24,7 +24,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Update the logger configuration.";
+    public description: string = "Update the logger configuration";
 
     /**
      * Configure the console command.
@@ -34,9 +34,9 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string())
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("emojify", "Whether to add emoji to the logs of Core.", Joi.boolean());
+            .setFlag("token", "The name of the token", Joi.string())
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("emojify", "Whether to add emoji to the logs of Core", Joi.boolean());
     }
 
     /**

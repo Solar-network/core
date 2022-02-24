@@ -109,7 +109,7 @@ export class Updater implements Contracts.Updater {
                 );
 
             if (!confirm) {
-                throw new Error("You'll need to confirm the update to continue.");
+                throw new Error("You'll need to confirm the update to continue");
             }
         }
 
@@ -153,7 +153,7 @@ export class Updater implements Contracts.Updater {
         if (exitCode !== 0) {
             this.app
                 .get<Warning>(Identifiers.Warning)
-                .render(`We were unable to find any releases for the "${this.packageChannel}" channel.`);
+                .render(`Unable to find any releases for the "${this.packageChannel}" channel`);
 
             return undefined;
         }

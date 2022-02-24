@@ -53,7 +53,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
 
     public validatePeerIp(peer, options: Contracts.P2P.AcceptNewPeerOptions = {}): boolean {
         if (this.configuration.get("disableDiscovery")) {
-            this.logger.warning(`Rejected ${peer.ip} because the relay is in non-discovery mode.`);
+            this.logger.warning(`Rejected ${peer.ip} because the relay is in non-discovery mode :see_no_evil:`);
 
             return false;
         }
@@ -78,7 +78,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
             /* istanbul ignore else */
             if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
                 this.logger.warning(
-                    `Rejected ${peer.ip} because we are already at the ${maxSameSubnetPeers} limit for peers sharing the same /24 subnet.`,
+                    `Rejected ${peer.ip} because we are already at the ${maxSameSubnetPeers} limit for peers sharing the same /24 subnet :no_entry:`,
                 );
             }
 

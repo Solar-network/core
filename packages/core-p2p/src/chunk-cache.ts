@@ -29,7 +29,7 @@ export class ChunkCache implements Contracts.P2P.ChunkCache {
         const chunkData = this.downloadedChunksCache.find((chunkData) => chunkData.key === key);
 
         if (!chunkData) {
-            throw new Error(`Downloaded chunk for key ${key} is not defined.`);
+            throw new Error(`Downloaded chunk for key ${key} is not defined`);
         }
 
         return chunkData.data;
