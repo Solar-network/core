@@ -70,7 +70,7 @@ export class TransactionVersionError extends CryptoError {
     }
 }
 
-export class UnkownTransactionError extends CryptoError {
+export class UnknownTransactionError extends CryptoError {
     public constructor(given: string) {
         super(`Unknown transaction type: ${given}`);
     }
