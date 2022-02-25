@@ -16,6 +16,6 @@ export class RegisterErrorHandler implements Bootstrapper {
      */
     public async bootstrap(): Promise<void> {
         // todo: implement passing in of options and ensure handling of critical exceptions
-        logProcessErrors({ exitOn: [] });
+        logProcessErrors({ level: { multipleResolves: "silent" }, exitOn: [] });
     }
 }
