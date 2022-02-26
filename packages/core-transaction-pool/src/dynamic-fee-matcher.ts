@@ -2,7 +2,7 @@ import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
 import { Handlers } from "@arkecosystem/core-transactions";
 import { Interfaces, Utils } from "@arkecosystem/crypto";
 
-import { TransactionFeeToHighError, TransactionFeeToLowError } from "./errors";
+import { TransactionFeeTooHighError, TransactionFeeTooLowError } from "./errors";
 
 @Container.injectable()
 export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMatcher {
@@ -45,7 +45,7 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
             }
 
             this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} < ${minFeeStr}) :zap:`);
-            throw new TransactionFeeToLowError(transaction);
+            throw new TransactionFeeTooLowError(transaction);
         } else {
             const staticFeeStr = Utils.formatSatoshi(transaction.staticFee);
 
@@ -55,11 +55,11 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
             }
             if (transaction.data.fee.isLessThan(transaction.staticFee)) {
                 this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} < ${staticFeeStr}) :zap:`);
-                throw new TransactionFeeToLowError(transaction);
+                throw new TransactionFeeTooLowError(transaction);
             }
 
             this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} > ${staticFeeStr}) :zap:`);
-            throw new TransactionFeeToHighError(transaction);
+            throw new TransactionFeeTooHighError(transaction);
         }
     }
 
@@ -88,7 +88,7 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
             }
 
             this.logger.notice(`${transaction} not eligible for broadcast (fee ${feeStr} < ${minFeeStr}) :zap:`);
-            throw new TransactionFeeToLowError(transaction);
+            throw new TransactionFeeTooLowError(transaction);
         } else {
             const staticFeeStr = Utils.formatSatoshi(transaction.staticFee);
 
@@ -98,11 +98,11 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
             }
             if (transaction.data.fee.isLessThan(transaction.staticFee)) {
                 this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} < ${staticFeeStr}) :zap:`);
-                throw new TransactionFeeToLowError(transaction);
+                throw new TransactionFeeTooLowError(transaction);
             }
 
             this.logger.notice(`${transaction} not eligible to enter pool (fee ${feeStr} > ${staticFeeStr}) :zap:`);
-            throw new TransactionFeeToHighError(transaction);
+            throw new TransactionFeeTooHighError(transaction);
         }
     }
 }
