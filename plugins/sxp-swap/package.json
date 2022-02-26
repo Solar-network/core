@@ -1,0 +1,30 @@
+{
+    "name": "@solar-network/sxp-swap",
+    "description": "Plugin to verify swaps from ERC20/BEP20 SXP tokens to the native blockchain",
+    "version": "0.0.1",
+    "contributors": [
+        "cactus1549 <cactus1549pool@gmail.com>",
+        "alessiodf <alessiodf@pm.me>"
+    ],
+    "license": "CC-BY-ND-4.0",
+    "main": "dist/index.js",
+    "files": [
+        "dist/*.js"
+    ],
+    "scripts": {
+        "compile": "../../node_modules/typescript/bin/tsc",
+        "build": "yarn clean && yarn compile",
+        "clean": "del dist",
+        "lint": "../../node_modules/eslint/bin/eslint.js . --ext .ts --fix",
+        "prettier": "prettier --write './**/*.{ts,js,json,md}'",
+        "format": "yarn lint && yarn prettier"
+    },
+    "dependencies": {
+        "delay": "5.0.0",
+        "ethereum-input-data-decoder": "0.4.0",
+        "web3": "1.7.0"
+    },
+    "devDependencies": {
+        "@arkecosystem/core": "^3.1.1-next.3"
+    }
+}
