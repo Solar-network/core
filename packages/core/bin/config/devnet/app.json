@@ -20,6 +20,12 @@
                 "package": "@arkecosystem/core-transaction-pool"
             },
             {
+                "package": "@solar-network/sxp-swap",
+                "options": {
+                    "swapWalletPublicKey": "026036ba85cf044b68bfe3de6c36a862bbbe567cbda158910cd220e66e50f0782b"
+                }
+            },
+            {
                 "package": "@arkecosystem/core-p2p",
                 "options": {
                     "minimumNetworkReach": 5
@@ -58,6 +64,12 @@
             },
             {
                 "package": "@arkecosystem/core-transaction-pool"
+            },
+            {
+                "package": "@solar-network/sxp-swap",
+                "options": {
+                    "swapWalletPublicKey": "026036ba85cf044b68bfe3de6c36a862bbbe567cbda158910cd220e66e50f0782b"
+                }
             },
             {
                 "package": "@arkecosystem/core-p2p",
