@@ -1,3 +1,4 @@
+import { Utils } from "@arkecosystem/crypto";
 import { BigNumber } from "@arkecosystem/utils";
 
 export class ApiCommunicationError extends Error {
@@ -32,7 +33,7 @@ export class TransactionNotValidError extends Error {
 
 export class TransactionHasWrongAmountError extends Error {
     public constructor(amount: BigNumber, expectedAmount: BigNumber) {
-        super(`The swap transaction has the wrong amount (${amount}, expected ${expectedAmount})`);
+        super(`The swap transaction has the wrong amount (${Utils.formatSatoshi(amount)}, expected ${Utils.formatSatoshi(expectedAmount)})`);
     }
 }
 
