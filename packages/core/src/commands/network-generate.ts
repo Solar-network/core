@@ -787,7 +787,7 @@ export class Command extends Commands.Command {
         }
 
         if (!Object.keys(dynamicFees.addonBytes).length) {
-            delete dynamicFees.addonBytes;
+            delete (dynamicFees as any).addonBytes;
         }
 
         const app = readJSONSync(resolve(__dirname, "../../bin/config/testnet/app.json"));

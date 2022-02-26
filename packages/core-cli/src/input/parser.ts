@@ -16,7 +16,7 @@ export class InputParser {
 
         const argv: string[] = parsed._;
 
-        delete parsed._;
+        delete (parsed as any)._;
 
         return { args: argv, flags: parsed };
     }
