@@ -110,7 +110,7 @@ sudo rm -rf ~/{.npm,.forever,.node*,.cache,.nvm}
 
 if [[ ! -z $DEB ]]; then
     sudo wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -
-    (echo "deb https://deb.nodesource.com/node_14.x ${DEB_ID} main" | sudo tee /etc/apt/sources.list.d/nodesource.list)
+    (echo "deb https://deb.nodesource.com/node_16.x ${DEB_ID} main" | sudo tee /etc/apt/sources.list.d/nodesource.list)
     sudo apt-get update
     sudo apt-get install nodejs -y
 
