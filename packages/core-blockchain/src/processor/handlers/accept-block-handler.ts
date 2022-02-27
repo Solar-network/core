@@ -27,8 +27,9 @@ export class AcceptBlockHandler implements BlockHandler {
     private readonly transactionPool!: Contracts.TransactionPool.Service;
 
     public async execute(block: Interfaces.IBlock): Promise<BlockProcessorResult> {
+        const transactionProcessing = { index: undefined };
         try {
-            await this.databaseInteraction.applyBlock(block);
+            await this.databaseInteraction.applyBlock(block, transactionProcessing);
 
             // Check if we recovered from a fork
             const forkedBlock = this.state.getForkedBlock();
@@ -57,11 +58,14 @@ export class AcceptBlockHandler implements BlockHandler {
 
             return BlockProcessorResult.Accepted;
         } catch (error) {
-            this.logger.warning("Refused new block :warning: :warning: :warning:");
-            this.logger.warning(JSON.stringify(block.data));
-
-            this.logger.debug(error.stack);
-
+            this.logger.warning(`Refused new block with id ${block.data.id} :warning: :warning: :warning:`);
+            if (transactionProcessing.index !== undefined) {
+                this.logger.warning(`Block contains a bad transaction: ${error.message} :no_entry:`);
+                this.logger.warning(`Bad transaction data: ${JSON.stringify(block.transactions[transactionProcessing.index].data)}`);
+            } else {
+                this.logger.warning(`Block is bad: ${error.message} :no_entry:`);
+                this.logger.warning(`Bad block data: ${JSON.stringify(block.data)}`);
+            }
             this.blockchain.resetLastDownloadedBlock();
 
             // Revert block if accepted

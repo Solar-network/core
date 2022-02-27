@@ -17,7 +17,7 @@ export class BlockState implements Contracts.State.BlockState {
     @Container.inject(Container.Identifiers.LogService)
     private logger!: Contracts.Kernel.Logger;
 
-    public async applyBlock(block: Interfaces.IBlock): Promise<void> {
+    public async applyBlock(block: Interfaces.IBlock, transactionProcessing): Promise<void> {
         if (block.data.height === 1) {
             this.initGenesisForgerWallet(block.data.generatorPublicKey);
         }
@@ -28,15 +28,15 @@ export class BlockState implements Contracts.State.BlockState {
         const appliedTransactions: Interfaces.ITransaction[] = [];
         try {
             for (const transaction of block.transactions) {
+                transactionProcessing.index = appliedTransactions.length;
                 await this.applyTransaction(transaction);
+                transactionProcessing.index = undefined;
                 appliedTransactions.push(transaction);
             }
             this.applyBlockToForger(forgerWallet, block.data);
 
             this.state.setLastBlock(block);
         } catch (error) {
-            this.logger.error(error.stack);
-            this.logger.error("Failed to apply all transactions in block - reverting previous transactions");
             for (const transaction of appliedTransactions.reverse()) {
                 await this.revertTransaction(transaction);
             }

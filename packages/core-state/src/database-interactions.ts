@@ -59,10 +59,10 @@ export class DatabaseInteraction {
         }
     }
 
-    public async applyBlock(block: Interfaces.IBlock): Promise<void> {
+    public async applyBlock(block: Interfaces.IBlock, transactionProcessing): Promise<void> {
         await this.roundState.detectMissedBlocks(block);
 
-        await this.blockState.applyBlock(block);
+        await this.blockState.applyBlock(block, transactionProcessing);
         await this.roundState.applyBlock(block);
 
         for (const transaction of block.transactions) {
