@@ -214,10 +214,10 @@ export class SXPSwap {
                         ...requests,
                         new Promise<undefined[]>(async (resolve) => {
                             await delay(2000);
-                            resolve([undefined, undefined, undefined, undefined]);
+                            resolve([]);
                         })
                     ]).catch(() => {
-                        return [undefined, undefined, undefined, undefined];
+                        return [];
                     });
 
                     const [api, height, txInfo, txReceipt] = results;
