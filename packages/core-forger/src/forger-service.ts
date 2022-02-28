@@ -379,8 +379,15 @@ export class ForgerService {
             }
             await delay(1000);
 
-            await this.loadRound();
-
+            try {
+                await this.loadRound();
+            } catch (error) {
+                if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
+                    this.logger.warning(error.message);
+                } else {
+                    this.logger.error(error.stack);
+                }
+            }
             return this.forgeNewBlock(delegate, false, this.round!);
         });
     }
