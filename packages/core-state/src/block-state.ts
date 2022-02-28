@@ -1,6 +1,6 @@
 import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
 import { Handlers } from "@arkecosystem/core-transactions";
-import { Enums, Identities, Interfaces, Utils } from "@arkecosystem/crypto";
+import { Enums, Identities, Interfaces, Managers, Utils } from "@arkecosystem/crypto";
 
 // todo: review the implementation
 @Container.injectable()
@@ -186,7 +186,15 @@ export class BlockState implements Contracts.State.BlockState {
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.plus(blockData.reward);
         delegateAttribute.lastBlock = blockData;
 
-        const balanceIncrease = blockData.reward.plus(blockData.totalFee);
+        const milestone = Managers.configManager.getMilestone(blockData.height);
+        let blockFee = blockData.totalFee;
+        if (milestone.burnPercentage !== undefined) {
+            const burnPercentage = parseInt(milestone.burnPercentage);
+            if (burnPercentage >= 0 && burnPercentage <= 100) {
+                blockFee = blockFee.times(100 - burnPercentage).dividedBy(100);
+            }
+        }
+        const balanceIncrease = blockData.reward.plus(blockFee);
         this.increaseWalletDelegateVoteBalance(forgerWallet, balanceIncrease);
         forgerWallet.increaseBalance(balanceIncrease);
     }
@@ -198,7 +206,15 @@ export class BlockState implements Contracts.State.BlockState {
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.minus(blockData.reward);
         delegateAttribute.lastBlock = undefined;
 
-        const balanceDecrease = blockData.reward.plus(blockData.totalFee);
+        const milestone = Managers.configManager.getMilestone(blockData.height);
+        let blockFee = blockData.totalFee;
+        if (milestone.burnPercentage !== undefined) {
+            const burnPercentage = parseInt(milestone.burnPercentage);
+            if (burnPercentage >= 0 && burnPercentage <= 100) {
+                blockFee = blockFee.times(100 - burnPercentage).dividedBy(100);
+            }
+        }
+        const balanceDecrease = blockData.reward.plus(blockFee);
         this.decreaseWalletDelegateVoteBalance(forgerWallet, balanceDecrease);
         forgerWallet.decreaseBalance(balanceDecrease);
     }
