@@ -569,7 +569,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         let fullMsg = `${this.logPrefix} ${msg}`;
         if (success === true) {
             fullMsg += " :white_check_mark:";
-        } else if(success === false) {
+        } else if (success === false) {
             fullMsg += " :no_entry_sign:";
         }
         switch (severity) {
