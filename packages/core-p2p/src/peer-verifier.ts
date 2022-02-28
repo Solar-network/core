@@ -203,7 +203,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             this.log(
                 Severity.DEBUG_EXTRA,
                 `peer's claimed chain is ${pluralize("block", blocksAhead, true)} higher than ` +
-                    `ours (our height ${ourHeight}, his claimed height ${claimedHeight})`,
+                    `ours (our height ${ourHeight}, his claimed height ${claimedHeight})`, null
             );
 
             return false;
