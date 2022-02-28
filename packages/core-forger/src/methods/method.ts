@@ -20,6 +20,10 @@ export abstract class Method {
         transactions: Interfaces.ITransactionData[],
         options: Record<string, any>,
     ): Interfaces.IBlock {
+        if (!(transactions instanceof Array)) {
+            transactions = [];
+        }
+
         const totals: { amount: Utils.BigNumber; fee: Utils.BigNumber } = {
             amount: Utils.BigNumber.ZERO,
             fee: Utils.BigNumber.ZERO,
