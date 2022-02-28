@@ -152,8 +152,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         peer.state = pingResponse.state;
 
         const stateBuffer = Buffer.from(Utils.stringify({ state: pingResponse.state, config: pingResponse.config }));
-        const alreadyCheckedDelegates: string[] = [];
-
+        const alreadyCheckedSignatures: string[] = [];
         let slotInfo;
         if (blockTimeLookup) {
             slotInfo = Crypto.Slots.getSlotInfo(blockTimeLookup);
@@ -164,17 +163,11 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                     .getPeers()
                     .find((otherPeer) => peer.ip !== otherPeer.ip && otherPeer.publicKeys.includes(publicKey));
                 if (
-                    !alreadyCheckedDelegates.includes(publicKey + signature) &&
+                    !alreadyCheckedSignatures.includes(publicKey + signature) &&
                     pingResponse.state &&
                     pingResponse.state.currentSlot
                 ) {
-                    if (
-                        [
-                            pingResponse.state.currentSlot - 1,
-                            pingResponse.state.currentSlot,
-                            pingResponse.state.currentSlot + 1,
-                        ].includes(slotInfo.slotNumber)
-                    ) {
+                    if (pingResponse.state.currentSlot === slotInfo.slotNumber) {
                         const lastBlock: Interfaces.IBlock = this.app
                             .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                             .getLastBlock();
@@ -192,9 +185,10 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                             } else if (!peer.isForked()) {
                                 if (
                                     delegatePeer.isForked() ||
-                                    peer.state.header.height === lastBlock.data.height ||
-                                    (peer.state.header.height > delegatePeer.state.header.height &&
-                                        delegatePeer.state.header.height !== lastBlock.data.height)
+                                    (peer.state.header.height === lastBlock.data.height &&
+                                        peer.state.header.id === lastBlock.data.id) ||
+                                    (peer.state.header.height >= delegatePeer.state.header.height &&
+                                        delegatePeer.state.header.id !== lastBlock.data.id)
                                 ) {
                                     peer.publicKeys.push(publicKey);
                                     delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
@@ -202,7 +196,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                                     );
                                 }
                             }
-                            alreadyCheckedDelegates.push(publicKey + signature);
+                            alreadyCheckedSignatures.push(publicKey + signature);
                         }
                     }
                 }
