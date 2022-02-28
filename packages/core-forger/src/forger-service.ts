@@ -240,16 +240,11 @@ export class ForgerService {
                 } else {
                     this.logger.warning(error.message);
                 }
-            } else {
-                this.logger.error(error.stack);
-
-                if (this.round) {
-                    this.logger.info(
-                        `Round: ${this.round.current.toLocaleString()}, height: ${this.round.lastBlock.height.toLocaleString()}`,
-                    );
+                try {
+                    this.client.emitEvent(Enums.ForgerEvent.Failed, { error: error.message });
+                } catch {
+                    //
                 }
-
-                this.client.emitEvent(Enums.ForgerEvent.Failed, { error: error.message });
             }
 
             // no idea when this will be ok, so waiting 2s before checking again
@@ -308,8 +303,8 @@ export class ForgerService {
                         .call("isForgingAllowed", { forgerService: this, delegate, networkState })
                 ) {
                     if (this.lastSlot !== roundSlot && currentSlot === roundSlot) {
-                        this.lastSlot = roundSlot;
                         this.transactions = await this.getTransactionsForForging();
+                        this.lastSlot = roundSlot;
                     }
 
                     const block: Interfaces.IBlock | undefined = delegate.forge(this.transactions, {
@@ -373,8 +368,6 @@ export class ForgerService {
             } catch (error) {
                 if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
                     this.logger.warning(error.message);
-                } else {
-                    this.logger.error(error.stack);
                 }
             }
             await delay(1000);
@@ -384,8 +377,6 @@ export class ForgerService {
             } catch (error) {
                 if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
                     this.logger.warning(error.message);
-                } else {
-                    this.logger.error(error.stack);
                 }
             }
             return this.forgeNewBlock(delegate, false, this.round!);
@@ -399,7 +390,7 @@ export class ForgerService {
     public async getTransactionsForForging(): Promise<Interfaces.ITransactionData[]> {
         const response = await this.client.getTransactions();
         if (AppUtils.isEmpty(response)) {
-            this.logger.error("Could not get unconfirmed transactions from transaction pool :warning:");
+            this.logger.warning("Could not get unconfirmed transactions from transaction pool :warning:");
             return [];
         }
         const transactions = response.transactions.map(
