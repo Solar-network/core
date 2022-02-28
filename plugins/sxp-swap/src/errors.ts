@@ -7,6 +7,12 @@ export class ApiCommunicationError extends Error {
     }
 }
 
+export class InvalidSignatureError extends Error {
+    public constructor() {
+        super("The swap transaction signature is invalid");
+    }
+}
+
 export class TransactionAlreadyCompletedError extends Error {
     public constructor() {
         super("The swap transaction has already been completed");

@@ -4,6 +4,7 @@ import { TransactionValidator } from "@arkecosystem/core-state/dist/transaction-
 import { Handlers } from "@arkecosystem/core-transactions";
 import { ColdWalletError } from "@arkecosystem/core-transactions/dist/errors";
 import { Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
+import * as EthereumTx from '@ethereumjs/tx';
 import assert from "assert";
 import delay from "delay";
 import InputDataDecoder from "ethereum-input-data-decoder";
@@ -13,6 +14,7 @@ import { HttpProvider } from "web3-providers-http";
 import { ApplyTransactionAction } from "./apply";
 import {
     ApiCommunicationError,
+    InvalidSignatureError,
     TransactionAlreadyCompletedError,
     TransactionAlreadySubmittedError,
     TransactionDoesNotExistError,
@@ -295,6 +297,27 @@ export class SXPSwap {
 
                     if (alreadyProcessedThisSwap !== undefined) {
                         throw new TransactionAlreadyCompletedError();
+                    }
+
+                    const transactionObject = EthereumTx.TransactionFactory.fromTxData({
+                        nonce: txInfo.nonce,
+                        gasPrice: +txInfo.gasPrice,
+                        gasLimit: +txInfo.gas,
+                        to: txInfo.to,
+                        value: "0x" + txInfo.value,
+                        data: txInfo.input,
+                        v: txInfo.v,
+                        r: txInfo.r,
+                        s: txInfo.s,
+                        type: txInfo.type,
+                        chainId: txInfo.chainId,
+                        accessList: txInfo.accessList,
+                        maxPriorityFeePerGas: +txInfo.maxPriorityFeePerGas,
+                        maxFeePerGas: +txInfo.maxFeePerGas
+                    });
+
+                    if (transactionObject.getSenderAddress().toString() !== txInfo.from.toLowerCase()) {
+                        throw new InvalidSignatureError();
                     }
 
                     switch (status) {

@@ -20,6 +20,7 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
+        "@ethereumjs/tx": "3.5.0",
         "delay": "5.0.0",
         "ethereum-input-data-decoder": "0.4.0",
         "web3": "1.7.0"
