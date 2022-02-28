@@ -1,6 +1,6 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
-import { DatabaseInterceptor } from "@arkecosystem/core-state";
-import { Crypto, Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
+import { DatabaseInteraction, DatabaseInterceptor } from "@arkecosystem/core-state";
+import { Crypto, Identities, Interfaces } from "@arkecosystem/crypto";
 import Hapi from "@hapi/hapi";
 
 import { constants } from "../../constants";
@@ -13,11 +13,16 @@ export class PeerController extends Controller {
     @Container.inject(Container.Identifiers.PeerRepository)
     private readonly peerRepository!: Contracts.P2P.PeerRepository;
 
+    @Container.inject(Container.Identifiers.DatabaseInteraction)
+    private readonly databaseInteraction!: DatabaseInteraction;
+
     @Container.inject(Container.Identifiers.DatabaseInterceptor)
     private readonly databaseInterceptor!: DatabaseInterceptor;
 
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
+
+    private cachedHeader: Contracts.P2P.PeerPingResponse | undefined;
 
     public getPeers(request: Hapi.Request, h: Hapi.ResponseToolkit): Contracts.P2P.PeerBroadcast[] {
         const peerIp = getPeerIp(request.socket);
@@ -27,8 +32,8 @@ export class PeerController extends Controller {
             .filter((peer) => peer.ip !== peerIp)
             .filter((peer) => peer.port !== -1)
             .sort((a, b) => {
-                Utils.assert.defined<number>(a.latency);
-                Utils.assert.defined<number>(b.latency);
+                AppUtils.assert.defined<number>(a.latency);
+                AppUtils.assert.defined<number>(b.latency);
 
                 return a.latency - b.latency;
             })
@@ -60,10 +65,22 @@ export class PeerController extends Controller {
     public async getStatus(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<Contracts.P2P.PeerPingResponse> {
         const lastBlock: Interfaces.IBlock = this.blockchain.getLastBlock();
 
-        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, lastBlock.data.height);
+        const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(
+            this.app,
+            lastBlock.data.height,
+        );
         const slotInfo = Crypto.Slots.getSlotInfo(blockTimeLookup);
 
-        return {
+        if (
+            this.cachedHeader &&
+            this.cachedHeader.state.header.id === lastBlock.data.id &&
+            this.cachedHeader.state.forgingAllowed === slotInfo.forgingStatus &&
+            this.cachedHeader.state.currentSlot === slotInfo.slotNumber
+        ) {
+            return this.cachedHeader;
+        }
+
+        const header: Contracts.P2P.PeerPingResponse = {
             state: {
                 height: lastBlock.data.height,
                 forgingAllowed: slotInfo.forgingStatus,
@@ -72,5 +89,29 @@ export class PeerController extends Controller {
             },
             config: getPeerConfig(this.app),
         };
+
+        const stateBuffer = Buffer.from(AppUtils.stringify(header));
+
+        header.publicKeys = [];
+        header.signatures = [];
+
+        const height = lastBlock.data.height + 1;
+        const roundInfo = AppUtils.roundCalculator.calculateRound(height);
+
+        const delegates = (await this.databaseInteraction.getActiveDelegates(roundInfo)).map(
+            (wallet: Contracts.State.Wallet) => wallet.getPublicKey(),
+        );
+
+        for (const secret of this.app.config("delegates.secrets")) {
+            const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
+            if (delegates.includes(keys.publicKey)) {
+                header.publicKeys.push(keys.publicKey);
+                header.signatures.push(Crypto.Hash.signSchnorr(stateBuffer, keys));
+            }
+        }
+
+        this.cachedHeader = header;
+
+        return header;
     }
 }

@@ -64,7 +64,9 @@ export const getStatus = {
                         totalFee,
                         reward,
                     }
-                }
+                },
+                publicKeys: decoded.publicKeys,
+                signatures: decoded.signatures
             } as Contracts.P2P.PeerPingResponse;
         },
     },

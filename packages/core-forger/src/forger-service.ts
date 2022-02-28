@@ -422,6 +422,9 @@ export class ForgerService {
         } else if (networkState.status === NetworkStateStatus.ColdStart) {
             this.logger.info("Skipping slot because of cold start. Will not forge :bomb:");
             return false;
+        } else if (networkState.status === NetworkStateStatus.BelowMinimumDelegates) {
+            this.logger.info("Not peered with enough delegates to get quorum. Will not forge :bomb:");
+            return false;
         } else if (networkState.status === NetworkStateStatus.BelowMinimumPeers) {
             this.logger.info("Network reach is not sufficient to get quorum. Will not forge :bomb:");
             return false;
@@ -473,7 +476,7 @@ export class ForgerService {
             }
         }
 
-        if (networkState.getQuorum() < 0.66) {
+        if (!networkState.canForge()) {
             networkState.setOverHeightBlockHeaders(distinctOverHeightBlockHeaders);
 
             this.logger.info("Not enough quorum to forge next block. Will not forge :bomb:");

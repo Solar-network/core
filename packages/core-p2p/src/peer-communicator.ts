@@ -1,5 +1,6 @@
 import { Container, Contracts, Enums, Providers, Types, Utils } from "@arkecosystem/core-kernel";
-import { Blocks, Interfaces, Managers, Transactions, Validation } from "@arkecosystem/crypto";
+import { DatabaseInteraction } from "@arkecosystem/core-state";
+import { Blocks, Crypto, Interfaces, Managers, Transactions, Validation } from "@arkecosystem/crypto";
 import dayjs from "dayjs";
 import delay from "delay";
 
@@ -25,11 +26,17 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     @Container.inject(Container.Identifiers.PeerConnector)
     private readonly connector!: Contracts.P2P.PeerConnector;
 
+    @Container.inject(Container.Identifiers.DatabaseInteraction)
+    private readonly databaseInteraction!: DatabaseInteraction;
+
     @Container.inject(Container.Identifiers.EventDispatcherService)
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
+
+    @Container.inject(Container.Identifiers.PeerRepository)
+    private readonly repository!: Contracts.P2P.PeerRepository;
 
     @Container.inject(Container.Identifiers.QueueFactory)
     private readonly createQueue!: Types.QueueFactory;
@@ -97,7 +104,12 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     // ! do not rely on parameter timeoutMsec as guarantee that ping method will resolve within it !
     // ! peerVerifier.checkState can take more time !
     // TODO refactor ?
-    public async ping(peer: Contracts.P2P.Peer, timeoutMsec: number, force = false): Promise<any> {
+    public async ping(
+        peer: Contracts.P2P.Peer,
+        timeoutMsec: number,
+        blockTimeLookup: Crypto.GetBlockTimeStampLookup | undefined,
+        force = false,
+    ): Promise<any> {
         const deadline = new Date().getTime() + timeoutMsec;
 
         if (peer.recentlyPinged() && !force) {
@@ -135,8 +147,67 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         }
 
         peer.lastPinged = dayjs();
-        peer.state = pingResponse.state;
         peer.plugins = pingResponse.config.plugins;
+        peer.publicKeys = [];
+        peer.state = pingResponse.state;
+
+        const stateBuffer = Buffer.from(Utils.stringify({ state: pingResponse.state, config: pingResponse.config }));
+        const alreadyCheckedDelegates: string[] = [];
+
+        let slotInfo;
+        if (blockTimeLookup) {
+            slotInfo = Crypto.Slots.getSlotInfo(blockTimeLookup);
+            for (const signatureIndex in pingResponse.signatures) {
+                const publicKey = pingResponse.publicKeys![signatureIndex];
+                const signature = pingResponse.signatures[signatureIndex];
+                const delegatePeer = this.repository
+                    .getPeers()
+                    .find((otherPeer) => peer.ip !== otherPeer.ip && otherPeer.publicKeys.includes(publicKey));
+                if (
+                    !alreadyCheckedDelegates.includes(publicKey + signature) &&
+                    pingResponse.state &&
+                    pingResponse.state.currentSlot
+                ) {
+                    if (
+                        [
+                            pingResponse.state.currentSlot - 1,
+                            pingResponse.state.currentSlot,
+                            pingResponse.state.currentSlot + 1,
+                        ].includes(slotInfo.slotNumber)
+                    ) {
+                        const lastBlock: Interfaces.IBlock = this.app
+                            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
+                            .getLastBlock();
+                        const height = lastBlock.data.height + 1;
+                        const roundInfo = Utils.roundCalculator.calculateRound(height);
+                        const delegates = (await this.databaseInteraction.getActiveDelegates(roundInfo)).map(
+                            (wallet: Contracts.State.Wallet) => wallet.getPublicKey(),
+                        );
+                        if (
+                            delegates.includes(publicKey) &&
+                            Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey)
+                        ) {
+                            if (!delegatePeer) {
+                                peer.publicKeys.push(publicKey);
+                            } else if (!peer.isForked()) {
+                                if (
+                                    delegatePeer.isForked() ||
+                                    peer.state.header.height === lastBlock.data.height ||
+                                    (peer.state.header.height > delegatePeer.state.header.height &&
+                                        delegatePeer.state.header.height !== lastBlock.data.height)
+                                ) {
+                                    peer.publicKeys.push(publicKey);
+                                    delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
+                                        (peerPublicKey) => peerPublicKey !== publicKey,
+                                    );
+                                }
+                            }
+                            alreadyCheckedDelegates.push(publicKey + signature);
+                        }
+                    }
+                }
+            }
+        }
 
         return pingResponse.state;
     }
@@ -242,6 +313,12 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         if (schema === undefined) {
             this.logger.error(`Cannot validate reply from "${endpoint}": none of the predefined schemas matches :bangbang:`);
             return false;
+        }
+        if (endpoint === "p2p.peer.getStatus") {
+            const milestone = Managers.configManager.getMilestone();
+
+            schema.properties.publicKeys.maxItems = milestone.activeDelegates;
+            schema.properties.signatures.maxItems = milestone.activeDelegates;
         }
 
         const { error } = Validation.validator.validate(schema, reply);

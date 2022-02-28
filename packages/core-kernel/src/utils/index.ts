@@ -10,6 +10,7 @@ import { calculateRound, isNewRound } from "./round-calculator";
 export * as IpAddress from "./ip-address";
 export * as Search from "./search";
 import { calculate } from "./supply-calculator";
+import { stringify } from "./stringify";
 
 export * from "@arkecosystem/utils";
 export * from "./expiration-calculator";
@@ -24,4 +25,4 @@ export const roundCalculator = { calculateRound, isNewRound };
 export const supplyCalculator = { calculate };
 export const forgingInfoCalculator = { calculateForgingInfo, getBlockTimeLookup };
 
-export { formatTimestamp, isBlockChained, getBlockNotChainedErrorMessage, isBlacklisted, isWhitelisted };
+export { formatTimestamp, isBlockChained, getBlockNotChainedErrorMessage, isBlacklisted, isWhitelisted, stringify };
