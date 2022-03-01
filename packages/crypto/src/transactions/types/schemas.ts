@@ -374,7 +374,7 @@ export const delegateResignation = extend(transactionBaseSchema, {
     properties: {
         type: { transactionType: TransactionType.DelegateResignation },
         amount: { bignumber: { minimum: 0, maximum: 0 } },
-        fee: { bignumber: { minimum: 1 } },
+        fee: { bignumber: { minimum: 0 } },
     },
 });
 
