@@ -46,7 +46,6 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     }
 
     public dynamicFee(context: Contracts.Shared.DynamicFeeContext): Utils.BigNumber {
-        // override dynamicFee calculation as this is a zero-fee transaction
         return Utils.BigNumber.ZERO;
     }
 
