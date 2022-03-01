@@ -299,7 +299,7 @@ export const htlcClaim = extend(transactionBaseSchema, {
     properties: {
         type: { transactionType: TransactionType.HtlcClaim },
         amount: { bignumber: { minimum: 0, maximum: 0 } },
-        fee: { bignumber: { minimum: 0, maximum: 0 } },
+        fee: { bignumber: { minimum: 0 } },
         asset: {
             type: "object",
             required: ["claim"],
@@ -322,7 +322,7 @@ export const htlcRefund = extend(transactionBaseSchema, {
     properties: {
         type: { transactionType: TransactionType.HtlcRefund },
         amount: { bignumber: { minimum: 0, maximum: 0 } },
-        fee: { bignumber: { minimum: 0, maximum: 0 } },
+        fee: { bignumber: { minimum: 0 } },
         asset: {
             type: "object",
             required: ["refund"],
