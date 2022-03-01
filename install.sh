@@ -41,8 +41,8 @@ error ()
 }
 
 # Detect pkg type
-DEB=$(which apt-get || :)
-RPM=$(which yum || :)
+DEB=$(which apt-get 2>/dev/null || :)
+RPM=$(which yum 2>/dev/null || :)
 
 # Detect SystemV / SystemD
 SYS=$([[ -L "/sbin/init" ]] && echo 'SystemD' || echo 'SystemV')
@@ -115,8 +115,9 @@ if [[ ! -z $DEB ]]; then
     sudo apt-get install nodejs -y
 
 elif [[ ! -z $RPM ]]; then
-    sudo yum install gcc-c++ make -y
-    curl -sL https://rpm.nodesource.com/setup_14.x | sudo -E bash - > /dev/null 2>&1
+    curl -sL https://rpm.nodesource.com/setup_16.x | sudo -E bash - > /dev/null 2>&1
+    sudo yum update -y
+    sudo yum install gcc-c++ make nodejs -y
 fi
 
 success "Installed node.js & npm!"
