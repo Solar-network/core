@@ -48,7 +48,7 @@ RPM=$(which yum || :)
 SYS=$([[ -L "/sbin/init" ]] && echo 'SystemD' || echo 'SystemV')
 
 # Detect Debian/Ubuntu derivative
-DEB_ID=$( (grep DISTRIB_CODENAME /etc/upstream-release/lsb-release || grep DISTRIB_CODENAME /etc/lsb-release) 2>/dev/null | cut -d'=' -f2 )
+DEB_ID=$( grep VERSION_CODENAME /etc/os-release /usr/lib/os-release 2>/dev/null | head -1 | cut -d'=' -f2 )
 
 if [[ ! -z $DEB ]]; then
     success "Running install for Debian derivative"
