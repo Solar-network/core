@@ -14,9 +14,6 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
     @Container.tagged("state", "blockchain")
     private readonly handlerRegistry!: Handlers.Registry;
 
-    @Container.inject(Container.Identifiers.StateStore)
-    private readonly stateStore!: Contracts.State.StateStore;
-
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
@@ -28,14 +25,12 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
 
         if (dynamicFeesConfiguration.enabled) {
             const addonBytes: number = dynamicFeesConfiguration.addonBytes[transaction.key];
-            const height: number = this.stateStore.getLastHeight();
             const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
 
             const minFeePool: Utils.BigNumber = handler.dynamicFee({
                 transaction,
                 addonBytes,
                 satoshiPerByte: dynamicFeesConfiguration.minFeePool,
-                height,
             });
             const minFeeStr = Utils.formatSatoshi(minFeePool);
 
@@ -71,14 +66,12 @@ export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMa
 
         if (dynamicFeesConfiguration.enabled) {
             const addonBytes: number = dynamicFeesConfiguration.addonBytes[transaction.key];
-            const height: number = this.stateStore.getLastHeight();
             const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
 
             const minFeeBroadcast: Utils.BigNumber = handler.dynamicFee({
                 transaction,
                 addonBytes,
                 satoshiPerByte: dynamicFeesConfiguration.minFeeBroadcast,
-                height,
             });
             const minFeeStr = Utils.formatSatoshi(minFeeBroadcast);
 
