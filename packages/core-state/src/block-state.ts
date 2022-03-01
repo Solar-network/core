@@ -179,13 +179,7 @@ export class BlockState implements Contracts.State.BlockState {
         return this.updateVoteBalances(sender, recipient, transaction, lockWallet, lockTransaction, true);
     }
 
-    private applyBlockToForger(forgerWallet: Contracts.State.Wallet, blockData: Interfaces.IBlockData) {
-        const delegateAttribute = forgerWallet.getAttribute<Contracts.State.WalletDelegateAttributes>("delegate");
-        delegateAttribute.producedBlocks++;
-        delegateAttribute.forgedFees = delegateAttribute.forgedFees.plus(blockData.totalFee);
-        delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.plus(blockData.reward);
-        delegateAttribute.lastBlock = blockData;
-
+    private burnTransactionFees(blockData: Interfaces.IBlockData): Utils.BigNumber {
         const milestone = Managers.configManager.getMilestone(blockData.height);
         let blockFee = blockData.totalFee;
         if (milestone.burnPercentage !== undefined) {
@@ -194,7 +188,19 @@ export class BlockState implements Contracts.State.BlockState {
                 blockFee = blockFee.times(100 - burnPercentage).dividedBy(100);
             }
         }
-        const balanceIncrease = blockData.reward.plus(blockFee);
+
+        return blockFee;
+    }
+
+    private applyBlockToForger(forgerWallet: Contracts.State.Wallet, blockData: Interfaces.IBlockData) {
+        const delegateAttribute = forgerWallet.getAttribute<Contracts.State.WalletDelegateAttributes>("delegate");
+        delegateAttribute.producedBlocks++;
+        delegateAttribute.forgedFees = delegateAttribute.forgedFees.plus(blockData.totalFee);
+        delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.plus(blockData.reward);
+        delegateAttribute.lastBlock = blockData;
+
+        const fees = this.burnTransactionFees(blockData);
+        const balanceIncrease = blockData.reward.plus(fees);
         this.increaseWalletDelegateVoteBalance(forgerWallet, balanceIncrease);
         forgerWallet.increaseBalance(balanceIncrease);
     }
@@ -206,15 +212,8 @@ export class BlockState implements Contracts.State.BlockState {
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.minus(blockData.reward);
         delegateAttribute.lastBlock = undefined;
 
-        const milestone = Managers.configManager.getMilestone(blockData.height);
-        let blockFee = blockData.totalFee;
-        if (milestone.burnPercentage !== undefined) {
-            const burnPercentage = parseInt(milestone.burnPercentage);
-            if (burnPercentage >= 0 && burnPercentage <= 100) {
-                blockFee = blockFee.times(100 - burnPercentage).dividedBy(100);
-            }
-        }
-        const balanceDecrease = blockData.reward.plus(blockFee);
+        const fees = this.burnTransactionFees(blockData);
+        const balanceDecrease = blockData.reward.plus(fees);
         this.decreaseWalletDelegateVoteBalance(forgerWallet, balanceDecrease);
         forgerWallet.decreaseBalance(balanceDecrease);
     }
