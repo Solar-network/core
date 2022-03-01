@@ -3,7 +3,7 @@ import { NetworkStateStatus } from "@arkecosystem/core-p2p";
 import { Handlers } from "@arkecosystem/core-transactions";
 import { Blocks, Crypto, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
 import delay from "delay";
-
+import { writeFileSync } from "fs";
 import { Client } from "./client";
 import { HostNoResponseError, RelayCommunicationError } from "./errors";
 import { Delegate } from "./interfaces";
@@ -538,6 +538,15 @@ export class ForgerService {
         });
 
         if (!this.initialized) {
+            AppUtils.sendForgerSignal("SIGTERM");
+
+            const pidFile: string = `${process.env.CORE_PATH_TEMP}/forger.pid`;
+            try {
+                writeFileSync(pidFile, process.pid.toString());
+            } catch {
+                this.app.terminate(`Could not save forger pid to ${pidFile}`);
+            }
+
             this.printLoadedDelegates();
 
             // @ts-ignore

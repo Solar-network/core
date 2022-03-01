@@ -5,12 +5,13 @@ import { formatTimestamp } from "./format-timestamp";
 import { getBlockTimeLookup } from "./get-blocktime-lookup";
 import { isBlacklisted } from "./is-blacklisted";
 import { getBlockNotChainedErrorMessage, isBlockChained } from "./is-block-chained";
+import { isForgerRunning, sendForgerSignal } from "./is-forger-running";
 import { isWhitelisted } from "./is-whitelisted";
 import { calculateRound, isNewRound } from "./round-calculator";
 export * as IpAddress from "./ip-address";
 export * as Search from "./search";
-import { calculate } from "./supply-calculator";
 import { stringify } from "./stringify";
+import { calculate } from "./supply-calculator";
 
 export * from "@arkecosystem/utils";
 export * from "./expiration-calculator";
@@ -25,4 +26,13 @@ export const roundCalculator = { calculateRound, isNewRound };
 export const supplyCalculator = { calculate };
 export const forgingInfoCalculator = { calculateForgingInfo, getBlockTimeLookup };
 
-export { formatTimestamp, isBlockChained, getBlockNotChainedErrorMessage, isBlacklisted, isWhitelisted, stringify };
+export {
+    formatTimestamp,
+    isBlockChained,
+    isForgerRunning,
+    getBlockNotChainedErrorMessage,
+    isBlacklisted,
+    isWhitelisted,
+    sendForgerSignal,
+    stringify,
+};

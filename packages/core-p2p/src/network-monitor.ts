@@ -621,10 +621,12 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         );
         const delegatesOnThisNode: string[] = [];
 
-        for (const secret of this.app.config("delegates.secrets")) {
-            const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
-            if (delegates.includes(keys.publicKey)) {
-                delegatesOnThisNode.push(keys.publicKey);
+        if (Utils.isForgerRunning()) {
+            for (const secret of this.app.config("delegates.secrets")) {
+                const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
+                if (delegates.includes(keys.publicKey)) {
+                    delegatesOnThisNode.push(keys.publicKey);
+                }
             }
         }
 
