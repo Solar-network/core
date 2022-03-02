@@ -146,9 +146,19 @@ export abstract class Command {
             this.input.bind();
             this.input.validate();
 
-            this.input.hasFlag("quiet")
-                ? this.output.setVerbosity(0)
-                : this.output.setVerbosity(this.input.getFlag("v") || 1);
+            if (this.input.hasFlag("quiet")) {
+                this.output.setVerbosity(0);
+            } else {
+                if (this.input.hasFlag("v")) {
+                    if (this.input.getFlag("v") === true) {
+                        this.output.setVerbosity(2);
+                    } else {
+                        this.output.setVerbosity(3);
+                    }
+                } else {
+                    this.output.setVerbosity(1);
+                }
+            }
         } catch (error) {
             this.components.fatal(error.message);
         }
