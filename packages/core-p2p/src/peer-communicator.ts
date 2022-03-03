@@ -308,12 +308,6 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             this.logger.error(`Cannot validate reply from "${endpoint}": none of the predefined schemas matches :bangbang:`);
             return false;
         }
-        if (endpoint === "p2p.peer.getStatus") {
-            const milestone = Managers.configManager.getMilestone();
-
-            schema.properties.publicKeys.maxItems = milestone.activeDelegates;
-            schema.properties.signatures.maxItems = milestone.activeDelegates;
-        }
 
         const { error } = Validation.validator.validate(schema, reply);
         if (error) {

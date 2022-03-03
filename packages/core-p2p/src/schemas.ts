@@ -1,4 +1,10 @@
+import { Managers } from "@arkecosystem/crypto";
+
 import { constants } from "./constants";
+
+const maxDelegates = Managers.configManager
+    .getMilestones()
+    .reduce((acc, curr) => Math.max(acc, curr.activeDelegates), 0);
 
 export const replySchemas = {
     "p2p.peer.getCommonBlocks": {
@@ -177,9 +183,8 @@ export const replySchemas = {
             },
             publicKeys: {
                 type: "array",
-                maxItems: 0, // set dynamically by milestone
-                items:
-                {
+                maxItems: maxDelegates,
+                items: {
                     allOf: [
                         {
                             $ref: "hex",
@@ -189,13 +194,12 @@ export const replySchemas = {
                             maxLength: 66,
                         },
                     ],
-                }
+                },
             },
             signatures: {
                 type: "array",
-                maxItems: 0, // set dynamically by milestone
-                items:
-                {
+                maxItems: maxDelegates,
+                items: {
                     allOf: [
                         {
                             $ref: "hex",
@@ -205,8 +209,8 @@ export const replySchemas = {
                             maxLength: 128,
                         },
                     ],
-                }
-            }
+                },
+            },
         },
     },
     "p2p.blocks.getBlocks": {
