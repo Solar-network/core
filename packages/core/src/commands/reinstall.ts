@@ -83,7 +83,7 @@ export class Command extends Commands.Command {
         spinner.start();
 
         try {
-            this.installer.install(this.pkg.name!, this.pkg.version!);
+            await this.installer.install(this.pkg.name!, this.pkg.version!);
 
             this.processManager.update();
 
