@@ -31,7 +31,12 @@ export interface NetworkMonitor {
     getNetworkState(log?: boolean): Promise<NetworkState>;
     refreshPeersAfterFork(): Promise<void>;
     checkNetworkHealth(): Promise<NetworkStatus>;
-    downloadBlocksFromHeight(fromBlockHeight: number, maxParallelDownloads?: number): Promise<Interfaces.IBlockData[]>;
+    downloadBlocksFromHeight(
+        fromBlockHeight: number,
+        maxParallelDownloads?: number,
+        silent?: boolean,
+        timeout?: number,
+    ): Promise<Interfaces.IBlockData[]>;
     broadcastBlock(block: Interfaces.IBlock): Promise<void>;
     isColdStart(): boolean;
     completeColdStart(): void;

@@ -180,7 +180,9 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             fromBlockHeight,
             blockLimit = constants.MAX_DOWNLOAD_BLOCKS,
             headersOnly,
-        }: { fromBlockHeight: number; blockLimit?: number; headersOnly?: boolean },
+            silent = false,
+            timeout,
+        }: { fromBlockHeight: number; blockLimit?: number; headersOnly?: boolean; silent?: boolean; timeout?: number },
     ): Promise<Interfaces.IBlockData[]> {
         const maxPayload = headersOnly ? blockLimit * constants.KILOBYTE : constants.DEFAULT_MAX_PAYLOAD;
 
@@ -193,19 +195,25 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 headersOnly,
                 serialized: true,
             },
-            this.configuration.getRequired<number>("getBlocksTimeout"),
+            timeout ? timeout : this.configuration.getRequired<number>("getBlocksTimeout"),
             maxPayload,
             false,
         );
 
         if (!peerBlocks || !peerBlocks.length) {
-            this.logger.debug(
-                `Peer ${peer.ip} did not return any blocks via height ${fromBlockHeight.toLocaleString()} :see_no_evil:`,
-            );
+            if (!silent) {
+                this.logger.debug(
+                    `Peer ${
+                        peer.ip
+                    } did not return any blocks via height ${fromBlockHeight.toLocaleString()} :see_no_evil:`,
+                );
+            }
             return [];
         }
 
         for (const block of peerBlocks) {
+            block.ip = peer.ip;
+
             if (headersOnly) {
                 // with headersOnly we still get block.transactions as empty array (protobuf deser) but in this case we actually
                 // don't want the transactions as a property at all (because it would make validation fail)
@@ -240,7 +248,9 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     private validateReply(peer: Contracts.P2P.Peer, reply: any, endpoint: string): boolean {
         const schema = replySchemas[endpoint];
         if (schema === undefined) {
-            this.logger.error(`Cannot validate reply from "${endpoint}": none of the predefined schemas matches :bangbang:`);
+            this.logger.error(
+                `Cannot validate reply from "${endpoint}": none of the predefined schemas matches :bangbang:`,
+            );
             return false;
         }
 
@@ -314,9 +324,6 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     private async throttle(peer: Contracts.P2P.Peer, event: string): Promise<void> {
         const msBeforeReCheck = 1000;
         while (await this.outgoingRateLimiter.hasExceededRateLimitNoConsume(peer.ip, event)) {
-            this.logger.debug(
-                `Throttling outgoing requests to ${peer.ip}/${event} to avoid triggering their rate limit :runner:`,
-            );
             await delay(msBeforeReCheck);
         }
         try {

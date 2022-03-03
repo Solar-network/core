@@ -42,6 +42,7 @@ export interface IBlockData {
     blockSignature?: string;
     serialized?: string;
     transactions?: ITransactionData[];
+    ip?: string;
 }
 
 export interface IBlockJson {

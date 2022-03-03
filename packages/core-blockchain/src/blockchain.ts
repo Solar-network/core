@@ -195,7 +195,11 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     /**
      * Push a block to the process queue.
      */
-    public async handleIncomingBlock(block: Interfaces.IBlockData, fromForger = false): Promise<void> {
+    public async handleIncomingBlock(
+        block: Interfaces.IBlockData,
+        fromForger = false,
+        fireBlockReceivedEvent = true,
+    ): Promise<void> {
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.height);
 
         const currentSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup);
@@ -205,13 +209,17 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             const minimumMs: number = 2000;
             const timeLeftInMs: number = Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup);
             if (currentSlot !== receivedSlot || timeLeftInMs < minimumMs) {
-                this.logger.info(`Discarded block ${block.height.toLocaleString()} because it was received too late :exclamation:`);
+                this.logger.info(
+                    `Discarded block ${block.height.toLocaleString()} because it was received too late :exclamation:`,
+                );
                 return;
             }
         }
 
         if (receivedSlot > currentSlot) {
-            this.logger.info(`Discarded block ${block.height.toLocaleString()} because it takes a future slot :exclamation:`);
+            this.logger.info(
+                `Discarded block ${block.height.toLocaleString()} because it takes a future slot :exclamation:`,
+            );
             return;
         }
 
@@ -221,7 +229,9 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             this.dispatch("NEWBLOCK");
             this.enqueueBlocks([block]);
 
-            this.events.dispatch(Enums.BlockEvent.Received, block);
+            if (fireBlockReceivedEvent) {
+                this.events.dispatch(Enums.BlockEvent.Received, block);
+            }
         } else {
             this.logger.info(`Block disregarded because blockchain is not ready :exclamation:`);
 
@@ -352,7 +362,11 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
             const resetHeight: number = lastBlock.data.height - nblocks;
             this.logger.info(
-                `Removing ${Utils.pluralize("block", nblocks, true)}. Reset to height ${resetHeight.toLocaleString()} :warning:`,
+                `Removing ${Utils.pluralize(
+                    "block",
+                    nblocks,
+                    true,
+                )}. Reset to height ${resetHeight.toLocaleString()} :warning:`,
             );
 
             this.stateStore.setLastDownloadedBlock(lastBlock.data);
