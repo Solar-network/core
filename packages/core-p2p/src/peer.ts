@@ -34,10 +34,22 @@ export class Peer implements Contracts.P2P.Peer {
     public lastPinged: Dayjs | undefined;
 
     /**
+     * @type {(string[])}
+     * @memberof Peer
+     */
+     public publicKeys: string[] = [];
+
+    /**
      * @type {(number)}
      * @memberof Peer
      */
     public sequentialErrorCounter: number = 0;
+
+    /**
+     * @type {(string[])}
+     * @memberof Peer
+     */
+     public signatures: string[] = [];
 
     /**
      * @type {(PeerVerificationResult | undefined)}
@@ -92,6 +104,14 @@ export class Peer implements Contracts.P2P.Peer {
      */
     public isForked(): boolean {
         return !!(this.isVerified() && this.verificationResult && this.verificationResult.forked);
+    }
+
+    /**
+     * @returns {boolean}
+     * @memberof Peer
+     */
+     public isActiveDelegate(): boolean {
+        return this.publicKeys.length > 0;
     }
 
     /**

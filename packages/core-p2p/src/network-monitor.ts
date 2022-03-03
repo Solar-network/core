@@ -1,5 +1,6 @@
 import { Container, Contracts, Enums, Providers, Services, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { DatabaseInteraction } from "@arkecosystem/core-state";
+import { Identities, Interfaces, Managers } from "@arkecosystem/crypto";
 import delay from "delay";
 import prettyMs from "pretty-ms";
 import { gt, lt } from "semver";
@@ -7,6 +8,7 @@ import { gt, lt } from "semver";
 import { NetworkState } from "./network-state";
 import { Peer } from "./peer";
 import { PeerCommunicator } from "./peer-communicator";
+import { PeerVerificationResult } from "./peer-verifier";
 import { checkDNS, checkNTP } from "./utils";
 
 const defaultDownloadChunkSize = 400;
@@ -15,7 +17,10 @@ const defaultDownloadChunkSize = 400;
 @Container.injectable()
 export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     @Container.inject(Container.Identifiers.Application)
-    private readonly app!: Contracts.Kernel.Application;
+    public readonly app!: Contracts.Kernel.Application;
+
+    @Container.inject(Container.Identifiers.DatabaseInteraction)
+    private readonly databaseInteraction!: DatabaseInteraction;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
     @Container.tagged("plugin", "@arkecosystem/core-p2p")
@@ -142,12 +147,16 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
         const peerErrors = {};
 
+        const lastBlock: Interfaces.IBlock = this.app
+            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
+            .getLastBlock();
+        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, lastBlock.data.height);
+
         // we use Promise.race to cut loose in case some communicator.ping() does not resolve within the delay
         // in that case we want to keep on with our program execution while ping promises can finish in the background
         await new Promise<void>((resolve) => {
             let isResolved = false;
 
-            // Simulates Promise.race, but doesn't cause "multipleResolvers" process error
             const resolvesFirst = () => {
                 if (!isResolved) {
                     isResolved = true;
@@ -158,7 +167,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             Promise.all(
                 peers.map(async (peer) => {
                     try {
-                        await this.communicator.ping(peer, pingDelay, forcePing);
+                        await this.communicator.ping(peer, pingDelay, blockTimeLookup, forcePing);
                     } catch (error) {
                         unresponsivePeers++;
 
@@ -265,8 +274,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     public async getNetworkState(log: boolean = true): Promise<Contracts.P2P.NetworkState> {
         await this.cleansePeers({ fast: true, forcePing: true, log });
-
-        return await NetworkState.analyze(this, this.repository);
+        return await NetworkState.analyze(this, this.repository, await this.getDelegatesOnThisNode());
     }
 
     public async refreshPeersAfterFork(): Promise<void> {
@@ -283,8 +291,41 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
             .getLastBlock();
 
-        const verificationResults: Contracts.P2P.PeerVerificationResult[] = this.repository
-            .getPeers()
+        const delegatesAndPeers: Contracts.P2P.Peer[] = [];
+        const peers: Contracts.P2P.Peer[] = this.repository.getPeers();
+
+        const milestone = Managers.configManager.getMilestone();
+        if (milestone.onlyActiveDelegatesInCalculations) {
+            const localPeer: Contracts.P2P.Peer = new Peer(
+                "127.0.0.1",
+                this.configuration.getRequired<number>("server.port"),
+            );
+            localPeer.publicKeys = await this.getDelegatesOnThisNode();
+            localPeer.verificationResult = new PeerVerificationResult(
+                lastBlock.data.height,
+                lastBlock.data.height,
+                lastBlock.data.height,
+            );
+
+            peers.forEach((peer) => {
+                peer.publicKeys = peer.publicKeys.filter((publicKey) => !localPeer.publicKeys.includes(publicKey));
+            });
+            peers.push(localPeer);
+
+            for (const peer of peers) {
+                if (peer.isActiveDelegate()) {
+                    for (let i = 0; i < peer.publicKeys.length; i++) {
+                        delegatesAndPeers.push(peer);
+                    }
+                } else if (peer.state && peer.state.height! >= lastBlock.data.height) {
+                    delegatesAndPeers.push(peer);
+                }
+            }
+        } else {
+            delegatesAndPeers.push(...peers);
+        }
+
+        const verificationResults: Contracts.P2P.PeerVerificationResult[] = delegatesAndPeers
             .filter((peer) => peer.verificationResult)
             .map((peer) => peer.verificationResult!);
 
@@ -306,8 +347,10 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         for (const forkHeight of forkHeights) {
             const forkPeerCount = forkVerificationResults.filter((vr) => vr.highestCommonHeight === forkHeight).length;
-            const ourPeerCount = verificationResults.filter((vr) => vr.highestCommonHeight > forkHeight).length + 1;
-
+            let ourPeerCount = verificationResults.filter((vr) => vr.highestCommonHeight > forkHeight).length;
+            if (!milestone.onlyActiveDelegatesInCalculations) {
+                ourPeerCount++;
+            }
             if (forkPeerCount > ourPeerCount) {
                 const blocksToRollback = lastBlock.data.height - forkHeight;
 
@@ -563,6 +606,31 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         } catch (error) {
             this.logger.error(`${error.message} :bangbang:`);
         }
+    }
+
+    private async getDelegatesOnThisNode(): Promise<string[]> {
+        const lastBlock: Interfaces.IBlock = this.app
+            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
+            .getLastBlock();
+
+        const height = lastBlock.data.height + 1;
+        const roundInfo = Utils.roundCalculator.calculateRound(height);
+
+        const delegates = (await this.databaseInteraction.getActiveDelegates(roundInfo)).map(
+            (wallet: Contracts.State.Wallet) => wallet.getPublicKey(),
+        );
+        const delegatesOnThisNode: string[] = [];
+
+        if (Utils.isForgerRunning()) {
+            for (const secret of this.app.config("delegates.secrets")) {
+                const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
+                if (delegates.includes(keys.publicKey)) {
+                    delegatesOnThisNode.push(keys.publicKey);
+                }
+            }
+        }
+
+        return delegatesOnThisNode;
     }
 
     private async scheduleUpdateNetworkStatus(nextUpdateInSeconds): Promise<void> {
