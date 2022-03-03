@@ -240,6 +240,7 @@ export class ForgerService {
                 } else {
                     this.logger.warning(error.message);
                 }
+            } else {
                 try {
                     this.client.emitEvent(Enums.ForgerEvent.Failed, { error: error.message });
                 } catch {
