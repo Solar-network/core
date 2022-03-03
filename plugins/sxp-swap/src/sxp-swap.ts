@@ -3,7 +3,7 @@ import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@a
 import { TransactionValidator } from "@arkecosystem/core-state/dist/transaction-validator";
 import { Handlers } from "@arkecosystem/core-transactions";
 import { ColdWalletError } from "@arkecosystem/core-transactions/dist/errors";
-import { Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
+import { Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
 import * as EthereumTx from '@ethereumjs/tx';
 import assert from "assert";
 import delay from "delay";
@@ -172,6 +172,9 @@ export class SXPSwap {
             if (!(this as any).walletRepository.hasByPublicKey(sender.getPublicKey()!) && senderWallet.getBalance().isZero()) {
                 throw new ColdWalletError();
             }
+
+            const milestone = Managers.configManager.getMilestone();
+            (this as any).enforceMinimumFee(transaction, milestone.dynamicFees);
 
             return (this as any).performGenericWalletChecks(transaction, sender);
         };
