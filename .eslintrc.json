@@ -43,6 +43,7 @@
         "@typescript-eslint/unbound-method": "off",
         "jest/no-standalone-expect": "off",
         "no-async-promise-executor": "off",
+        "no-control-regex": "off",
         "no-empty": "off",
         "no-inferrable-types": "off",
         "no-prototype-builtins": "off",

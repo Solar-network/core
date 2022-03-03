@@ -118,7 +118,7 @@ export class Updater implements Contracts.Updater {
         spinner.start();
 
         try {
-            this.installer.install(this.packageName, this.packageChannel);
+            await this.installer.install(this.packageName, this.packageChannel);
 
             if (updateProcessManager) {
                 this.processManager.update();
