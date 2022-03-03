@@ -12,6 +12,7 @@ import {
     LegacyMultiSignatureRegistrationError,
     MissingMultiSignatureOnSenderError,
     SenderWalletMismatchError,
+    TransactionFeeTooLowError,
     UnexpectedNonceError,
     UnexpectedSecondSignatureError,
     UnsupportedMultiSignatureTransactionError,
@@ -64,6 +65,31 @@ export abstract class TransactionHandler {
         return Utils.BigNumber.make(addonBytes + transactionSizeInBytes).times(satoshiPerByte);
     }
 
+    public getMinimumFee(transaction: Interfaces.ITransaction, dynamicFeesConfiguration): Utils.BigNumber {
+        if (dynamicFeesConfiguration && dynamicFeesConfiguration.enabled) {
+            const addonBytes: number = dynamicFeesConfiguration.addonBytes[transaction.key];
+
+            const minFee: Utils.BigNumber = this.dynamicFee({
+                transaction,
+                addonBytes,
+                satoshiPerByte: dynamicFeesConfiguration.minFee,
+            });
+
+            return minFee;
+        }
+        return Utils.BigNumber.ZERO;
+    }
+
+    public enforceMinimumFee(transaction: Interfaces.ITransaction, dynamicFeesConfiguration): void {
+        if (dynamicFeesConfiguration && dynamicFeesConfiguration.enabled) {
+            const minFee = this.getMinimumFee(transaction, dynamicFeesConfiguration);
+
+            if (transaction.data.fee.isLessThan(minFee)) {
+                throw new TransactionFeeTooLowError(transaction.data.fee, minFee);
+            }
+        }
+    }
+
     public async throwIfCannotBeApplied(
         transaction: Interfaces.ITransaction,
         sender: Contracts.State.Wallet,
@@ -75,6 +101,9 @@ export abstract class TransactionHandler {
         if (!this.walletRepository.hasByPublicKey(sender.getPublicKey()!) && senderWallet.getBalance().isZero()) {
             throw new ColdWalletError();
         }
+
+        const milestone = Managers.configManager.getMilestone();
+        this.enforceMinimumFee(transaction, milestone.dynamicFees);
 
         return this.performGenericWalletChecks(transaction, sender);
     }

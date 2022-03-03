@@ -19,6 +19,12 @@ export class TransactionError extends Error {
     }
 }
 
+export class TransactionFeeTooLowError extends TransactionError {
+    public constructor(fee: Utils.BigNumber, expectedFee: Utils.BigNumber) {
+        super(`Transaction fee is too low (fee ${Utils.formatSatoshi(fee)} < ${Utils.formatSatoshi(expectedFee)})`);
+    }
+}
+
 export class InvalidTransactionTypeError extends TransactionError {
     public constructor(type: Transactions.InternalTransactionType) {
         super(`Transaction type ${type.toString()} does not exist`);
