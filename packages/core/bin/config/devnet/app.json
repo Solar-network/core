@@ -22,7 +22,7 @@
             {
                 "package": "@solar-network/sxp-swap",
                 "options": {
-                    "swapWalletPublicKey": "026036ba85cf044b68bfe3de6c36a862bbbe567cbda158910cd220e66e50f0782b"
+                    "swapWalletPublicKey": "02f1e870a5404676a6f9058f871fc01f538252acbe269e3a3a33822d49905a0659"
                 }
             },
             {
@@ -68,7 +68,7 @@
             {
                 "package": "@solar-network/sxp-swap",
                 "options": {
-                    "swapWalletPublicKey": "026036ba85cf044b68bfe3de6c36a862bbbe567cbda158910cd220e66e50f0782b"
+                    "swapWalletPublicKey": "02f1e870a5404676a6f9058f871fc01f538252acbe269e3a3a33822d49905a0659"
                 }
             },
             {
