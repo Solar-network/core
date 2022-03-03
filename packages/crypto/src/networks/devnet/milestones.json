@@ -100,5 +100,24 @@
                 "53": 1325000000
             }
         }
+    },
+    {
+        "height": 89677,
+        "burnPercentage": 90,
+        "dynamicFees": {
+            "enabled": true,
+            "minFee": 11299,
+            "addonBytes": {
+                "transfer": 99,
+                "secondSignature": 99,
+                "delegateRegistration": 663703,
+                "vote": 98,
+                "multiSignature": 16,
+                "ipfs": 98,
+                "multiPayment": 85,
+                "htlcLock": 82
+            }
+        },
+        "onlyActiveDelegatesInCalculations": true
     }
 ]
