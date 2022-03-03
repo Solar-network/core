@@ -141,6 +141,7 @@ export class CommandLineInterface {
                     suffix: "core",
                 }).config,
             );
+            this.argv.push(`--network=${tempFlags.network}`);
         } catch {}
 
         return tempFlags;

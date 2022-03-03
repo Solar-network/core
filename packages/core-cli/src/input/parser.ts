@@ -12,7 +12,7 @@ export class InputParser {
      * @memberof InputParser
      */
     public static parseArgv(args: string[]) {
-        const parsed: yargs.Arguments = yargs(args, { count: ["v"] });
+        const parsed: yargs.Arguments = yargs(args, { count: [] });
 
         const argv: string[] = parsed._;
 
