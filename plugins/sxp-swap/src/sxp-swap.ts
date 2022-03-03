@@ -28,7 +28,7 @@ import {
     VendorFieldIncorrectError,
     WrongChainError,
     WrongContractError,
-    WrongTokenError
+    WrongTokenError,
 } from "./errors";
 import { DuplicateSwapTransactionsHandler } from "./handler";
 import { Peers } from "./interfaces";
@@ -58,44 +58,44 @@ export class SXPSwap {
 
         const peersAddresses = {
             bsc: this.configuration.get("peers.bsc") as string[],
-            eth: this.configuration.get("peers.eth") as string[]
+            eth: this.configuration.get("peers.eth") as string[],
         };
 
         const swapWalletPublicKey = this.configuration.get("swapWalletPublicKey") as string;
 
         const chainId = {
             bsc: this.configuration.get("chainId.bsc") as string,
-            eth: this.configuration.get("chainId.eth") as string
+            eth: this.configuration.get("chainId.eth") as string,
         };
 
         const contractAbis = {
             bsc: JSON.parse(this.configuration.get("contractAbis.bsc") as string),
-            eth: JSON.parse(this.configuration.get("contractAbis.eth") as string)
+            eth: JSON.parse(this.configuration.get("contractAbis.eth") as string),
         };
 
         const contractDecimals = {
             bsc: this.configuration.get("contractDecimals.bsc") as Number,
-            eth: this.configuration.get("contractDecimals.eth") as Number
+            eth: this.configuration.get("contractDecimals.eth") as Number,
         };
 
         const minimumConfirmations = {
             bsc: this.configuration.get("minimumConfirmations.bsc") as Number,
-            eth: this.configuration.get("minimumConfirmations.eth") as Number
+            eth: this.configuration.get("minimumConfirmations.eth") as Number,
         };
 
         const sxpTokenContracts = {
             bsc: this.configuration.get("sxpTokenContracts.bsc") as string,
-            eth: this.configuration.get("sxpTokenContracts.eth") as string
+            eth: this.configuration.get("sxpTokenContracts.eth") as string,
         };
 
         const swapContractAddresses = {
             bsc: this.configuration.get("swapContractAddresses.bsc") as string,
-            eth: this.configuration.get("swapContractAddresses.eth") as string
+            eth: this.configuration.get("swapContractAddresses.eth") as string,
         };
 
         const peers: Peers = {
             bsc: [],
-            eth: []
+            eth: [],
         };
 
         peers.bsc = peersAddresses.bsc.map((o) => new Web3(o));
@@ -103,40 +103,57 @@ export class SXPSwap {
 
         (BlockProcessor.prototype as any)._process = BlockProcessor.prototype.process;
         BlockProcessor.prototype.process = function (block: Interfaces.IBlock): Promise<BlockProcessorResult> {
-            const swapTransactions = block.transactions.filter((transaction) => transaction.data.senderPublicKey === swapWalletPublicKey);
+            const swapTransactions = block.transactions.filter(
+                (transaction) => transaction.data.senderPublicKey === swapWalletPublicKey,
+            );
             const duplicateSwapVendorFields = new Set(
-                swapTransactions.map((transaction) => transaction.data.vendorField).filter((vendorField, index, array) => array.indexOf(vendorField) !== index)
+                swapTransactions
+                    .map((transaction) => transaction.data.vendorField)
+                    .filter((vendorField, index, array) => array.indexOf(vendorField) !== index),
             );
 
             if (duplicateSwapVendorFields.size > 0) {
                 for (const duplicateSwapVendorField of duplicateSwapVendorFields) {
-                    const vendorFieldData: string[] = typeof duplicateSwapVendorField === "string" ? duplicateSwapVendorField.split(":") : [];
+                    const vendorFieldData: string[] =
+                        typeof duplicateSwapVendorField === "string" ? duplicateSwapVendorField.split(":") : [];
                     if (vendorFieldData.length === 2) {
                         const [network, transactionId] = vendorFieldData;
                         swapTransactions
                             .filter((transaction) => transaction.data.vendorField === duplicateSwapVendorField)
                             .forEach((transaction) => {
-                                self.log.warning(`Attempted duplication of swap transaction ${transactionId} (${network}) => ${transaction.data.id} (native token) rejected :gun:`);
+                                self.log.warning(
+                                    `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transaction.data.id} (native token) rejected :gun:`,
+                                );
                             });
                     }
                 }
 
-                self.log.warning(`Block ${block.data.height.toLocaleString()} disregarded, because it contains duplicated swap transactions :scroll:`);
+                self.log.warning(
+                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains duplicated swap transactions :scroll:`,
+                );
                 return (this as any).app.resolve(DuplicateSwapTransactionsHandler).execute();
             }
 
             return (this as any)._process(block);
         };
 
-        Handlers.TransactionHandler.prototype.apply = async function (transaction: Interfaces.ITransaction, status?: string): Promise<void> {
+        Handlers.TransactionHandler.prototype.apply = async function (
+            transaction: Interfaces.ITransaction,
+            status?: string,
+        ): Promise<void> {
             await (this as any).applyToSender(transaction, status);
             await this.applyToRecipient(transaction);
         };
 
-        Handlers.TransactionHandler.prototype.applyToSender = async function (transaction: Interfaces.ITransaction, status?: string): Promise<void> {
+        Handlers.TransactionHandler.prototype.applyToSender = async function (
+            transaction: Interfaces.ITransaction,
+            status?: string,
+        ): Promise<void> {
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-            const sender: Contracts.State.Wallet = (this as any).walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+            const sender: Contracts.State.Wallet = (this as any).walletRepository.findByPublicKey(
+                transaction.data.senderPublicKey,
+            );
             const data: Interfaces.ITransactionData = transaction.data;
 
             if (Utils.isException(data)) {
@@ -159,35 +176,48 @@ export class SXPSwap {
             sender.setBalance(newBalance);
         };
 
-        Handlers.TransactionHandler.prototype.throwIfCannotBeApplied = async function (transaction: Interfaces.ITransaction, sender: Contracts.State.Wallet): Promise<void> {
-            const senderWallet: Contracts.State.Wallet = (this as any).walletRepository.findByAddress(sender.getAddress());
+        Handlers.TransactionHandler.prototype.throwIfCannotBeApplied = async function (
+            transaction: Interfaces.ITransaction,
+            sender: Contracts.State.Wallet,
+        ): Promise<void> {
+            const senderWallet: Contracts.State.Wallet = (this as any).walletRepository.findByAddress(
+                sender.getAddress(),
+            );
 
             AppUtils.assert.defined<string>(sender.getPublicKey());
 
             const transactionData: Interfaces.ITransactionData = transaction.data;
-            if (transactionData.senderPublicKey === swapWalletPublicKey && (transactionData.typeGroup !== 1 || transactionData.type !== 0)) {
+            if (
+                transactionData.senderPublicKey === swapWalletPublicKey &&
+                (transactionData.typeGroup !== 1 || transactionData.type !== 0)
+            ) {
                 throw new TransactionTypeNotPermittedError();
             }
 
-            if (!(this as any).walletRepository.hasByPublicKey(sender.getPublicKey()!) && senderWallet.getBalance().isZero()) {
+            if (
+                !(this as any).walletRepository.hasByPublicKey(sender.getPublicKey()!) &&
+                senderWallet.getBalance().isZero()
+            ) {
                 throw new ColdWalletError();
             }
 
             return (this as any).performGenericWalletChecks(transaction, sender);
         };
 
-        (Handlers.Two.TransferTransactionHandler as any).prototype._throwIfCannotBeApplied = Handlers.Two.TransferTransactionHandler.prototype.throwIfCannotBeApplied;
+        (Handlers.Two.TransferTransactionHandler as any).prototype._throwIfCannotBeApplied =
+            Handlers.Two.TransferTransactionHandler.prototype.throwIfCannotBeApplied;
         Handlers.Two.TransferTransactionHandler.prototype.throwIfCannotBeApplied = async function (
             transaction: Interfaces.ITransaction,
             sender: Contracts.State.Wallet,
-            status?: string
+            status?: string,
         ): Promise<void> {
             await (this as any)._throwIfCannotBeApplied(transaction, sender);
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
             const transactionData: Interfaces.ITransactionData = transaction.data;
             if (transactionData.senderPublicKey === swapWalletPublicKey) {
-                const vendorFieldData: string[] = typeof transactionData.vendorField === "string" ? transactionData.vendorField.split(":") : [];
+                const vendorFieldData: string[] =
+                    typeof transactionData.vendorField === "string" ? transactionData.vendorField.split(":") : [];
                 if (vendorFieldData.length !== 2) {
                     throw new VendorFieldIncorrectError();
                 }
@@ -208,8 +238,8 @@ export class SXPSwap {
                             peer.eth.currentProvider ? (peer.eth.currentProvider as HttpProvider).host : undefined,
                             peer.eth.getBlockNumber(),
                             peer.eth.getTransaction(transactionId),
-                            peer.eth.getTransactionReceipt(transactionId)
-                        ])
+                            peer.eth.getTransactionReceipt(transactionId),
+                        ]),
                     );
 
                     const results: any = await Promise.any([
@@ -217,7 +247,7 @@ export class SXPSwap {
                         new Promise<undefined[]>(async (resolve) => {
                             await delay(2000);
                             resolve([]);
-                        })
+                        }),
                     ]).catch(() => {
                         return [];
                     });
@@ -228,7 +258,9 @@ export class SXPSwap {
                         throw new ApiCommunicationError(network);
                     }
 
-                    self.log.info(`Queried ${network} server ${api} for status of swap transaction ${transactionId} :mag:`);
+                    self.log.info(
+                        `Queried ${network} server ${api} for status of swap transaction ${transactionId} :mag:`,
+                    );
 
                     if (!txInfo || !txReceipt) {
                         throw new TransactionDoesNotExistError();
@@ -246,7 +278,11 @@ export class SXPSwap {
                         throw new WrongChainError(txInfo.chainId, chainId[network]);
                     }
 
-                    if (!txReceipt.blockNumber || !txInfo.blockNumber || (txReceipt.status !== 1 && txReceipt.status !== true)) {
+                    if (
+                        !txReceipt.blockNumber ||
+                        !txInfo.blockNumber ||
+                        (txReceipt.status !== 1 && txReceipt.status !== true)
+                    ) {
                         throw new TransactionNotYetConfirmedError();
                     }
 
@@ -292,7 +328,7 @@ export class SXPSwap {
 
                     const alreadyProcessedThisSwap = await self.transactionHistoryService.findOneByCriteria({
                         senderPublicKey: swapWalletPublicKey,
-                        vendorField: transactionData.vendorField
+                        vendorField: transactionData.vendorField,
                     });
 
                     if (alreadyProcessedThisSwap !== undefined) {
@@ -313,7 +349,7 @@ export class SXPSwap {
                         chainId: txInfo.chainId,
                         accessList: txInfo.accessList,
                         maxPriorityFeePerGas: +txInfo.maxPriorityFeePerGas,
-                        maxFeePerGas: +txInfo.maxFeePerGas
+                        maxFeePerGas: +txInfo.maxFeePerGas,
                     });
 
                     if (transactionObject.getSenderAddress().toString() !== txInfo.from.toLowerCase()) {
@@ -323,35 +359,43 @@ export class SXPSwap {
                     switch (status) {
                         case "pool": {
                             self.log.info(
-                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) passed all checks to enter the transaction pool :crossed_fingers:`
+                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) passed all checks to enter the transaction pool :crossed_fingers:`,
                             );
                             break;
                         }
                         case "validate": {
-                            self.log.info(`Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) ready to be forged :v:`);
+                            self.log.info(
+                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) ready to be forged :v:`,
+                            );
                             break;
                         }
                         default: {
                             self.log.info(
-                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) approved and added to the blockchain :white_check_mark:`
+                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) approved and added to the blockchain :white_check_mark:`,
                             );
                         }
                     }
                 } catch (error) {
-                    self.log.warning(`Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) rejected :x:`);
+                    self.log.warning(
+                        `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) rejected :x:`,
+                    );
                     throw error;
                 }
             }
         };
 
-        (Handlers.Two.TransferTransactionHandler as any).prototype._throwIfCannotEnterPool = Handlers.Two.TransferTransactionHandler.prototype.throwIfCannotEnterPool;
-        Handlers.Two.TransferTransactionHandler.prototype.throwIfCannotEnterPool = async function (transaction: Interfaces.ITransaction): Promise<void> {
+        (Handlers.Two.TransferTransactionHandler as any).prototype._throwIfCannotEnterPool =
+            Handlers.Two.TransferTransactionHandler.prototype.throwIfCannotEnterPool;
+        Handlers.Two.TransferTransactionHandler.prototype.throwIfCannotEnterPool = async function (
+            transaction: Interfaces.ITransaction,
+        ): Promise<void> {
             await (this as any)._throwIfCannotEnterPool(transaction);
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
             const transactionData: Interfaces.ITransactionData = transaction.data;
             if (transactionData.senderPublicKey === swapWalletPublicKey) {
-                const vendorFieldData: string[] = typeof transactionData.vendorField === "string" ? transactionData.vendorField.split(":") : [];
+                const vendorFieldData: string[] =
+                    typeof transactionData.vendorField === "string" ? transactionData.vendorField.split(":") : [];
                 if (vendorFieldData.length !== 2) {
                     throw new VendorFieldIncorrectError();
                 }
@@ -364,20 +408,26 @@ export class SXPSwap {
                     .has();
 
                 if (alreadyInPool) {
-                    self.log.warning(`Attempted duplication of swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) rejected :gun:`);
+                    self.log.warning(
+                        `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) rejected :gun:`,
+                    );
                     throw new TransactionAlreadySubmittedError();
                 }
             }
         };
 
         TransactionValidator.prototype.validate = async function (transaction: Interfaces.ITransaction): Promise<void> {
-            const deserialized: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(transaction.serialized);
+            const deserialized: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(
+                transaction.serialized,
+            );
             assert.strictEqual(transaction.id, deserialized.id);
             const handler = await (this as any).handlerRegistry.getActivatedHandlerForData(transaction.data);
             await handler.apply(transaction, "validate");
         };
 
         this.app.get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService).unbind("applyTransaction");
-        this.app.get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService).bind("applyTransaction", new ApplyTransactionAction());
+        this.app
+            .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
+            .bind("applyTransaction", new ApplyTransactionAction());
     }
 }

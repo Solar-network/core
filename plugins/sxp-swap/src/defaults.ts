@@ -1,7 +1,7 @@
 export const defaults = {
     chainId: {
         bsc: "0x61",
-        eth: "0x2a"
+        eth: "0x2a",
     },
     contractAbis: {
         bsc: `
@@ -23,6 +23,31 @@ export const defaults = {
                         }
                     ],
                     "name": "OwnershipTransferred",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": false,
+                            "internalType": "address",
+                            "name": "_from",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "string",
+                            "name": "_to",
+                            "type": "string"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "uint256",
+                            "name": "_amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Swap",
                     "type": "event"
                 },
                 {
@@ -161,6 +186,31 @@ export const defaults = {
                     "type": "event"
                 },
                 {
+                    "anonymous": false,
+                    "inputs": [
+                        {
+                            "indexed": false,
+                            "internalType": "address",
+                            "name": "_from",
+                            "type": "address"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "string",
+                            "name": "_to",
+                            "type": "string"
+                        },
+                        {
+                            "indexed": false,
+                            "internalType": "uint256",
+                            "name": "_amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "Swap",
+                    "type": "event"
+                },
+                {
                     "inputs": [
                         {
                             "internalType": "uint256",
@@ -273,16 +323,16 @@ export const defaults = {
                     "type": "function"
                 }
             ]
-        `
+        `,
     },
     contractDecimals: {
         bsc: 18,
-        eth: 18
+        eth: 18,
     },
     enabled: true,
     minimumConfirmations: {
         bsc: 35,
-        eth: 35
+        eth: 35,
     },
     peers: {
         bsc: ["https://bsc1.testnet.sh", "https://bsc2.testnet.sh", "https://bsc3.testnet.sh"],
@@ -290,11 +340,11 @@ export const defaults = {
     },
     sxpTokenContracts: {
         bsc: "0x8B06059234080FcB3e5f32598bf256d6d911FC26",
-        eth: "0x3DD5CfbC967593E8D7C7f391F131E44c0A8a6892"
+        eth: "0x3DD5CfbC967593E8D7C7f391F131E44c0A8a6892",
     },
     swapContractAddresses: {
-        bsc: "0xB2C07186bF2a85f2a08C5354e02609eB3D7360eD",
-        eth: "0x9Ac9B9EA1cBe4210Fb914e23671f5E0916705E89"
+        bsc: "0x80a531752F7686435a1Eb15c8e41D9465daf2178",
+        eth: "0x4436fc5feF736FD6f7E0F537521a5246F0e29a66",
     },
-    swapWalletPublicKey: ""
+    swapWalletPublicKey: "",
 };
