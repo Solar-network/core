@@ -34,7 +34,12 @@ export abstract class AbstractSource implements Source {
     }
 
     protected async installDependencies(packageName: string): Promise<void> {
-        execa.sync(`yarn`, ["install", "--production"], { cwd: this.getDestPath(packageName) });
+        const subprocess = execa(`yarn`, ["install", "--production"], { cwd: this.getDestPath(packageName) });
+        if (process.argv.includes("-v") || process.argv.includes("-vv")) {
+            subprocess.stdout!.pipe(process.stdout);
+            subprocess.stderr!.pipe(process.stderr);
+        }
+        await subprocess;
     }
 
     protected getOriginPath(): string {
