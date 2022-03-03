@@ -35,13 +35,29 @@ export class Git extends AbstractSource {
     public async update(value: string): Promise<void> {
         const dest = this.getDestPath(value);
 
-        execa.sync(`git`, ["reset", "--hard"], { cwd: dest });
-        execa.sync(`git`, ["pull"], { cwd: dest });
+        let subprocess = execa(`git`, ["reset", "--hard"], { cwd: dest });
+        if (process.argv.includes("-v") || process.argv.includes("-vv")) {
+            subprocess.stdout!.pipe(process.stdout);
+            subprocess.stderr!.pipe(process.stderr);
+        }
+        await subprocess;
+
+        subprocess = execa(`git`, ["pull"], { cwd: dest });
+        if (process.argv.includes("-v") || process.argv.includes("-vv")) {
+            subprocess.stdout!.pipe(process.stdout);
+            subprocess.stderr!.pipe(process.stderr);
+        }
+        await subprocess;
 
         await this.installDependencies(value);
     }
 
     protected async preparePackage(value: string): Promise<void> {
-        execa.sync(`git`, ["clone", value, this.getOriginPath()]);
+        const subprocess = execa(`git`, ["clone", value, this.getOriginPath()]);
+        if (process.argv.includes("-v") || process.argv.includes("-vv")) {
+            subprocess.stdout!.pipe(process.stdout);
+            subprocess.stderr!.pipe(process.stderr);
+        }
+        await subprocess;
     }
 }

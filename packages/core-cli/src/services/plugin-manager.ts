@@ -42,7 +42,10 @@ export class PluginManager implements Contracts.PluginManager {
             });
 
             if (await source.exists(pkg, version)) {
-                return source.install(pkg, version);
+                console.log(`Installing ${pkg} from ${source.constructor.name.toLowerCase()}...`)
+                await source.install(pkg, version);
+                console.log("Installation complete!");
+                return;
             }
         }
 
@@ -61,10 +64,13 @@ export class PluginManager implements Contracts.PluginManager {
         }
 
         if (existsSync(`${directory}/.git`)) {
-            return new Git(paths).update(pkg);
+            console.log(`Updating ${pkg} from git...`)
+            await new Git(paths).update(pkg);
+        } else {
+            console.log(`Updating ${pkg} from npm...`)
+            await new NPM(paths).update(pkg);
         }
-
-        return new NPM(paths).update(pkg);
+        console.log("Update complete!");
     }
 
     public async remove(token: string, network: string, pkg): Promise<void> {
@@ -74,7 +80,9 @@ export class PluginManager implements Contracts.PluginManager {
             throw new Error(`The package [${pkg}] does not exist`);
         }
 
+        console.log(`Removing ${pkg}...`)
         removeSync(directory);
+        console.log("Removal complete!");
     }
 
     private getPluginsPath(token: string, network: string): string {
