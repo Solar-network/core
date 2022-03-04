@@ -29,71 +29,74 @@ export class CheckLater implements Action {
 
     public async handle(): Promise<void> {
         if (!this.blockchain.isStopped() && !this.stateStore.isWakeUpTimeoutSet()) {
-            const downloadInterval = setInterval(async () => {
-                try {
-                    let lastBlock = this.app
-                        .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
-                        .getLastBlock();
-                    let blocks = await this.peerNetworkMonitor.downloadBlocksFromHeight(
-                        lastBlock.data.height,
-                        undefined,
-                        true,
-                        2000,
-                    );
-                    lastBlock = this.app
-                        .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
-                        .getLastBlock();
-                    blocks = blocks.filter((block) => block.height > lastBlock.data.height);
-                    if (blocks.length) {
-                        if (blocks.length === 1) {
-                            const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-                                blocks[0].generatorPublicKey,
-                            );
+            if (!this.stateStore.hasPolledForBlocks()) {
+                this.stateStore.polledForBlocks();
+                const downloadInterval = setInterval(async () => {
+                    try {
+                        let lastBlock = this.app
+                            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
+                            .getLastBlock();
+                        let blocks = await this.peerNetworkMonitor.downloadBlocksFromHeight(
+                            lastBlock.data.height,
+                            undefined,
+                            true,
+                            2000,
+                        );
+                        lastBlock = this.app
+                            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
+                            .getLastBlock();
+                        blocks = blocks.filter((block) => block.height > lastBlock.data.height);
+                        if (blocks.length) {
+                            if (blocks.length === 1) {
+                                const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                                    blocks[0].generatorPublicKey,
+                                );
 
-                            let generator: string;
-                            try {
-                                generator = `delegate ${generatorWallet.getAttribute(
-                                    "delegate.username",
-                                )} (#${generatorWallet.getAttribute("delegate.rank")})`;
-                            } catch {
-                                generator = "an unknown delegate";
+                                let generator: string;
+                                try {
+                                    generator = `delegate ${generatorWallet.getAttribute(
+                                        "delegate.username",
+                                    )} (#${generatorWallet.getAttribute("delegate.rank")})`;
+                                } catch {
+                                    generator = "an unknown delegate";
+                                }
+
+                                this.logger.info(
+                                    `Downloaded new block forged by ${generator} at height ${blocks[0].height.toLocaleString()} with ${Utils.formatSatoshi(
+                                        blocks[0].reward,
+                                    )} reward :package:`,
+                                );
+
+                                this.logger.debug(`The id of the new block is ${blocks[0].id}`);
+
+                                this.logger.debug(
+                                    `It contains ${AppUtils.pluralize(
+                                        "transaction",
+                                        blocks[0].numberOfTransactions,
+                                        true,
+                                    )} and was downloaded from ${blocks[0].ip}`,
+                                );
+
+                                this.blockchain.handleIncomingBlock(blocks[0], false, false);
+                            } else {
+                                this.blockchain.enqueueBlocks(blocks);
+                                this.blockchain.dispatch("DOWNLOADED");
                             }
-
-                            this.logger.info(
-                                `Downloaded new block forged by ${generator} at height ${blocks[0].height.toLocaleString()} with ${Utils.formatSatoshi(
-                                    blocks[0].reward,
-                                )} reward :package:`,
-                            );
-
-                            this.logger.debug(`The id of the new block is ${blocks[0].id}`);
-
-                            this.logger.debug(
-                                `It contains ${AppUtils.pluralize(
-                                    "transaction",
-                                    blocks[0].numberOfTransactions,
-                                    true,
-                                )} and was downloaded from ${blocks[0].ip}`,
-                            );
-
-                            this.blockchain.handleIncomingBlock(blocks[0], false, false);
-                        } else {
-                            this.blockchain.enqueueBlocks(blocks);
-                            this.blockchain.dispatch("DOWNLOADED");
                         }
+                    } catch {
+                        //
                     }
-                } catch {
-                    //
-                }
-            }, 500);
+                }, 500);
 
-            const stopDownloading = {
-                handle: () => {
-                    this.events.forget(Enums.BlockEvent.Received, stopDownloading);
-                    clearInterval(downloadInterval);
-                },
-            };
+                const stopDownloading = {
+                    handle: () => {
+                        this.events.forget(Enums.BlockEvent.Received, stopDownloading);
+                        clearInterval(downloadInterval);
+                    },
+                };
 
-            this.events.listen(Enums.BlockEvent.Received, stopDownloading);
+                this.events.listen(Enums.BlockEvent.Received, stopDownloading);
+            }
 
             this.blockchain.setWakeUp();
         }

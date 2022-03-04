@@ -153,4 +153,8 @@ export interface StateStore {
      * Push ping block
      */
     pushPingBlock(block: Interfaces.IBlockData, fromForger?: boolean): void;
+
+    hasPolledForBlocks(): boolean;
+
+    polledForBlocks(): void;
 }

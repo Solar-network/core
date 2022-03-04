@@ -23,6 +23,7 @@ export class StateStore implements Contracts.State.StateStore {
     private lastStoredBlockHeight: number = 1;
     private blockPing?: Contracts.State.BlockPing;
     private started = false;
+    private polled = false;
     private forkedBlock?: Interfaces.IBlock;
     private wakeUpTimeout?: NodeJS.Timeout;
     private noBlockCounter: number = 0;
@@ -376,6 +377,14 @@ export class StateStore implements Contracts.State.StateStore {
             fromForger: fromForger,
             block,
         };
+    }
+
+    public hasPolledForBlocks(): boolean {
+        return this.polled;
+    }
+
+    public polledForBlocks(): void {
+        this.polled = true;
     }
 
     // Map Block instances to block data.
