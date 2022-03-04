@@ -22,6 +22,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
     public walletAttributes(): ReadonlyArray<string> {
         return [
             "delegate.approval", // Used by the API
+            "delegate.burnedFees", // Used by the API
             "delegate.forgedFees", // Used by the API
             "delegate.forgedRewards", // Used by the API
             "delegate.forgedTotal", // Used by the API
@@ -121,6 +122,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         sender.setAttribute<Contracts.State.WalletDelegateAttributes>("delegate", {
             username: transaction.data.asset.delegate.username,
             voteBalance: Utils.BigNumber.ZERO,
+            burnedFees: Utils.BigNumber.ZERO,
             forgedFees: Utils.BigNumber.ZERO,
             forgedRewards: Utils.BigNumber.ZERO,
             producedBlocks: 0,

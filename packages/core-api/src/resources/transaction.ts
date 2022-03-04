@@ -44,6 +44,7 @@ export class TransactionResource implements Resource {
             type: resource.type,
             typeGroup: resource.typeGroup,
             amount: resource.amount.toFixed(),
+            burnedFee: resource.burnedFee.toFixed(),
             fee: resource.fee.toFixed(),
             sender,
             senderPublicKey: resource.senderPublicKey,

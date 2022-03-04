@@ -23,6 +23,7 @@ export type DelegateResource = {
         approval: number;
     };
     forged: {
+        burnedFees: Utils.BigNumber;
         fees: Utils.BigNumber;
         rewards: Utils.BigNumber;
         total: Utils.BigNumber;

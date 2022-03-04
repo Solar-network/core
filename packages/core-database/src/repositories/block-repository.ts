@@ -92,6 +92,7 @@ export class BlockRepository extends AbstractRepository<Block> {
 
     public async getStatistics(): Promise<{
         numberOfTransactions: number;
+        burnedFee: string;
         totalFee: string;
         totalAmount: string;
         count: number;
@@ -99,6 +100,7 @@ export class BlockRepository extends AbstractRepository<Block> {
         return this.createQueryBuilder()
             .select([])
             .addSelect("COALESCE(SUM(number_of_transactions), 0)", "numberOfTransactions")
+            .addSelect("COALESCE(SUM(burned_fee), 0)", "burnedFee")
             .addSelect("COALESCE(SUM(total_fee), 0)", "totalFee")
             .addSelect("COALESCE(SUM(total_amount), 0)", "totalAmount")
             .addSelect("COUNT(DISTINCT(height))", "count")
@@ -109,17 +111,18 @@ export class BlockRepository extends AbstractRepository<Block> {
         return this.createQueryBuilder()
             .select([])
             .addSelect("generator_public_key", "generatorPublicKey")
-            .addSelect("SUM(reward + total_fee)", "rewards")
+            .addSelect("SUM(reward + total_fee - burned_fee)", "rewards")
             .groupBy("generator_public_key")
             .getRawMany();
     }
 
     public async getDelegatesForgedBlocks(): Promise<
-        { generatorPublicKey: string; totalRewards: string; totalFees: string; totalProduced: number }[]
+        { generatorPublicKey: string; totalRewards: string; burnedFees: string, totalFees: string; totalProduced: number }[]
     > {
         return this.createQueryBuilder()
             .select([])
             .addSelect("generator_public_key", "generatorPublicKey")
+            .addSelect("SUM(burned_fee)", "burnedFees")
             .addSelect("SUM(total_fee)", "totalFees")
             .addSelect("SUM(reward)", "totalRewards")
             .addSelect("COUNT(total_amount)", "totalProduced")

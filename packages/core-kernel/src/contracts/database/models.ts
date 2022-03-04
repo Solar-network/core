@@ -9,6 +9,7 @@ export interface BlockModel {
     numberOfTransactions: number;
     totalAmount: Utils.BigNumber;
     totalFee: Utils.BigNumber;
+    burnedFee: Utils.BigNumber;
     reward: Utils.BigNumber;
     payloadLength: number;
     payloadHash: string;
@@ -31,6 +32,7 @@ export interface TransactionModel {
     vendorField: string | undefined;
     amount: Utils.BigNumber;
     fee: Utils.BigNumber;
+    burnedFee: Utils.BigNumber;
     serialized: Buffer;
     asset: Record<string, any>;
 }

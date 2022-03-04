@@ -106,6 +106,13 @@ export class Transaction implements Contracts.Database.TransactionModel {
     public fee!: Utils.BigNumber;
 
     @Column({
+        type: "bigint",
+        transformer: transformBigInt,
+        nullable: false,
+    })
+    public burnedFee!: Utils.BigNumber;
+
+    @Column({
         type: "bytea",
         nullable: false,
     })

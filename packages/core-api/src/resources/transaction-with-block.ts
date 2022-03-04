@@ -33,6 +33,7 @@ export class TransactionWithBlockResource implements Resource {
             type: transactionData.type,
             typeGroup: transactionData.typeGroup,
             amount: transactionData.amount.toFixed(),
+            burnedFee: transactionData.burnedFee.toFixed(),
             fee: transactionData.fee.toFixed(),
             sender,
             senderPublicKey: transactionData.senderPublicKey,

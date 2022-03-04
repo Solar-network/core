@@ -29,6 +29,7 @@ export const transactionBaseSchema: Record<string, any> = {
         typeGroup: { type: "integer", minimum: 0 },
         amount: { bignumber: { minimum: 1, bypassGenesis: true } },
         fee: { bignumber: { minimum: 0, bypassGenesis: true } },
+        burnedFee: { bignumber: { minimum: 0 } },
         senderPublicKey: { $ref: "publicKey" },
         signature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
         secondSignature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
