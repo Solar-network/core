@@ -66,7 +66,7 @@ export interface PluginManager {
 
     install(token: string, network: string, pkg: string, version?: string): Promise<void>;
 
-    update(token: string, network: string, pkg: string): Promise<void>;
+    update(all: boolean, token: string, network: string, pkg: string): Promise<void>;
 
     remove(token: string, network: string, pkg: string): Promise<void>;
 }

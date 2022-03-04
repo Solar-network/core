@@ -36,9 +36,10 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
+            .setFlag("all", "Whether to update all packages", Joi.boolean())
             .setFlag("token", "The name of the token", Joi.string().default("ark"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
-            .setArgument("package", "The name of the package", Joi.string().required());
+            .setArgument("package", "The name of the package", Joi.string());
     }
 
     /**
@@ -49,6 +50,7 @@ export class Command extends Commands.Command {
      */
     public async execute(): Promise<void> {
         return await this.pluginManager.update(
+            this.getFlag("all"),
             this.getFlag("token"),
             this.getFlag("network"),
             this.getArgument("package"),
