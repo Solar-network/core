@@ -111,9 +111,6 @@ export class StateBuilder {
                 // Senders of whitelisted transactions that result in a negative balance,
                 // also need to be special treated during bootstrap. Therefore, specific
                 // senderPublicKey/nonce pairs are allowed to be negative.
-                // Example:
-                //          https://explorer.ark.io/transaction/608c7aeba0895da4517496590896eb325a0b5d367e1b186b1c07d7651a568b9e
-                //          Results in a negative balance (-2 ARK) from height 93478 to 187315
                 const negativeBalanceExceptions: Record<string, Record<string, string>> = this.configRepository.get(
                     "crypto.exceptions.negativeBalances",
                     {},

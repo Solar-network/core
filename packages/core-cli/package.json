@@ -1,7 +1,7 @@
 {
     "name": "@arkecosystem/core-cli",
     "version": "3.1.1",
-    "description": "Core of the ARK Blockchain",
+    "description": "Command Line Interface to manage the Core of the Solar Network Blockchain",
     "license": "CC-BY-ND-4.0",
     "contributors": [
         "Brian Faust <brian@ark.io>"

@@ -1,7 +1,7 @@
 {
     "name": "@arkecosystem/core-blockchain",
     "version": "3.1.1",
-    "description": "Blockchain Manager for ARK Core",
+    "description": "Blockchain Manager for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
         "François-Xavier Thoorens <fx@ark.io>",

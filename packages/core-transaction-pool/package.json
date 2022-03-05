@@ -1,7 +1,7 @@
 {
     "name": "@arkecosystem/core-transaction-pool",
     "version": "3.1.1",
-    "description": "Transaction Pool Manager for ARK Core",
+    "description": "Transaction Pool Manager for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
         "Kristjan Košič <kristjan@ark.io>",

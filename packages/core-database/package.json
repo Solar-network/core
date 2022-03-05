@@ -1,7 +1,7 @@
 {
     "name": "@arkecosystem/core-database",
     "version": "3.1.1",
-    "description": "Database Interface for ARK Core",
+    "description": "Database Interface for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
         "Brian Faust <brian@ark.io>",

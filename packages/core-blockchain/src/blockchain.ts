@@ -63,7 +63,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         if (this.stateStore.getNetworkStart()) {
             this.logger.warning(
-                "ARK Core is launched in Genesis Start mode. This is usually for starting the first node on the blockchain. Unless you know what you are doing, this is likely wrong :warning:",
+                "Solar Core is launched in Genesis Start mode. This is usually for starting the first node on the blockchain. Unless you know what you are doing, this is likely wrong :warning:",
             );
         }
 

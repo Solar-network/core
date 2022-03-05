@@ -1,7 +1,7 @@
 {
     "name": "@arkecosystem/core-p2p",
     "version": "3.1.1",
-    "description": "P2P API for ARK Core",
+    "description": "P2P API for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
         "François-Xavier Thoorens <fx@ark.io>",
