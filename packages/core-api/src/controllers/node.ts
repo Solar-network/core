@@ -126,6 +126,7 @@ export class NodeController extends Controller {
 
             groupedByTypeGroup[result.typeGroup][handlerKey] = {
                 avg: result.avg,
+                burned: result.burned,
                 max: result.max,
                 min: result.min,
                 sum: result.sum,

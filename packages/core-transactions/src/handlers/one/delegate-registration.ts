@@ -23,6 +23,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         return [
             "delegate.approval", // Used by the API
             "delegate.forgedFees", // Used by the API
+            "delegate.burnedFees", // Used by the API
             "delegate.forgedRewards", // Used by the API
             "delegate.forgedTotal", // Used by the API
             "delegate.lastBlock",
@@ -122,6 +123,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             username: transaction.data.asset.delegate.username,
             voteBalance: Utils.BigNumber.ZERO,
             forgedFees: Utils.BigNumber.ZERO,
+            burnedFees: Utils.BigNumber.ZERO,
             forgedRewards: Utils.BigNumber.ZERO,
             producedBlocks: 0,
             round: 0,

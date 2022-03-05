@@ -10,6 +10,7 @@ import { AbstractRepository } from "./abstract-repository";
 type FeeStatistics = {
     type: number;
     typeGroup: number;
+    burned: number;
     avg: number;
     min: number;
     max: number;
@@ -48,12 +49,14 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
     public async getStatistics(): Promise<{
         count: number;
         totalFee: string;
+        burnedFee: string;
         totalAmount: string;
     }> {
         return this.createQueryBuilder()
             .select([])
             .addSelect("COUNT(DISTINCT(id))", "count")
             .addSelect("COALESCE(SUM(fee), 0)", "totalFee")
+            .addSelect("COALESCE(SUM(burned_fee), 0)", "burnedFee")
             .addSelect("COALESCE(SUM(amount), 0)", "totalAmount")
             .getRawOne();
     }
@@ -74,6 +77,7 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
                 .addSelect("COALESCE(MIN(fee), 0)::int8", "min")
                 .addSelect("COALESCE(MAX(fee), 0)::int8", "max")
                 .addSelect("COALESCE(SUM(fee), 0)::int8", "sum")
+                .addSelect("COALESCE(SUM(burned_fee), 0)::int8", "burned")
                 .where("timestamp >= :age AND fee >= :minFee", { age, minFee })
                 .groupBy("type_group")
                 .addGroupBy("type")
@@ -81,8 +85,10 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
                 .getRawMany();
         }
 
-        // no days parameter, take the stats from each type for its last 20 txs
         const feeStatistics: FeeStatistics[] = [];
+
+        // no days parameter, take the stats from each type for its last 20 txs
+        // except burned amount, which is all time
         for (const feeStatsByType of txTypes) {
             // we don't use directly this.createQueryBuilder() because it forces to have FROM transactions
             // instead of just the FROM (...) subquery
@@ -109,13 +115,36 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
                 .groupBy("subquery.type_group")
                 .addGroupBy("subquery.type")
                 .getRawOne();
+
+            const burnStatsForType: FeeStatistics = await this.manager.connection.createQueryBuilder()
+                .select("COALESCE(SUM(subquery.burned_fee), 0)::int8", "burned")
+                .from(
+                    qb => qb
+                        .subQuery()
+                        .select()
+                        .from("transactions", "txs")
+                        .where(
+                            "txs.type = :type and txs.type_group = :typeGroup",
+                            { type: feeStatsByType.type, typeGroup: feeStatsByType.typeGroup }
+                        ),
+                    "subquery"
+                )
+                .groupBy("subquery.type_group")
+                .addGroupBy("subquery.type")
+                .getRawOne();
+
+            if (feeStatsForType && burnStatsForType) {
+                feeStatsForType.burned = burnStatsForType.burned;
+            }
+
             feeStatistics.push(feeStatsForType ?? {
                 type: feeStatsByType.type,
                 typeGroup: feeStatsByType.typeGroup,
-                avg: 0,
-                min: 0,
-                max: 0,
-                sum: 0,
+                avg: "0",
+                burned: "0",
+                min: "0",
+                max: "0",
+                sum: "0",
             });
         }
 

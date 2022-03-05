@@ -24,6 +24,7 @@ export type DelegateResource = {
     };
     forged: {
         fees: Utils.BigNumber;
+        burnedFees: Utils.BigNumber;
         rewards: Utils.BigNumber;
         total: Utils.BigNumber;
     };

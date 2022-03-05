@@ -14,6 +14,7 @@ export interface IBlock {
     transactions: ITransaction[];
     verification: IBlockVerification;
 
+    getBurnedFees(): BigNumber;
     getHeader(): IBlockData;
     verifySignature(): boolean;
     verify(): IBlockVerification;
@@ -34,6 +35,7 @@ export interface IBlockData {
     numberOfTransactions: number;
     totalAmount: BigNumber;
     totalFee: BigNumber;
+    burnedFee: BigNumber;
     reward: BigNumber;
     payloadLength: number;
     payloadHash: string;
@@ -57,6 +59,7 @@ export interface IBlockJson {
     numberOfTransactions: number;
     totalAmount: string;
     totalFee: string;
+    burnedFee: string;
     reward: string;
     payloadLength: number;
     payloadHash: string;

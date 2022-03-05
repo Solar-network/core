@@ -29,6 +29,7 @@ export class DelegateRegistrationTransactionHandler extends One.DelegateRegistra
                 username: transaction.asset.delegate.username,
                 voteBalance: Utils.BigNumber.ZERO,
                 forgedFees: Utils.BigNumber.ZERO,
+                burnedFees: Utils.BigNumber.ZERO,
                 forgedRewards: Utils.BigNumber.ZERO,
                 producedBlocks: 0,
                 rank: undefined,
@@ -48,6 +49,7 @@ export class DelegateRegistrationTransactionHandler extends One.DelegateRegistra
             }
 
             const delegate: Contracts.State.WalletDelegateAttributes = wallet.getAttribute("delegate");
+            delegate.burnedFees = delegate.forgedFees.plus(block.burnedFees);
             delegate.forgedFees = delegate.forgedFees.plus(block.totalFees);
             delegate.forgedRewards = delegate.forgedRewards.plus(block.totalRewards);
             delegate.producedBlocks += +block.totalProduced;

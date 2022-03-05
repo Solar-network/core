@@ -68,6 +68,13 @@ export class Block implements Contracts.Database.BlockModel {
         nullable: false,
         transformer: transformBigInt,
     })
+    public burnedFee!: Utils.BigNumber;
+
+    @Column({
+        type: "bigint",
+        nullable: false,
+        transformer: transformBigInt,
+    })
     public reward!: Utils.BigNumber;
 
     @Column({

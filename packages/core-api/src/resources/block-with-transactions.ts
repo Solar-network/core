@@ -38,8 +38,9 @@ export class BlockWithTransactionsResource implements Resource {
             forged: {
                 reward: blockData.reward.toFixed(),
                 fee: blockData.totalFee.toFixed(),
+                burnedFee: blockData.burnedFee.toFixed(),
                 amount: totalAmountTransferred.toFixed(),
-                total: blockData.reward.plus(blockData.totalFee).toFixed(),
+                total: blockData.reward.plus(blockData.totalFee).minus(blockData.burnedFee).toFixed(),
             },
             payload: {
                 hash: blockData.payloadHash,

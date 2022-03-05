@@ -39,6 +39,8 @@ export class Block implements IBlock {
 
         delete this.data.transactions;
 
+        this.data.burnedFee = this.getBurnedFees();
+
         this.verification = this.verify();
 
         // Order of transactions messed up in mainnet V1
@@ -152,6 +154,7 @@ export class Block implements IBlock {
         data.reward = this.data.reward.toString();
         data.totalAmount = this.data.totalAmount.toString();
         data.totalFee = this.data.totalFee.toString();
+        data.burnedFee = this.data.burnedFee.toString();
         data.transactions = this.transactions.map((transaction) => transaction.toJson());
 
         return data;
@@ -284,5 +287,13 @@ export class Block implements IBlock {
     private applyGenesisBlockFix(id: string): void {
         this.data.id = id;
         this.data.idHex = id.length === 64 ? id : Block.toBytesHex(id); // if id.length is 64 it's already hex
+    }
+
+    public getBurnedFees(): BigNumber {
+        let fees = BigNumber.ZERO;
+        for (const transaction of this.transactions) {
+            fees = fees.plus(transaction.data.burnedFee);
+        }
+        return fees;
     }
 }
