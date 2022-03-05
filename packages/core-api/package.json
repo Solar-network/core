@@ -4,8 +4,9 @@
     "description": "Public API for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "Kristjan Košič <kristjan@ark.io>",
-        "Brian Faust <brian@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"

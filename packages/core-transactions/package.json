@@ -4,7 +4,9 @@
     "description": "Transaction Services for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "Joshua Noack <joshua@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"

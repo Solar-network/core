@@ -4,7 +4,9 @@
     "description": "Provides live local streamed snapshots functionality for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "Sebastijan Kužner <sebastijan@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"

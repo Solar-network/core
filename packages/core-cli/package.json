@@ -4,7 +4,9 @@
     "description": "Command Line Interface to manage the Core of the Solar Network Blockchain",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "Brian Faust <brian@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "/dist"

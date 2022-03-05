@@ -4,7 +4,9 @@
     "description": "Webhooks for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "Brian Faust <brian@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"

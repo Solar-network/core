@@ -4,8 +4,8 @@
     "description": "Plugin to verify swaps from ERC20/BEP20 SXP tokens to the native blockchain",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "alessiodf <alessiodf@pm.me>",
-        "cactus1549 <cactus1549pool@gmail.com>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>"
     ],
     "files": [
         "dist"
