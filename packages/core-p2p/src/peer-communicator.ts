@@ -177,27 +177,28 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                             (wallet: Contracts.State.Wallet) => wallet.getPublicKey(),
                         );
                         if (
-                            delegates.includes(publicKey) &&
-                            Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey)
+                            !delegates.includes(publicKey) ||
+                            !Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey)
                         ) {
-                            if (!delegatePeer) {
-                                peer.publicKeys.push(publicKey);
-                            } else if (!peer.isForked()) {
-                                if (
-                                    delegatePeer.isForked() ||
-                                    (peer.state.header.height === lastBlock.data.height &&
-                                        peer.state.header.id === lastBlock.data.id) ||
-                                    (peer.state.header.height >= delegatePeer.state.header.height &&
-                                        delegatePeer.state.header.id !== lastBlock.data.id)
-                                ) {
-                                    peer.publicKeys.push(publicKey);
-                                    delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
-                                        (peerPublicKey) => peerPublicKey !== publicKey,
-                                    );
-                                }
-                            }
-                            alreadyCheckedSignatures.push(publicKey + signature);
+                            break;
                         }
+                        if (!delegatePeer) {
+                            peer.publicKeys.push(publicKey);
+                        } else if (!peer.isForked()) {
+                            if (
+                                delegatePeer.isForked() ||
+                                (peer.state.header.height === lastBlock.data.height &&
+                                    peer.state.header.id === lastBlock.data.id) ||
+                                (peer.state.header.height >= delegatePeer.state.header.height &&
+                                    delegatePeer.state.header.id !== lastBlock.data.id)
+                            ) {
+                                peer.publicKeys.push(publicKey);
+                                delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
+                                    (peerPublicKey) => peerPublicKey !== publicKey,
+                                );
+                            }
+                        }
+                        alreadyCheckedSignatures.push(publicKey + signature);
                     }
                 }
             }
