@@ -1,5 +1,7 @@
 import { Utils } from "@arkecosystem/core-kernel";
 import { Crypto, Enums } from "@arkecosystem/crypto";
+import { Enums as SolarEnums } from "@solar-network/solar-crypto";
+
 import dayjs from "dayjs";
 import { Brackets, EntityRepository, In } from "typeorm";
 
@@ -149,6 +151,24 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
         }
 
         return feeStatistics;
+    }
+
+    public async getFeesBurned(): Promise<string> {
+        const { burned } = await this.createQueryBuilder()
+            .select("COALESCE(SUM(burned_fee), 0)::int8", "burned")
+            .getRawOne();
+        return burned;
+    }
+
+    public async getBurnTransactionTotal(): Promise<string> {
+        const { amount } = await this.createQueryBuilder()
+            .select("COALESCE(SUM(amount), 0)::int8", "amount")
+            .where(
+                "type = :type and type_group = :typeGroup",
+                { type: SolarEnums.SolarTransactionType.Burn, typeGroup: SolarEnums.SolarTransactionGroup }
+            )
+            .getRawOne();
+        return amount;
     }
 
     public async getSentTransactions(): Promise<
