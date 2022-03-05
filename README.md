@@ -6,7 +6,11 @@
 
 ## Introduction
 
-> This repository contains all plugins that make up the Solar Core.
+> This repository contains all packages that make up the Solar Core.
+
+## Security
+
+If you discover a security vulnerability within any of these packages, please send an e-mail to security@solar.org. All security vulnerabilities will be promptly addressed.
 
 ## Credits
 
