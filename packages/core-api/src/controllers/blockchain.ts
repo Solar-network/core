@@ -1,3 +1,4 @@
+import { Repositories } from "@arkecosystem/core-database";
 import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
 
 import { Controller } from "./controller";
@@ -6,6 +7,9 @@ export class BlockchainController extends Controller {
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
 
+    @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
+    private readonly transactionRepository!: Repositories.TransactionRepository;
+
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")
     private readonly walletRepository!: Contracts.State.WalletRepository;
@@ -13,11 +17,20 @@ export class BlockchainController extends Controller {
     public async index() {
         const { data } = this.stateStore.getLastBlock();
 
+        const fees = Utils.BigNumber.make(await this.transactionRepository.getFeesBurned());
+        const transactions = Utils.BigNumber.make(await this.transactionRepository.getBurnTransactionTotal());
+        const total = fees.plus(transactions);
+
         return {
             data: {
                 block: {
                     height: data.height,
                     id: data.id,
+                },
+                burned: {
+                    fees,
+                    transactions,
+                    total,
                 },
                 supply: Utils.supplyCalculator.calculate(this.walletRepository.allByAddress()),
             },
