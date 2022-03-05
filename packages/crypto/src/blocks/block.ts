@@ -133,8 +133,8 @@ export class Block implements IBlock {
 
     public getHeader(): IBlockData {
         const header: IBlockData = Object.assign({}, this.data);
+        delete header.burnedFee;
         delete header.transactions;
-
         return header;
     }
 
@@ -154,7 +154,7 @@ export class Block implements IBlock {
         data.reward = this.data.reward.toString();
         data.totalAmount = this.data.totalAmount.toString();
         data.totalFee = this.data.totalFee.toString();
-        data.burnedFee = this.data.burnedFee.toString();
+        data.burnedFee = this.data.burnedFee!.toString();
         data.transactions = this.transactions.map((transaction) => transaction.toJson());
 
         return data;

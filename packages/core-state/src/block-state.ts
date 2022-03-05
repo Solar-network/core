@@ -182,12 +182,12 @@ export class BlockState implements Contracts.State.BlockState {
     private applyBlockToForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
         const delegateAttribute = forgerWallet.getAttribute<Contracts.State.WalletDelegateAttributes>("delegate");
         delegateAttribute.producedBlocks++;
-        delegateAttribute.burnedFees = delegateAttribute.burnedFees.plus(block.data.burnedFee);
+        delegateAttribute.burnedFees = delegateAttribute.burnedFees.plus(block.data.burnedFee!);
         delegateAttribute.forgedFees = delegateAttribute.forgedFees.plus(block.data.totalFee);
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.plus(block.data.reward);
         delegateAttribute.lastBlock = block.data;
 
-        const balanceIncrease = block.data.reward.plus(block.data.totalFee.minus(block.data.burnedFee));
+        const balanceIncrease = block.data.reward.plus(block.data.totalFee.minus(block.data.burnedFee!));
         this.increaseWalletDelegateVoteBalance(forgerWallet, balanceIncrease);
         forgerWallet.increaseBalance(balanceIncrease);
     }
@@ -195,12 +195,12 @@ export class BlockState implements Contracts.State.BlockState {
     private revertBlockFromForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
         const delegateAttribute = forgerWallet.getAttribute<Contracts.State.WalletDelegateAttributes>("delegate");
         delegateAttribute.producedBlocks--;
-        delegateAttribute.burnedFees = delegateAttribute.burnedFees.minus(block.data.burnedFee);
+        delegateAttribute.burnedFees = delegateAttribute.burnedFees.minus(block.data.burnedFee!);
         delegateAttribute.forgedFees = delegateAttribute.forgedFees.minus(block.data.totalFee);
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.minus(block.data.reward);
         delegateAttribute.lastBlock = undefined;
 
-        const balanceDecrease = block.data.reward.plus(block.data.totalFee.minus(block.data.burnedFee));
+        const balanceDecrease = block.data.reward.plus(block.data.totalFee.minus(block.data.burnedFee!));
         this.decreaseWalletDelegateVoteBalance(forgerWallet, balanceDecrease);
         forgerWallet.decreaseBalance(balanceDecrease);
     }

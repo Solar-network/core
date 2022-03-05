@@ -35,7 +35,7 @@ export interface IBlockData {
     numberOfTransactions: number;
     totalAmount: BigNumber;
     totalFee: BigNumber;
-    burnedFee: BigNumber;
+    burnedFee?: BigNumber;
     reward: BigNumber;
     payloadLength: number;
     payloadHash: string;
