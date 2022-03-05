@@ -2,6 +2,7 @@ import { base58 } from "bstring";
 import moize from "fast-memoize";
 
 import { HashAlgorithms } from "../crypto";
+import { Cache } from "./cache";
 
 const encodeCheck = (buff: Buffer): string => {
     const checksum: Buffer = HashAlgorithms.hash256(buff);
@@ -22,6 +23,20 @@ const decodeCheck = (address: string): Buffer => {
 };
 
 export const Base58 = {
-    encodeCheck: moize(encodeCheck),
-    decodeCheck: moize(decodeCheck),
+    encodeCheck: moize(encodeCheck, {
+        cache: {
+            // @ts-ignore
+            create: () => {
+                return new Cache<string, string>(10000);
+            },
+        },
+    }),
+    decodeCheck: moize(decodeCheck, {
+        cache: {
+            // @ts-ignore
+            create: () => {
+                return new Cache<string, Buffer>(10000);
+            },
+        },
+    }),
 };
