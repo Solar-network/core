@@ -92,8 +92,8 @@ export class BlockRepository extends AbstractRepository<Block> {
 
     public async getStatistics(): Promise<{
         numberOfTransactions: number;
-        burnedFee: string;
         totalFee: string;
+        burnedFee: string;
         totalAmount: string;
         count: number;
     }> {
@@ -122,8 +122,8 @@ export class BlockRepository extends AbstractRepository<Block> {
         return this.createQueryBuilder()
             .select([])
             .addSelect("generator_public_key", "generatorPublicKey")
-            .addSelect("SUM(burned_fee)", "burnedFees")
             .addSelect("SUM(total_fee)", "totalFees")
+            .addSelect("SUM(burned_fee)", "burnedFees")
             .addSelect("SUM(reward)", "totalRewards")
             .addSelect("COUNT(total_amount)", "totalProduced")
             .groupBy("generator_public_key")

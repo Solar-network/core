@@ -28,8 +28,8 @@ export class DelegateRegistrationTransactionHandler extends One.DelegateRegistra
             wallet.setAttribute<Contracts.State.WalletDelegateAttributes>("delegate", {
                 username: transaction.asset.delegate.username,
                 voteBalance: Utils.BigNumber.ZERO,
-                burnedFees: Utils.BigNumber.ZERO,
                 forgedFees: Utils.BigNumber.ZERO,
+                burnedFees: Utils.BigNumber.ZERO,
                 forgedRewards: Utils.BigNumber.ZERO,
                 producedBlocks: 0,
                 rank: undefined,

@@ -48,15 +48,15 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
 
     public async getStatistics(): Promise<{
         count: number;
-        burnedFee: string;
         totalFee: string;
+        burnedFee: string;
         totalAmount: string;
     }> {
         return this.createQueryBuilder()
             .select([])
             .addSelect("COUNT(DISTINCT(id))", "count")
-            .addSelect("COALESCE(SUM(burned_fee), 0)", "burnedFee")
             .addSelect("COALESCE(SUM(fee), 0)", "totalFee")
+            .addSelect("COALESCE(SUM(burned_fee), 0)", "burnedFee")
             .addSelect("COALESCE(SUM(amount), 0)", "totalAmount")
             .getRawOne();
     }

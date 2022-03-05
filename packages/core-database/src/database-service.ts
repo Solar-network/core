@@ -217,16 +217,16 @@ export class DatabaseService {
 
         const blockStats: {
             numberOfTransactions: number;
-            burnedFee: string;
             totalFee: string;
+            burnedFee: string;
             totalAmount: string;
             count: number;
         } = await this.blockRepository.getStatistics();
 
         const transactionStats: {
             count: number;
-            burnedFee: string;
             totalFee: string;
+            burnedFee: string;
             totalAmount: string;
         } = await this.transactionRepository.getStatistics();
 
