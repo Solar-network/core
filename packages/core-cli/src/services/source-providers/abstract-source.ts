@@ -1,5 +1,15 @@
 import execa from "execa";
-import { ensureDirSync, moveSync, readJSONSync, removeSync } from "fs-extra";
+import {
+    ensureDirSync,
+    moveSync,
+    readFileSync,
+    readJSONSync,
+    removeSync,
+    statSync,
+    writeFileSync,
+    writeJSONSync,
+} from "fs-extra";
+import glob from "glob";
 import { join } from "path";
 
 import { Source } from "./contracts";
@@ -25,6 +35,8 @@ export abstract class AbstractSource implements Source {
 
         const packageName = this.getPackageName(origin);
         this.removeInstalledPackage(packageName);
+
+        this.translate(origin);
 
         moveSync(origin, this.getDestPath(packageName));
 
@@ -67,4 +79,35 @@ export abstract class AbstractSource implements Source {
     public abstract update(value: string): Promise<void>;
 
     protected abstract preparePackage(value: string, version?: string): Promise<void>;
+
+    protected translate(origin: string): void {
+        const files = glob
+            .sync("**/*", { cwd: origin })
+            .map((file) => `${origin}/${file}`)
+            .filter((file) => statSync(file).isFile());
+
+        for (const file of files) {
+            if (file.endsWith("/package.json")) {
+                const pkg = readJSONSync(file);
+                if (pkg.dependencies && Object.keys(pkg.dependencies).length > 0) {
+                    pkg.dependencies = Object.keys(pkg.dependencies).reduce((acc, key) => {
+                        if (!key.startsWith("@arkecosystem/")) {
+                            acc[key] = pkg.dependencies[key];
+                        }
+                        return acc;
+                    }, {});
+                }
+                if (pkg.devDependencies && Object.keys(pkg.devDependencies).length > 0) {
+                    pkg.devDependencies = Object.keys(pkg.devDependencies).reduce((acc, key) => {
+                        if (!key.startsWith("@arkecosystem/")) {
+                            acc[key] = pkg.devDependencies[key];
+                        }
+                        return acc;
+                    }, {});
+                }
+                writeJSONSync(file, pkg, { spaces: 4 });
+            }
+            writeFileSync(file, readFileSync(file).toString().replaceAll("@arkecosystem/", "@solar-network/"));
+        }
+    }
 }
