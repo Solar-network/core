@@ -1,5 +1,5 @@
-import { Container, Contracts, Services } from "@arkecosystem/core-kernel";
-import { Enums } from "@arkecosystem/crypto";
+import { Container, Contracts, Services } from "@solar-network/core-kernel";
+import { Enums } from "@solar-network/crypto";
 import { Boom, notFound } from "@hapi/boom";
 import Hapi from "@hapi/hapi";
 

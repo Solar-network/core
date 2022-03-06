@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 import { Connection, createConnection, getCustomRepository } from "typeorm";
 import Joi from "joi";
 

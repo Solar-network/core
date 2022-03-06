@@ -1,5 +1,5 @@
-import { Commands, Container, Contracts, Services } from "@arkecosystem/core-cli";
-import { Blocks, Crypto, Identities, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
+import { Commands, Container, Contracts, Services } from "@solar-network/core-cli";
+import { Blocks, Crypto, Identities, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { generateMnemonic } from "bip39";
 import envPaths from "env-paths";
 import { ensureDirSync, existsSync, readJSONSync, writeFileSync, writeJSONSync } from "fs-extra";
@@ -793,11 +793,11 @@ export class Command extends Commands.Command {
         const app = readJSONSync(resolve(__dirname, "../../bin/config/testnet/app.json"));
 
         if (includeDynamicFees) {
-            app.core.plugins.find((plugin) => plugin.package === "@arkecosystem/core-transaction-pool").options = {
+            app.core.plugins.find((plugin) => plugin.package === "@solar-network/core-transaction-pool").options = {
                 dynamicFees,
             };
 
-            app.relay.plugins.find((plugin) => plugin.package === "@arkecosystem/core-transaction-pool").options = {
+            app.relay.plugins.find((plugin) => plugin.package === "@solar-network/core-transaction-pool").options = {
                 dynamicFees,
             };
         }

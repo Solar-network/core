@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 
 import { SXPSwap } from "./sxp-swap";
 

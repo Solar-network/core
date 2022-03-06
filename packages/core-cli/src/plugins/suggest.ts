@@ -1,4 +1,4 @@
-import { minBy } from "@arkecosystem/utils";
+import { minBy } from "@solar-network/utils";
 import Levenshtein from "fast-levenshtein";
 import { blue, red } from "kleur";
 import { JsonObject } from "type-fest";

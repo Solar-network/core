@@ -1,4 +1,4 @@
-import { Managers } from "@arkecosystem/crypto";
+import { Managers } from "@solar-network/crypto";
 import { performance } from "perf_hooks";
 
 import { EventDispatcher } from "../../contracts/kernel/events";

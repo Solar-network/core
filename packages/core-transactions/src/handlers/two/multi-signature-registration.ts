@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Identities, Interfaces, Managers, Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
 import {
     InvalidMultiSignatureError,

@@ -1,5 +1,5 @@
 {
-    "name": "@arkecosystem/core-transaction-pool",
+    "name": "@solar-network/core-transaction-pool",
     "version": "3.1.1",
     "description": "Transaction Pool Manager for Solar Core",
     "license": "CC-BY-ND-4.0",
@@ -23,9 +23,9 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@arkecosystem/core-kernel": "3.1.1",
-        "@arkecosystem/core-transactions": "3.1.1",
-        "@arkecosystem/crypto": "3.1.1",
+        "@solar-network/core-kernel": "3.1.1",
+        "@solar-network/core-transactions": "3.1.1",
+        "@solar-network/crypto": "3.1.1",
         "better-sqlite3": "7.4.3",
         "fs-extra": "8.1.0",
         "joi": "17.4.2"

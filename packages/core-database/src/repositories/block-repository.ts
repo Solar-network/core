@@ -1,5 +1,5 @@
-import { Contracts, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Contracts, Utils } from "@solar-network/core-kernel";
+import { Interfaces, Transactions } from "@solar-network/crypto";
 import { EntityRepository, In } from "typeorm";
 
 import { Block, Round, Transaction } from "../models";

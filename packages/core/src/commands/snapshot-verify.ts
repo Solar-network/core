@@ -1,7 +1,7 @@
-import { Commands, Components, Container, Contracts, Utils } from "@arkecosystem/core-cli";
-import { Container as KernelContainer, Contracts as KernelContracts } from "@arkecosystem/core-kernel";
-import { ProgressRenderer } from "@arkecosystem/core-snapshots";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Components, Container, Contracts, Utils } from "@solar-network/core-cli";
+import { Container as KernelContainer, Contracts as KernelContracts } from "@solar-network/core-kernel";
+import { ProgressRenderer } from "@solar-network/core-snapshots";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
 /**

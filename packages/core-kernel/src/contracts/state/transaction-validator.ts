@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 export interface TransactionValidator {
     validate(transaction: Interfaces.ITransaction): Promise<void>;

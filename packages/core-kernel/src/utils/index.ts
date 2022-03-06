@@ -13,7 +13,7 @@ export * as Search from "./search";
 import { stringify } from "./stringify";
 import { calculate } from "./supply-calculator";
 
-export * from "@arkecosystem/utils";
+export * from "@solar-network/utils";
 export * from "./expiration-calculator";
 export * from "./assert";
 export * from "./ipc-handler";

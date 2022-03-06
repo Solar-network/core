@@ -1,7 +1,7 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Interfaces, Managers } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Interfaces, Managers } from "@solar-network/crypto";
 
 import { Action } from "../contracts";
 

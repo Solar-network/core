@@ -1,5 +1,5 @@
-import { Commands, Container, Contracts } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container, Contracts } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import { validateMnemonic } from "bip39";
 import { writeJSONSync } from "fs-extra";
 import Joi from "joi";

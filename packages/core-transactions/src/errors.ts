@@ -1,5 +1,5 @@
-import { Contracts } from "@arkecosystem/core-kernel";
-import { Transactions, Utils } from "@arkecosystem/crypto";
+import { Contracts } from "@solar-network/core-kernel";
+import { Transactions, Utils } from "@solar-network/crypto";
 
 export class TransactionError extends Error {
     public constructor(message: string) {

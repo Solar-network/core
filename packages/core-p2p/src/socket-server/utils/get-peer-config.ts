@@ -1,5 +1,5 @@
-import { Container, Contracts, Providers, Services, Utils } from "@arkecosystem/core-kernel";
-import { Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Providers, Services, Utils } from "@solar-network/core-kernel";
+import { Managers } from "@solar-network/crypto";
 
 type PluginConfig = { package: string; options: any };
 

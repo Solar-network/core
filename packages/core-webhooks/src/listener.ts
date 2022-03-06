@@ -1,4 +1,4 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import { performance } from "perf_hooks";
 
 import * as conditions from "./conditions";

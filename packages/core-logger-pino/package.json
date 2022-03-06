@@ -1,5 +1,5 @@
 {
-    "name": "@arkecosystem/core-logger-pino",
+    "name": "@solar-network/core-logger-pino",
     "version": "3.1.1",
     "description": "Webhooks for Solar Core",
     "license": "CC-BY-ND-4.0",
@@ -22,7 +22,7 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@arkecosystem/core-kernel": "3.1.1",
+        "@solar-network/core-kernel": "3.1.1",
         "chalk": "4.1.2",
         "joi": "17.4.2",
         "node-emoji": "1.11.0",

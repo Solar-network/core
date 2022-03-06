@@ -1,5 +1,5 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
 /**

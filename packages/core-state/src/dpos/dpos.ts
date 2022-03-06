@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 
 @Container.injectable()
 export class DposState implements Contracts.State.DposState {

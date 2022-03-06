@@ -1,5 +1,5 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Container } from "@arkecosystem/core-kernel";
+import { Repositories } from "@solar-network/core-database";
+import { Container } from "@solar-network/core-kernel";
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
 

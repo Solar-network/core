@@ -1,4 +1,4 @@
-import { Contracts, Utils } from "@arkecosystem/core-kernel";
+import { Contracts, Utils } from "@solar-network/core-kernel";
 import { EntityRepository, Repository } from "typeorm";
 
 import { Round } from "../models";

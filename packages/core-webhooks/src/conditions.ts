@@ -1,4 +1,4 @@
-import { Utils } from "@arkecosystem/crypto";
+import { Utils } from "@solar-network/crypto";
 
 /**
  * @param {*} value

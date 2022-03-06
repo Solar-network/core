@@ -1,5 +1,5 @@
 {
-    "name": "@arkecosystem/core-forger",
+    "name": "@solar-network/core-forger",
     "version": "3.1.1",
     "description": "Forger for Solar Core",
     "license": "CC-BY-ND-4.0",
@@ -22,10 +22,10 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@arkecosystem/core-kernel": "3.1.1",
-        "@arkecosystem/core-p2p": "3.1.1",
-        "@arkecosystem/core-transactions": "3.1.1",
-        "@arkecosystem/crypto": "3.1.1",
+        "@solar-network/core-kernel": "3.1.1",
+        "@solar-network/core-p2p": "3.1.1",
+        "@solar-network/core-transactions": "3.1.1",
+        "@solar-network/crypto": "3.1.1",
         "joi": "17.4.2",
         "node-forge": "1.2.1",
         "wif": "2.0.6"

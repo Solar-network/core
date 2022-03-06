@@ -1,4 +1,4 @@
-import { camelCase, expandTilde, set } from "@arkecosystem/utils";
+import { camelCase, expandTilde, set } from "@solar-network/utils";
 import envPaths from "env-paths";
 import { ensureDirSync } from "fs-extra";
 import { resolve } from "path";

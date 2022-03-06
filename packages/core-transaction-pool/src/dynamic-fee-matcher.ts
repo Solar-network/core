@@ -1,13 +1,13 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Interfaces, Managers, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Interfaces, Managers, Utils } from "@solar-network/crypto";
 
 import { TransactionFeeTooHighError, TransactionFeeTooLowError } from "./errors";
 
 @Container.injectable()
 export class DynamicFeeMatcher implements Contracts.TransactionPool.DynamicFeeMatcher {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-transaction-pool")
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)

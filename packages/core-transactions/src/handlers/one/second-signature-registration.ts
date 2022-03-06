@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
+import { Interfaces, Transactions } from "@solar-network/crypto";
 
 import { NotSupportedForMultiSignatureWalletError, SecondSignatureAlreadyRegisteredError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";

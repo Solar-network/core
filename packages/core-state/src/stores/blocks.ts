@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 import assert from "assert";
 
 // todo: review its implementation and finally integrate it as planned in v2

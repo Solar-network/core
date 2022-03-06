@@ -1,5 +1,5 @@
-import { Commands, Container, Utils } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container, Utils } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
 /**
@@ -56,8 +56,8 @@ export class Command extends Commands.Command {
         await Utils.buildApplication({
             flags,
             plugins: {
-                "@arkecosystem/core-p2p": Utils.buildPeerFlags(flags),
-                "@arkecosystem/core-blockchain": {
+                "@solar-network/core-p2p": Utils.buildPeerFlags(flags),
+                "@solar-network/core-blockchain": {
                     networkStart: flags.networkStart,
                 },
             },

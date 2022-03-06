@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 
 export const getHeaders = (app: Contracts.Kernel.Application) => {
     const headers: {
@@ -12,7 +12,7 @@ export const getHeaders = (app: Contracts.Kernel.Application) => {
                 .getTagged<Providers.PluginConfiguration>(
                     Container.Identifiers.PluginConfiguration,
                     "plugin",
-                    "@arkecosystem/core-p2p",
+                    "@solar-network/core-p2p",
                 )
                 .get<number>("port"),
         ),

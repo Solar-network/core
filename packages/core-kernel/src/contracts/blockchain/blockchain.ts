@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 import { Queue } from "../kernel/queue";
 import { BlockPing } from "../state/state-store";

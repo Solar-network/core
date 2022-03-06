@@ -1,7 +1,7 @@
-import { BlockProcessorResult } from "@arkecosystem/core-blockchain/dist/processor";
-import { BlockHandler } from "@arkecosystem/core-blockchain/dist/processor/contracts";
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { BlockProcessorResult } from "@solar-network/core-blockchain/dist/processor";
+import { BlockHandler } from "@solar-network/core-blockchain/dist/processor/contracts";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 @Container.injectable()
 export class DuplicateSwapTransactionsHandler implements BlockHandler {

@@ -1,5 +1,5 @@
-import { Commands, Container, Contracts } from "@arkecosystem/core-cli";
-import { Utils } from "@arkecosystem/core-kernel";
+import { Commands, Container, Contracts } from "@solar-network/core-cli";
+import { Utils } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 /**

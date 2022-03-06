@@ -1,4 +1,4 @@
-import { Container, Providers, Services, Types, Utils } from "@arkecosystem/core-kernel";
+import { Container, Providers, Services, Types, Utils } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { ValidateAndAcceptPeerAction } from "./actions";

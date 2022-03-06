@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
 
@@ -11,7 +11,7 @@ export class Controller {
     protected readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-api")
+    @Container.tagged("plugin", "@solar-network/core-api")
     protected readonly apiConfiguration!: Providers.PluginConfiguration;
 
     protected getQueryPagination(query: Hapi.RequestQuery): Contracts.Search.Pagination {

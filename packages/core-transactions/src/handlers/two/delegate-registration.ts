@@ -1,6 +1,6 @@
-import { Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Transactions, Utils } from "@arkecosystem/crypto";
+import { Utils as AppUtils } from "@solar-network/core-kernel";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Transactions, Utils } from "@solar-network/crypto";
 
 import { One } from "../index";
 

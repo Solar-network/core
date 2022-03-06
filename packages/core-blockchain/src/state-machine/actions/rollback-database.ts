@@ -1,6 +1,6 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 import { Action } from "../contracts";
 
@@ -10,7 +10,7 @@ export class RollbackDatabase implements Action {
     public readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-blockchain")
+    @Container.tagged("plugin", "@solar-network/core-blockchain")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.LogService)

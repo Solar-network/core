@@ -1,4 +1,4 @@
-import { Interfaces, Utils } from "@arkecosystem/crypto";
+import { Interfaces, Utils } from "@solar-network/crypto";
 
 // todo: review all interfaces in here and document them properly. Remove ones that are no longer needed.
 

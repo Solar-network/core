@@ -1,4 +1,4 @@
-import { isEmpty, prettyTime } from "@arkecosystem/utils";
+import { isEmpty, prettyTime } from "@solar-network/utils";
 import chalk, { Chalk } from "chalk";
 import dayjs, { Dayjs } from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";

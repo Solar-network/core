@@ -1,7 +1,7 @@
-import { DatabaseService, Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Services, Utils } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Blocks, Crypto, Interfaces, Utils as CryptoUtils } from "@arkecosystem/crypto";
+import { DatabaseService, Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Blocks, Crypto, Interfaces, Utils as CryptoUtils } from "@solar-network/crypto";
 
 import { BlockProcessor, BlockProcessorResult } from "./processor";
 import { RevertBlockHandler } from "./processor/handlers";

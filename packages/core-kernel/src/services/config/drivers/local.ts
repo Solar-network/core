@@ -1,4 +1,4 @@
-import { dotenv, get, set } from "@arkecosystem/utils";
+import { dotenv, get, set } from "@solar-network/utils";
 import Joi from "joi";
 import { existsSync, readFileSync } from "fs";
 import importFresh from "import-fresh";

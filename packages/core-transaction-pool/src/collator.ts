@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Interfaces, Managers } from "@solar-network/crypto";
 import { TransactionHasExpiredError } from "./errors";
 
 @Container.injectable()

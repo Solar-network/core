@@ -1,7 +1,7 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Application, Container, Contracts, Enums, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Managers, Utils } from "@arkecosystem/crypto";
+import { Repositories } from "@solar-network/core-database";
+import { Application, Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Managers, Utils } from "@solar-network/crypto";
 
 // todo: review the implementation
 @Container.injectable()

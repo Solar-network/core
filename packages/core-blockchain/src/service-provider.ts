@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers, Services } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers, Services } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { ProcessBlockAction } from "./actions";

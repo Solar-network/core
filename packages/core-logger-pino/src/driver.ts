@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers, Utils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers, Utils } from "@solar-network/core-kernel";
 import chalk, { Chalk } from "chalk";
 import * as console from "console";
 import { emojify } from "node-emoji";
@@ -31,7 +31,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
     private readonly configFlags!: { processType: string };
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-logger-pino")
+    @Container.tagged("plugin", "@solar-network/core-logger-pino")
     private readonly configuration!: Providers.PluginConfiguration;
 
     /**

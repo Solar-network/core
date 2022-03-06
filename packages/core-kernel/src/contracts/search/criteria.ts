@@ -1,4 +1,4 @@
-import { Utils } from "@arkecosystem/crypto";
+import { Utils } from "@solar-network/crypto";
 
 export type EqualCriteria<T> = T;
 export type NumericCriteria<T> = T | { from: T } | { to: T } | { from: T; to: T };

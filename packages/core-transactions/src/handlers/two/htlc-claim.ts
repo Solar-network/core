@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Crypto, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Crypto, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { strict } from "assert";
 
 import { HtlcLockExpiredError, HtlcLockTransactionNotFoundError, HtlcSecretHashMismatchError } from "../../errors";

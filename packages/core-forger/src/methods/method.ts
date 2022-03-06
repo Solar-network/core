@@ -1,5 +1,5 @@
-import { Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Blocks, Crypto, Interfaces, Utils } from "@arkecosystem/crypto";
+import { Utils as AppUtils } from "@solar-network/core-kernel";
+import { Blocks, Crypto, Interfaces, Utils } from "@solar-network/crypto";
 
 /**
  * @export

@@ -1,5 +1,5 @@
-import { Models } from "@arkecosystem/core-database";
-import { Blocks, Crypto, Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Models } from "@solar-network/core-database";
+import { Blocks, Crypto, Interfaces, Transactions } from "@solar-network/crypto";
 
 import * as Exceptions from "./exceptions/verifier";
 

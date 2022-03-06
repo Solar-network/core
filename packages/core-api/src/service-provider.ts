@@ -1,4 +1,4 @@
-import { Providers } from "@arkecosystem/core-kernel";
+import { Providers } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import Handlers from "./handlers";

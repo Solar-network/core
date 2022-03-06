@@ -1,5 +1,5 @@
-import { Models } from "@arkecosystem/core-database";
-import { Managers } from "@arkecosystem/crypto";
+import { Models } from "@solar-network/core-database";
+import { Managers } from "@solar-network/crypto";
 import { parentPort } from "worker_threads";
 
 import { Worker } from "../../contracts";

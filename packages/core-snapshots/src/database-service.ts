@@ -1,6 +1,6 @@
-import { Models } from "@arkecosystem/core-database";
-import { Container, Contracts, Providers, Types, Utils } from "@arkecosystem/core-kernel";
-import { Blocks, Interfaces, Managers } from "@arkecosystem/crypto";
+import { Models } from "@solar-network/core-database";
+import { Container, Contracts, Providers, Types, Utils } from "@solar-network/core-kernel";
+import { Blocks, Interfaces, Managers } from "@solar-network/crypto";
 
 import { Database, Meta, Options, Worker } from "./contracts";
 import { Filesystem } from "./filesystem/filesystem";
@@ -15,11 +15,11 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
     private readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-snapshots")
+    @Container.tagged("plugin", "@solar-network/core-snapshots")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-database")
+    @Container.tagged("plugin", "@solar-network/core-database")
     private readonly coreDatabaseConfiguration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.LogService)

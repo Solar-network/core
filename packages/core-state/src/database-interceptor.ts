@@ -1,6 +1,6 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 @Container.injectable()
 export class DatabaseInterceptor {

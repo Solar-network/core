@@ -1,5 +1,5 @@
 {
-    "name": "@arkecosystem/core-blockchain",
+    "name": "@solar-network/core-blockchain",
     "version": "3.1.1",
     "description": "Blockchain Manager for Solar Core",
     "license": "CC-BY-ND-4.0",
@@ -23,11 +23,11 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@arkecosystem/core-database": "3.1.1",
-        "@arkecosystem/core-kernel": "3.1.1",
-        "@arkecosystem/core-state": "3.1.1",
-        "@arkecosystem/core-transactions": "3.1.1",
-        "@arkecosystem/crypto": "3.1.1",
+        "@solar-network/core-database": "3.1.1",
+        "@solar-network/core-kernel": "3.1.1",
+        "@solar-network/core-state": "3.1.1",
+        "@solar-network/core-transactions": "3.1.1",
+        "@solar-network/crypto": "3.1.1",
         "joi": "17.4.2",
         "xstate": "4.23.4"
     },

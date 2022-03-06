@@ -1,12 +1,12 @@
-import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Transactions } from "@solar-network/crypto";
 
 import { TransactionAlreadyInPoolError, TransactionPoolFullError } from "./errors";
 
 @Container.injectable()
 export class Service implements Contracts.TransactionPool.Service {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-transaction-pool")
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.StateStore)

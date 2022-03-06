@@ -1,6 +1,6 @@
-import { Models, Utils } from "@arkecosystem/core-database";
-import { Container } from "@arkecosystem/core-kernel";
-import { Managers, Transactions } from "@arkecosystem/crypto";
+import { Models, Utils } from "@solar-network/core-database";
+import { Container } from "@solar-network/core-kernel";
+import { Managers, Transactions } from "@solar-network/crypto";
 import { Readable } from "stream";
 import { Connection, createConnection, getCustomRepository } from "typeorm";
 import { parentPort, workerData } from "worker_threads";

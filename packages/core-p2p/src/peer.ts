@@ -1,4 +1,4 @@
-import { Contracts } from "@arkecosystem/core-kernel";
+import { Contracts } from "@solar-network/core-kernel";
 import dayjs, { Dayjs } from "dayjs";
 
 import { PeerVerificationResult } from "./peer-verifier";

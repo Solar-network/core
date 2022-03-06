@@ -1,5 +1,5 @@
-import { Commands, Container, Contracts, Services } from "@arkecosystem/core-cli";
-import { prettyBytes, prettyTime } from "@arkecosystem/utils";
+import { Commands, Container, Contracts, Services } from "@solar-network/core-cli";
+import { prettyBytes, prettyTime } from "@solar-network/utils";
 import Joi from "joi";
 import dayjs from "dayjs";
 

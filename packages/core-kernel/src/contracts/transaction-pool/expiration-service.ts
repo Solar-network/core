@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 export interface ExpirationService {
     canExpire(transaction: Interfaces.ITransaction): boolean;

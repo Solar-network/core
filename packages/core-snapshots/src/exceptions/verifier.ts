@@ -1,4 +1,4 @@
-import { Exceptions } from "@arkecosystem/core-kernel";
+import { Exceptions } from "@solar-network/core-kernel";
 
 export class BlockVerifyException extends Exceptions.Base.Exception {
     public constructor(id: string, message: string = "") {

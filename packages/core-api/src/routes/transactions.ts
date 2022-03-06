@@ -1,4 +1,4 @@
-import { Container, Providers } from "@arkecosystem/core-kernel";
+import { Container, Providers } from "@solar-network/core-kernel";
 import Hapi from "@hapi/hapi";
 import Joi from "joi";
 
@@ -48,7 +48,7 @@ export const register = (server: Hapi.Server): void => {
                                     .getTagged<Providers.PluginConfiguration>(
                                         Container.Identifiers.PluginConfiguration,
                                         "plugin",
-                                        "@arkecosystem/core-transaction-pool",
+                                        "@solar-network/core-transaction-pool",
                                     )
                                     .get<number>("maxTransactionsPerRequest"),
                             },

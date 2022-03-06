@@ -1,4 +1,4 @@
-import { Networks } from "@arkecosystem/crypto";
+import { Networks } from "@solar-network/crypto";
 import { existsSync, readdirSync } from "fs-extra";
 import prompts from "prompts";
 

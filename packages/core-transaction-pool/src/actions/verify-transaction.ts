@@ -1,6 +1,6 @@
-import { Services, Types } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Services, Types } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Interfaces } from "@solar-network/crypto";
 
 export class VerifyTransactionAction extends Services.Triggers.Action {
     public async execute(args: Types.ActionArguments): Promise<boolean> {

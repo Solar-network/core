@@ -1,4 +1,4 @@
-import { Commands, Container, Services } from "@arkecosystem/core-cli";
+import { Commands, Container, Services } from "@solar-network/core-cli";
 import Joi from "joi";
 
 /**

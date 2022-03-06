@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Transactions } from "@solar-network/crypto";
 import { AlreadyVotedError, NoVoteError, UnvoteMismatchError } from "../../errors";
 import { One } from "../index";
 import { TransactionHandlerConstructor } from "../transaction";

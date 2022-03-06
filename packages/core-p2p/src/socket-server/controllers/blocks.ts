@@ -1,6 +1,6 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Providers, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Blocks, Interfaces, Managers, Utils } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Blocks, Interfaces, Managers, Utils } from "@solar-network/crypto";
 import Hapi from "@hapi/hapi";
 
 import { constants } from "../../constants";
@@ -10,7 +10,7 @@ import { Controller } from "./controller";
 
 export class BlocksController extends Controller {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-p2p")
+    @Container.tagged("plugin", "@solar-network/core-p2p")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.BlockchainService)

@@ -1,5 +1,5 @@
-import { Services, Types } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Services, Types } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 import { BlockProcessor, BlockProcessorResult } from "../processor";
 

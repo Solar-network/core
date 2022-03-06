@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 import { BigNumber } from "../../utils";
 import { Wallet } from "./wallets";

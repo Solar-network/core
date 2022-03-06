@@ -1,6 +1,6 @@
-import { Container, Contracts, Enums, Providers, Services } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Crypto, Interfaces, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Providers, Services } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
 
 import {
     RetryTransactionError,
@@ -15,7 +15,7 @@ import {
 @Container.injectable()
 export class SenderState implements Contracts.TransactionPool.SenderState {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-transaction-pool")
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)

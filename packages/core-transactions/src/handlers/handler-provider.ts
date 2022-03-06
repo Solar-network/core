@@ -1,5 +1,5 @@
-import { Container, Services, Utils } from "@arkecosystem/core-kernel";
-import { Enums, Transactions } from "@arkecosystem/crypto";
+import { Container, Services, Utils } from "@solar-network/core-kernel";
+import { Enums, Transactions } from "@solar-network/crypto";
 
 import { AlreadyRegisteredError, UnsatisfiedDependencyError } from "../errors";
 import { TransactionHandlerConstructor } from "./transaction";

@@ -1,5 +1,5 @@
-import { Container, Contracts, Services, Utils } from "@arkecosystem/core-kernel";
-import { Managers, Utils as CryptoUtils } from "@arkecosystem/crypto";
+import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
+import { Managers, Utils as CryptoUtils } from "@solar-network/crypto";
 
 import { Delegate } from "./interfaces";
 

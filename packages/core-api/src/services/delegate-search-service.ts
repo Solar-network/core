@@ -1,4 +1,4 @@
-import { Container, Contracts, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Services, Utils as AppUtils } from "@solar-network/core-kernel";
 
 import { DelegateCriteria, DelegateResource, DelegateResourceLastBlock } from "../resources-new";
 

@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Enums, Interfaces, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Enums, Interfaces, Utils } from "@solar-network/crypto";
 
 import { Resource } from "../interfaces";
 

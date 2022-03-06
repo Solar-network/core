@@ -1,5 +1,5 @@
-import { Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers, Transactions } from "@arkecosystem/crypto";
+import { Contracts } from "@solar-network/core-kernel";
+import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
 export class WorkerScriptHandler implements Contracts.TransactionPool.WorkerScriptHandler {
     public loadCryptoPackage(packageName: string): void {

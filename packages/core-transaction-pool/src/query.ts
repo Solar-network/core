@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Enums, Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Enums, Interfaces } from "@solar-network/crypto";
 
 import { Comparator, IteratorMany } from "./utils";
 

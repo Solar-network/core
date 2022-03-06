@@ -1,4 +1,4 @@
-import { Contracts, Container } from "@arkecosystem/core-kernel";
+import { Contracts, Container } from "@solar-network/core-kernel";
 import { Connection } from "typeorm";
 
 @Container.injectable()
