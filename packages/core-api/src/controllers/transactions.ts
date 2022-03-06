@@ -93,7 +93,10 @@ export class TransactionsController extends Controller {
             pagination.offset,
             pagination.offset + pagination.limit,
         );
-        const results = transactions.map((t) => t.data);
+        const results = transactions.map((t) => {
+            delete t.data.burnedFee;
+            return t.data;
+        });
         const resultsPage = {
             results,
             totalCount: all.length,
@@ -113,6 +116,7 @@ export class TransactionsController extends Controller {
         }
 
         const transaction: Interfaces.ITransaction = transactionQuery.first();
+        delete transaction.data.burnedFee;
 
         return super.respondWithResource(transaction.data, TransactionResource, !!request.query.transform);
     }

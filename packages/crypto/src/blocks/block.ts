@@ -292,7 +292,7 @@ export class Block implements IBlock {
     public getBurnedFees(): BigNumber {
         let fees = BigNumber.ZERO;
         for (const transaction of this.transactions) {
-            fees = fees.plus(transaction.data.burnedFee);
+            fees = fees.plus(transaction.data.burnedFee!);
         }
         return fees;
     }

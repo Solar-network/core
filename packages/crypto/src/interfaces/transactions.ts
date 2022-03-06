@@ -58,7 +58,7 @@ export interface ITransactionData {
     senderPublicKey: string | undefined;
 
     fee: BigNumber;
-    burnedFee: BigNumber;
+    burnedFee?: BigNumber;
     amount: BigNumber;
 
     expiration?: number;
