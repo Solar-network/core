@@ -8,7 +8,7 @@ import { Transaction } from "../transaction";
 
 export abstract class MultiPaymentTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.MultiPayment;
+    public static type: number = TransactionType.Core.MultiPayment;
     public static key = "multiPayment";
     public static version: number = 2;
 

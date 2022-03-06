@@ -19,11 +19,16 @@ export class WorkerPool implements Contracts.TransactionPool.WorkerPool {
     @Container.postConstruct()
     public initialize() {
         const workerCount: number = this.pluginConfiguration.getRequired("workerPool.workerCount");
-        const cryptoPackages: CryptoPackagesConfig = this.pluginConfiguration.getRequired("workerPool.cryptoPackages");
+        const cryptoPackages: CryptoPackagesConfig = this.pluginConfiguration.getOptional(
+            "workerPool.cryptoPackages",
+            [],
+        );
 
         for (let i = 0; i < workerCount; i++) {
             const worker = this.createWorker();
-            const availableCryptoPackages = cryptoPackages.filter((p) => require.resolve(p.packageName));
+            const availableCryptoPackages = cryptoPackages
+                ? cryptoPackages.filter((p: any) => require.resolve(p.packageName))
+                : [];
             for (const { packageName } of availableCryptoPackages) {
                 worker.loadCryptoPackage(packageName);
             }
@@ -32,12 +37,15 @@ export class WorkerPool implements Contracts.TransactionPool.WorkerPool {
     }
 
     public isTypeGroupSupported(typeGroup: Enums.TransactionTypeGroup): boolean {
-        if (typeGroup === Enums.TransactionTypeGroup.Core) {
+        if (typeGroup === Enums.TransactionTypeGroup.Core || typeGroup === Enums.TransactionTypeGroup.Solar) {
             return true;
         }
 
-        const cryptoPackages: CryptoPackagesConfig = this.pluginConfiguration.getRequired("workerPool.cryptoPackages");
-        return cryptoPackages.some((p) => p.typeGroup === typeGroup);
+        const cryptoPackages: CryptoPackagesConfig = this.pluginConfiguration.getOptional(
+            "workerPool.cryptoPackages",
+            [],
+        );
+        return cryptoPackages.some((p: any) => p.typeGroup === typeGroup);
     }
 
     public async getTransactionFromData(

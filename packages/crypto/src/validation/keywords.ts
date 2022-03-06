@@ -33,7 +33,7 @@ const transactionType = (ajv: Ajv) => {
             return (data, dataPath, parentObject: ITransactionData) => {
                 // Impose dynamic multipayment limit based on milestone
                 if (
-                    data === TransactionType.MultiPayment &&
+                    data === TransactionType.Core.MultiPayment &&
                     parentObject &&
                     (!parentObject.typeGroup || parentObject.typeGroup === 1)
                 ) {

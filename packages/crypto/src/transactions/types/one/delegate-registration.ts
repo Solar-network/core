@@ -6,7 +6,7 @@ import { Transaction } from "../transaction";
 
 export abstract class DelegateRegistrationTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.DelegateRegistration;
+    public static type: number = TransactionType.Core.DelegateRegistration;
     public static key = "delegateRegistration";
     public static version: number = 1;
 

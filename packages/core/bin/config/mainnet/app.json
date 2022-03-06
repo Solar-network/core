@@ -14,9 +14,6 @@
                 "package": "@arkecosystem/core-transactions"
             },
             {
-                "package": "@solar-network/solar-transactions"
-            },
-            {
                 "package": "@arkecosystem/core-transaction-pool"
             },
             {
@@ -51,9 +48,6 @@
                 "package": "@arkecosystem/core-transactions"
             },
             {
-                "package": "@solar-network/solar-transactions"
-            },
-            {
                 "package": "@arkecosystem/core-transaction-pool"
             },
             {
@@ -80,9 +74,6 @@
             },
             {
                 "package": "@arkecosystem/core-transactions"
-            },
-            {
-                "package": "@solar-network/solar-transactions"
             },
             {
                 "package": "@arkecosystem/core-forger"

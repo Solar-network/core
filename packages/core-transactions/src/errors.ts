@@ -25,6 +25,16 @@ export class TransactionFeeTooLowError extends TransactionError {
     }
 }
 
+export class InsufficientBurnAmountError extends TransactionError {
+    public constructor(amount: Utils.BigNumber, minimumAmount: Utils.BigNumber) {
+        super(
+            `Failed to apply transaction, because burn amount (${Utils.formatSatoshi(
+                amount,
+            )}) is below the minimum (${Utils.formatSatoshi(minimumAmount)}).`,
+        );
+    }
+}
+
 export class InvalidTransactionTypeError extends TransactionError {
     public constructor(type: Transactions.InternalTransactionType) {
         super(`Transaction type ${type.toString()} does not exist`);

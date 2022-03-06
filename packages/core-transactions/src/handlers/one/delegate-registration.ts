@@ -1,5 +1,5 @@
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Enums, Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
+import { Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
 
 import {
     NotSupportedForMultiSignatureWalletError,
@@ -89,7 +89,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
 
         if (hasSender) {
             throw new Contracts.TransactionPool.PoolError(
-                `Sender ${transaction.data.senderPublicKey} already has a transaction of type '${Enums.TransactionType.DelegateRegistration}' in the pool`,
+                `Sender ${transaction.data.senderPublicKey} already has a delegate registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }

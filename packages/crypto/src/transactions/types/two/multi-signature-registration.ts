@@ -7,7 +7,7 @@ import { Transaction } from "../transaction";
 
 export class MultiSignatureRegistrationTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.MultiSignature;
+    public static type: number = TransactionType.Core.MultiSignature;
     public static key = "multiSignature";
     public static version: number = 2;
 

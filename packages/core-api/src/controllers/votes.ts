@@ -15,7 +15,7 @@ export class VotesController extends Controller {
         const criteria = {
             ...request.query,
             typeGroup: Enums.TransactionTypeGroup.Core,
-            type: Enums.TransactionType.Vote,
+            type: Enums.TransactionType.Core.Vote,
         };
 
         const transactionListResult = await this.transactionHistoryService.listByCriteria(
@@ -31,13 +31,13 @@ export class VotesController extends Controller {
     public async show(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         const transaction = await this.transactionHistoryService.findOneByCriteria({
             typeGroup: Enums.TransactionTypeGroup.Core,
-            type: Enums.TransactionType.Vote,
+            type: Enums.TransactionType.Core.Vote,
             id: request.params.id,
         });
 
         if (
             !transaction ||
-            transaction.type !== Enums.TransactionType.Vote ||
+            transaction.type !== Enums.TransactionType.Core.Vote ||
             transaction.typeGroup !== Enums.TransactionTypeGroup.Core
         ) {
             return Boom.notFound("Vote not found");

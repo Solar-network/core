@@ -54,7 +54,10 @@ export class TransactionHandlerProvider {
             }
         }
 
-        if (transactionConstructor.typeGroup !== Enums.TransactionTypeGroup.Core) {
+        if (
+            transactionConstructor.typeGroup !== Enums.TransactionTypeGroup.Core &&
+            transactionConstructor.typeGroup !== Enums.TransactionTypeGroup.Solar
+        ) {
             Transactions.TransactionRegistry.registerTransactionType(transactionConstructor);
         }
     }

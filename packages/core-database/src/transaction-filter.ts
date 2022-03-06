@@ -140,7 +140,7 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
             op: "and",
             expressions: [
                 { op: "equal", property: "typeGroup", value: Enums.TransactionTypeGroup.Core },
-                { op: "equal", property: "type", value: Enums.TransactionType.MultiPayment },
+                { op: "equal", property: "type", value: Enums.TransactionType.Core.MultiPayment },
                 { op: "contains", property: "asset", value: { payments: [{ recipientId: criteria }] } },
             ],
         };
@@ -151,7 +151,7 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
                 op: "and",
                 expressions: [
                     { op: "equal", property: "typeGroup", value: Enums.TransactionTypeGroup.Core },
-                    { op: "equal", property: "type", value: Enums.TransactionType.DelegateRegistration },
+                    { op: "equal", property: "type", value: Enums.TransactionType.Core.DelegateRegistration },
                     { op: "equal", property: "senderPublicKey", value: recipientWallet.getPublicKey() },
                 ],
             };

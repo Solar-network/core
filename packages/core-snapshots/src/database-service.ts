@@ -347,7 +347,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
                 updateStep: this.configuration.getOptional("updateStep", 1000),
             },
             networkConfig: Managers.configManager.all()!,
-            cryptoPackages: this.configuration.getRequired("cryptoPackages"),
+            cryptoPackages: this.configuration.getOptional("cryptoPackages", []),
             connection: this.coreDatabaseConfiguration.getRequired("connection"),
         };
     }
