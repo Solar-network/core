@@ -5,7 +5,7 @@ import {
     UnknownTransactionError,
 } from "../errors";
 import { validator } from "../validation";
-import { One, Transaction, TransactionTypeFactory, Two } from "./types";
+import { One, Solar, Transaction, TransactionTypeFactory, Two } from "./types";
 import { InternalTransactionType } from "./types/internal-transaction-type";
 
 export type TransactionConstructor = typeof Transaction;
@@ -40,6 +40,9 @@ class TransactionRegistry {
         this.registerTransactionType(Two.HtlcLockTransaction);
         this.registerTransactionType(Two.HtlcClaimTransaction);
         this.registerTransactionType(Two.HtlcRefundTransaction);
+
+        // Solar transactions
+        this.registerTransactionType(Solar.BurnTransaction);
     }
 
     public registerTransactionType(constructor: TransactionConstructor): void {

@@ -254,7 +254,7 @@ export abstract class TransactionHandler {
 
         // Prevent legacy multisignatures from being used
         const isMultiSignatureRegistration: boolean =
-            transaction.type === Enums.TransactionType.MultiSignature &&
+            transaction.type === Enums.TransactionType.Core.MultiSignature &&
             transaction.typeGroup === Enums.TransactionTypeGroup.Core;
         if (isMultiSignatureRegistration && !Managers.configManager.getMilestone().aip11) {
             throw new LegacyMultiSignatureRegistrationError();

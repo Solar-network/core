@@ -15,15 +15,15 @@ export class StandardCriteriaService {
                 //
                 // Example:
                 // [
-                //   { type: Enums.TransactionType.DelegateRegistration },
-                //   { type: Enums.TransactionType.Vote }
+                //   { type: Enums.TransactionType.Core.DelegateRegistration },
+                //   { type: Enums.TransactionType.Core.Vote }
                 // ]
                 //
                 // Alternatively (behaves same as above):
                 // {
                 //   type: [
-                //     Enums.TransactionType.DelegateRegistration,
-                //     Enums.TransactionType.Vote
+                //     Enums.TransactionType.Core.DelegateRegistration,
+                //     Enums.TransactionType.Core.Vote
                 //   ]
                 // }
 

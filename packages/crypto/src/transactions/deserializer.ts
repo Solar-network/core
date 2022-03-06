@@ -16,10 +16,10 @@ export class Deserializer {
         transaction.secondSignature = transaction.secondSignature || transaction.signSignature;
         transaction.typeGroup = TransactionTypeGroup.Core;
 
-        if (transaction.type === TransactionType.Vote && transaction.senderPublicKey) {
+        if (transaction.type === TransactionType.Core.Vote && transaction.senderPublicKey) {
             transaction.recipientId = Address.fromPublicKey(transaction.senderPublicKey, transaction.network);
         } else if (
-            transaction.type === TransactionType.MultiSignature &&
+            transaction.type === TransactionType.Core.MultiSignature &&
             transaction.asset &&
             transaction.asset.multiSignatureLegacy
         ) {

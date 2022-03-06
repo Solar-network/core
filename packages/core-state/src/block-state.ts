@@ -74,7 +74,7 @@ export class BlockState implements Contracts.State.BlockState {
         let lockWallet: Contracts.State.Wallet | undefined;
         let lockTransaction: Interfaces.ITransactionData | undefined;
         if (
-            transaction.type === Enums.TransactionType.HtlcClaim &&
+            transaction.type === Enums.TransactionType.Core.HtlcClaim &&
             transaction.typeGroup === Enums.TransactionTypeGroup.Core
         ) {
             AppUtils.assert.defined<Interfaces.IHtlcClaimAsset>(transaction.data.asset?.claim);
@@ -122,7 +122,7 @@ export class BlockState implements Contracts.State.BlockState {
         let lockWallet: Contracts.State.Wallet | undefined;
         let lockTransaction: Interfaces.ITransactionData | undefined;
         if (
-            transaction.type === Enums.TransactionType.HtlcClaim &&
+            transaction.type === Enums.TransactionType.Core.HtlcClaim &&
             transaction.typeGroup === Enums.TransactionTypeGroup.Core
         ) {
             AppUtils.assert.defined<Interfaces.IHtlcClaimAsset>(transaction.data.asset?.claim);
@@ -225,7 +225,7 @@ export class BlockState implements Contracts.State.BlockState {
         revert: boolean,
     ): void {
         if (
-            transaction.type === Enums.TransactionType.Vote &&
+            transaction.type === Enums.TransactionType.Core.Vote &&
             transaction.typeGroup === Enums.TransactionTypeGroup.Core
         ) {
             AppUtils.assert.defined<Interfaces.ITransactionAsset>(transaction.asset?.votes);
@@ -265,7 +265,7 @@ export class BlockState implements Contracts.State.BlockState {
 
                 let amount: AppUtils.BigNumber = transaction.amount;
                 if (
-                    transaction.type === Enums.TransactionType.MultiPayment &&
+                    transaction.type === Enums.TransactionType.Core.MultiPayment &&
                     transaction.typeGroup === Enums.TransactionTypeGroup.Core
                 ) {
                     AppUtils.assert.defined<Interfaces.IMultiPaymentItem[]>(transaction.asset?.payments);
@@ -285,13 +285,13 @@ export class BlockState implements Contracts.State.BlockState {
                 let newVoteBalance: Utils.BigNumber;
 
                 if (
-                    transaction.type === Enums.TransactionType.HtlcLock &&
+                    transaction.type === Enums.TransactionType.Core.HtlcLock &&
                     transaction.typeGroup === Enums.TransactionTypeGroup.Core
                 ) {
                     // HTLC Lock keeps the locked amount as the sender's delegate vote balance
                     newVoteBalance = revert ? voteBalance.plus(transaction.fee) : voteBalance.minus(transaction.fee);
                 } else if (
-                    transaction.type === Enums.TransactionType.HtlcClaim &&
+                    transaction.type === Enums.TransactionType.Core.HtlcClaim &&
                     transaction.typeGroup === Enums.TransactionTypeGroup.Core
                 ) {
                     // HTLC Claim transfers the locked amount to the lock recipient's (= claim sender) delegate vote balance
@@ -306,7 +306,7 @@ export class BlockState implements Contracts.State.BlockState {
             }
 
             if (
-                transaction.type === Enums.TransactionType.HtlcClaim &&
+                transaction.type === Enums.TransactionType.Core.HtlcClaim &&
                 transaction.typeGroup === Enums.TransactionTypeGroup.Core &&
                 lockWallet.hasAttribute("vote")
             ) {
@@ -327,7 +327,7 @@ export class BlockState implements Contracts.State.BlockState {
             }
 
             if (
-                transaction.type === Enums.TransactionType.MultiPayment &&
+                transaction.type === Enums.TransactionType.Core.MultiPayment &&
                 transaction.typeGroup === Enums.TransactionTypeGroup.Core
             ) {
                 AppUtils.assert.defined<Interfaces.IMultiPaymentItem[]>(transaction.asset?.payments);
@@ -354,7 +354,7 @@ export class BlockState implements Contracts.State.BlockState {
             if (
                 recipient &&
                 recipient.hasVoted() &&
-                (transaction.type !== Enums.TransactionType.HtlcLock ||
+                (transaction.type !== Enums.TransactionType.Core.HtlcLock ||
                     transaction.typeGroup !== Enums.TransactionTypeGroup.Core)
             ) {
                 const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(

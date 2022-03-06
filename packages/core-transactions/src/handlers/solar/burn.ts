@@ -1,15 +1,12 @@
 import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Transactions as SolarTransactions } from "@solar-network/solar-crypto";
-import { Handlers } from "@arkecosystem/core-transactions";
 import { Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
 
-import { SolarTransactionHandler } from "./handler";
-
-import { InsufficientBurnAmountError } from "./errors";
+import { InsufficientBurnAmountError } from "../../errors";
+import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
 @Container.injectable()
-export class BurnTransactionHandler extends SolarTransactionHandler {
-    public dependencies(): ReadonlyArray<Handlers.TransactionHandlerConstructor> {
+export class BurnTransactionHandler extends TransactionHandler {
+    public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
         return [];
     }
 
@@ -18,22 +15,29 @@ export class BurnTransactionHandler extends SolarTransactionHandler {
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return SolarTransactions.BurnTransaction;
+        return Transactions.Solar.BurnTransaction;
     }
 
     public async isActivated(): Promise<boolean> {
         const milestone = Managers.configManager.getMilestone();
-        return typeof milestone.solarTransactions === "object" && typeof milestone.solarTransactions.burn === "object" && typeof milestone.solarTransactions.burn.minimumAmount === "number";
+        return (
+            typeof milestone.solarTransactions === "object" &&
+            typeof milestone.solarTransactions.burn === "object" &&
+            typeof milestone.solarTransactions.burn.minimumAmount === "number"
+        );
     }
 
-    public async throwIfCannotBeApplied(transaction: Interfaces.ITransaction, wallet: Contracts.State.Wallet): Promise<void> {
+    public async throwIfCannotBeApplied(
+        transaction: Interfaces.ITransaction,
+        wallet: Contracts.State.Wallet,
+    ): Promise<void> {
         const milestone = Managers.configManager.getMilestone();
 
         const { data }: Interfaces.ITransaction = transaction;
         const minimumAmount = +milestone.solarTransactions.burn.minimumAmount;
 
         if (data.amount.isLessThan(minimumAmount)) {
-            throw new InsufficientBurnAmountError(data.amount, minimumAmount);
+            throw new InsufficientBurnAmountError(data.amount, Utils.BigNumber.make(minimumAmount));
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);

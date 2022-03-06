@@ -7,7 +7,7 @@ import { Transaction } from "../transaction";
 
 export abstract class HtlcRefundTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.HtlcRefund;
+    public static type: number = TransactionType.Core.HtlcRefund;
     public static key = "htlcRefund";
     public static version: number = 2;
 

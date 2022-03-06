@@ -40,12 +40,12 @@ export class LocksController extends Controller {
         const criteria = [
             {
                 typeGroup: Enums.TransactionTypeGroup.Core,
-                type: Enums.TransactionType.HtlcClaim,
+                type: Enums.TransactionType.Core.HtlcClaim,
                 asset: request.payload.ids.map((lockId: string) => ({ claim: { lockTransactionId: lockId } })),
             },
             {
                 typeGroup: Enums.TransactionTypeGroup.Core,
-                type: Enums.TransactionType.HtlcRefund,
+                type: Enums.TransactionType.Core.HtlcRefund,
                 asset: request.payload.ids.map((lockId: string) => ({ refund: { lockTransactionId: lockId } })),
             },
         ];

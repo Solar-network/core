@@ -197,7 +197,7 @@ export class WalletsController extends Controller {
         const criteria: Contracts.Shared.TransactionCriteria = {
             ...request.query,
             typeGroup: Enums.TransactionTypeGroup.Core,
-            type: Enums.TransactionType.Vote,
+            type: Enums.TransactionType.Core.Vote,
             senderPublicKey: walletResource.publicKey,
         };
         const sorting: Contracts.Search.Sorting = this.getListingOrder(request);

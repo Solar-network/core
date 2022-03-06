@@ -1,5 +1,5 @@
 import { Container, Contracts, Utils, Enums as AppEnums } from "@arkecosystem/core-kernel";
-import { Enums, Interfaces, Transactions, Managers } from "@arkecosystem/crypto";
+import { Interfaces, Transactions, Managers } from "@arkecosystem/crypto";
 
 import {
     AlreadyVotedError,
@@ -105,7 +105,7 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         if (hasSender) {
             throw new Contracts.TransactionPool.PoolError(
-                `Sender ${transaction.data.senderPublicKey} already has a transaction of type '${Enums.TransactionType.Vote}' in the pool`,
+                `Sender ${transaction.data.senderPublicKey} already has a vote transaction in the pool`,
                 "ERR_PENDING",
             );
         }
