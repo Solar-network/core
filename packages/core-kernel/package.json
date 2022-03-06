@@ -1,13 +1,13 @@
 {
     "name": "@solar-network/core-kernel",
-    "description": "Kernel of Solar Core",
     "version": "3.1.1",
+    "description": "Kernel of Solar Core",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
         "alessiodf <gym@solar.org>",
         "cactus1549 <cactus1549@solar.org>",
         "ARK Ecosystem <info@ark.io>"
     ],
-    "license": "CC-BY-ND-4.0",
     "main": "dist/index",
     "types": "dist/index",
     "files": [
