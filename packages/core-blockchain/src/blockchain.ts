@@ -1,7 +1,7 @@
-import { DatabaseService, Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Enums, Providers, Types, Utils } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Blocks, Crypto, Interfaces, Managers } from "@arkecosystem/crypto";
+import { DatabaseService, Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Enums, Providers, Types, Utils } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Blocks, Crypto, Interfaces, Managers } from "@solar-network/crypto";
 
 import { ProcessBlocksJob } from "./process-blocks-job";
 import { StateMachine } from "./state-machine";
@@ -14,7 +14,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     public readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-blockchain")
+    @Container.tagged("plugin", "@solar-network/core-blockchain")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.StateStore)
@@ -63,7 +63,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         if (this.stateStore.getNetworkStart()) {
             this.logger.warning(
-                "ARK Core is launched in Genesis Start mode. This is usually for starting the first node on the blockchain. Unless you know what you are doing, this is likely wrong :warning:",
+                "Solar Core is launched in Genesis Start mode. This is usually for starting the first node on the blockchain. Unless you know what you are doing, this is likely wrong :warning:",
             );
         }
 

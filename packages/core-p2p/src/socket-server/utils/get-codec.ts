@@ -1,4 +1,4 @@
-import { Contracts } from "@arkecosystem/core-kernel";
+import { Contracts } from "@solar-network/core-kernel";
 import { BlocksRoute } from "../routes/blocks";
 import { InternalRoute } from "../routes/internal";
 import { PeerRoute } from "../routes/peer";

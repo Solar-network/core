@@ -1,5 +1,5 @@
-import { Container } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Container } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 
 import { Resource } from "../interfaces";
 

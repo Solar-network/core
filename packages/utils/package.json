@@ -1,12 +1,13 @@
 {
-    "name": "@arkecosystem/utils",
-    "description": "Performance oriented implementations of commonly used functions in TypeScript.",
+    "name": "@solar-network/utils",
     "version": "1.3.1",
-    "contributors": [
-        "Brian Faust <brian@ark.io>",
-        "Joshua Noack <joshua@ark.io>"
-    ],
+    "description": "Performance oriented implementations of commonly used functions in TypeScript.",
     "license": "CC-BY-ND-4.0",
+    "contributors": [
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
+    ],
     "main": "dist/index",
     "types": "dist/index",
     "files": [

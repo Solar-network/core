@@ -1,4 +1,4 @@
-import { Container, Contracts, Enums, Providers, Services } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Enums, Providers, Services } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { ForgeNewBlockAction, IsForgingAllowedAction } from "./actions";

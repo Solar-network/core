@@ -1,5 +1,5 @@
-import { Container, Contracts, Enums } from "@arkecosystem/core-kernel";
-import { Blocks, Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums } from "@solar-network/core-kernel";
+import { Blocks, Interfaces, Transactions } from "@solar-network/crypto";
 import { Connection } from "typeorm";
 
 import { DatabaseEvent } from "./events";

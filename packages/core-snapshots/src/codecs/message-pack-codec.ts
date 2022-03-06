@@ -1,6 +1,6 @@
-import { Models } from "@arkecosystem/core-database";
-import { Container } from "@arkecosystem/core-kernel";
-import { Blocks, Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
+import { Models } from "@solar-network/core-database";
+import { Container } from "@solar-network/core-kernel";
+import { Blocks, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { decode, encode } from "msgpack-lite";
 import { camelizeKeys } from "xcase";
 

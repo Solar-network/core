@@ -1,7 +1,7 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Interfaces, Utils } from "@arkecosystem/crypto";
+import { Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Services, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Interfaces, Utils } from "@solar-network/crypto";
 
 import {
     AcceptBlockHandler,

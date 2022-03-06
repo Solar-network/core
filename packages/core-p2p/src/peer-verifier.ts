@@ -1,6 +1,6 @@
-import { Container, Contracts, Services, Utils } from "@arkecosystem/core-kernel";
-import { DatabaseInterceptor } from "@arkecosystem/core-state";
-import { Blocks, Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
+import { DatabaseInterceptor } from "@solar-network/core-state";
+import { Blocks, Interfaces } from "@solar-network/crypto";
 import assert from "assert";
 import pluralize from "pluralize";
 import { inspect } from "util";

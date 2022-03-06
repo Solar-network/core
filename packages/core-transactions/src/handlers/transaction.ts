@@ -1,6 +1,6 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Enums, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
+import { Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import assert from "assert";
 
 import {

@@ -1,7 +1,7 @@
-import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { NetworkStateStatus } from "@arkecosystem/core-p2p";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Blocks, Crypto, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/core-kernel";
+import { NetworkStateStatus } from "@solar-network/core-p2p";
+import { Handlers } from "@solar-network/core-transactions";
+import { Blocks, Crypto, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import delay from "delay";
 import { writeFileSync } from "fs";
 import { Client } from "./client";

@@ -1,5 +1,5 @@
-import { Container, Contracts, Providers, Utils } from "@arkecosystem/core-kernel";
-import { Crypto, Interfaces, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Providers, Utils } from "@solar-network/core-kernel";
+import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
 
 import { NetworkStateStatus } from "./enums";
 import { Peer } from "./peer";
@@ -101,7 +101,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         const configuration = monitor.app.getTagged<Providers.PluginConfiguration>(
             Container.Identifiers.PluginConfiguration,
             "plugin",
-            "@arkecosystem/core-p2p",
+            "@solar-network/core-p2p",
         );
 
         const milestone = Managers.configManager.getMilestone();

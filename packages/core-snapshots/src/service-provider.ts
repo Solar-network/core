@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 import Joi from "joi";
 import { getCustomRepository } from "typeorm";
 
@@ -23,7 +23,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
     public dependencies(): Contracts.Kernel.PluginDependency[] {
         return [
             {
-                name: "@arkecosystem/core-database",
+                name: "@solar-network/core-database",
                 required: true,
             },
         ];

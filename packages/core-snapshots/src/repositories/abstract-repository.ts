@@ -1,4 +1,4 @@
-import { Repositories } from "@arkecosystem/core-database";
+import { Repositories } from "@solar-network/core-database";
 import { ObjectLiteral } from "typeorm";
 
 interface WhereExpression {

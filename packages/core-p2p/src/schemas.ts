@@ -1,4 +1,4 @@
-import { Managers } from "@arkecosystem/crypto";
+import { Managers } from "@solar-network/crypto";
 
 import { constants } from "./constants";
 

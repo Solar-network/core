@@ -1,4 +1,4 @@
-import { Validation } from "@arkecosystem/crypto";
+import { Validation } from "@solar-network/crypto";
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
 

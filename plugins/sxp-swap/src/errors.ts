@@ -1,5 +1,5 @@
-import { Utils } from "@arkecosystem/crypto";
-import { BigNumber } from "@arkecosystem/utils";
+import { Utils } from "@solar-network/crypto";
+import { BigNumber } from "@solar-network/utils";
 
 export class ApiCommunicationError extends Error {
     public constructor(network: string) {

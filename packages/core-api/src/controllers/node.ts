@@ -1,7 +1,7 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Providers, Services } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Crypto, Managers } from "@arkecosystem/crypto";
+import { Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Providers, Services } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Crypto, Managers } from "@solar-network/crypto";
 import Hapi from "@hapi/hapi";
 
 import { PortsResource } from "../resources";
@@ -10,7 +10,7 @@ import { Controller } from "./controller";
 @Container.injectable()
 export class NodeController extends Controller {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-transaction-pool")
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
     private readonly transactionPoolConfiguration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)

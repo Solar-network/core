@@ -1,4 +1,4 @@
-import { Contracts } from "@arkecosystem/core-kernel";
+import { Contracts } from "@solar-network/core-kernel";
 
 export class WalletIndex implements Contracts.State.WalletIndex {
     private walletByKey: Map<string, Contracts.State.Wallet>;

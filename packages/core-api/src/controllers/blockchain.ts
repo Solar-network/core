@@ -1,5 +1,5 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
+import { Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 
 import { Controller } from "./controller";
 

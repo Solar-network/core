@@ -1,15 +1,12 @@
 {
-    "name": "@arkecosystem/crypto",
+    "name": "@solar-network/crypto",
     "version": "3.1.1",
-    "description": "Crypto utilities for the ARK Blockchain",
+    "description": "Crypto utilities for the Solar Network Blockchain",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "François-Xavier Thoorens <fx.thoorens@ark.io>",
-        "Brian Faust <brian@ark.io>",
-        "Alex Barnsley <alex@ark.io>",
-        "Lúcio Rubens <lucio@ark.io>",
-        "Juan A. Martín <juan@ark.io>",
-        "Joshua Noack <joshua@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"
@@ -31,7 +28,7 @@
         "prepublishOnly": "yarn build:rollup"
     },
     "dependencies": {
-        "@arkecosystem/utils": "1.3.1",
+        "@solar-network/utils": "1.3.1",
         "ajv": "6.12.6",
         "ajv-keywords": "3.4.1",
         "bcrypto": "5.4.0",

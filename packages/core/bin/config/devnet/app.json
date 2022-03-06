@@ -2,19 +2,19 @@
     "core": {
         "plugins": [
             {
-                "package": "@arkecosystem/core-logger-pino"
+                "package": "@solar-network/core-logger-pino"
             },
             {
-                "package": "@arkecosystem/core-state"
+                "package": "@solar-network/core-state"
             },
             {
-                "package": "@arkecosystem/core-database"
+                "package": "@solar-network/core-database"
             },
             {
-                "package": "@arkecosystem/core-transactions"
+                "package": "@solar-network/core-transactions"
             },
             {
-                "package": "@arkecosystem/core-transaction-pool"
+                "package": "@solar-network/core-transaction-pool"
             },
             {
                 "package": "@solar-network/sxp-swap",
@@ -23,41 +23,41 @@
                 }
             },
             {
-                "package": "@arkecosystem/core-p2p",
+                "package": "@solar-network/core-p2p",
                 "options": {
                     "minimumNetworkReach": 5
                 }
             },
             {
-                "package": "@arkecosystem/core-blockchain"
+                "package": "@solar-network/core-blockchain"
             },
             {
-                "package": "@arkecosystem/core-api"
+                "package": "@solar-network/core-api"
             },
             {
-                "package": "@arkecosystem/core-webhooks"
+                "package": "@solar-network/core-webhooks"
             },
             {
-                "package": "@arkecosystem/core-forger"
+                "package": "@solar-network/core-forger"
             }
         ]
     },
     "relay": {
         "plugins": [
             {
-                "package": "@arkecosystem/core-logger-pino"
+                "package": "@solar-network/core-logger-pino"
             },
             {
-                "package": "@arkecosystem/core-state"
+                "package": "@solar-network/core-state"
             },
             {
-                "package": "@arkecosystem/core-database"
+                "package": "@solar-network/core-database"
             },
             {
-                "package": "@arkecosystem/core-transactions"
+                "package": "@solar-network/core-transactions"
             },
             {
-                "package": "@arkecosystem/core-transaction-pool"
+                "package": "@solar-network/core-transaction-pool"
             },
             {
                 "package": "@solar-network/sxp-swap",
@@ -66,48 +66,48 @@
                 }
             },
             {
-                "package": "@arkecosystem/core-p2p",
+                "package": "@solar-network/core-p2p",
                 "options": {
                     "minimumNetworkReach": 5
                 }
             },
             {
-                "package": "@arkecosystem/core-blockchain"
+                "package": "@solar-network/core-blockchain"
             },
             {
-                "package": "@arkecosystem/core-api"
+                "package": "@solar-network/core-api"
             },
             {
-                "package": "@arkecosystem/core-webhooks"
+                "package": "@solar-network/core-webhooks"
             }
         ]
     },
     "forger": {
         "plugins": [
             {
-                "package": "@arkecosystem/core-logger-pino"
+                "package": "@solar-network/core-logger-pino"
             },
             {
-                "package": "@arkecosystem/core-database"
+                "package": "@solar-network/core-database"
             },
             {
-                "package": "@arkecosystem/core-transactions"
+                "package": "@solar-network/core-transactions"
             },
             {
-                "package": "@arkecosystem/core-forger"
+                "package": "@solar-network/core-forger"
             }
         ]
     },
     "snapshot": {
         "plugins": [
             {
-                "package": "@arkecosystem/core-logger-pino"
+                "package": "@solar-network/core-logger-pino"
             },
             {
-                "package": "@arkecosystem/core-database"
+                "package": "@solar-network/core-database"
             },
             {
-                "package": "@arkecosystem/core-snapshots"
+                "package": "@solar-network/core-snapshots"
             }
         ]
     }

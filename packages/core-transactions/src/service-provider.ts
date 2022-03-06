@@ -1,4 +1,4 @@
-import { Container, Providers, Services } from "@arkecosystem/core-kernel";
+import { Container, Providers, Services } from "@solar-network/core-kernel";
 
 import { One, Solar, TransactionHandlerConstructor, Two } from "./handlers";
 import { TransactionHandlerProvider } from "./handlers/handler-provider";

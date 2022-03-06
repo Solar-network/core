@@ -1,5 +1,5 @@
-import { Commands, Container, Contracts, Utils } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container, Contracts, Utils } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
 import { checkForPassphrase } from "../internal/crypto";
@@ -62,11 +62,11 @@ export class Command extends Commands.Command {
         await Utils.buildApplication({
             flags,
             plugins: {
-                "@arkecosystem/core-p2p": Utils.buildPeerFlags(flags),
-                "@arkecosystem/core-blockchain": {
+                "@solar-network/core-p2p": Utils.buildPeerFlags(flags),
+                "@solar-network/core-blockchain": {
                     networkStart: flags.networkStart,
                 },
-                "@arkecosystem/core-forger": {},
+                "@solar-network/core-forger": {},
             },
         });
 

@@ -1,11 +1,12 @@
 {
-    "name": "@arkecosystem/core-state",
+    "name": "@solar-network/core-state",
     "version": "3.1.1",
-    "description": "State Management for ARK Core",
+    "description": "State Management for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "Brian Faust <brian@ark.io>",
-        "Joshua Noack <joshua@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"
@@ -22,10 +23,10 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@arkecosystem/core-database": "3.1.1",
-        "@arkecosystem/core-kernel": "3.1.1",
-        "@arkecosystem/core-transactions": "3.1.1",
-        "@arkecosystem/crypto": "3.1.1",
+        "@solar-network/core-database": "3.1.1",
+        "@solar-network/core-kernel": "3.1.1",
+        "@solar-network/core-transactions": "3.1.1",
+        "@solar-network/crypto": "3.1.1",
         "immutable": "4.0.0-rc.14",
         "joi": "17.4.2"
     },

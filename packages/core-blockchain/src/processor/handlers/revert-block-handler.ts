@@ -1,7 +1,7 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Interfaces } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Interfaces } from "@solar-network/crypto";
 
 import { BlockProcessorResult } from "../block-processor";
 import { BlockHandler } from "../contracts";

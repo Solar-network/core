@@ -1,5 +1,5 @@
-import { Utils } from "@arkecosystem/core-kernel";
-import { Crypto, Enums } from "@arkecosystem/crypto";
+import { Utils } from "@solar-network/core-kernel";
+import { Crypto, Enums } from "@solar-network/crypto";
 import dayjs from "dayjs";
 import { Brackets, EntityRepository, In } from "typeorm";
 

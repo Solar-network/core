@@ -1,4 +1,4 @@
-import { Application, Container, Contracts } from "@arkecosystem/core-kernel";
+import { Application, Container, Contracts } from "@solar-network/core-kernel";
 
 import { AnyObject } from "../contracts";
 

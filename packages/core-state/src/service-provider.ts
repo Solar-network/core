@@ -1,5 +1,5 @@
-import { Container, Contracts, Providers, Services } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Providers, Services } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 import Joi from "joi";
 
 import { BuildDelegateRankingAction, GetActiveDelegatesAction } from "./actions";
@@ -113,7 +113,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
     }
 
     public async bootWhen(serviceProvider?: string): Promise<boolean> {
-        return serviceProvider === "@arkecosystem/core-database";
+        return serviceProvider === "@solar-network/core-database";
     }
 
     public configSchema(): object {

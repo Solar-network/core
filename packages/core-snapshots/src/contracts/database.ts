@@ -1,5 +1,5 @@
-import { Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Contracts } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 import * as Meta from "./meta-data";
 import * as Options from "./options";

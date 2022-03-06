@@ -1,4 +1,4 @@
-import { Enums, Interfaces } from "@arkecosystem/crypto";
+import { Enums, Interfaces } from "@solar-network/crypto";
 
 export type QueryPredicate = (transaction: Interfaces.ITransaction) => boolean;
 

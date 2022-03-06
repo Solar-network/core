@@ -1,5 +1,5 @@
-import { Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Interfaces, Utils } from "@arkecosystem/crypto";
+import { Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Utils } from "@solar-network/crypto";
 
 export class RetryTransactionError extends Contracts.TransactionPool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {

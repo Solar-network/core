@@ -1,4 +1,4 @@
-import { Crypto, Managers } from "@arkecosystem/crypto";
+import { Crypto, Managers } from "@solar-network/crypto";
 import { ForgingInfo } from "../contracts/shared";
 
 export interface MilestoneSearchResult {

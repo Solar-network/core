@@ -1,4 +1,4 @@
-import { Models } from "@arkecosystem/core-database";
+import { Models } from "@solar-network/core-database";
 
 export interface Codec {
     encodeBlock(block: any): Buffer;

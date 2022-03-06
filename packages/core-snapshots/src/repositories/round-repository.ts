@@ -1,4 +1,4 @@
-import { Models } from "@arkecosystem/core-database";
+import { Models } from "@solar-network/core-database";
 import { Readable } from "stream";
 import { EntityRepository } from "typeorm";
 

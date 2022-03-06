@@ -1,4 +1,4 @@
-import { ApplicationFactory, Commands, Container, Contracts, InputParser, Plugins } from "@arkecosystem/core-cli";
+import { ApplicationFactory, Commands, Container, Contracts, InputParser, Plugins } from "@solar-network/core-cli";
 import envPaths from "env-paths";
 import { existsSync } from "fs-extra";
 import { platform } from "os";
@@ -39,7 +39,7 @@ export class CommandLineInterface {
      * @memberof CommandLineInterface
      */
     public async execute(dirname = __dirname): Promise<void> {
-        // Set NODE_PATHS. Only required for plugins that uses @arkecosystem as peer dependencies.
+        // Set NODE_PATHS. Only required for plugins that uses @solar-network as peer dependencies.
         this.setNodePath();
 
         // Load the package information. Only needed for updates and installations.

@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 import assert from "assert";
 
 import { BlockRepository } from "./repositories/block-repository";

@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 import { BlockDataWithTransactionData } from "../shared/block-history-service";
 import { TransactionDataWithBlockData } from "../shared/transaction-history-service";

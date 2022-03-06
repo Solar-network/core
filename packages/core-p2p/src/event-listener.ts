@@ -1,4 +1,4 @@
-import { Container, Contracts, Enums } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Enums } from "@solar-network/core-kernel";
 
 import { DisconnectPeer } from "./listeners";
 

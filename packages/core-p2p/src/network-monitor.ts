@@ -1,6 +1,6 @@
-import { Container, Contracts, Enums, Providers, Services, Utils } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Identities, Interfaces, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Providers, Services, Utils } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Identities, Interfaces, Managers } from "@solar-network/crypto";
 import delay from "delay";
 import prettyMs from "pretty-ms";
 import { gt, lt } from "semver";
@@ -23,7 +23,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     private readonly databaseInteraction!: DatabaseInteraction;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-p2p")
+    @Container.tagged("plugin", "@solar-network/core-p2p")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.PeerCommunicator)

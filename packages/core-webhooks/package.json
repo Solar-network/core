@@ -1,10 +1,12 @@
 {
-    "name": "@arkecosystem/core-webhooks",
+    "name": "@solar-network/core-webhooks",
     "version": "3.1.1",
-    "description": "Webhooks for ARK Core",
+    "description": "Webhooks for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "Brian Faust <brian@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"
@@ -20,8 +22,8 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@arkecosystem/core-kernel": "3.1.1",
-        "@arkecosystem/crypto": "3.1.1",
+        "@solar-network/core-kernel": "3.1.1",
+        "@solar-network/crypto": "3.1.1",
         "@hapi/boom": "9.0.0",
         "@hapi/hapi": "20.1.5",
         "fs-extra": "8.1.0",

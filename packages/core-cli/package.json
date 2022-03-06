@@ -1,10 +1,12 @@
 {
-    "name": "@arkecosystem/core-cli",
+    "name": "@solar-network/core-cli",
     "version": "3.1.1",
-    "description": "Core of the ARK Blockchain",
+    "description": "Command Line Interface to manage the Core of the Solar Network Blockchain",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "Brian Faust <brian@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "/dist"
@@ -21,9 +23,9 @@
         "prepublishOnly": "yarn build"
     },
     "dependencies": {
-        "@arkecosystem/core-kernel": "3.1.1",
-        "@arkecosystem/crypto": "3.1.1",
-        "@arkecosystem/utils": "1.3.1",
+        "@solar-network/core-kernel": "3.1.1",
+        "@solar-network/crypto": "3.1.1",
+        "@solar-network/utils": "1.3.1",
         "boxen": "4.2.0",
         "cli-table3": "0.6.0",
         "dayjs": "1.10.7",

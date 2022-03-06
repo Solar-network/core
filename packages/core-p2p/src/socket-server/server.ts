@@ -1,4 +1,4 @@
-import { Container, Contracts, Types } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Types } from "@solar-network/core-kernel";
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
 
 import { plugin as hapiNesPlugin } from "../hapi-nes";

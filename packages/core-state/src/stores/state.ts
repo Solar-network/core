@@ -1,5 +1,5 @@
-import { Container, Contracts, Enums, Providers, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Providers, Utils } from "@solar-network/core-kernel";
+import { Interfaces, Managers } from "@solar-network/crypto";
 import assert from "assert";
 import { OrderedMap, OrderedSet, Seq } from "immutable";
 
@@ -11,7 +11,7 @@ export class StateStore implements Contracts.State.StateStore {
     private readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-state")
+    @Container.tagged("plugin", "@solar-network/core-state")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.LogService)

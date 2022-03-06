@@ -1,4 +1,4 @@
-import { BigNumber } from "@arkecosystem/utils";
+import { BigNumber } from "@solar-network/utils";
 import { FindOperator } from "typeorm";
 
 export const transformBigInt = {

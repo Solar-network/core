@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils, Enums as AppEnums } from "@arkecosystem/core-kernel";
-import { Interfaces, Transactions, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils, Enums as AppEnums } from "@solar-network/core-kernel";
+import { Interfaces, Transactions, Managers } from "@solar-network/crypto";
 
 import {
     AlreadyVotedError,

@@ -1,4 +1,4 @@
-import { Validation } from "@arkecosystem/crypto";
+import { Validation } from "@solar-network/crypto";
 
 import { SocketErrors } from "../../enums";
 

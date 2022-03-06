@@ -1,11 +1,11 @@
-import { Container, Contracts, Enums, Providers, Utils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Enums, Providers, Utils } from "@solar-network/core-kernel";
 
 import { WalletEvent } from "./wallet-event";
 
 @Container.injectable()
 export class WalletSyncService implements Contracts.Kernel.EventListener {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-state")
+    @Container.tagged("plugin", "@solar-network/core-state")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.Application)

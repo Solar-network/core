@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Identities, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Identities, Utils } from "@solar-network/crypto";
 
 import { WalletIndexNotFoundError } from "./errors";
 import { WalletIndex } from "./wallet-index";

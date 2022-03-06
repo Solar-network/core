@@ -1,4 +1,4 @@
-import { Blocks, Transactions } from "@arkecosystem/crypto";
+import { Blocks, Transactions } from "@solar-network/crypto";
 
 import { AssertionException } from "../exceptions/runtime";
 

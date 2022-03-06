@@ -1,4 +1,4 @@
-import { Crypto } from "@arkecosystem/crypto";
+import { Crypto } from "@solar-network/crypto";
 import Hapi from "@hapi/hapi";
 import NodeCache from "node-cache";
 

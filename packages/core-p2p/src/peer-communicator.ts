@@ -1,6 +1,6 @@
-import { Container, Contracts, Enums, Providers, Types, Utils } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Blocks, Crypto, Interfaces, Managers, Transactions, Validation } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Providers, Types, Utils } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Blocks, Crypto, Interfaces, Managers, Transactions, Validation } from "@solar-network/crypto";
 import dayjs from "dayjs";
 import delay from "delay";
 
@@ -20,7 +20,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     private readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-p2p")
+    @Container.tagged("plugin", "@solar-network/core-p2p")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.PeerConnector)

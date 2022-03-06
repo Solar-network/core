@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Enums, Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 
 import { InvalidTransactionDataError } from "./errors";
 

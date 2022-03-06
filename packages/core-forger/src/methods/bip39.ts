@@ -1,4 +1,4 @@
-import { Identities, Interfaces } from "@arkecosystem/crypto";
+import { Identities, Interfaces } from "@solar-network/crypto";
 
 import { Delegate } from "../interfaces";
 import { Method } from "./method";

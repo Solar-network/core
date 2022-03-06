@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@solar-network/core-kernel";
 import { fork } from "child_process";
 import Joi from "joi";
 

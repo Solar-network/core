@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers, Types, Utils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers, Types, Utils } from "@solar-network/core-kernel";
 import { badData } from "@hapi/boom";
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
 import { readFileSync } from "fs";
@@ -22,7 +22,7 @@ export class Server {
      * @memberof Server
      */
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-api")
+    @Container.tagged("plugin", "@solar-network/core-api")
     private readonly configuration!: Providers.PluginConfiguration;
 
     /**

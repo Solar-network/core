@@ -1,7 +1,7 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Enums } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Blocks, Interfaces, Managers } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts, Enums } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Blocks, Interfaces, Managers } from "@solar-network/crypto";
 
 import { RoundState } from "./round-state";
 

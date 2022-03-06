@@ -1,4 +1,4 @@
-import { get, has, set, unset, cloneDeep } from "@arkecosystem/utils";
+import { get, has, set, unset, cloneDeep } from "@solar-network/utils";
 import { strictEqual } from "assert";
 
 import { assert } from "../../utils";

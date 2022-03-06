@@ -1,12 +1,12 @@
 {
-    "name": "@arkecosystem/core-forger",
+    "name": "@solar-network/core-forger",
     "version": "3.1.1",
-    "description": "Forger for ARK Core",
+    "description": "Forger for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "François-Xavier Thoorens <fx@ark.io>",
-        "Kristjan Košič <kristjan@ark.io>",
-        "Brian Faust <brian@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"
@@ -22,10 +22,10 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@arkecosystem/core-kernel": "3.1.1",
-        "@arkecosystem/core-p2p": "3.1.1",
-        "@arkecosystem/core-transactions": "3.1.1",
-        "@arkecosystem/crypto": "3.1.1",
+        "@solar-network/core-kernel": "3.1.1",
+        "@solar-network/core-p2p": "3.1.1",
+        "@solar-network/core-transactions": "3.1.1",
+        "@solar-network/crypto": "3.1.1",
         "joi": "17.4.2",
         "node-forge": "1.2.1",
         "wif": "2.0.6"

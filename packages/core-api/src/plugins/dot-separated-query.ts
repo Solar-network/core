@@ -1,4 +1,4 @@
-import { Utils } from "@arkecosystem/core-kernel";
+import { Utils } from "@solar-network/core-kernel";
 import Hapi from "@hapi/hapi";
 
 export const dotSeparatedQuery = {

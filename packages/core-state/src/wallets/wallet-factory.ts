@@ -1,4 +1,4 @@
-import { Contracts, Services } from "@arkecosystem/core-kernel";
+import { Contracts, Services } from "@solar-network/core-kernel";
 import { Wallet } from "./wallet";
 
 export const walletFactory = (

@@ -1,11 +1,12 @@
 {
-    "name": "@arkecosystem/core-api",
+    "name": "@solar-network/core-api",
     "version": "3.1.1",
-    "description": "Public API for ARK Core",
+    "description": "Public API for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
-        "Kristjan Košič <kristjan@ark.io>",
-        "Brian Faust <brian@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"
@@ -22,10 +23,10 @@
         "pretest": "bash ../../scripts/pre-test.sh"
     },
     "dependencies": {
-        "@arkecosystem/core-database": "3.1.1",
-        "@arkecosystem/core-kernel": "3.1.1",
-        "@arkecosystem/core-transactions": "3.1.1",
-        "@arkecosystem/crypto": "3.1.1",
+        "@solar-network/core-database": "3.1.1",
+        "@solar-network/core-kernel": "3.1.1",
+        "@solar-network/core-transactions": "3.1.1",
+        "@solar-network/crypto": "3.1.1",
         "@hapi/boom": "9.1.4",
         "@hapi/hapi": "20.1.5",
         "@hapi/hoek": "9.2.0",

@@ -1,6 +1,6 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Blocks, Crypto, Identities, Interfaces, Utils } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Blocks, Crypto, Identities, Interfaces, Utils } from "@solar-network/crypto";
 import assert from "assert";
 
 @Container.injectable()

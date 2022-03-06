@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 
 import { InsufficientBurnAmountError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";

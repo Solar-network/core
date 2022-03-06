@@ -1,5 +1,5 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import { readJSONSync, writeJSONSync } from "fs-extra";
 import Joi from "joi";
 
@@ -56,7 +56,7 @@ export class Command extends Commands.Command {
 
             for (const app of Object.keys(appJson)) {
                 const loggerConfig = appJson[app].plugins.filter(
-                    (plugin) => plugin.package === "@arkecosystem/core-logger-pino",
+                    (plugin) => plugin.package === "@solar-network/core-logger-pino",
                 )[0];
                 const emojify = this.getFlag("emojify");
 

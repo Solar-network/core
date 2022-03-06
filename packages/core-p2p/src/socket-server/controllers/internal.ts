@@ -1,6 +1,6 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Crypto, Interfaces, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
 import Hapi from "@hapi/hapi";
 
 import { Controller } from "./controller";

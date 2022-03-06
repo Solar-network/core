@@ -1,4 +1,4 @@
-import { Errors, Managers } from "@arkecosystem/crypto";
+import { Errors, Managers } from "@solar-network/crypto";
 import { RoundInfo } from "../contracts/shared";
 import { getMilestonesWhichAffectActiveDelegateCount } from "./calculate-forging-info";
 
