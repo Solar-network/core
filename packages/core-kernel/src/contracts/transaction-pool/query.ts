@@ -12,7 +12,7 @@ export interface Query {
 export interface QueryIterable extends Iterable<Interfaces.ITransaction> {
     wherePredicate(predicate: QueryPredicate): QueryIterable;
     whereId(id: string): QueryIterable;
-    whereType(type: typeof Enums.TransactionType.Core | typeof Enums.TransactionType.Solar | number): QueryIterable;
+    whereType(type: Enums.CoreTransactionType | Enums.SolarTransactionType | number): QueryIterable;
     whereTypeGroup(typeGroup: Enums.TransactionTypeGroup | number): QueryIterable;
     whereVersion(version: number): QueryIterable;
     whereKind(transaction: Interfaces.ITransaction): QueryIterable;
