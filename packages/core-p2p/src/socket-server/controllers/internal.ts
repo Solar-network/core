@@ -93,6 +93,15 @@ export class InternalController extends Controller {
         };
     }
 
+    public async getSlotNumber(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<number> {
+        const lastBlock = this.blockchain.getLastBlock();
+
+        const height = lastBlock.data.height + 1;
+        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, height);
+        return Crypto.Slots.getSlotNumber(blockTimeLookup, request.payload.timestamp);
+    }
+
+
     public async getNetworkState(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<Contracts.P2P.NetworkState> {
         return this.peerNetworkMonitor.getNetworkState(!!request.payload.log);
     }
