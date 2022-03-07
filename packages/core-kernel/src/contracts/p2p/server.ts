@@ -31,7 +31,8 @@ export interface ForgingTransactions {
 export interface Status {
     state: {
         header: {
-            timestamp: number
+            generatorPublicKey: string;
+            timestamp: number;
         }
     };
 }

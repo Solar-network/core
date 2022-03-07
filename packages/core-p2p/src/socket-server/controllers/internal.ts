@@ -103,7 +103,7 @@ export class InternalController extends Controller {
 
 
     public async getNetworkState(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<Contracts.P2P.NetworkState> {
-        return this.peerNetworkMonitor.getNetworkState(!!request.payload.log);
+        return await this.peerNetworkMonitor.getNetworkState(!!request.payload.log);
     }
 
     public syncBlockchain(request: Hapi.Request, h: Hapi.ResponseToolkit): boolean {

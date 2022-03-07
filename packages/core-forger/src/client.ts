@@ -131,7 +131,7 @@ export class Client {
     }
 
     public async getNetworkState(log: boolean): Promise<Contracts.P2P.NetworkState> {
-        return NetworkState.parse(await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", { log }, 4000));
+        return await NetworkState.parse(await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", { log }, 4000));
     }
 
     /**

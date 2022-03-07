@@ -106,13 +106,6 @@ export class ForgerService {
 
     /**
      * @private
-     * @type {number}
-     * @memberof ForgerService
-     */
-    private lastSlot!: number;
-
-    /**
-     * @private
      * @type {(Interfaces.ITransactionData[])}
      * @memberof ForgerService
      */
@@ -277,16 +270,8 @@ export class ForgerService {
             let errored = false;
             const minimumMs = 2000;
             try {
-                const networkState: Contracts.P2P.NetworkState = await this.client.getNetworkState(firstAttempt);
-
+                let networkState: Contracts.P2P.NetworkState = await this.client.getNetworkState(firstAttempt);
                 const networkStateHeight = networkState.getNodeHeight();
-                if (networkStateHeight !== round.lastBlock.height) {
-                    this.logger.warning(
-                        `The NetworkState height (${networkState
-                            .getNodeHeight()
-                            ?.toLocaleString()}) and round height (${round.lastBlock.height.toLocaleString()}) are out of sync. This indicates delayed blocks on the network :zzz:`,
-                    );
-                }
 
                 AppUtils.assert.defined<number>(networkStateHeight);
                 AppUtils.assert.defined<string>(delegate.publicKey);
@@ -294,49 +279,54 @@ export class ForgerService {
                 Managers.configManager.setHeight(networkStateHeight!);
 
                 const roundSlot: number = await this.client.getSlotNumber(round.timestamp);
-                let currentSlot: number = await this.client.getSlotNumber();
 
-                let { state } = await this.client.getStatus();
-                let lastBlockSlot: number = await this.client.getSlotNumber(state.header.timestamp);
+                if (firstAttempt) {
+                    this.transactions = await this.getTransactionsForForging();
+                }
+
+                const block: Interfaces.IBlock | undefined = delegate.forge(this.transactions, {
+                    previousBlock: {
+                        id: networkState.getLastBlockId(),
+                        idHex: Managers.configManager.getMilestone().block.idFullSha256
+                            ? networkState.getLastBlockId()
+                            : Blocks.Block.toBytesHex(networkState.getLastBlockId()),
+                        height: networkStateHeight,
+                    },
+                    timestamp: round.timestamp,
+                    reward: Utils.calculateReward(
+                        networkStateHeight! + 1,
+                        round.currentForger.delegate.rank!,
+                    ),
+                });
+
+                const timeLeftInMs: number = this.getRoundRemainingSlotTime(round);
+
+                const prettyName = this.usernames[delegate.publicKey];
+
+                networkState = await this.client.getNetworkState(false);
+                const { state } = await this.client.getStatus();
+                const currentSlot = await this.client.getSlotNumber();
+                const lastBlockSlot = await this.client.getSlotNumber(state.header.timestamp);
 
                 if (lastBlockSlot === currentSlot || delegate.publicKey !== round.currentForger.publicKey) {
+                    if (firstAttempt && ((networkState.getLastGenerator() === delegate.publicKey && networkState.getLastSlotNumber() === roundSlot) ||
+                        (state.header.generatorPublicKey === delegate.publicKey && lastBlockSlot === roundSlot))) {
+                        this.logger.warning(
+                            `Not going to forge because delegate ${prettyName} has already forged on another node :octagonal_sign:`,
+                        );
+                    }
                     return;
                 }
 
-                if (
-                    await this.app
-                        .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-                        .call("isForgingAllowed", { forgerService: this, delegate, networkState })
-                ) {
-                    if (this.lastSlot !== roundSlot && currentSlot === roundSlot) {
-                        this.transactions = await this.getTransactionsForForging();
-                        this.lastSlot = roundSlot;
-                    }
+                if (networkState.getNodeHeight() !== round.lastBlock.height) {
+                    this.logger.warning(
+                        `The NetworkState height (${networkState
+                            .getNodeHeight()
+                            ?.toLocaleString()}) and round height (${round.lastBlock.height.toLocaleString()}) are out of sync. This indicates delayed blocks on the network :zzz:`,
+                    );
+                }
 
-                    const block: Interfaces.IBlock | undefined = delegate.forge(this.transactions, {
-                        previousBlock: {
-                            id: networkState.getLastBlockId(),
-                            idHex: Managers.configManager.getMilestone().block.idFullSha256
-                                ? networkState.getLastBlockId()
-                                : Blocks.Block.toBytesHex(networkState.getLastBlockId()),
-                            height: networkStateHeight,
-                        },
-                        timestamp: round.timestamp,
-                        reward: Utils.calculateReward(
-                            networkStateHeight! + 1,
-                            round.currentForger.delegate.rank!,
-                        ),
-                    });
-
-                    const timeLeftInMs: number = this.getRoundRemainingSlotTime(round);
-
-                    const prettyName = this.usernames[delegate.publicKey];
-
-                    currentSlot = await this.client.getSlotNumber();
-
-                    ({ state } = await this.client.getStatus());
-                    lastBlockSlot = await this.client.getSlotNumber(state.header.timestamp);
-
+                if (this.isForgingAllowed(networkState, delegate)) {
                     if (
                         timeLeftInMs >= minimumMs &&
                         currentSlot === roundSlot &&
