@@ -55,15 +55,7 @@
         "@types/ip": "1.1.0",
         "@types/semver": "6.2.3"
     },
-    "engines": {
-        "node": ">=10.x"
-    },
     "publishConfig": {
         "access": "public"
-    },
-    "arkecosystem": {
-        "core": {
-            "alias": "p2p"
-        }
     }
 }

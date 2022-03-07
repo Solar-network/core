@@ -58,9 +58,6 @@
         "@types/semver": "6.2.3",
         "@types/yargs-parser": "20.2.1"
     },
-    "engines": {
-        "node": ">=10.x"
-    },
     "publishConfig": {
         "access": "public"
     }

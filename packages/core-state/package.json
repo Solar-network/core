@@ -30,15 +30,7 @@
         "immutable": "4.0.0-rc.14",
         "joi": "17.4.2"
     },
-    "engines": {
-        "node": ">=10.x"
-    },
     "publishConfig": {
         "access": "public"
-    },
-    "arkecosystem": {
-        "core": {
-            "alias": "state"
-        }
     }
 }

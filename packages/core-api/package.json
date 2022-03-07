@@ -43,15 +43,7 @@
         "@types/semver": "6.2.3",
         "lodash.clonedeep": "4.5.0"
     },
-    "engines": {
-        "node": ">=10.x"
-    },
     "publishConfig": {
         "access": "public"
-    },
-    "arkecosystem": {
-        "core": {
-            "alias": "api"
-        }
     }
 }

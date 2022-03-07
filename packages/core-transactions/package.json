@@ -26,9 +26,6 @@
         "@solar-network/core-kernel": "3.1.1",
         "@solar-network/crypto": "3.1.1"
     },
-    "engines": {
-        "node": ">=10.x"
-    },
     "publishConfig": {
         "access": "public"
     }

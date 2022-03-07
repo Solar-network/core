@@ -34,15 +34,7 @@
         "@types/better-sqlite3": "5.4.3",
         "@types/fs-extra": "8.1.2"
     },
-    "engines": {
-        "node": ">=10.x"
-    },
     "publishConfig": {
         "access": "public"
-    },
-    "arkecosystem": {
-        "core": {
-            "alias": "transactionPool"
-        }
     }
 }

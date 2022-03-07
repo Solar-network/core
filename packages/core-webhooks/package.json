@@ -37,9 +37,6 @@
         "@types/hapi__joi": "17.1.7",
         "@types/uuid": "8.3.1"
     },
-    "engines": {
-        "node": ">=10.x"
-    },
     "publishConfig": {
         "access": "public"
     }

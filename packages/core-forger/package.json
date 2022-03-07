@@ -34,15 +34,7 @@
         "@types/node-forge": "0.10.4",
         "@types/wif": "2.0.2"
     },
-    "engines": {
-        "node": ">=10.x"
-    },
     "publishConfig": {
         "access": "public"
-    },
-    "arkecosystem": {
-        "core": {
-            "alias": "forger"
-        }
     }
 }

@@ -32,9 +32,6 @@
         "reflect-metadata": "0.1.13",
         "typeorm": "0.2.25"
     },
-    "engines": {
-        "node": ">=10.x"
-    },
     "publishConfig": {
         "access": "public"
     }
