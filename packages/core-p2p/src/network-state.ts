@@ -68,13 +68,15 @@ class QuorumDetails {
 export class NetworkState implements Contracts.P2P.NetworkState {
     private nodeHeight?: number;
     private lastBlockId?: string;
+    private lastGenerator?: string;
+    private lastSlotNumber?: number;
     private quorumDetails: QuorumDetails;
 
-    public constructor(public readonly status: NetworkStateStatus, lastBlock?: Interfaces.IBlock) {
+    public constructor(public readonly status: NetworkStateStatus, lastBlock?: Interfaces.IBlock, monitor?: Contracts.P2P.NetworkMonitor) {
         this.quorumDetails = new QuorumDetails();
 
         if (lastBlock) {
-            this.setLastBlock(lastBlock);
+            this.setLastBlock(lastBlock, monitor);
         }
     }
 
@@ -134,41 +136,44 @@ export class NetworkState implements Contracts.P2P.NetworkState {
 
         if (monitor.isColdStart()) {
             monitor.completeColdStart();
-            return new NetworkState(NetworkStateStatus.ColdStart, lastBlock);
+            return await new NetworkState(NetworkStateStatus.ColdStart, lastBlock, monitor);
         } else if (process.env.CORE_ENV === "test") {
-            return new NetworkState(NetworkStateStatus.Test, lastBlock);
+            return await new NetworkState(NetworkStateStatus.Test, lastBlock, monitor);
         } else if (!milestone.onlyActiveDelegatesInCalculations && repository.getPeers().length < minimumNetworkReach) {
-            return new NetworkState(NetworkStateStatus.BelowMinimumPeers, lastBlock);
+            return await new NetworkState(NetworkStateStatus.BelowMinimumPeers, lastBlock, monitor);
         } else if (
             milestone.onlyActiveDelegatesInCalculations &&
             peers.flatMap((peer) => peer.publicKeys).length < minimumDelegateReach
         ) {
-            return new NetworkState(NetworkStateStatus.BelowMinimumDelegates, lastBlock);
+            return await new NetworkState(NetworkStateStatus.BelowMinimumDelegates, lastBlock, monitor);
         }
 
-        return this.analyzeNetwork(lastBlock, peers, blockTimeLookup);
+        return await this.analyzeNetwork(lastBlock, peers, blockTimeLookup, monitor);
     }
 
-    public static parse(data: any): Contracts.P2P.NetworkState {
+    public static async parse(data: any): Promise<Contracts.P2P.NetworkState> {
         if (!data || data.status === undefined) {
-            return new NetworkState(NetworkStateStatus.Unknown);
+            return await new NetworkState(NetworkStateStatus.Unknown);
         }
 
-        const networkState = new NetworkState(data.status);
+        const networkState = await new NetworkState(data.status);
         networkState.nodeHeight = data.nodeHeight;
         networkState.lastBlockId = data.lastBlockId;
+        networkState.lastGenerator = data.lastGenerator;
+        networkState.lastSlotNumber = data.lastSlotNumber;
 
         Object.assign(networkState.quorumDetails, data.quorumDetails);
 
         return networkState;
     }
 
-    private static analyzeNetwork(
+    private static async analyzeNetwork(
         lastBlock,
         peers: Contracts.P2P.Peer[],
         getTimeStampForBlock: (height: number) => number,
-    ): Contracts.P2P.NetworkState {
-        const networkState = new NetworkState(NetworkStateStatus.Default, lastBlock);
+        monitor: Contracts.P2P.NetworkMonitor,
+    ): Promise<Contracts.P2P.NetworkState> {
+        const networkState = await new NetworkState(NetworkStateStatus.Default, lastBlock, monitor);
         const currentSlot = Crypto.Slots.getSlotNumber(getTimeStampForBlock);
 
         for (const peer of peers) {
@@ -192,6 +197,14 @@ export class NetworkState implements Contracts.P2P.NetworkState {
 
     public getLastBlockId(): string | undefined {
         return this.lastBlockId;
+    }
+
+    public getLastGenerator(): string | undefined {
+        return this.lastGenerator;
+    }
+
+    public getLastSlotNumber(): number | undefined {
+        return this.lastSlotNumber;
     }
 
     public getQuorum(): number {
@@ -218,9 +231,19 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         return JSON.stringify(data, undefined, 2);
     }
 
-    private setLastBlock(lastBlock: Interfaces.IBlock): void {
+    private async setLastBlock(lastBlock: Interfaces.IBlock, monitor?: Contracts.P2P.NetworkMonitor): Promise<void> {
         this.nodeHeight = lastBlock.data.height;
         this.lastBlockId = lastBlock.data.id;
+        this.lastGenerator = lastBlock.data.generatorPublicKey;
+
+        if (monitor) {
+            const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(
+                // @ts-ignore - app exists but isn't on the interface for now
+                monitor.app,
+                lastBlock.data.height,
+            );
+            this.lastSlotNumber = Crypto.Slots.getSlotNumber(blockTimeLookup, lastBlock.data.timestamp);
+        }
     }
 
     private update(peer: Contracts.P2P.Peer, currentSlot: number): void {
