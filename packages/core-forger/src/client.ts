@@ -1,5 +1,5 @@
 import { Container, Contracts, Utils } from "@solar-network/core-kernel";
-import { Codecs, Nes, NetworkState, NetworkStateStatus } from "@solar-network/core-p2p";
+import { Codecs, Nes, NetworkState } from "@solar-network/core-p2p";
 import { Blocks, Interfaces } from "@solar-network/crypto";
 
 import { HostNoResponseError, RelayCommunicationError } from "./errors";
@@ -124,14 +124,14 @@ export class Client {
         return this.emit<Contracts.P2P.CurrentRound>("p2p.internal.getCurrentRound");
     }
 
+    public async getSlotNumber(timestamp?: number): Promise<number> {
+        await this.selectHost();
+
+        return this.emit<number>("p2p.internal.getSlotNumber", { timestamp });
+    }
+
     public async getNetworkState(log: boolean): Promise<Contracts.P2P.NetworkState> {
-        try {
-            return NetworkState.parse(
-                await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", { log }, 4000),
-            );
-        } catch (err) {
-            return new NetworkState(NetworkStateStatus.Unknown);
-        }
+        return NetworkState.parse(await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", { log }, 4000));
     }
 
     /**
@@ -241,6 +241,7 @@ export class Client {
             "p2p.internal.getUnconfirmedTransactions": Codecs.getUnconfirmedTransactions,
             "p2p.internal.getCurrentRound": Codecs.getCurrentRound,
             "p2p.internal.getNetworkState": Codecs.getNetworkState,
+            "p2p.internal.getSlotNumber": Codecs.getSlotNumber,
             "p2p.internal.syncBlockchain": Codecs.syncBlockchain,
             "p2p.blocks.postBlock": Codecs.postBlock,
             "p2p.peer.getStatus": Codecs.getStatus,

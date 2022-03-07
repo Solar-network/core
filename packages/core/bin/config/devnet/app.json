@@ -88,9 +88,6 @@
                 "package": "@solar-network/core-logger-pino"
             },
             {
-                "package": "@solar-network/core-database"
-            },
-            {
                 "package": "@solar-network/core-transactions"
             },
             {

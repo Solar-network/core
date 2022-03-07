@@ -1,7 +1,7 @@
 import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/core-kernel";
 import { NetworkStateStatus } from "@solar-network/core-p2p";
 import { Handlers } from "@solar-network/core-transactions";
-import { Blocks, Crypto, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Blocks, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import delay from "delay";
 import { writeFileSync } from "fs";
 import { Client } from "./client";
@@ -61,6 +61,13 @@ export class ForgerService {
      * @memberof ForgerService
      */
     private delegates: Delegate[] = [];
+
+    /**
+     * @private
+     * @type {number}
+     * @memberof ForgerService
+     */
+     private errorCount: number = 0;
 
     /**
      * @private
@@ -223,6 +230,7 @@ export class ForgerService {
                 return this.checkLater(this.getRoundRemainingSlotTime(this.round));
             }
 
+            this.errorCount = 0;
             await this.app
                 .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
                 .call("forgeNewBlock", { forgerService: this, delegate, firstAttempt: true, round: this.round });
@@ -266,11 +274,13 @@ export class ForgerService {
         round: Contracts.P2P.CurrentRound,
     ): Promise<void> {
         setImmediate(async () => {
+            let errored = false;
             const minimumMs = 2000;
             try {
                 const networkState: Contracts.P2P.NetworkState = await this.client.getNetworkState(firstAttempt);
 
-                if (networkState.getNodeHeight() !== round.lastBlock.height) {
+                const networkStateHeight = networkState.getNodeHeight();
+                if (networkStateHeight !== round.lastBlock.height) {
                     this.logger.warning(
                         `The NetworkState height (${networkState
                             .getNodeHeight()
@@ -278,21 +288,16 @@ export class ForgerService {
                     );
                 }
 
-                AppUtils.assert.defined<number>(networkState.getNodeHeight());
+                AppUtils.assert.defined<number>(networkStateHeight);
                 AppUtils.assert.defined<string>(delegate.publicKey);
 
-                Managers.configManager.setHeight(networkState.getNodeHeight()!);
+                Managers.configManager.setHeight(networkStateHeight!);
 
-                const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(
-                    this.app,
-                    networkState.getNodeHeight()!,
-                );
-
-                const roundSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup, round.timestamp);
-                let currentSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup);
+                const roundSlot: number = await this.client.getSlotNumber(round.timestamp);
+                let currentSlot: number = await this.client.getSlotNumber();
 
                 let { state } = await this.client.getStatus();
-                let lastBlockSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup, state.header.timestamp);
+                let lastBlockSlot: number = await this.client.getSlotNumber(state.header.timestamp);
 
                 if (lastBlockSlot === currentSlot || delegate.publicKey !== round.currentForger.publicKey) {
                     return;
@@ -314,11 +319,11 @@ export class ForgerService {
                             idHex: Managers.configManager.getMilestone().block.idFullSha256
                                 ? networkState.getLastBlockId()
                                 : Blocks.Block.toBytesHex(networkState.getLastBlockId()),
-                            height: networkState.getNodeHeight(),
+                            height: networkStateHeight,
                         },
                         timestamp: round.timestamp,
                         reward: Utils.calculateReward(
-                            networkState.getNodeHeight()! + 1,
+                            networkStateHeight! + 1,
                             round.currentForger.delegate.rank!,
                         ),
                     });
@@ -327,10 +332,10 @@ export class ForgerService {
 
                     const prettyName = this.usernames[delegate.publicKey];
 
-                    currentSlot = Crypto.Slots.getSlotNumber(blockTimeLookup);
+                    currentSlot = await this.client.getSlotNumber();
 
-                    state = (await this.client.getStatus()).state;
-                    lastBlockSlot = Crypto.Slots.getSlotNumber(blockTimeLookup, state.header.timestamp);
+                    ({ state } = await this.client.getStatus());
+                    lastBlockSlot = await this.client.getSlotNumber(state.header.timestamp);
 
                     if (
                         timeLeftInMs >= minimumMs &&
@@ -338,7 +343,7 @@ export class ForgerService {
                         delegate.publicKey === round.currentForger.publicKey
                     ) {
                         AppUtils.assert.defined<Interfaces.IBlock>(block);
-                        if (Crypto.Slots.getSlotNumber(blockTimeLookup, block.data.timestamp) !== lastBlockSlot) {
+                        if (await this.client.getSlotNumber(block.data.timestamp) !== lastBlockSlot) {
                             this.logger.info(
                                 `Delegate ${prettyName} forged a new block at height ${block.data.height.toLocaleString()} with ${AppUtils.pluralize(
                                     "transaction",
@@ -370,6 +375,7 @@ export class ForgerService {
                 if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
                     this.logger.warning(error.message);
                 }
+                errored = true;
             }
             await delay(1000);
 
@@ -379,8 +385,18 @@ export class ForgerService {
                 if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
                     this.logger.warning(error.message);
                 }
+                errored = true;
             }
-            return this.forgeNewBlock(delegate, false, this.round!);
+            if (errored) {
+                this.errorCount++;
+            } else {
+                this.errorCount = 0;
+            }
+
+            const blocktime = Managers.configManager.getMilestone(round.lastBlock.height).blocktime;
+            if (this.errorCount < blocktime - 1) {
+                return this.forgeNewBlock(delegate, false, this.round!);
+            }
         });
     }
 
