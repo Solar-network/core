@@ -73,5 +73,5 @@
             "port": 6002
         }
     ],
-    "sources": ["https://raw.githubusercontent.com/Solar-network/peers/main/devnet/p2p.json"]
+    "sources": ["https://raw.githubusercontent.com/solar-network/peers/main/devnet/p2p.json"]
 }
