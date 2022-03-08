@@ -77,7 +77,7 @@ export class MethodArgumentNotImplemented extends BadMethodCallException {
  * @extends {BadMethodCallException}
  */
 export class MethodArgumentValueNotImplemented extends BadMethodCallException {
-    public constructor(methodName: string, argName: string, argValue) {
+    public constructor(methodName: string, argName: string, argValue: object) {
         super(`The ${methodName}() method's argument $${argName} value ${argValue} behavior is not implemented`);
     }
 }
@@ -91,10 +91,10 @@ export class UnexpectedType extends InvalidArgumentException {
     /**
      * @param {string} paramName
      * @param {string} expectedType
-     * @param {*} givenType
+     * @param {object} givenType
      * @memberof InvalidType
      */
-    public constructor(paramName: string, expectedType: string, givenType: any) {
+    public constructor(paramName: string, expectedType: string, givenType: object) {
         super(`Expected argument [${paramName}] of type ${expectedType}, ${givenType} given`);
     }
 }

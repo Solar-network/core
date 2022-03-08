@@ -9,7 +9,7 @@ export class LastForgedBlockRemoteAction implements Contracts.Kernel.ProcessActi
 
     public name = "forger.lastForgedBlock";
 
-    public async handler() {
+    public async handler(): Promise<object> {
         const lastForgedBlock = this.forger.getLastForgedBlock();
 
         Utils.assert.defined(lastForgedBlock);

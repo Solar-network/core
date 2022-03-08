@@ -1,6 +1,5 @@
 import { HashAlgorithms } from "../crypto";
 import { PublicKeyError } from "../errors";
-
 import { IMultiSignatureAsset } from "../interfaces";
 import { configManager } from "../managers";
 import { NetworkType } from "../types";
@@ -42,7 +41,7 @@ export class Address {
         return this.fromPublicKey(PublicKey.fromMultiSignatureAsset(asset), networkVersion);
     }
 
-    public static fromPrivateKey(privateKey, networkVersion?: number): string {
+    public static fromPrivateKey(privateKey: { publicKey: string }, networkVersion?: number): string {
         return Address.fromPublicKey(privateKey.publicKey, networkVersion);
     }
 

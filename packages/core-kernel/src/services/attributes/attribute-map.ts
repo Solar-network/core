@@ -1,4 +1,4 @@
-import { get, has, set, unset, cloneDeep } from "@solar-network/utils";
+import { cloneDeep, get, has, set, unset } from "@solar-network/utils";
 import { strictEqual } from "assert";
 
 import { assert } from "../../utils";

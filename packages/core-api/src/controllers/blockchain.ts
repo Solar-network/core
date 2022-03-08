@@ -14,7 +14,7 @@ export class BlockchainController extends Controller {
     @Container.tagged("state", "blockchain")
     private readonly walletRepository!: Contracts.State.WalletRepository;
 
-    public async index() {
+    public async index(): Promise<object> {
         const { data } = this.stateStore.getLastBlock();
 
         const fees = Utils.BigNumber.make(await this.transactionRepository.getFeesBurned());

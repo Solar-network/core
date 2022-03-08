@@ -1,5 +1,5 @@
-import { Container, Providers } from "@solar-network/core-kernel";
 import Hapi from "@hapi/hapi";
+import { Container, Providers } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { TransactionsController } from "../controllers/transactions";

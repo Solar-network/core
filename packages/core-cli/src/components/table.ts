@@ -20,11 +20,11 @@ export class Table {
     /**
      * @static
      * @param {string[]} head
-     * @param {*} callback
+     * @param {Function} callback
      * @param {object} [opts={}]
      * @memberof Table
      */
-    public render(head: string[], callback: any, opts: object = {}): void {
+    public render(head: string[], callback: Function, opts: object = {}): void {
         const table = new Table3({
             ...{
                 head,

@@ -1,1 +1,1 @@
-export const isMatch = (value: any, pattern: string | RegExp): boolean => new RegExp(pattern).test(value);
+export const isMatch = (value: string, pattern: string | RegExp): boolean => new RegExp(pattern).test(value);

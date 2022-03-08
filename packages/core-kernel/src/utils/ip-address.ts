@@ -1,10 +1,10 @@
 import ipaddr from "ipaddr.js";
 
-export const isValidAddress = (ip: string) => {
+export const isValidAddress = (ip: string): boolean => {
     return ipaddr.isValid(cleanAddress(ip));
 };
 
-export const isIPv6Address = (ip: string) => {
+export const isIPv6Address = (ip: string): boolean => {
     try {
         return ipaddr.parse(cleanAddress(ip)).kind() === "ipv6";
     } catch {}
@@ -12,7 +12,7 @@ export const isIPv6Address = (ip: string) => {
     return false;
 };
 
-export const normalizeAddress = (ip: string) => {
+export const normalizeAddress = (ip: string): string => {
     ip = cleanAddress(ip);
 
     if (isIPv6Address(ip)) {
@@ -22,6 +22,6 @@ export const normalizeAddress = (ip: string) => {
     return ip;
 };
 
-export const cleanAddress = (ip: string) => {
+export const cleanAddress = (ip: string): string => {
     return ip.replace("[", "").replace("]", "");
 };

@@ -1,7 +1,7 @@
-import { Container, Contracts } from "@solar-network/core-kernel";
-import { Enums } from "@solar-network/crypto";
 import { Boom, notFound } from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Enums } from "@solar-network/crypto";
 
 import { Identifiers } from "../identifiers";
 import { BlockResource, BlockWithTransactionsResource } from "../resources";
@@ -75,7 +75,10 @@ export class DelegatesController extends Controller {
         });
     }
 
-    public async blocks(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async blocks(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object> | Boom> {
         const walletId = request.params.id as string;
 
         const walletResource = this.walletSearchService.getWallet(walletId);

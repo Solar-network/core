@@ -1,4 +1,4 @@
-export const stringify = (object): string => {
+export const stringify = (object: object): string => {
     const keys: any = [];
     const seen: object = {};
     JSON.stringify(object, (key, value) => {
@@ -10,4 +10,4 @@ export const stringify = (object): string => {
     });
     keys.sort();
     return JSON.stringify(object, keys);
-}
+};

@@ -59,7 +59,12 @@ export class DatabaseInteraction {
         }
     }
 
-    public async applyBlock(block: Interfaces.IBlock, transactionProcessing): Promise<void> {
+    public async applyBlock(
+        block: Interfaces.IBlock,
+        transactionProcessing: {
+            index: number | undefined;
+        },
+    ): Promise<void> {
         await this.roundState.detectMissedBlocks(block);
 
         await this.blockState.applyBlock(block, transactionProcessing);

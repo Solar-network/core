@@ -2,7 +2,7 @@ import { totalmem } from "os";
 
 import { Application } from "../application";
 import { Spinner } from "../components";
-import { ProcessOptions } from "../contracts";
+import { AnyObject, ProcessOptions } from "../contracts";
 import { Identifiers, inject, injectable } from "../ioc";
 import { ProcessManager } from "../services";
 import { AbortRunningProcess } from "./abort-running-process";
@@ -36,7 +36,7 @@ export class DaemonizeProcess {
      * @param {*} flags
      * @memberof DaemonizeProcess
      */
-    public execute(options: ProcessOptions, flags): void {
+    public execute(options: ProcessOptions, flags: AnyObject): void {
         const processName: string = options.name;
 
         if (this.processManager.has(processName)) {

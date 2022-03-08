@@ -1,13 +1,13 @@
-import { Container, Contracts, Utils, Enums as AppEnums } from "@solar-network/core-kernel";
-import { Interfaces, Transactions, Managers } from "@solar-network/crypto";
+import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/core-kernel";
+import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
 import {
     AlreadyVotedError,
     NoVoteError,
+    SwitchVoteDisabledError,
     UnvoteMismatchError,
     VotedForNonDelegateError,
     VotedForResignedDelegateError,
-    SwitchVoteDisabledError,
 } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 import { DelegateRegistrationTransactionHandler } from "./delegate-registration";
@@ -87,7 +87,7 @@ export class VoteTransactionHandler extends TransactionHandler {
     public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        for (const vote of transaction.data.asset!.votes) {
+        for (const vote of transaction.data.asset.votes) {
             emitter.dispatch(vote.startsWith("+") ? AppEnums.VoteEvent.Vote : AppEnums.VoteEvent.Unvote, {
                 delegate: vote,
                 transaction: transaction.data,

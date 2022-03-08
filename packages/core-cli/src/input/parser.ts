@@ -11,7 +11,7 @@ export class InputParser {
      * @returns
      * @memberof InputParser
      */
-    public static parseArgv(args: string[]) {
+    public static parseArgv(args: string[]): { args: string[]; flags: yargs.Arguments } {
         const parsed: yargs.Arguments = yargs(args, { count: [] });
 
         const argv: string[] = parsed._;

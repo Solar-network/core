@@ -34,7 +34,8 @@ export class TransactionWithBlockResource implements Resource {
             typeGroup: transactionData.typeGroup,
             amount: transactionData.amount.toFixed(),
             fee: transactionData.fee.toFixed(),
-            burnedFee: typeof transactionData.burnedFee !== "undefined" ? transactionData.burnedFee!.toFixed() : undefined,
+            burnedFee:
+                typeof transactionData.burnedFee !== "undefined" ? transactionData.burnedFee.toFixed() : undefined,
             sender,
             senderPublicKey: transactionData.senderPublicKey,
             recipient,

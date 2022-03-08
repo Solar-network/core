@@ -28,5 +28,5 @@ export const get = <T, V>(object: T, path: string | string[], defaultValue?: V):
         }
     }
 
-    return (object as unknown) as V;
+    return object as unknown as V;
 };

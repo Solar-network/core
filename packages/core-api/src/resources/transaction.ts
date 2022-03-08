@@ -45,7 +45,7 @@ export class TransactionResource implements Resource {
             typeGroup: resource.typeGroup,
             amount: resource.amount.toFixed(),
             fee: resource.fee.toFixed(),
-            burnedFee: typeof resource.burnedFee !== "undefined" ? resource.burnedFee!.toFixed() : undefined,
+            burnedFee: typeof resource.burnedFee !== "undefined" ? resource.burnedFee.toFixed() : undefined,
             sender,
             senderPublicKey: resource.senderPublicKey,
             recipient: resource.recipientId || sender,

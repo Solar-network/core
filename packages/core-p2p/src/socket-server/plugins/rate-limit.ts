@@ -1,5 +1,7 @@
-import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 import Boom from "@hapi/boom";
+import { Server } from "@hapi/hapi";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
+
 import { RateLimiter } from "../../rate-limiter";
 import { buildRateLimiter } from "../../utils/build-rate-limiter";
 import { BlocksRoute } from "../routes/blocks";
@@ -18,7 +20,7 @@ export class RateLimitPlugin {
 
     private rateLimiter!: RateLimiter;
 
-    public register(server) {
+    public register(server: Server): void {
         this.rateLimiter = buildRateLimiter({
             whitelist: [],
             remoteAccess: this.configuration.getOptional<Array<string>>("remoteAccess", []),

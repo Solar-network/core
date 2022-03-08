@@ -65,7 +65,10 @@ export class Command extends Commands.Command {
 
             for (const signature of signatures) {
                 commandsAsString.push(
-                    `  ${signature.padEnd(longestSignature, " ")}        ${commands[signature].description.replace(/\.$/, "")}`,
+                    `  ${signature.padEnd(longestSignature, " ")}        ${commands[signature].description.replace(
+                        /\.$/,
+                        "",
+                    )}`,
                 );
             }
         }

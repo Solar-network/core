@@ -1,7 +1,7 @@
-import { Container, Contracts } from "@solar-network/core-kernel";
-import { Enums } from "@solar-network/crypto";
 import { Boom, notFound } from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Enums } from "@solar-network/crypto";
 
 import { Identifiers } from "../identifiers";
 import { TransactionResource } from "../resources";
@@ -36,7 +36,10 @@ export class LocksController extends Controller {
         return { data: lockResource };
     }
 
-    public async unlocked(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async unlocked(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object>> {
         const criteria = [
             {
                 typeGroup: Enums.TransactionTypeGroup.Core,

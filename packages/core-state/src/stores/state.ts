@@ -2,6 +2,7 @@ import { Container, Contracts, Enums, Providers, Utils } from "@solar-network/co
 import { Interfaces, Managers } from "@solar-network/crypto";
 import assert from "assert";
 import { OrderedMap, OrderedSet, Seq } from "immutable";
+import { DefaultContext, EventObject, StateMachine, StateSchema } from "xstate";
 
 // todo: extract block and transaction behaviours into their respective stores
 // todo: review the implementation
@@ -17,7 +18,7 @@ export class StateStore implements Contracts.State.StateStore {
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
-    private blockchain: any = {};
+    private blockchain = {};
     private genesisBlock?: Interfaces.IBlock;
     private lastDownloadedBlock?: Interfaces.IBlockData;
     private lastStoredBlockHeight: number = 1;
@@ -39,11 +40,11 @@ export class StateStore implements Contracts.State.StateStore {
     // can be configured with the option `state.maxLastTransactionIds`.
     private cachedTransactionIds: OrderedSet<string> = OrderedSet();
 
-    public getBlockchain(): any {
+    public getBlockchain(): Contracts.Blockchain.Blockchain | object {
         return this.blockchain;
     }
 
-    public setBlockchain(blockchain: any): void {
+    public setBlockchain(blockchain: Contracts.Blockchain.Blockchain): void {
         this.blockchain = blockchain;
     }
 
@@ -147,7 +148,7 @@ export class StateStore implements Contracts.State.StateStore {
      * Resets the state.
      * @todo: remove the need for this method.
      */
-    public reset(blockchainMachine): void {
+    public reset(blockchainMachine: StateMachine<DefaultContext, StateSchema, EventObject>): void {
         this.blockchain = blockchainMachine.initialState;
     }
 
@@ -292,9 +293,10 @@ export class StateStore implements Contracts.State.StateStore {
     /**
      * Cache the ids of the given transactions.
      */
-    public cacheTransactions(
-        transactions: Interfaces.ITransactionData[],
-    ): { added: Interfaces.ITransactionData[]; notAdded: Interfaces.ITransactionData[] } {
+    public cacheTransactions(transactions: Interfaces.ITransactionData[]): {
+        added: Interfaces.ITransactionData[];
+        notAdded: Interfaces.ITransactionData[];
+    } {
         const notAdded: Interfaces.ITransactionData[] = [];
         const added: Interfaces.ITransactionData[] = transactions.filter((tx) => {
             Utils.assert.defined<string>(tx.id);

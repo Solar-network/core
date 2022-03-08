@@ -1,7 +1,7 @@
-import { Container, Contracts, Services } from "@solar-network/core-kernel";
-import { Enums } from "@solar-network/crypto";
 import { Boom, notFound } from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts, Services } from "@solar-network/core-kernel";
+import { Enums } from "@solar-network/crypto";
 
 import { Identifiers } from "../identifiers";
 import { TransactionResource, TransactionWithBlockResource } from "../resources";
@@ -72,7 +72,10 @@ export class WalletsController extends Controller {
         return this.lockSearchService.getWalletLocksPage(pagination, sorting, walletResource.address, criteria);
     }
 
-    public async transactions(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async transactions(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object> | Boom> {
         const walletId = request.params.id as string;
         const walletResource = this.walletSearchService.getWallet(walletId);
 
@@ -106,7 +109,10 @@ export class WalletsController extends Controller {
         }
     }
 
-    public async transactionsSent(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async transactionsSent(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object> | Boom> {
         const walletId = request.params.id as string;
         const walletResource = this.walletSearchService.getWallet(walletId);
 
@@ -146,7 +152,10 @@ export class WalletsController extends Controller {
         }
     }
 
-    public async transactionsReceived(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async transactionsReceived(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object> | Boom> {
         const walletId = request.params.id as string;
         const walletResource = this.walletSearchService.getWallet(walletId);
 
@@ -183,7 +192,10 @@ export class WalletsController extends Controller {
         }
     }
 
-    public async votes(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async votes(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object> | Boom> {
         const walletId = request.params.id as string;
         const walletResource = this.walletSearchService.getWallet(walletId);
 

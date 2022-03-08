@@ -1,18 +1,18 @@
 // Based on https://github.com/fknop/hapi-pagination
-
-import { Utils } from "@solar-network/core-kernel";
+import Hapi from "@hapi/hapi";
 import Hoek from "@hapi/hoek";
+import { Utils } from "@solar-network/core-kernel";
 import Qs from "querystring";
 
 export class Ext {
     private readonly routePathPrefix = "/api";
-    public constructor(private readonly config) {}
+    public constructor(private readonly config: object) {}
 
-    public isValidRoute(request) {
+    public isValidRoute(request: Hapi.Request): boolean {
         return this.hasPagination(request);
     }
 
-    public onPreHandler(request, h) {
+    public onPreHandler(request: Hapi.Request, h: Hapi.Handler): void {
         if (this.isValidRoute(request)) {
             const setParam = (name, defaultValue) => {
                 let value;
@@ -38,7 +38,7 @@ export class Ext {
         return h.continue;
     }
 
-    public onPostHandler(request, h) {
+    public onPostHandler(request: Hapi.Request, h: Hapi.Handler): void {
         const { statusCode } = request.response;
         const processResponse: boolean =
             this.isValidRoute(request) && statusCode >= 200 && statusCode <= 299 && this.hasPagination(request);
@@ -110,7 +110,7 @@ export class Ext {
         return h.continue;
     }
 
-    public hasPagination(request) {
+    public hasPagination(request: Hapi.Request): boolean {
         const pagination = this.getRoutePaginationOptions(request);
 
         if (!pagination) {
@@ -120,7 +120,7 @@ export class Ext {
         return pagination.enabled !== undefined ? pagination.enabled : true;
     }
 
-    private getRoutePaginationOptions(request) {
+    private getRoutePaginationOptions(request: Hapi.Request): { enabled: boolean } {
         return request.route.settings.plugins.pagination;
     }
 }

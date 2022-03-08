@@ -1,7 +1,8 @@
-import { Container, Contracts } from "@solar-network/core-kernel";
 import Boom from "@hapi/boom";
-import { isValidVersion } from "../../utils";
+import { Server } from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
+import { isValidVersion } from "../../utils";
 import { BlocksRoute } from "../routes/blocks";
 import { InternalRoute } from "../routes/internal";
 import { PeerRoute } from "../routes/peer";
@@ -12,7 +13,7 @@ export class ValidatePlugin {
     @Container.inject(Container.Identifiers.Application)
     protected readonly app!: Contracts.Kernel.Application;
 
-    public register(server) {
+    public register(server: Server): void {
         const allRoutesConfigByPath = {
             ...this.app.resolve(InternalRoute).getRoutesConfigByPath(),
             ...this.app.resolve(PeerRoute).getRoutesConfigByPath(),

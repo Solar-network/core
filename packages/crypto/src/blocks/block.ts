@@ -1,3 +1,4 @@
+import { Managers } from "..";
 import { Hash, HashAlgorithms, Slots } from "../crypto";
 import { BlockSchemaError } from "../errors";
 import { IBlock, IBlockData, IBlockJson, IBlockVerification, ITransaction, ITransactionData } from "../interfaces";
@@ -5,7 +6,6 @@ import { configManager } from "../managers/config";
 import { BigNumber, isException } from "../utils";
 import { validator } from "../validation";
 import { Serializer } from "./serializer";
-import { Managers } from "..";
 
 export class Block implements IBlock {
     // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
@@ -99,6 +99,13 @@ export class Block implements IBlock {
         return result.value;
     }
 
+    public static getId(data: IBlockData): string {
+        const constants = configManager.getMilestone(data.height);
+        const idHex: string = Block.getIdHex(data);
+
+        return constants.block.idFullSha256 ? idHex : BigNumber.make(`0x${idHex}`).toString();
+    }
+
     public static getIdHex(data: IBlockData): string {
         const constants = configManager.getMilestone(data.height);
         const payloadHash: Buffer = Serializer.serialize(data);
@@ -118,17 +125,18 @@ export class Block implements IBlock {
         return temp.toString("hex");
     }
 
-    public static toBytesHex(data): string {
+    public static toBytesHex(data: string | undefined): string {
         const temp: string = data ? BigNumber.make(data).toString(16) : "";
 
         return "0".repeat(16 - temp.length) + temp;
     }
 
-    public static getId(data: IBlockData): string {
-        const constants = configManager.getMilestone(data.height);
-        const idHex: string = Block.getIdHex(data);
-
-        return constants.block.idFullSha256 ? idHex : BigNumber.make(`0x${idHex}`).toString();
+    public getBurnedFees(): BigNumber {
+        let fees = BigNumber.ZERO;
+        for (const transaction of this.transactions) {
+            fees = fees.plus(transaction.data.burnedFee!);
+        }
+        return fees;
     }
 
     public getHeader(): IBlockData {
@@ -287,13 +295,5 @@ export class Block implements IBlock {
     private applyGenesisBlockFix(id: string): void {
         this.data.id = id;
         this.data.idHex = id.length === 64 ? id : Block.toBytesHex(id); // if id.length is 64 it's already hex
-    }
-
-    public getBurnedFees(): BigNumber {
-        let fees = BigNumber.ZERO;
-        for (const transaction of this.transactions) {
-            fees = fees.plus(transaction.data.burnedFee!);
-        }
-        return fees;
     }
 }

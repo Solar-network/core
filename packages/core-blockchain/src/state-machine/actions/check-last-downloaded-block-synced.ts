@@ -26,7 +26,9 @@ export class CheckLastDownloadedBlockSynced implements Action {
 
         // tried to download but no luck after 5 tries (looks like network missing blocks)
         if (this.stateStore.getNoBlockCounter() > 5 && !this.blockchain.getQueue().isRunning()) {
-            this.logger.info("Tried to sync 5 times to different nodes, looks like the network is missing blocks :umbrella:");
+            this.logger.info(
+                "Tried to sync 5 times to different nodes, looks like the network is missing blocks :umbrella:",
+            );
 
             this.stateStore.setNoBlockCounter(0);
             event = "NETWORKHALTED";

@@ -65,7 +65,10 @@ export abstract class TransactionHandler {
         return Utils.BigNumber.make(addonBytes + transactionSizeInBytes).times(satoshiPerByte);
     }
 
-    public getMinimumFee(transaction: Interfaces.ITransaction, dynamicFeesConfiguration): Utils.BigNumber {
+    public getMinimumFee(
+        transaction: Interfaces.ITransaction,
+        dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number },
+    ): Utils.BigNumber {
         if (dynamicFeesConfiguration && dynamicFeesConfiguration.enabled) {
             const addonBytes: number = dynamicFeesConfiguration.addonBytes[transaction.key];
 
@@ -80,7 +83,10 @@ export abstract class TransactionHandler {
         return Utils.BigNumber.ZERO;
     }
 
-    public enforceMinimumFee(transaction: Interfaces.ITransaction, dynamicFeesConfiguration): void {
+    public enforceMinimumFee(
+        transaction: Interfaces.ITransaction,
+        dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number },
+    ): void {
         if (dynamicFeesConfiguration && dynamicFeesConfiguration.enabled) {
             const minFee = this.getMinimumFee(transaction, dynamicFeesConfiguration);
 

@@ -45,7 +45,7 @@ export const transactionBaseSchema: Record<string, any> = {
     },
 };
 
-export const extend = (parent, properties): TransactionSchema => {
+export const extend = (parent: object, properties: object): TransactionSchema => {
     return deepmerge(parent, properties);
 };
 

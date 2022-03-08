@@ -1,3 +1,4 @@
+import { Server } from "@hapi/hapi";
 import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { getPeerIp } from "../../utils/get-peer-ip";
@@ -13,7 +14,7 @@ export class VersionPlugin {
     @Container.inject(Container.Identifiers.PeerRepository)
     private readonly peerRepository!: Contracts.P2P.PeerRepository;
 
-    public register(server) {
+    public register(server: Server): void {
         const routesConfigByPath = {
             ...this.app.resolve(PeerRoute).getRoutesConfigByPath(),
             ...this.app.resolve(BlocksRoute).getRoutesConfigByPath(),

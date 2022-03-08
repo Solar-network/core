@@ -1,7 +1,7 @@
 import { Commands, Container, Contracts, Services } from "@solar-network/core-cli";
 import { Networks } from "@solar-network/crypto";
-import Joi from "joi";
 import { copySync, ensureDirSync, existsSync, removeSync } from "fs-extra";
+import Joi from "joi";
 import { resolve } from "path";
 
 /**

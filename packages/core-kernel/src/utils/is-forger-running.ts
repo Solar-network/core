@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 
 export const isForgerRunning = (): boolean => {
     return sendForgerSignal(0);
-}
+};
 
 export const sendForgerSignal = (signal: string | number): boolean => {
     try {
@@ -12,4 +12,4 @@ export const sendForgerSignal = (signal: string | number): boolean => {
     } catch {
         return false;
     }
-}
+};

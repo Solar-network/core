@@ -42,4 +42,5 @@ export class Keys {
             privateKey: privateKey.toString("hex"),
             compressed,
         };
-    }}
+    }
+}

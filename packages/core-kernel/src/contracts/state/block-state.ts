@@ -4,7 +4,7 @@ import { BigNumber } from "../../utils";
 import { Wallet } from "./wallets";
 
 export interface BlockState {
-    applyBlock(block: Interfaces.IBlock, transactionProcessing: { index: number }): Promise<void>;
+    applyBlock(block: Interfaces.IBlock, transactionProcessing: { index: number | undefined }): Promise<void>;
 
     revertBlock(block: Interfaces.IBlock): Promise<void>;
 

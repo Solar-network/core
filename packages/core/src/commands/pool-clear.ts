@@ -1,7 +1,7 @@
 import { Commands, Container } from "@solar-network/core-cli";
 import { Networks } from "@solar-network/crypto";
-import Joi from "joi";
 import { removeSync } from "fs-extra";
+import Joi from "joi";
 
 /**
  * @export

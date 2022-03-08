@@ -57,7 +57,7 @@ export class WalletSyncService implements Contracts.Kernel.EventListener {
         this.disposed = true;
     }
 
-    public handle({ name, data }): void {
+    public handle({ name, data }: { name: string; data: { height: number; wallet: { address: string } } }): void {
         switch (name) {
             case Enums.StateEvent.BuilderFinished:
                 this.initializeWalletsTable(this.stateStore.getLastHeight());

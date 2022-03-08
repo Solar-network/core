@@ -9,7 +9,7 @@ export class CurrentDelegateProcessAction implements Contracts.Kernel.ProcessAct
 
     public name = "forger.currentDelegate";
 
-    public async handler() {
+    public async handler(): Promise<object> {
         const round = this.forger.getRound();
 
         Utils.assert.defined(round);

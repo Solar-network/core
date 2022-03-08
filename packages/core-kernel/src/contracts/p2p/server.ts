@@ -33,7 +33,7 @@ export interface Status {
         header: {
             generatorPublicKey: string;
             timestamp: number;
-        }
+        };
     };
 }
 

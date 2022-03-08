@@ -61,7 +61,9 @@ export class AcceptBlockHandler implements BlockHandler {
             this.logger.warning(`Refused new block with id ${block.data.id} :warning: :warning: :warning:`);
             if (transactionProcessing.index !== undefined) {
                 this.logger.warning(`Block contains a bad transaction: ${error.message} :no_entry:`);
-                this.logger.warning(`Bad transaction data: ${JSON.stringify(block.transactions[transactionProcessing.index].data)}`);
+                this.logger.warning(
+                    `Bad transaction data: ${JSON.stringify(block.transactions[transactionProcessing.index].data)}`,
+                );
             } else {
                 this.logger.warning(`Block is bad: ${error.message} :no_entry:`);
                 this.logger.warning(`Bad block data: ${JSON.stringify(block.data)}`);

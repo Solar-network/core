@@ -72,7 +72,11 @@ export class NetworkState implements Contracts.P2P.NetworkState {
     private lastSlotNumber?: number;
     private quorumDetails: QuorumDetails;
 
-    public constructor(public readonly status: NetworkStateStatus, lastBlock?: Interfaces.IBlock, monitor?: Contracts.P2P.NetworkMonitor) {
+    public constructor(
+        public readonly status: NetworkStateStatus,
+        lastBlock?: Interfaces.IBlock,
+        monitor?: Contracts.P2P.NetworkMonitor,
+    ) {
         this.quorumDetails = new QuorumDetails();
 
         if (lastBlock) {
@@ -151,7 +155,14 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         return await this.analyzeNetwork(lastBlock, peers, blockTimeLookup, monitor);
     }
 
-    public static async parse(data: any): Promise<Contracts.P2P.NetworkState> {
+    public static async parse(data: {
+        nodeHeight?: number;
+        lastBlockId?: string;
+        lastGenerator?: string;
+        lastSlotNumber?: number;
+        quorumDetails?: object;
+        status?: NetworkStateStatus;
+    }): Promise<Contracts.P2P.NetworkState> {
         if (!data || data.status === undefined) {
             return await new NetworkState(NetworkStateStatus.Unknown);
         }
@@ -168,7 +179,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
     }
 
     private static async analyzeNetwork(
-        lastBlock,
+        lastBlock: Interfaces.IBlock,
         peers: Contracts.P2P.Peer[],
         getTimeStampForBlock: (height: number) => number,
         monitor: Contracts.P2P.NetworkMonitor,
@@ -219,7 +230,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         return Object.values(this.quorumDetails.overHeightBlockHeaders);
     }
 
-    public setOverHeightBlockHeaders(overHeightBlockHeaders): void {
+    public setOverHeightBlockHeaders(overHeightBlockHeaders: string[]): void {
         this.quorumDetails.overHeightBlockHeaders = overHeightBlockHeaders;
     }
 

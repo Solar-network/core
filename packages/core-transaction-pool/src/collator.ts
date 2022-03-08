@@ -1,5 +1,6 @@
 import { Container, Contracts } from "@solar-network/core-kernel";
 import { Interfaces, Managers } from "@solar-network/crypto";
+
 import { TransactionHasExpiredError } from "./errors";
 
 @Container.injectable()

@@ -5,7 +5,7 @@ import { ForgeNewBlockAction, IsForgingAllowedAction } from "./actions";
 import { DelegateFactory } from "./delegate-factory";
 import { DelegateTracker } from "./delegate-tracker";
 import { ForgerService } from "./forger-service";
-import { Delegate } from "./interfaces";
+import { Delegate, RelayHost } from "./interfaces";
 import { CurrentDelegateProcessAction, LastForgedBlockRemoteAction, NextSlotProcessAction } from "./process-actions";
 
 /**
@@ -35,7 +35,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         const forgerService = this.app.get<ForgerService>(Container.Identifiers.ForgerService);
 
-        forgerService.register(this.config().all());
+        forgerService.register(this.config().get("hosts") as RelayHost[]);
         await forgerService.boot(delegates);
 
         this.startTracker(delegates);

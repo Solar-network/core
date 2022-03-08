@@ -48,7 +48,7 @@ export class Client {
      * @param {RelayHost[]} hosts
      * @memberof Client
      */
-    public register(hosts: RelayHost[]) {
+    public register(hosts: RelayHost[]): void {
         this.hosts = hosts.map((host: RelayHost) => {
             const url = `ws://${Utils.IpAddress.normalizeAddress(host.hostname)}:${host.port}`;
             const options = { ws: { maxPayload: MAX_PAYLOAD_CLIENT } };
@@ -131,7 +131,9 @@ export class Client {
     }
 
     public async getNetworkState(log: boolean): Promise<Contracts.P2P.NetworkState> {
-        return await NetworkState.parse(await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", { log }, 4000));
+        return await NetworkState.parse(
+            await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", { log }, 4000),
+        );
     }
 
     /**
@@ -139,7 +141,11 @@ export class Client {
      * @memberof Client
      */
     public async getStatus(): Promise<Contracts.P2P.Status> {
-        return await this.emit<Contracts.P2P.Status>("p2p.peer.getStatus", { headers: { version: this.app.version() }}, 2000);
+        return await this.emit<Contracts.P2P.Status>(
+            "p2p.peer.getStatus",
+            { headers: { version: this.app.version() } },
+            2000,
+        );
     }
 
     /**

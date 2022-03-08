@@ -98,7 +98,7 @@ export class RoundState {
                     voteBalance: Utils.BigNumber.make(balance),
                     username: existingWallet.username,
                     round: roundInfo!.round,
-                    rank: existingWallet.rank
+                    rank: existingWallet.rank,
                 };
                 AppUtils.assert.defined(delegate.username);
 
@@ -131,9 +131,7 @@ export class RoundState {
             const missedSlot: number = lastSlot + i + 1;
             const delegate: Contracts.State.Wallet = this.forgingDelegates[missedSlot % this.forgingDelegates.length];
 
-            this.logger.debug(
-                `Delegate ${delegate.getAttribute("delegate.username")} just missed a block :pensive:`,
-            );
+            this.logger.debug(`Delegate ${delegate.getAttribute("delegate.username")} just missed a block :pensive:`);
 
             this.events.dispatch(Enums.ForgerEvent.Missing, {
                 delegate,

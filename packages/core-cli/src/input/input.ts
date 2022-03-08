@@ -139,7 +139,7 @@ export class Input {
      * @returns
      * @memberof Input
      */
-    public getArguments(values?: object) {
+    public getArguments(values?: object): object {
         return values ? { ...values, ...this.args } : this.args;
     }
 
@@ -183,7 +183,7 @@ export class Input {
      * @returns
      * @memberof Input
      */
-    public getFlags(values?: object) {
+    public getFlags(values?: object): object {
         return values ? { ...values, ...this.flags } : this.flags;
     }
 

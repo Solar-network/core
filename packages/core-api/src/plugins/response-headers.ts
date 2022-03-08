@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@solar-network/core-kernel";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 export const responseHeaders = {
     name: "response-headers",
@@ -20,6 +20,6 @@ export const responseHeaders = {
             responsePropToUpdate.headers["X-Block-Height"] = blockHeight;
 
             return h.continue;
-        }
+        };
     },
 };

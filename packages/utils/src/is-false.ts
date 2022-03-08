@@ -1,1 +1,1 @@
-export const isFalse = (value: any): boolean => value === false;
+export const isFalse = (value: boolean): boolean => value === false;

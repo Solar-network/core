@@ -17,10 +17,7 @@ export class TransactionExceedsMaximumByteSizeError extends Contracts.Transactio
     public readonly maxSize: number;
 
     public constructor(transaction: Interfaces.ITransaction, maxSize: number) {
-        super(
-            `${transaction} exceeds size limit of ${AppUtils.pluralize("byte", maxSize, true)}`,
-            "ERR_TOO_LARGE",
-        );
+        super(`${transaction} exceeds size limit of ${AppUtils.pluralize("byte", maxSize, true)}`, "ERR_TOO_LARGE");
         this.maxSize = maxSize;
     }
 }

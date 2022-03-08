@@ -1,5 +1,5 @@
-import Listr, { ListrTaskWrapper } from "listr";
 import { sync } from "execa";
+import Listr, { ListrTaskWrapper } from "listr";
 import { spawn } from "node-pty";
 
 import { Application } from "../application";
@@ -30,7 +30,7 @@ export class Installer {
         let gitTag: string = tag;
         let tagFromRegex!: string;
 
-        let version:string = tag;
+        let version: string = tag;
 
         if (tag === "latest") {
             tagFromRegex = getLastTag('"^\\d+.\\d+.\\d+"');

@@ -4,6 +4,7 @@ import Boom from "@hapi/boom";
 import Bounce from "@hapi/bounce";
 import Hoek from "@hapi/hoek";
 import Teamwork from "@hapi/teamwork";
+
 import { parseNesMessage, protocol, stringifyNesMessage } from "./utils";
 
 const internals = {
@@ -27,7 +28,11 @@ export class Socket {
     private _sending;
     private _lastPinged;
 
-    public constructor(ws, req, listener) {
+    public constructor(
+        ws: object,
+        req: { headers: string[]; socket: { remoteAddress: string; remotePort: number } },
+        listener: object,
+    ) {
         this._ws = ws;
         this._listener = listener;
         this._helloed = false;
@@ -52,27 +57,27 @@ export class Socket {
         this._ws.on("pong", () => this.terminate());
     }
 
-    public disconnect() {
+    public disconnect(): void {
         this._ws.close();
         return this._removed;
     }
 
-    public terminate() {
+    public terminate(): void {
         this._ws.terminate();
         return this._removed;
     }
 
-    public isOpen() {
+    public isOpen(): boolean {
         return this._ws.readyState === 1;
     }
 
     // public even though it starts with _ ; this is to match the original code
-    public _active() {
+    public _active(): boolean {
         return this._pinged || this._sending || this._processingCount;
     }
 
     // public because used in listener ; from original code
-    public _send(message, options?) {
+    public _send(message: { id?: number; type: string }, options?: { replace?: string }): Promise<unknown> {
         options = options || {};
 
         if (!this.isOpen()) {
@@ -85,7 +90,7 @@ export class Socket {
             string = stringifyNesMessage(message);
             if (options.replace) {
                 Object.keys(options.replace).forEach((token) => {
-                    string = string.replace(`"${token}"`, options.replace[token]);
+                    string = string.replace(`"${token}"`, options!.replace![token]);
                 });
             }
         } catch (err) {
@@ -238,7 +243,7 @@ export class Socket {
         // Initialization and Authentication
 
         if (request.type === "ping") {
-            if (this._lastPinged && (Date.now() < this._lastPinged + 1000)) {
+            if (this._lastPinged && Date.now() < this._lastPinged + 1000) {
                 this._lastPinged = Date.now();
                 throw Boom.badRequest("Exceeded ping limit");
             }

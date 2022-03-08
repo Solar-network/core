@@ -19,14 +19,11 @@ export class MessagePackCodec implements Codec {
         return itemToReturn;
     }
 
-    public encodeBlock(block: any): Buffer {
+    public encodeBlock(block: { Block_burned_fee: Utils.BigNumber; Block_id: string }): Buffer {
         try {
             const blockCamelized = camelizeKeys(MessagePackCodec.removePrefix(block, "Block_"));
 
-            return encode([
-                    block.Block_burned_fee,
-                    Blocks.Serializer.serialize(blockCamelized, true),
-            ]);
+            return encode([block.Block_burned_fee, Blocks.Serializer.serialize(blockCamelized, true)]);
         } catch (err) {
             throw new CodecException.BlockEncodeException(block.Block_id, err.message);
         }
@@ -43,7 +40,15 @@ export class MessagePackCodec implements Codec {
         }
     }
 
-    public encodeTransaction(transaction: any): Buffer {
+    public encodeTransaction(transaction: {
+        Transaction_id: string;
+        Transaction_block_id: string;
+        Transaction_block_height: number;
+        Transaction_burned_fee: Utils.BigNumber;
+        Transaction_sequence: number;
+        Transaction_timestamp: number;
+        Transaction_serialized: Buffer;
+    }): Buffer {
         try {
             return encode([
                 transaction.Transaction_id,
@@ -93,11 +98,11 @@ export class MessagePackCodec implements Codec {
                 asset: transaction.data.asset,
             };
         } catch (err) {
-            throw new CodecException.TransactionDecodeException((transactionId as unknown) as string, err.message);
+            throw new CodecException.TransactionDecodeException(transactionId as unknown as string, err.message);
         }
     }
 
-    public encodeRound(round: any): Buffer {
+    public encodeRound(round: { Round_round: string }): Buffer {
         try {
             const roundCamelized = camelizeKeys(MessagePackCodec.removePrefix(round, "Round_"));
 

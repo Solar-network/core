@@ -3,13 +3,8 @@ import { Enums } from "@solar-network/crypto";
 
 import { Transaction } from "./models/transaction";
 
-const {
-    handleAndCriteria,
-    handleOrCriteria,
-    handleNumericCriteria,
-    optimizeExpression,
-    hasOrCriteria,
-} = AppUtils.Search;
+const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimizeExpression, hasOrCriteria } =
+    AppUtils.Search;
 
 @Container.injectable()
 export class TransactionFilter implements Contracts.Database.TransactionFilter {
