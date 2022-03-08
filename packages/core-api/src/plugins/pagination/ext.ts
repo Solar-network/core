@@ -12,7 +12,7 @@ export class Ext {
         return this.hasPagination(request);
     }
 
-    public onPreHandler(request: Hapi.Request, h: Hapi.Handler): void {
+    public onPreHandler(request: Hapi.Request, h: Hapi.ResponseToolkit): void {
         if (this.isValidRoute(request)) {
             const setParam = (name, defaultValue) => {
                 let value;
@@ -38,7 +38,7 @@ export class Ext {
         return h.continue;
     }
 
-    public onPostHandler(request: Hapi.Request, h: Hapi.Handler): void {
+    public onPostHandler(request: Hapi.Request, h: Hapi.ResponseToolkit): void {
         const { statusCode } = request.response;
         const processResponse: boolean =
             this.isValidRoute(request) && statusCode >= 200 && statusCode <= 299 && this.hasPagination(request);
