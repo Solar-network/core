@@ -17,7 +17,7 @@ export class NSect {
      * higher than that one must not match. This probe function will be called logA(sequence length)
      * times, where A, the base of the logarithm is equal to nAry.
      */
-    constructor(private readonly nAry: number, private readonly probe: ProbeCallback) {}
+    public constructor(private readonly nAry: number, private readonly probe: ProbeCallback) {}
 
     /**
      * Find the first (lowest) element satisfying a condition as defined by the probe function

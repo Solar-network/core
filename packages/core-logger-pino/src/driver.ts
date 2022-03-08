@@ -83,7 +83,10 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @returns {Promise<Contracts.Kernel.Logger>}
      * @memberof PinoLogger
      */
-    public async make(options?: any): Promise<Contracts.Kernel.Logger> {
+    public async make(options: {
+        fileRotator: { interval: string };
+        levels: Record<string, string>;
+    }): Promise<Contracts.Kernel.Logger> {
         this.stream = new PassThrough();
         this.logger = pino(
             {
@@ -147,7 +150,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public emergency(message: any): void {
+    public emergency(message: object): void {
         this.log("emergency", message);
     }
 
@@ -155,7 +158,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public alert(message: any): void {
+    public alert(message: object): void {
         this.log("alert", message);
     }
 
@@ -163,7 +166,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public critical(message: any): void {
+    public critical(message: object): void {
         this.log("critical", message);
     }
 
@@ -171,7 +174,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public error(message: any): void {
+    public error(message: object): void {
         this.log("error", message);
     }
 
@@ -179,7 +182,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public warning(message: any): void {
+    public warning(message: object): void {
         this.log("warning", message);
     }
 
@@ -187,7 +190,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public notice(message: any): void {
+    public notice(message: object): void {
         this.log("notice", message);
     }
 
@@ -195,7 +198,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public info(message: any): void {
+    public info(message: object): void {
         this.log("info", message);
     }
 
@@ -203,7 +206,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public debug(message: any): void {
+    public debug(message: object): void {
         this.log("debug", message);
     }
 
@@ -237,7 +240,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @returns {boolean}
      * @memberof Logger
      */
-    private log(level: string, message: any): void {
+    private log(level: string, message: string | object): void {
         if (this.silentConsole) {
             return;
         }

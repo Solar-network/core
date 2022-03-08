@@ -30,7 +30,7 @@ export class Database {
     /**
      * @memberof Database
      */
-    public boot() {
+    public boot(): void {
         const adapterFile: string = this.app.cachePath("webhooks.json");
 
         if (!existsSync(adapterFile)) {

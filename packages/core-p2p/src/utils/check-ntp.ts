@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import Sntp, { TimeOptions } from "@hapi/sntp";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 
 export const checkNTP = (
     app: Contracts.Kernel.Application,

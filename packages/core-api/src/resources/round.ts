@@ -12,7 +12,7 @@ export class RoundResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public raw(resource): object {
+    public raw(resource: object): object {
         return resource;
     }
 
@@ -23,7 +23,7 @@ export class RoundResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public transform(resource): object {
+    public transform(resource: { balance: string; publicKey: string }): object {
         return {
             publicKey: resource.publicKey,
             votes: Utils.BigNumber.make(resource.balance).toFixed(),

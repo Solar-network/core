@@ -29,7 +29,7 @@ export class MixinService {
      * @param {Function} macro
      * @memberof MixinService
      */
-    public set(name: string, macro: Function) {
+    public set(name: string, macro: Function): void {
         this.mixins.set(name, macro);
     }
 

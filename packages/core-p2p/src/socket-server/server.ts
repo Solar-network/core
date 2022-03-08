@@ -1,5 +1,5 @@
-import { Container, Contracts, Types } from "@solar-network/core-kernel";
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
+import { Container, Contracts, Types } from "@solar-network/core-kernel";
 
 import { plugin as hapiNesPlugin } from "../hapi-nes";
 import { AcceptPeerPlugin } from "./plugins/accept-peer";

@@ -19,7 +19,7 @@ export enum SolarTransactionType {
 export const TransactionType = {
     Core: CoreTransactionType,
     Solar: SolarTransactionType,
-}
+};
 
 export enum TransactionTypeGroup {
     Test = 0,

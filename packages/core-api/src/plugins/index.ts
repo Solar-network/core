@@ -5,33 +5,44 @@ import { log } from "./log";
 import { responseHeaders } from "./response-headers";
 import { whitelist } from "./whitelist";
 
-export const preparePlugins = (config) => [
+export const preparePlugins = (
+    config:
+        | {
+              cache: object;
+              log: object;
+              pagination: { limit: number };
+              rateLimit: object;
+              trustProxy: boolean;
+              whitelist: string[];
+          }
+        | undefined,
+): unknown => [
     {
         plugin: whitelist,
         options: {
-            whitelist: config.whitelist,
-            trustProxy: config.trustProxy,
+            whitelist: config!.whitelist,
+            trustProxy: config!.trustProxy,
         },
     },
     { plugin: hapiAjv },
     {
         plugin: log,
         options: {
-            ...config.log,
-            trustProxy: config.trustProxy,
+            ...config!.log,
+            trustProxy: config!.trustProxy,
         },
     },
     { plugin: commaArrayQuery },
     { plugin: dotSeparatedQuery },
     {
         plugin: require("./cache"),
-        options: config.cache,
+        options: config!.cache,
     },
     {
         plugin: require("./rate-limit"),
         options: {
-            ...config.rateLimit,
-            trustProxy: config.trustProxy,
+            ...config!.rateLimit,
+            trustProxy: config!.trustProxy,
         },
     },
     {
@@ -39,7 +50,7 @@ export const preparePlugins = (config) => [
         options: {
             query: {
                 limit: {
-                    default: config.pagination.limit,
+                    default: config!.pagination.limit,
                 },
             },
         },

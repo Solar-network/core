@@ -21,7 +21,7 @@ export class StateMachine {
      * @param  {String} event
      * @return {void}
      */
-    public transition(event) {
+    public transition(event: string): void {
         const nextState = blockchainMachine.transition(this.stateStore.getBlockchain(), event);
 
         if (nextState.actions.length > 0) {

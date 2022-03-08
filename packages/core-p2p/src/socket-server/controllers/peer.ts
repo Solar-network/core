@@ -1,7 +1,7 @@
+import Hapi from "@hapi/hapi";
 import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import { DatabaseInteraction, DatabaseInterceptor } from "@solar-network/core-state";
 import { Crypto, Identities, Interfaces } from "@solar-network/crypto";
-import Hapi from "@hapi/hapi";
 
 import { constants } from "../../constants";
 import { MissingCommonBlockError } from "../../errors";

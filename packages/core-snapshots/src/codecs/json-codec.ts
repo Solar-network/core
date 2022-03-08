@@ -45,7 +45,7 @@ export class JSONCodec implements Codec {
         });
     }
 
-    public encodeBlock(block: any): Buffer {
+    public encodeBlock(block: { Block_id: string }): Buffer {
         try {
             const blockStringified = JSONCodec.stringify(camelizeKeys(JSONCodec.removePrefix(block, "Block_")));
 
@@ -63,7 +63,7 @@ export class JSONCodec implements Codec {
         }
     }
 
-    public encodeTransaction(transaction: any): Buffer {
+    public encodeTransaction(transaction: { Transaction_id: string }): Buffer {
         try {
             let tmp = JSONCodec.removePrefix(transaction, "Transaction_");
             tmp = camelizeKeys(tmp);
@@ -94,7 +94,7 @@ export class JSONCodec implements Codec {
         }
     }
 
-    public encodeRound(round: any): Buffer {
+    public encodeRound(round: { Round_round: string }): Buffer {
         try {
             return Buffer.from(JSONCodec.stringify(camelizeKeys(JSONCodec.removePrefix(round, "Round_"))));
         } catch (err) {

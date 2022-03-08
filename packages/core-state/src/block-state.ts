@@ -17,7 +17,12 @@ export class BlockState implements Contracts.State.BlockState {
     @Container.inject(Container.Identifiers.LogService)
     private logger!: Contracts.Kernel.Logger;
 
-    public async applyBlock(block: Interfaces.IBlock, transactionProcessing): Promise<void> {
+    public async applyBlock(
+        block: Interfaces.IBlock,
+        transactionProcessing: {
+            index: number | undefined;
+        },
+    ): Promise<void> {
         if (block.data.height === 1) {
             this.initGenesisForgerWallet(block.data.generatorPublicKey);
         }
@@ -136,7 +141,7 @@ export class BlockState implements Contracts.State.BlockState {
         this.revertVoteBalances(sender, recipient, data, lockWallet, lockTransaction);
     }
 
-    public increaseWalletDelegateVoteBalance(wallet: Contracts.State.Wallet, amount: AppUtils.BigNumber) {
+    public increaseWalletDelegateVoteBalance(wallet: Contracts.State.Wallet, amount: AppUtils.BigNumber): void {
         // ? packages/core-transactions/src/handlers/one/vote.ts:L120 blindly sets "vote" attribute
         // ? is it guaranteed that delegate wallet exists, so delegateWallet.getAttribute("delegate.voteBalance") is safe?
         if (wallet.hasVoted()) {
@@ -148,7 +153,7 @@ export class BlockState implements Contracts.State.BlockState {
         }
     }
 
-    public decreaseWalletDelegateVoteBalance(wallet: Contracts.State.Wallet, amount: AppUtils.BigNumber) {
+    public decreaseWalletDelegateVoteBalance(wallet: Contracts.State.Wallet, amount: AppUtils.BigNumber): void {
         if (wallet.hasVoted()) {
             const delegatePulicKey = wallet.getAttribute<string>("vote");
             const delegateWallet = this.walletRepository.findByPublicKey(delegatePulicKey);

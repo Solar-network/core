@@ -61,7 +61,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         });
     }
 
-    public async postBlock(peer: Contracts.P2P.Peer, block: Interfaces.IBlock) {
+    public async postBlock(peer: Contracts.P2P.Peer, block: Interfaces.IBlock): Promise<void> {
         const postBlockTimeout = 10000;
 
         const response = await this.emit(

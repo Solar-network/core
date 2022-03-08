@@ -1,7 +1,7 @@
+import Hapi from "@hapi/hapi";
 import { DatabaseService } from "@solar-network/core-database";
 import { Container, Contracts, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Blocks, Interfaces, Managers, Utils } from "@solar-network/crypto";
-import Hapi from "@hapi/hapi";
 
 import { constants } from "../../constants";
 import { TooManyTransactionsError } from "../errors";
@@ -70,20 +70,28 @@ export class BlocksController extends Controller {
 
         let generator: string;
         try {
-            generator = `delegate ${generatorWallet.getAttribute("delegate.username")} (#${generatorWallet.getAttribute("delegate.rank")})`;
+            generator = `delegate ${generatorWallet.getAttribute("delegate.username")} (#${generatorWallet.getAttribute(
+                "delegate.rank",
+            )})`;
         } catch {
             generator = "an unknown delegate";
         }
 
-        this.logger.info(`Received new block forged by ${generator} at height ${block.height.toLocaleString()} with ${Utils.formatSatoshi(block.reward)} reward :package:`);
+        this.logger.info(
+            `Received new block forged by ${generator} at height ${block.height.toLocaleString()} with ${Utils.formatSatoshi(
+                block.reward,
+            )} reward :package:`,
+        );
 
         this.logger.debug(`The id of the new block is ${block.id}`);
 
-        this.logger.debug(`It contains ${AppUtils.pluralize(
-            "transaction",
-            block.numberOfTransactions,
-            true,
-        )} and was received from ${mapAddr(request.info.remoteAddress)}`);
+        this.logger.debug(
+            `It contains ${AppUtils.pluralize(
+                "transaction",
+                block.numberOfTransactions,
+                true,
+            )} and was received from ${mapAddr(request.info.remoteAddress)}`,
+        );
 
         await this.blockchain.handleIncomingBlock(block, fromForger);
 

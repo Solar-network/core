@@ -75,7 +75,7 @@ export class DisconnectPeer implements Contracts.Kernel.EventListener {
      * @returns {Promise<void>}
      * @memberof DisconnectPeer
      */
-    public async handle({ data }): Promise<void> {
+    public async handle({ data }: { name: string; data: { peer: Contracts.P2P.Peer } }): Promise<void> {
         this.connector.disconnect(data.peer);
 
         this.repository.forgetPeer(data.peer);

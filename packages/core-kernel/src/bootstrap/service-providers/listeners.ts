@@ -49,7 +49,7 @@ export class ChangeServiceProviderState implements EventListener {
      * @returns {Promise<void>}
      * @memberof ChangeServiceProviderState
      */
-    public async handle({ name, data }): Promise<void> {
+    public async handle({ name, data }: { name: string; data: { name: string } }): Promise<void> {
         if (name === BlockEvent.Applied) {
             return this.changeState();
         }

@@ -139,7 +139,7 @@ export abstract class Command {
     /**
      * @memberof Command
      */
-    public register(argv: string[]) {
+    public register(argv: string[]): void {
         try {
             this.input = this.app.resolve(Input);
             this.input.parse(argv, this.definition);
@@ -238,11 +238,12 @@ export abstract class Command {
 
     /**
      * @template T
-     * @param {string} name
+     * @param {*} name
      * @returns {T}
      * @memberof Command
      */
-    public getArgument(name: string) {
+    public getArgument(name: string): any {
+        // eslint-disable @typescript-eslint/explicit-module-boundary-types
         return this.input.getArgument(name);
     }
 
@@ -274,11 +275,12 @@ export abstract class Command {
 
     /**
      * @template T
-     * @param {string} name
+     * @param {*} name
      * @returns {T}
      * @memberof Command
      */
-    public getFlag(name: string) {
+    public getFlag(name: string): any {
+        // eslint-disable @typescript-eslint/explicit-module-boundary-types
         return this.input.getFlag(name);
     }
 

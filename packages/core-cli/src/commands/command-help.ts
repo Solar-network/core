@@ -4,6 +4,7 @@ import { PackageJson } from "type-fest";
 import { AppHeader } from "../components";
 import { Application } from "../contracts";
 import { Identifiers, inject, injectable } from "../ioc";
+import { Command } from "./command";
 
 /**
  * @export
@@ -31,11 +32,11 @@ export class CommandHelp {
      * @returns {string}
      * @memberof CommandHelp
      */
-    public render(command): string {
+    public render(command: Command): string {
         let helpMessage: string = `${this.app.get<AppHeader>(Identifiers.AppHeader).render()}
 
 ${blue().bold("Description")}
-${command.description.replace(/\.$/, "")}`;
+${command.description!.replace(/\.$/, "")}`;
 
         const args: string = this.buildArguments(command);
 

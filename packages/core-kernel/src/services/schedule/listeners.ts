@@ -36,7 +36,7 @@ export class ExecuteCallbackWhenReady implements EventListener {
      * @returns {Promise<void>}
      * @memberof ExecuteCallbackWhenReady
      */
-    public async handle({ data }): Promise<void> {
+    public async handle({ data }: { name: string; data: { height: number } }): Promise<void> {
         if (data.height % this.blockCount === 0) {
             await this.callback();
         }

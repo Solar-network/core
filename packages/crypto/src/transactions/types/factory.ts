@@ -8,7 +8,9 @@ type TransactionConstructor = typeof Transaction;
 export class TransactionTypeFactory {
     private static transactionTypes: Map<InternalTransactionType, Map<number, TransactionConstructor>>;
 
-    public static initialize(transactionTypes: Map<InternalTransactionType, Map<number, TransactionConstructor>>) {
+    public static initialize(
+        transactionTypes: Map<InternalTransactionType, Map<number, TransactionConstructor>>,
+    ): void {
         this.transactionTypes = transactionTypes;
     }
 

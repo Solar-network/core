@@ -37,7 +37,7 @@ export class Peer implements Contracts.P2P.Peer {
      * @type {(string[])}
      * @memberof Peer
      */
-     public publicKeys: string[] = [];
+    public publicKeys: string[] = [];
 
     /**
      * @type {(number)}
@@ -49,7 +49,7 @@ export class Peer implements Contracts.P2P.Peer {
      * @type {(string[])}
      * @memberof Peer
      */
-     public signatures: string[] = [];
+    public signatures: string[] = [];
 
     /**
      * @type {(PeerVerificationResult | undefined)}
@@ -110,7 +110,7 @@ export class Peer implements Contracts.P2P.Peer {
      * @returns {boolean}
      * @memberof Peer
      */
-     public isActiveDelegate(): boolean {
+    public isActiveDelegate(): boolean {
         return this.publicKeys.length > 0;
     }
 

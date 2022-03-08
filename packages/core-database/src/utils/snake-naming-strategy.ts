@@ -34,7 +34,7 @@ export class SnakeNamingStrategy extends DefaultNamingStrategy implements Naming
         return snakeCase(tableName + "_" + (columnName ? columnName : propertyName));
     }
 
-    public classTableInheritanceParentColumnName(parentTableName: any, parentTableIdPropertyName: any): string {
+    public classTableInheritanceParentColumnName(parentTableName: object, parentTableIdPropertyName: object): string {
         return snakeCase(parentTableName + "_" + parentTableIdPropertyName);
     }
 

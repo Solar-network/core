@@ -1,6 +1,6 @@
-import { Validation } from "@solar-network/crypto";
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Validation } from "@solar-network/crypto";
 
 const name = "hapi-ajv";
 
@@ -8,7 +8,7 @@ const name = "hapi-ajv";
 export const hapiAjv = {
     name,
     version: "1.0.0",
-    register: async (server: Hapi.Server, options: any): Promise<void> => {
+    register: async (server: Hapi.Server, options: object): Promise<void> => {
         const createErrorResponse = (request, h, errors) => {
             return Boom.badData(errors.map((error) => error.message).join(","));
         };

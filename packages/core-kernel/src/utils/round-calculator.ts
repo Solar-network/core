@@ -1,4 +1,5 @@
 import { Errors, Managers } from "@solar-network/crypto";
+
 import { RoundInfo } from "../contracts/shared";
 import { getMilestonesWhichAffectActiveDelegateCount } from "./calculate-forging-info";
 

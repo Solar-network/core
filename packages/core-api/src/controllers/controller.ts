@@ -1,6 +1,6 @@
-import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 
 import { Resource } from "../interfaces";
 import { SchemaObject } from "../schemas";
@@ -72,7 +72,7 @@ export class Controller {
         };
     }
 
-    protected respondWithResource(data, transformer, transform = true): any {
+    protected respondWithResource(data: unknown, transformer: new () => Resource, transform = true): any {
         if (!data) {
             return Boom.notFound();
         }
@@ -80,7 +80,7 @@ export class Controller {
         return { data: this.toResource(data, transformer, transform) };
     }
 
-    protected respondWithCollection(data, transformer, transform = true): object {
+    protected respondWithCollection(data: unknown[], transformer: new () => Resource, transform = true): object {
         return {
             data: this.toCollection(data, transformer, transform),
         };

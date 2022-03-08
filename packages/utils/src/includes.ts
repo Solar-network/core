@@ -8,7 +8,7 @@ export const includes = <T, V>(iterable: T, value: V): boolean => {
     }
 
     if (isString(iterable)) {
-        return iterable.includes((value as unknown) as string);
+        return iterable.includes(value as unknown as string);
     }
 
     if (isObject(iterable)) {

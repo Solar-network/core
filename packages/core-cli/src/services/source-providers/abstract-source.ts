@@ -74,12 +74,6 @@ export abstract class AbstractSource implements Source {
         removeSync(this.getDestPath(packageName));
     }
 
-    public abstract exists(value: string, version?: string): Promise<boolean>;
-
-    public abstract update(value: string): Promise<void>;
-
-    protected abstract preparePackage(value: string, version?: string): Promise<void>;
-
     protected translate(origin: string): void {
         const files = glob
             .sync("**/*", { cwd: origin })
@@ -110,4 +104,10 @@ export abstract class AbstractSource implements Source {
             writeFileSync(file, readFileSync(file).toString().replaceAll("@arkecosystem/", "@solar-network/"));
         }
     }
+
+    public abstract exists(value: string, version?: string): Promise<boolean>;
+
+    public abstract update(value: string): Promise<void>;
+
+    protected abstract preparePackage(value: string, version?: string): Promise<void>;
 }

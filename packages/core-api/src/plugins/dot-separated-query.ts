@@ -1,5 +1,5 @@
-import { Utils } from "@solar-network/core-kernel";
 import Hapi from "@hapi/hapi";
+import { Utils } from "@solar-network/core-kernel";
 
 export const dotSeparatedQuery = {
     name: "dot-separated-query",

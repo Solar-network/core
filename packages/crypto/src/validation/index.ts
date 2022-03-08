@@ -57,7 +57,7 @@ export class Validator {
         this.ajv.removeSchema(schemaKeyRef);
     }
 
-    public extendTransaction(schema: TransactionSchema, remove?: boolean) {
+    public extendTransaction(schema: TransactionSchema, remove?: boolean): void {
         this.extendTransactionSchema(this.ajv, schema, remove);
     }
 

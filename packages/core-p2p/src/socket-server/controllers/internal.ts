@@ -1,7 +1,7 @@
+import Hapi from "@hapi/hapi";
 import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import { DatabaseInteraction } from "@solar-network/core-state";
 import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
-import Hapi from "@hapi/hapi";
 
 import { Controller } from "./controller";
 
@@ -61,12 +61,12 @@ export class InternalController extends Controller {
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
         const reward = Managers.configManager.getMilestone(height).reward;
-        const allDelegates: Contracts.P2P.DelegateWallet[] = (
-            await this.walletRepository.allByUsername()
-        ).map((wallet) => ({
-            ...wallet.getData(),
-            delegate: wallet.getAttribute("delegate"),
-        }));
+        const allDelegates: Contracts.P2P.DelegateWallet[] = (await this.walletRepository.allByUsername()).map(
+            (wallet) => ({
+                ...wallet.getData(),
+                delegate: wallet.getAttribute("delegate"),
+            }),
+        );
 
         const delegates: Contracts.P2P.DelegateWallet[] = (
             await this.databaseInteraction.getActiveDelegates(roundInfo)
@@ -100,7 +100,6 @@ export class InternalController extends Controller {
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, height);
         return Crypto.Slots.getSlotNumber(blockTimeLookup, request.payload.timestamp);
     }
-
 
     public async getNetworkState(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<Contracts.P2P.NetworkState> {
         return await this.peerNetworkMonitor.getNetworkState(!!request.payload.log);

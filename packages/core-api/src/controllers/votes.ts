@@ -1,7 +1,7 @@
-import { Container, Contracts } from "@solar-network/core-kernel";
-import { Enums } from "@solar-network/crypto";
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Enums } from "@solar-network/crypto";
 
 import { TransactionResource } from "../resources";
 import { Controller } from "./controller";
@@ -11,7 +11,7 @@ export class VotesController extends Controller {
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
-    public async index(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async index(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<Contracts.Search.ResultsPage<object>> {
         const criteria = {
             ...request.query,
             typeGroup: Enums.TransactionTypeGroup.Core,
@@ -28,7 +28,7 @@ export class VotesController extends Controller {
         return this.toPagination(transactionListResult, TransactionResource, request.query.transform);
     }
 
-    public async show(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async show(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object | Boom.Boom> {
         const transaction = await this.transactionHistoryService.findOneByCriteria({
             typeGroup: Enums.TransactionTypeGroup.Core,
             type: Enums.TransactionType.Core.Vote,

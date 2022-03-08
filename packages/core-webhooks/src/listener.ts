@@ -41,7 +41,7 @@ export class Listener {
      * @param {string} event
      * @memberof Listener
      */
-    public async handle({ name, data }): Promise<void> {
+    public async handle({ name, data }: { name: string; data: Webhook }): Promise<void> {
         // Skip own events to prevent cycling
         if (name.toString().includes("webhooks")) {
             return;

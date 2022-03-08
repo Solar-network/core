@@ -6,14 +6,14 @@ import { Worker } from "../../contracts";
 // For testing purposes only
 @Container.injectable()
 export class TestWorkerAction implements Worker.WorkerAction {
-    private options: any | undefined;
+    private options!: { table: string };
     private resume: Function | undefined;
 
-    public init(options: any): void {
+    public init(options: { table: string }): void {
         this.options = options;
     }
 
-    public sync(data: any): void {
+    public sync(data: { execute: string }): void {
         /* istanbul ignore next */
         if (this.resume) {
             this.resume();

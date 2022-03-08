@@ -55,7 +55,7 @@ export class Service implements Contracts.TransactionPool.Service {
         this.disposed = true;
     }
 
-    public async handle({ name }): Promise<void> {
+    public async handle({ name }: { name: string; data: object }): Promise<void> {
         try {
             switch (name) {
                 case Enums.StateEvent.BuilderFinished:
@@ -151,7 +151,9 @@ export class Service implements Contracts.TransactionPool.Service {
 
                     previouslyForgedSuccesses++;
                 } catch (error) {
-                    this.logger.debug(`Failed to re-add previously forged transaction ${id}: ${error.message} :warning:`);
+                    this.logger.debug(
+                        `Failed to re-add previously forged transaction ${id}: ${error.message} :warning:`,
+                    );
                     previouslyForgedFailures++;
                 }
             }
@@ -172,7 +174,9 @@ export class Service implements Contracts.TransactionPool.Service {
                         previouslyStoredSuccesses++;
                     } catch (error) {
                         this.storage.removeTransaction(id);
-                        this.logger.debug(`Failed to re-add previously stored transaction ${id}: ${error.message} :warning:`);
+                        this.logger.debug(
+                            `Failed to re-add previously stored transaction ${id}: ${error.message} :warning:`,
+                        );
                         previouslyStoredFailures++;
                     }
                 } else {
@@ -183,19 +187,27 @@ export class Service implements Contracts.TransactionPool.Service {
             }
 
             if (previouslyForgedSuccesses >= 1) {
-                this.logger.info(`${previouslyForgedSuccesses} previously forged transactions re-added :money_with_wings:`);
+                this.logger.info(
+                    `${previouslyForgedSuccesses} previously forged transactions re-added :money_with_wings:`,
+                );
             }
             if (previouslyForgedFailures >= 1) {
-                this.logger.warning(`${previouslyForgedFailures} previously forged transactions failed re-adding :warning:`);
+                this.logger.warning(
+                    `${previouslyForgedFailures} previously forged transactions failed re-adding :warning:`,
+                );
             }
             if (previouslyStoredSuccesses >= 1) {
-                this.logger.info(`${previouslyStoredSuccesses} previously stored transactions re-added :money_with_wings:`);
+                this.logger.info(
+                    `${previouslyStoredSuccesses} previously stored transactions re-added :money_with_wings:`,
+                );
             }
             if (previouslyStoredExpirations >= 1) {
                 this.logger.info(`${previouslyStoredExpirations} previously stored transactions expired :zap:`);
             }
             if (previouslyStoredFailures >= 1) {
-                this.logger.warning(`${previouslyStoredFailures} previously stored transactions failed re-adding :warning:`);
+                this.logger.warning(
+                    `${previouslyStoredFailures} previously stored transactions failed re-adding :warning:`,
+                );
             }
         });
     }

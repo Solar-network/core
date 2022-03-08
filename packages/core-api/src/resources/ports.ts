@@ -19,7 +19,7 @@ export class PortsResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public raw(resource): object {
+    public raw(resource: object): object {
         return resource;
     }
 
@@ -30,7 +30,7 @@ export class PortsResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public transform(resource): object {
+    public transform(resource: object): object {
         const result = {};
         const keys = ["@solar-network/core-p2p", "@solar-network/core-api", "@solar-network/core-webhooks"];
 

@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@solar-network/core-kernel";
 import { Server } from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { InternalRoute } from "../routes/internal";
 

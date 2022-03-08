@@ -203,7 +203,8 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             this.log(
                 Severity.DEBUG_EXTRA,
                 `peer's claimed chain is ${pluralize("block", blocksAhead, true)} higher than ` +
-                    `ours (our height ${ourHeight}, his claimed height ${claimedHeight})`, null
+                    `ours (our height ${ourHeight}, his claimed height ${claimedHeight})`,
+                null,
             );
 
             return false;
@@ -226,14 +227,16 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
                 this.log(
                     Severity.DEBUG_EXTRA,
                     `success: peer's latest block is the same as our latest ` +
-                        `block (height=${claimedHeight}, id=${claimedState.header.id}). Identical chains`, true,
+                        `block (height=${claimedHeight}, id=${claimedState.header.id}). Identical chains`,
+                    true,
                 );
             } else {
                 this.log(
                     Severity.DEBUG_EXTRA,
                     `success: peer's latest block ` +
                         `(height=${claimedHeight}, id=${claimedState.header.id}) is part of our chain. ` +
-                        `Peer is ${pluralize("block", ourHeight - claimedHeight, true)} behind us`, true,
+                        `Peer is ${pluralize("block", ourHeight - claimedHeight, true)} behind us`,
+                    true,
                 );
             }
             return true;
@@ -518,7 +521,8 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         if (delegatesByPublicKey[block.data.generatorPublicKey]) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `successfully verified block at height ${height}, signed by ` + block.data.generatorPublicKey, true,
+                `successfully verified block at height ${height}, signed by ` + block.data.generatorPublicKey,
+                true,
             );
 
             return true;

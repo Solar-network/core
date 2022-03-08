@@ -4,9 +4,11 @@ import { Handlers } from "@solar-network/core-transactions";
 import { Blocks, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import delay from "delay";
 import { writeFileSync } from "fs";
+
 import { Client } from "./client";
 import { HostNoResponseError, RelayCommunicationError } from "./errors";
 import { Delegate } from "./interfaces";
+import { RelayHost } from "./interfaces";
 
 @Container.injectable()
 export class ForgerService {
@@ -67,7 +69,7 @@ export class ForgerService {
      * @type {number}
      * @memberof ForgerService
      */
-     private errorCount: number = 0;
+    private errorCount: number = 0;
 
     /**
      * @private
@@ -141,9 +143,9 @@ export class ForgerService {
      * @param {*} options
      * @memberof ForgerService
      */
-    public register(options): void {
+    public register(hosts: RelayHost[]): void {
         this.client = this.app.resolve<Client>(Client);
-        this.client.register(options.hosts);
+        this.client.register(hosts);
     }
 
     /**
@@ -276,7 +278,7 @@ export class ForgerService {
                 AppUtils.assert.defined<number>(networkStateHeight);
                 AppUtils.assert.defined<string>(delegate.publicKey);
 
-                Managers.configManager.setHeight(networkStateHeight!);
+                Managers.configManager.setHeight(networkStateHeight);
 
                 const roundSlot: number = await this.client.getSlotNumber(round.timestamp);
 
@@ -293,10 +295,7 @@ export class ForgerService {
                         height: networkStateHeight,
                     },
                     timestamp: round.timestamp,
-                    reward: Utils.calculateReward(
-                        networkStateHeight! + 1,
-                        round.currentForger.delegate.rank!,
-                    ),
+                    reward: Utils.calculateReward(networkStateHeight + 1, round.currentForger.delegate.rank!),
                 });
 
                 const timeLeftInMs: number = this.getRoundRemainingSlotTime(round);
@@ -309,8 +308,12 @@ export class ForgerService {
                 const lastBlockSlot = await this.client.getSlotNumber(state.header.timestamp);
 
                 if (lastBlockSlot === currentSlot || delegate.publicKey !== round.currentForger.publicKey) {
-                    if (firstAttempt && ((networkState.getLastGenerator() === delegate.publicKey && networkState.getLastSlotNumber() === roundSlot) ||
-                        (state.header.generatorPublicKey === delegate.publicKey && lastBlockSlot === roundSlot))) {
+                    if (
+                        firstAttempt &&
+                        ((networkState.getLastGenerator() === delegate.publicKey &&
+                            networkState.getLastSlotNumber() === roundSlot) ||
+                            (state.header.generatorPublicKey === delegate.publicKey && lastBlockSlot === roundSlot))
+                    ) {
                         this.logger.warning(
                             `Not going to forge because delegate ${prettyName} has already forged on another node :octagonal_sign:`,
                         );
@@ -333,7 +336,7 @@ export class ForgerService {
                         delegate.publicKey === round.currentForger.publicKey
                     ) {
                         AppUtils.assert.defined<Interfaces.IBlock>(block);
-                        if (await this.client.getSlotNumber(block.data.timestamp) !== lastBlockSlot) {
+                        if ((await this.client.getSlotNumber(block.data.timestamp)) !== lastBlockSlot) {
                             this.logger.info(
                                 `Delegate ${prettyName} forged a new block at height ${block.data.height.toLocaleString()} with ${AppUtils.pluralize(
                                     "transaction",
@@ -449,7 +452,8 @@ export class ForgerService {
         };
 
         const overHeightBlockHeaders: Array<{ [ip: string]: any }> = networkState.getOverHeightBlockHeaders();
-        const distinctOverHeightBlockHeaders: Array<{ [ip: string]: any }> = removeDuplicateBlockHeaders(overHeightBlockHeaders);
+        const distinctOverHeightBlockHeaders: Array<{ [ip: string]: any }> =
+            removeDuplicateBlockHeaders(overHeightBlockHeaders);
 
         if (distinctOverHeightBlockHeaders.length > 0) {
             this.logger.info(
@@ -465,7 +469,9 @@ export class ForgerService {
                     AppUtils.assert.defined<string>(delegate.publicKey);
 
                     try {
-                        const { verified } = Blocks.BlockFactory.fromData(overHeightBlockHeader as Interfaces.IBlockData)!.verification;
+                        const { verified } = Blocks.BlockFactory.fromData(
+                            overHeightBlockHeader as Interfaces.IBlockData,
+                        )!.verification;
                         if (verified) {
                             this.logger.warning(
                                 `Delegate ${
@@ -618,7 +624,11 @@ export class ForgerService {
     private printLoadedDelegates(): void {
         if (this.activeDelegates.length > 0) {
             this.logger.info(
-                `Loaded ${AppUtils.pluralize("active delegate", this.activeDelegates.length, true)}: ${this.activeDelegates
+                `Loaded ${AppUtils.pluralize(
+                    "active delegate",
+                    this.activeDelegates.length,
+                    true,
+                )}: ${this.activeDelegates
                     .map(({ publicKey }) => {
                         AppUtils.assert.defined<string>(publicKey);
 
@@ -630,11 +640,19 @@ export class ForgerService {
 
         if (this.delegates.length > this.activeDelegates.length) {
             this.logger.info(
-                `Loaded ${AppUtils.pluralize("inactive delegate", this.inactiveDelegates.length, true)}: ${this.inactiveDelegates
+                `Loaded ${AppUtils.pluralize(
+                    "inactive delegate",
+                    this.inactiveDelegates.length,
+                    true,
+                )}: ${this.inactiveDelegates
                     .map(({ publicKey }) => {
                         AppUtils.assert.defined<string>(publicKey);
 
-                        return `${this.allUsernames[publicKey] ? this.allUsernames[publicKey] : `unregistered delegate (public key: ${publicKey})`}`;
+                        return `${
+                            this.allUsernames[publicKey]
+                                ? this.allUsernames[publicKey]
+                                : `unregistered delegate (public key: ${publicKey})`
+                        }`;
                     })
                     .join(", ")}`,
             );

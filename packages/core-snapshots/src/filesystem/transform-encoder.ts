@@ -6,7 +6,7 @@ export class TransformEncoder extends Transform {
         super({ objectMode: true });
     }
 
-    public _transform(chunk: any, encoding: string, callback: TransformCallback): void {
+    public _transform(chunk: object, encoding: string, callback: TransformCallback): void {
         const encoded: Buffer = this.encode(chunk);
 
         const buffer: ByteBuffer = new ByteBuffer(4 + encoded.length, true);

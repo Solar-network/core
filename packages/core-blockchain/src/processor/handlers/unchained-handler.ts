@@ -78,7 +78,9 @@ export class UnchainedHandler implements BlockHandler {
 
             return UnchainedBlockStatus.NotReadyToAcceptNewHeight;
         } else if (block.data.height < lastBlock.data.height) {
-            this.logger.debug(`Block ${block.data.height.toLocaleString()} disregarded because already in blockchain :warning:`);
+            this.logger.debug(
+                `Block ${block.data.height.toLocaleString()} disregarded because already in blockchain :warning:`,
+            );
 
             return UnchainedBlockStatus.AlreadyInBlockchain;
         } else if (block.data.height === lastBlock.data.height && block.data.id === lastBlock.data.id) {

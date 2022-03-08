@@ -2,7 +2,7 @@ import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import dns from "dns";
 import util from "util";
 
-export const checkDNS = async (app: Contracts.Kernel.Application, hosts: string[]) => {
+export const checkDNS = async (app: Contracts.Kernel.Application, hosts: string[]): Promise<string> => {
     hosts = Utils.shuffle(hosts);
 
     const lookupService = util.promisify(dns.lookupService);

@@ -1,6 +1,6 @@
 import { Container, Contracts, Providers } from "@solar-network/core-kernel";
-import { Connection, createConnection, getCustomRepository } from "typeorm";
 import Joi from "joi";
+import { Connection, createConnection, getCustomRepository } from "typeorm";
 
 import { BlockFilter } from "./block-filter";
 import { BlockHistoryService } from "./block-history-service";

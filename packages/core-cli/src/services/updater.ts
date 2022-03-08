@@ -1,15 +1,15 @@
+import { sync } from "execa";
 import { dim, green, reset } from "kleur";
 import * as semver from "semver";
 import { PackageJson } from "type-fest";
-import { sync } from "execa";
 
 import { Application } from "../application";
 import { Confirm, Spinner, Warning } from "../components";
 import { Config } from "../contracts";
+import * as Contracts from "../contracts";
 import { Identifiers, inject, injectable } from "../ioc";
 import { Installer } from "./installer";
 import { ProcessManager } from "./process-manager";
-import * as Contracts from "../contracts";
 
 /**
  * @export
@@ -63,6 +63,18 @@ export class Updater implements Contracts.Updater {
      * @memberof Updater
      */
     private latestVersion: string | undefined;
+
+    private get packageName(): string {
+        return this.pkg.name!;
+    }
+
+    private get packageVersion(): string {
+        return this.pkg.version!;
+    }
+
+    private get packageChannel(): string {
+        return this.config.get("channel");
+    }
 
     /**
      * @returns {Promise<boolean>}
@@ -139,7 +151,6 @@ export class Updater implements Contracts.Updater {
      * @memberof Updater
      */
     public async getLatestVersion(): Promise<string | undefined> {
-
         const coreDirectory = __dirname + "/../../../../";
 
         let regex = '"^\\d+.\\d+.\\d+"';
@@ -163,17 +174,5 @@ export class Updater implements Contracts.Updater {
         }
 
         return stdout;
-    }
-
-    private get packageName(): string {
-        return this.pkg.name!;
-    }
-
-    private get packageVersion(): string {
-        return this.pkg.version!;
-    }
-
-    private get packageChannel(): string {
-        return this.config.get("channel");
     }
 }
