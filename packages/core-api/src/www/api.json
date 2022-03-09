@@ -164,7 +164,7 @@
                     {
                         "name": "orderBy",
                         "in": "query",
-                        "description": "Sorting method (version) :asc or :desc",
+                        "description": "Sorting method (height, latency, version) :asc or :desc",
                         "required": false,
                         "type": "string"
                     }
