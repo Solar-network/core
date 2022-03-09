@@ -64,7 +64,6 @@ export class Server {
     public async initialize(name: string, optionsServer: Types.JsonObject): Promise<void> {
         this.name = name;
         this.server = new HapiServer(this.getServerOptions(optionsServer));
-
         const timeout: number = this.configuration.getRequired<number>("plugins.socketTimeout");
         this.server.listener.timeout = timeout;
         this.server.listener.keepAliveTimeout = timeout;
@@ -83,14 +82,6 @@ export class Server {
                 this.logger.error(request.response.stack);
             }
             return h.continue;
-        });
-
-        this.server.route({
-            method: "GET",
-            path: "/",
-            handler() {
-                return { data: "Hello World!" };
-            },
         });
     }
 

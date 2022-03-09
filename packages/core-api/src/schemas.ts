@@ -178,6 +178,7 @@ export const blockCriteriaSchemas = {
     numberOfTransactions: orNumericCriteria(Joi.number().integer().min(0)),
     totalAmount: orNumericCriteria(Joi.number().integer().min(0)),
     totalFee: orNumericCriteria(Joi.number().integer().min(0)),
+    burnedFee: orNumericCriteria(Joi.number().integer().min(0)),
     reward: orNumericCriteria(Joi.number().integer().min(0)),
     payloadLength: orNumericCriteria(Joi.number().integer().min(0)),
     payloadHash: orEqualCriteria(Joi.string().hex()),
@@ -201,5 +202,6 @@ export const transactionCriteriaSchemas = {
     vendorField: orLikeCriteria(Joi.string().max(255, "utf8")),
     amount: orNumericCriteria(Joi.number().integer().min(0)),
     fee: orNumericCriteria(Joi.number().integer().min(0)),
+    burnedFee: orNumericCriteria(Joi.number().integer().min(0)),
     asset: orContainsCriteria(Joi.object()),
 };

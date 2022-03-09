@@ -38,6 +38,7 @@ export const preparePlugins = (
         plugin: require("./cache"),
         options: config!.cache,
     },
+    { plugin: require("@hapi/inert") },
     {
         plugin: require("./rate-limit"),
         options: {
