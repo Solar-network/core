@@ -114,7 +114,6 @@ export class Server {
                 handler: {
                     directory: {
                         path: `${__dirname}/www`,
-                        listing: true,
                     },
                 },
             });
