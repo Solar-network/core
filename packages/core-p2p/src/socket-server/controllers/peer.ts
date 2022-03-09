@@ -96,9 +96,11 @@ export class PeerController extends Controller {
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
-        const delegates: (string | undefined)[] = ((await this.triggers.call("getActiveDelegates", {
-            roundInfo,
-        })) as Contracts.State.Wallet[]).map((wallet) => wallet.getPublicKey());
+        const delegates: (string | undefined)[] = (
+            (await this.triggers.call("getActiveDelegates", {
+                roundInfo,
+            })) as Contracts.State.Wallet[]
+        ).map((wallet) => wallet.getPublicKey());
 
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {

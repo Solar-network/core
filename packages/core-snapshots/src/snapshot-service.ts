@@ -49,9 +49,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             try {
                 meta = await this.filesystem.readMetaData();
             } catch (e) {
-                this.logger.error(
-                    `Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`,
-                );
+                this.logger.error(`Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`);
                 return;
             }
 
@@ -91,9 +89,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             try {
                 meta = await this.filesystem.readMetaData();
             } catch (e) {
-                this.logger.error(
-                    `Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`,
-                );
+                this.logger.error(`Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`);
             }
 
             this.database.init(meta!.codec, meta!.skipCompression);

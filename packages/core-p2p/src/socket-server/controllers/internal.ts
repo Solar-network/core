@@ -67,9 +67,11 @@ export class InternalController extends Controller {
             }),
         );
 
-        const delegates: Contracts.P2P.DelegateWallet[] = ((await this.triggers.call("getActiveDelegates", {
-            roundInfo,
-        })) as Contracts.State.Wallet[]).map((wallet) => ({
+        const delegates: Contracts.P2P.DelegateWallet[] = (
+            (await this.triggers.call("getActiveDelegates", {
+                roundInfo,
+            })) as Contracts.State.Wallet[]
+        ).map((wallet) => ({
             ...wallet.getData(),
             delegate: wallet.getAttribute("delegate"),
         }));

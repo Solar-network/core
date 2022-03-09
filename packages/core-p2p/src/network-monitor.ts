@@ -650,9 +650,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
-        const delegates: (string | undefined)[] = ((await this.triggers.call("getActiveDelegates", {
-            roundInfo,
-        })) as Contracts.State.Wallet[]).map((wallet) => wallet.getPublicKey());
+        const delegates: (string | undefined)[] = (
+            (await this.triggers.call("getActiveDelegates", {
+                roundInfo,
+            })) as Contracts.State.Wallet[]
+        ).map((wallet) => wallet.getPublicKey());
 
         const delegatesOnThisNode: string[] = [];
         const publicKeys = Utils.getForgerDelegates();
