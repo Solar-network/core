@@ -63,6 +63,7 @@ export const delegateCriteriaSchemaObject = {
         approval: Schemas.createRangeCriteriaSchema(Joi.number().min(0)),
     },
     forged: {
+        burnedFees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         fees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         rewards: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         total: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
