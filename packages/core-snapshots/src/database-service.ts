@@ -76,13 +76,13 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
 
     public async dump(options: Options.DumpOptions): Promise<void> {
         try {
-            this.logger.info("Start counting blocks, rounds and transactions");
+            this.logger.info("Started counting blocks, rounds and transactions");
 
             const dumpRage = await this.getDumpRange(options.start, options.end);
             const meta = this.prepareMetaData(options, dumpRage);
 
             this.logger.info(
-                `Start running dump for ${Utils.pluralize("block", dumpRage.blocksCount, true)}, ${Utils.pluralize(
+                `Started running dump for ${Utils.pluralize("block", dumpRage.blocksCount, true)}, ${Utils.pluralize(
                     "round",
                     dumpRage.roundsCount,
                     true,

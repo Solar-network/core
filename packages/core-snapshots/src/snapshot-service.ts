@@ -26,7 +26,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
 
             await this.database.dump(options);
 
-            this.logger.info(`Snapshot is saved on location: ${this.filesystem.getSnapshotPath()}`);
+            this.logger.info(`Snapshot was saved to: ${this.filesystem.getSnapshotPath()}`);
         } catch (err) {
             this.logger.error(`DUMP failed`);
             this.logger.error(err.stack);
@@ -50,7 +50,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
                 meta = await this.filesystem.readMetaData();
             } catch (e) {
                 this.logger.error(
-                    `Metadata for snapshot ${options.blocks} of network ${options.network} are not valid`,
+                    `Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`,
                 );
                 return;
             }
@@ -62,7 +62,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             await this.database.restore(meta!, { truncate: !!options.truncate });
 
             this.logger.info(
-                `Successfully restore  ${Utils.pluralize("block", meta!.blocks.count, true)}, ${Utils.pluralize(
+                `Successfully restored ${Utils.pluralize("block", meta!.blocks.count, true)}, ${Utils.pluralize(
                     "transaction",
                     meta!.transactions.count,
                     true,
@@ -92,7 +92,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
                 meta = await this.filesystem.readMetaData();
             } catch (e) {
                 this.logger.error(
-                    `Metadata for snapshot ${options.blocks} of network ${options.network} are not valid`,
+                    `Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`,
                 );
             }
 
@@ -133,7 +133,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             const newLastBlock = await this.database.rollback(roundInfo);
 
             this.logger.info(
-                `Rolling back chain to last finished round ${roundInfo.round.toLocaleString()} with last block height ${newLastBlock.data.height.toLocaleString()}`,
+                `Rolling back blockchain to last finished round ${roundInfo.round.toLocaleString()} with last block height ${newLastBlock.data.height.toLocaleString()}`,
             );
         } catch (err) {
             this.logger.error("ROLLBACK failed");
@@ -142,7 +142,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
     }
 
     public async rollbackByNumber(number: number): Promise<void> {
-        this.logger.info("Running ROLLBACK by Number method inside SnapshotService");
+        this.logger.info("Running ROLLBACK");
 
         const lastBlock = await this.database.getLastBlock();
 
