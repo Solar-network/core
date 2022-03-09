@@ -2,6 +2,7 @@ import { badData } from "@hapi/boom";
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
 import { Container, Contracts, Providers, Types, Utils } from "@solar-network/core-kernel";
 import { readFileSync } from "fs";
+import { readJsonSync } from "fs-extra";
 
 import * as Schemas from "./schemas";
 
@@ -47,6 +48,8 @@ export class Server {
      */
     private name!: string;
 
+    private swaggerJson!: { basePath: string; info: { version: string }; schemes: string[] };
+
     /**
      * @type {string}
      * @memberof Server
@@ -64,7 +67,10 @@ export class Server {
     public async initialize(name: string, optionsServer: Types.JsonObject): Promise<void> {
         this.name = name;
         this.server = new HapiServer(this.getServerOptions(optionsServer));
-
+        this.swaggerJson = readJsonSync(`${__dirname}/www/api.json`);
+        this.swaggerJson.basePath = this.configuration.getRequired<string>("options.basePath");
+        this.swaggerJson.info.version = this.app.version();
+        this.swaggerJson.schemes.push(this.server.info.protocol);
         const timeout: number = this.configuration.getRequired<number>("plugins.socketTimeout");
         this.server.listener.timeout = timeout;
         this.server.listener.keepAliveTimeout = timeout;
@@ -84,14 +90,6 @@ export class Server {
             }
             return h.continue;
         });
-
-        this.server.route({
-            method: "GET",
-            path: "/",
-            handler() {
-                return { data: "Hello World!" };
-            },
-        });
     }
 
     /**
@@ -102,6 +100,24 @@ export class Server {
         try {
             await this.server.start();
 
+            this.server.route({
+                method: "GET",
+                path: "/api.json",
+                handler: () => {
+                    return this.swaggerJson;
+                },
+            });
+
+            this.server.route({
+                method: "GET",
+                path: "/{param*}",
+                handler: {
+                    directory: {
+                        path: `${__dirname}/www`,
+                        listing: true,
+                    },
+                },
+            });
             this.logger.info(`${this.name} Server started at ${this.server.info.uri}`);
         } catch {
             await this.app.terminate(`Failed to start ${this.name} Server!`);

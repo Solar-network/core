@@ -1,0 +1,2135 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Solar Core: Public API"
+    },
+    "tags": [
+        {
+            "name": "Blockchain"
+        },
+        {
+            "name": "Node"
+        },
+        {
+            "name": "Blocks"
+        },
+        {
+            "name": "Delegates"
+        },
+        {
+            "name": "Locks"
+        },
+        {
+            "name": "Rounds"
+        },
+        {
+            "name": "Transactions"
+        },
+        {
+            "name": "Votes"
+        },
+        {
+            "name": "Wallets"
+        }
+    ],
+    "schemes": [
+    ],
+    "paths": {
+        "/blockchain": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Get general blockchain information",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/node/configuration": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get node configuration information",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/node/configuration/crypto": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get node crypto configuration information",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/node/fees": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get node fee statistics",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/node/status": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get node status information",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/node/syncing": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Get node sync status information",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/peers": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "See node peer status information",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "description": "The node version by which the resources will be filtered",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Sorting method (version) :asc or :desc",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/peers/{ip}": {
+            "get": {
+                "tags": [
+                    "Node"
+                ],
+                "summary": "Find a single peer by its IP address",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "ip",
+                        "in": "path",
+                        "description": "IP address of the peer",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Peer not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/blocks": {
+            "get": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "List blocks or search for blocks meeting specific criteria",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "ID of the block to be retrieved",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Version of the block(s) to be retrieved"
+                    },
+                    {
+                        "name": "previousBlock",
+                        "in": "query",
+                        "type": "string",
+                        "required": false,
+                        "description": "Previous block ID chained to the block to be retrieved"
+                    },
+                    {
+                        "name": "payloadHash",
+                        "in": "query",
+                        "type": "string",
+                        "required": false,
+                        "description": "Hash of the transaction payload of the block(s) to be returned"
+                    },
+                    {
+                        "name": "generatorPublicKey",
+                        "in": "query",
+                        "type": "string",
+                        "required": false,
+                        "description": "Public key of the delegate that forged the block(s) to be returned"
+                    },
+                    {
+                        "name": "blockSignature",
+                        "in": "query",
+                        "type": "string",
+                        "required": false,
+                        "description": "Signature of the block to be returned"
+                    },
+                    {
+                        "name": "height",
+                        "in": "query",
+                        "description": "Exact height of the block to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "height.from",
+                        "in": "query",
+                        "description": "Earliest height of the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "height.to",
+                        "in": "query",
+                        "description": "Latest height of the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "Exact time, in seconds since the epoch, of the block to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "timestamp.from",
+                        "in": "query",
+                        "description": "Earliest time, in seconds since the epoch, of the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "timestamp.to",
+                        "in": "query",
+                        "description": "Latest time, in seconds since the epoch, of the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "numberOfTransactions",
+                        "in": "query",
+                        "description": "Exact number of transactions inside the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "numberOfTransactions.from",
+                        "in": "query",
+                        "description": "Minimum number of transactions inside the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "numberOfTransactions.to",
+                        "in": "query",
+                        "description": "Maximum number of transactions inside the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "totalAmount",
+                        "in": "query",
+                        "description": "Exact amount, in satoshis, of all transactions in the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "totalAmount.from",
+                        "in": "query",
+                        "description": "Minimum amount, in satoshis, of all transactions in the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "totalAmount.to",
+                        "in": "query",
+                        "description": "Maximum amount, in satoshis, of all transactions in the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "totalFee",
+                        "in": "query",
+                        "description": "Exact amount, in satoshis, of the fees of all transactions in the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "totalFee.from",
+                        "in": "query",
+                        "description": "Minimum amount, in satoshis, of the fees of all transactions in the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "totalFee.to",
+                        "in": "query",
+                        "description": "Maximum amount, in satoshis, of the fees of all transactions in the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "burnedFee",
+                        "in": "query",
+                        "description": "Exact amount, in satoshis, of the fees that were burned in all transactions in the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "burnedFee.from",
+                        "in": "query",
+                        "description": "Minimum amount, in satoshis, of the fees that were burned in all transactions in the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "burnedFee.to",
+                        "in": "query",
+                        "description": "Maximum amount, in satoshis, of the fees that were burned in all transactions in the block(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "reward",
+                        "in": "query",
+                        "description": "Exact block reward amount of the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "reward.from",
+                        "in": "query",
+                        "description": "Lowest block reward amount of the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "reward.to",
+                        "in": "query",
+                        "description": "Highest block reward amount of the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "payloadLength",
+                        "in": "query",
+                        "description": "Exact transaction payload length of the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "payloadLength.from",
+                        "in": "query",
+                        "description": "Minimum transaction payload length of the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "payloadLength.to",
+                        "in": "query",
+                        "description": "Maximum transaction payload length of the block(s) to be received",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Sorting method (id, version, previousBlock, payloadHash, generatorPublicKey, blockSignature, height, timestamp, numberOfTransactions, totalAmount, totalFee, burnedFee, reward, payloadLength) :asc or :desc",
+                        "required": false,
+                        "default": "timestamp:desc",
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/blocks/{block}": {
+            "get": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Find a single block by its ID or height",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "block",
+                        "in": "path",
+                        "description": "ID or height of block to return",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Block not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/blocks/last": {
+            "get": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Get the most recent block in the blockchain",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/blocks/{block}/transactions": {
+            "get": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Find transactions in a specific block",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "block",
+                        "in": "path",
+                        "description": "ID or height of block to get transactions",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Block not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/delegates": {
+            "get": {
+                "tags": [
+                    "Delegates"
+                ],
+                "summary": "List delegates or search for delegates meeting specific criteria",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "description": "The address of the delegate to be retrieved"
+                    },
+                    {
+                        "name": "publicKey",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "description": "The public key of the delegate to be retrieved"
+                    },
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "description": "The username of the delegate to be retrieved"
+                    },
+                    {
+                        "name": "isResigned",
+                        "in": "query",
+                        "required": false,
+                        "type": "boolean",
+                        "description": "Whether the delegate(s) to be retrieved are resigned and no longer able to forge"
+                    },
+                    {
+                        "name": "production.approval",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "The number of results per page"
+                    },
+                    {
+                        "name": "production.approval.from",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "The number of results per page"
+                    },
+                    {
+                        "name": "production.approval.to",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "The number of results per page"
+                    },
+                    {
+                        "name": "forged.fees",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Exact amount, in satoshis, of all fees forged by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.fees.from",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Minimum amount, in satoshis, of all fees forged by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.fees.to",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Maximum amount, in satoshis, of all fees forged by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.burnedFees",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Exact amount, in satoshis, of all fees burned by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.burnedFees.from",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Minimum amount, in satoshis, of all fees burned by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.burnedFees.to",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Maximum amount, in satoshis, of all fees burned by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.rewards",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Exact amount, in satoshis, of all block rewards earned by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.rewards.from",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Minimum amount, in satoshis, of all block rewards earned by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.rewards.to",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Maximum amount, in satoshis, of all block rewards earned by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.total",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Exact amount, in satoshis, of all unburned fees plus block rewards earned by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.total.from",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Minimum amount, in satoshis, of all unburned fees plus block rewards earned by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "forged.total.to",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Maximum amount, in satoshis, of all unburned fees plus block rewards earned by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "votes",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Exact amount of vote weight for the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "votes.from",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Minimum amount of vote weight for the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "votes.to",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Maximum amount of vote weight for the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "blocks.produced",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Exact number of blocks produced by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "blocks.produced.from",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Minimum number of blocks produced by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "blocks.produced.to",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Maximum number of blocks produced by the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "rank",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Exact rank of the delegate to be retrieved"
+                    },
+                    {
+                        "name": "rank.from",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Lowest rank of the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "rank.to",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "description": "Highest rank of the delegates(s) to be retrieved"
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Sorting method (address, publicKey, username, isResigned, production.approval, forged.fees, forged.burnedFees, forged.rewards, forged.total, votes, blocks.produced, rank) :asc or :desc",
+                        "required": false,
+                        "default": "rank:asc",
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/delegates/{identifier}": {
+            "get": {
+                "tags": [
+                    "Delegates"
+                ],
+                "summary": "Find a single delegate by its identifier",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Identifier for delegate (address, public key, username)",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Delegate not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/delegates/{identifier}/blocks": {
+            "get": {
+                "tags": [
+                    "Delegates"
+                ],
+                "summary": "Find blocks produced by a specific delegate",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Identifier for delegate (address, public key, username)",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Delegate not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/delegates/{identifier}/voters": {
+            "get": {
+                "tags": [
+                    "Delegates"
+                ],
+                "summary": "Find wallets currently voting for a specific delegate",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Identifier for delegate (address, public key, username)",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Delegate not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/locks": {
+            "get": {
+                "tags": [
+                    "Locks"
+                ],
+                "summary": "List HTLC transaction locks or search for locks meeting specific criteria",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "lockId",
+                        "in": "query",
+                        "description": "The lock id to be retrieved",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "senderPublicKey",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Public key of the sender of the lock(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "recipientId",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Address of the recipient of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "secretHash",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Secret hash string of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+
+                    {
+                        "name": "vendorField",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Vendor field string of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "isExpired",
+                        "in": "query",
+                        "required": false,
+                        "type": "boolean",
+                        "description": "Whether the lock(s) to be retrieved have expired"
+                    },
+                    {
+                        "name": "expirationType",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Expiration type (1 = timestamp, 2 = height) of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "expirationValue",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact expiration time or height of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "expirationValue.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Earliest expiration time or height of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "expirationValue.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Latest expiration time or height of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "amount",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact amount, in satoshis, of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "amount.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Minimum amount, in satoshis, of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "amount.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Maximum amount, in satoshis, of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.epoch",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact time, in seconds since the epoch, of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.epoch.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Earliest time, in seconds since the epoch, of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.epoch.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Latest time, in seconds since the epoch, of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.unix",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact time, in UNIX timestamp format, of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.unix.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Earliest time, in UNIX timestamp format, of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.unix.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Latest time, in UNIX timestamp format, of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.human",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Exact time, in human readable format (e.g. 2022-03-28T18:00:00.000Z), of the lock transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Sorting method (lockId, senderPublicKey, isExpired, amount, secretHash, recipientId, timestamp.epoch, timestamp.human, timestamp.unix, expirationType, expirationValue, vendorField) :asc or :desc",
+                        "required": false,
+                        "default": "timestamp.epoch:desc",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/locks/{id}": {
+            "get": {
+                "tags": [
+                    "Locks"
+                ],
+                "summary": "Find a single HTLC transaction lock by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Lock ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Lock not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/locks/unlocked": {
+            "post": {
+                "tags": [
+                    "Locks"
+                ],
+                "summary": "View unlocked HTLC transactions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "ids",
+                        "description": "An ids object containing an array of lock IDs",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "items": {
+                                "type": "array"
+                            },
+                            "example": "{\"ids\": []}"
+                        }
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Sorting method (id, blockId, version, senderPublicKey, senderId, recipientId, vendorField, amount, fee, burnedFee, timestamp, nonce) :asc or :desc",
+                        "required": false,
+                        "default": "timestamp:desc",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/rounds/{id}/delegates": {
+            "get": {
+                "tags": [
+                    "Rounds"
+                ],
+                "summary": "Get delegate public keys forging in a specific round",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The forging round number to retrieve the public keys of delegates",
+                        "required": true,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Round not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/transactions": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "List transactions or search for transactions meeting specific criteria",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "The transaction id to be retrieved",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "The type of the transaction(s) to be retrieved",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "typeGroup",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "The type group of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "blockId",
+                        "in": "query",
+                        "description": "The block ID containing the transaction(s) to be retrieved",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "The version of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "senderPublicKey",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Public key of the sender of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "senderId",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Address of the sender of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "recipientId",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Address of the recipient of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "vendorField",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Vendor field string of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "amount",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact amount, in satoshis, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "amount.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Minimum amount, in satoshis, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "amount.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Maximum amount, in satoshis, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "fee",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact fee, in satoshis, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "fee.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Minimum fee, in satoshis, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "fee.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Maximum fee, in satoshis, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "burnedFee",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact fee amount that was burned, in satoshis, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "burnedFee.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Minimum fee amount that was burned, in satoshis, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "burnedFee.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Maximum fee amount that was burned, in satoshis, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact time, in seconds since the epoch, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Earliest time, in seconds since the epoch, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Latest time, in seconds since the epoch, of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "nonce",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact nonce of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "nonce.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Minimum nonce of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "nonce.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Maximum nonce of the transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Sorting method (id, type, typeGroup, blockId, version, senderPublicKey, senderId, recipientId, vendorField, amount, fee, burnedFee, timestamp, nonce) :asc or :desc",
+                        "required": false,
+                        "default": "timestamp:desc",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Post transactions to be included in the blockchain",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "transactions",
+                        "description": "A transactions object containing an array of signed transactions",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "items": {
+                                "type": "array"
+                            },
+                            "example": "{\"transactions\": []}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/transactions/{transactionId}": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Find a single transaction by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "transactionId",
+                        "in": "path",
+                        "description": "Transaction ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Transaction not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/transactions/unconfirmed": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "View unconfirmed transactions not yet in the blockchain",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/transactions/unconfirmed/{transactionId}": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Find a single unconfirmed transaction by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "transactionId",
+                        "in": "path",
+                        "description": "Transaction ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Transaction not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/transactions/types": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "List transaction types",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/transactions/fees": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "List transaction fees",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/votes": {
+            "get": {
+                "tags": [
+                    "Votes"
+                ],
+                "summary": "List votes or search for votes meeting specific criteria",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "The vote transaction id to be retrieved",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "blockId",
+                        "in": "query",
+                        "description": "The block ID containing the vote transaction(s) to be retrieved",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "The version of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "senderPublicKey",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Public key of the sender of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "senderId",
+                        "in": "query",
+                        "type": "string",
+                        "description": "Address of the sender of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "fee",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact fee, in satoshis, of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "fee.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Minimum fee, in satoshis, of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "fee.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Maximum fee, in satoshis, of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "burnedFee",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact fee amount that was burned, in satoshis, of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "burnedFee.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Minimum fee amount that was burned, in satoshis, of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "burnedFee.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Maximum fee amount that was burned, in satoshis, of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact time, in seconds since the epoch, of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Earliest time, in seconds since the epoch, of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "timestamp.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Latest time, in seconds since the epoch, of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "nonce",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Exact nonce of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "nonce.from",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Minimum nonce of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "nonce.to",
+                        "in": "query",
+                        "type": "integer",
+                        "description": "Maximum nonce of the vote transaction(s) to be retrieved",
+                        "required": false
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Sorting method (id, blockId, version, senderPublicKey, senderId, fee, burnedFee, timestamp, nonce) :asc or :desc",
+                        "required": false,
+                        "default": "timestamp:desc",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/votes/{transactionId}": {
+            "get": {
+                "tags": [
+                    "Votes"
+                ],
+                "summary": "Find a single vote by its transaction ID",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "transactionId",
+                        "in": "path",
+                        "description": "Transaction ID",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Vote not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/wallets": {
+            "get": {
+                "tags": [
+                    "Wallets"
+                ],
+                "summary": "List wallets or search for wallets meeting specific criteria",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "type": "string",
+                        "required": false,
+                        "description": "The address of the wallet to be retrieved"
+                    },
+                    {
+                        "name": "balance",
+                        "in": "query",
+                        "type": "integer",
+                        "required": false,
+                        "description": "The exact balance of the wallet(s) to be retrieved"
+                    },
+                    {
+                        "name": "balance.from",
+                        "in": "query",
+                        "type": "integer",
+                        "required": false,
+                        "description": "The minimum balance of the wallet(s) to be retrieved"
+                    },
+                    {
+                        "name": "balance.to",
+                        "in": "query",
+                        "type": "integer",
+                        "required": false,
+                        "description": "The maximum balance of the wallet(s) to be retrieved"
+                    },
+                    {
+                        "name": "publicKey",
+                        "in": "query",
+                        "type": "string",
+                        "required": false,
+                        "description": "The public key of the wallet to be retrieved"
+                    },
+                    {
+                        "name": "attributes.secondPublicKey",
+                        "in": "query",
+                        "type": "string",
+                        "required": false,
+                        "description": "The second public key of the wallet to be retrieved"
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Sorting method (address, balance, publicKey, attributes.secondPublicKey) :asc or :desc",
+                        "required": false,
+                        "default": "balance:desc",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Wallet not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/wallets/{identifier}": {
+            "get": {
+                "tags": [
+                    "Wallets"
+                ],
+                "summary": "Find a single wallet by its identifier",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Can be address, public key or username of the wallet",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Wallet not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/wallets/{identifier}/transactions": {
+            "get": {
+                "tags": [
+                    "Wallets"
+                ],
+                "summary": "List all transactions in a specific wallet",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Can be address, public key or username of the wallet",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Wallet not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/wallets/{identifier}/transactions/received": {
+            "get": {
+                "tags": [
+                    "Wallets"
+                ],
+                "summary": "List transactions received by a specific wallet",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Can be address, public key or username of the wallet",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Wallet not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/wallets/{identifier}/transactions/sent": {
+            "get": {
+                "tags": [
+                    "Wallets"
+                ],
+                "summary": "List transactions sent by a specific wallet",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Can be address, public key or username of the wallet",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Wallet not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/wallets/{identifier}/votes": {
+            "get": {
+                "tags": [
+                    "Wallets"
+                ],
+                "summary": "List vote or unvote transactions from a specific wallet",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Can be address, public key or username of the wallet",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Wallet not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/wallets/top": {
+            "get": {
+                "tags": [
+                    "Wallets"
+                ],
+                "summary": "List wallets in descending order of balance",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "required": false,
+                        "default": 1,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "required": false,
+                        "default": 100,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        }
+    }
+}

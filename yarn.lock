@@ -1642,7 +1642,7 @@
     "@hapi/boom" "9.x.x"
     "@hapi/hoek" "9.x.x"
 
-"@hapi/ammo@^5.0.1":
+"@hapi/ammo@5.x.x", "@hapi/ammo@^5.0.1":
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/@hapi/ammo/-/ammo-5.0.1.tgz#9d34560f5c214eda563d838c01297387efaab490"
   integrity sha512-FbCNwcTbnQP4VYYhLNGZmA76xb2aHg9AMPiy18NZyWMG310P5KdFGyA9v2rm5ujrIny77dEEIkMOwl0Xv+fSSA==
@@ -1770,6 +1770,18 @@
   version "9.2.1"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.1.tgz#9551142a1980503752536b5050fd99f4a7f13b17"
   integrity sha512-gfta+H8aziZsm8pZa0vj04KO6biEiisppNgA1kbJvFrrWu9Vm7eaUEy76DIxsuTaWvti5fkJVhllWc6ZTE+Mdw==
+
+"@hapi/inert@6.0.5":
+  version "6.0.5"
+  resolved "https://registry.yarnpkg.com/@hapi/inert/-/inert-6.0.5.tgz#0c5a28e9b5a637d3d47419859bb7163d0b194a61"
+  integrity sha512-eVAdUVhJLmmXLM/Zt7u5H5Vzazs9GKe4zfPK2b97ePHEfs3g/AQkxHfYQjJqMy11hvyB7a21Z6rBEA0R//dtXw==
+  dependencies:
+    "@hapi/ammo" "5.x.x"
+    "@hapi/boom" "9.x.x"
+    "@hapi/bounce" "2.x.x"
+    "@hapi/hoek" "9.x.x"
+    "@hapi/validate" "1.x.x"
+    lru-cache "^6.0.0"
 
 "@hapi/iron@6.x.x":
   version "6.0.0"
