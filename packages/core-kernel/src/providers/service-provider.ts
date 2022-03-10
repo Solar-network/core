@@ -115,7 +115,10 @@ export abstract class ServiceProvider {
      */
     public alias(): string | undefined {
         if (this.packageManifest) {
-            return this.packageManifest.get("solar-network.core.alias");
+            const name = this.packageManifest.get<string>("name");
+            if (name.startsWith("@solar-network/")) {
+                return name.replace("@solar-network/", "@arkecosystem/");
+            }
         }
 
         return undefined;
