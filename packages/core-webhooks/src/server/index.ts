@@ -1,8 +1,10 @@
 import { badData } from "@hapi/boom";
 import Boom from "@hapi/boom";
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse } from "@hapi/hapi";
-import { Container, Contracts, Types, Utils } from "@solar-network/core-kernel";
+import inert from "@hapi/inert";
+import { Container, Contracts, Providers, Types, Utils } from "@solar-network/core-kernel";
 import { randomBytes } from "crypto";
+import { readJsonSync } from "fs-extra";
 
 import { Database } from "../database";
 import { Identifiers } from "../identifiers";
@@ -10,7 +12,6 @@ import { Webhook } from "../interfaces";
 import { whitelist } from "./plugins/whitelist";
 import * as schema from "./schema";
 import * as utils from "./utils";
-
 /**
  * @export
  * @class Server
@@ -24,6 +25,15 @@ export class Server {
      */
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Contracts.Kernel.Application;
+
+    /**
+     * @private
+     * @type {Providers.PluginConfiguration}
+     * @memberof Server
+     */
+    @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/core-webhooks")
+    private readonly configuration!: Providers.PluginConfiguration;
 
     /**
      * @private
@@ -160,6 +170,10 @@ export class Server {
                 whitelist: config.whitelist,
             },
         });
+
+        await this.server.register({
+            plugin: inert,
+        });
     }
 
     /**
@@ -168,17 +182,13 @@ export class Server {
      * @memberof Server
      */
     private registerRoutes(): void {
-        this.server.route({
-            method: "GET",
-            path: "/",
-            handler() {
-                return { data: "Hello World!" };
-            },
-        });
+        const swaggerJson = readJsonSync(`${__dirname}/../www/api.json`);
+        swaggerJson.servers.push({ url: this.configuration.getRequired<string>("options.basePath") });
+        swaggerJson.info.version = this.app.version();
 
         this.server.route({
             method: "GET",
-            path: "/api/webhooks",
+            path: `${this.configuration.get("options.basePath")}/webhooks`,
             handler: (request) => {
                 return {
                     data: request.server.app.database.all().map((webhook) => {
@@ -192,7 +202,7 @@ export class Server {
 
         this.server.route({
             method: "POST",
-            path: "/api/webhooks",
+            path: `${this.configuration.get("options.basePath")}/webhooks`,
             handler(request: any, h) {
                 const token: string = randomBytes(32).toString("hex");
 
@@ -220,7 +230,7 @@ export class Server {
 
         this.server.route({
             method: "GET",
-            path: "/api/webhooks/{id}",
+            path: `${this.configuration.get("options.basePath")}/webhooks/{id}`,
             async handler(request) {
                 if (!request.server.app.database.hasById(request.params.id)) {
                     return Boom.notFound();
@@ -245,7 +255,7 @@ export class Server {
 
         this.server.route({
             method: "PUT",
-            path: "/api/webhooks/{id}",
+            path: `${this.configuration.get("options.basePath")}/webhooks/{id}`,
             handler: (request, h) => {
                 if (!request.server.app.database.hasById(request.params.id)) {
                     return Boom.notFound();
@@ -262,7 +272,7 @@ export class Server {
 
         this.server.route({
             method: "DELETE",
-            path: "/api/webhooks/{id}",
+            path: `${this.configuration.get("options.basePath")}/webhooks/{id}`,
             handler: (request, h) => {
                 if (!request.server.app.database.hasById(request.params.id)) {
                     return Boom.notFound();
@@ -274,6 +284,22 @@ export class Server {
             },
             options: {
                 validate: schema.destroy,
+            },
+        });
+
+        this.server.route({
+            method: "GET",
+            path: "/api.json",
+            handler: () => swaggerJson,
+        });
+
+        this.server.route({
+            method: "GET",
+            path: "/{param*}",
+            handler: {
+                directory: {
+                    path: `${__dirname}/../www`,
+                },
             },
         });
     }
