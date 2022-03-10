@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const child_process = require("child_process");
+const { existsSync, readdirSync, readJSONSync, statSync } = require("fs-extra");
+const glob = require("glob");
 
 const jemallocPath = child_process
     .spawnSync(
@@ -21,8 +23,7 @@ if (jemallocPath) {
         } catch (error) {
             exitCode = error.status;
         }
-        process.exitCode = exitCode;
-        return;
+        process.exit(exitCode);
     }
 } else {
     console.error(
@@ -32,6 +33,20 @@ if (jemallocPath) {
 
 const main = async () => {
     try {
+        const { addAlias } = require("module-alias");
+        const files = readdirSync(`${__dirname}/../../`).map(
+            (file) => `${__dirname}/../../${file}/package.json`)
+            .filter((file) => existsSync(file) && statSync(file).isFile());
+
+         for (const file of files) {
+             if (file.endsWith("/package.json")) {
+                 const { name } = readJSONSync(file);
+                 if (name.startsWith("@solar-network/")) {
+                    addAlias(name.replace("@solar-network/", "@arkecosystem/"), name);
+                 }
+            }
+        }
+
         const CommandLineInterface = new (require("../dist").CommandLineInterface)(process.argv.slice(2));
 
         await CommandLineInterface.execute();

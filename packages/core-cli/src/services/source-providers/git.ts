@@ -49,8 +49,6 @@ export class Git extends AbstractSource {
         }
         await subprocess;
 
-        this.translate(dest);
-
         await this.installDependencies(value);
     }
 
