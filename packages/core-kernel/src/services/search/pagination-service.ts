@@ -3,7 +3,7 @@ import createTree from "functional-red-black-tree";
 
 import { Pagination, ResultsPage, Sorting } from "../../contracts/search";
 import { injectable } from "../../ioc";
-import { get } from "../../utils";
+import { get, Semver } from "../../utils";
 
 @injectable()
 export class PaginationService {
@@ -86,6 +86,12 @@ export class PaginationService {
             }
 
             if (valueA instanceof Utils.BigNumber && valueB instanceof Utils.BigNumber) {
+                if (valueA.isLessThan(valueB)) return -1;
+                if (valueA.isGreaterThan(valueB)) return 1;
+                continue;
+            }
+
+            if (valueA instanceof Semver && valueB instanceof Semver) {
                 if (valueA.isLessThan(valueB)) return -1;
                 if (valueA.isGreaterThan(valueB)) return 1;
                 continue;
