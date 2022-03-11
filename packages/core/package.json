@@ -54,7 +54,7 @@
         "@solar-network/core-transactions": "3.1.1",
         "@solar-network/core-webhooks": "3.1.1",
         "@solar-network/crypto": "3.1.1",
-        "@solar-network/utils": "1.3.1",
+        "@solar-network/utils": "1.3.2",
         "argon2": "0.28.2",
         "bip39": "3.0.4",
         "boxen": "4.2.0",
