@@ -1,5 +1,4 @@
-import { Container, Contracts, Enums, Providers, Types, Utils } from "@solar-network/core-kernel";
-import { DatabaseInteraction } from "@solar-network/core-state";
+import { Container, Contracts, Enums, Providers, Services, Types, Utils } from "@solar-network/core-kernel";
 import { Blocks, Crypto, Interfaces, Managers, Transactions, Validation } from "@solar-network/crypto";
 import dayjs from "dayjs";
 import delay from "delay";
@@ -26,9 +25,6 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     @Container.inject(Container.Identifiers.PeerConnector)
     private readonly connector!: Contracts.P2P.PeerConnector;
 
-    @Container.inject(Container.Identifiers.DatabaseInteraction)
-    private readonly databaseInteraction!: DatabaseInteraction;
-
     @Container.inject(Container.Identifiers.EventDispatcherService)
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
@@ -40,6 +36,13 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
     @Container.inject(Container.Identifiers.QueueFactory)
     private readonly createQueue!: Types.QueueFactory;
+
+    @Container.inject(Container.Identifiers.TriggerService)
+    private readonly triggers!: Services.Triggers.Triggers;
+
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
 
     private outgoingRateLimiter!: RateLimiter;
 
@@ -112,7 +115,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     ): Promise<any> {
         const deadline = new Date().getTime() + timeoutMsec;
 
-        if (peer.recentlyPinged() && !force) {
+        if (!peer.stale && peer.recentlyPinged() && !force) {
             return undefined;
         }
 
@@ -149,6 +152,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         peer.lastPinged = dayjs();
         peer.plugins = pingResponse.config.plugins;
         peer.publicKeys = [];
+        peer.stale = false;
         peer.state = pingResponse.state;
 
         const stateBuffer = Buffer.from(Utils.stringify({ state: pingResponse.state, config: pingResponse.config }));
@@ -156,6 +160,16 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         let slotInfo;
         if (blockTimeLookup) {
             slotInfo = Crypto.Slots.getSlotInfo(blockTimeLookup);
+            const lastBlock: Interfaces.IBlock = this.app
+                .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
+                .getLastBlock();
+            const height = lastBlock.data.height + 1;
+            const roundInfo = Utils.roundCalculator.calculateRound(height);
+            const delegates: (string | undefined)[] = (
+                (await this.triggers.call("getActiveDelegates", {
+                    roundInfo,
+                })) as Contracts.State.Wallet[]
+            ).map((wallet) => wallet.getPublicKey());
             for (const signatureIndex in pingResponse.signatures) {
                 const publicKey = pingResponse.publicKeys![signatureIndex];
                 const signature = pingResponse.signatures[signatureIndex];
@@ -168,22 +182,17 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                     pingResponse.state.currentSlot
                 ) {
                     if (pingResponse.state.currentSlot === slotInfo.slotNumber) {
-                        const lastBlock: Interfaces.IBlock = this.app
-                            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
-                            .getLastBlock();
-                        const height = lastBlock.data.height + 1;
-                        const roundInfo = Utils.roundCalculator.calculateRound(height);
-                        const delegates = (await this.databaseInteraction.getActiveDelegates(roundInfo)).map(
-                            (wallet: Contracts.State.Wallet) => wallet.getPublicKey(),
-                        );
                         if (
                             !delegates.includes(publicKey) ||
                             !Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey)
                         ) {
                             break;
                         }
+                        const delegateWallet = this.walletRepository.findByPublicKey(publicKey);
+
                         if (!delegatePeer) {
                             peer.publicKeys.push(publicKey);
+                            delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
                         } else if (!peer.isForked()) {
                             if (
                                 delegatePeer.isForked() ||
@@ -193,6 +202,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                                     delegatePeer.state.header.id !== lastBlock.data.id)
                             ) {
                                 peer.publicKeys.push(publicKey);
+                                delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
                                 delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
                                     (peerPublicKey) => peerPublicKey !== publicKey,
                                 );

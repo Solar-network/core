@@ -3,7 +3,7 @@ import { NetworkStateStatus } from "@solar-network/core-p2p";
 import { Handlers } from "@solar-network/core-transactions";
 import { Blocks, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import delay from "delay";
-import { writeFileSync } from "fs";
+import { writeJSONSync } from "fs-extra";
 
 import { Client } from "./client";
 import { HostNoResponseError, RelayCommunicationError } from "./errors";
@@ -551,11 +551,14 @@ export class ForgerService {
         if (!this.initialized) {
             AppUtils.sendForgerSignal("SIGTERM");
 
-            const pidFile: string = `${process.env.CORE_PATH_TEMP}/forger.pid`;
+            const jsonFile: string = `${process.env.CORE_PATH_TEMP}/forger.json`;
             try {
-                writeFileSync(pidFile, process.pid.toString());
+                writeJSONSync(jsonFile, {
+                    pid: process.pid,
+                    publicKeys: this.delegates.map((delegate) => delegate.publicKey),
+                });
             } catch {
-                this.app.terminate(`Could not save forger pid to ${pidFile}`);
+                this.app.terminate(`Could not save forger data to ${jsonFile}`);
             }
 
             this.printLoadedDelegates();

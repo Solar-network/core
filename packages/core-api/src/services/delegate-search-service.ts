@@ -1,9 +1,14 @@
 import { Container, Contracts, Services, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Managers } from "@solar-network/crypto";
+import { Semver } from "@solar-network/utils";
 
 import { DelegateCriteria, DelegateResource, DelegateResourceLastBlock } from "../resources-new";
 
 @Container.injectable()
 export class DelegateSearchService {
+    @Container.inject(Container.Identifiers.Application)
+    protected readonly app!: Contracts.Kernel.Application;
+
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")
     private readonly walletRepository!: Contracts.State.WalletRepository;
@@ -16,10 +21,10 @@ export class DelegateSearchService {
 
     public getDelegate(walletAddress: string): DelegateResource | undefined {
         const wallet = this.walletRepository.findByAddress(walletAddress);
-        const supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
-
+        const supply: string = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
+        const ourKeys: string[] = AppUtils.getForgerDelegates();
         if (wallet.hasAttribute("delegate")) {
-            return this.getDelegateResourceFromWallet(wallet, supply);
+            return this.getDelegateResourceFromWallet(wallet, supply, ourKeys);
         } else {
             return undefined;
         }
@@ -35,12 +40,20 @@ export class DelegateSearchService {
         return this.paginationService.getPage(pagination, sorting, this.getDelegates(...criterias));
     }
 
-    private getDelegateResourceFromWallet(wallet: Contracts.State.Wallet, supply): DelegateResource {
+    private getDelegateResourceFromWallet(
+        wallet: Contracts.State.Wallet,
+        supply: string,
+        ourKeys: string[],
+    ): DelegateResource {
         AppUtils.assert.defined<string>(wallet.getPublicKey());
+
+        const publicKey = wallet.getPublicKey();
 
         const delegateAttribute = wallet.getAttribute("delegate");
 
         let delegateLastBlock: DelegateResourceLastBlock | undefined;
+
+        const activeDelegates: number = Managers.configManager.getMilestone().activeDelegates;
 
         if (delegateAttribute.lastBlock) {
             delegateLastBlock = {
@@ -50,10 +63,14 @@ export class DelegateSearchService {
             };
         }
 
+        if (!delegateAttribute.version && ourKeys.includes(publicKey!)) {
+            wallet.setAttribute("delegate.version", this.app.version());
+        }
+
         return {
             username: delegateAttribute.username,
             address: wallet.getAddress(),
-            publicKey: wallet.getPublicKey()!,
+            publicKey: publicKey!,
             votes: delegateAttribute.voteBalance,
             rank: delegateAttribute.rank,
             isResigned: !!delegateAttribute.resigned,
@@ -72,14 +89,21 @@ export class DelegateSearchService {
                     .minus(delegateAttribute.burnedFees)
                     .plus(delegateAttribute.forgedRewards),
             },
+            version:
+                delegateAttribute.version &&
+                delegateAttribute.rank &&
+                delegateAttribute.rank <= activeDelegates
+                    ? new Semver(delegateAttribute.version)
+                    : undefined,
         };
     }
 
     private *getDelegates(...criterias: DelegateCriteria[]): Iterable<DelegateResource> {
-        const supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
+        const supply: string = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
+        const ourKeys: string[] = AppUtils.getForgerDelegates();
 
         for (const wallet of this.walletRepository.allByUsername()) {
-            const delegateResource = this.getDelegateResourceFromWallet(wallet, supply);
+            const delegateResource = this.getDelegateResourceFromWallet(wallet, supply, ourKeys);
 
             if (this.standardCriteriaService.testStandardCriterias(delegateResource, ...criterias)) {
                 yield delegateResource;

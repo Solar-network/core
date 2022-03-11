@@ -1,5 +1,5 @@
 import { Utils } from "@solar-network/crypto";
-
+import { Semver } from "@solar-network/utils";
 export type EqualCriteria<T> = T;
 export type NumericCriteria<T> = T | { from: T } | { to: T } | { from: T; to: T };
 export type LikeCriteria<T> = T;
@@ -25,6 +25,8 @@ export type StandardCriteriaOfItem<T> = T extends any[]
     ? NumericCriteria<number | BigInt | Utils.BigNumber | string>
     : T extends string
     ? string
+    : T extends Semver
+    ? NumericCriteria<Semver>
     : T extends object
     ? { [K in keyof T]?: StandardCriteriaOf<T[K]> } | { "*"?: unknown }
     : never;

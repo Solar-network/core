@@ -2,6 +2,7 @@ import { Container, Contracts, Enums, Providers, Services, Utils } from "@solar-
 import { DatabaseInteraction } from "@solar-network/core-state";
 import { Identities, Interfaces, Managers } from "@solar-network/crypto";
 import delay from "delay";
+import { readJSONSync } from "fs-extra";
 import prettyMs from "pretty-ms";
 import { gt, lt } from "semver";
 
@@ -83,8 +84,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             }
         }
 
-        // Give time to cooldown rate limits after peer verifier finished.
-        await Utils.sleep(1000);
+        this.events.listen(Enums.RoundEvent.Applied, {
+            handle: () => {
+                this.cleansePeers({ fast: true, forcePing: true, log: false });
+            },
+        });
 
         this.initializing = false;
     }
@@ -315,9 +319,9 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 lastBlock.data.height,
             );
 
-            peers.forEach((peer) => {
+            for (const peer of peers) {
                 peer.publicKeys = peer.publicKeys.filter((publicKey) => !localPeer.publicKeys.includes(publicKey));
-            });
+            }
             peers.push(localPeer);
 
             for (const peer of peers) {
@@ -650,16 +654,16 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             (wallet: Contracts.State.Wallet) => wallet.getPublicKey(),
         );
         const delegatesOnThisNode: string[] = [];
-
-        if (Utils.isForgerRunning()) {
-            for (const secret of this.app.config("delegates.secrets")) {
+        const publicKeys = Utils.getForgerDelegates();
+        if (publicKeys.length > 0) {
+            const { secrets } = readJSONSync(`${this.app.configPath()}/delegates.json`);
+            for (const secret of secrets) {
                 const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
-                if (delegates.includes(keys.publicKey)) {
+                if (delegates.includes(keys.publicKey) && publicKeys.includes(keys.publicKey)) {
                     delegatesOnThisNode.push(keys.publicKey);
                 }
             }
         }
-
         return delegatesOnThisNode;
     }
 

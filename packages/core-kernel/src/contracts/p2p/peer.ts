@@ -22,6 +22,7 @@ export interface Peer {
     plugins: PeerPlugins;
     publicKeys: string[];
     sequentialErrorCounter: number;
+    stale: boolean;
     state: PeerState;
     verificationResult: PeerVerificationResult | undefined;
 

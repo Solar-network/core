@@ -58,6 +58,12 @@ export class Peer implements Contracts.P2P.Peer {
     public verificationResult: PeerVerificationResult | undefined;
 
     /**
+     * @type {(boolean)}
+     * @memberof Peer
+     */
+    public stale: boolean = true;
+
+    /**
      * @type {Contracts.P2P.PeerState}
      * @memberof Peer
      */

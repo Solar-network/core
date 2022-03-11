@@ -2,11 +2,13 @@ import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse, Server
 import { Container, Contracts, Types } from "@solar-network/core-kernel";
 
 import { plugin as hapiNesPlugin } from "../hapi-nes";
+import { Socket } from "../hapi-nes/socket";
 import { AcceptPeerPlugin } from "./plugins/accept-peer";
 import { AwaitBlockPlugin } from "./plugins/await-block";
 import { CodecPlugin } from "./plugins/codec";
 import { IsAppReadyPlugin } from "./plugins/is-app-ready";
 import { RateLimitPlugin } from "./plugins/rate-limit";
+import { StalePeerPlugin } from "./plugins/stale-peer";
 import { ValidatePlugin } from "./plugins/validate";
 import { VersionPlugin } from "./plugins/version";
 import { WhitelistForgerPlugin } from "./plugins/whitelist-forger";
@@ -65,6 +67,7 @@ export class Server {
         await this.server.register({
             plugin: hapiNesPlugin,
             options: {
+                onDisconnection: (socket: Socket) => this.app.resolve(StalePeerPlugin).register(socket),
                 maxPayload: 20971520, // 20 MB TODO to adjust
             },
         });

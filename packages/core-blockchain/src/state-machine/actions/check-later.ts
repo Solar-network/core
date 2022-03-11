@@ -31,6 +31,7 @@ export class CheckLater implements Action {
         if (!this.blockchain.isStopped() && !this.stateStore.isWakeUpTimeoutSet()) {
             if (!this.stateStore.hasPolledForBlocks()) {
                 this.stateStore.polledForBlocks();
+                this.peerNetworkMonitor.cleansePeers({ fast: true, forcePing: true, log: false });
                 const downloadInterval = setInterval(async () => {
                     try {
                         let lastBlock = this.app

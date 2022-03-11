@@ -1,40 +1,59 @@
-// @ts-ignore
-const { compare } = new Intl.Collator(0, { numeric: 1 });
+import * as semver from "semver";
 
-export const comparator = (value: string, other: string): number => {
-    const a: string[] = value.split(".");
-    const b: string[] = other.split(".");
+export class Semver {
+    private readonly value: string;
 
-    const hasSameMajor: number = compare(a[0], b[0]);
-
-    if (hasSameMajor) {
-        return hasSameMajor;
+    public constructor(value: string | Semver) {
+        this.value = value.toString();
     }
 
-    const hasSameMinor: number = compare(a[1], b[1]);
+    public comparedTo(other: Semver): number {
+        const otherValue = semver.clean(other.toString()) as string;
+        if (semver.gt(this.value, otherValue)) {
+            return 1;
+        }
 
-    if (hasSameMinor) {
-        return hasSameMinor;
+        if (semver.lt(this.value, otherValue)) {
+            return -1;
+        }
+
+        return 0;
     }
 
-    return compare(a.slice(2).join("."), b.slice(2).join("."));
-};
+    public isEqualTo(other: Semver): boolean {
+        const otherValue = semver.clean(other.toString()) as string;
+        return semver.eq(this.value, otherValue);
+    }
 
-const isEqual = (value: string, other: string): boolean => comparator(value, other) === 0;
+    public isLessThan(other: Semver): boolean {
+        const otherValue = semver.clean(other.toString()) as string;
+        return semver.lt(this.value, otherValue);
+    }
 
-const isGreaterThan = (value: string, other: string): boolean => comparator(value, other) === 1;
+    public isLessThanEqual(other: Semver): boolean {
+        const otherValue = semver.clean(other.toString()) as string;
+        return semver.lte(this.value, otherValue);
+    }
 
-const isGreaterThanOrEqual = (value: string, other: string): boolean =>
-    isGreaterThan(value, other) || isEqual(value, other);
+    public isGreaterThan(other: Semver): boolean {
+        const otherValue = semver.clean(other.toString()) as string;
+        return semver.gt(this.value, otherValue);
+    }
 
-const isLessThan = (value: string, other: string): boolean => comparator(value, other) === -1;
+    public isGreaterThanEqual(other: Semver): boolean {
+        const otherValue = semver.clean(other.toString()) as string;
+        return semver.gte(this.value, otherValue);
+    }
 
-const isLessThanOrEqual = (value: string, other: string): boolean => isLessThan(value, other) || isEqual(value, other);
+    public isValid(): boolean {
+        return semver.valid(this.value) !== null;
+    }
 
-export const semver = {
-    isEqual,
-    isGreaterThan,
-    isGreaterThanOrEqual,
-    isLessThan,
-    isLessThanOrEqual,
-};
+    public toString() {
+        return this.value;
+    }
+
+    public toJSON() {
+        return this.value;
+    }
+}

@@ -31,6 +31,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             "delegate.rank",
             "delegate.round",
             "delegate.username",
+            "delegate.version", // Used by the API
             "delegate.voteBalance",
             "delegate",
         ];
