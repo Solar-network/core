@@ -1,5 +1,4 @@
 import { Providers } from "@solar-network/core-kernel";
-import { readJsonSync } from "fs-extra";
 import Joi from "joi";
 
 import Handlers from "./handlers";
@@ -105,22 +104,11 @@ export class ServiceProvider extends Providers.ServiceProvider {
             },
         });
 
-        const swaggerJson = readJsonSync(`${__dirname}/www/api.json`);
-        swaggerJson.basePath = this.config().getRequired<string>("options.basePath");
-        swaggerJson.info.version = this.app.version();
-        swaggerJson.schemes.push(type);
-
         await server.register(preparePlugins(this.config().get("plugins")));
 
         await server.register({
             plugin: Handlers,
             routes: { prefix: this.config().get("options.basePath") },
-        });
-
-        await server.route({
-            method: "GET",
-            path: "/api.json",
-            handler: () => swaggerJson,
         });
 
         await server.route({

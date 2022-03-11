@@ -1,7 +1,10 @@
 import { badData } from "@hapi/boom";
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
 import { Container, Contracts, Providers, Types, Utils } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Identities } from "@solar-network/crypto";
 import { readFileSync } from "fs";
+import { readJsonSync } from "fs-extra";
 
 import * as Schemas from "./schemas";
 
@@ -32,6 +35,24 @@ export class Server {
      */
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
+
+    /**
+     * @private
+     * @type {Container.Identifiers.TransactionHandlerRegistry}
+     * @memberof Server
+     */
+    @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
+    @Container.tagged("state", "null")
+    private readonly nullHandlerRegistry!: Handlers.Registry;
+
+    /**
+     * @private
+     * @type {Providers.PluginConfiguration}
+     * @memberof Server
+     */
+    @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
+    private readonly poolConfiguration!: Providers.PluginConfiguration;
 
     /**
      * @private
@@ -91,6 +112,44 @@ export class Server {
      */
     public async boot(): Promise<void> {
         try {
+            const swaggerJson = readJsonSync(`${__dirname}/www/api.json`);
+            const dummyAddress = Identities.Address.fromPassphrase("");
+            const networkCharacter = dummyAddress.slice(0, 1);
+            swaggerJson.servers.push({ url: this.configuration.getRequired<string>("options.basePath") });
+            swaggerJson.info.version = this.app.version();
+            swaggerJson.components.schemas.address.pattern = swaggerJson.components.schemas.recipientId.pattern =
+                swaggerJson.components.schemas.address.pattern.substring(0, 1) +
+                networkCharacter +
+                swaggerJson.components.schemas.address.pattern.substring(2);
+            swaggerJson.components.schemas.recipientId.example = dummyAddress;
+            swaggerJson.components.schemas.walletIdentifier.pattern =
+                swaggerJson.components.schemas.walletIdentifier.pattern.substring(0, 1) +
+                networkCharacter +
+                swaggerJson.components.schemas.walletIdentifier.pattern.substring(2);
+            swaggerJson.components.schemas.transactions.properties.transactions.maxItems =
+                this.poolConfiguration.getRequired<number>("maxTransactionsPerRequest");
+
+            const activatedTransactionHandlers = await this.nullHandlerRegistry.getActivatedHandlers();
+            const typeGroups: Set<number> = new Set();
+            const types: Set<number> = new Set();
+
+            for (const handler of activatedTransactionHandlers) {
+                const constructor = handler.getConstructor();
+                const type: number = constructor.type!;
+                const typeGroup: number = constructor.typeGroup!;
+                typeGroups.add(typeGroup);
+                types.add(type);
+            }
+
+            swaggerJson.components.schemas.transactionTypes.enum = [...types];
+            swaggerJson.components.schemas.transactionTypeGroups.enum = [...typeGroups];
+
+            await this.server.route({
+                method: "GET",
+                path: "/api.json",
+                handler: () => swaggerJson,
+            });
+
             await this.server.start();
 
             this.logger.info(`${this.name} Server started at ${this.server.info.uri}`);

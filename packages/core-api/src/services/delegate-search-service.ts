@@ -90,9 +90,7 @@ export class DelegateSearchService {
                     .plus(delegateAttribute.forgedRewards),
             },
             version:
-                delegateAttribute.version &&
-                delegateAttribute.rank &&
-                delegateAttribute.rank <= activeDelegates
+                delegateAttribute.version && delegateAttribute.rank && delegateAttribute.rank <= activeDelegates
                     ? new Semver(delegateAttribute.version)
                     : undefined,
         };
