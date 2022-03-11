@@ -145,8 +145,8 @@ export class BlockState implements Contracts.State.BlockState {
         // ? packages/core-transactions/src/handlers/one/vote.ts:L120 blindly sets "vote" attribute
         // ? is it guaranteed that delegate wallet exists, so delegateWallet.getAttribute("delegate.voteBalance") is safe?
         if (wallet.hasVoted()) {
-            const delegatePulicKey = wallet.getAttribute<string>("vote");
-            const delegateWallet = this.walletRepository.findByPublicKey(delegatePulicKey);
+            const delegatePublicKey = wallet.getAttribute<string>("vote");
+            const delegateWallet = this.walletRepository.findByPublicKey(delegatePublicKey);
             const oldDelegateVoteBalance = delegateWallet.getAttribute<AppUtils.BigNumber>("delegate.voteBalance");
             const newDelegateVoteBalance = oldDelegateVoteBalance.plus(amount);
             delegateWallet.setAttribute("delegate.voteBalance", newDelegateVoteBalance);
@@ -155,8 +155,8 @@ export class BlockState implements Contracts.State.BlockState {
 
     public decreaseWalletDelegateVoteBalance(wallet: Contracts.State.Wallet, amount: AppUtils.BigNumber): void {
         if (wallet.hasVoted()) {
-            const delegatePulicKey = wallet.getAttribute<string>("vote");
-            const delegateWallet = this.walletRepository.findByPublicKey(delegatePulicKey);
+            const delegatePublicKey = wallet.getAttribute<string>("vote");
+            const delegateWallet = this.walletRepository.findByPublicKey(delegatePublicKey);
             const oldDelegateVoteBalance = delegateWallet.getAttribute<AppUtils.BigNumber>("delegate.voteBalance");
             const newDelegateVoteBalance = oldDelegateVoteBalance.minus(amount);
             delegateWallet.setAttribute("delegate.voteBalance", newDelegateVoteBalance);
