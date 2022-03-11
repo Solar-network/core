@@ -14,7 +14,7 @@
     "main": "dist/index",
     "types": "dist/index",
     "scripts": {
-        "build": "yarn clean && yarn compile && cp -r ./src/www/ ./dist/",
+        "build": "yarn clean && yarn compile && cp -r ./src/www/ ./dist/www",
         "build:watch": "yarn clean && yarn compile -w",
         "build:docs": "../../node_modules/typedoc/bin/typedoc --out docs src",
         "clean": "rimraf dist",
