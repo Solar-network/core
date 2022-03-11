@@ -1,10 +1,18 @@
 import { Contracts } from "@solar-network/core-kernel";
 import { Utils } from "@solar-network/crypto";
+import { Semver } from "@solar-network/utils";
 import Joi from "joi";
 
 const isSchema = (value: Joi.Schema | SchemaObject): value is Joi.Schema => {
     return Joi.isSchema(value);
 };
+
+export const semver = Joi.custom((value: Semver, helpers) => {
+    if (!(value instanceof Semver)) {
+        value = new Semver(value as any);
+    }
+    return value.isValid() ? value.toString() : helpers.error("any.invalid");
+});
 
 // BigNumber
 

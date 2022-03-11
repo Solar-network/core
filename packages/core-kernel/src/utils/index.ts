@@ -3,9 +3,9 @@ import { calculateApproval, calculateForgedTotal } from "./delegate-calculator";
 import { calculateLockExpirationStatus, calculateTransactionExpiration } from "./expiration-calculator";
 import { formatTimestamp } from "./format-timestamp";
 import { getBlockTimeLookup } from "./get-blocktime-lookup";
+import { getForgerDelegates, sendForgerSignal } from "./get-forger-delegates";
 import { isBlacklisted } from "./is-blacklisted";
 import { getBlockNotChainedErrorMessage, isBlockChained } from "./is-block-chained";
-import { isForgerRunning, sendForgerSignal } from "./is-forger-running";
 import { isWhitelisted } from "./is-whitelisted";
 import { calculateRound, isNewRound } from "./round-calculator";
 export * as IpAddress from "./ip-address";
@@ -29,8 +29,8 @@ export const forgingInfoCalculator = { calculateForgingInfo, getBlockTimeLookup 
 export {
     formatTimestamp,
     isBlockChained,
-    isForgerRunning,
     getBlockNotChainedErrorMessage,
+    getForgerDelegates,
     isBlacklisted,
     isWhitelisted,
     sendForgerSignal,

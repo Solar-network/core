@@ -2,6 +2,7 @@ import Hapi from "@hapi/hapi";
 import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import { DatabaseInteraction, DatabaseInterceptor } from "@solar-network/core-state";
 import { Crypto, Identities, Interfaces } from "@solar-network/crypto";
+import { readJSONSync } from "fs-extra";
 
 import { constants } from "../../constants";
 import { MissingCommonBlockError } from "../../errors";
@@ -99,10 +100,12 @@ export class PeerController extends Controller {
             (wallet: Contracts.State.Wallet) => wallet.getPublicKey(),
         );
 
-        if (Utils.isForgerRunning()) {
-            for (const secret of this.app.config("delegates.secrets")) {
+        const publicKeys = Utils.getForgerDelegates();
+        if (publicKeys.length > 0) {
+            const { secrets } = readJSONSync(`${this.app.configPath()}/delegates.json`);
+            for (const secret of secrets) {
                 const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
-                if (delegates.includes(keys.publicKey)) {
+                if (delegates.includes(keys.publicKey) && publicKeys.includes(keys.publicKey)) {
                     header.publicKeys.push(keys.publicKey);
                     header.signatures.push(Crypto.Hash.signSchnorr(stateBuffer, keys));
                 }
