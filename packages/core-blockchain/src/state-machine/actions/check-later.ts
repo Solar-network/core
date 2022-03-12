@@ -52,7 +52,7 @@ export class CheckLater implements Action {
                 const secs = Math.floor(seconds % 60);
 
                 let emoji = emojiSet.normal;
-                if (hours === 0) {
+                if (days === 0 && hours === 0) {
                     emoji = emojiSet.soon;
                 }
 
