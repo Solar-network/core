@@ -17,18 +17,6 @@ export class Block implements IBlock {
     public constructor({ data, transactions, id }: { data: IBlockData; transactions: ITransaction[]; id?: string }) {
         this.data = data;
 
-        // TODO genesis block calculated id is wrong for some reason
-        if (this.data.height === 1) {
-            if (id) {
-                this.applyGenesisBlockFix(id);
-            } else if (data.id) {
-                this.applyGenesisBlockFix(data.id);
-            }
-        }
-
-        // fix on real timestamp, this is overloading transaction
-        // timestamp with block timestamp for storage only
-        // also add sequence to keep database sequence
         this.transactions = transactions.map((transaction, index) => {
             transaction.data.blockId = this.data.id;
             transaction.data.blockHeight = this.data.height;
@@ -42,16 +30,6 @@ export class Block implements IBlock {
         this.data.burnedFee = this.getBurnedFees();
 
         this.verification = this.verify();
-
-        // Order of transactions messed up in mainnet V1
-        const { wrongTransactionOrder } = configManager.get("exceptions");
-        if (this.data.id && wrongTransactionOrder && wrongTransactionOrder[this.data.id]) {
-            const fixedOrderIds = wrongTransactionOrder[this.data.id];
-
-            this.transactions = fixedOrderIds.map((id: string) =>
-                this.transactions.find((transaction) => transaction.id === id),
-            );
-        }
     }
 
     public static applySchema(data: IBlockData): IBlockData | undefined {
@@ -290,10 +268,5 @@ export class Block implements IBlock {
         result.verified = result.errors.length === 0;
 
         return result;
-    }
-
-    private applyGenesisBlockFix(id: string): void {
-        this.data.id = id;
-        this.data.idHex = id.length === 64 ? id : Block.toBytesHex(id); // if id.length is 64 it's already hex
     }
 }
