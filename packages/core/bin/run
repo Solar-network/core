@@ -3,6 +3,7 @@
 const child_process = require("child_process");
 const { existsSync, readdirSync, readJSONSync, statSync } = require("fs-extra");
 const glob = require("glob");
+const { dirname, join } = require("path");
 
 const jemallocPath = child_process
     .spawnSync(
@@ -42,9 +43,17 @@ const main = async () => {
              if (file.endsWith("/package.json")) {
                  const { name } = readJSONSync(file);
                  if (name.startsWith("@solar-network/")) {
-                    addAlias(name.replace("@solar-network/", "@arkecosystem/"), name);
-                 }
+                    const dir = file.substring(0, file.length - 13);
+                    addAlias(name, dir);
+                    addAlias(name.replace("@solar-network/", "@arkecosystem/"), dir);
+                }
             }
+        }
+
+        const extraPackages = ["joi"];
+
+        for (const pkg of extraPackages) {
+            addAlias(pkg, dirname(require.resolve(join(pkg, "package.json"))));
         }
 
         const CommandLineInterface = new (require("../dist").CommandLineInterface)(process.argv.slice(2));
