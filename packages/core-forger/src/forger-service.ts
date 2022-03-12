@@ -226,9 +226,12 @@ export class ForgerService {
             }
 
             this.errorCount = 0;
-            await this.app
-                .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-                .call("forgeNewBlock", { forgerService: this, delegate, firstAttempt: true, round: this.round });
+
+            if (this.round.timestamp >= 0) {
+                await this.app
+                    .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
+                    .call("forgeNewBlock", { forgerService: this, delegate, firstAttempt: true, round: this.round });
+            }
 
             this.logAppReady = true;
 
