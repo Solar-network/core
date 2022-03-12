@@ -1,4 +1,5 @@
 import { Container, Contracts } from "@solar-network/core-kernel";
+import { Managers } from "@solar-network/crypto";
 
 import { Action } from "../contracts";
 
@@ -17,6 +18,12 @@ export class CheckLastDownloadedBlockSynced implements Action {
     private readonly networkMonitor!: Contracts.P2P.NetworkMonitor;
 
     public async handle(): Promise<void> {
+        const epoch = Math.floor(new Date(Managers.configManager.getMilestone(1).epoch).getTime() / 1000);
+        if (Math.floor(new Date().getTime() / 1000) <= epoch) {
+            this.blockchain.dispatch("SYNCED");
+            return;
+        }
+
         let event = "NOTSYNCED";
         this.logger.debug(`Queued chunks of blocks (process: ${this.blockchain.getQueue().size()})`);
 

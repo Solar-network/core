@@ -1,5 +1,6 @@
 import { Container, Contracts, Enums, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Utils } from "@solar-network/crypto";
+import { Crypto, Managers, Utils } from "@solar-network/crypto";
+import delay from "delay";
 
 import { Action } from "../contracts";
 
@@ -28,6 +29,53 @@ export class CheckLater implements Action {
     private readonly walletRepository!: Contracts.State.WalletRepository;
 
     public async handle(): Promise<void> {
+        const { blocktime } = await Managers.configManager.getMilestone();
+        const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, 1);
+
+        const epoch = Math.floor(new Date(Managers.configManager.getMilestone().epoch).getTime() / 1000);
+
+        let timeNow = Math.floor(new Date().getTime() / 1000);
+        while (timeNow < epoch) {
+            await delay(Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup));
+            timeNow = Math.floor(new Date().getTime() / 1000);
+            if (timeNow < epoch) {
+                const seconds = epoch - timeNow;
+
+                const emojiSet = {
+                    normal: [":hatching_chick:", ":stopwatch:", ":watch:", ":alarm_clock:", ":mantelpiece_clock:"],
+                    soon: [":balloon:", ":clinking_glasses:", ":confetti_ball:", ":rocket:", ":partying_face:"],
+                };
+
+                const days = Math.floor(seconds / (3600 * 24));
+                const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+                const mins = Math.floor((seconds % 3600) / 60);
+                const secs = Math.floor(seconds % 60);
+
+                let emoji = emojiSet.normal;
+                if (hours === 0) {
+                    emoji = emojiSet.soon;
+                }
+
+                const daysToGo = days > 0 ? days + (days == 1 ? " day, " : " days, ") : "";
+                const hoursToGo = hours > 0 ? hours + (hours == 1 ? " hour, " : " hours, ") : "";
+                const minsToGo = mins > 0 ? mins + (mins == 1 ? " minute, " : " minutes, ") : "";
+                const secsToGo = secs > 0 ? secs + (secs == 1 ? " second" : " seconds") : "";
+
+                const countdown = (daysToGo + hoursToGo + minsToGo + secsToGo)
+                    .replace(/,\s*$/, "")
+                    .replace(/,([^,]*)$/, " and$1");
+                this.logger.info(`The network launches in ${countdown} ${emoji[seconds % 5]}`);
+            } else {
+                this.logger.info(
+                    `The network has launched and the next block is due in ${AppUtils.pluralize(
+                        "second",
+                        blocktime,
+                        true,
+                    )}! Welcome aboard :tada:`,
+                );
+            }
+        }
+
         if (!this.blockchain.isStopped() && !this.stateStore.isWakeUpTimeoutSet()) {
             if (!this.stateStore.hasPolledForBlocks()) {
                 this.stateStore.polledForBlocks();
