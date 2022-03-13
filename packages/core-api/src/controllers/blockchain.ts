@@ -1,6 +1,6 @@
+import Hapi from "@hapi/hapi";
 import { Repositories } from "@solar-network/core-database";
 import { Container, Contracts, Utils } from "@solar-network/core-kernel";
-import Hapi from "@hapi/hapi";
 
 import { Controller } from "./controller";
 

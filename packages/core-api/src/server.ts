@@ -1,8 +1,8 @@
+import { badData, isBoom } from "@hapi/boom";
+import { RequestRoute, Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
 import { Container, Contracts, Providers, Types, Utils } from "@solar-network/core-kernel";
 import { Handlers } from "@solar-network/core-transactions";
 import { Identities } from "@solar-network/crypto";
-import { badData, isBoom } from "@hapi/boom";
-import { RequestRoute, Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
 import { readFileSync } from "fs";
 import { readJsonSync } from "fs-extra";
 
