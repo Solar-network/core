@@ -47,6 +47,9 @@ RPM=$(which yum 2>/dev/null || :)
 # Detect SystemV / SystemD
 SYS=$([[ -L "/sbin/init" ]] && echo 'SystemD' || echo 'SystemV')
 
+# Detect GLIBC version
+GLIBC_VERSION=$(ldd --version | grep ldd | awk '{print $NF}')
+
 # Detect Debian/Ubuntu derivative
 DEB_ID=$( grep VERSION_CODENAME /etc/os-release /usr/lib/os-release 2>/dev/null | head -1 | cut -d'=' -f2 )
 
@@ -95,10 +98,15 @@ heading "Installing system dependencies..."
 
 if [[ ! -z $DEB ]]; then
     sudo apt-get update
-    sudo apt-get install -y git curl apt-transport-https update-notifier
+    sudo apt-get install -y git curl apt-transport-https update-notifier bc wget gnupg
 elif [[ ! -z $RPM ]]; then
     sudo yum update -y
-    sudo yum install git curl epel-release --skip-broken -y
+    sudo yum install git curl epel-release bc wget --skip-broken -y
+fi
+
+if [[ $(echo "$GLIBC_VERSION < 2.25" | bc -l) -eq 1 ]]; then
+    heading "Unsupported GLIBC version - required >= 2.25"
+    exit 1;
 fi
 
 success "Installed system dependencies!"
@@ -116,30 +124,28 @@ if [[ ! -z $DEB ]]; then
 
 elif [[ ! -z $RPM ]]; then
     curl -sL https://rpm.nodesource.com/setup_16.x | sudo -E bash - > /dev/null 2>&1
+    sudo sed -i '/^failovermethod=/d' /etc/yum.repos.d/*.repo > /dev/null 2>&1
     sudo yum update -y
     sudo yum install gcc-c++ make nodejs -y
 fi
 
 success "Installed node.js & npm!"
 
-heading "Installing Yarn..."
+heading "Installing pnpm..."
 
-if [[ ! -z $DEB ]]; then
-    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-    (echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list)
+npm config set prefix '~/.pnpm'
+npm config set global-dir ~/.pnpm
+npm config set global-bin-dir ~/.pnpm/bin
+export PATH=$(npm config get global-bin-dir):$PATH
+echo 'export PATH=$(npm config get global-bin-dir):$PATH' >> ~/.bashrc
 
-    sudo apt-get update
-    sudo apt-get install -y yarn
-elif [[ ! -z $RPM ]]; then
-    curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
-    sudo yum install yarn -y
-fi
+npm install -g pnpm
 
-success "Installed Yarn!"
+success "Installed pnpm!"
 
 heading "Installing PM2..."
 
-sudo yarn global add pm2
+pnpm install -g pm2
 pm2 install pm2-logrotate
 pm2 set pm2-logrotate:max_size 500M
 pm2 set pm2-logrotate:compress true
@@ -150,7 +156,7 @@ success "Installed PM2!"
 heading "Installing program dependencies..."
 
 if [[ ! -z $DEB ]]; then
-    sudo apt-get install build-essential libcairo2-dev pkg-config libtool autoconf automake python libpq-dev jq libjemalloc-dev -y
+    sudo apt-get install build-essential libcairo2-dev pkg-config libtool autoconf automake python libpq-dev jq libjemalloc-dev net-tools -y
 elif [[ ! -z $RPM ]]; then
     sudo yum groupinstall "Development Tools" -y -q
     sudo yum install postgresql-devel jq jemalloc-devel -y -q
@@ -180,8 +186,6 @@ success "Installed PostgreSQL!"
 
 heading "Installing NTP..."
 
-sudo timedatectl set-ntp off > /dev/null 2>&1 || true # disable the default systemd timesyncd service
-
 if [[ ! -z $DEB ]]; then
     sudo apt-get install ntp -yyq
     if [ -z "$(sudo service ntp status |grep running)" ] ; then
@@ -207,8 +211,8 @@ if [[ ! -z $DEB ]]; then
     sudo apt-get autoremove -yyq
     sudo apt-get autoclean -yq
 elif [[ ! -z $RPM ]]; then
-    sudo yum update
-    sudo yum clean all
+    sudo yum update -y
+    sudo yum clean all -y
 fi
 
 success "Installed system updates!"
@@ -230,22 +234,17 @@ cd "$HOME/solar-core"
 
 git tag -l | xargs git tag -d >/dev/null
 git fetch --all --tags -f 2>/dev/null
-rm -f node_modules/better-sqlite3/build/Release/better_sqlite3.node
 git reset --hard >/dev/null
 git checkout tags/`git tag --sort=committerdate | grep -Px "^\\d+.\\d+.\\d+" | tail -1` >/dev/null
-yarn cache clean
 
-YARN_SETUP="N"
-while [ "$YARN_SETUP" == "N" ]; do
-  YARN_SETUP="Y"
-  rm -rf "$HOME/.cache/yarn"
-  yarn setup || YARN_SETUP="N"
+PNPM_SETUP="N"
+while [ "$PNPM_SETUP" == "N" ]; do
+  PNPM_SETUP="Y"
+  (pnpm install && pnpm build) || PNPM_SETUP="N"
 done
 rm -rf "$HOME/.config/@solar"
 rm -rf "$HOME/.config/solar-core"
 
-echo 'export PATH=$(yarn global bin):$PATH' >> ~/.bashrc
-export PATH=$(yarn global bin):$PATH
 solar config:publish
 
 success "Installed Solar Core!"
