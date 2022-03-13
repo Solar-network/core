@@ -161,6 +161,7 @@
                             "block.forged",
                             "block.received",
                             "block.reverted",
+                            "blockchain.synced",
                             "cache.flushed",
                             "cache.forgotten",
                             "cache.hit",
