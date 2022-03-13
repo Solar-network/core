@@ -15,7 +15,6 @@
     "types": "dist/index",
     "scripts": {
         "build": "pnpm clean && pnpm compile && cp -r ./src/www/ ./dist/www",
-        "build:watch": "pnpm clean && pnpm compile -w && cp -r ./src/www/ ./dist/www",
         "clean": "rimraf dist",
         "compile": "node ../../node_modules/typescript/bin/tsc"
     },

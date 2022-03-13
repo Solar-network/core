@@ -14,7 +14,6 @@
     "main": "dist/index",
     "scripts": {
         "build": "pnpm clean && pnpm compile",
-        "build:watch": "pnpm clean && pnpm compile -w",
         "clean": "rimraf dist",
         "compile": "node ../../node_modules/typescript/bin/tsc"
     },
