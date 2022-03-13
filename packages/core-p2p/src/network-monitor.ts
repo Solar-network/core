@@ -48,6 +48,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     private downloadChunkSize: number = defaultDownloadChunkSize;
 
     private initializing = true;
+    private lastPinged: number = 0;
 
     @Container.postConstruct()
     public initialize(): void {
@@ -83,9 +84,21 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             }
         }
 
+        this.events.listen(Enums.BlockchainEvent.Synced, {
+            handle: async () => {
+                await delay(1000);
+                this.pingAll();
+            },
+        });
+
         this.events.listen(Enums.RoundEvent.Applied, {
             handle: () => {
-                this.cleansePeers({ fast: true, forcePing: true, log: false });
+                const synced = this.app
+                    .get<Contracts.Blockchain.Blockchain>(Container.Identifiers.BlockchainService)
+                    .isSynced();
+                if (synced) {
+                    this.pingAll();
+                }
             },
         });
 
@@ -692,6 +705,14 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
 
         return Object.keys(this.repository.getPeers()).length >= this.config.minimumNetworkReach;
+    }
+
+    private pingAll(): void {
+        const timeNow: number = new Date().getTime() / 1000;
+        if (timeNow - this.lastPinged > 10) {
+            this.cleansePeers({ fast: true, forcePing: true, log: false });
+            this.lastPinged = timeNow;
+        }
     }
 
     private async populateSeedPeers(): Promise<any> {

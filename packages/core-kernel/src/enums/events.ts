@@ -36,6 +36,14 @@ export enum CryptoEvent {
  * @export
  * @enum {number}
  */
+export enum BlockchainEvent {
+    Synced = "blockchain.synced",
+}
+
+/**
+ * @export
+ * @enum {number}
+ */
 export enum BlockEvent {
     Applied = "block.applied",
     Disregarded = "block.disregarded",

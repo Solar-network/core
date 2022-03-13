@@ -1,4 +1,4 @@
-import { Container, Contracts } from "@solar-network/core-kernel";
+import { Container, Contracts, Enums } from "@solar-network/core-kernel";
 
 import { Action } from "../contracts";
 
@@ -6,6 +6,9 @@ import { Action } from "../contracts";
 export class SyncingComplete implements Action {
     @Container.inject(Container.Identifiers.Application)
     public readonly app!: Contracts.Kernel.Application;
+
+    @Container.inject(Container.Identifiers.EventDispatcherService)
+    private readonly events!: Contracts.Kernel.EventDispatcher;
 
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
@@ -16,6 +19,7 @@ export class SyncingComplete implements Action {
     public async handle(): Promise<void> {
         this.logger.info("Blockchain 100% in sync :100:");
 
+        this.events.dispatch(Enums.BlockchainEvent.Synced);
         this.blockchain.dispatch("SYNCFINISHED");
     }
 }
