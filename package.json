@@ -19,7 +19,6 @@
         "@oclif/dev-cli": "1.26.0",
         "@types/babel__core": "7.1.16",
         "@types/create-hash": "1.2.2",
-        "@types/depcheck": "0.9.1",
         "@types/js-yaml": "4.0.4",
         "@types/node": "16.11.6",
         "@types/prettier": "2.4.1",
