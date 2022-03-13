@@ -3,12 +3,11 @@
     "name": "core",
     "description": "The packages that make up the Solar Core",
     "scripts": {
-        "setup": "pnpm install && pnpm build",
         "build": "pnpm build -r",
+        "format": "pnpm lint:fix && pnpm prettier",
         "lint": "eslint packages/*/src --ext .ts --max-warnings 0",
         "lint:fix": "eslint packages/*/src --ext .ts --fix",
-        "prettier": "prettier --write \"./*.{ts,js,json,md}\" \"./packages/**/*.{ts,js,json,md}\" \"./__tests__/**/*.{ts,js,json,md}\"",
-        "format": "pnpm lint && pnpm prettier"
+        "prettier": "prettier --write \"./*.{ts,js,json,md}\" \"./packages/**/*.{ts,js,json,md}\""
     },
     "devDependencies": {
         "@solar-network/crypto": "workspace:*",
