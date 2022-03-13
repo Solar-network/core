@@ -15,7 +15,7 @@
     ],
     "scripts": {
         "build": "pnpm clean && pnpm compile",
-        "build:watch": "yarn clean && yarn compile -w",
+        "build:watch": "pnpm clean && pnpm compile -w",
         "compile": "node ../../node_modules/typescript/bin/tsc",
         "clean": "rimraf dist"
     },
