@@ -1,3 +1,5 @@
+import inert from "@hapi/inert";
+
 import { cache } from "./cache";
 import { commaArrayQuery } from "./comma-array-query";
 import { dotSeparatedQuery } from "./dot-separated-query";
@@ -7,7 +9,6 @@ import { pagination } from "./pagination";
 import { rateLimit } from "./rate-limit";
 import { responseHeaders } from "./response-headers";
 import { whitelist } from "./whitelist";
-import inert from "@hapi/inert"
 
 export const preparePlugins = (config) => [
     {
