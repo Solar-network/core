@@ -35,7 +35,7 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setFlag("env", "", Joi.string().default("production"))
             .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39", Joi.string())
