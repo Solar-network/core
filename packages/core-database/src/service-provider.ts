@@ -87,15 +87,15 @@ export class ServiceProvider extends Providers.ServiceProvider {
     public configSchema(): object {
         return Joi.object({
             connection: Joi.object({
-                type: Joi.string().required(),
-                host: Joi.string().required(),
-                port: Joi.number().integer().min(1).max(65535).required(),
                 database: Joi.string().required(),
-                username: Joi.string().required(),
-                password: Joi.string().required(),
                 entityPrefix: Joi.string().required(),
-                synchronize: Joi.bool().required(),
+                extra: Joi.object({
+                    host: Joi.string().required(),
+                }),
                 logging: Joi.bool().required(),
+                synchronize: Joi.bool().required(),
+                type: Joi.string().required(),
+                username: Joi.string().required(),
             }).required(),
         }).unknown(true);
     }
