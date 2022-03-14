@@ -253,6 +253,7 @@ importers:
       boxen: 5.1.2
       cli-table3: 0.6.0
       dayjs: 1.10.7
+      delay: 5.0.0
       env-paths: 2.2.0
       envfile: 5.2.0
       execa: 3.4.0
@@ -282,6 +283,7 @@ importers:
       boxen: 5.1.2
       cli-table3: 0.6.0
       dayjs: 1.10.7
+      delay: 5.0.0
       env-paths: 2.2.0
       envfile: 5.2.0
       execa: 3.4.0
