@@ -1,11 +1,14 @@
+import delay from "delay";
 import { sync } from "execa";
-import Listr, { ListrTaskWrapper } from "listr";
+import { white } from "kleur";
+import Listr from "listr";
 import { spawn } from "node-pty";
 
 import { Application } from "../application";
-import { Spinner, TaskList } from "../components";
+import { Spinner } from "../components";
 import { Identifiers, inject, injectable } from "../ioc";
 import { Output } from "../output";
+import { Logger } from "./logger";
 
 /**
  * @export
@@ -16,6 +19,9 @@ export class Installer {
     @inject(Identifiers.Application)
     private readonly app!: Application;
 
+    @inject(Identifiers.Logger)
+    private readonly logger!: Logger;
+
     @inject(Identifiers.Output)
     private readonly output!: Output;
 
@@ -24,13 +30,19 @@ export class Installer {
      * @memberof Installer
      */
     public async install(pkg: string, tag: string = "latest"): Promise<void> {
-        const coreDirectory = __dirname + "/../../../../";
+        const corePath = __dirname + "/../../../../";
 
-        const getLastTag = (regex) => `git tag --sort=committerdate | grep -Px ${regex} | tail -1`;
+        const getLastTag = (regex: string) => `git tag --sort=committerdate | grep -Px ${regex} | tail -1`;
         let gitTag: string = tag;
         let tagFromRegex!: string;
 
         let version: string = tag;
+
+        const dependencies: Record<string, string> = {};
+        const dependenciesListr = new Listr();
+
+        const packages: Record<string, string> = {};
+        const packagesListr = new Listr();
 
         if (tag === "latest") {
             tagFromRegex = getLastTag('"^\\d+.\\d+.\\d+"');
@@ -41,209 +53,198 @@ export class Installer {
         }
 
         if (tagFromRegex) {
-            version = sync(tagFromRegex, { cwd: coreDirectory, shell: true }).stdout;
+            version = sync(tagFromRegex, { cwd: corePath, shell: true }).stdout;
         }
 
-        let currentTask: ListrTaskWrapper;
-        let errorMessage!: string;
-        let log = "";
-        const packages = { building: 0, total: 0 };
-        let phase = 0;
-        const phaseComplete: {
-            promise: Promise<void>;
-            reject: (value: void) => void;
-            resolve: (value: void) => void;
-        }[] = [];
-
-        const nextPhase = () => {
-            phaseComplete[phase].resolve();
-            phase++;
-        };
-
-        for (let i = 0; i < 5; i++) {
+        const generatePromise = (name?: string) => {
             let rejecter!: (value: void) => void;
             let resolver!: (value: void) => void;
-            phaseComplete.push({
+            return {
+                name,
                 promise: new Promise<void>((resolve, reject) => {
                     (rejecter = reject), (resolver = resolve);
                 }).catch(() => {}),
                 reject: rejecter,
                 resolve: resolver,
-            });
-        }
+            };
+        };
+
+        const downloadPhase = generatePromise();
+        const gitPhase = generatePromise();
+        const installPhase = { start: generatePromise(), end: generatePromise() };
+
+        const pnpmFlags = "--reporter=" + (this.output.isNormal() ? "ndjson" : "default");
 
         const shell = spawn(
             "sh",
             [
                 "-c",
-                `( git tag -l | xargs git tag -d && git fetch --all --tags -f && rm -f node_modules/better-sqlite3/build/Release/better_sqlite3.node && git reset --hard && git checkout tags/${gitTag} && yarn --force && yarn lerna:verbose run build && cd node_modules/better-sqlite3 && npm rebuild && exit 0 ) || exit $?`,
+                `( git tag -l | xargs git tag -d && git fetch --all --tags -f && git reset --hard && git checkout tags/${gitTag} && pnpm install ${pnpmFlags} && pnpm build ${pnpmFlags} && exit 0 ) || exit $?`,
             ],
-            { cwd: coreDirectory },
+            { cols: process.stdout.columns, cwd: corePath },
         );
+
+        let errorLevel = 0;
+        let errorMessage!: string;
+        let log: string = "";
+
         const shellExit = new Promise<void>((resolve, reject) => {
-            shell.onExit(({ exitCode }) => {
+            shell.onExit(async ({ exitCode }) => {
+                errorLevel = exitCode;
                 if (exitCode === 0) {
-                    if (phase === 4) {
-                        nextPhase();
-                    }
                     resolve();
                 } else {
-                    reject(`Process failed with error code ${exitCode}`);
+                    const tasksInProgress = tasks.tasks.filter((task) => (task as any)._state === 0);
+                    for (const task of tasksInProgress) {
+                        (task as any)._state = 2;
+                    }
+                    await delay(250);
+                    reject(`The process failed with error code ${exitCode}`);
                 }
             });
         }).catch((error) => {
+            let message: string;
             if (this.output.isNormal()) {
-                errorMessage = `The process did not complete successfully:\n${log}\n${error}`;
+                message = `The process did not complete successfully:\n${log}\n${error}`;
             } else {
-                errorMessage = error;
+                message = error;
             }
-            for (const phase of phaseComplete) {
-                phase.reject();
-            }
+            this.logger.error(white().bgRed(`[ERROR] ${message}`));
+            process.exit(errorLevel);
         });
 
-        shell.onData((data) => {
+        let shellOutput = "";
+
+        shell.onData((data: string) => {
             if (this.output.isNormal()) {
-                log += data;
-                const output = data
-                    .replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "")
-                    .trim()
-                    .split("\n");
-                for (const line of output) {
-                    switch (phase) {
-                        case 0: {
-                            if (line.includes("yarn install")) {
-                                nextPhase();
-                            }
-                            break;
-                        }
-                        case 1: {
-                            if (line.includes("]")) {
-                                const progress = line
-                                    .substring(line.indexOf("]") + 1)
-                                    .trim()
-                                    .split("/");
-                                if (!isNaN(+progress[0]) && !isNaN(+progress[1])) {
-                                    currentTask.title = `Fetching dependencies (${progress[0]} of ${progress[1]})`;
-                                }
-                            }
-                            if (line.includes("Linking dependencies...")) {
-                                currentTask.title = "Fetching dependencies";
-                                nextPhase();
-                            }
-                            break;
-                        }
-                        case 2: {
-                            if (line.includes("]")) {
-                                const progress = line
-                                    .substring(line.indexOf("]") + 1)
-                                    .trim()
-                                    .split("/");
-                                if (!isNaN(+progress[0]) && !isNaN(+progress[1])) {
-                                    currentTask.title = `Linking dependencies (${progress[0]} of ${progress[1]})`;
-                                }
-                            }
-                            if (
-                                line.includes("Rebuilding all packages...") ||
-                                line.includes("Building fresh packages...")
-                            ) {
-                                currentTask.title = "Linking dependencies";
-                                nextPhase();
-                            }
-                            break;
-                        }
-                        case 3: {
-                            if (line.includes("]")) {
-                                const dependencyName = line.substring(line.lastIndexOf(" ") + 1);
-                                const progress = line.substring(1, line.indexOf("]")).trim().split("/");
-                                if (!isNaN(+progress[0]) && !isNaN(+progress[1])) {
-                                    currentTask.title = `Building dependencies (${progress[0]} of ${progress[1]}: ${dependencyName})`;
-                                }
-                            }
-                            if (line.includes("Done in")) {
-                                currentTask.title = "Building dependencies";
-                                nextPhase();
-                            }
-                            break;
-                        }
-                        case 4: {
-                            if (line.includes("Executing command in")) {
-                                packages.total = +line
-                                    .substring(line.indexOf("Executing command in") + 21)
-                                    .split(" ")[0];
-                            }
-                            if (line.includes("build []")) {
-                                const packageName = line.substring(line.lastIndexOf(" ") + 1).trim();
-                                packages.building++;
-                                currentTask.title = `Installing Core packages (${packages.building} of ${packages.total}: ${packageName})`;
-                            }
-                        }
-                    }
+                shellOutput += data;
+                while (shellOutput.includes("\n")) {
+                    const line = shellOutput.substring(0, shellOutput.indexOf("\n"));
+                    consume(line);
+                    shellOutput = shellOutput.substring(line.length + 1);
                 }
             } else {
                 process.stdout.write(data);
             }
         });
-        const tasks = [
-            {
-                title: `Downloading Core ${version}`,
-                task: async (ctx, task) => {
-                    currentTask = task;
-                    await phaseComplete[0].promise;
-                },
-            },
-            {
-                title: `Preparing to build Core ${version}`,
-                task: () => {
-                    return new Listr([
+
+        let workspacePrefix = "";
+
+        function consume(data: string) {
+            let line: string;
+            let parsed: any = {};
+            try {
+                parsed = JSON.parse(data);
+                line = parsed.line;
+            } catch {
+                line = data;
+            }
+
+            if (line && !line.startsWith("{") && !line.endsWith("}")) {
+                log += line + "\n";
+            }
+
+            if (parsed.workspacePrefix) {
+                workspacePrefix = parsed.workspacePrefix;
+                gitPhase.resolve();
+            }
+
+            if (parsed.initial && parsed.initial.name && parsed.prefix) {
+                const prefix = parsed.prefix.replace(workspacePrefix, "");
+                if (prefix) {
+                    packages[parsed.prefix] = parsed.initial.name;
+                    packagesListr.add([
                         {
-                            title: "Fetching dependencies",
-                            task: async (ctx, task) => {
-                                currentTask = task;
-                                await phaseComplete[1].promise;
-                            },
-                        },
-                        {
-                            title: "Linking dependencies",
-                            task: async (ctx, task) => {
-                                currentTask = task;
-                                await phaseComplete[2].promise;
-                            },
-                        },
-                        {
-                            title: "Building dependencies",
-                            task: async (ctx, task) => {
-                                currentTask = task;
-                                await phaseComplete[3].promise;
-                            },
+                            title: `Building ${parsed.initial.name}`,
+                            task: () => shellExit,
                         },
                     ]);
+                }
+            }
+
+            if (parsed.name === "pnpm:summary") {
+                downloadPhase.resolve();
+                installPhase.start.resolve();
+                installPhase.end.resolve();
+            }
+
+            if (parsed.script !== undefined) {
+                const pkg = packages[parsed.depPath];
+                if (pkg) {
+                    (packagesListr.tasks.find((task) => task.title === `Building ${pkg}`)! as any)._state = 0;
+                } else if (parsed.depPath) {
+                    const depPath: string[] = parsed.depPath.split("/");
+                    const dependency: string = depPath[depPath.length - 1];
+                    if (!dependencies[parsed.depPath]) {
+                        dependenciesListr.add([
+                            {
+                                title: `Building ${dependency}`,
+                                task: () => installPhase.end.promise,
+                            },
+                        ]);
+                        (
+                            dependenciesListr.tasks.find((task) => task.title === `Building ${dependency}`)! as any
+                        )._state = 0;
+                        dependencies[parsed.depPath] = dependency;
+                    }
+                    downloadPhase.resolve();
+                    installPhase.start.resolve();
+                }
+            }
+
+            if (parsed.exitCode !== undefined) {
+                let listr!: Listr;
+                let pkg!: string;
+                if (packages[parsed.depPath]) {
+                    listr = packagesListr;
+                    pkg = packages[parsed.depPath];
+                } else if (dependencies[parsed.depPath]) {
+                    listr = dependenciesListr;
+                    pkg = dependencies[parsed.depPath];
+                }
+
+                if (listr && pkg) {
+                    (listr.tasks.find((task) => task.title === `Building ${pkg}`)! as any)._state =
+                        parsed.exitCode === 0 ? 1 : 2;
+                    if (parsed.exitCode !== 0) {
+                        const tasksInProgress = listr.tasks.filter((task) => (task as any)._state === 0);
+                        for (const task of tasksInProgress) {
+                            delete (task as any)._state;
+                        }
+                    }
+                }
+            }
+        }
+
+        const tasks = new Listr([
+            {
+                title: `Downloading Core ${version}`,
+                task: () => gitPhase.promise,
+            },
+            {
+                title: "Downloading dependencies",
+                task: () => downloadPhase.promise,
+            },
+            {
+                title: "Building dependencies",
+                task: async () => {
+                    await installPhase.start.promise;
+                    return dependenciesListr;
                 },
             },
             {
                 title: `Building Core ${version}`,
-                task: async () => {
-                    return new Listr([
-                        {
-                            title: `Installing Core packages`,
-                            task: async (ctx, task) => {
-                                currentTask = task;
-                                await phaseComplete[4].promise;
-                                task.title = "Installing Core packages";
-                            },
-                        },
-                    ]);
-                },
+                task: () => packagesListr,
             },
-        ];
+        ]);
 
         this.app.get<Spinner>(Identifiers.Spinner).get().stop();
 
         if (this.output.isNormal()) {
-            await this.app.get<TaskList>(Identifiers.TaskList).render(tasks);
+            await tasks.run(tasks);
+        } else {
+            await shellExit;
         }
-
-        await shellExit;
 
         if (errorMessage) {
             throw new Error(errorMessage);
