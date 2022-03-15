@@ -5,14 +5,14 @@
         "public": 70617039,
         "private": 70615956
     },
-    "pubKeyHash": 63,
-    "nethash": "bfc21e5c7eaa48fdece8a92ea64bbd8f1779a2983f57cf14308ca1fb20823728",
+    "pubKeyHash": 30,
+    "nethash": "72db1365ae549683980a8e29ff744c6d4d9920c3cd215e462f40a58da3f13dce",
     "wif": 252,
     "slip44": 1,
     "aip20": 0,
     "client": {
         "token": "tSXP",
         "symbol": "tSXP",
-        "explorer": "http://127.0.0.1"
+        "explorer": "https://texplorer.solar.org"
     }
 }

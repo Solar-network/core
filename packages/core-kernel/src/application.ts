@@ -270,7 +270,7 @@ export class Application implements Contracts.Kernel.Application {
      * @memberof Application
      */
     public isDevelopment(): boolean {
-        return this.environment() === "development" || ["devnet", "testnet"].includes(this.network());
+        return this.environment() === "development" || this.network() === "testnet";
     }
 
     /**
