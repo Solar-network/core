@@ -37,7 +37,7 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setFlag("height", "The height after the roll back", Joi.number())
             .setFlag("number", "The number of blocks to roll back", Joi.number());

@@ -1,4 +1,6 @@
 import { Container, Contracts, Enums, Providers } from "@solar-network/core-kernel";
+import { sync } from "execa";
+import { existsSync, readFileSync, unlinkSync } from "fs";
 import Joi from "joi";
 import { Connection, createConnection, getCustomRepository } from "typeorm";
 
@@ -62,6 +64,29 @@ export class ServiceProvider extends Providers.ServiceProvider {
             connection.logger = this.app.get(Container.Identifiers.DatabaseLogger);
         }
 
+        try {
+            const pidFile: string = `${connection.extra.host}/postmaster.pid`;
+            let startPostgres: boolean = true;
+
+            if (existsSync(pidFile)) {
+                const pid = +readFileSync(pidFile).toString().split("\n")[0];
+                try {
+                    process.kill(pid, 0);
+                    startPostgres = false;
+                } catch {
+                    unlinkSync(pidFile);
+                }
+            }
+
+            if (startPostgres) {
+                sync(`${process.env.POSTGRES_DIR}/bin/pg_ctl -D ${connection.extra.host} start >/dev/null`, {
+                    shell: true,
+                });
+            }
+        } catch (error) {
+            this.app.terminate(error.stderr || error.shortMessage);
+        }
+
         return createConnection({
             ...(connection as any),
             namingStrategy: new SnakeNamingStrategy(),
@@ -87,15 +112,15 @@ export class ServiceProvider extends Providers.ServiceProvider {
     public configSchema(): object {
         return Joi.object({
             connection: Joi.object({
-                type: Joi.string().required(),
-                host: Joi.string().required(),
-                port: Joi.number().integer().min(1).max(65535).required(),
                 database: Joi.string().required(),
-                username: Joi.string().required(),
-                password: Joi.string().required(),
                 entityPrefix: Joi.string().required(),
-                synchronize: Joi.bool().required(),
+                extra: Joi.object({
+                    host: Joi.string().required(),
+                }),
                 logging: Joi.bool().required(),
+                synchronize: Joi.bool().required(),
+                type: Joi.string().required(),
+                username: Joi.string().required(),
             }).required(),
         }).unknown(true);
     }

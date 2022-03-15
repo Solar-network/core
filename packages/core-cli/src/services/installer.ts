@@ -174,7 +174,10 @@ export class Installer {
                     (packagesListr.tasks.find((task) => task.title === `Building ${pkg}`)! as any)._state = 0;
                 } else if (parsed.depPath) {
                     const depPath: string[] = parsed.depPath.split("/");
-                    const dependency: string = depPath[depPath.length - 1];
+                    let dependency: string = depPath[depPath.length - 1];
+                    if (/^\d+.\d+.\d+$|^\d+.\d+.\d+-next.\d+$/.test(dependency)) {
+                        dependency = depPath[depPath.length - 2];
+                    }
                     if (!dependencies[parsed.depPath]) {
                         dependenciesListr.add([
                             {

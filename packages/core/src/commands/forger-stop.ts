@@ -32,7 +32,7 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("daemon", "Stop the Core process or daemon", Joi.boolean());
     }
 

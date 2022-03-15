@@ -24,6 +24,7 @@
         "@solar-network/crypto": "workspace:*",
         "@solar-network/utils": "workspace:*",
         "dayjs": "1.10.7",
+        "execa": "3.4.0",
         "joi": "17.6.0",
         "pg": "8.7.1",
         "reflect-metadata": "0.1.13",

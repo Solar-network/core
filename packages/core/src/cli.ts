@@ -105,7 +105,7 @@ export class CommandLineInterface {
 
     private async detectNetworkAndToken(flags: Flags): Promise<TokenNetworkFlags> {
         const tempFlags: TokenNetworkFlags = {
-            token: "ark",
+            token: "solar",
             ...flags,
         };
 

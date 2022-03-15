@@ -37,7 +37,7 @@ export class Command extends Commands.Command {
     public configure(): void {
         this.definition
             .setFlag("all", "Whether to update all packages", Joi.boolean())
-            .setFlag("token", "The name of the token", Joi.string().default("ark"))
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setArgument("package", "The name of the package", Joi.string());
     }
