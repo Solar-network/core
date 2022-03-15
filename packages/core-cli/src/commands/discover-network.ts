@@ -24,7 +24,7 @@ export class DiscoverNetwork {
         const folders: string[] = readdirSync(path).filter((folder) => this.isValidNetwork(folder));
 
         if (!folders || folders.length === 0) {
-            throw new Error('Unable to detect a network configuration. Please run "ark config:publish" and try again');
+            throw new Error('Unable to detect a network configuration. Please run "solar config:publish" and try again');
         }
 
         if (folders.length === 1) {
