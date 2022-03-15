@@ -1,4 +1,6 @@
 import { Container, Contracts, Enums, Providers } from "@solar-network/core-kernel";
+import { sync } from "execa";
+import { existsSync, readFileSync, unlinkSync } from "fs";
 import Joi from "joi";
 import { Connection, createConnection, getCustomRepository } from "typeorm";
 
@@ -60,6 +62,27 @@ export class ServiceProvider extends Providers.ServiceProvider {
         if (this.app.isBound(Container.Identifiers.DatabaseLogger)) {
             connection.logging = "all";
             connection.logger = this.app.get(Container.Identifiers.DatabaseLogger);
+        }
+
+        try {
+            const pidFile: string = `${connection.extra.host}/postmaster.pid`;
+            let startPostgres: boolean = true;
+
+            if (existsSync(pidFile)) {
+                const pid = +readFileSync(pidFile).toString().split("\n")[0];
+                try {
+                    process.kill(pid, 0);
+                    startPostgres = false;
+                } catch {
+                    unlinkSync(pidFile);
+                }
+            }
+
+            if (startPostgres) {
+                sync(`${process.env.POSTGRES_DIR}/bin/pg_ctl -D ${connection.extra.host} start >/dev/null`, { shell: true });
+            }
+        } catch (error) {
+            this.app.terminate(error.stderr || error.shortMessage);
         }
 
         return createConnection({
