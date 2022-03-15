@@ -15,7 +15,8 @@ Create a new user (for example `solar`), switch to that account and then downloa
 ```
 adduser solar
 su -l solar
-curl -so- https://raw.githubusercontent.com/solar-network/core/main/install.sh | bash
+curl -o install.sh https://raw.githubusercontent.com/solar-network/core/develop/install.sh
+bash install.sh
 ```
 
 Choose whether you want to run on `Mainnet` (which installs the latest stable release) or `Testnet` (which installs the latest development release) and then wait for the installation to complete.
