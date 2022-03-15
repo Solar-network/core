@@ -177,7 +177,7 @@ export class Installer {
                     let dependency: string = depPath[depPath.length - 1];
                     if (/^\d+.\d+.\d+$|^\d+.\d+.\d+-next.\d+$/.test(dependency)) {
                         dependency = depPath[depPath.length - 2];
-                    }    
+                    }
                     if (!dependencies[parsed.depPath]) {
                         dependenciesListr.add([
                             {

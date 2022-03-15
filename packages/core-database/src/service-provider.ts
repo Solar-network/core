@@ -79,7 +79,9 @@ export class ServiceProvider extends Providers.ServiceProvider {
             }
 
             if (startPostgres) {
-                sync(`${process.env.POSTGRES_DIR}/bin/pg_ctl -D ${connection.extra.host} start >/dev/null`, { shell: true });
+                sync(`${process.env.POSTGRES_DIR}/bin/pg_ctl -D ${connection.extra.host} start >/dev/null`, {
+                    shell: true,
+                });
             }
         } catch (error) {
             this.app.terminate(error.stderr || error.shortMessage);
