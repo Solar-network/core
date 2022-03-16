@@ -161,9 +161,11 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             if (slotInfo.slotNumber < 0 && pingResponse.state.currentSlot) {
                 pingResponse.state.currentSlot = pingResponse.state.currentSlot >> 0;
             }
-            const stateBuffer = Buffer.from(Utils.stringify({ state: pingResponse.state, config: pingResponse.config }));
+            const stateBuffer = Buffer.from(
+                Utils.stringify({ state: pingResponse.state, config: pingResponse.config }),
+            );
             const alreadyCheckedSignatures: string[] = [];
-                const lastBlock: Interfaces.IBlock = this.app
+            const lastBlock: Interfaces.IBlock = this.app
                 .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                 .getLastBlock();
             const height = lastBlock.data.height + 1;
