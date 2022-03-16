@@ -286,6 +286,7 @@ async function core() {
         pm2 set pm2-logrotate:compress true &&
         pm2 set pm2-logrotate:retain 7 &&
         rm -rf /tmp/pm2-logrotate &&
+        (crontab -l; echo "@reboot /bin/bash -lc \\"source "$HOME"/"."$SOLAR_CORE_TOKEN"rc"; pm2 resurrect\\"") | sort -u - | crontab - 2>/dev/null &&
         cd "$SOLAR_CORE_PATH" &&
         pnpm install ${pnpmFlags} &&
         pnpm build ${pnpmFlags} &&
