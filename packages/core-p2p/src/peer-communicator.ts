@@ -155,12 +155,15 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         peer.stale = false;
         peer.state = pingResponse.state;
 
-        const stateBuffer = Buffer.from(Utils.stringify({ state: pingResponse.state, config: pingResponse.config }));
-        const alreadyCheckedSignatures: string[] = [];
         let slotInfo;
         if (blockTimeLookup) {
             slotInfo = Crypto.Slots.getSlotInfo(blockTimeLookup);
-            const lastBlock: Interfaces.IBlock = this.app
+            if (slotInfo.slotNumber < 0 && pingResponse.state.currentSlot) {
+                pingResponse.state.currentSlot = pingResponse.state.currentSlot >> 0;
+            }
+            const stateBuffer = Buffer.from(Utils.stringify({ state: pingResponse.state, config: pingResponse.config }));
+            const alreadyCheckedSignatures: string[] = [];
+                const lastBlock: Interfaces.IBlock = this.app
                 .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                 .getLastBlock();
             const height = lastBlock.data.height + 1;
