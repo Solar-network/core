@@ -34,6 +34,8 @@ export PATH=$PATH:"$SOLAR_DATA_PATH"/usr/bin:"$SOLAR_DATA_PATH"/bin:"$SOLAR_DATA
 export CFLAGS="--sysroot=\"$SOLAR_DATA_PATH\""
 export LDFLAGS="--sysroot=\"$SOLAR_DATA_PATH\""
 export PERL5LIB=$PERL5LIB:"$SOLAR_DATA_PATH"/usr/share/perl5
+export GIT_EXEC_PATH="$SOLAR_DATA_PATH"/usr/lib/git-core
+export GIT_TEMPLATE_DIR="$SOLAR_DATA_PATH"/usr/share/git-core/templates
 '
 
 eval "$RC"
@@ -57,7 +59,7 @@ mkdir -p "$SOLAR_DATA_PATH" "$HOME"/.pnpm/bin "$SOLAR_TEMP_PATH"/cache "$SOLAR_T
 
 if [ $NODEVERSION -lt 16 ]; then
     rm -rf "$HOME"/.nvm
-    curl -Ls https://raw.githubusercontent.com/tj/n/master/bin/n -o n
+    wget -qO n https://raw.githubusercontent.com/tj/n/master/bin/n
     bash n 16 >/dev/null
     rm n
 fi
@@ -275,17 +277,8 @@ async function addPlugins() {
 
 async function core() {
     return new Promise((resolve, reject) => {
-        const architecture = spawnSync("gcc -dumpmachine", { shell: true }).stdout.toString().trim();
         const pnpm = spawn(`
-        RC='export CPATH=$CPATH:"$SOLAR_DATA_PATH"/usr/include:"$SOLAR_DATA_PATH"/usr/include/${architecture}\n` +
-        `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$SOLAR_DATA_PATH"/usr/lib/${architecture}\n'
-        eval "$RC" &&
-        echo "$RC" >> "$HOME"/"."$SOLAR_CORE_TOKEN"rc" &&
-        rm -rf "$SOLAR_DATA_PATH"/lib/${architecture} &&
-        ln -fs "$SOLAR_DATA_PATH"/usr/bin/gcc "$SOLAR_DATA_PATH"/usr/bin/cc &&
-        ln -fs /usr/lib/${architecture}/libgcc_s.* "$SOLAR_DATA_PATH"/usr/lib/${architecture}/ &&
-        ln -fs /usr/lib/${architecture}/ "$SOLAR_DATA_PATH"/lib/ &&
-        (grep -rl include_next "$SOLAR_DATA_PATH"/usr/include/c++/ | xargs sed -i "s/include_next/include/g" 2>/dev/null; true) &&
+        . "$HOME"/"."$SOLAR_CORE_TOKEN"rc"
         npm -g install pnpm &&
         pnpm -g install pm2 &&
         pm2 install pm2-logrotate &&
@@ -325,7 +318,15 @@ async function core() {
 
 async function downloadCore(version) {
     return new Promise((resolve, reject) => {
+        const architecture = spawnSync("gcc -dumpmachine", { shell: true }).stdout.toString().trim();
         const git = spawn(`
+        RC='export CPATH=$CPATH:"$SOLAR_DATA_PATH"/usr/include:"$SOLAR_DATA_PATH"/usr/include/${architecture}\n` +
+        `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$SOLAR_DATA_PATH"/usr/lib/${architecture}'\n
+        eval "$RC" &&
+        echo "$RC" >> "$HOME"/"."$SOLAR_CORE_TOKEN"rc" &&
+        ln -fs "$SOLAR_DATA_PATH"/usr/bin/gcc "$SOLAR_DATA_PATH"/usr/bin/cc &&
+        ln -fs /usr/lib/${architecture}/libgcc_s.* "$SOLAR_DATA_PATH"/usr/lib/${architecture}/ &&
+        (grep -rl include_next "$SOLAR_DATA_PATH"/usr/include/c++/ | xargs sed -i "s/include_next/include/g" 2>/dev/null; true) &&
         rm -rf "$SOLAR_CORE_PATH" &&
         cd "$HOME" &&
         git clone "https://github.com/solar-network/core.git" "$SOLAR_CORE_PATH" --progress &&
@@ -348,12 +349,50 @@ async function downloadCore(version) {
 
 async function downloadOSDependencies() {
     return await new Promise((resolve, reject) => {
+        const packages = [
+            "apt-transport-https",
+            "autoconf",
+            "automake",
+            "build-essential",
+            "gcc",
+            "git",
+            "jq",
+            "libcairo2-dev",
+            "libjemalloc-dev",
+            "libpq-dev",
+            "libtool",
+            "postgresql",
+            "postgresql-contrib",
+            "postgresql-client",
+            "postgresql-client-common",
+            "python",
+        ];
+
+        const enumerateDependencies = () => {
+            const cache = spawnSync(`apt-cache depends ${packages.join(" ")} | grep '[ |]Depends: [^<]' | cut -d: -f2`, {
+                shell: true,
+            }).stdout.toString();
+            const deps = cache.split("\n");
+            let again = false;
+            for (const dep of deps) {
+                const dependency = dep.trim();
+                if (dependency.length > 0 && !packages.includes(dependency)) {
+                    packages.push(dependency);
+                    again = true;
+                }
+            }
+
+            if (again) {
+                return enumerateDependencies();
+            }
+
+            return packages.join(" ");
+        };
+
         const apt = spawn(`
         APT_PARAMS="-o debug::nolocking=true -o dir::cache=\"$SOLAR_TEMP_PATH\"/cache -o dir::state=\"$SOLAR_TEMP_PATH/state\"" &&
         apt-get $APT_PARAMS update &&
-        apt-get $APT_PARAMS -y -d install --reinstall apt-transport-https autoconf automake build-essential curl git jq libcairo2-dev \
-        libjemalloc-dev libpq-dev libtool postgresql postgresql-contrib postgresql-client postgresql-client-common python
-        `,
+        apt-get $APT_PARAMS -y -d install --reinstall ${enumerateDependencies()}`,
             { shell: true },
         );
         apt.stdout.on("data", (data) => route(data));
@@ -528,7 +567,7 @@ async function start() {
 
         try {
             const tags = JSON.parse(
-                spawnSync("curl -Lso- https://api.github.com/repos/solar-network/core/git/refs/tags", { shell: true })
+                spawnSync("wget -qO- https://api.github.com/repos/solar-network/core/git/refs/tags", { shell: true })
                     .stdout,
             );
             version = Object.values(tags.map((tag) => tag.ref.substring(10)))

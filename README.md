@@ -15,7 +15,7 @@ Create a new user (for example `solar`), switch to that account and then downloa
 ```
 adduser solar
 su -l solar
-curl -o install.sh https://raw.githubusercontent.com/solar-network/core/develop/install.sh
+wget -O install.sh https://raw.githubusercontent.com/solar-network/core/develop/install.sh
 bash install.sh
 ```
 
