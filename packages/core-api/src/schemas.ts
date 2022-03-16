@@ -70,7 +70,7 @@ export const createSortingSchema = (
     return Joi.object({
         orderBy: Joi.custom((value, helpers) => {
             if (value === "") {
-                return [];
+                return transform ? [] : undefined;
             }
 
             const sorting: Contracts.Search.Sorting = [];
@@ -100,7 +100,7 @@ export const createSortingSchema = (
             }
 
             return sorting;
-        }).default([]),
+        }),
     });
 };
 
