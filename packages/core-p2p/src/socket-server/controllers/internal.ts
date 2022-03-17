@@ -1,6 +1,6 @@
 import Hapi from "@hapi/hapi";
 import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
-import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
+import { Crypto, Interfaces } from "@solar-network/crypto";
 
 import { Controller } from "./controller";
 
@@ -22,6 +22,9 @@ export class InternalController extends Controller {
 
     @Container.inject(Container.Identifiers.TransactionPoolCollator)
     private readonly collator!: Contracts.TransactionPool.Collator;
+
+    @Container.inject(Container.Identifiers.RoundState)
+    private readonly roundState!: Contracts.State.RoundState;
 
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")
@@ -59,7 +62,6 @@ export class InternalController extends Controller {
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
-        const reward = Managers.configManager.getMilestone(height).reward;
         const allDelegates: Contracts.P2P.DelegateWallet[] = (await this.walletRepository.allByUsername()).map(
             (wallet) => ({
                 ...wallet.getData(),
@@ -78,19 +80,24 @@ export class InternalController extends Controller {
 
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, height);
 
-        const timestamp = Crypto.Slots.getTime();
+        const timestamp: number = Crypto.Slots.getTime();
         const forgingInfo = Utils.forgingInfoCalculator.calculateForgingInfo(timestamp, height, blockTimeLookup);
 
+        const { reward } = await this.roundState.getRewardForBlockInRound(
+            height + 1,
+            await this.walletRepository.findByPublicKey(delegates[forgingInfo.currentForger].publicKey!),
+        );
+
         return {
-            current: roundInfo.round,
-            reward,
-            timestamp: forgingInfo.blockTimestamp,
             allDelegates,
-            delegates,
-            currentForger: delegates[forgingInfo.currentForger],
-            nextForger: delegates[forgingInfo.nextForger],
-            lastBlock: lastBlock.data,
             canForge: forgingInfo.canForge,
+            current: roundInfo.round,
+            currentForger: delegates[forgingInfo.currentForger],
+            delegates,
+            lastBlock: lastBlock.data,
+            nextForger: delegates[forgingInfo.nextForger],
+            reward: reward.toString(),
+            timestamp: forgingInfo.blockTimestamp,
         };
     }
 

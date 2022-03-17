@@ -1,10 +1,10 @@
 import { DatabaseService } from "@solar-network/core-database";
 import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Blocks, Crypto, Identities, Interfaces, Utils } from "@solar-network/crypto";
+import { Blocks, Crypto, Identities, Interfaces, Managers, Utils } from "@solar-network/crypto";
 import assert from "assert";
 
 @Container.injectable()
-export class RoundState {
+export class RoundState implements Contracts.State.RoundState {
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Contracts.Kernel.Application;
 
@@ -137,6 +137,29 @@ export class RoundState {
                 delegate,
             });
         }
+    }
+
+    public async getRewardForBlockInRound(
+        height: number,
+        wallet: Contracts.State.Wallet,
+    ): Promise<{ alreadyForged: boolean; reward: Utils.BigNumber }> {
+        const { dynamicReward } = Managers.configManager.getMilestone(height);
+        let alreadyForged: boolean = false;
+        let reward: Utils.BigNumber | undefined = undefined;
+        if (dynamicReward && dynamicReward.enabled) {
+            alreadyForged = this.blocksInCurrentRound.some(
+                (blockGenerator) => blockGenerator.data.generatorPublicKey === wallet.getPublicKey(),
+            );
+            if (alreadyForged) {
+                reward = Utils.BigNumber.make(dynamicReward.secondaryReward);
+            }
+        }
+
+        if (reward === undefined) {
+            reward = Utils.calculateReward(height, wallet.getAttribute("delegate.rank"));
+        }
+
+        return { alreadyForged, reward };
     }
 
     private async applyRound(height: number): Promise<void> {

@@ -1,6 +1,7 @@
 export * from "./block-state";
 export * from "./block-store";
 export * from "./dpos";
+export * from "./round-state";
 export * from "./state-builder";
 export * from "./state-store";
 export * from "./transaction-store";
