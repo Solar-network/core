@@ -390,6 +390,13 @@ async function downloadOSDependencies() {
             return packages.join(" ");
         };
 
+        const locked = spawnSync("dpkg -C", { shell: true }).status !== 0;
+
+        if (locked) {
+            reject (new Error("System updates are currently in progress. Please wait for them to finish and try again"));
+            return;
+        }
+
         const apt = spawn(`
         APT_PARAMS="-o debug::nolocking=true -o dir::cache=\"$SOLAR_TEMP_PATH\"/cache -o dir::state=\"$SOLAR_TEMP_PATH/state\"" &&
         apt-get $APT_PARAMS update &&
