@@ -25,6 +25,9 @@ export class BlocksController extends Controller {
     @Container.inject(Container.Identifiers.DatabaseService)
     private readonly database!: DatabaseService;
 
+    @Container.inject(Container.Identifiers.RoundState)
+    private readonly roundState!: Contracts.State.RoundState;
+
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")
     private readonly walletRepository!: Contracts.State.WalletRepository;
@@ -88,6 +91,22 @@ export class BlocksController extends Controller {
                 block.reward,
             )} reward :package:`,
         );
+
+        const { dynamicReward } = Managers.configManager.getMilestone();
+
+        if (dynamicReward.enabled && block.reward.isEqualTo(dynamicReward.secondaryReward)) {
+            const { alreadyForged } = await this.roundState.getRewardForBlockInRound(block.height, generatorWallet);
+            if (
+                alreadyForged &&
+                !block.reward.isEqualTo(dynamicReward.ranks[generatorWallet.getAttribute("delegate.rank")])
+            ) {
+                this.logger.info(
+                    `The reward was reduced because ${generatorWallet.getAttribute(
+                        "delegate.username",
+                    )} already forged in this round :fire:`,
+                );
+            }
+        }
 
         this.logger.debug(`The id of the new block is ${block.id}`);
 

@@ -1,18 +1,19 @@
 import { configManager } from "../managers/config";
+import { BigNumber } from "./bignum";
 
-const getReward = (height: number): number => {
+const getReward = (height: number): BigNumber => {
     const milestones = configManager.get("milestones");
 
     for (let i = milestones.length - 1; i >= 0; i--) {
         const milestone = milestones[i];
         if (milestone.height <= height) {
             if (milestone.reward) {
-                return milestone.reward;
+                return BigNumber.make(milestone.reward);
             }
         }
     }
 
-    return 0;
+    return BigNumber.ZERO;
 };
 
 const getDynamicReward = (height: number) => {
@@ -30,7 +31,7 @@ const getDynamicReward = (height: number) => {
     return {};
 };
 
-export const calculateReward = (height: number, rank: number): number => {
+export const calculateReward = (height: number, rank: number): BigNumber => {
     const dynamicReward = getDynamicReward(height);
     const reward = getReward(height);
 

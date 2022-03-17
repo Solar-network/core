@@ -29,24 +29,27 @@ export class BlockProcessor {
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Contracts.Kernel.Application;
 
-    @Container.inject(Container.Identifiers.LogService)
-    private readonly logger!: Contracts.Kernel.Logger;
-
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
-    @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
-    private readonly transactionRepository!: Repositories.TransactionRepository;
+    @Container.inject(Container.Identifiers.LogService)
+    private readonly logger!: Contracts.Kernel.Logger;
 
-    @Container.inject(Container.Identifiers.WalletRepository)
-    @Container.tagged("state", "blockchain")
-    private readonly walletRepository!: Contracts.State.WalletRepository;
+    @Container.inject(Container.Identifiers.RoundState)
+    private readonly roundState!: Contracts.State.RoundState;
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
 
+    @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
+    private readonly transactionRepository!: Repositories.TransactionRepository;
+
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
+
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
 
     public async process(block: Interfaces.IBlock): Promise<BlockProcessorResult> {
         if (Utils.isException({ ...block.data, transactions: block.transactions.map((tx) => tx.data) })) {
@@ -289,15 +292,13 @@ export class BlockProcessor {
 
         const generatorWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(block.data.generatorPublicKey);
 
-        const expectedReward = AppUtils.BigNumber.make(
-            Utils.calculateReward(block.data.height, generatorWallet.getAttribute("delegate.rank")),
-        );
+        const { reward } = await this.roundState.getRewardForBlockInRound(block.data.height, generatorWallet);
 
-        if (!block.data.reward.isEqualTo(expectedReward)) {
+        if (!block.data.reward.isEqualTo(reward)) {
             this.logger.warning(
                 `Block rejected as reward was ${Utils.formatSatoshi(
                     block.data.reward,
-                )}, should be ${Utils.formatSatoshi(expectedReward)} :bangbang:`,
+                )}, should be ${Utils.formatSatoshi(reward)} :bangbang:`,
             );
             return false;
         }

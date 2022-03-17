@@ -1,7 +1,7 @@
 import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/core-kernel";
 import { NetworkStateStatus } from "@solar-network/core-p2p";
 import { Handlers } from "@solar-network/core-transactions";
-import { Blocks, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Blocks, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 import delay from "delay";
 import { writeJSONSync } from "fs-extra";
 
@@ -298,7 +298,7 @@ export class ForgerService {
                         height: networkStateHeight,
                     },
                     timestamp: round.timestamp,
-                    reward: Utils.calculateReward(networkStateHeight + 1, round.currentForger.delegate.rank!),
+                    reward: round.reward,
                 });
 
                 const timeLeftInMs: number = this.getRoundRemainingSlotTime(round);

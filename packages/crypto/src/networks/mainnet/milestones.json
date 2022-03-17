@@ -1,7 +1,6 @@
 [
     {
         "height": 1,
-        "reward": "0",
         "activeDelegates": 53,
         "aip11": true,
         "aip37": true,
@@ -30,6 +29,7 @@
         "epoch": "2022-03-28T18:00:00.000Z",
         "multiPaymentLimit": 256,
         "onlyActiveDelegatesInCalculations": true,
+        "reward": "0",
         "solarTransactions": {
             "burn": {
                 "minimumAmount": 2000000
@@ -99,7 +99,8 @@
                 "51": 1300000000,
                 "52": 1312500000,
                 "53": 1325000000
-            }
+            },
+            "secondaryReward": 675000000
         }
     }
 ]
