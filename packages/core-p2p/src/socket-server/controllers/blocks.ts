@@ -101,9 +101,7 @@ export class BlocksController extends Controller {
                 !block.reward.isEqualTo(dynamicReward.ranks[generatorWallet.getAttribute("delegate.rank")])
             ) {
                 this.logger.info(
-                    `The reward is reduced to ${Utils.formatSatoshi(
-                        block.reward,
-                    )} because ${generatorWallet.getAttribute(
+                    `The reward was reduced because ${generatorWallet.getAttribute(
                         "delegate.username",
                     )} already forged in this round :fire:`,
                 );
