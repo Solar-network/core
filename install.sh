@@ -531,38 +531,53 @@ async function start() {
             if (flag === "-v") {
                 verbose = true;
             }
+            if (flag.startsWith("--network")) {
+                if (network) {
+                    process.stdin.write("\033[A");
+                    throw new Error("Only one network parameter may be specified");
+                }
+
+                network = flag.substring(10);
+
+                if (!["mainnet", "testnet"].includes(network)) {
+                    process.stdin.write("\033[A");
+                    throw new Error("Only mainnet or testnet are valid networks");
+                }
+            }
         }
 
         pnpmFlags += verbose ? "append-only" : "ndjson";
 
-        ({ network } = await prompts({
-            type: "select",
-            name: "network",
-            message: "Which network do you want to connect to?",
-            choices: [
-                { title: "Mainnet", value: "mainnet" },
-                { title: "Testnet", value: "testnet" },
-            ],
-        }));
-
         if (!network) {
+            ({ network } = await prompts({
+                type: "select",
+                name: "network",
+                message: "Which network do you want to connect to?",
+                choices: [
+                    { title: "Mainnet", value: "mainnet" },
+                    { title: "Testnet", value: "testnet" },
+                ],
+            }));
+
+            if (!network) {
+                console.log();
+                console.log("Installation aborted");
+                return;
+            }
+
+            const { confirm } = await prompts({
+                type: "confirm",
+                name: "confirm",
+                message: "Are you sure?",
+            });
+
+            if (!confirm) {
+                await start();
+                return;
+            }
             console.log();
-            console.log("Installation aborted");
-            return;
         }
 
-        const { confirm } = await prompts({
-            type: "confirm",
-            name: "confirm",
-            message: "Are you sure?",
-        });
-
-        if (!confirm) {
-            await start();
-            return;
-        }
-
-        console.log();
         console.log(`Installing Solar Core for ${network}. This process may take a few minutes`);
 
         let regex = /^\d+.\d+.\d+$/;
