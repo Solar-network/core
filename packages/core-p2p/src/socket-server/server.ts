@@ -6,6 +6,7 @@ import { Socket } from "../hapi-nes/socket";
 import { AcceptPeerPlugin } from "./plugins/accept-peer";
 import { AwaitBlockPlugin } from "./plugins/await-block";
 import { BanHammerPlugin } from "./plugins/ban-hammer";
+import { CloseConnectionPlugin } from "./plugins/close-connection";
 import { CodecPlugin } from "./plugins/codec";
 import { IsAppReadyPlugin } from "./plugins/is-app-ready";
 import { RateLimitPlugin } from "./plugins/rate-limit";
@@ -104,6 +105,9 @@ export class Server {
 
         // onPreHandler
         this.app.resolve(AcceptPeerPlugin).register(this.server);
+
+        // onPreResponse
+        this.app.resolve(CloseConnectionPlugin).register(this.server);
     }
 
     /**
