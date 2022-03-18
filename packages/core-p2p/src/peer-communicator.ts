@@ -115,7 +115,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     ): Promise<any> {
         const deadline = new Date().getTime() + timeoutMsec;
 
-        if (!peer.stale && peer.recentlyPinged() && !force) {
+        if (peer.isIgnored() || (!peer.stale && peer.recentlyPinged() && !force)) {
             return undefined;
         }
 

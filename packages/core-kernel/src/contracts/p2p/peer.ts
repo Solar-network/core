@@ -18,6 +18,8 @@ export interface Peer {
     version: string | undefined;
     latency: number | undefined;
 
+    infractions: Set<number>;
+
     lastPinged: Dayjs | undefined;
     plugins: PeerPlugins;
     publicKeys: string[];
@@ -26,7 +28,9 @@ export interface Peer {
     state: PeerState;
     verificationResult: PeerVerificationResult | undefined;
 
+    addInfraction(): void;
     isActiveDelegate(): boolean;
+    isIgnored(): boolean;
     isVerified(): boolean;
     isForked(): boolean;
     recentlyPinged(): boolean;

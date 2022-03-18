@@ -275,7 +275,7 @@ export class ForgerService {
             let errored = false;
             const minimumMs = 2000;
             try {
-                let networkState: Contracts.P2P.NetworkState = await this.client.getNetworkState(firstAttempt);
+                const networkState: Contracts.P2P.NetworkState = await this.client.getNetworkState(firstAttempt);
                 const networkStateHeight = networkState.getNodeHeight();
 
                 AppUtils.assert.defined<number>(networkStateHeight);
@@ -305,7 +305,6 @@ export class ForgerService {
 
                 const prettyName = this.usernames[delegate.publicKey];
 
-                networkState = await this.client.getNetworkState(false);
                 const { state } = await this.client.getStatus();
                 const currentSlot = await this.client.getSlotNumber();
                 const lastBlockSlot = await this.client.getSlotNumber(state.header.timestamp);
