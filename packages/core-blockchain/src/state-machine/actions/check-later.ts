@@ -48,22 +48,14 @@ export class CheckLater implements Action {
 
                 const days = Math.floor(seconds / (3600 * 24));
                 const hours = Math.floor((seconds % (3600 * 24)) / 3600);
-                const mins = Math.floor((seconds % 3600) / 60);
-                const secs = Math.floor(seconds % 60);
 
                 let emoji = emojiSet.normal;
                 if (days === 0 && hours === 0) {
                     emoji = emojiSet.soon;
                 }
 
-                const daysToGo = days > 0 ? days + (days == 1 ? " day, " : " days, ") : "";
-                const hoursToGo = hours > 0 ? hours + (hours == 1 ? " hour, " : " hours, ") : "";
-                const minsToGo = mins > 0 ? mins + (mins == 1 ? " minute, " : " minutes, ") : "";
-                const secsToGo = secs > 0 ? secs + (secs == 1 ? " second" : " seconds") : "";
+                const countdown = AppUtils.formatSeconds(seconds);
 
-                const countdown = (daysToGo + hoursToGo + minsToGo + secsToGo)
-                    .replace(/,\s*$/, "")
-                    .replace(/,([^,]*)$/, " and$1");
                 this.logger.info(`The network launches in ${countdown} ${emoji[seconds % 5]}`);
             } else {
                 this.logger.info(
