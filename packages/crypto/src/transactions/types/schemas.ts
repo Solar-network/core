@@ -249,6 +249,7 @@ export const ipfs = extend(transactionBaseSchema, {
         type: { transactionType: TransactionType.Core.Ipfs },
         amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
+        vendorField: { anyOf: [{ type: "null" }, { type: "string", format: "vendorField" }] },
         asset: {
             type: "object",
             required: ["ipfs"],

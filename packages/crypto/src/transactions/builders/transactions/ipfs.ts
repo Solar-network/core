@@ -10,6 +10,7 @@ export class IPFSBuilder extends TransactionBuilder<IPFSBuilder> {
         this.data.type = Two.IpfsTransaction.type;
         this.data.typeGroup = Two.IpfsTransaction.typeGroup;
         this.data.fee = Two.IpfsTransaction.staticFee();
+        this.data.vendorField = undefined;
         this.data.amount = BigNumber.ZERO;
         this.data.asset = {};
     }
@@ -24,6 +25,7 @@ export class IPFSBuilder extends TransactionBuilder<IPFSBuilder> {
 
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
+        struct.vendorField = this.data.vendorField;
         struct.amount = this.data.amount;
         struct.asset = this.data.asset;
         return struct;
