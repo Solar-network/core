@@ -1,6 +1,7 @@
 import { calculateForgingInfo } from "./calculate-forging-info";
 import { calculateApproval, calculateForgedTotal } from "./delegate-calculator";
 import { calculateLockExpirationStatus, calculateTransactionExpiration } from "./expiration-calculator";
+import { formatSeconds } from "./format-seconds";
 import { formatTimestamp } from "./format-timestamp";
 import { getBlockTimeLookup } from "./get-blocktime-lookup";
 import { getForgerDelegates, sendForgerSignal } from "./get-forger-delegates";
@@ -27,6 +28,7 @@ export const supplyCalculator = { calculate };
 export const forgingInfoCalculator = { calculateForgingInfo, getBlockTimeLookup };
 
 export {
+    formatSeconds,
     formatTimestamp,
     isBlockChained,
     getBlockNotChainedErrorMessage,
