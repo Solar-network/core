@@ -153,7 +153,7 @@ export class Peer implements Contracts.P2P.Peer {
     public isIgnored(): boolean {
         const timeNow: number = new Date().getTime() / 1000;
         for (const infraction of this.infractions) {
-            if (timeNow - infraction > 60) {
+            if (timeNow - infraction > 600) {
                 this.infractions.delete(infraction);
             }
         }
