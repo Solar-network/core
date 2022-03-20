@@ -47,6 +47,8 @@ export class Listener {
         this._wss = new Ws.Server(options);
 
         this._wss.on("connection", (ws, req) => {
+            ws._socket.wsOpen = true;
+
             ws.on("error", Hoek.ignore);
 
             if (

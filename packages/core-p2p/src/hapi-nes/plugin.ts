@@ -22,6 +22,7 @@ const internals: any = {
 };
 
 internals.schema = Joi.object({
+    banHammerPlugin: Joi.object(),
     onConnection: Joi.function(), // async function (socket) {}
     onDisconnection: Joi.function(), // function (socket) {}
     onMessage: Joi.function(), // async function (socket, message) { return data; }    // Or throw errors

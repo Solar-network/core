@@ -5,6 +5,7 @@ import { plugin as hapiNesPlugin } from "../hapi-nes";
 import { Socket } from "../hapi-nes/socket";
 import { AcceptPeerPlugin } from "./plugins/accept-peer";
 import { AwaitBlockPlugin } from "./plugins/await-block";
+import { BanHammerPlugin } from "./plugins/ban-hammer";
 import { CodecPlugin } from "./plugins/codec";
 import { IsAppReadyPlugin } from "./plugins/is-app-ready";
 import { RateLimitPlugin } from "./plugins/rate-limit";
@@ -56,20 +57,30 @@ export class Server {
      * @returns {Promise<void>}
      * @memberof Server
      */
-    public async initialize(name: string, optionsServer: { hostname: string; port: number }): Promise<void> {
+    public async initialize(
+        name: string,
+        optionsServer: { banSeconds: number; hostname: string; port: number },
+    ): Promise<void> {
         this.name = name;
 
         const address = optionsServer.hostname;
         const port = Number(optionsServer.port);
 
-        this.server = new HapiServer({ address, port });
+        const banHammerPlugin: BanHammerPlugin = this.app.resolve(BanHammerPlugin);
+
+        const listener = banHammerPlugin.createServer();
+
+        this.server = new HapiServer({ address, listener, port });
+
         // @ts-ignore
         this.server.app = this.app; // TODO: Move app under app
+
         await this.server.register({
             plugin: hapiNesPlugin,
             options: {
+                banHammerPlugin,
                 onDisconnection: (socket: Socket) => this.app.resolve(StalePeerPlugin).register(socket),
-                maxPayload: 20971520, // 20 MB TODO to adjust
+                maxPayload: 20971520,
             },
         });
 
@@ -77,6 +88,8 @@ export class Server {
         this.app.resolve(PeerRoute).register(this.server);
         this.app.resolve(BlocksRoute).register(this.server);
         this.app.resolve(TransactionsRoute).register(this.server);
+
+        banHammerPlugin.register(this.server, optionsServer.banSeconds);
 
         // onPreAuth
         this.app.resolve(WhitelistForgerPlugin).register(this.server);

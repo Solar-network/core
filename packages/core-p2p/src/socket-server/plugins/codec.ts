@@ -28,7 +28,7 @@ export class CodecPlugin {
                 try {
                     request.payload = allRoutesConfigByPath[request.path].codec.request.deserialize(request.payload);
                 } catch (e) {
-                    return Boom.badRequest(`Payload deserializing failed: ${e}`);
+                    return Boom.badRequest(`Payload deserialising failed: ${e}`);
                 }
                 return h.continue;
             },
