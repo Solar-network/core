@@ -168,6 +168,8 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             .getLastBlock();
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, lastBlock.data.height);
 
+        const pingedPeers: Set<Contracts.P2P.Peer> = new Set();
+
         // we use Promise.race to cut loose in case some communicator.ping() does not resolve within the delay
         // in that case we want to keep on with our program execution while ping promises can finish in the background
         await new Promise<void>((resolve) => {
@@ -183,6 +185,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             Promise.all(
                 peers.map(async (peer) => {
                     try {
+                        pingedPeers.add(peer);
                         await this.communicator.ping(peer, pingDelay, blockTimeLookup, forcePing);
                     } catch (error) {
                         unresponsivePeers++;
@@ -193,12 +196,18 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                         await this.events.dispatch(Enums.PeerEvent.Disconnect, { peer });
 
                         this.events.dispatch(Enums.PeerEvent.Removed, peer);
+                    } finally {
+                        pingedPeers.delete(peer);
                     }
                 }),
             ).then(resolvesFirst);
 
             delay(pingDelay).finally(resolvesFirst);
         });
+
+        for (const peer of pingedPeers) {
+            peer.addInfraction();
+        }
 
         for (const key of Object.keys(peerErrors)) {
             const peerCount = peerErrors[key].length;

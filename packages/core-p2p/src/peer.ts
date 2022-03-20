@@ -22,6 +22,12 @@ export class Peer implements Contracts.P2P.Peer {
     public version: string | undefined;
 
     /**
+     * @type {(Set<number>)}
+     * @memberof Peer
+     */
+    public infractions: Set<number> = new Set();
+
+    /**
      * @type {(number | undefined)}
      * @memberof Peer
      */
@@ -137,5 +143,20 @@ export class Peer implements Contracts.P2P.Peer {
             ip: this.ip,
             port: this.port,
         };
+    }
+
+    public addInfraction(): void {
+        const timeNow: number = new Date().getTime() / 1000;
+        this.infractions.add(timeNow);
+    }
+
+    public isIgnored(): boolean {
+        const timeNow: number = new Date().getTime() / 1000;
+        for (const infraction of this.infractions) {
+            if (timeNow - infraction > 600) {
+                this.infractions.delete(infraction);
+            }
+        }
+        return this.infractions.size >= 3;
     }
 }
