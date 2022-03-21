@@ -119,7 +119,11 @@ export class BanHammerPlugin {
 
         this.events.listen(Enums.BlockchainEvent.Synced, {
             handle: async () => {
-                this.synced = true;
+                if (!this.synced) {
+                    setTimeout(() => {
+                        this.synced = true;
+                    }, 60000);
+                }
             },
         });
         const routesConfigByPath = {
