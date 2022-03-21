@@ -1,7 +1,9 @@
 import { ApplicationFactory, Commands, Container, Contracts, InputParser, Plugins } from "@solar-network/core-cli";
+import { dotenv, set } from "@solar-network/utils";
 import envPaths from "env-paths";
+import { homedir } from "os";
 import { resolve } from "path";
-import { PackageJson } from "type-fest";
+import { PackageJson, Primitive } from "type-fest";
 
 type Flags = {
     [args: string]: any;
@@ -57,6 +59,14 @@ export class CommandLineInterface {
 
         const args = parsedArgv.args;
         const flags = await this.detectNetworkAndToken(parsedArgv.flags);
+
+        const home: string = homedir();
+
+        const config: Record<string, Primitive> = dotenv.parseFile(`${home}/.${flags.token}/.env`);
+
+        for (const [key, value] of Object.entries(config)) {
+            set(process.env, key, value);
+        }
 
         // Discover commands and commands from plugins
         const commands: Contracts.CommandList = await this.discoverCommands(dirname, flags);

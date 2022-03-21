@@ -76,12 +76,18 @@ export class Installer {
         const pnpmFlags = "--reporter=" + (this.output.isNormal() ? "ndjson" : "default");
 
         const shell = spawn(
-            "sh",
+            "/bin/bash",
             [
                 "-c",
-                `( git tag -l | xargs git tag -d && git fetch --all --tags -f && git reset --hard && git checkout tags/${gitTag} && pnpm install ${pnpmFlags} && pnpm build ${pnpmFlags} && exit 0 ) || exit $?`,
+                `(git tag -l | xargs git tag -d &&
+                git fetch --all --tags -f &&
+                git reset --hard &&
+                git checkout tags/${gitTag} &&
+                CFLAGS="$CFLAGS" CPATH="$CPATH" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" pnpm install ${pnpmFlags} &&
+                pnpm build ${pnpmFlags} &&
+                exit 0) || exit $?`,
             ],
-            { cols: process.stdout.columns, cwd: corePath },
+            { cols: process.stdout.columns, cwd: corePath, env: process.env as { [key: string]: string } },
         );
 
         let errorLevel = 0;
