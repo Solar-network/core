@@ -1,5 +1,28 @@
 #!/bin/bash
 
+function cleanup() {
+    PATH=$SOLAR_OLD_PATH
+    CFLAGS=$SOLAR_OLD_CFLAGS
+    LDFLAGS=$SOLAR_OLD_LDFLAGS
+    PERL5LIB=$SOLAR_OLD_PERL5LIB
+    GIT_EXEC_PATH=$SOLAR_OLD_GIT_EXEC_PATH
+    GIT_TEMPLATE_DIR=$SOLAR_OLD_GIT_TEMPLATE_DIR
+
+    unset SOLAR_OLD_PATH
+    unset SOLAR_OLD_CFLAGS
+    unset SOLAR_OLD_LDFLAGS
+    unset SOLAR_OLD_PERL5LIB
+    unset SOLAR_OLD_GIT_EXEC_PATH
+    unset SOLAR_OLD_GIT_TEMPLATE_DIR
+
+    rm -rf "$SOLAR_TEMP_PATH"
+}
+
+function sigtrap() {
+    cleanup
+    exit 1
+}
+
 echo '
 ███████╗ ██████╗ ██╗      █████╗ ██████╗      ██████╗ ██████╗ ██████╗ ███████╗
 ██╔════╝██╔═══██╗██║     ██╔══██╗██╔══██╗    ██╔════╝██╔═══██╗██╔══██╗██╔════╝
@@ -22,65 +45,76 @@ if [ $EUID -eq 0 ]; then
     exit 1
 fi
 
+if [[ "$HOME" =~ \ |\' ]]; then
+    echo Sorry, your home directory must not contain spaces to install Solar Core
+    echo
+    exit 1
+fi
+
 echo Thanks for choosing to install Solar Core! Preparing the setup procedure...
 echo
 
-RC='export SOLAR_CORE_TOKEN=solar
-export SOLAR_CORE="$SOLAR_CORE_TOKEN"-core
-export SOLAR_CORE_PATH="$HOME"/"$SOLAR_CORE"
-export SOLAR_DATA_PATH="$HOME"/."$SOLAR_CORE_TOKEN"
-export N_PREFIX="$SOLAR_DATA_PATH"
-export PATH=$PATH:"$SOLAR_DATA_PATH"/usr/bin:"$SOLAR_DATA_PATH"/bin:"$SOLAR_DATA_PATH"/sbin:"$SOLAR_DATA_PATH"/usr/share:"$SOLAR_DATA_PATH"/usr/lib:"$HOME"/.pnpm/bin
-export CFLAGS="--sysroot=\"$SOLAR_DATA_PATH\""
-export LDFLAGS="--sysroot=\"$SOLAR_DATA_PATH\""
-export PERL5LIB=$PERL5LIB:"$SOLAR_DATA_PATH"/usr/share/perl5
-export GIT_EXEC_PATH="$SOLAR_DATA_PATH"/usr/lib/git-core
-export GIT_TEMPLATE_DIR="$SOLAR_DATA_PATH"/usr/share/git-core/templates
-'
+SOLAR_OLD_PATH=$PATH
+SOLAR_OLD_CFLAGS=$CFLAGS
+SOLAR_OLD_LDFLAGS=$LDFLAGS
+SOLAR_OLD_PERL5LIB=$PERL5LIB
+SOLAR_OLD_GIT_EXEC_PATH=$GIT_EXEC_PATH
+SOLAR_OLD_GIT_TEMPLATE_DIR=$GIT_TEMPLATE_DIR
+
+RC='SOLAR_CORE_TOKEN=solar
+SOLAR_CORE="$SOLAR_CORE_TOKEN"-core
+SOLAR_CORE_PATH="$HOME"/"$SOLAR_CORE"
+SOLAR_DATA_PATH="$HOME"/."$SOLAR_CORE_TOKEN"
+SOLAR_TEMP_PATH="$SOLAR_DATA_PATH"/tmp
+PATH="$SOLAR_DATA_PATH"/usr/bin:"$SOLAR_DATA_PATH"/bin:"$SOLAR_DATA_PATH"/sbin:"$SOLAR_DATA_PATH"/usr/share:"$SOLAR_DATA_PATH"/usr/lib:"$SOLAR_DATA_PATH"/.pnpm/bin:/bin:/usr/bin
+CFLAGS="--sysroot=\"$SOLAR_DATA_PATH\""
+LDFLAGS="--sysroot=\"$SOLAR_DATA_PATH\""
+PERL5LIB="$SOLAR_DATA_PATH"/usr/share/perl5
+GIT_EXEC_PATH="$SOLAR_DATA_PATH"/usr/lib/git-core
+GIT_TEMPLATE_DIR="$SOLAR_DATA_PATH"/usr/share/git-core/templates'
 
 eval "$RC"
 
-export SOLAR_TEMP_PATH="$SOLAR_DATA_PATH"/tmp
+trap sigtrap INT
 
-echo "$RC" > "$HOME"/"."$SOLAR_CORE_TOKEN"rc"
+mkdir -p "$SOLAR_DATA_PATH" "$SOLAR_DATA_PATH"/etc "$SOLAR_DATA_PATH"/.pnpm/bin "$SOLAR_TEMP_PATH"/cache "$SOLAR_TEMP_PATH"/state/archives/partial "$SOLAR_TEMP_PATH"/state/lists/partial
 
-NODEJS=$(which node 2>/dev/null || :)
+echo "$(source <(echo "echo \"$RC\""))" > "$SOLAR_DATA_PATH"/.env &&
 
-if [[ -z $NODEJS ]]; then
-    NODEVERSION=0
-else
-    NODEVERSION=$("$NODEJS" -v)
-    NODEVERSION="${NODEVERSION:1}"
-    NODEVERSION=(${NODEVERSION//./ }})
+if [ ! -f ""$SOLAR_DATA_PATH"/bin/node" ]; then
+    wget -qO "$SOLAR_TEMP_PATH"/n https://raw.githubusercontent.com/tj/n/master/bin/n
+    N_PREFIX="$SOLAR_DATA_PATH" /bin/bash "$SOLAR_TEMP_PATH"/n 16 >/dev/null 2>/dev/null
 fi
 
-rm -rf "$SOLAR_TEMP_PATH"
-mkdir -p "$SOLAR_DATA_PATH" "$HOME"/.pnpm/bin "$SOLAR_TEMP_PATH"/cache "$SOLAR_TEMP_PATH"/state/archives/partial "$SOLAR_TEMP_PATH"/state/lists/partial
+echo "prefix=""$SOLAR_DATA_PATH""/.pnpm
+global-dir=""$SOLAR_DATA_PATH""/.pnpm
+global-bin-dir=""$SOLAR_DATA_PATH""/.pnpm/bin
+store-dir=""$SOLAR_DATA_PATH""/.pnpm/store" > "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc
+ln -sf "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc "$SOLAR_DATA_PATH"/etc/npmrc
 
-if [ $NODEVERSION -lt 16 ]; then
-    rm -rf "$HOME"/.nvm
-    wget -qO n https://raw.githubusercontent.com/tj/n/master/bin/n
-    bash n 16 >/dev/null
-    rm n
-fi
+npm install -g delay@5.0.0 env-paths@2.2.0 kleur@4.0.0 listr@0.14.3 pnpm prompts@2.4.0 >/dev/null 2>/dev/null
 
-npm config set prefix "$SOLAR_TEMP_PATH"
-npm config set global-dir "$SOLAR_TEMP_PATH"
-npm config set global-bin-dir "$SOLAR_TEMP_PATH"/bin
-npm install -g delay kleur listr pnpm prompts >/dev/null 2>/dev/null
-npm config set prefix "$HOME"/.pnpm
-npm config set global-dir "$HOME"/.pnpm
-npm config set global-bin-dir "$HOME"/.pnpm/bin
-
-export NODE_PATH="$SOLAR_TEMP_PATH"/lib/node_modules
 cat << 'EOF' > "$SOLAR_TEMP_PATH"/install.js
 const { spawn, spawnSync } = require("child_process");
 const delay = require("delay");
+const envPaths = require("env-paths");
 const { appendFileSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync, unlinkSync } = require("fs");
 const { homedir } = require("os");
 const { white } = require("kleur");
 const Listr = require("listr");
 const prompts = require("prompts");
+
+const envLines = readFileSync(`${process.env.SOLAR_DATA_PATH}/.env`).toString().split("\n");
+const envVars = {};
+
+for (const line of envLines) {
+    const split = line.split("=");
+    envVars[split[0]] = split.slice(1).join("=");
+}
+
+for (const [key, value] of Object.entries(envVars)) {
+    process.env[key] = value;
+}
 
 let currentTask = {};
 let log = "";
@@ -129,13 +163,12 @@ function consume(data, stderr) {
         }
         return;
     }
-    if (data.endsWith("not upgraded.")) {
+    if (data.endsWith("]") && currentTask.title.startsWith("Downloading operating system dependencies")) {
         const split = data.split(" ");
-        totalPackages = +split[0] + +split[2] + +split[5];
-    } else if (data.startsWith("Get:") && totalPackages > 0) {
-        const split = data.split(" ");
-        const currentPackage = split[0].substring(4);
-        currentTask.title = `Downloading dependencies (${currentPackage} of ${totalPackages}: ${split[4]}-${split[6]})`;
+        if (!split[4].includes("[") && !split[4].includes("]") && !split[6].includes("[") && !split[6].includes("]")) {
+            totalPackages++;
+            currentTask.title = `Downloading operating system dependencies (${split[4]}-${split[6]})`;
+        }
     } else if (data.startsWith("{") && data.endsWith("}")) {
         const parsed = JSON.parse(data);
         if (parsed.name === "pnpm:summary") {
@@ -252,12 +285,12 @@ async function addPlugins() {
         {
             package: "@alessiodf/rocket-boot",
             command:
-                "\"$SOLAR_CORE_PATH\"/packages/core/bin/run plugin:install @alessiodf/rocket-boot && \"$SOLAR_CORE_PATH\"/packages/core/bin/run rocket:enable --force --token=\"$SOLAR_CORE_TOKEN\"",
+                '"$SOLAR_CORE_PATH"/packages/core/bin/run plugin:install @alessiodf/rocket-boot && "$SOLAR_CORE_PATH"/packages/core/bin/run rocket:enable --force --token="$SOLAR_CORE_TOKEN"',
         },
         {
             package: "@alessiodf/round-monitor",
             command:
-                "\"$SOLAR_CORE_PATH\"/packages/core/bin/run plugin:install @alessiodf/round-monitor && \"$SOLAR_CORE_PATH\"/packages/core/bin/run monitor:enable --disableServer --restartTimeBuffer=45 --force --token=\"$SOLAR_CORE_TOKEN\"",
+                '"$SOLAR_CORE_PATH"/packages/core/bin/run plugin:install @alessiodf/round-monitor && "$SOLAR_CORE_PATH"/packages/core/bin/run monitor:enable --disableServer --restartTimeBuffer=45 --force --token="$SOLAR_CORE_TOKEN"',
         },
     ];
     for (const plugin of plugins) {
@@ -277,25 +310,26 @@ async function addPlugins() {
 
 async function core() {
     return new Promise((resolve, reject) => {
-        const pnpm = spawn(`
-        . "$HOME"/"."$SOLAR_CORE_TOKEN"rc"
-        npm -g install pnpm &&
-        pnpm -g install pm2 &&
-        pm2 install pm2-logrotate &&
-        pm2 set pm2-logrotate:max_size 500M &&
-        pm2 set pm2-logrotate:compress true &&
-        pm2 set pm2-logrotate:retain 7 &&
-        rm -rf /tmp/pm2-logrotate &&
-        (crontab -l; echo "@reboot /bin/bash -lc \\"source "$HOME"/"."$SOLAR_CORE_TOKEN"rc"; pm2 resurrect\\"") | sort -u - | crontab - 2>/dev/null &&
-        cd "$SOLAR_CORE_PATH" &&
-        pnpm install ${pnpmFlags} &&
-        pnpm build ${pnpmFlags} &&
-        RC='export POSTGRES_DIR=$(find "$SOLAR_DATA_PATH" -regex ".*/usr/lib/postgresql/[0-9]+")\n` +
-        `alias "$SOLAR_CORE_TOKEN"="\"$SOLAR_CORE_PATH\"/packages/core/bin/run $@ --token=\"$SOLAR_CORE_TOKEN\""' &&
-        eval "$RC" &&
-        echo "$RC" >> "$HOME"/"."$SOLAR_CORE_TOKEN"rc" &&
-        packages/core/bin/run config:publish --network=${network} >/dev/null 2>/dev/null
-        `,
+        const pnpm = spawn(
+            `
+                . "${process.env.SOLAR_DATA_PATH}"/.env &&
+                npm -g install pnpm &&
+                pnpm -g install pm2 &&
+                pm2 install pm2-logrotate &&
+                pm2 set pm2-logrotate:max_size 500M &&
+                pm2 set pm2-logrotate:compress true &&
+                pm2 set pm2-logrotate:retain 7 &&
+                ln -sf "$SOLAR_DATA_PATH"/bin/node "$SOLAR_DATA_PATH"/.pnpm/bin/node &&
+                rm -rf /tmp/pm2-logrotate &&
+                (crontab -l; echo "@reboot /bin/bash -lc \\"source "$SOLAR_DATA_PATH"/.env; "$SOLAR_DATA_PATH"/.pnpm/bin/pm2 resurrect\\"") | sort -u - | crontab - 2>/dev/null &&
+                cd "$SOLAR_CORE_PATH" &&
+                CFLAGS="$CFLAGS" CPATH="$CPATH" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" pnpm install ${pnpmFlags} &&
+                pnpm build ${pnpmFlags} &&
+                RC=POSTGRES_DIR=$(find "$SOLAR_DATA_PATH" -regex ".*/usr/lib/postgresql/[0-9]+") &&
+                eval "$RC" &&
+                echo "$RC" >> "$SOLAR_DATA_PATH"/.env &&
+                packages/core/bin/run config:publish --network=${network} >/dev/null 2>/dev/null
+            `,
             { shell: true },
         );
         pnpm.stdout.on("data", (data) => route(data));
@@ -319,21 +353,33 @@ async function core() {
 
 async function downloadCore(version) {
     return new Promise((resolve, reject) => {
-        const architecture = spawnSync("gcc -dumpmachine", { shell: true }).stdout.toString().trim();
-        const git = spawn(`
-        RC='export CPATH=$CPATH:"$SOLAR_DATA_PATH"/usr/include:"$SOLAR_DATA_PATH"/usr/include/${architecture}\n` +
-        `export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$SOLAR_DATA_PATH"/usr/lib/${architecture}'\n
-        eval "$RC" &&
-        echo "$RC" >> "$HOME"/"."$SOLAR_CORE_TOKEN"rc" &&
-        ln -fs "$SOLAR_DATA_PATH"/usr/bin/gcc "$SOLAR_DATA_PATH"/usr/bin/cc &&
-        ln -fs /usr/lib/${architecture}/libgcc_s.* "$SOLAR_DATA_PATH"/usr/lib/${architecture}/ &&
-        (grep -rl include_next "$SOLAR_DATA_PATH"/usr/include/c++/ | xargs sed -i "s/include_next/include/g" 2>/dev/null; true) &&
-        rm -rf "$SOLAR_CORE_PATH" &&
-        cd "$HOME" &&
-        git clone "https://github.com/solar-network/core.git" "$SOLAR_CORE_PATH" --progress &&
-        cd "$SOLAR_CORE_PATH" &&
-        git checkout tags/${version}
-        `,
+        const architecture = spawnSync(
+            `
+                . "${process.env.SOLAR_DATA_PATH}"/.env &&
+                gcc -dumpmachine
+            `,
+            { shell: true },
+        )
+            .stdout.toString()
+            .trim();
+        const git = spawn(
+            `
+                . "${process.env.SOLAR_DATA_PATH}"/.env &&
+                RC=CPATH="$SOLAR_DATA_PATH"/usr/include:"$SOLAR_DATA_PATH"/usr/include/${architecture} &&
+                eval "$RC" &&
+                echo "$RC" >> "$SOLAR_DATA_PATH"/.env &&
+                RC=LD_LIBRARY_PATH="$SOLAR_DATA_PATH"/usr/lib/${architecture} &&
+                eval "$RC" &&
+                echo "$RC" >> "$SOLAR_DATA_PATH"/.env &&
+                ln -sf "$SOLAR_DATA_PATH"/usr/bin/gcc "$SOLAR_DATA_PATH"/usr/bin/cc &&
+                ln -sf /usr/lib/${architecture}/libgcc_s.* "$SOLAR_DATA_PATH"/usr/lib/${architecture}/ &&
+                (grep -rl include_next "$SOLAR_DATA_PATH"/usr/include/c++/ | xargs sed -i "s/include_next/include/g" 2>/dev/null; true) &&
+                rm -rf "$SOLAR_CORE_PATH" &&
+                cd "$HOME" &&
+                git clone "https://github.com/solar-network/core.git" "$SOLAR_CORE_PATH" --progress &&
+                cd "$SOLAR_CORE_PATH" &&
+                git checkout tags/${version}
+            `,
             { shell: true },
         );
         git.stdout.on("data", (data) => route(data));
@@ -359,20 +405,22 @@ async function downloadOSDependencies() {
             "git",
             "jq",
             "libcairo2-dev",
-            "libjemalloc-dev",
             "libpq-dev",
             "libtool",
             "postgresql",
             "postgresql-contrib",
             "postgresql-client",
             "postgresql-client-common",
-            "python",
+            "python3",
         ];
 
         const enumerateDependencies = () => {
-            const cache = spawnSync(`apt-cache depends ${packages.join(" ")} | grep '[ |]Depends: [^<]' | cut -d: -f2`, {
-                shell: true,
-            }).stdout.toString();
+            const cache = spawnSync(
+                `apt-cache depends ${packages.join(" ")} | grep '[ |]Depends: [^<]' | cut -d: -f2`,
+                {
+                    shell: true,
+                },
+            ).stdout.toString();
             const deps = cache.split("\n");
             let again = false;
             for (const dep of deps) {
@@ -393,21 +441,23 @@ async function downloadOSDependencies() {
         const locked = spawnSync("dpkg -C", { shell: true }).status !== 0;
 
         if (locked) {
-            reject (new Error("System updates are currently in progress. Please wait for them to finish and try again"));
+            reject(new Error("System updates are currently in progress. Please wait for them to finish and try again"));
             return;
         }
 
-        const apt = spawn(`
-        APT_PARAMS="-o debug::nolocking=true -o dir::cache=\"$SOLAR_TEMP_PATH\"/cache -o dir::state=\"$SOLAR_TEMP_PATH/state\"" &&
-        apt-get $APT_PARAMS update &&
-        apt-get $APT_PARAMS -y -d install --reinstall ${enumerateDependencies()}`,
+        const apt = spawn(
+            `
+                . "${process.env.SOLAR_DATA_PATH}"/.env &&
+                APT_PARAMS="-o debug::nolocking=true -o dir::cache="$SOLAR_TEMP_PATH"/cache -o dir::state="$SOLAR_TEMP_PATH/state"" &&
+                apt-get $APT_PARAMS update &&
+                apt-get $APT_PARAMS -y -d install --reinstall ${enumerateDependencies()}
+            `,
             { shell: true },
         );
         apt.stdout.on("data", (data) => route(data));
         apt.stderr.on("data", (data) => route(data, true));
         apt.on("close", (code) => {
             if (code === 0) {
-                writeFileSync(`${process.env.SOLAR_DATA_PATH}/.installed`, "");
                 resolve();
             } else {
                 reject(new Error(`The process failed with error code ${code}`));
@@ -427,7 +477,7 @@ async function installOSDependencies() {
             currentPackage++;
             const name = unescape(pkg.substring(0, pkg.length - 4).substring(pkg.lastIndexOf("/") + 1));
             if (currentTask.title) {
-                currentTask.title = `Installing dependencies (${currentPackage} of ${totalPackages}: ${name})`;
+                currentTask.title = `Installing operating system dependencies (${currentPackage} of ${totalPackages}: ${name})`;
             }
             try {
                 await installOSDependency(pkg);
@@ -435,14 +485,20 @@ async function installOSDependencies() {
                 reject(error);
             }
         }
-        currentTask.title = "Installing dependencies";
+        currentTask.title = "Installing operating system dependencies";
         resolve();
     });
 }
 
 async function installOSDependency(pkg) {
     return await new Promise((resolve, reject) => {
-        const dpkg = spawn(`dpkg -x ${pkg} "${process.env.SOLAR_DATA_PATH}"`, { shell: true });
+        const dpkg = spawn(
+            `
+                . "${process.env.SOLAR_DATA_PATH}"/.env &&
+                dpkg -x ${pkg} "${process.env.SOLAR_DATA_PATH}"
+            `,
+            { shell: true },
+        );
         dpkg.stdout.on("data", (data) => route(data));
         dpkg.stderr.on("data", (data) => route(data, true));
         dpkg.on("close", (code) => {
@@ -458,17 +514,19 @@ async function installOSDependency(pkg) {
 
 async function setUpDatabase() {
     return new Promise((resolve, reject) => {
-        const psql = spawn(`
-        . "$HOME"/".${process.env.SOLAR_CORE_TOKEN}rc" &&
-        mkdir -p "$HOME"/.local/share/$SOLAR_CORE/${network}/database &&
-        "$POSTGRES_DIR"/bin/initdb -D "$HOME"/.local/share/"$SOLAR_CORE"/${network}/database &&
-        echo "\n# "$SOLAR_CORE_TOKEN"\nlisten_addresses = ''\nunix_socket_directories = '"$HOME"/.local/share/"$SOLAR_CORE"/${network}/database'\nunix_socket_permissions = 0700" >> "$HOME"/.local/share/"$SOLAR_CORE"/${network}/database/postgresql.conf &&
-        "$POSTGRES_DIR"/bin/pg_ctl -D "$HOME"/.local/share/"$SOLAR_CORE"/${network}/database start >"$SOLAR_TEMP_PATH"/pg_ctl.log &&
-        cat "$SOLAR_TEMP_PATH"/pg_ctl.log &&
-        rm "$SOLAR_TEMP_PATH"/pg_ctl.log &&
-        sed -i "s@\"/usr/lib/postgresql/\"@\""$SOLAR_DATA_PATH"/usr/lib/postgresql/\"@g" "$SOLAR_DATA_PATH"/usr/share/perl5/PgCommon.pm
-        createdb -h "$HOME"/.local/share/"$SOLAR_CORE"/${network}/database "$SOLAR_CORE_TOKEN"_${network}
-        `,
+        const { data } = envPaths(process.env.SOLAR_CORE_TOKEN, { suffix: "core" });
+        const psql = spawn(
+            `
+                . "${process.env.SOLAR_DATA_PATH}"/.env &&
+                mkdir -p ${data}/${network}/database &&
+                LD_LIBRARY_PATH="$LD_LIBRARY_PATH" "$POSTGRES_DIR"/bin/initdb -D ${data}/${network}/database &&
+                echo "\n# "$SOLAR_CORE_TOKEN"\nlisten_addresses = ''\nunix_socket_directories = '${data}/${network}/database'\nunix_socket_permissions = 0700" >> ${data}/${network}/database/postgresql.conf &&
+                "$POSTGRES_DIR"/bin/pg_ctl -D ${data}/${network}/database start >"$SOLAR_TEMP_PATH"/pg_ctl.log &&
+                cat "$SOLAR_TEMP_PATH"/pg_ctl.log &&
+                rm "$SOLAR_TEMP_PATH"/pg_ctl.log &&
+                sed -i "s@"/usr/lib/postgresql/"@""$SOLAR_DATA_PATH"/usr/lib/postgresql/"@g" "$SOLAR_DATA_PATH"/usr/share/perl5/PgCommon.pm &&
+                LD_LIBRARY_PATH="$LD_LIBRARY_PATH" PERL5LIB="$PERL5LIB" createdb -h ${data}/${network}/database "$SOLAR_CORE_TOKEN"_${network}
+            `,
             { shell: true },
         );
         psql.stdout.on("data", (data) => route(data));
@@ -483,23 +541,12 @@ async function setUpDatabase() {
     });
 }
 
-function skip(phase) {
-    switch (phase) {
-        case 0: {
-            return existsSync(`${process.env.SOLAR_DATA_PATH}/.installed`);
-        }
-        case 1: {
-            return totalPackages === 0;
-        }
-        case 2: {
-            const home = homedir();
-            if (existsSync(`${home}/.local/share/${process.env.SOLAR_CORE}/${network}/database/postgresql.conf`)) {
-                const config = readFileSync(
-                    `${home}/.local/share/${process.env.SOLAR_CORE}/${network}/database/postgresql.conf`,
-                ).toString();
-                return config.includes(`# ${process.env.SOLAR_CORE_TOKEN}`);
-            }
-        }
+function skipDatabase() {
+    const home = homedir();
+    const { data } = envPaths(process.env.SOLAR_CORE_TOKEN, { suffix: "core" });
+    if (existsSync(`${data}/${network}/database/postgresql.conf`)) {
+        const config = readFileSync(`${data}/${network}/database/postgresql.conf`).toString();
+        return config.includes(`# ${process.env.SOLAR_CORE_TOKEN}`);
     }
 }
 
@@ -562,7 +609,7 @@ async function start() {
             if (!network) {
                 console.log();
                 console.log("Installation aborted");
-                return;
+                process.exit(1);
             }
 
             const { confirm } = await prompts({
@@ -572,6 +619,7 @@ async function start() {
             });
 
             if (!confirm) {
+                network = undefined;
                 await start();
                 return;
             }
@@ -608,8 +656,7 @@ async function start() {
 
         tasks = new Listr([
             {
-                title: `Downloading operating system dependencies`,
-                skip: () => skip(0),
+                title: "Downloading operating system dependencies",
                 task: async (_, task) => {
                     currentTask = task;
                     return await downloadOSDependencies();
@@ -617,7 +664,6 @@ async function start() {
             },
             {
                 title: "Installing operating system dependencies",
-                skip: () => skip(1),
                 task: async (_, task) => {
                     currentTask.title = currentTask.title.substring(0, currentTask.title.lastIndexOf("("));
                     currentTask = task;
@@ -629,14 +675,14 @@ async function start() {
                 task: () => downloadCore(version),
             },
             {
-                title: `Downloading Core dependencies`,
+                title: "Downloading Core dependencies",
                 task: async () => {
                     core().catch(() => {});
                     return await downloadPhase.promise;
                 },
             },
             {
-                title: `Installing Core dependencies`,
+                title: "Installing Core dependencies",
                 task: async () => {
                     await installPhase.start.promise;
                     return dependenciesListr;
@@ -652,7 +698,7 @@ async function start() {
             },
             {
                 title: "Setting up database",
-                skip: () => skip(2),
+                skip: () => skipDatabase(),
                 task: () => setUpDatabase(),
             },
         ]);
@@ -660,32 +706,30 @@ async function start() {
         if (!verbose) {
             await tasks.run(tasks);
         } else {
-            if (!skip(0)) {
-                await downloadOSDependencies();
-                await installOSDependencies();
-            }
+            await downloadOSDependencies();
+            await installOSDependencies();
             await downloadCore(version);
             await core();
             await addPlugins();
-            if (!skip(2)) {
+            if (!skipDatabase()) {
                 await setUpDatabase();
             }
         }
 
         const home = homedir();
 
+        const rc =
+            `alias ${process.env.SOLAR_CORE_TOKEN}="${process.env.SOLAR_DATA_PATH}/bin/node ${process.env.SOLAR_CORE_PATH}/packages/core/bin/run $@ --token=${process.env.SOLAR_CORE_TOKEN}"\n` +
+            `alias pm2="${process.env.SOLAR_DATA_PATH}/.pnpm/bin/pm2"`;
+        writeFileSync(`${home}/.${process.env.SOLAR_CORE_TOKEN}rc`, rc);
+
         for (const file of [".bashrc", ".kshrc", ".zshrc"]) {
             const rcFile = `${home}/${file}`;
-            let add = true;
             if (existsSync(rcFile)) {
                 const data = readFileSync(rcFile).toString();
-                if (data.includes(`.${process.env.SOLAR_CORE_TOKEN}rc`)) {
-                    add = false;
+                if (!data.includes(`.${process.env.SOLAR_CORE_TOKEN}rc`)) {
+                    appendFileSync(rcFile, `\n. "$HOME"/".${process.env.SOLAR_CORE_TOKEN}rc"\n`);
                 }
-            }
-
-            if (add) {
-                appendFileSync(rcFile, `\n. "$HOME"/".${process.env.SOLAR_CORE_TOKEN}rc"\n`);
             }
         }
         console.log();
@@ -700,8 +744,16 @@ async function start() {
 start();
 EOF
 
-node "$SOLAR_TEMP_PATH"/install.js $@;
+SOLAR_DATA_PATH="$SOLAR_DATA_PATH" SOLAR_CORE_TOKEN="$SOLAR_CORE_TOKEN" SOLAR_TEMP_PATH="$SOLAR_TEMP_PATH" NODE_PATH="$SOLAR_DATA_PATH"/.pnpm/lib/node_modules ARGV="$@" /bin/bash -c '
+"$SOLAR_DATA_PATH"/bin/node "$SOLAR_TEMP_PATH"/install.js $ARGV
+ERRORLEVEL=$?
+rm -rf "$SOLAR_TEMP_PATH"
+exit $ERRORLEVEL'
 
-if [ $? -eq 0 ]; then
-    exec $SHELL;
+ERRORLEVEL=$?
+
+cleanup
+
+if [ $ERRORLEVEL -eq 0 ]; then
+    exec $SHELL
 fi

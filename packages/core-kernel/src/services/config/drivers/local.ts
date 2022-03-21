@@ -2,6 +2,7 @@ import { dotenv, get, set } from "@solar-network/utils";
 import { existsSync, readFileSync } from "fs";
 import importFresh from "import-fresh";
 import Joi from "joi";
+import { homedir } from "os";
 import { extname } from "path";
 
 import { Application } from "../../../contracts/kernel";
@@ -66,13 +67,20 @@ export class LocalConfigLoader implements ConfigLoader {
      */
     public async loadEnvironmentVariables(): Promise<void> {
         try {
-            const config: Record<string, Primitive> = dotenv.parseFile(this.app.environmentFile());
+            const home: string = homedir();
 
-            for (const [key, value] of Object.entries(config)) {
-                if (process.env[key] === undefined) {
-                    set(process.env, key, value);
+            const config: Record<string, Primitive>[] = [
+                dotenv.parseFile(this.app.environmentFile()),
+                dotenv.parseFile(`${home}/.${process.env.CORE_TOKEN}/.env`),
+            ];
+
+            config.forEach((configuration, index) => {
+                for (const [key, value] of Object.entries(configuration)) {
+                    if (+index === 1 || process.env[key] === undefined) {
+                        set(process.env, key, value);
+                    }
                 }
-            }
+            });
         } catch (error) {
             throw new EnvironmentConfigurationCannotBeLoaded(error.message);
         }
