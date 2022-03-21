@@ -27,7 +27,7 @@ importers:
       cross-env: 7.0.3
       del-cli: 4.0.1
       depcheck: 1.4.2
-      env-paths: 2.2.0
+      env-paths: 2.2.1
       eslint: 8.1.0
       eslint-config-prettier: 8.3.0
       eslint-plugin-prettier: 4.0.0
@@ -75,7 +75,7 @@ importers:
       cross-env: 7.0.3
       del-cli: 4.0.1
       depcheck: 1.4.2
-      env-paths: 2.2.0
+      env-paths: 2.2.1
       eslint: 8.1.0
       eslint-config-prettier: 8.3.0_eslint@8.1.0
       eslint-plugin-prettier: 4.0.0_850528f9ec3c0797b9b19a94a36b5ba3
@@ -254,7 +254,7 @@ importers:
       cli-table3: 0.6.0
       dayjs: 1.10.7
       delay: 5.0.0
-      env-paths: 2.2.0
+      env-paths: 2.2.1
       envfile: 5.2.0
       execa: 3.4.0
       fast-levenshtein: 2.0.6
@@ -284,7 +284,7 @@ importers:
       cli-table3: 0.6.0
       dayjs: 1.10.7
       delay: 5.0.0
-      env-paths: 2.2.0
+      env-paths: 2.2.1
       envfile: 5.2.0
       execa: 3.4.0
       fast-levenshtein: 2.0.6
@@ -376,7 +376,7 @@ importers:
       cron: 1.8.2
       dayjs: 1.10.7
       deepmerge: 4.2.2
-      env-paths: 2.2.0
+      env-paths: 2.2.1
       fs-extra: 8.1.0
       functional-red-black-tree: 1.0.1
       glob: 7.1.7
@@ -398,7 +398,7 @@ importers:
       cron: 1.8.2
       dayjs: 1.10.7
       deepmerge: 4.2.2
-      env-paths: 2.2.0
+      env-paths: 2.2.1
       fs-extra: 8.1.0
       functional-red-black-tree: 1.0.1
       glob: 7.1.7
@@ -6929,14 +6929,9 @@ packages:
       ansi-colors: 4.1.1
     dev: true
 
-  /env-paths/2.2.0:
-    resolution: {integrity: sha512-6u0VYSCo/OW6IoD5WCLLy9JUGARbamfSavcNXry/eu8aHVFei6CD3Sw+VGX5alea1i9pgPHW0mbu6Xj0uBh7gA==}
-    engines: {node: '>=6'}
-
   /env-paths/2.2.1:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
-    dev: false
 
   /envfile/5.2.0:
     resolution: {integrity: sha512-AvFbXqYw/zZCQLSt3KisBTf42nNAgZ9mkewvTfoPtYuBeIld7UMmNvVQewVu4c0w93STUAfyZZf8DS4jD7JTag==}
@@ -10159,7 +10154,7 @@ packages:
     engines: {node: '>= 10.12.0'}
     hasBin: true
     dependencies:
-      env-paths: 2.2.0
+      env-paths: 2.2.1
       glob: 7.2.0
       graceful-fs: 4.2.9
       nopt: 5.0.0
