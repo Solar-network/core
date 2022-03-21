@@ -92,7 +92,7 @@ global-bin-dir=""$SOLAR_DATA_PATH""/.pnpm/bin
 store-dir=""$SOLAR_DATA_PATH""/.pnpm/store" > "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc
 ln -sf "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc "$SOLAR_DATA_PATH"/etc/npmrc
 
-npm install -g delay@5.0.0 env-paths@2.2.1 kleur@4.0.0 listr@0.14.3 pnpm prompts@2.4.0 >/dev/null 2>/dev/null
+npm install -g delay@5.0.0 env-paths@2.2.1 kleur@4.1.4 listr@0.14.3 pnpm prompts@2.4.0 >/dev/null 2>/dev/null
 
 cat << 'EOF' > "$SOLAR_TEMP_PATH"/install.js
 const { spawn, spawnSync } = require("child_process");

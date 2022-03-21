@@ -263,7 +263,7 @@ importers:
       got: 11.8.2
       inversify: 5.1.1
       joi: 17.6.0
-      kleur: 4.0.0
+      kleur: 4.1.4
       latest-version: 5.1.0
       listr: 0.14.3
       node-pty: 0.10.1
@@ -293,7 +293,7 @@ importers:
       got: 11.8.2
       inversify: 5.1.1
       joi: 17.6.0
-      kleur: 4.0.0
+      kleur: 4.1.4
       latest-version: 5.1.0
       listr: 0.14.3
       node-pty: 0.10.1
@@ -9186,11 +9186,6 @@ packages:
   /kleur/3.0.3:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
-
-  /kleur/4.0.0:
-    resolution: {integrity: sha512-D8qk4wvB8ofBeLAsRNwnCkjbwdrcKYsMC/56pFQMOSfmmYJkG1O9/oBgXzD05K7biYAwnHjMI2abZ3YiuMY0Pg==}
-    engines: {node: '>=10'}
-    dev: false
 
   /kleur/4.1.4:
     resolution: {integrity: sha512-8QADVssbrFjivHWQU7KkMgptGTl6WAcSdlbBPY4uNF+mWr6DGcKrvY2w4FQJoXch7+fKMjj0dRrL75vk3k23OA==}
