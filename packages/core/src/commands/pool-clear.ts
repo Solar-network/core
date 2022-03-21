@@ -34,6 +34,7 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
+            .setFlag("force", "Force the pool to be cleared", Joi.boolean())
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)));
     }
@@ -49,7 +50,7 @@ export class Command extends Commands.Command {
         this.actions.abortRunningProcess(`${this.getFlag("token")}-forger`);
         this.actions.abortRunningProcess(`${this.getFlag("token")}-relay`);
 
-        if (this.getFlag("false")) {
+        if (this.getFlag("force")) {
             return this.removeFiles();
         }
 
