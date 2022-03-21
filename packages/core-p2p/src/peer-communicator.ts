@@ -219,6 +219,10 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             }
         }
 
+        if (peer.plugins["@solar-network/core-api"]) {
+            peer.plugins["@arkecosystem/core-api"] = peer.plugins["@solar-network/core-api"];
+        }
+
         return pingResponse.state;
     }
 
