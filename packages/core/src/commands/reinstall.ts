@@ -50,7 +50,9 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public configure(): void {
-        this.definition.setFlag("force", "Force a reinstall", Joi.boolean());
+        this.definition
+            .setFlag("force", "Force a reinstall", Joi.boolean())
+            .setFlag("token", "The name of the token", Joi.string().default("solar"));
     }
 
     /**
@@ -65,7 +67,6 @@ export class Command extends Commands.Command {
         }
 
         if (await this.components.confirm("Are you sure you want to reinstall?")) {
-            //Come back to this
             return this.performInstall();
         }
 
