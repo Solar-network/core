@@ -27,6 +27,10 @@ You can check that everything is working correctly by reading the logs with `pm2
 
 The PM2 process manager is automatically enabled to load on startup, so if you would like Solar Core to automatically start when your system reboots, first launch the processes you would like to restart automatically with the commands above, then run `pm2 save`.
 
+### Command Line Options
+
+You can enable verbose logging during the installation process by adding the `-v` switch to `bash install.sh`. You can also pass the network directly with `--network=mainnet` or `--network=testnet` for an unattended installation.
+
 ## Security
 
 If you discover a security vulnerability within any of these packages, please send an e-mail to security@solar.org. All security vulnerabilities will be promptly addressed.
