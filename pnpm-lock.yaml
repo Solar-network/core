@@ -43,7 +43,7 @@ importers:
       moment-timezone: 0.5.33
       npm-check-updates: 11.8.5
       prettier: 2.4.1
-      prompts: 2.4.0
+      prompts: 2.4.2
       rimraf: 3.0.2
       sinon: 11.1.2
       tmp: 0.2.1
@@ -91,7 +91,7 @@ importers:
       moment-timezone: 0.5.33
       npm-check-updates: 11.8.5
       prettier: 2.4.1
-      prompts: 2.4.0
+      prompts: 2.4.2
       rimraf: 3.0.2
       sinon: 11.1.2
       tmp: 0.2.1
@@ -131,7 +131,7 @@ importers:
       kleur: 4.1.4
       module-alias: 2.2.2
       ngrok: 3.4.1
-      prompts: 2.4.0
+      prompts: 2.4.2
       tar: 6.1.11
       type-fest: 0.21.3
       wif: 2.0.6
@@ -164,7 +164,7 @@ importers:
       kleur: 4.1.4
       module-alias: 2.2.2
       ngrok: 3.4.1
-      prompts: 2.4.0
+      prompts: 2.4.2
       tar: 6.1.11
       type-fest: 0.21.3
       wif: 2.0.6
@@ -269,7 +269,7 @@ importers:
       node-pty: 0.10.1
       nodejs-tail: 1.1.1
       ora: 4.1.1
-      prompts: 2.4.0
+      prompts: 2.4.2
       read-last-lines: 1.8.0
       reflect-metadata: 0.1.13
       semver: 6.3.0
@@ -299,7 +299,7 @@ importers:
       node-pty: 0.10.1
       nodejs-tail: 1.1.1
       ora: 4.1.1
-      prompts: 2.4.0
+      prompts: 2.4.2
       read-last-lines: 1.8.0
       reflect-metadata: 0.1.13
       semver: 6.3.0
@@ -11132,20 +11132,12 @@ packages:
       retry: 0.12.0
     dev: true
 
-  /prompts/2.4.0:
-    resolution: {integrity: sha512-awZAKrk3vN6CroQukBL+R9051a4R3zCZBlJm/HBfrSZ8iTpYix3VX1vU4mveiLpiwmOJT4wokTF9m6HUk4KqWQ==}
-    engines: {node: '>= 6'}
-    dependencies:
-      kleur: 3.0.3
-      sisteransi: 1.0.5
-
   /prompts/2.4.2:
     resolution: {integrity: sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==}
     engines: {node: '>= 6'}
     dependencies:
       kleur: 3.0.3
       sisteransi: 1.0.5
-    dev: true
 
   /protobufjs/6.10.2:
     resolution: {integrity: sha512-27yj+04uF6ya9l+qfpH187aqEzfCF4+Uit0I9ZBQVqK09hk/SQzKa2MUqUpXaVa7LOFRg1TSSr3lVxGOk6c0SQ==}
