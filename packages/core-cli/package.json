@@ -19,6 +19,7 @@
         "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
+        "@alessiodf/listr": "^0.0.1",
         "@solar-network/core-kernel": "workspace:*",
         "@solar-network/crypto": "workspace:*",
         "@solar-network/utils": "workspace:*",
@@ -37,7 +38,6 @@
         "joi": "17.6.0",
         "kleur": "4.1.4",
         "latest-version": "5.1.0",
-        "listr": "0.14.3",
         "node-pty": "0.10.1",
         "nodejs-tail": "1.1.1",
         "ora": "4.1.1",
