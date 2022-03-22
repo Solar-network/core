@@ -329,9 +329,7 @@ async function core() {
                 CFLAGS="$CFLAGS" CPATH="$CPATH" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" pnpm install ${pnpmFlags} &&
                 pnpm build ${pnpmFlags} &&
                 RC=POSTGRES_DIR=$(find "$SOLAR_DATA_PATH" -regex ".*/usr/lib/postgresql/[0-9]+") &&
-                eval "$RC" &&
-                echo "$RC" >> "$SOLAR_DATA_PATH"/.env &&
-                "$SOLAR_DATA_PATH"/bin/node packages/core/bin/run config:publish --network=${network} >/dev/null 2>/dev/null
+                echo "$RC" >> "$SOLAR_DATA_PATH"/.env
             `,
             { shell: true },
         );
@@ -515,6 +513,27 @@ async function installOSDependency(pkg) {
     });
 }
 
+async function saveConfiguration() {
+    return new Promise((resolve, reject) => {
+        const config = spawn(
+            `
+                cd "$SOLAR_CORE_PATH" &&
+                "$SOLAR_DATA_PATH"/bin/node packages/core/bin/run config:publish --network=${network}
+            `,
+            { shell: true },
+        );
+        config.stdout.on("data", (data) => route(data));
+        config.stderr.on("data", (data) => route(data, true));
+        config.on("close", (code) => {
+            if (code === 0) {
+                resolve();
+            } else {
+                reject(new Error(`The process failed with error code ${code}`));
+            }
+        });
+    });
+}
+
 async function setUpDatabase() {
     return new Promise((resolve, reject) => {
         const { data } = envPaths(process.env.SOLAR_CORE_TOKEN, { suffix: "core" });
@@ -542,6 +561,12 @@ async function setUpDatabase() {
             }
         });
     });
+}
+
+function skipConfiguration() {
+    const home = homedir();
+    const { config } = envPaths(process.env.SOLAR_CORE_TOKEN, { suffix: "core" });
+    return existsSync(`${config}/${network}`);
 }
 
 function skipDatabase() {
@@ -696,6 +721,11 @@ async function start() {
                 task: () => packagesListr,
             },
             {
+                title: "Saving configuration",
+                skip: () => skipConfiguration(),
+                task: () => saveConfiguration(),
+            },
+            {
                 title: "Adding plugins",
                 task: () => addPlugins(),
             },
@@ -713,6 +743,9 @@ async function start() {
             await installOSDependencies();
             await downloadCore(version);
             await core();
+            if (!skipConfiguration()) {
+                await saveConfiguration();
+            }
             await addPlugins();
             if (!skipDatabase()) {
                 await setUpDatabase();
