@@ -367,7 +367,6 @@ async function downloadCore(version) {
             `
                 . "${process.env.SOLAR_DATA_PATH}"/.env &&
                 RC=CPATH="$SOLAR_DATA_PATH"/usr/include:"$SOLAR_DATA_PATH"/usr/include/${architecture} &&
-                eval "$RC" &&
                 echo "$RC" >> "$SOLAR_DATA_PATH"/.env &&
                 RC=LD_LIBRARY_PATH="$SOLAR_DATA_PATH"/usr/lib/${architecture} &&
                 eval "$RC" &&
@@ -377,7 +376,7 @@ async function downloadCore(version) {
                 (grep -rl include_next "$SOLAR_DATA_PATH"/usr/include/c++/ | xargs sed -i "s/include_next/include/g" 2>/dev/null; true) &&
                 rm -rf "$SOLAR_CORE_PATH" &&
                 cd "$HOME" &&
-                git clone "https://github.com/solar-network/core.git" "$SOLAR_CORE_PATH" --progress &&
+                LD_LIBRARY_PATH="$LD_LIBRARY_PATH" git clone "https://github.com/solar-network/core.git" "$SOLAR_CORE_PATH" --progress &&
                 cd "$SOLAR_CORE_PATH" &&
                 git checkout tags/${version}
             `,
