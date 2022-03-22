@@ -19,6 +19,7 @@
         "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
+        "@alessiodf/ora": "^0.0.1",
         "@solar-network/core-database": "workspace:*",
         "@solar-network/core-kernel": "workspace:*",
         "@solar-network/crypto": "workspace:*",
@@ -26,7 +27,6 @@
         "fs-extra": "8.1.0",
         "joi": "17.6.0",
         "msgpack-lite": "0.1.26",
-        "ora": "4.1.1",
         "pg": "8.7.1",
         "pg-query-stream": "3.4.2",
         "pluralize": "8.0.0",

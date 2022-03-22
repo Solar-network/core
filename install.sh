@@ -95,7 +95,7 @@ global-bin-dir=""$SOLAR_DATA_PATH""/.pnpm/bin
 store-dir=""$SOLAR_DATA_PATH""/.pnpm/store" > "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc
 ln -sf "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc "$SOLAR_DATA_PATH"/etc/npmrc
 
-npm install -g delay@5.0.0 env-paths@2.2.1 kleur@4.1.4 listr@0.14.3 pnpm prompts@2.4.2 >/dev/null 2>/dev/null
+npm install -g delay@5.0.0 env-paths@2.2.1 kleur@4.1.4 @alessiodf/listr pnpm prompts@2.4.2 >/dev/null 2>/dev/null
 
 cat << 'EOF' > "$SOLAR_TEMP_PATH"/install.js
 const { spawn, spawnSync } = require("child_process");
@@ -104,7 +104,8 @@ const envPaths = require("env-paths");
 const { appendFileSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync, unlinkSync } = require("fs");
 const { homedir } = require("os");
 const { white } = require("kleur");
-const Listr = require("listr");
+const Listr = require("@alessiodf/listr");
+
 const prompts = require("prompts");
 
 const envLines = readFileSync(`${process.env.SOLAR_DATA_PATH}/.env`).toString().split("\n");
@@ -166,11 +167,10 @@ function consume(data, stderr) {
         }
         return;
     }
-    if (data.endsWith("]") && currentTask.title.startsWith("Downloading operating system dependencies")) {
+    if (data.endsWith("]") && currentTask.title === "Downloading operating system dependencies") {
         const split = data.split(" ");
         if (!split[4].includes("[") && !split[4].includes("]") && !split[6].includes("[") && !split[6].includes("]")) {
             totalPackages++;
-            currentTask.title = `Downloading operating system dependencies (${split[4]}-${split[6]})`;
         }
     } else if (data.startsWith("{") && data.endsWith("}")) {
         const parsed = JSON.parse(data);
@@ -477,16 +477,12 @@ async function installOSDependencies() {
         for (const pkg of packages) {
             currentPackage++;
             const name = unescape(pkg.substring(0, pkg.length - 4).substring(pkg.lastIndexOf("/") + 1));
-            if (currentTask.title) {
-                currentTask.title = `Installing operating system dependencies (${currentPackage} of ${totalPackages}: ${name})`;
-            }
             try {
                 await installOSDependency(pkg);
             } catch (error) {
                 reject(error);
             }
         }
-        currentTask.title = "Installing operating system dependencies";
         resolve();
     });
 }
@@ -693,7 +689,6 @@ async function start() {
             {
                 title: "Installing operating system dependencies",
                 task: async (_, task) => {
-                    currentTask.title = currentTask.title.substring(0, currentTask.title.lastIndexOf("("));
                     currentTask = task;
                     return await installOSDependencies();
                 },

@@ -1,4 +1,4 @@
-import { Options, Ora } from "ora";
+import { Options, Ora } from "@alessiodf/ora";
 import { JsonObject } from "type-fest";
 
 import {
