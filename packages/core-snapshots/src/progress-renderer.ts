@@ -1,5 +1,5 @@
 import { Container, Contracts } from "@solar-network/core-kernel";
-import { Ora } from "ora";
+import { Ora } from "@alessiodf/ora";
 
 import { SnapshotApplicationEvents } from "./events";
 
