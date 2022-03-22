@@ -101,17 +101,19 @@ export class Command extends Commands.Command {
             const home = homedir();
             const { cache, config, data, log, temp } = envPaths(this.getFlag("token"), { suffix: "core" });
 
-            readdirSync(data)
-                .map((dir) => `${data}/${dir}/database/postmaster.pid`)
-                .filter((file) => existsSync(file) && statSync(file).isFile())
-                .map((file) => readFileSync(file).toString().split("\n")[0])
-                .forEach((pid) => {
-                    try {
-                        process.kill(+pid, "SIGKILL");
-                    } catch {
-                        //
-                    }
-                });
+            if (existsSync(data)) {
+                readdirSync(data)
+                    .map((dir) => `${data}/${dir}/database/postmaster.pid`)
+                    .filter((file) => existsSync(file) && statSync(file).isFile())
+                    .map((file) => readFileSync(file).toString().split("\n")[0])
+                    .forEach((pid) => {
+                        try {
+                            process.kill(+pid, "SIGKILL");
+                        } catch {
+                            //
+                        }
+                    });
+            }
 
             removeSync(cache);
             removeSync(config);
