@@ -241,7 +241,7 @@ importers:
 
   packages/core-cli:
     specifiers:
-      '@alessiodf/listr': ^0.0.1
+      '@alessiodf/listr': ^0.0.2
       '@alessiodf/ora': ^0.0.1
       '@solar-network/core-kernel': workspace:*
       '@solar-network/crypto': workspace:*
@@ -277,7 +277,7 @@ importers:
       type-fest: 0.21.3
       yargs-parser: 20.2.9
     dependencies:
-      '@alessiodf/listr': 0.0.1
+      '@alessiodf/listr': 0.0.2
       '@alessiodf/ora': 0.0.1
       '@solar-network/core-kernel': link:../core-kernel
       '@solar-network/crypto': link:../crypto
@@ -758,8 +758,8 @@ importers:
 
 packages:
 
-  /@alessiodf/listr/0.0.1:
-    resolution: {integrity: sha512-9qkXEcnLwtxVI41ZcQr4ll34Bk2AajAtcup7h7Tf4VKz5R9OSXVK2c2klXUyMbZnvdGm99krsVMJf3oZQ5NmEg==}
+  /@alessiodf/listr/0.0.2:
+    resolution: {integrity: sha512-OgLJ0vFkDcp8PovtbuGp1RVI7eND89H9GCP9/byuFkfwE+ISsu6V3N/AlSthKjHdCsfNR/d5LUCk9Lye1ZKIjw==}
     dependencies:
       '@samverschueren/stream-to-observable': 0.3.1_rxjs@7.5.5
       chalk: 4.1.2
