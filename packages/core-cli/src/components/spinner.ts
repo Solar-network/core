@@ -1,4 +1,4 @@
-import ora, { Options, Ora } from "ora";
+import ora, { Options, Ora } from "@alessiodf/ora";
 
 import { injectable } from "../ioc";
 

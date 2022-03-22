@@ -20,6 +20,7 @@
     },
     "dependencies": {
         "@alessiodf/listr": "^0.0.1",
+        "@alessiodf/ora": "^0.0.1",
         "@solar-network/core-kernel": "workspace:*",
         "@solar-network/crypto": "workspace:*",
         "@solar-network/utils": "workspace:*",
@@ -40,7 +41,6 @@
         "latest-version": "5.1.0",
         "node-pty": "0.10.1",
         "nodejs-tail": "1.1.1",
-        "ora": "4.1.1",
         "prompts": "2.4.2",
         "read-last-lines": "1.8.0",
         "reflect-metadata": "0.1.13",
