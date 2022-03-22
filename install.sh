@@ -77,7 +77,7 @@ eval "$RC"
 
 trap sigtrap INT
 
-mkdir -p "$SOLAR_DATA_PATH" "$SOLAR_DATA_PATH"/etc "$SOLAR_DATA_PATH"/.pnpm/bin "$SOLAR_TEMP_PATH"/cache "$SOLAR_TEMP_PATH"/state/archives/partial "$SOLAR_TEMP_PATH"/state/lists/partial
+mkdir -p "$SOLAR_DATA_PATH" "$SOLAR_DATA_PATH"/etc "$SOLAR_TEMP_PATH"/cache "$SOLAR_TEMP_PATH"/state/archives/partial "$SOLAR_TEMP_PATH"/state/lists/partial
 
 echo "$(source <(echo "echo \"$RC\""))" > "$SOLAR_DATA_PATH"/.env &&
 
@@ -85,6 +85,9 @@ if [ ! -f ""$SOLAR_DATA_PATH"/bin/node" ]; then
     wget -qO "$SOLAR_TEMP_PATH"/n https://raw.githubusercontent.com/tj/n/master/bin/n
     N_PREFIX="$SOLAR_DATA_PATH" /bin/bash "$SOLAR_TEMP_PATH"/n 16 >/dev/null 2>/dev/null
 fi
+
+rm -rf "$SOLAR_DATA_PATH"/.pnpm
+mkdir -p "$SOLAR_DATA_PATH"/.pnpm/bin
 
 echo "prefix=""$SOLAR_DATA_PATH""/.pnpm
 global-dir=""$SOLAR_DATA_PATH""/.pnpm
@@ -285,12 +288,12 @@ async function addPlugins() {
         {
             package: "@alessiodf/rocket-boot",
             command:
-                '"$SOLAR_CORE_PATH"/packages/core/bin/run plugin:install @alessiodf/rocket-boot && "$SOLAR_CORE_PATH"/packages/core/bin/run rocket:enable --force --token="$SOLAR_CORE_TOKEN"',
+                '"$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run plugin:install @alessiodf/rocket-boot && "$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run rocket:enable --force --token="$SOLAR_CORE_TOKEN"',
         },
         {
             package: "@alessiodf/round-monitor",
             command:
-                '"$SOLAR_CORE_PATH"/packages/core/bin/run plugin:install @alessiodf/round-monitor && "$SOLAR_CORE_PATH"/packages/core/bin/run monitor:enable --disableServer --restartTimeBuffer=45 --force --token="$SOLAR_CORE_TOKEN"',
+                '"$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run plugin:install @alessiodf/round-monitor && "$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run monitor:enable --disableServer --restartTimeBuffer=45 --force --token="$SOLAR_CORE_TOKEN"',
         },
     ];
     for (const plugin of plugins) {
@@ -328,7 +331,7 @@ async function core() {
                 RC=POSTGRES_DIR=$(find "$SOLAR_DATA_PATH" -regex ".*/usr/lib/postgresql/[0-9]+") &&
                 eval "$RC" &&
                 echo "$RC" >> "$SOLAR_DATA_PATH"/.env &&
-                packages/core/bin/run config:publish --network=${network} >/dev/null 2>/dev/null
+                "$SOLAR_DATA_PATH"/bin/node packages/core/bin/run config:publish --network=${network} >/dev/null 2>/dev/null
             `,
             { shell: true },
         );
