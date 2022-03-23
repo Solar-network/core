@@ -1,7 +1,7 @@
 export const defaults = {
     chainId: {
-        bsc: "0x61",
-        eth: "0x2a",
+        bsc: "0x38",
+        eth: "0x01",
     },
     contractAbis: {
         bsc: `
@@ -86,26 +86,6 @@ export const defaults = {
                 },
                 {
                     "inputs": [],
-                    "name": "isLocked",
-                    "outputs": [
-                        {
-                            "internalType": "bool",
-                            "name": "",
-                            "type": "bool"
-                        }
-                    ],
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "inputs": [],
-                    "name": "lockSwap",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "inputs": [],
                     "name": "owner",
                     "outputs": [
                         {
@@ -151,13 +131,6 @@ export const defaults = {
                         }
                     ],
                     "name": "transferOwnership",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "inputs": [],
-                    "name": "unlockSwap",
                     "outputs": [],
                     "stateMutability": "nonpayable",
                     "type": "function"
@@ -246,26 +219,6 @@ export const defaults = {
                 },
                 {
                     "inputs": [],
-                    "name": "isLocked",
-                    "outputs": [
-                        {
-                            "internalType": "bool",
-                            "name": "",
-                            "type": "bool"
-                        }
-                    ],
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "inputs": [],
-                    "name": "lockSwap",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "inputs": [],
                     "name": "owner",
                     "outputs": [
                         {
@@ -314,13 +267,6 @@ export const defaults = {
                     "outputs": [],
                     "stateMutability": "nonpayable",
                     "type": "function"
-                },
-                {
-                    "inputs": [],
-                    "name": "unlockSwap",
-                    "outputs": [],
-                    "stateMutability": "nonpayable",
-                    "type": "function"
                 }
             ]
         `,
@@ -335,16 +281,16 @@ export const defaults = {
         eth: 35,
     },
     peers: {
-        bsc: ["https://bsc1.testnet.sh", "https://bsc2.testnet.sh", "https://bsc3.testnet.sh"],
-        eth: ["https://eth1.testnet.sh", "https://eth2.testnet.sh", "https://eth3.testnet.sh"]
+        bsc: ["https://bsc1.mainnet.sh", "https://bsc2.mainnet.sh", "https://bsc3.mainnet.sh"],
+        eth: ["https://eth1.mainnet.sh", "https://eth2.mainnet.sh", "https://eth3.mainnet.sh"]
     },
     sxpTokenContracts: {
-        bsc: "0x8B06059234080FcB3e5f32598bf256d6d911FC26",
-        eth: "0x3DD5CfbC967593E8D7C7f391F131E44c0A8a6892",
+        bsc: "0x47bead2563dcbf3bf2c9407fea4dc236faba485a",
+        eth: "0x8ce9137d39326ad0cd6491fb5cc0cba0e089b6a9",
     },
     swapContractAddresses: {
-        bsc: "0x80a531752F7686435a1Eb15c8e41D9465daf2178",
-        eth: "0x4436fc5feF736FD6f7E0F537521a5246F0e29a66",
+        bsc: "0x66b44A53b55d2e4d69976cCF196D6beD2861D5a6",
+        eth: "0x3996E6837D7F43b046a95517436D1aAFc3BcC135",
     },
     swapWalletPublicKey: "",
 };
