@@ -1,7 +1,7 @@
 import { Commands, Container, Services } from "@solar-network/core-cli";
 import envPaths from "env-paths";
 import { sync } from "execa";
-import { existsSync, readdirSync, readFileSync, removeSync, statSync, writeFileSync } from "fs-extra";
+import { existsSync, readdirSync, readFileSync, remove, statSync, writeFileSync } from "fs-extra";
 import Joi from "joi";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -76,18 +76,17 @@ export class Command extends Commands.Command {
      */
     private async performUninstall(): Promise<void> {
         const spinner = this.components.spinner("Uninstalling Core");
-
         spinner.start();
 
         try {
             if (this.processManager.has(`${this.getFlag("token")}-core`)) {
-                this.processManager.delete(`${this.getFlag("token")}-core`);
+                await this.processManager.delete(`${this.getFlag("token")}-core`);
             }
             if (this.processManager.has(`${this.getFlag("token")}-relay`)) {
-                this.processManager.delete(`${this.getFlag("token")}-relay`);
+                await this.processManager.delete(`${this.getFlag("token")}-relay`);
             }
             if (this.processManager.has(`${this.getFlag("token")}-forger`)) {
-                this.processManager.delete(`${this.getFlag("token")}-forger`);
+                await this.processManager.delete(`${this.getFlag("token")}-forger`);
             }
 
             try {
@@ -115,19 +114,19 @@ export class Command extends Commands.Command {
                     });
             }
 
-            removeSync(cache);
-            removeSync(config);
-            removeSync(data);
-            removeSync(log);
-            removeSync(temp);
+            await remove(cache);
+            await remove(config);
+            await remove(data);
+            await remove(log);
+            await remove(temp);
 
-            removeSync(config.split("/").slice(0, -1).join("/") + "/@solar-network");
+            await remove(config.split("/").slice(0, -1).join("/") + "/@solar-network");
 
-            removeSync(`${home}/.${this.getFlag("token")}rc`);
-            removeSync(`${home}/.${this.getFlag("token")}`);
+            await remove(`${home}/.${this.getFlag("token")}rc`);
+            await remove(`${home}/.${this.getFlag("token")}`);
 
             const corePath = resolve(`${__dirname}/../../../../`);
-            removeSync(corePath);
+            await remove(corePath);
 
             for (const file of [".bashrc", ".kshrc", ".zshrc"]) {
                 const rcFile = `${home}/${file}`;

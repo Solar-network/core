@@ -241,8 +241,8 @@ importers:
 
   packages/core-cli:
     specifiers:
-      '@alessiodf/listr': ^0.0.2
-      '@alessiodf/ora': ^0.0.1
+      '@alessiodf/listr': ^0.0.6
+      '@alessiodf/ora': ^0.0.2
       '@solar-network/core-kernel': workspace:*
       '@solar-network/crypto': workspace:*
       '@solar-network/utils': workspace:*
@@ -277,8 +277,8 @@ importers:
       type-fest: 0.21.3
       yargs-parser: 20.2.9
     dependencies:
-      '@alessiodf/listr': 0.0.2
-      '@alessiodf/ora': 0.0.1
+      '@alessiodf/listr': 0.0.6
+      '@alessiodf/ora': 0.0.2
       '@solar-network/core-kernel': link:../core-kernel
       '@solar-network/crypto': link:../crypto
       '@solar-network/utils': link:../utils
@@ -516,7 +516,7 @@ importers:
 
   packages/core-snapshots:
     specifiers:
-      '@alessiodf/ora': ^0.0.1
+      '@alessiodf/ora': ^0.0.2
       '@solar-network/core-database': workspace:*
       '@solar-network/core-kernel': workspace:*
       '@solar-network/crypto': workspace:*
@@ -531,7 +531,7 @@ importers:
       typeorm: 0.2.25
       xcase: 2.0.1
     dependencies:
-      '@alessiodf/ora': 0.0.1
+      '@alessiodf/ora': 0.0.2
       '@solar-network/core-database': link:../core-database
       '@solar-network/core-kernel': link:../core-kernel
       '@solar-network/crypto': link:../crypto
@@ -758,11 +758,12 @@ importers:
 
 packages:
 
-  /@alessiodf/listr/0.0.2:
-    resolution: {integrity: sha512-OgLJ0vFkDcp8PovtbuGp1RVI7eND89H9GCP9/byuFkfwE+ISsu6V3N/AlSthKjHdCsfNR/d5LUCk9Lye1ZKIjw==}
+  /@alessiodf/listr/0.0.6:
+    resolution: {integrity: sha512-OwiJG7RCKTTkt2IMk/q2XOJu+/NWmAq2fpMSWn2PBm8HE05W6PS4Ic4U7vN0JUbAWJoE6jXT8pFelcGQU4C7wg==}
     dependencies:
       '@samverschueren/stream-to-observable': 0.3.1_rxjs@7.5.5
       chalk: 4.1.2
+      cli-cursor: 3.1.0
       cli-truncate: 2.1.0
       figures: 3.2.0
       indent-string: 4.0.0
@@ -770,7 +771,6 @@ packages:
       is-promise: 4.0.0
       is-stream: 2.0.1
       log-symbols: 4.1.0
-      log-update: 4.0.0
       p-map: 4.0.0
       rxjs: 7.5.5
       strip-ansi: 6.0.1
@@ -778,8 +778,8 @@ packages:
       - zen-observable
     dev: false
 
-  /@alessiodf/ora/0.0.1:
-    resolution: {integrity: sha512-Ffe8Vht/MKd3h6ssjtSuuXe7LgM+ZgDmb34tJpKY01l+hPdEhcEWM5Yb3Or48glQHSuuTAkT/qJNq/bl45vZHw==}
+  /@alessiodf/ora/0.0.2:
+    resolution: {integrity: sha512-oJVGx9qRBuGAECkRQ4vdh1lOMFoqOYzawkI/TYU4rNSqPXJpeQ3vv+Ib3YTX9B2ih3hzEWMPw6c54PTVFVTliw==}
     dependencies:
       chalk: 4.1.2
       cli-cursor: 3.1.0
@@ -5006,6 +5006,7 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       type-fest: 0.21.3
+    dev: true
 
   /ansi-regex/2.1.1:
     resolution: {integrity: sha1-w7M6te42DYbg5ijwRorn7yfWVN8=}
@@ -9362,6 +9363,7 @@ packages:
       cli-cursor: 3.1.0
       slice-ansi: 4.0.0
       wrap-ansi: 6.2.0
+    dev: true
 
   /long/3.2.0:
     resolution: {integrity: sha1-2CG3E4yhy1gcFymQ7xTbIAtcR0s=}
@@ -11947,6 +11949,7 @@ packages:
       ansi-styles: 4.3.0
       astral-regex: 2.0.0
       is-fullwidth-code-point: 3.0.0
+    dev: true
 
   /smart-buffer/4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
@@ -13303,6 +13306,7 @@ packages:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
+    dev: true
 
   /wrap-ansi/7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}

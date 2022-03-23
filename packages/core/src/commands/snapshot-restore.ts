@@ -1,6 +1,5 @@
-import { Commands, Components, Container, Contracts, Utils } from "@solar-network/core-cli";
+import { Commands, Container, Contracts, Utils } from "@solar-network/core-cli";
 import { Container as KernelContainer, Contracts as KernelContracts } from "@solar-network/core-kernel";
-import { ProgressRenderer } from "@solar-network/core-snapshots";
 import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
@@ -55,9 +54,6 @@ export class Command extends Commands.Command {
         const app = await Utils.buildApplication({
             flags,
         });
-
-        const spinner = this.app.get<Components.ComponentFactory>(Container.Identifiers.ComponentFactory).spinner();
-        new ProgressRenderer(spinner, app);
 
         await app
             .get<KernelContracts.Snapshot.SnapshotService>(KernelContainer.Identifiers.SnapshotService)

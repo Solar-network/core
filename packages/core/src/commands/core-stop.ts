@@ -43,7 +43,7 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        this.app
+        await this.app
             .get<any>(Container.Identifiers.ProcessFactory)(this.getFlag("token"), "core")
             .stop(this.getFlag("daemon"));
     }
