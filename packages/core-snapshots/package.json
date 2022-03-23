@@ -19,7 +19,7 @@
         "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
-        "@alessiodf/ora": "^0.0.1",
+        "@alessiodf/ora": "^0.0.2",
         "@solar-network/core-database": "workspace:*",
         "@solar-network/core-kernel": "workspace:*",
         "@solar-network/crypto": "workspace:*",
