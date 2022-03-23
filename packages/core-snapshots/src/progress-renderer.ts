@@ -1,9 +1,11 @@
-import { Container, Contracts } from "@solar-network/core-kernel";
 import ora from "@alessiodf/ora";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { SnapshotApplicationEvents } from "./events";
 
 export class ProgressRenderer {
+    public spinner: ora;
+
     private isAnyStarted: boolean = false;
 
     private count = {
@@ -17,8 +19,6 @@ export class ProgressRenderer {
         transactions: "---.--",
         rounds: "---.--",
     };
-
-    public spinner: ora;
 
     public constructor(app: Contracts.Kernel.Application) {
         this.spinner = ora();

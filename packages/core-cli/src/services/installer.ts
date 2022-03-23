@@ -1,7 +1,7 @@
+import Listr from "@alessiodf/listr";
 import delay from "delay";
 import { sync } from "execa";
 import { white } from "kleur";
-import Listr from "@alessiodf/listr";
 import { spawn } from "node-pty";
 
 import { Application } from "../application";

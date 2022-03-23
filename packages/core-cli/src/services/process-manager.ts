@@ -95,7 +95,10 @@ export class ProcessManager {
      * @returns {ExecaReturnValue}
      * @memberof ProcessManager
      */
-    public async restart(id: ProcessIdentifier, flags: Record<string, any> = { "update-env": true }): Promise<ExecaReturnValue> {
+    public async restart(
+        id: ProcessIdentifier,
+        flags: Record<string, any> = { "update-env": true },
+    ): Promise<ExecaReturnValue> {
         let command: string = `pm2 restart ${id}`;
 
         if (Object.keys(flags).length > 0) {
