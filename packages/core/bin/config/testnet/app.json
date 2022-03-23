@@ -17,12 +17,6 @@
                 "package": "@solar-network/core-transaction-pool"
             },
             {
-                "package": "@solar-network/sxp-swap",
-                "options": {
-                    "swapWalletPublicKey": "02f1e870a5404676a6f9058f871fc01f538252acbe269e3a3a33822d49905a0659"
-                }
-            },
-            {
                 "package": "@solar-network/core-p2p"
             },
             {
@@ -55,12 +49,6 @@
             },
             {
                 "package": "@solar-network/core-transaction-pool"
-            },
-            {
-                "package": "@solar-network/sxp-swap",
-                "options": {
-                    "swapWalletPublicKey": "02f1e870a5404676a6f9058f871fc01f538252acbe269e3a3a33822d49905a0659"
-                }
             },
             {
                 "package": "@solar-network/core-p2p"
