@@ -239,9 +239,9 @@ export class SXPSwap {
                     const requests = peers[network].map((peer: Web3) =>
                         Promise.all([
                             peer.eth.currentProvider ? (peer.eth.currentProvider as HttpProvider).host : undefined,
-                            peer.eth.getBlockNumber(),
-                            peer.eth.getTransaction(transactionId),
-                            peer.eth.getTransactionReceipt(transactionId),
+                            self.getBlockNumber(peer),
+                            self.getTransaction(transactionId, peer),
+                            self.getReceipt(transactionId, peer)
                         ]),
                     );
 
@@ -432,5 +432,47 @@ export class SXPSwap {
         this.app
             .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
             .bind("applyTransaction", new ApplyTransactionAction());
+    }
+
+    private async getBlockNumber(peer) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const blockNumber = await peer.eth.getBlockNumber();
+                if (!blockNumber) {
+                    reject();
+                }
+                resolve(blockNumber);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    private async getTransaction(transactionId, peer) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const transaction = await peer.eth.getTransaction(transactionId);
+                if (!transaction) {
+                    reject();
+                }
+                resolve(transaction);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    private async getReceipt(transactionId, peer) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const receipt = await peer.eth.getTransactionReceipt(transactionId);
+                if (!receipt) {
+                    reject();
+                }
+                resolve(receipt);
+            } catch (err) {
+                reject(err);
+            }
+        });
     }
 }
