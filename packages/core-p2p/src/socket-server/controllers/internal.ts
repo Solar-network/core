@@ -1,6 +1,6 @@
 import Hapi from "@hapi/hapi";
 import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
-import { Crypto, Interfaces } from "@solar-network/crypto";
+import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
 
 import { Controller } from "./controller";
 
@@ -83,10 +83,12 @@ export class InternalController extends Controller {
         const timestamp: number = Crypto.Slots.getTime();
         const forgingInfo = Utils.forgingInfoCalculator.calculateForgingInfo(timestamp, height, blockTimeLookup);
 
-        const { reward } = await this.roundState.getRewardForBlockInRound(
-            height + 1,
-            await this.walletRepository.findByPublicKey(delegates[forgingInfo.currentForger].publicKey!),
-        );
+        const { reward } = delegates[forgingInfo.currentForger]
+            ? await this.roundState.getRewardForBlockInRound(
+                  height + 1,
+                  this.walletRepository.findByPublicKey(delegates[forgingInfo.currentForger].publicKey!),
+              )
+            : Managers.configManager.getMilestone();
 
         return {
             allDelegates,
