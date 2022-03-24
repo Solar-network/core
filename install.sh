@@ -541,15 +541,9 @@ async function setUpDatabase() {
         const { data } = envPaths(process.env.SOLAR_CORE_TOKEN, { suffix: "core" });
         const psql = spawn(
             `
-                . "${process.env.SOLAR_DATA_PATH}"/.env &&
-                mkdir -p ${data}/${network}/database &&
-                LD_LIBRARY_PATH="$LD_LIBRARY_PATH" "$POSTGRES_DIR"/bin/initdb -D ${data}/${network}/database &&
-                echo "\n# "$SOLAR_CORE_TOKEN"\nlisten_addresses = ''\nunix_socket_directories = '${data}/${network}/database'\nunix_socket_permissions = 0700" >> ${data}/${network}/database/postgresql.conf &&
-                "$POSTGRES_DIR"/bin/pg_ctl -D ${data}/${network}/database start >"$SOLAR_TEMP_PATH"/pg_ctl.log &&
-                cat "$SOLAR_TEMP_PATH"/pg_ctl.log &&
-                rm "$SOLAR_TEMP_PATH"/pg_ctl.log &&
                 sed -i "s@"/usr/lib/postgresql/"@""$SOLAR_DATA_PATH"/usr/lib/postgresql/"@g" "$SOLAR_DATA_PATH"/usr/share/perl5/PgCommon.pm &&
-                LD_LIBRARY_PATH="$LD_LIBRARY_PATH" PERL5LIB="$PERL5LIB" createdb -h ${data}/${network}/database "$SOLAR_CORE_TOKEN"_${network}
+                cd "$SOLAR_CORE_PATH" &&
+                "$SOLAR_DATA_PATH"/bin/node packages/core/bin/run database:create --network=${network}
             `,
             { shell: true },
         );
