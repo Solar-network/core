@@ -79,28 +79,21 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     private async performInstall(): Promise<void> {
-        const spinner = this.components.spinner(`Reinstalling ${this.pkg.version}`);
-
-        spinner.start();
-
         try {
             await this.installer.install(this.pkg.name!, this.pkg.version);
 
             this.processManager.update();
 
-            spinner.succeed();
-
             if (this.getFlag("force")) {
-                await this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
-                await this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
-                await this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
+                this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
+                this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
+                this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
             } else {
                 await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
                 await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
                 await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
             }
         } catch (error) {
-            spinner.fail();
             this.components.error(error);
         }
     }

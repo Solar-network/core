@@ -64,20 +64,20 @@ export class Command extends Commands.Command {
 
             if (this.hasRestartFlag()) {
                 if (this.hasFlag("restart")) {
-                    await this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
-                    await this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
-                    await this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
+                    this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
+                    this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
+                    this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
                 } else {
                     if (this.hasFlag("restartCore")) {
-                        await this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
+                        this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
                     }
 
                     if (this.hasFlag("restartRelay")) {
-                        await this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
+                        this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
                     }
 
                     if (this.hasFlag("restartForger")) {
-                        await this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
+                        this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
                     }
                 }
             } else if (!this.getFlag("force")) {
