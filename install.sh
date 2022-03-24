@@ -332,7 +332,8 @@ async function core() {
                 CFLAGS="$CFLAGS" CPATH="$CPATH" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" pnpm install ${pnpmFlags} &&
                 pnpm build ${pnpmFlags} &&
                 RC=POSTGRES_DIR=$(find "$SOLAR_DATA_PATH" -regex ".*/usr/lib/postgresql/[0-9]+") &&
-                echo "$RC" >> "$SOLAR_DATA_PATH"/.env
+                echo "$RC" >> "$SOLAR_DATA_PATH"/.env &&
+                sed -i "s@"/usr/lib/postgresql/"@""$SOLAR_DATA_PATH"/usr/lib/postgresql/"@g" "$SOLAR_DATA_PATH"/usr/share/perl5/PgCommon.pm
             `,
             { shell: true },
         );
@@ -541,7 +542,6 @@ async function setUpDatabase() {
         const { data } = envPaths(process.env.SOLAR_CORE_TOKEN, { suffix: "core" });
         const psql = spawn(
             `
-                sed -i "s@"/usr/lib/postgresql/"@""$SOLAR_DATA_PATH"/usr/lib/postgresql/"@g" "$SOLAR_DATA_PATH"/usr/share/perl5/PgCommon.pm &&
                 cd "$SOLAR_CORE_PATH" &&
                 "$SOLAR_DATA_PATH"/bin/node packages/core/bin/run database:create --network=${network}
             `,
