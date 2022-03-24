@@ -94,7 +94,7 @@ export class BlocksController extends Controller {
 
         const { dynamicReward } = Managers.configManager.getMilestone();
 
-        if (dynamicReward.enabled && block.reward.isEqualTo(dynamicReward.secondaryReward)) {
+        if (dynamicReward && dynamicReward.enabled && block.reward.isEqualTo(dynamicReward.secondaryReward)) {
             const { alreadyForged } = await this.roundState.getRewardForBlockInRound(block.height, generatorWallet);
             if (
                 alreadyForged &&
