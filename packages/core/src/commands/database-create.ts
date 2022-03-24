@@ -95,7 +95,7 @@ export class Command extends Commands.Command {
 
             let shellResult = await this.shell(`${process.env.POSTGRES_DIR}/bin/initdb -D ${databaseDir}`);
             if (shellResult.exitCode !== 0) {
-                throw new Error(shellResult.stdout.toString());
+                throw new Error(shellResult.stderr.toString());
             }
 
             let config: string = readFileSync(`${databaseDir}/postgresql.conf`).toString();
@@ -108,14 +108,14 @@ export class Command extends Commands.Command {
 
             shellResult = await this.shell(`${process.env.POSTGRES_DIR}/bin/pg_ctl -D ${databaseDir} start >/dev/null`);
             if (shellResult.exitCode !== 0) {
-                throw new Error(shellResult.stdout.toString());
+                throw new Error(shellResult.stderr.toString());
             }
 
             shellResult = await this.shell(
                 `createdb -h ${databaseDir} ${this.getFlag("token")}_${this.getFlag("network")}`,
             );
             if (shellResult.exitCode !== 0) {
-                throw new Error(shellResult.stdout.toString());
+                throw new Error(shellResult.stderr.toString());
             }
 
             spinner.succeed();
