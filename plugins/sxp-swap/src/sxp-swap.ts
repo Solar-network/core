@@ -122,7 +122,7 @@ export class SXPSwap {
                             .filter((transaction) => transaction.data.vendorField === duplicateSwapVendorField)
                             .forEach((transaction) => {
                                 self.log.warning(
-                                    `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transaction.data.id} (native token) rejected :gun:`,
+                                    `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transaction.data.id} (native coin) rejected :gun:`,
                                 );
                             });
                     }
@@ -362,25 +362,25 @@ export class SXPSwap {
                     switch (status) {
                         case "pool": {
                             self.log.info(
-                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) passed all checks to enter the transaction pool :crossed_fingers:`,
+                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) passed all checks to enter the transaction pool :crossed_fingers:`,
                             );
                             break;
                         }
                         case "validate": {
                             self.log.info(
-                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) ready to be forged :v:`,
+                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) ready to be forged :v:`,
                             );
                             break;
                         }
                         default: {
                             self.log.info(
-                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) approved and added to the blockchain :white_check_mark:`,
+                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) approved and added to the blockchain :white_check_mark:`,
                             );
                         }
                     }
                 } catch (error) {
                     self.log.warning(
-                        `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) rejected :x:`,
+                        `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) rejected :x:`,
                     );
                     throw error;
                 }
@@ -412,7 +412,7 @@ export class SXPSwap {
 
                 if (alreadyInPool) {
                     self.log.warning(
-                        `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transactionData.id} (native token) rejected :gun:`,
+                        `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) rejected :gun:`,
                     );
                     throw new TransactionAlreadySubmittedError();
                 }
