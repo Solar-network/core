@@ -68,7 +68,6 @@ export class Command extends Commands.Command {
                         //
                     }
                 }
-                await remove(databaseDir);
                 return this.createDatabase(databaseDir);
             }
 
@@ -91,6 +90,7 @@ export class Command extends Commands.Command {
         const spinner = this.components.spinner("Creating database");
         spinner.start();
         try {
+            await remove(databaseDir);
             mkdirSync(databaseDir, { recursive: true });
 
             let shellResult = await this.shell(`${process.env.POSTGRES_DIR}/bin/initdb -D ${databaseDir}`);
