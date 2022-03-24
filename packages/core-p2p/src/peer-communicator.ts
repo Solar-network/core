@@ -53,6 +53,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         this.outgoingRateLimiter = buildRateLimiter({
             // White listing anybody here means we would not throttle ourselves when sending
             // them requests, ie we could spam them.
+            isOutgoing: true,
             whitelist: [],
             remoteAccess: [],
             rateLimit: this.configuration.getOptional<number>("rateLimit", 100),

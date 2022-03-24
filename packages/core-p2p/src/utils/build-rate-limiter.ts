@@ -1,6 +1,7 @@
 import { RateLimiter } from "../rate-limiter";
 
 export const buildRateLimiter = (options: {
+    isOutgoing?: boolean;
     whitelist: string[];
     rateLimit: number;
     rateLimitPostTransactions: number;
@@ -15,16 +16,16 @@ export const buildRateLimiter = (options: {
             endpoints: [
                 {
                     rateLimit: 2,
-                    duration: 4,
+                    duration: options.isOutgoing ? 4 : 2,
                     endpoint: "p2p.blocks.postBlock",
                 },
                 {
-                    rateLimit: 1,
-                    duration: 2,
+                    rateLimit: options.isOutgoing ? 1 : 2,
+                    duration: options.isOutgoing ? 2 : 1,
                     endpoint: "p2p.blocks.getBlocks",
                 },
                 {
-                    rateLimit: 1,
+                    rateLimit: options.isOutgoing ? 1 : 2,
                     endpoint: "p2p.peer.getPeers",
                 },
                 {
