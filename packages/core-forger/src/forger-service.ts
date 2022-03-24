@@ -200,6 +200,10 @@ export class ForgerService {
 
             AppUtils.assert.defined<Contracts.P2P.CurrentRound>(this.round);
 
+            if (this.round.timestamp < 0) {
+                return this.checkLater(this.getRemainingSlotTime()!);
+            }
+
             AppUtils.assert.defined<string>(this.round.currentForger.publicKey);
 
             const delegate: Delegate | undefined = this.isActiveDelegate(this.round.currentForger.publicKey);
@@ -227,11 +231,9 @@ export class ForgerService {
 
             this.errorCount = 0;
 
-            if (this.round.timestamp >= 0) {
-                await this.app
-                    .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-                    .call("forgeNewBlock", { forgerService: this, delegate, firstAttempt: true, round: this.round });
-            }
+            await this.app
+                .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
+                .call("forgeNewBlock", { forgerService: this, delegate, firstAttempt: true, round: this.round });
 
             this.logAppReady = true;
 
