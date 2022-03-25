@@ -36,9 +36,9 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("force", "Force the database creation", Joi.boolean())
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
-            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)));
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("reset", "Using the --reset flag will destroy and recreate existing database", Joi.boolean());
     }
 
     /**
@@ -53,7 +53,7 @@ export class Command extends Commands.Command {
         const pidFile: string = databaseDir + "/postmaster.pid";
         if (existsSync(databaseDir)) {
             if (
-                this.getFlag("force") ||
+                this.getFlag("reset") ||
                 (await this.components.confirm(
                     `The ${this.getFlag(
                         "network",
