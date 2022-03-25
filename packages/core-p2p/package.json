@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/core-p2p",
-    "version": "3.2.0-next.3",
+    "version": "3.2.0",
     "description": "P2P API for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
