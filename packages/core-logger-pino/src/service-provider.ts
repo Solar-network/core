@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers, Services } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers, Services } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { PinoLogger } from "./driver";
@@ -17,8 +17,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
     }
 
     public async dispose(): Promise<void> {
-        // todo: destroy console stream
-        // todo: destroy file stream
+        await this.app.get<Contracts.Kernel.Logger>(Container.Identifiers.LogService).dispose();
     }
 
     public configSchema(): object {

@@ -1,4 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Managers } from "@solar-network/crypto";
 
 import { Action } from "../contracts";
 
@@ -17,6 +18,12 @@ export class CheckLastDownloadedBlockSynced implements Action {
     private readonly networkMonitor!: Contracts.P2P.NetworkMonitor;
 
     public async handle(): Promise<void> {
+        const epoch = Math.floor(new Date(Managers.configManager.getMilestone(1).epoch).getTime() / 1000);
+        if (Math.floor(new Date().getTime() / 1000) <= epoch) {
+            this.blockchain.dispatch("SYNCED");
+            return;
+        }
+
         let event = "NOTSYNCED";
         this.logger.debug(`Queued chunks of blocks (process: ${this.blockchain.getQueue().size()})`);
 
@@ -26,13 +33,15 @@ export class CheckLastDownloadedBlockSynced implements Action {
 
         // tried to download but no luck after 5 tries (looks like network missing blocks)
         if (this.stateStore.getNoBlockCounter() > 5 && !this.blockchain.getQueue().isRunning()) {
-            this.logger.info("Tried to sync 5 times to different nodes, looks like the network is missing blocks");
+            this.logger.info(
+                "Tried to sync 5 times to different nodes, looks like the network is missing blocks :umbrella:",
+            );
 
             this.stateStore.setNoBlockCounter(0);
             event = "NETWORKHALTED";
 
             if (this.stateStore.getP2pUpdateCounter() + 1 > 3) {
-                this.logger.info("Network keeps missing blocks.");
+                this.logger.info("Network keeps missing blocks :umbrella:");
 
                 const networkStatus = await this.networkMonitor.checkNetworkHealth();
 

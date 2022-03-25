@@ -1,11 +1,11 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 import BetterSqlite3 from "better-sqlite3";
 import { ensureFileSync } from "fs-extra";
 
 @Container.injectable()
 export class Storage implements Contracts.TransactionPool.Storage {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-transaction-pool")
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
     private readonly configuration!: Providers.PluginConfiguration;
 
     private database!: BetterSqlite3.Database;

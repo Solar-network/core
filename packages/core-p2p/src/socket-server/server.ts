@@ -1,13 +1,18 @@
-import { Container, Contracts, Types } from "@arkecosystem/core-kernel";
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { plugin as hapiNesPlugin } from "../hapi-nes";
+import { Socket } from "../hapi-nes/socket";
 import { AcceptPeerPlugin } from "./plugins/accept-peer";
 import { AwaitBlockPlugin } from "./plugins/await-block";
+import { BanHammerPlugin } from "./plugins/ban-hammer";
+import { CloseConnectionPlugin } from "./plugins/close-connection";
 import { CodecPlugin } from "./plugins/codec";
 import { IsAppReadyPlugin } from "./plugins/is-app-ready";
 import { RateLimitPlugin } from "./plugins/rate-limit";
+import { StalePeerPlugin } from "./plugins/stale-peer";
 import { ValidatePlugin } from "./plugins/validate";
+import { VersionPlugin } from "./plugins/version";
 import { WhitelistForgerPlugin } from "./plugins/whitelist-forger";
 import { BlocksRoute } from "./routes/blocks";
 import { InternalRoute } from "./routes/internal";
@@ -53,18 +58,30 @@ export class Server {
      * @returns {Promise<void>}
      * @memberof Server
      */
-    public async initialize(name: string, optionsServer: Types.JsonObject): Promise<void> {
+    public async initialize(
+        name: string,
+        optionsServer: { banSeconds: number; hostname: string; port: number },
+    ): Promise<void> {
         this.name = name;
 
         const address = optionsServer.hostname;
         const port = Number(optionsServer.port);
 
-        this.server = new HapiServer({ address, port });
-        this.server.app = this.app;
+        const banHammerPlugin: BanHammerPlugin = this.app.resolve(BanHammerPlugin);
+
+        const listener = banHammerPlugin.createServer();
+
+        this.server = new HapiServer({ address, listener, port });
+
+        // @ts-ignore
+        this.server.app = this.app; // TODO: Move app under app
+
         await this.server.register({
             plugin: hapiNesPlugin,
             options: {
-                maxPayload: 20971520, // 20 MB TODO to adjust
+                banHammerPlugin,
+                onDisconnection: (socket: Socket) => this.app.resolve(StalePeerPlugin).register(socket),
+                maxPayload: 20971520,
             },
         });
 
@@ -72,6 +89,8 @@ export class Server {
         this.app.resolve(PeerRoute).register(this.server);
         this.app.resolve(BlocksRoute).register(this.server);
         this.app.resolve(TransactionsRoute).register(this.server);
+
+        banHammerPlugin.register(this.server, optionsServer.banSeconds);
 
         // onPreAuth
         this.app.resolve(WhitelistForgerPlugin).register(this.server);
@@ -81,10 +100,14 @@ export class Server {
         // onPostAuth
         this.app.resolve(CodecPlugin).register(this.server);
         this.app.resolve(ValidatePlugin).register(this.server);
+        this.app.resolve(VersionPlugin).register(this.server);
         this.app.resolve(IsAppReadyPlugin).register(this.server);
 
         // onPreHandler
         this.app.resolve(AcceptPeerPlugin).register(this.server);
+
+        // onPreResponse
+        this.app.resolve(CloseConnectionPlugin).register(this.server);
     }
 
     /**
@@ -138,6 +161,6 @@ export class Server {
      * @memberof Server
      */
     public async inject(options: string | ServerInjectOptions): Promise<ServerInjectResponse> {
-        await this.server.inject(options);
+        return this.server.inject(options);
     }
 }

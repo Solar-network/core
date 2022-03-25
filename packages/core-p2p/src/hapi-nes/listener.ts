@@ -1,5 +1,6 @@
 "use strict";
 
+import { Server } from "@hapi/hapi";
 import Hoek from "@hapi/hoek";
 import Ws from "ws";
 
@@ -23,7 +24,7 @@ export class Listener {
     private _beatTimeout;
     private _wss;
 
-    public constructor(server, settings) {
+    public constructor(server: Server, settings: { maxPayload: number; origin: string }) {
         this._server = server;
         this._settings = settings;
         this._sockets = new Sockets(this);
@@ -34,7 +35,11 @@ export class Listener {
 
         // WebSocket listener
 
-        const options: any = { server: this._server.listener, maxPayload: settings.maxPayload, perMessageDeflate: false };
+        const options: any = {
+            server: this._server.listener,
+            maxPayload: settings.maxPayload,
+            perMessageDeflate: false,
+        };
         if (settings.origin) {
             options.verifyClient = (info) => settings.origin.indexOf(info.origin) >= 0;
         }
@@ -42,6 +47,8 @@ export class Listener {
         this._wss = new Ws.Server(options);
 
         this._wss.on("connection", (ws, req) => {
+            ws._socket.wsOpen = true;
+
             ws.on("error", Hoek.ignore);
 
             if (
@@ -61,7 +68,7 @@ export class Listener {
         this._server.plugins.nes = { _listener: this };
     }
 
-    public async _close() {
+    public async _close(): Promise<void> {
         this._stopped = true;
         clearTimeout(this._heartbeat);
         clearTimeout(this._beatTimeout);
@@ -71,7 +78,7 @@ export class Listener {
         this._wss.close();
     }
 
-    public _beat() {
+    public _beat(): void {
         if (!this._settings.heartbeat) {
             return;
         }
@@ -109,7 +116,7 @@ export class Listener {
         }, this._settings.heartbeat.interval);
     }
 
-    public _generateId() {
+    public _generateId(): string {
         const id = Date.now() + ":" + this._server.info.id + ":" + this._socketCounter++;
         if (this._socketCounter > internals.counter.max) {
             this._socketCounter = internals.counter.min;
@@ -118,7 +125,7 @@ export class Listener {
         return id;
     }
 
-    private _add(ws, req) {
+    private _add(ws, req): void {
         // Socket object
 
         const socket = new Socket(ws, req, this);

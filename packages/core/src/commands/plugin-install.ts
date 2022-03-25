@@ -1,8 +1,6 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container, Contracts } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
-
-import { File, Git, NPM, Source } from "../source-providers";
 
 /**
  * @export
@@ -11,6 +9,9 @@ import { File, Git, NPM, Source } from "../source-providers";
  */
 @Container.injectable()
 export class Command extends Commands.Command {
+    @Container.inject(Container.Identifiers.PluginManager)
+    private readonly pluginManager!: Contracts.PluginManager;
+
     /**
      * The console command signature.
      *
@@ -25,7 +26,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Installs a package, and any packages that it depends on.";
+    public description: string = "Installs a package, and any packages that it depends on";
 
     /**
      * Configure the console command.
@@ -35,10 +36,10 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("version", "The version of the package.", Joi.string())
-            .setArgument("package", "The name of the package.", Joi.string().required());
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("version", "The version of the package", Joi.string())
+            .setArgument("package", "The name of the package", Joi.string().required());
     }
 
     /**
@@ -48,35 +49,11 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        const pkg: string = this.getArgument("package");
-        const version: string | undefined = this.getFlag("version");
-
-        try {
-            return await this.install(pkg, version);
-        } catch (error) {
-            throw new Error(error.message);
-        }
-    }
-
-    /**
-     * @private
-     * @param {string} pkg
-     * @param version
-     * @returns {Promise<void>}
-     * @memberof Command
-     */
-    private async install(pkg: string, version?: string): Promise<void> {
-        for (const Instance of [File, Git, NPM]) {
-            const source: Source = new Instance({
-                data: this.app.getCorePath("data", "plugins"),
-                temp: this.app.getCorePath("temp", "plugins"),
-            });
-
-            if (await source.exists(pkg, version)) {
-                return source.install(pkg, version);
-            }
-        }
-
-        throw new Error(`The given package [${pkg}] is neither a git nor a npm package.`);
+        return await this.pluginManager.install(
+            this.getFlag("token"),
+            this.getFlag("network"),
+            this.getArgument("package"),
+            this.getFlag("version"),
+        );
     }
 }

@@ -1,7 +1,7 @@
-import { Commands, Container, Contracts, Services } from "@arkecosystem/core-cli";
-import { prettyBytes, prettyTime } from "@arkecosystem/utils";
-import Joi from "joi";
+import { Commands, Container, Contracts, Services } from "@solar-network/core-cli";
+import { prettyBytes, prettyTime } from "@solar-network/utils";
 import dayjs from "dayjs";
+import Joi from "joi";
 
 /**
  * @export
@@ -32,7 +32,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "List all Core daemons.";
+    public description: string = "List all Core daemons";
 
     /**
      * Indicates whether the command requires a network to be present.
@@ -49,7 +49,7 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public configure(): void {
-        this.definition.setFlag("token", "The name of the token.", Joi.string().default("ark"));
+        this.definition.setFlag("token", "The name of the token", Joi.string().default("solar"));
     }
 
     /**
@@ -59,12 +59,12 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        const processes: Contracts.ProcessDescription[] = (
-            this.processManager.list() || []
-        ).filter((p: Contracts.ProcessDescription) => p.name.startsWith(this.getFlag("token")));
+        const processes: Contracts.ProcessDescription[] = (this.processManager.list() || []).filter(
+            (p: Contracts.ProcessDescription) => p.name.startsWith(this.getFlag("token")),
+        );
 
         if (!processes || !Object.keys(processes).length) {
-            this.components.fatal("No processes are running.");
+            this.components.fatal("No processes are running");
         }
 
         this.components.table(["ID", "Name", "Version", "Status", "Uptime", "CPU", "RAM"], (table) => {

@@ -1,5 +1,5 @@
-import { Nes } from "@arkecosystem/core-p2p";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Nes } from "@solar-network/core-p2p";
+import { Interfaces } from "@solar-network/crypto";
 
 /**
  * @export

@@ -1,4 +1,4 @@
-import { Container } from "@arkecosystem/core-kernel";
+import { Container } from "@solar-network/core-kernel";
 
 import { Resource } from "../interfaces";
 
@@ -11,7 +11,7 @@ export class FeeStatisticsResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public raw(resource): object {
+    public raw(resource: object): object {
         return resource;
     }
 
@@ -22,7 +22,7 @@ export class FeeStatisticsResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public transform(resource): object {
+    public transform(resource: { avgFee: string; minFee: string; maxFee: string; type: string }): object {
         return {
             type: resource.type,
             fees: {

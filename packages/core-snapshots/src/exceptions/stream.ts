@@ -1,8 +1,8 @@
-import { Exceptions } from "@arkecosystem/core-kernel";
+import { Exceptions } from "@solar-network/core-kernel";
 
 export class StreamNotOpen extends Exceptions.Base.Exception {
     public constructor(file: string) {
-        super(`Stream file file ${file} is not open.`);
+        super(`Stream file file ${file} is not open`);
     }
 }
 

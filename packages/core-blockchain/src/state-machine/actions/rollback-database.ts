@@ -1,6 +1,6 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 import { Action } from "../contracts";
 
@@ -10,7 +10,7 @@ export class RollbackDatabase implements Action {
     public readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-blockchain")
+    @Container.tagged("plugin", "@solar-network/core-blockchain")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.LogService)
@@ -26,7 +26,7 @@ export class RollbackDatabase implements Action {
     private readonly stateStore!: Contracts.State.StateStore;
 
     public async handle(): Promise<void> {
-        this.logger.info("Trying to restore database integrity");
+        this.logger.info("Trying to restore database integrity :fire_engine:");
 
         let maxBlockRewind = this.configuration.getRequired<number>("databaseRollback.maxBlockRewind");
         let steps = this.configuration.getRequired<number>("databaseRollback.steps");
@@ -60,7 +60,7 @@ export class RollbackDatabase implements Action {
         this.stateStore.setLastStoredBlockHeight(lastBlock.data.height);
 
         this.logger.info(
-            `Database integrity verified again after rollback to height ${lastBlock.data.height.toLocaleString()}`,
+            `Database integrity verified again after rollback to height ${lastBlock.data.height.toLocaleString()} :green_heart:`,
         );
 
         this.blockchain.dispatch("SUCCESS");

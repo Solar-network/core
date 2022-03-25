@@ -1,10 +1,18 @@
-import { Contracts } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Contracts } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
+import { Semver } from "@solar-network/utils";
 import Joi from "joi";
 
 const isSchema = (value: Joi.Schema | SchemaObject): value is Joi.Schema => {
     return Joi.isSchema(value);
 };
+
+export const semver = Joi.custom((value: Semver, helpers) => {
+    if (!(value instanceof Semver)) {
+        value = new Semver(value as any);
+    }
+    return value.isValid() ? value.toString() : helpers.error("any.invalid");
+});
 
 // BigNumber
 
@@ -44,7 +52,11 @@ export const createRangeCriteriaSchema = (item: Joi.Schema): Joi.Schema => {
 
 // Sorting
 
-export const createSortingSchema = (schemaObject: SchemaObject, wildcardPaths: string[] = []): Joi.ObjectSchema => {
+export const createSortingSchema = (
+    schemaObject: SchemaObject,
+    wildcardPaths: string[] = [],
+    transform: boolean = true,
+): Joi.ObjectSchema => {
     const getObjectPaths = (object: SchemaObject): string[] => {
         return Object.entries(object)
             .map(([key, value]) => {
@@ -55,37 +67,45 @@ export const createSortingSchema = (schemaObject: SchemaObject, wildcardPaths: s
 
     const exactPaths = getObjectPaths(schemaObject);
 
-    return Joi.object({
-        orderBy: Joi.custom((value, helpers) => {
-            if (value === "") {
-                return [];
+    const orderBy = Joi.custom((value, helpers) => {
+        if (value === "") {
+            return [];
+        }
+
+        const sorting: Contracts.Search.Sorting = [];
+
+        for (const item of value.split(",")) {
+            const pair = item.split(":");
+            const property = String(pair[0]);
+            const direction = pair.length === 1 ? "asc" : pair[1];
+
+            if (!exactPaths.includes(property) && !wildcardPaths.find((wp) => property.startsWith(`${wp}.`))) {
+                return helpers.message({
+                    custom: `Unknown orderBy property '${property}'`,
+                });
             }
 
-            const sorting: Contracts.Search.Sorting = [];
+            if (direction !== "asc" && direction !== "desc") {
+                return helpers.message({
+                    custom: `Unexpected orderBy direction '${direction}' for property '${property}'`,
+                });
+            }
 
-            for (const item of value.split(",")) {
-                const pair = item.split(":");
-                const property = String(pair[0]);
-                const direction = pair.length === 1 ? "asc" : pair[1];
-
-                if (!exactPaths.includes(property) && !wildcardPaths.find((wp) => property.startsWith(`${wp}.`))) {
-                    return helpers.message({
-                        custom: `Unknown orderBy property '${property}'`,
-                    });
-                }
-
-                if (direction !== "asc" && direction !== "desc") {
-                    return helpers.message({
-                        custom: `Unexpected orderBy direction '${direction}' for property '${property}'`,
-                    });
-                }
-
+            if (transform) {
                 sorting.push({ property, direction: direction as "asc" | "desc" });
+            } else {
+                sorting.push(value);
             }
+        }
 
-            return sorting;
-        }).default([]),
+        return sorting;
     });
+
+    if (transform) {
+        return Joi.object({ orderBy: orderBy.default([]) });
+    } else {
+        return Joi.object({ orderBy });
+    }
 };
 
 // Pagination
@@ -178,11 +198,12 @@ export const blockCriteriaSchemas = {
     numberOfTransactions: orNumericCriteria(Joi.number().integer().min(0)),
     totalAmount: orNumericCriteria(Joi.number().integer().min(0)),
     totalFee: orNumericCriteria(Joi.number().integer().min(0)),
+    burnedFee: orNumericCriteria(Joi.number().integer().min(0)),
     reward: orNumericCriteria(Joi.number().integer().min(0)),
     payloadLength: orNumericCriteria(Joi.number().integer().min(0)),
     payloadHash: orEqualCriteria(Joi.string().hex()),
     generatorPublicKey: orEqualCriteria(Joi.string().hex().length(66)),
-    blockSignature: orEqualCriteria(Joi.string().hex()),
+    blockSignature: orEqualCriteria(Joi.string().hex().length(128)),
 };
 
 export const transactionCriteriaSchemas = {
@@ -201,5 +222,6 @@ export const transactionCriteriaSchemas = {
     vendorField: orLikeCriteria(Joi.string().max(255, "utf8")),
     amount: orNumericCriteria(Joi.number().integer().min(0)),
     fee: orNumericCriteria(Joi.number().integer().min(0)),
+    burnedFee: orNumericCriteria(Joi.number().integer().min(0)),
     asset: orContainsCriteria(Joi.object()),
 };

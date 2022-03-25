@@ -46,7 +46,7 @@ export class InvalidBindingName extends ContainerException {
      * @memberof InvalidBindingName
      */
     public constructor(name: string) {
-        super(`The name [${name}] is reserved.`);
+        super(`The name [${name}] is reserved`);
     }
 }
 
@@ -61,6 +61,6 @@ export class DriverCannotBeResolved extends ContainerException {
      * @memberof DriverCannotBeResolved
      */
     public constructor(name: string) {
-        super(`Unable to resolve driver for [${name}].'`);
+        super(`Unable to resolve driver for [${name}]`);
     }
 }

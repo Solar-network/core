@@ -1,7 +1,7 @@
-import { DatabaseService, Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Enums, Providers, Types, Utils } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Blocks, Crypto, Interfaces, Managers } from "@arkecosystem/crypto";
+import { DatabaseService, Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Enums, Providers, Types, Utils } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Blocks, Crypto, Interfaces, Managers } from "@solar-network/crypto";
 
 import { ProcessBlocksJob } from "./process-blocks-job";
 import { StateMachine } from "./state-machine";
@@ -14,7 +14,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     public readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-blockchain")
+    @Container.tagged("plugin", "@solar-network/core-blockchain")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.StateStore)
@@ -63,7 +63,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         if (this.stateStore.getNetworkStart()) {
             this.logger.warning(
-                "ARK Core is launched in Genesis Start mode. This is usually for starting the first node on the blockchain. Unless you know what you are doing, this is likely wrong.",
+                "Solar Core is launched in Genesis Start mode. This is usually for starting the first node on the blockchain. Unless you know what you are doing, this is likely wrong :warning:",
             );
         }
 
@@ -81,7 +81,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                     "block",
                     blocks.length,
                     true,
-                )} from height ${blocks[0].height.toLocaleString()} in queue.`,
+                )} from height ${blocks[0].height.toLocaleString()} in queue :skull:`,
             );
         });
     }
@@ -115,7 +115,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
      * @return {void}
      */
     public async boot(skipStartedCheck = false): Promise<boolean> {
-        this.logger.info("Starting Blockchain Manager");
+        this.logger.info("Starting Blockchain Manager :chains:");
 
         this.stateStore.reset(blockchainMachine);
 
@@ -145,7 +145,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     public async dispose(): Promise<void> {
         if (!this.stopped) {
-            this.logger.info("Stopping Blockchain Manager");
+            this.logger.info("Stopping Blockchain Manager :chains:");
 
             this.stopped = true;
             this.stateStore.clearWakeUpTimeout();
@@ -195,7 +195,11 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     /**
      * Push a block to the process queue.
      */
-    public async handleIncomingBlock(block: Interfaces.IBlockData, fromForger = false): Promise<void> {
+    public async handleIncomingBlock(
+        block: Interfaces.IBlockData,
+        fromForger = false,
+        fireBlockReceivedEvent = true,
+    ): Promise<void> {
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.height);
 
         const currentSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup);
@@ -205,13 +209,17 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             const minimumMs: number = 2000;
             const timeLeftInMs: number = Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup);
             if (currentSlot !== receivedSlot || timeLeftInMs < minimumMs) {
-                this.logger.info(`Discarded block ${block.height.toLocaleString()} because it was received too late.`);
+                this.logger.info(
+                    `Discarded block ${block.height.toLocaleString()} because it was received too late :exclamation:`,
+                );
                 return;
             }
         }
 
         if (receivedSlot > currentSlot) {
-            this.logger.info(`Discarded block ${block.height.toLocaleString()} because it takes a future slot.`);
+            this.logger.info(
+                `Discarded block ${block.height.toLocaleString()} because it takes a future slot :exclamation:`,
+            );
             return;
         }
 
@@ -221,9 +229,11 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             this.dispatch("NEWBLOCK");
             this.enqueueBlocks([block]);
 
-            this.events.dispatch(Enums.BlockEvent.Received, block);
+            if (fireBlockReceivedEvent) {
+                this.events.dispatch(Enums.BlockEvent.Received, block);
+            }
         } else {
-            this.logger.info(`Block disregarded because blockchain is not ready`);
+            this.logger.info(`Block disregarded because blockchain is not ready :exclamation:`);
 
             this.events.dispatch(Enums.BlockEvent.Disregarded, block);
         }
@@ -352,7 +362,11 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
             const resetHeight: number = lastBlock.data.height - nblocks;
             this.logger.info(
-                `Removing ${Utils.pluralize("block", nblocks, true)}. Reset to height ${resetHeight.toLocaleString()}`,
+                `Removing ${Utils.pluralize(
+                    "block",
+                    nblocks,
+                    true,
+                )}. Reset to height ${resetHeight.toLocaleString()} :warning:`,
             );
 
             this.stateStore.setLastDownloadedBlock(lastBlock.data);
@@ -376,7 +390,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             }
         } catch (err) {
             this.logger.error(err.stack);
-            this.logger.warning("Shutting down app, because state might be corrupted");
+            this.logger.warning("Shutting down app, because state might be corrupted :boom:");
             process.exit(1);
         }
     }

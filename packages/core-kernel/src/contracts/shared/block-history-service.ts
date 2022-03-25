@@ -1,4 +1,4 @@
-import { Interfaces, Utils } from "@arkecosystem/crypto";
+import { Interfaces, Utils } from "@solar-network/crypto";
 
 import { Options, OrCriteria, OrEqualCriteria, OrNumericCriteria, Pagination, ResultsPage, Sorting } from "../search";
 import { OrTransactionCriteria } from "./transaction-history-service";

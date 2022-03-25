@@ -1,4 +1,4 @@
-import { Options, Ora } from "ora";
+import { Options, Ora } from "@alessiodf/ora";
 import { JsonObject } from "type-fest";
 
 import {
@@ -247,12 +247,12 @@ export class ComponentFactory {
 
     /**
      * @param {string[]} head
-     * @param {*} callback
+     * @param {Function} callback
      * @param {object} [opts={}]
      * @returns {void}
      * @memberof ComponentFactory
      */
-    public table(head: string[], callback: any, opts: object = {}): void {
+    public table(head: string[], callback: Function, opts: object = {}): void {
         return this.app.get<Table>(Identifiers.Table).render(head, callback, opts);
     }
 

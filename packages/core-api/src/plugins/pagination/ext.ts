@@ -1,7 +1,7 @@
 // Based on https://github.com/fknop/hapi-pagination
 
-import { Utils } from "@arkecosystem/core-kernel";
 import Hoek from "@hapi/hoek";
+import { Utils } from "@solar-network/core-kernel";
 import Qs from "querystring";
 
 export class Ext {

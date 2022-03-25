@@ -6,7 +6,7 @@ import { ITransactionData } from "../interfaces";
 import { configManager } from "../managers";
 import { BigNumber, isGenesisTransaction } from "../utils";
 
-const maxBytes = (ajv: Ajv) => {
+const maxBytes = (ajv: Ajv): void => {
     ajv.addKeyword("maxBytes", {
         type: "string",
         compile(schema, parentSchema) {
@@ -26,14 +26,14 @@ const maxBytes = (ajv: Ajv) => {
     });
 };
 
-const transactionType = (ajv: Ajv) => {
+const transactionType = (ajv: Ajv): void => {
     ajv.addKeyword("transactionType", {
         // @ts-ignore
         compile(schema) {
             return (data, dataPath, parentObject: ITransactionData) => {
                 // Impose dynamic multipayment limit based on milestone
                 if (
-                    data === TransactionType.MultiPayment &&
+                    data === TransactionType.Core.MultiPayment &&
                     parentObject &&
                     (!parentObject.typeGroup || parentObject.typeGroup === 1)
                 ) {
@@ -54,7 +54,7 @@ const transactionType = (ajv: Ajv) => {
     });
 };
 
-const network = (ajv: Ajv) => {
+const network = (ajv: Ajv): void => {
     ajv.addKeyword("network", {
         compile(schema) {
             return (data) => {
@@ -68,7 +68,7 @@ const network = (ajv: Ajv) => {
     });
 };
 
-const bignumber = (ajv: Ajv) => {
+const bignumber = (ajv: Ajv): void => {
     const instanceOf = ajvKeywords.get("instanceof").definition;
     instanceOf.CONSTRUCTORS.BigNumber = BigNumber;
 
@@ -130,7 +130,7 @@ const bignumber = (ajv: Ajv) => {
     });
 };
 
-const blockId = (ajv: Ajv) => {
+const blockId = (ajv: Ajv): void => {
     ajv.addKeyword("blockId", {
         compile(schema) {
             return (data, dataPath, parentObject: any) => {

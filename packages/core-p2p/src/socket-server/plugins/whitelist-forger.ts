@@ -1,5 +1,6 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
 import Boom from "@hapi/boom";
+import { Server } from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { InternalRoute } from "../routes/internal";
 
@@ -11,7 +12,7 @@ export class WhitelistForgerPlugin {
     @Container.inject(Container.Identifiers.PeerProcessor)
     private readonly peerProcessor!: Contracts.P2P.PeerProcessor;
 
-    public register(server) {
+    public register(server: Server): void {
         const peerRoutesConfigByPath = this.app.resolve(InternalRoute).getRoutesConfigByPath();
         const peerProcessor = this.peerProcessor;
 

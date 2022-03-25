@@ -15,6 +15,7 @@ export enum Severity {
 
 export enum NetworkStateStatus {
     Default,
+    BelowMinimumDelegates,
     BelowMinimumPeers,
     Test,
     ColdStart,

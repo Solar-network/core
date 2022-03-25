@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 
 @Container.injectable()
 export class DposState implements Contracts.State.DposState {
@@ -73,7 +73,7 @@ export class DposState implements Contracts.State.DposState {
                     const username = a.getAttribute("delegate.username");
                     throw new Error(
                         `The balance and public key of both delegates are identical! ` +
-                            `Delegate "${username}" appears twice in the list.`,
+                            `Delegate "${username}" appears twice in the list`,
                     );
                 }
 
@@ -91,8 +91,8 @@ export class DposState implements Contracts.State.DposState {
     public setDelegatesRound(roundInfo: Contracts.Shared.RoundInfo): void {
         if (this.activeDelegates.length < roundInfo.maxDelegates) {
             throw new Error(
-                `Expected to find ${roundInfo.maxDelegates} delegates but only found ${this.activeDelegates.length}.` +
-                    `This indicates an issue with the genesis block & delegates.`,
+                `Expected to find ${roundInfo.maxDelegates} delegates but only found ${this.activeDelegates.length}. ` +
+                    `This indicates an issue with the genesis block and delegates`,
             );
         }
 

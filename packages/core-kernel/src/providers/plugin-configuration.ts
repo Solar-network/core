@@ -1,4 +1,4 @@
-import { get, has, set, unset } from "@arkecosystem/utils";
+import { get, has, set, unset } from "@solar-network/utils";
 import deepmerge from "deepmerge";
 
 import { Identifiers, inject, injectable } from "../ioc";

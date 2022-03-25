@@ -1,6 +1,6 @@
-import { Models } from "@arkecosystem/core-database";
-import { Container } from "@arkecosystem/core-kernel";
-import { Blocks, Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
+import { Models } from "@solar-network/core-database";
+import { Container } from "@solar-network/core-kernel";
+import { Blocks, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { decode, encode } from "msgpack-lite";
 import { camelizeKeys } from "xcase";
 
@@ -19,11 +19,11 @@ export class MessagePackCodec implements Codec {
         return itemToReturn;
     }
 
-    public encodeBlock(block: any): Buffer {
+    public encodeBlock(block: { Block_burned_fee: Utils.BigNumber; Block_id: string }): Buffer {
         try {
             const blockCamelized = camelizeKeys(MessagePackCodec.removePrefix(block, "Block_"));
 
-            return Blocks.Serializer.serialize(blockCamelized, true);
+            return encode([block.Block_burned_fee, Blocks.Serializer.serialize(blockCamelized, true)]);
         } catch (err) {
             throw new CodecException.BlockEncodeException(block.Block_id, err.message);
         }
@@ -31,18 +31,30 @@ export class MessagePackCodec implements Codec {
 
     public decodeBlock(buffer: Buffer): Models.Block {
         try {
-            return Blocks.Deserializer.deserialize(buffer, false).data as Models.Block;
+            const [burnedFee, serialized] = decode(buffer);
+            const data = Blocks.Deserializer.deserialize(serialized, false).data as Models.Block;
+            data.burnedFee = burnedFee;
+            return data;
         } catch (err) {
             throw new CodecException.BlockDecodeException(undefined, err.message);
         }
     }
 
-    public encodeTransaction(transaction: any): Buffer {
+    public encodeTransaction(transaction: {
+        Transaction_id: string;
+        Transaction_block_id: string;
+        Transaction_block_height: number;
+        Transaction_burned_fee: Utils.BigNumber;
+        Transaction_sequence: number;
+        Transaction_timestamp: number;
+        Transaction_serialized: Buffer;
+    }): Buffer {
         try {
             return encode([
                 transaction.Transaction_id,
                 transaction.Transaction_block_id,
                 transaction.Transaction_block_height,
+                transaction.Transaction_burned_fee,
                 transaction.Transaction_sequence,
                 transaction.Transaction_timestamp,
                 transaction.Transaction_serialized,
@@ -55,7 +67,7 @@ export class MessagePackCodec implements Codec {
     public decodeTransaction(buffer: Buffer): Models.Transaction {
         let transactionId = undefined;
         try {
-            const [id, blockId, blockHeight, sequence, timestamp, serialized] = decode(buffer);
+            const [id, blockId, blockHeight, burnedFee, sequence, timestamp, serialized] = decode(buffer);
             transactionId = id;
 
             const transaction: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytesUnsafe(
@@ -78,6 +90,7 @@ export class MessagePackCodec implements Codec {
                 vendorField: transaction.data.vendorField,
                 amount: transaction.data.amount,
                 fee: transaction.data.fee,
+                burnedFee: burnedFee,
                 serialized: serialized,
                 typeGroup: transaction.data.typeGroup || 1,
                 nonce: Utils.BigNumber.make(transaction.data.nonce || 0),
@@ -85,11 +98,11 @@ export class MessagePackCodec implements Codec {
                 asset: transaction.data.asset,
             };
         } catch (err) {
-            throw new CodecException.TransactionDecodeException((transactionId as unknown) as string, err.message);
+            throw new CodecException.TransactionDecodeException(transactionId as unknown as string, err.message);
         }
     }
 
-    public encodeRound(round: any): Buffer {
+    public encodeRound(round: { Round_round: string }): Buffer {
         try {
             const roundCamelized = camelizeKeys(MessagePackCodec.removePrefix(round, "Round_"));
 

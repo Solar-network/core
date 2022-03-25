@@ -2,7 +2,7 @@ import { totalmem } from "os";
 
 import { Application } from "../application";
 import { Spinner } from "../components";
-import { ProcessOptions } from "../contracts";
+import { AnyObject, ProcessOptions } from "../contracts";
 import { Identifiers, inject, injectable } from "../ioc";
 import { ProcessManager } from "../services";
 import { AbortRunningProcess } from "./abort-running-process";
@@ -36,7 +36,7 @@ export class DaemonizeProcess {
      * @param {*} flags
      * @memberof DaemonizeProcess
      */
-    public execute(options: ProcessOptions, flags): void {
+    public async execute(options: ProcessOptions, flags: AnyObject): Promise<void> {
         const processName: string = options.name;
 
         if (this.processManager.has(processName)) {
@@ -44,10 +44,9 @@ export class DaemonizeProcess {
             this.app.get<AbortUnknownProcess>(Identifiers.AbortRunningProcess).execute(processName);
         }
 
-        let spinner;
-        try {
-            spinner = this.app.get<Spinner>(Identifiers.Spinner).render(`Starting ${processName}`);
+        const spinner = this.app.get<Spinner>(Identifiers.Spinner).render(`Starting ${processName}`);
 
+        try {
             const flagsProcess: Record<string, boolean | number | string> = {
                 "max-restarts": 5,
                 "kill-timeout": 30000,
@@ -61,7 +60,9 @@ export class DaemonizeProcess {
 
             const potato: boolean = totalmem() < 2 * 1024 ** 3;
 
-            this.processManager.start(
+            spinner.start();
+
+            await this.processManager.start(
                 {
                     ...options,
                     ...{
@@ -74,10 +75,11 @@ export class DaemonizeProcess {
                 },
                 flagsProcess,
             );
+
+            spinner.succeed();
         } catch (error) {
+            spinner.fail();
             throw new Error(error.stderr ? `${error.message}: ${error.stderr}` : error.message);
-        } finally {
-            spinner.stop();
         }
     }
 }

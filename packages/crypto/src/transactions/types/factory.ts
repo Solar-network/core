@@ -1,4 +1,4 @@
-import { UnkownTransactionError } from "../../errors";
+import { UnknownTransactionError } from "../../errors";
 import { ITransaction, ITransactionData } from "../../interfaces";
 import { InternalTransactionType } from "./internal-transaction-type";
 import { Transaction } from "./transaction";
@@ -8,7 +8,9 @@ type TransactionConstructor = typeof Transaction;
 export class TransactionTypeFactory {
     private static transactionTypes: Map<InternalTransactionType, Map<number, TransactionConstructor>>;
 
-    public static initialize(transactionTypes: Map<InternalTransactionType, Map<number, TransactionConstructor>>) {
+    public static initialize(
+        transactionTypes: Map<InternalTransactionType, Map<number, TransactionConstructor>>,
+    ): void {
         this.transactionTypes = transactionTypes;
     }
 
@@ -24,7 +26,7 @@ export class TransactionTypeFactory {
         const internalType: InternalTransactionType = InternalTransactionType.from(type, typeGroup);
 
         if (!this.transactionTypes.has(internalType)) {
-            throw new UnkownTransactionError(internalType.toString());
+            throw new UnknownTransactionError(internalType.toString());
         }
 
         // Either there is a match for the provided version or use the first available constructor as a fallback

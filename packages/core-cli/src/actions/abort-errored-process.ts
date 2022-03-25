@@ -22,7 +22,7 @@ export class AbortErroredProcess {
      */
     public execute(processName: string): void {
         if (this.processManager.isErrored(processName)) {
-            throw new Error(`The "${processName}" process has errored.`);
+            throw new Error(`The "${processName}" process has errored`);
         }
     }
 }

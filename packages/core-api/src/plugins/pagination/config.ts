@@ -2,7 +2,7 @@
 
 import Joi from "joi";
 
-export const getConfig = (options) => {
+export const getConfig = (options: object): { error: Joi.ValidationError | undefined; config: any } => {
     const { error, value } = Joi.object({
         query: Joi.object({
             limit: Joi.object({

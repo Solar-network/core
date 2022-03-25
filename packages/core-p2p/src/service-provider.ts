@@ -1,4 +1,4 @@
-import { Container, Providers, Services, Types, Utils } from "@arkecosystem/core-kernel";
+import { Container, Providers, Services, Types, Utils } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { ValidateAndAcceptPeerAction } from "./actions";
@@ -55,6 +55,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
     public configSchema(): object {
         return Joi.object({
             server: Joi.object({
+                banSeconds: Joi.number().integer().min(0).required(),
                 hostname: Joi.string()
                     .ip({ version: ["ipv4", "ipv6"] })
                     .required(),
@@ -114,7 +115,8 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
     private async buildServer(): Promise<void> {
         const server: Server = this.app.get<Server>(Container.Identifiers.P2PServer);
-        const serverConfig = this.config().get<Types.JsonObject>("server");
+        const serverConfig =
+            this.config().getRequired<{ banSeconds: number; hostname: string; port: number }>("server");
         Utils.assert.defined<Types.JsonObject>(serverConfig);
 
         await server.initialize("P2P Server", serverConfig);

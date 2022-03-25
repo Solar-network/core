@@ -1,4 +1,4 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import { performance } from "perf_hooks";
 
 import * as conditions from "./conditions";
@@ -41,7 +41,7 @@ export class Listener {
      * @param {string} event
      * @memberof Listener
      */
-    public async handle({ name, data }): Promise<void> {
+    public async handle({ name, data }: { name: string; data: Webhook }): Promise<void> {
         // Skip own events to prevent cycling
         if (name.toString().includes("webhooks")) {
             return;
@@ -81,12 +81,12 @@ export class Listener {
             });
 
             this.logger.debug(
-                `Webhooks Job ${webhook.id} completed! Event [${webhook.event}] has been transmitted to [${webhook.target}] with a status of [${statusCode}].`,
+                `Webhooks job ${webhook.id} completed! Event [${webhook.event}] has been transmitted to [${webhook.target}] with a status of [${statusCode}] :white_check_mark:`,
             );
 
             await this.dispatchWebhookEvent(start, webhook, payload);
         } catch (error) {
-            this.logger.error(`Webhooks Job ${webhook.id} failed: ${error.message}`);
+            this.logger.error(`Webhooks job ${webhook.id} failed: ${error.message} :x:`);
 
             await this.dispatchWebhookEvent(start, webhook, payload, error);
         }

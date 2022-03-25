@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers, Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
 @Container.injectable()
 export class Worker implements Contracts.TransactionPool.Worker {
@@ -32,7 +32,10 @@ export class Worker implements Contracts.TransactionPool.Worker {
             this.ipcSubprocess.sendAction("setHeight", currentHeight);
         }
 
-        const { id, serialized, isVerified } = await this.ipcSubprocess.sendRequest("getTransactionFromData", transactionData);
+        const { id, serialized, isVerified } = await this.ipcSubprocess.sendRequest(
+            "getTransactionFromData",
+            transactionData instanceof Buffer ? transactionData.toString("hex") : transactionData,
+        );
         const transaction = Transactions.TransactionFactory.fromBytesUnsafe(Buffer.from(serialized, "hex"), id);
         transaction.isVerified = isVerified;
 

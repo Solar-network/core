@@ -1,12 +1,12 @@
 {
-    "name": "@arkecosystem/core-blockchain",
-    "version": "3.1.0",
-    "description": "Blockchain Manager for ARK Core",
-    "license": "MIT",
+    "name": "@solar-network/core-blockchain",
+    "version": "3.2.0",
+    "description": "Blockchain Manager for Solar Core",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
-        "François-Xavier Thoorens <fx@ark.io>",
-        "Kristjan Košič <kristjan@ark.io>",
-        "Brian Faust <brian@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"
@@ -14,35 +14,22 @@
     "main": "dist/index",
     "types": "dist/index",
     "scripts": {
-        "build": "yarn clean && yarn compile",
-        "build:watch": "yarn clean && yarn compile -w",
-        "build:docs": "../../node_modules/typedoc/bin/typedoc --out docs src",
+        "build": "pnpm clean && pnpm compile",
+        "build:watch": "pnpm clean && pnpm compile -w",
         "clean": "rimraf dist",
-        "compile": "node ../../node_modules/typescript/bin/tsc",
-        "prepublishOnly": "yarn build",
-        "pretest": "bash ../../scripts/pre-test.sh"
+        "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
-        "@arkecosystem/core-database": "3.1.0",
-        "@arkecosystem/core-kernel": "3.1.0",
-        "@arkecosystem/core-state": "3.1.0",
-        "@arkecosystem/core-transactions": "3.1.0",
-        "@arkecosystem/crypto": "3.1.0",
-        "joi": "17.4.2",
+        "@solar-network/core-database": "workspace:*",
+        "@solar-network/core-kernel": "workspace:*",
+        "@solar-network/core-state": "workspace:*",
+        "@solar-network/core-transactions": "workspace:*",
+        "@solar-network/crypto": "workspace:*",
+        "delay": "5.0.0",
+        "joi": "17.6.0",
         "xstate": "4.23.4"
     },
     "devDependencies": {
         "@types/async": "3.2.7"
-    },
-    "engines": {
-        "node": ">=10.x"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "arkecosystem": {
-        "core": {
-            "alias": "blockchain"
-        }
     }
 }

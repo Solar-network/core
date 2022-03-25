@@ -1,5 +1,5 @@
-import { Container, Contracts, Enums, Providers, Types, Utils } from "@arkecosystem/core-kernel";
-import { Blocks, Interfaces, Managers, Transactions, Validation } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Providers, Services, Types, Utils } from "@solar-network/core-kernel";
+import { Blocks, Crypto, Interfaces, Managers, Transactions, Validation } from "@solar-network/crypto";
 import dayjs from "dayjs";
 import delay from "delay";
 
@@ -19,7 +19,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     private readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-p2p")
+    @Container.tagged("plugin", "@solar-network/core-p2p")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.PeerConnector)
@@ -31,8 +31,18 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
+    @Container.inject(Container.Identifiers.PeerRepository)
+    private readonly repository!: Contracts.P2P.PeerRepository;
+
     @Container.inject(Container.Identifiers.QueueFactory)
     private readonly createQueue!: Types.QueueFactory;
+
+    @Container.inject(Container.Identifiers.TriggerService)
+    private readonly triggers!: Services.Triggers.Triggers;
+
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
 
     private outgoingRateLimiter!: RateLimiter;
 
@@ -43,6 +53,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         this.outgoingRateLimiter = buildRateLimiter({
             // White listing anybody here means we would not throttle ourselves when sending
             // them requests, ie we could spam them.
+            isOutgoing: true,
             whitelist: [],
             remoteAccess: [],
             rateLimit: this.configuration.getOptional<number>("rateLimit", 100),
@@ -54,7 +65,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         });
     }
 
-    public async postBlock(peer: Contracts.P2P.Peer, block: Interfaces.IBlock) {
+    public async postBlock(peer: Contracts.P2P.Peer, block: Interfaces.IBlock): Promise<void> {
         const postBlockTimeout = 10000;
 
         const response = await this.emit(
@@ -97,10 +108,15 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     // ! do not rely on parameter timeoutMsec as guarantee that ping method will resolve within it !
     // ! peerVerifier.checkState can take more time !
     // TODO refactor ?
-    public async ping(peer: Contracts.P2P.Peer, timeoutMsec: number, force = false): Promise<any> {
+    public async ping(
+        peer: Contracts.P2P.Peer,
+        timeoutMsec: number,
+        blockTimeLookup: Crypto.GetBlockTimeStampLookup | undefined,
+        force = false,
+    ): Promise<any> {
         const deadline = new Date().getTime() + timeoutMsec;
 
-        if (peer.recentlyPinged() && !force) {
+        if (peer.isIgnored() || (!peer.stale && peer.recentlyPinged() && !force)) {
             return undefined;
         }
 
@@ -135,8 +151,82 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         }
 
         peer.lastPinged = dayjs();
-        peer.state = pingResponse.state;
         peer.plugins = pingResponse.config.plugins;
+        peer.publicKeys = [];
+        peer.stale = false;
+        peer.state = pingResponse.state;
+
+        let slotInfo;
+        if (blockTimeLookup) {
+            slotInfo = Crypto.Slots.getSlotInfo(blockTimeLookup);
+            if (slotInfo.slotNumber < 0 && pingResponse.state.currentSlot) {
+                pingResponse.state.currentSlot = pingResponse.state.currentSlot >> 0;
+            }
+            const stateBuffer = Buffer.from(
+                Utils.stringify({ state: pingResponse.state, config: pingResponse.config }),
+            );
+            const alreadyCheckedSignatures: string[] = [];
+            const lastBlock: Interfaces.IBlock = this.app
+                .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
+                .getLastBlock();
+            const height = lastBlock.data.height + 1;
+            const roundInfo = Utils.roundCalculator.calculateRound(height);
+            const delegates: (string | undefined)[] = (
+                (await this.triggers.call("getActiveDelegates", {
+                    roundInfo,
+                })) as Contracts.State.Wallet[]
+            ).map((wallet) => wallet.getPublicKey());
+            for (const signatureIndex in pingResponse.signatures) {
+                const publicKey = pingResponse.publicKeys![signatureIndex];
+                const signature = pingResponse.signatures[signatureIndex];
+                const delegatePeer = this.repository
+                    .getPeers()
+                    .find((otherPeer) => peer.ip !== otherPeer.ip && otherPeer.publicKeys.includes(publicKey));
+                if (
+                    !alreadyCheckedSignatures.includes(publicKey + signature) &&
+                    pingResponse.state &&
+                    pingResponse.state.currentSlot
+                ) {
+                    if (
+                        pingResponse.state.currentSlot === slotInfo.slotNumber - 1 ||
+                        pingResponse.state.currentSlot === slotInfo.slotNumber ||
+                        pingResponse.state.currentSlot === slotInfo.slotNumber + 1
+                    ) {
+                        if (
+                            !delegates.includes(publicKey) ||
+                            !Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey)
+                        ) {
+                            break;
+                        }
+                        const delegateWallet = this.walletRepository.findByPublicKey(publicKey);
+
+                        if (!delegatePeer) {
+                            peer.publicKeys.push(publicKey);
+                            delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
+                        } else if (!peer.isForked()) {
+                            if (
+                                delegatePeer.isForked() ||
+                                (peer.state.header.height === lastBlock.data.height &&
+                                    peer.state.header.id === lastBlock.data.id) ||
+                                (peer.state.header.height >= delegatePeer.state.header.height &&
+                                    delegatePeer.state.header.id !== lastBlock.data.id)
+                            ) {
+                                peer.publicKeys.push(publicKey);
+                                delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
+                                delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
+                                    (peerPublicKey) => peerPublicKey !== publicKey,
+                                );
+                            }
+                        }
+                        alreadyCheckedSignatures.push(publicKey + signature);
+                    }
+                }
+            }
+        }
+
+        if (peer.plugins["@solar-network/core-api"]) {
+            peer.plugins["@arkecosystem/core-api"] = peer.plugins["@solar-network/core-api"];
+        }
 
         return pingResponse.state;
     }
@@ -180,7 +270,9 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             fromBlockHeight,
             blockLimit = constants.MAX_DOWNLOAD_BLOCKS,
             headersOnly,
-        }: { fromBlockHeight: number; blockLimit?: number; headersOnly?: boolean },
+            silent = false,
+            timeout,
+        }: { fromBlockHeight: number; blockLimit?: number; headersOnly?: boolean; silent?: boolean; timeout?: number },
     ): Promise<Interfaces.IBlockData[]> {
         const maxPayload = headersOnly ? blockLimit * constants.KILOBYTE : constants.DEFAULT_MAX_PAYLOAD;
 
@@ -193,19 +285,25 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 headersOnly,
                 serialized: true,
             },
-            this.configuration.getRequired<number>("getBlocksTimeout"),
+            timeout ? timeout : this.configuration.getRequired<number>("getBlocksTimeout"),
             maxPayload,
             false,
         );
 
         if (!peerBlocks || !peerBlocks.length) {
-            this.logger.debug(
-                `Peer ${peer.ip} did not return any blocks via height ${fromBlockHeight.toLocaleString()}.`,
-            );
+            if (!silent) {
+                this.logger.debug(
+                    `Peer ${
+                        peer.ip
+                    } did not return any blocks via height ${fromBlockHeight.toLocaleString()} :see_no_evil:`,
+                );
+            }
             return [];
         }
 
         for (const block of peerBlocks) {
+            block.ip = peer.ip;
+
             if (headersOnly) {
                 // with headersOnly we still get block.transactions as empty array (protobuf deser) but in this case we actually
                 // don't want the transactions as a property at all (because it would make validation fail)
@@ -240,7 +338,9 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     private validateReply(peer: Contracts.P2P.Peer, reply: any, endpoint: string): boolean {
         const schema = replySchemas[endpoint];
         if (schema === undefined) {
-            this.logger.error(`Can't validate reply from "${endpoint}": none of the predefined schemas matches.`);
+            this.logger.error(
+                `Cannot validate reply from "${endpoint}": none of the predefined schemas matches :bangbang:`,
+            );
             return false;
         }
 
@@ -314,9 +414,6 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     private async throttle(peer: Contracts.P2P.Peer, event: string): Promise<void> {
         const msBeforeReCheck = 1000;
         while (await this.outgoingRateLimiter.hasExceededRateLimitNoConsume(peer.ip, event)) {
-            this.logger.debug(
-                `Throttling outgoing requests to ${peer.ip}/${event} to avoid triggering their rate limit`,
-            );
             await delay(msBeforeReCheck);
         }
         try {
@@ -339,18 +436,18 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
         switch (error.name) {
             case SocketErrors.Validation:
-                this.logger.debug(`Socket data validation error (peer ${peer.ip}) : ${error.message}`);
+                this.logger.debug(`Socket data validation error (peer ${peer.ip}) : ${error.message} :warning:`);
                 break;
             case "Error":
                 /* istanbul ignore else */
                 if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                    this.logger.debug(`Response error (peer ${peer.ip}/${event}) : ${error.message}`);
+                    this.logger.debug(`Response error (peer ${peer.ip}/${event}) : ${error.message} :warning:`);
                 }
                 break;
             default:
                 /* istanbul ignore else */
                 if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                    this.logger.debug(`Socket error (peer ${peer.ip}) : ${error.message}`);
+                    this.logger.debug(`Socket error (peer ${peer.ip}) : ${error.message} :warning:`);
                 }
                 /* istanbul ignore else */
                 if (disconnect) {

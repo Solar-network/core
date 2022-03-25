@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
 import Sntp, { TimeOptions } from "@hapi/sntp";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 
 export const checkNTP = (
     app: Contracts.Kernel.Application,
@@ -22,6 +22,6 @@ export const checkNTP = (
             }
         }
 
-        reject(new Error("Please check your NTP connectivity, couldn't connect to any host."));
+        reject(new Error("Please check your NTP connectivity, couldn't connect to any host"));
     });
 };

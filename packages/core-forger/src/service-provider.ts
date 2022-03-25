@@ -1,11 +1,11 @@
-import { Container, Contracts, Enums, Providers, Services } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Enums, Providers, Services } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { ForgeNewBlockAction, IsForgingAllowedAction } from "./actions";
 import { DelegateFactory } from "./delegate-factory";
 import { DelegateTracker } from "./delegate-tracker";
 import { ForgerService } from "./forger-service";
-import { Delegate } from "./interfaces";
+import { Delegate, RelayHost } from "./interfaces";
 import { CurrentDelegateProcessAction, LastForgedBlockRemoteAction, NextSlotProcessAction } from "./process-actions";
 
 /**
@@ -35,14 +35,10 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         const forgerService = this.app.get<ForgerService>(Container.Identifiers.ForgerService);
 
-        forgerService.register(this.config().all());
+        forgerService.register(this.config().get("hosts") as RelayHost[]);
         await forgerService.boot(delegates);
 
         this.startTracker(delegates);
-
-        // // Don't keep bip38 password in memory
-        // this.config().set("app.flags.bip38", undefined);
-        // this.config().set("app.flags.password", undefined);
     }
 
     /**
@@ -58,9 +54,9 @@ export class ServiceProvider extends Providers.ServiceProvider {
      * @memberof ServiceProvider
      */
     public async bootWhen(): Promise<boolean> {
-        const { secrets, bip38 }: { secrets: string[]; bip38: string } = this.app.config("delegates")!;
+        const { secrets }: { secrets: string[] } = this.app.config("delegates")!;
 
-        if (!bip38 && (!secrets || !secrets.length || !Array.isArray(secrets))) {
+        if (!secrets || !secrets.length || !Array.isArray(secrets)) {
             return false;
         }
 
@@ -82,8 +78,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
                 )
                 .required(),
             tracker: Joi.bool().required(),
-            bip38: Joi.string(),
-            password: Joi.string(),
         }).unknown(true);
     }
 
@@ -140,12 +134,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         for (const secret of this.app.config("delegates.secrets")) {
             delegates.add(DelegateFactory.fromBIP39(secret));
-        }
-
-        const { bip38, password } = this.app.config("app.flags")!;
-
-        if (bip38) {
-            delegates.add(DelegateFactory.fromBIP38(bip38, password));
         }
 
         return [...delegates];

@@ -1247,6 +1247,12 @@ export namespace peer {
 
         /** GetStatusResponse config */
         config?: (peer.GetStatusResponse.IConfig|null);
+
+        /** GetStatusResponse publicKeys */
+        publicKeys?: (string[]|null);
+
+        /** GetStatusResponse signatures */
+        signatures?: (string[]|null);
     }
 
     /** Represents a GetStatusResponse. */
@@ -1263,6 +1269,12 @@ export namespace peer {
 
         /** GetStatusResponse config. */
         public config?: (peer.GetStatusResponse.IConfig|null);
+
+        /** GetStatusResponse publicKeys. */
+        public publicKeys: string[];
+
+        /** GetStatusResponse signatures. */
+        public signatures: string[];
 
         /**
          * Creates a new GetStatusResponse instance using the specified properties.

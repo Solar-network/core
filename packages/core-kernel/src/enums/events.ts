@@ -36,12 +36,31 @@ export enum CryptoEvent {
  * @export
  * @enum {number}
  */
+export enum BlockchainEvent {
+    Synced = "blockchain.synced",
+}
+
+/**
+ * @export
+ * @enum {number}
+ */
 export enum BlockEvent {
     Applied = "block.applied",
     Disregarded = "block.disregarded",
     Forged = "block.forged",
     Received = "block.received",
     Reverted = "block.reverted",
+}
+
+/**
+ * @export
+ * @enum {number}
+ */
+export enum DatabaseEvent {
+    PreConnect = "database.preConnect",
+    PostConnect = "database.postConnect",
+    PreDisconnect = "database.preDisconnect",
+    PostDisconnect = "database.postDisconnect",
 }
 
 /**

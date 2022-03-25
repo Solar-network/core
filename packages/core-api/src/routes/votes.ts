@@ -2,6 +2,7 @@ import Hapi from "@hapi/hapi";
 import Joi from "joi";
 
 import { VotesController } from "../controllers/votes";
+import { transactionSortingSchema } from "../resources-new";
 import * as Schemas from "../schemas";
 
 export const register = (server: Hapi.Server): void => {
@@ -11,14 +12,16 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/votes",
-        handler: (request: Hapi.Request) => controller.index(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.index(request, h),
         options: {
             validate: {
                 query: Joi.object({
                     ...server.app.schemas.transactionCriteriaSchemas,
                     orderBy: server.app.schemas.transactionsOrderBy,
                     transform: Joi.bool().default(true),
-                }).concat(Schemas.pagination),
+                })
+                    .concat(transactionSortingSchema)
+                    .concat(Schemas.pagination),
             },
             plugins: {
                 pagination: {
@@ -31,7 +34,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/votes/{id}",
-        handler: (request: Hapi.Request) => controller.show(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.show(request, h),
         options: {
             validate: {
                 params: Joi.object({

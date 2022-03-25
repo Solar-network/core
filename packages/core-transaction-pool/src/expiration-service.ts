@@ -1,5 +1,5 @@
-import { Container, Contracts, Providers, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Crypto, Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Crypto, Interfaces } from "@solar-network/crypto";
 
 @Container.injectable()
 export class ExpirationService implements Contracts.TransactionPool.ExpirationService {
@@ -7,7 +7,7 @@ export class ExpirationService implements Contracts.TransactionPool.ExpirationSe
     public readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-transaction-pool")
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.StateStore)

@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Crypto, Interfaces } from "@solar-network/crypto";
 
 import { Peer } from "./peer";
 
@@ -9,7 +9,12 @@ export interface PeerCommunicator {
 
     postTransactions(peer: Peer, transactions: Buffer[]): Promise<any>;
 
-    ping(peer: Peer, timeoutMsec: number, force?: boolean): Promise<any>;
+    ping(
+        peer: Peer,
+        timeoutMsec: number,
+        blockTimeLookup?: Crypto.GetBlockTimeStampLookup,
+        force?: boolean,
+    ): Promise<any>;
 
     pingPorts(peer: Peer): Promise<void>;
 

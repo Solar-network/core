@@ -1,12 +1,12 @@
-import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Transactions } from "@solar-network/crypto";
 
 import { TransactionAlreadyInPoolError, TransactionPoolFullError } from "./errors";
 
 @Container.injectable()
 export class Service implements Contracts.TransactionPool.Service {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-transaction-pool")
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.StateStore)
@@ -55,7 +55,7 @@ export class Service implements Contracts.TransactionPool.Service {
         this.disposed = true;
     }
 
-    public async handle({ name }): Promise<void> {
+    public async handle({ name }: { name: string; data: object }): Promise<void> {
         try {
             switch (name) {
                 case Enums.StateEvent.BuilderFinished:
@@ -105,7 +105,7 @@ export class Service implements Contracts.TransactionPool.Service {
                 this.events.dispatch(Enums.TransactionEvent.AddedToPool, transaction.data);
             } catch (error) {
                 this.storage.removeTransaction(transaction.id);
-                this.logger.warning(`${transaction} failed to enter pool: ${error.message}`);
+                this.logger.warning(`${transaction} failed to enter pool: ${error.message} :warning:`);
                 this.events.dispatch(Enums.TransactionEvent.RejectedByPool, transaction.data);
 
                 throw error instanceof Contracts.TransactionPool.PoolError
@@ -151,7 +151,9 @@ export class Service implements Contracts.TransactionPool.Service {
 
                     previouslyForgedSuccesses++;
                 } catch (error) {
-                    this.logger.debug(`Failed to re-add previously forged transaction ${id}: ${error.message}`);
+                    this.logger.debug(
+                        `Failed to re-add previously forged transaction ${id}: ${error.message} :warning:`,
+                    );
                     previouslyForgedFailures++;
                 }
             }
@@ -172,7 +174,9 @@ export class Service implements Contracts.TransactionPool.Service {
                         previouslyStoredSuccesses++;
                     } catch (error) {
                         this.storage.removeTransaction(id);
-                        this.logger.debug(`Failed to re-add previously stored transaction ${id}: ${error.message}`);
+                        this.logger.debug(
+                            `Failed to re-add previously stored transaction ${id}: ${error.message} :warning:`,
+                        );
                         previouslyStoredFailures++;
                     }
                 } else {
@@ -183,19 +187,27 @@ export class Service implements Contracts.TransactionPool.Service {
             }
 
             if (previouslyForgedSuccesses >= 1) {
-                this.logger.info(`${previouslyForgedSuccesses} previously forged transactions re-added`);
+                this.logger.info(
+                    `${previouslyForgedSuccesses} previously forged transactions re-added :money_with_wings:`,
+                );
             }
             if (previouslyForgedFailures >= 1) {
-                this.logger.warning(`${previouslyForgedFailures} previously forged transactions failed re-adding`);
+                this.logger.warning(
+                    `${previouslyForgedFailures} previously forged transactions failed re-adding :warning:`,
+                );
             }
             if (previouslyStoredSuccesses >= 1) {
-                this.logger.info(`${previouslyStoredSuccesses} previously stored transactions re-added`);
+                this.logger.info(
+                    `${previouslyStoredSuccesses} previously stored transactions re-added :money_with_wings:`,
+                );
             }
             if (previouslyStoredExpirations >= 1) {
-                this.logger.info(`${previouslyStoredExpirations} previously stored transactions expired`);
+                this.logger.info(`${previouslyStoredExpirations} previously stored transactions expired :zap:`);
             }
             if (previouslyStoredFailures >= 1) {
-                this.logger.warning(`${previouslyStoredFailures} previously stored transactions failed re-adding`);
+                this.logger.warning(
+                    `${previouslyStoredFailures} previously stored transactions failed re-adding :warning:`,
+                );
             }
         });
     }
@@ -210,7 +222,7 @@ export class Service implements Contracts.TransactionPool.Service {
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
             if (this.storage.hasTransaction(transaction.id) === false) {
-                this.logger.error(`Failed to remove ${transaction} that isn't in pool`);
+                this.logger.error(`Failed to remove ${transaction} that isn't in pool :warning:`);
                 return;
             }
 

@@ -1,5 +1,5 @@
-import { Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Blocks, Crypto, Interfaces, Utils } from "@arkecosystem/crypto";
+import { Utils as AppUtils } from "@solar-network/core-kernel";
+import { Blocks, Crypto, Interfaces, Utils } from "@solar-network/crypto";
 
 /**
  * @export
@@ -20,6 +20,10 @@ export abstract class Method {
         transactions: Interfaces.ITransactionData[],
         options: Record<string, any>,
     ): Interfaces.IBlock {
+        if (!(transactions instanceof Array)) {
+            transactions = [];
+        }
+
         const totals: { amount: Utils.BigNumber; fee: Utils.BigNumber } = {
             amount: Utils.BigNumber.ZERO,
             fee: Utils.BigNumber.ZERO,

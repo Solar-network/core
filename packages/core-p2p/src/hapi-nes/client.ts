@@ -7,6 +7,7 @@
 */
 
 import WebSocket from "ws";
+
 import { parseNesMessage, stringifyNesMessage } from "./utils";
 
 /* eslint no-undef: 0 */
@@ -88,7 +89,7 @@ export class Client {
     private _disconnectRequested;
     private _lastPinged;
 
-    public constructor(url, options?) {
+    public constructor(url: string, options?: { ws?: object; timeout?: number }) {
         options = options || {};
 
         options.ws = options.ws || {};
@@ -96,8 +97,8 @@ export class Client {
         options.ws = {
             maxPayload: DEFAULT_MAX_PAYLOAD_CLIENT,
             ...options.ws,
-            perMessageDeflate: false
-        }
+            perMessageDeflate: false,
+        };
 
         // Configuration
         this._url = url;
@@ -127,7 +128,14 @@ export class Client {
         this.id = null; // Assigned when hello response is received
     }
 
-    public connect(options?) {
+    public connect(options?: {
+        auth?: unknown;
+        delay?: number;
+        maxDelay?: number;
+        reconnect?: boolean;
+        retries?: number;
+        timeout?: number;
+    }): Promise<void> {
         options = options || {};
 
         if (this._reconnection) {
@@ -155,7 +163,7 @@ export class Client {
             this._reconnection = null;
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             this._connect(options, true, (err) => {
                 if (err) {
                     return reject(err);
@@ -166,15 +174,15 @@ export class Client {
         });
     }
 
-    public disconnect() {
+    public disconnect(): Promise<void> {
         return new Promise((resolve) => this._disconnect(resolve, false));
     }
 
-    public terminate() {
+    public terminate(): Promise<void> {
         return new Promise((resolve) => this._disconnect(resolve, false, true));
     }
 
-    public request(options) {
+    public request(options: { headers?: unknown; path: string; payload?: unknown }): Promise<unknown> {
         if (typeof options === "string") {
             options = {
                 path: options,
@@ -192,17 +200,17 @@ export class Client {
         return this._send(request, true);
     }
 
-    public _isReady() {
+    public _isReady(): boolean {
         return this._ws && this._ws.readyState === WebSocket.OPEN;
     }
 
-    public setMaxPayload(maxPayload: number) {
+    public setMaxPayload(maxPayload: number): void {
         if (this._ws?._receiver) {
             this._ws._receiver._maxPayload = maxPayload;
         }
     }
 
-    public setTimeout(timeout: number) {
+    public setTimeout(timeout: number): void {
         this._settings.timeout = timeout;
     }
 

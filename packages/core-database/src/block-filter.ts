@@ -1,4 +1,4 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 
 import { Block } from "./models/block";
 

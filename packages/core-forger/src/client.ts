@@ -1,6 +1,6 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
-import { Codecs, Nes, NetworkState, NetworkStateStatus } from "@arkecosystem/core-p2p";
-import { Blocks, Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
+import { Codecs, Nes, NetworkState } from "@solar-network/core-p2p";
+import { Blocks, Interfaces } from "@solar-network/crypto";
 
 import { HostNoResponseError, RelayCommunicationError } from "./errors";
 import { RelayHost } from "./interfaces";
@@ -13,6 +13,15 @@ const MAX_PAYLOAD_CLIENT = 20 * 1024 * 1024; // allow large value of max payload
  */
 @Container.injectable()
 export class Client {
+    /**
+     * @private
+     * @type {Contracts.Kernel.Application}
+     * @memberof ForgerService
+     */
+
+    @Container.inject(Container.Identifiers.Application)
+    private readonly app!: Contracts.Kernel.Application;
+
     /**
      * @private
      * @type {Contracts.Kernel.Logger}
@@ -39,7 +48,7 @@ export class Client {
      * @param {RelayHost[]} hosts
      * @memberof Client
      */
-    public register(hosts: RelayHost[]) {
+    public register(hosts: RelayHost[]): void {
         this.hosts = hosts.map((host: RelayHost) => {
             const url = `ws://${Utils.IpAddress.normalizeAddress(host.hostname)}:${host.port}`;
             const options = { ws: { maxPayload: MAX_PAYLOAD_CLIENT } };
@@ -47,7 +56,7 @@ export class Client {
             connection.connect().catch((e) => {}); // connect promise can fail when p2p is not ready, it's fine it will retry
 
             connection.onError = (e) => {
-                this.logger.error(e.message);
+                this.logger.error(`${e.message} :bangbang:`);
             };
 
             host.socket = connection;
@@ -77,12 +86,6 @@ export class Client {
      * @memberof Client
      */
     public async broadcastBlock(block: Interfaces.IBlock): Promise<void> {
-        this.logger.debug(
-            `Broadcasting block ${block.data.height.toLocaleString()} (${block.data.id}) with ${
-                block.data.numberOfTransactions
-            } transactions to ${this.host.hostname}`,
-        );
-
         try {
             await this.emit("p2p.blocks.postBlock", {
                 block: Blocks.Serializer.serializeWithTransactions({
@@ -91,7 +94,7 @@ export class Client {
                 }),
             });
         } catch (error) {
-            this.logger.error(`Broadcast block failed: ${error.message}`);
+            this.logger.error(`Broadcast block failed: ${error.message} :bangbang:`);
         }
     }
 
@@ -107,7 +110,7 @@ export class Client {
         try {
             await this.emit("p2p.internal.syncBlockchain");
         } catch (error) {
-            this.logger.error(`Could not sync check: ${error.message}`);
+            this.logger.error(`Could not sync check: ${error.message} :bangbang:`);
         }
     }
 
@@ -121,14 +124,28 @@ export class Client {
         return this.emit<Contracts.P2P.CurrentRound>("p2p.internal.getCurrentRound");
     }
 
-    public async getNetworkState(): Promise<Contracts.P2P.NetworkState> {
-        try {
-            return NetworkState.parse(
-                await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", {}, 4000),
-            );
-        } catch (err) {
-            return new NetworkState(NetworkStateStatus.Unknown);
-        }
+    public async getSlotNumber(timestamp?: number): Promise<number> {
+        await this.selectHost();
+
+        return this.emit<number>("p2p.internal.getSlotNumber", { timestamp });
+    }
+
+    public async getNetworkState(log: boolean): Promise<Contracts.P2P.NetworkState> {
+        return await NetworkState.parse(
+            await this.emit<Contracts.P2P.NetworkState>("p2p.internal.getNetworkState", { log }, 4000),
+        );
+    }
+
+    /**
+     * @returns {Promise<Contracts.P2P.Status>}
+     * @memberof Client
+     */
+    public async getStatus(): Promise<Contracts.P2P.Status> {
+        return await this.emit<Contracts.P2P.Status>(
+            "p2p.peer.getStatus",
+            { headers: { version: this.app.version() } },
+            2000,
+        );
     }
 
     /**
@@ -160,14 +177,14 @@ export class Client {
         );
 
         if (!host) {
-            this.logger.error("emitEvent: unable to find any local hosts.");
+            this.logger.error("emitEvent: unable to find any local hosts :bangbang:");
             return;
         }
 
         try {
             await this.emit("p2p.internal.emitEvent", { event, body });
         } catch (error) {
-            this.logger.error(`Failed to emit "${event}" to "${host.hostname}:${host.port}"`);
+            this.logger.error(`Failed to emit "${event}" to "${host.hostname}:${host.port}" :bangbang:`);
         }
     }
 
@@ -190,7 +207,7 @@ export class Client {
         this.logger.debug(
             `No open socket connection to any host: ${JSON.stringify(
                 this.hosts.map((host) => `${host.hostname}:${host.port}`),
-            )}.`,
+            )} :bangbang:`,
         );
 
         throw new HostNoResponseError(this.hosts.map((host) => host.hostname).join());
@@ -230,8 +247,10 @@ export class Client {
             "p2p.internal.getUnconfirmedTransactions": Codecs.getUnconfirmedTransactions,
             "p2p.internal.getCurrentRound": Codecs.getCurrentRound,
             "p2p.internal.getNetworkState": Codecs.getNetworkState,
+            "p2p.internal.getSlotNumber": Codecs.getSlotNumber,
             "p2p.internal.syncBlockchain": Codecs.syncBlockchain,
             "p2p.blocks.postBlock": Codecs.postBlock,
+            "p2p.peer.getStatus": Codecs.getStatus,
         };
 
         return codecs[event];

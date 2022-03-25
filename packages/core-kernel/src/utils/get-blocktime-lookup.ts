@@ -1,4 +1,4 @@
-import { Managers } from "@arkecosystem/crypto";
+import { Managers } from "@solar-network/crypto";
 
 import { Application } from "../contracts/kernel/application";
 import { Identifiers } from "../ioc/identifiers";
@@ -26,7 +26,7 @@ const mapHeightToMilestoneSpanTimestamp = async (
         const result = heightMappedToBlockTimestamp.get(height);
         if (result === undefined) {
             throw new Error(
-                `Attempted lookup of block height ${height} for milestone span calculation, but none exists.`,
+                `Attempted lookup of block height ${height} for milestone span calculation, but none exists`,
             );
         } else {
             return result;

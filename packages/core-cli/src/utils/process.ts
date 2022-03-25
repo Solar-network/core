@@ -1,5 +1,5 @@
-import { Utils } from "@arkecosystem/core-kernel";
-import { prettyBytes, prettyTime } from "@arkecosystem/utils";
+import { Utils } from "@solar-network/core-kernel";
+import { prettyBytes, prettyTime } from "@solar-network/utils";
 import dayjs from "dayjs";
 import Tail from "nodejs-tail";
 import readLastLines from "read-last-lines";
@@ -53,7 +53,7 @@ export class Process {
      * @param {boolean} daemon
      * @memberof Process
      */
-    public stop(daemon: boolean): void {
+    public async stop(daemon: boolean): Promise<void> {
         this.app.get<AbortMissingProcess>(Identifiers.AbortMissingProcess).execute(this.processName);
         this.app.get<AbortUnknownProcess>(Identifiers.AbortUnknownProcess).execute(this.processName);
         this.app.get<AbortStoppedProcess>(Identifiers.AbortStoppedProcess).execute(this.processName);
@@ -62,7 +62,7 @@ export class Process {
 
         spinner.start();
 
-        this.processManager[daemon ? "delete" : "stop"](this.processName);
+        await this.processManager[daemon ? "delete" : "stop"](this.processName);
 
         spinner.succeed();
     }
@@ -70,7 +70,7 @@ export class Process {
     /**
      * @memberof Process
      */
-    public restart(): void {
+    public async restart(): Promise<void> {
         this.app.get<AbortMissingProcess>(Identifiers.AbortMissingProcess).execute(this.processName);
         this.app.get<AbortStoppedProcess>(Identifiers.AbortStoppedProcess).execute(this.processName);
 
@@ -78,7 +78,7 @@ export class Process {
 
         spinner.start();
 
-        this.processManager.restart(this.processName);
+        await this.processManager.restart(this.processName);
 
         spinner.succeed();
     }

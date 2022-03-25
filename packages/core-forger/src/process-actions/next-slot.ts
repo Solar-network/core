@@ -1,4 +1,4 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { ForgerService } from "../forger-service";
 
@@ -9,7 +9,7 @@ export class NextSlotProcessAction implements Contracts.Kernel.ProcessAction {
 
     public name = "forger.nextSlot";
 
-    public async handler() {
+    public async handler(): Promise<object> {
         return {
             remainingTime: this.forger.getRemainingSlotTime(),
         };

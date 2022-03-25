@@ -1,5 +1,5 @@
-import { Contracts, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Contracts, Utils } from "@solar-network/core-kernel";
+import { Interfaces, Transactions } from "@solar-network/crypto";
 import { EntityRepository, In } from "typeorm";
 
 import { Block, Round, Transaction } from "../models";
@@ -8,9 +8,9 @@ import { AbstractRepository } from "./abstract-repository";
 @EntityRepository(Block)
 export class BlockRepository extends AbstractRepository<Block> {
     public async findLatest(): Promise<Interfaces.IBlockData | undefined> {
-        return (this.findOne({
+        return this.findOne({
             order: { height: "DESC" },
-        }) as unknown) as Interfaces.IBlockData; // TODO: refactor
+        }) as unknown as Interfaces.IBlockData; // TODO: refactor
     }
 
     public async findRecent(limit: number): Promise<{ id: string }[]> {
@@ -93,12 +93,14 @@ export class BlockRepository extends AbstractRepository<Block> {
     public async getStatistics(): Promise<{
         numberOfTransactions: number;
         totalFee: string;
+        burnedFee: string;
         totalAmount: string;
         count: number;
     }> {
         return this.createQueryBuilder()
             .select([])
             .addSelect("COALESCE(SUM(number_of_transactions), 0)", "numberOfTransactions")
+            .addSelect("COALESCE(SUM(burned_fee), 0)", "burnedFee")
             .addSelect("COALESCE(SUM(total_fee), 0)", "totalFee")
             .addSelect("COALESCE(SUM(total_amount), 0)", "totalAmount")
             .addSelect("COUNT(DISTINCT(height))", "count")
@@ -109,18 +111,25 @@ export class BlockRepository extends AbstractRepository<Block> {
         return this.createQueryBuilder()
             .select([])
             .addSelect("generator_public_key", "generatorPublicKey")
-            .addSelect("SUM(reward + total_fee)", "rewards")
+            .addSelect("SUM(reward + total_fee - burned_fee)", "rewards")
             .groupBy("generator_public_key")
             .getRawMany();
     }
 
     public async getDelegatesForgedBlocks(): Promise<
-        { generatorPublicKey: string; totalRewards: string; totalFees: string; totalProduced: number }[]
+        {
+            generatorPublicKey: string;
+            totalRewards: string;
+            burnedFees: string;
+            totalFees: string;
+            totalProduced: number;
+        }[]
     > {
         return this.createQueryBuilder()
             .select([])
             .addSelect("generator_public_key", "generatorPublicKey")
             .addSelect("SUM(total_fee)", "totalFees")
+            .addSelect("SUM(burned_fee)", "burnedFees")
             .addSelect("SUM(reward)", "totalRewards")
             .addSelect("COUNT(total_amount)", "totalProduced")
             .groupBy("generator_public_key")

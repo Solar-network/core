@@ -16,7 +16,7 @@ export interface EventDispatcher {
      * Register a listener with the dispatcher.
      *
      * @param {EventName} event
-     * @param {EventListener} listener
+     * @param {EventListener | Service} listener
      * @returns {() => void}
      * @memberof EventDispatcher
      */
@@ -44,7 +44,7 @@ export interface EventDispatcher {
      * Remove a listener from the dispatcher.
      *
      * @param {EventName} event
-     * @param {EventListener} [listener]
+     * @param {EventListener | Service} [listener]
      * @memberof EventDispatcher
      */
     forget(event: EventName, listener?: EventListener): void;

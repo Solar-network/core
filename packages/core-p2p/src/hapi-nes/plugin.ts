@@ -1,6 +1,7 @@
 /* tslint:disable */
 "use strict";
 
+import { Server } from "@hapi/hapi";
 import Hoek from "@hapi/hoek";
 import Joi from "joi";
 
@@ -21,6 +22,7 @@ const internals: any = {
 };
 
 internals.schema = Joi.object({
+    banHammerPlugin: Joi.object(),
     onConnection: Joi.function(), // async function (socket) {}
     onDisconnection: Joi.function(), // function (socket) {}
     onMessage: Joi.function(), // async function (socket, message) { return data; }    // Or throw errors
@@ -42,7 +44,7 @@ const plugin = {
     requirements: {
         hapi: ">=19.0.0",
     },
-    register: function (server, options) {
+    register: function (server: Server, options: object): void {
         const settings: any = Hoek.applyToDefaults(internals.defaults, options);
 
         if (Array.isArray(settings.headers)) {

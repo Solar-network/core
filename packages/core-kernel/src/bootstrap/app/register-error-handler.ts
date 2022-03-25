@@ -1,5 +1,3 @@
-import logProcessErrors from "log-process-errors";
-
 import { injectable } from "../../ioc";
 import { Bootstrapper } from "../interfaces";
 
@@ -15,7 +13,9 @@ export class RegisterErrorHandler implements Bootstrapper {
      * @memberof RegisterErrorHandler
      */
     public async bootstrap(): Promise<void> {
-        // todo: implement passing in of options and ensure handling of critical exceptions
-        logProcessErrors({ exitOn: [] });
+        /* eslint-disable @typescript-eslint/no-implied-eval */
+        const _importDynamic = new Function("modulePath", "return import(modulePath)");
+        const logProcessErrors = await _importDynamic("log-process-errors");
+        logProcessErrors.default({ exitOn: [] });
     }
 }

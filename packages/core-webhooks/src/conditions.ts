@@ -1,4 +1,5 @@
-import { Utils } from "@arkecosystem/crypto";
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import { Utils } from "@solar-network/crypto";
 
 /**
  * @param {*} value

@@ -1,7 +1,7 @@
-import { Commands, Container, Contracts, Services } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
-import Joi from "joi";
+import { Commands, Container, Contracts, Services } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import { copySync, ensureDirSync, existsSync, removeSync } from "fs-extra";
+import Joi from "joi";
 import { resolve } from "path";
 
 /**
@@ -33,7 +33,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Publish the configuration.";
+    public description: string = "Publish the configuration";
 
     /**
      * Indicates whether the command requires a network to be present.
@@ -51,9 +51,9 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("reset", "Using the --reset flag will overwrite existing configuration.", Joi.boolean());
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("reset", "Using the --reset flag will overwrite existing configuration", Joi.boolean());
     }
 
     /**
@@ -82,11 +82,11 @@ export class Command extends Commands.Command {
         ]);
 
         if (!response.network) {
-            this.components.fatal("You'll need to select the network to continue.");
+            this.components.fatal("You'll need to select the network to continue");
         }
 
         if (!response.confirm) {
-            this.components.fatal("You'll need to confirm the network to continue.");
+            this.components.fatal("You'll need to confirm the network to continue");
         }
 
         await this.performPublishment({ ...response, ...this.getFlags() });
@@ -115,11 +115,11 @@ export class Command extends Commands.Command {
                     }
 
                     if (existsSync(configDest)) {
-                        this.components.fatal("Please use the --reset flag if you wish to reset your configuration.");
+                        this.components.fatal("Please use the --reset flag if you wish to reset your configuration");
                     }
 
                     if (!existsSync(configSrc)) {
-                        this.components.fatal(`Couldn't find the core configuration files at ${configSrc}.`);
+                        this.components.fatal(`Couldn't find the core configuration files at ${configSrc}`);
                     }
 
                     ensureDirSync(configDest);
@@ -129,7 +129,7 @@ export class Command extends Commands.Command {
                 title: "Publish environment",
                 task: () => {
                     if (!existsSync(`${configSrc}/.env`)) {
-                        this.components.fatal(`Couldn't find the environment file at ${configSrc}/.env.`);
+                        this.components.fatal(`Couldn't find the environment file at ${configSrc}/.env`);
                     }
 
                     copySync(`${configSrc}/.env`, `${configDest}/.env`);

@@ -1,5 +1,5 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
-import { Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
+import { Managers } from "@solar-network/crypto";
 import semver from "semver";
 
 // todo: review the implementation
@@ -23,7 +23,7 @@ export const isValidVersion = (app: Contracts.Kernel.Application, peer: Contract
         const configuration = app.getTagged<Providers.PluginConfiguration>(
             Container.Identifiers.PluginConfiguration,
             "plugin",
-            "@arkecosystem/core-p2p",
+            "@solar-network/core-p2p",
         );
         minimumVersions = configuration.getOptional<string[]>("minimumVersions", []);
     }

@@ -6,7 +6,7 @@ import { Webhook } from "../interfaces";
  * @param {*} model
  * @returns {Webhook}
  */
-export const transformResource = (model): Webhook => ({
+export const transformResource = (model: Webhook): Webhook => ({
     id: model.id,
     event: model.event,
     target: model.target,
@@ -19,5 +19,5 @@ export const transformResource = (model): Webhook => ({
  * @param {*} data
  * @returns {{ data: Webhook }}
  */
-export const respondWithResource = (data): { data: Webhook } | Boom<Webhook> =>
+export const respondWithResource = (data: Webhook): { data: Webhook } | Boom<Webhook> =>
     data ? { data: transformResource(data) } : notFound();

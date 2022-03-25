@@ -1,8 +1,8 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Providers, Services } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Crypto, Managers } from "@arkecosystem/crypto";
 import Hapi from "@hapi/hapi";
+import { Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Providers, Services } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Crypto, Managers } from "@solar-network/crypto";
 
 import { PortsResource } from "../resources";
 import { Controller } from "./controller";
@@ -10,7 +10,7 @@ import { Controller } from "./controller";
 @Container.injectable()
 export class NodeController extends Controller {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-transaction-pool")
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
     private readonly transactionPoolConfiguration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
@@ -29,7 +29,10 @@ export class NodeController extends Controller {
     @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
     private readonly transactionRepository!: Repositories.TransactionRepository;
 
-    public async status(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async status(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<{ data: { synced: boolean; now: number; blocksCount: number; timestamp: number } }> {
         const lastBlock = this.blockchain.getLastBlock();
         const networkHeight = this.networkMonitor.getNetworkHeight();
 
@@ -43,7 +46,10 @@ export class NodeController extends Controller {
         };
     }
 
-    public async syncing(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async syncing(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<{ data: { syncing: boolean; blocks: number; height: number; id: string | undefined } }> {
         const lastBlock = this.blockchain.getLastBlock();
         const networkHeight = this.networkMonitor.getNetworkHeight();
 
@@ -57,7 +63,7 @@ export class NodeController extends Controller {
         };
     }
 
-    public async configuration(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async configuration(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<unknown> {
         const dynamicFees = this.transactionPoolConfiguration.getRequired<{
             enabled?: boolean;
         }>("dynamicFees");
@@ -80,15 +86,12 @@ export class NodeController extends Controller {
                 constants: Managers.configManager.getMilestone(this.blockchain.getLastHeight()),
                 transactionPool: {
                     dynamicFees: dynamicFees.enabled ? dynamicFees : { enabled: false },
-                    maxTransactionsInPool: this.transactionPoolConfiguration.getRequired<number>(
-                        "maxTransactionsInPool",
-                    ),
-                    maxTransactionsPerSender: this.transactionPoolConfiguration.getRequired<number>(
-                        "maxTransactionsPerSender",
-                    ),
-                    maxTransactionsPerRequest: this.transactionPoolConfiguration.getRequired<number>(
-                        "maxTransactionsPerRequest",
-                    ),
+                    maxTransactionsInPool:
+                        this.transactionPoolConfiguration.getRequired<number>("maxTransactionsInPool"),
+                    maxTransactionsPerSender:
+                        this.transactionPoolConfiguration.getRequired<number>("maxTransactionsPerSender"),
+                    maxTransactionsPerRequest:
+                        this.transactionPoolConfiguration.getRequired<number>("maxTransactionsPerRequest"),
                     maxTransactionAge: this.transactionPoolConfiguration.getRequired<number>("maxTransactionAge"),
                     maxTransactionBytes: this.transactionPoolConfiguration.getRequired<number>("maxTransactionBytes"),
                 },
@@ -96,22 +99,21 @@ export class NodeController extends Controller {
         };
     }
 
-    public async configurationCrypto() {
+    public async configurationCrypto(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         return {
             data: Managers.configManager.all(),
         };
     }
 
-    public async fees(request: Hapi.Request) {
+    public async fees(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         // @ts-ignore
         const handlers = this.nullHandlerRegistry.getRegisteredHandlers();
         const handlersKey = {};
-        const txsTypes: Array<{ type: number, typeGroup: number }> = [];
+        const txsTypes: Array<{ type: number; typeGroup: number }> = [];
         for (const handler of handlers) {
-            handlersKey[
-                `${handler.getConstructor().type}-${handler.getConstructor().typeGroup}`
-            ] = handler.getConstructor().key;
-            txsTypes.push({ type: handler.getConstructor().type!, typeGroup: handler.getConstructor().typeGroup!});
+            handlersKey[`${handler.getConstructor().type}-${handler.getConstructor().typeGroup}`] =
+                handler.getConstructor().key;
+            txsTypes.push({ type: handler.getConstructor().type!, typeGroup: handler.getConstructor().typeGroup! });
         }
 
         const results = await this.transactionRepository.getFeeStatistics(txsTypes, request.query.days);
@@ -126,6 +128,7 @@ export class NodeController extends Controller {
 
             groupedByTypeGroup[result.typeGroup][handlerKey] = {
                 avg: result.avg,
+                burned: result.burned,
                 max: result.max,
                 min: result.min,
                 sum: result.sum,

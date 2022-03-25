@@ -1,4 +1,4 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { Action } from "../contracts";
 
@@ -8,6 +8,6 @@ export class DownloadPaused implements Action {
     private readonly logger!: Contracts.Kernel.Logger;
 
     public async handle(): Promise<void> {
-        this.logger.info("Blockchain download paused");
+        this.logger.info("Blockchain download paused :clock1030:");
     }
 }

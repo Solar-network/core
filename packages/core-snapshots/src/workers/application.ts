@@ -1,4 +1,4 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 @Container.injectable()
 export class Application {
@@ -20,7 +20,7 @@ export class Application {
     public getTagged<T>(
         serviceIdentifier: Contracts.Kernel.Container.ServiceIdentifier<T>,
         key: string | number | symbol,
-        value: any,
+        value: string,
     ): T {
         return this.container.getTagged(serviceIdentifier, key, value);
     }

@@ -1,13 +1,15 @@
-import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { NetworkStateStatus } from "@arkecosystem/core-p2p";
-import { Blocks, Interfaces, Managers, Transactions } from "@arkecosystem/crypto";
-import { Handlers } from "@arkecosystem/core-transactions";
+import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/core-kernel";
+import { NetworkStateStatus } from "@solar-network/core-p2p";
+import { Handlers } from "@solar-network/core-transactions";
+import { Blocks, Interfaces, Managers, Transactions } from "@solar-network/crypto";
+import delay from "delay";
+import { writeJSONSync } from "fs-extra";
 
 import { Client } from "./client";
 import { HostNoResponseError, RelayCommunicationError } from "./errors";
 import { Delegate } from "./interfaces";
+import { RelayHost } from "./interfaces";
 
-// todo: review the implementation - quite a mess right now with quite a few responsibilities
 @Container.injectable()
 export class ForgerService {
     /**
@@ -36,6 +38,20 @@ export class ForgerService {
 
     /**
      * @private
+     * @type {Delegate[]}
+     * @memberof ForgerService
+     */
+    private activeDelegates: Delegate[] = [];
+
+    /**
+     * @private
+     * @type {{ [key: string]: string }}
+     * @memberof ForgerService
+     */
+    private allUsernames: { [key: string]: string } = {};
+
+    /**
+     * @private
      * @type {Client}
      * @memberof ForgerService
      */
@@ -50,10 +66,24 @@ export class ForgerService {
 
     /**
      * @private
+     * @type {number}
+     * @memberof ForgerService
+     */
+    private errorCount: number = 0;
+
+    /**
+     * @private
      * @type {{ [key: string]: string }}
      * @memberof ForgerService
      */
     private usernames: { [key: string]: string } = {};
+
+    /**
+     * @private
+     * @type {Delegate[]}
+     * @memberof ForgerService
+     */
+    private inactiveDelegates: Delegate[] = [];
 
     /**
      * @private
@@ -75,6 +105,13 @@ export class ForgerService {
      * @memberof ForgerService
      */
     private lastForgedBlock: Interfaces.IBlock | undefined;
+
+    /**
+     * @private
+     * @type {(Interfaces.ITransactionData[])}
+     * @memberof ForgerService
+     */
+    private transactions;
 
     /**
      * @private
@@ -106,9 +143,9 @@ export class ForgerService {
      * @param {*} options
      * @memberof ForgerService
      */
-    public register(options): void {
+    public register(hosts: RelayHost[]): void {
         this.client = this.app.resolve<Client>(Client);
-        this.client.register(options.hosts);
+        this.client.register(hosts);
     }
 
     /**
@@ -121,15 +158,17 @@ export class ForgerService {
             this.handlerProvider.registerHandlers();
         }
 
-        this.delegates = delegates;
+        this.delegates = delegates.filter((value, index, self) => {
+            return index === self.findIndex((delegate) => delegate.publicKey === value.publicKey);
+        });
 
         let timeout: number = 2000;
         try {
             await this.loadRound();
             AppUtils.assert.defined<Contracts.P2P.CurrentRound>(this.round);
-            timeout = Math.max(0, this.getRoundRemainingSlotTime(this.round));
+            timeout = 0;
         } catch (error) {
-            this.logger.warning("Waiting for a responsive host");
+            this.logger.warning("Waiting for a responsive host :hourglass_flowing_sand:");
         } finally {
             this.checkLater(timeout);
         }
@@ -161,9 +200,8 @@ export class ForgerService {
 
             AppUtils.assert.defined<Contracts.P2P.CurrentRound>(this.round);
 
-            if (!this.round.canForge) {
-                // basically looping until we lock at beginning of next slot
-                return this.checkLater(200);
+            if (this.round.timestamp < 0) {
+                return this.checkLater(this.getRemainingSlotTime()!);
             }
 
             AppUtils.assert.defined<string>(this.round.currentForger.publicKey);
@@ -174,10 +212,15 @@ export class ForgerService {
                 AppUtils.assert.defined<string>(this.round.nextForger.publicKey);
 
                 if (this.isActiveDelegate(this.round.nextForger.publicKey)) {
+                    const blocktime = Managers.configManager.getMilestone(this.round.lastBlock.height).blocktime;
                     const username = this.usernames[this.round.nextForger.publicKey];
 
                     this.logger.info(
-                        `Next forging delegate ${username} (${this.round.nextForger.publicKey}) is active on this node.`,
+                        `Delegate ${username} is due to forge in ${AppUtils.pluralize(
+                            "second",
+                            blocktime,
+                            true,
+                        )} from now :sparkles:`,
                     );
 
                     await this.client.syncWithNetwork();
@@ -186,25 +229,11 @@ export class ForgerService {
                 return this.checkLater(this.getRoundRemainingSlotTime(this.round));
             }
 
-            const networkState: Contracts.P2P.NetworkState = await this.client.getNetworkState();
+            this.errorCount = 0;
 
-            if (networkState.getNodeHeight() !== this.round.lastBlock.height) {
-                this.logger.warning(
-                    `The NetworkState height (${networkState
-                        .getNodeHeight()
-                        ?.toLocaleString()}) and round height (${this.round.lastBlock.height.toLocaleString()}) are out of sync. This indicates delayed blocks on the network.`,
-                );
-            }
-
-            if (
-                await this.app
-                    .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-                    .call("isForgingAllowed", { forgerService: this, delegate, networkState })
-            ) {
-                await this.app
-                    .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-                    .call("forgeNewBlock", { forgerService: this, delegate, round: this.round, networkState });
-            }
+            await this.app
+                .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
+                .call("forgeNewBlock", { forgerService: this, delegate, firstAttempt: true, round: this.round });
 
             this.logAppReady = true;
 
@@ -212,24 +241,19 @@ export class ForgerService {
         } catch (error) {
             if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
                 if (error.message.includes("blockchain isn't ready") || error.message.includes("App is not ready")) {
-                    /* istanbul ignore else */
                     if (this.logAppReady) {
-                        this.logger.info("Waiting for relay to become ready.");
+                        this.logger.info("Waiting for relay to become ready :hourglass_flowing_sand:");
                         this.logAppReady = false;
                     }
                 } else {
                     this.logger.warning(error.message);
                 }
             } else {
-                this.logger.error(error.stack);
-
-                if (this.round) {
-                    this.logger.info(
-                        `Round: ${this.round.current.toLocaleString()}, height: ${this.round.lastBlock.height.toLocaleString()}`,
-                    );
+                try {
+                    this.client.emitEvent(Enums.ForgerEvent.Failed, { error: error.message });
+                } catch {
+                    //
                 }
-
-                this.client.emitEvent(Enums.ForgerEvent.Failed, { error: error.message });
             }
 
             // no idea when this will be ok, so waiting 2s before checking again
@@ -246,51 +270,131 @@ export class ForgerService {
      */
     public async forgeNewBlock(
         delegate: Delegate,
+        firstAttempt: boolean,
         round: Contracts.P2P.CurrentRound,
-        networkState: Contracts.P2P.NetworkState,
     ): Promise<void> {
-        AppUtils.assert.defined<number>(networkState.getNodeHeight());
-        Managers.configManager.setHeight(networkState.getNodeHeight()!);
+        setImmediate(async () => {
+            let errored = false;
+            const minimumMs = 2000;
+            try {
+                const networkState: Contracts.P2P.NetworkState = await this.client.getNetworkState(firstAttempt);
+                const networkStateHeight = networkState.getNodeHeight();
 
-        const transactions: Interfaces.ITransactionData[] = await this.getTransactionsForForging();
+                AppUtils.assert.defined<number>(networkStateHeight);
+                AppUtils.assert.defined<string>(delegate.publicKey);
 
-        const block: Interfaces.IBlock | undefined = delegate.forge(transactions, {
-            previousBlock: {
-                id: networkState.getLastBlockId(),
-                idHex: Managers.configManager.getMilestone().block.idFullSha256
-                    ? networkState.getLastBlockId()
-                    : Blocks.Block.toBytesHex(networkState.getLastBlockId()),
-                height: networkState.getNodeHeight(),
-            },
-            timestamp: round.timestamp,
-            reward: round.reward,
-        });
+                Managers.configManager.setHeight(networkStateHeight);
 
-        AppUtils.assert.defined<Interfaces.IBlock>(block);
-        AppUtils.assert.defined<string>(delegate.publicKey);
+                const roundSlot: number = await this.client.getSlotNumber(round.timestamp);
 
-        const minimumMs = 2000;
-        const timeLeftInMs: number = this.getRoundRemainingSlotTime(round);
-        const prettyName = `${this.usernames[delegate.publicKey]} (${delegate.publicKey})`;
+                if (firstAttempt) {
+                    this.transactions = await this.getTransactionsForForging();
+                }
 
-        if (timeLeftInMs >= minimumMs) {
-            this.logger.info(`Forged new block ${block.data.id} by delegate ${prettyName}`);
+                const block: Interfaces.IBlock | undefined = delegate.forge(this.transactions, {
+                    previousBlock: {
+                        id: networkState.getLastBlockId(),
+                        idHex: Managers.configManager.getMilestone().block.idFullSha256
+                            ? networkState.getLastBlockId()
+                            : Blocks.Block.toBytesHex(networkState.getLastBlockId()),
+                        height: networkStateHeight,
+                    },
+                    timestamp: round.timestamp,
+                    reward: round.reward,
+                });
 
-            await this.client.broadcastBlock(block);
+                const timeLeftInMs: number = this.getRoundRemainingSlotTime(round);
 
-            this.lastForgedBlock = block;
-            this.client.emitEvent(Enums.BlockEvent.Forged, block.data);
+                const prettyName = this.usernames[delegate.publicKey];
 
-            for (const transaction of transactions) {
-                this.client.emitEvent(Enums.TransactionEvent.Forged, transaction);
+                const { state } = await this.client.getStatus();
+                const currentSlot = await this.client.getSlotNumber();
+                const lastBlockSlot = await this.client.getSlotNumber(state.header.timestamp);
+
+                if (lastBlockSlot === currentSlot || delegate.publicKey !== round.currentForger.publicKey) {
+                    if (
+                        firstAttempt &&
+                        ((networkState.getLastGenerator() === delegate.publicKey &&
+                            networkState.getLastSlotNumber() === roundSlot) ||
+                            (state.header.generatorPublicKey === delegate.publicKey && lastBlockSlot === roundSlot))
+                    ) {
+                        this.logger.warning(
+                            `Not going to forge because delegate ${prettyName} has already forged on another node :octagonal_sign:`,
+                        );
+                    }
+                    return;
+                }
+
+                if (networkState.getNodeHeight() !== round.lastBlock.height) {
+                    this.logger.warning(
+                        `The NetworkState height (${networkState
+                            .getNodeHeight()
+                            ?.toLocaleString()}) and round height (${round.lastBlock.height.toLocaleString()}) are out of sync. This indicates delayed blocks on the network :zzz:`,
+                    );
+                }
+
+                if (this.isForgingAllowed(networkState, delegate)) {
+                    if (
+                        timeLeftInMs >= minimumMs &&
+                        currentSlot === roundSlot &&
+                        delegate.publicKey === round.currentForger.publicKey
+                    ) {
+                        AppUtils.assert.defined<Interfaces.IBlock>(block);
+                        if ((await this.client.getSlotNumber(block.data.timestamp)) !== lastBlockSlot) {
+                            this.logger.info(
+                                `Delegate ${prettyName} forged a new block at height ${block.data.height.toLocaleString()} with ${AppUtils.pluralize(
+                                    "transaction",
+                                    block.data.numberOfTransactions,
+                                    true,
+                                )} :trident:`,
+                            );
+
+                            await this.client.broadcastBlock(block);
+
+                            this.lastForgedBlock = block;
+                            this.client.emitEvent(Enums.BlockEvent.Forged, block.data);
+
+                            for (const transaction of this.transactions) {
+                                this.client.emitEvent(Enums.TransactionEvent.Forged, transaction);
+                            }
+                        }
+                    } else if (timeLeftInMs > 0) {
+                        this.logger.warning(
+                            `Failed to forge new block by delegate ${prettyName}, because there were ${timeLeftInMs}ms left in the current slot (less than ${minimumMs}ms) :bangbang:`,
+                        );
+                    } else {
+                        this.logger.warning(
+                            `Failed to forge new block by delegate ${prettyName}, because already in next slot :bangbang:`,
+                        );
+                    }
+                }
+            } catch (error) {
+                if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
+                    this.logger.warning(error.message);
+                }
+                errored = true;
             }
-        } else if (timeLeftInMs > 0) {
-            this.logger.warning(
-                `Failed to forge new block by delegate ${prettyName}, because there were ${timeLeftInMs}ms left in the current slot (less than ${minimumMs}ms).`,
-            );
-        } else {
-            this.logger.warning(`Failed to forge new block by delegate ${prettyName}, because already in next slot.`);
-        }
+            await delay(1000);
+
+            try {
+                await this.loadRound();
+            } catch (error) {
+                if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
+                    this.logger.warning(error.message);
+                }
+                errored = true;
+            }
+            if (errored) {
+                this.errorCount++;
+            } else {
+                this.errorCount = 0;
+            }
+
+            const blocktime = Managers.configManager.getMilestone(round.lastBlock.height).blocktime;
+            if (this.errorCount < blocktime - 1) {
+                return this.forgeNewBlock(delegate, false, this.round!);
+            }
+        });
     }
 
     /**
@@ -300,7 +404,7 @@ export class ForgerService {
     public async getTransactionsForForging(): Promise<Interfaces.ITransactionData[]> {
         const response = await this.client.getTransactions();
         if (AppUtils.isEmpty(response)) {
-            this.logger.error("Could not get unconfirmed transactions from transaction pool.");
+            this.logger.warning("Could not get unconfirmed transactions from transaction pool :warning:");
             return [];
         }
         const transactions = response.transactions.map(
@@ -308,7 +412,11 @@ export class ForgerService {
         );
         this.logger.debug(
             `Received ${AppUtils.pluralize("transaction", transactions.length, true)} ` +
-                `from the pool containing ${AppUtils.pluralize("transaction", response.poolSize, true)} total`,
+                `from the pool containing ${AppUtils.pluralize(
+                    "transaction",
+                    response.poolSize,
+                    true,
+                )} total :money_with_wings:`,
         );
         return transactions;
     }
@@ -321,43 +429,72 @@ export class ForgerService {
      */
     public isForgingAllowed(networkState: Contracts.P2P.NetworkState, delegate: Delegate): boolean {
         if (networkState.status === NetworkStateStatus.Unknown) {
-            this.logger.info("Failed to get network state from client. Will not forge.");
+            this.logger.info("Failed to get network state from client. Will not forge :bomb:");
             return false;
         } else if (networkState.status === NetworkStateStatus.ColdStart) {
-            this.logger.info("Skipping slot because of cold start. Will not forge.");
+            this.logger.info("Skipping slot because of cold start. Will not forge :bomb:");
+            return false;
+        } else if (networkState.status === NetworkStateStatus.BelowMinimumDelegates) {
+            this.logger.info("Not peered with enough delegates to get quorum. Will not forge :bomb:");
             return false;
         } else if (networkState.status === NetworkStateStatus.BelowMinimumPeers) {
-            this.logger.info("Network reach is not sufficient to get quorum. Will not forge.");
+            this.logger.info("Network reach is not sufficient to get quorum. Will not forge :bomb:");
             return false;
         }
 
-        const overHeightBlockHeaders: Array<{
-            [id: string]: any;
-        }> = networkState.getOverHeightBlockHeaders();
-        if (overHeightBlockHeaders.length > 0) {
+        const removeDuplicateBlockHeaders = (blockHeaders) => {
+            let lastSeen;
+            const sortedHeaders = blockHeaders.sort((a, b) => (a.id > b.id ? 1 : a.id < b.id ? -1 : 0));
+
+            return sortedHeaders.reduce((sum, block) => {
+                if (lastSeen !== block.id) {
+                    sum.push(block);
+                }
+                lastSeen = block.id;
+                return sum;
+            }, []);
+        };
+
+        const overHeightBlockHeaders: Array<{ [ip: string]: any }> = networkState.getOverHeightBlockHeaders();
+        const distinctOverHeightBlockHeaders: Array<{ [ip: string]: any }> =
+            removeDuplicateBlockHeaders(overHeightBlockHeaders);
+
+        if (distinctOverHeightBlockHeaders.length > 0) {
             this.logger.info(
                 `Detected ${AppUtils.pluralize(
                     "distinct overheight block header",
-                    overHeightBlockHeaders.length,
+                    distinctOverHeightBlockHeaders.length,
                     true,
-                )}.`,
+                )} :zzz:`,
             );
 
             for (const overHeightBlockHeader of overHeightBlockHeaders) {
                 if (overHeightBlockHeader.generatorPublicKey === delegate.publicKey) {
                     AppUtils.assert.defined<string>(delegate.publicKey);
 
-                    const username: string = this.usernames[delegate.publicKey];
-
-                    this.logger.warning(
-                        `Possible double forging delegate: ${username} (${delegate.publicKey}) - Block: ${overHeightBlockHeader.id}.`,
-                    );
+                    try {
+                        const { verified } = Blocks.BlockFactory.fromData(
+                            overHeightBlockHeader as Interfaces.IBlockData,
+                        )!.verification;
+                        if (verified) {
+                            this.logger.warning(
+                                `Delegate ${
+                                    this.usernames[delegate.publicKey]
+                                } already forged a block. Will not forge :bomb:`,
+                            );
+                            return false;
+                        }
+                    } catch {
+                        //
+                    }
                 }
             }
         }
 
-        if (networkState.getQuorum() < 0.66) {
-            this.logger.info("Not enough quorum to forge next block. Will not forge.");
+        if (!networkState.canForge()) {
+            networkState.setOverHeightBlockHeaders(distinctOverHeightBlockHeaders);
+
+            this.logger.info("Not enough quorum to forge next block. Will not forge :bomb:");
             this.logger.debug(`Network State: ${networkState.toJson()}`);
 
             return false;
@@ -384,6 +521,14 @@ export class ForgerService {
     private async loadRound(): Promise<void> {
         this.round = await this.client.getRound();
 
+        this.allUsernames = this.round.allDelegates.reduce((acc, wallet) => {
+            AppUtils.assert.defined<string>(wallet.publicKey);
+
+            return Object.assign(acc, {
+                [wallet.publicKey]: wallet.delegate.username,
+            });
+        }, {});
+
         this.usernames = this.round.delegates.reduce((acc, wallet) => {
             AppUtils.assert.defined<string>(wallet.publicKey);
 
@@ -392,7 +537,34 @@ export class ForgerService {
             });
         }, {});
 
+        const oldActiveDelegates: Delegate[] = this.activeDelegates;
+        const oldInactiveDelegates: Delegate[] = this.inactiveDelegates;
+
+        this.activeDelegates = this.delegates.filter((delegate) => {
+            AppUtils.assert.defined<string>(delegate.publicKey);
+
+            return this.usernames.hasOwnProperty(delegate.publicKey);
+        });
+
+        this.inactiveDelegates = this.delegates.filter((delegate) => {
+            AppUtils.assert.defined<string>(delegate.publicKey);
+
+            return !this.activeDelegates.includes(delegate);
+        });
+
         if (!this.initialized) {
+            AppUtils.sendForgerSignal("SIGTERM");
+
+            const jsonFile: string = `${process.env.CORE_PATH_TEMP}/forger.json`;
+            try {
+                writeJSONSync(jsonFile, {
+                    pid: process.pid,
+                    publicKeys: this.delegates.map((delegate) => delegate.publicKey),
+                });
+            } catch {
+                this.app.terminate(`Could not save forger data to ${jsonFile}`);
+            }
+
             this.printLoadedDelegates();
 
             // @ts-ignore
@@ -400,7 +572,44 @@ export class ForgerService {
                 activeDelegates: this.delegates.map((delegate) => delegate.publicKey),
             });
 
-            this.logger.info(`Forger Manager started.`);
+            this.logger.info(`Forger Manager started :hammer:`);
+        } else {
+            const newlyActiveDelegates = this.activeDelegates
+                .map((delegate) => delegate.publicKey)
+                .filter(
+                    (activeDelegate) =>
+                        !oldActiveDelegates.map((oldDelegate) => oldDelegate.publicKey).includes(activeDelegate),
+                )
+                .map((publicKey) => this.usernames[publicKey]);
+            const newlyInactiveDelegates = this.inactiveDelegates
+                .map((delegate) => delegate.publicKey)
+                .filter(
+                    (inactiveDelegate) =>
+                        !oldInactiveDelegates.map((oldDelegate) => oldDelegate.publicKey).includes(inactiveDelegate),
+                )
+                .map((publicKey) => (this.allUsernames[publicKey] ? this.allUsernames[publicKey] : publicKey));
+
+            if (newlyActiveDelegates.length === 1) {
+                this.logger.info(`Delegate ${newlyActiveDelegates[0]} is now in an active forging position :tada:`);
+            } else if (newlyActiveDelegates.length > 1) {
+                this.logger.info(
+                    `Delegates ${newlyActiveDelegates
+                        .join(", ")
+                        .replace(/,(?=[^,]*$)/, " and")} are now in active forging positions :tada:`,
+                );
+            }
+
+            if (newlyInactiveDelegates.length === 1) {
+                this.logger.info(
+                    `Delegate ${newlyInactiveDelegates[0]} is no longer in an active forging position :cry:`,
+                );
+            } else if (newlyInactiveDelegates.length > 1) {
+                this.logger.info(
+                    `Delegates ${newlyInactiveDelegates
+                        .join(", ")
+                        .replace(/,(?=[^,]*$)/, " and")} are no longer in active forging positions :cry:`,
+                );
+            }
         }
 
         this.initialized = true;
@@ -420,35 +629,39 @@ export class ForgerService {
      * @memberof ForgerService
      */
     private printLoadedDelegates(): void {
-        const activeDelegates: Delegate[] = this.delegates.filter((delegate) => {
-            AppUtils.assert.defined<string>(delegate.publicKey);
-
-            return this.usernames.hasOwnProperty(delegate.publicKey);
-        });
-
-        if (activeDelegates.length > 0) {
+        if (this.activeDelegates.length > 0) {
             this.logger.info(
-                `Loaded ${AppUtils.pluralize("active delegate", activeDelegates.length, true)}: ${activeDelegates
+                `Loaded ${AppUtils.pluralize(
+                    "active delegate",
+                    this.activeDelegates.length,
+                    true,
+                )}: ${this.activeDelegates
                     .map(({ publicKey }) => {
                         AppUtils.assert.defined<string>(publicKey);
 
-                        return `${this.usernames[publicKey]} (${publicKey})`;
+                        return `${this.usernames[publicKey]}`;
                     })
                     .join(", ")}`,
             );
         }
 
-        if (this.delegates.length > activeDelegates.length) {
-            const inactiveDelegates: (string | undefined)[] = this.delegates
-                .filter((delegate) => !activeDelegates.includes(delegate))
-                .map((delegate) => delegate.publicKey);
-
+        if (this.delegates.length > this.activeDelegates.length) {
             this.logger.info(
                 `Loaded ${AppUtils.pluralize(
                     "inactive delegate",
-                    inactiveDelegates.length,
+                    this.inactiveDelegates.length,
                     true,
-                )}: ${inactiveDelegates.join(", ")}`,
+                )}: ${this.inactiveDelegates
+                    .map(({ publicKey }) => {
+                        AppUtils.assert.defined<string>(publicKey);
+
+                        return `${
+                            this.allUsernames[publicKey]
+                                ? this.allUsernames[publicKey]
+                                : `unregistered delegate (public key: ${publicKey})`
+                        }`;
+                    })
+                    .join(", ")}`,
             );
         }
     }

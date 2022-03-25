@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Interfaces, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Utils } from "@solar-network/crypto";
 
 import { Action } from "../contracts";
 
@@ -64,7 +64,7 @@ export class DownloadBlocks implements Action {
                 this.stateStore.setLastDownloadedBlock(blocks[blocks.length - 1]);
                 this.blockchain.dispatch("DOWNLOADED");
             } catch (error) {
-                this.logger.warning(`Failed to enqueue downloaded block.`);
+                this.logger.warning("Failed to enqueue downloaded block :warning:");
 
                 this.blockchain.dispatch("NOBLOCK");
 
@@ -75,10 +75,12 @@ export class DownloadBlocks implements Action {
                 this.logger.info(
                     `Could not download any blocks from any peer from height ${(
                         lastDownloadedBlock.height + 1
-                    ).toLocaleString()}`,
+                    ).toLocaleString()} :warning:`,
                 );
             } else {
-                this.logger.warning(`Downloaded block not accepted: ${JSON.stringify(blocks[0])}`);
+                this.logger.warning("Downloaded block not accepted :warning: :warning: :warning:");
+                this.logger.warning(JSON.stringify(blocks[0]));
+
                 this.logger.warning(`Last downloaded block: ${JSON.stringify(lastDownloadedBlock)}`);
 
                 this.blockchain.clearQueue();

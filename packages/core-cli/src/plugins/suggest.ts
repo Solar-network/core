@@ -1,4 +1,4 @@
-import { minBy } from "@arkecosystem/utils";
+import { minBy } from "@solar-network/utils";
 import Levenshtein from "fast-levenshtein";
 import { blue, red } from "kleur";
 import { JsonObject } from "type-fest";
@@ -41,7 +41,7 @@ export class SuggestCommand {
 
         const suggestion: string = minBy(signatures, (c) => Levenshtein.get(signature, c));
 
-        this.app.get<any>(Identifiers.Warning).render(`${red(signature)} is not a ${context.bin} command.`);
+        this.app.get<any>(Identifiers.Warning).render(`${red(signature)} is not a ${context.bin} command`);
 
         if (
             await this.app
@@ -53,7 +53,7 @@ export class SuggestCommand {
             return suggestion;
         }
 
-        this.app.get<any>(Identifiers.Info).render(`Run ${blue("ark help")} for a list of available commands.`);
+        this.app.get<any>(Identifiers.Info).render(`Run ${blue("solar help")} for a list of available commands`);
 
         return undefined;
     }

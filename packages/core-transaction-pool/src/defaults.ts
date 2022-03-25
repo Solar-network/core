@@ -1,6 +1,6 @@
 export const defaults = {
     enabled: !process.env.CORE_TRANSACTION_POOL_DISABLED,
-    storage: `${process.env.CORE_PATH_DATA}/transaction-pool.sqlite`,
+    storage: `${process.env.CORE_PATH_DATA}/transaction-pool/transaction-pool.sqlite`,
     // When the pool contains that many transactions, then a new transaction is
     // only accepted if its fee is higher than the transaction with the lowest
     // fee in the pool. In this case the transaction with the lowest fee is removed
@@ -34,6 +34,6 @@ export const defaults = {
     },
     workerPool: {
         workerCount: 3,
-        cryptoPackages: [{ typeGroup: 2, packageName: "@arkecosystem/core-magistrate-crypto" }],
+        cryptoPackages: [],
     },
 };

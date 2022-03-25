@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 interface ChunkData {
     key: string;
@@ -29,7 +29,7 @@ export class ChunkCache implements Contracts.P2P.ChunkCache {
         const chunkData = this.downloadedChunksCache.find((chunkData) => chunkData.key === key);
 
         if (!chunkData) {
-            throw new Error(`Downloaded chunk for key ${key} is not defined.`);
+            throw new Error(`Downloaded chunk for key ${key} is not defined`);
         }
 
         return chunkData.data;

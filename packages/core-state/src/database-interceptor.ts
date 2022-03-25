@@ -1,6 +1,6 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 @Container.injectable()
 export class DatabaseInterceptor {
@@ -26,7 +26,7 @@ export class DatabaseInterceptor {
         if (commonBlocks.length < ids.length) {
             // ! do not query blocks that were found
             // ! why method is called commonBlocks, but is just findByIds?
-            commonBlocks = ((await this.databaseService.findBlockByID(ids)) as unknown) as Interfaces.IBlockData[];
+            commonBlocks = (await this.databaseService.findBlockByID(ids)) as unknown as Interfaces.IBlockData[];
         }
 
         return commonBlocks;

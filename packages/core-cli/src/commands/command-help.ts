@@ -4,6 +4,7 @@ import { PackageJson } from "type-fest";
 import { AppHeader } from "../components";
 import { Application } from "../contracts";
 import { Identifiers, inject, injectable } from "../ioc";
+import { Command } from "./command";
 
 /**
  * @export
@@ -31,11 +32,11 @@ export class CommandHelp {
      * @returns {string}
      * @memberof CommandHelp
      */
-    public render(command): string {
+    public render(command: Command): string {
         let helpMessage: string = `${this.app.get<AppHeader>(Identifiers.AppHeader).render()}
 
 ${blue().bold("Description")}
-${command.description}`;
+${command.description!.replace(/\.$/, "")}`;
 
         const args: string = this.buildArguments(command);
 
@@ -70,7 +71,7 @@ ${flags}`;
 
         const output: string[] = [];
         for (let i = 0; i < options.length; i++) {
-            output.push(`${options[i].padEnd(longestProperty, " ")}    ${descriptions[i]}`);
+            output.push(`${options[i].padEnd(longestProperty, " ")}    ${descriptions[i].replace(/\.$/, "")}`);
         }
 
         return output.join("\n");
@@ -92,7 +93,7 @@ ${flags}`;
 
         const output: string[] = [];
         for (let i = 0; i < options.length; i++) {
-            output.push(`--${options[i].padEnd(longestProperty, " ")}    ${descriptions[i]}`);
+            output.push(`--${options[i].padEnd(longestProperty, " ")}    ${descriptions[i].replace(/\.$/, "")}`);
         }
 
         return output.join("\n");
@@ -111,7 +112,7 @@ ${flags}`;
 
         for (const option of Object.keys(properties)) {
             options.push(option);
-            descriptions.push(properties[option].description);
+            descriptions.push(properties[option].description.replace(/\.$/, ""));
         }
 
         return {

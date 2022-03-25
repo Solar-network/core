@@ -1,5 +1,6 @@
-import { Contracts } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Contracts } from "@solar-network/core-kernel";
+import { Interfaces, Utils } from "@solar-network/crypto";
+
 import { blocks } from "./proto/protos";
 
 const hardLimitNumberOfBlocks = 400;
@@ -11,15 +12,15 @@ export const getBlocks = {
         deserialize: (payload: Buffer): blocks.IGetBlocksRequest => blocks.GetBlocksRequest.decode(payload),
     },
     response: {
-        serialize: (obj): Buffer => {
+        serialize: (obj: blocks.IGetBlocksResponse): Buffer => {
             const blockBuffers: Buffer[] = [];
 
-            for (const block of obj) {
-                let txBuffers: Buffer[] = [];
+            for (const block of obj as Interfaces.IBlockData[]) {
+                const txBuffers: Buffer[] = [];
 
                 if (block.transactions) {
                     for (const transaction of block.transactions) {
-                        const txBuffer = Buffer.from(transaction, "hex");
+                        const txBuffer = Buffer.from(transaction as unknown as string, "hex");
                         const txLengthBuffer = Buffer.alloc(4);
                         txLengthBuffer.writeUInt32BE(txBuffer.byteLength);
                         txBuffers.push(txLengthBuffer, txBuffer);
@@ -42,7 +43,7 @@ export const getBlocks = {
 
             return Buffer.concat(blockBuffers);
         },
-        deserialize: (payload: Buffer) => {
+        deserialize: (payload: Buffer): object => {
             const blocksBuffer = Buffer.from(payload);
             const blocksBuffers: Buffer[] = [];
             for (let offset = 0; offset < blocksBuffer.byteLength - 4; ) {
@@ -68,9 +69,9 @@ export const getBlocks = {
                 }
                 return {
                     ...blockWithTxBuffer,
-                    totalAmount: new Utils.BigNumber(blockWithTxBuffer.totalAmount as string),
-                    totalFee: new Utils.BigNumber(blockWithTxBuffer.totalFee as string),
-                    reward: new Utils.BigNumber(blockWithTxBuffer.reward as string),
+                    totalAmount: new Utils.BigNumber(blockWithTxBuffer.totalAmount),
+                    totalFee: new Utils.BigNumber(blockWithTxBuffer.totalFee),
+                    reward: new Utils.BigNumber(blockWithTxBuffer.reward),
                     transactions: txs,
                 };
             });
@@ -81,7 +82,7 @@ export const getBlocks = {
 export const postBlock = {
     request: {
         serialize: (obj: blocks.IPostBlockRequest): Buffer => Buffer.from(blocks.PostBlockRequest.encode(obj).finish()),
-        deserialize: (payload: Buffer) => {
+        deserialize: (payload: Buffer): object => {
             const decoded = blocks.PostBlockRequest.decode(payload);
             return {
                 ...decoded,

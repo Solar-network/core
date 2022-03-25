@@ -1,4 +1,4 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { actions } from "./actions";
 import { Action } from "./contracts";
@@ -21,7 +21,7 @@ export class StateMachine {
      * @param  {String} event
      * @return {void}
      */
-    public transition(event) {
+    public transition(event: string): void {
         const nextState = blockchainMachine.transition(this.stateStore.getBlockchain(), event);
 
         if (nextState.actions.length > 0) {
@@ -50,7 +50,7 @@ export class StateMachine {
             if (action) {
                 setImmediate(() => action.handle());
             } else {
-                this.logger.error(`No action '${actionKey}' found`);
+                this.logger.error(`No action '${actionKey}' found :interrobang:`);
             }
         }
 

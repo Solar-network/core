@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Identities, Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Identities, Interfaces } from "@solar-network/crypto";
 
 @Container.injectable()
 export class Mempool implements Contracts.TransactionPool.Mempool {

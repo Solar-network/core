@@ -1,4 +1,4 @@
-import { Container } from "@arkecosystem/core-kernel";
+import { Container } from "@solar-network/core-kernel";
 
 import { Worker } from "../../contracts";
 import { AbstractWorkerAction } from "./abstract-worker-action";

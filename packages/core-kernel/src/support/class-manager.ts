@@ -102,7 +102,7 @@ export abstract class ClassManager {
         const creatorFunction = `create${pascalCase(name)}Driver`;
 
         if (typeof this[creatorFunction] !== "function") {
-            throw new Error(`${name} driver is not supported by ${this.constructor.name}.`);
+            throw new Error(`${name} driver is not supported by ${this.constructor.name}`);
         }
 
         return this[creatorFunction]();

@@ -1,4 +1,10 @@
+import { Managers } from "@solar-network/crypto";
+
 import { constants } from "./constants";
+
+const maxDelegates = Managers.configManager
+    .getMilestones()
+    .reduce((acc, curr) => Math.max(acc, curr.activeDelegates), 0);
 
 export const replySchemas = {
     "p2p.peer.getCommonBlocks": {
@@ -55,7 +61,7 @@ export const replySchemas = {
     },
     "p2p.peer.getStatus": {
         type: "object",
-        required: ["state", "config"],
+        required: ["state", "config", "signatures"],
         additionalProperties: false,
         properties: {
             state: {
@@ -71,7 +77,7 @@ export const replySchemas = {
                     },
                     currentSlot: {
                         type: "integer",
-                        minimum: 1,
+                        minimum: 0,
                     },
                     header: {
                         anyOf: [
@@ -173,6 +179,36 @@ export const replySchemas = {
                             },
                         },
                     },
+                },
+            },
+            publicKeys: {
+                type: "array",
+                maxItems: maxDelegates,
+                items: {
+                    allOf: [
+                        {
+                            $ref: "hex",
+                        },
+                        {
+                            minLength: 66,
+                            maxLength: 66,
+                        },
+                    ],
+                },
+            },
+            signatures: {
+                type: "array",
+                maxItems: maxDelegates,
+                items: {
+                    allOf: [
+                        {
+                            $ref: "hex",
+                        },
+                        {
+                            minLength: 128,
+                            maxLength: 128,
+                        },
+                    ],
                 },
             },
         },

@@ -1,4 +1,4 @@
-export enum TransactionType {
+export enum CoreTransactionType {
     Transfer = 0,
     SecondSignature = 1,
     DelegateRegistration = 2,
@@ -12,9 +12,19 @@ export enum TransactionType {
     HtlcRefund = 10,
 }
 
+export enum SolarTransactionType {
+    Burn = 0,
+}
+
+export const TransactionType = {
+    Core: CoreTransactionType,
+    Solar: SolarTransactionType,
+};
+
 export enum TransactionTypeGroup {
     Test = 0,
     Core = 1,
+    Solar = 2,
 
     // Everything above is available to anyone
     Reserved = 1000,

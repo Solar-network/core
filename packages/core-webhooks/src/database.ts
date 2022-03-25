@@ -1,4 +1,4 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
+import { Container, Contracts } from "@solar-network/core-kernel";
 import { ensureFileSync, existsSync } from "fs-extra";
 import lowdb from "lowdb";
 import FileSync from "lowdb/adapters/FileSync";
@@ -30,7 +30,7 @@ export class Database {
     /**
      * @memberof Database
      */
-    public boot() {
+    public boot(): void {
         const adapterFile: string = this.app.cachePath("webhooks.json");
 
         if (!existsSync(adapterFile)) {

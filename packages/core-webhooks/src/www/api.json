@@ -1,0 +1,257 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Solar Core: Webhook API"
+    },
+    "servers": [],
+    "tags": [
+        {
+            "name": "Webhooks"
+        }
+    ],
+    "paths": {
+        "/webhooks": {
+            "get": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "List all webhooks",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Create a webhook",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/webhook"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/webhooks/{id}": {
+            "get": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Retrieve a webhook",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the webhook to be returned",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Webhook not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Update a webhook",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the webhook to be returned",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/webhook"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Webhook not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Delete a webhook",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of the webhook to be deleted",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Webhook not found"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "uuid": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "webhook": {
+                "type": "object",
+                "required": [
+                    "conditions",
+                    "event",
+                    "target"
+                ],
+                "properties": {
+                    "event": {
+                        "type": "string",
+                        "example": "block.forged",
+                        "enum": [
+                            "block.applied",
+                            "block.disregarded",
+                            "block.forged",
+                            "block.received",
+                            "block.reverted",
+                            "blockchain.synced",
+                            "cache.flushed",
+                            "cache.forgotten",
+                            "cache.hit",
+                            "cache.missed",
+                            "cache.written",
+                            "crypto.milestone.changed",
+                            "delegate.registered",
+                            "delegate.resigned",
+                            "forger.failed",
+                            "forger.missing",
+                            "forger.started",
+                            "peer.added",
+                            "peer.disconnect",
+                            "peer.disconnected",
+                            "peer.disconnecting",
+                            "peer.removed",
+                            "round.applied",
+                            "round.created",
+                            "round.missed",
+                            "transaction.pool.added",
+                            "transaction.applied",
+                            "transaction.expired",
+                            "transaction.forged",
+                            "transaction.pool.rejected",
+                            "transaction.pool.removed",
+                            "transaction.reverted",
+                            "schedule.blockJob.finished",
+                            "schedule.cronJob.finished",
+                            "queue.finished",
+                            "queue.failed",
+                            "wallet.vote",
+                            "wallet.unvote"
+                        ]
+                    },
+                    "target": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "http://127.0.0.1/endpoint/"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "conditions": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "condition",
+                                "key"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "key": {
+                                    "type": "string",
+                                    "example": "generatorPublicKey"
+                                },
+                                "condition": {
+                                    "type": "string",
+                                    "example": "eq",
+                                    "enum": [
+                                        "between",
+                                        "contains",
+                                        "eq",
+                                        "falsy",
+                                        "gt",
+                                        "gte",
+                                        "lt",
+                                        "lte",
+                                        "ne",
+                                        "not-between",
+                                        "regexp",
+                                        "truthy"
+                                    ]
+                                },
+                                "value": {
+                                    "oneOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "object"
+                                        }
+                                    ],
+                                    "example": "022bcee076006120b24f145d495686d2afc880079daf2eb20d8be9bf0e434ca3e1"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

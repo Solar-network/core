@@ -1,9 +1,11 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers, Utils } from "@solar-network/core-kernel";
 import chalk, { Chalk } from "chalk";
 import * as console from "console";
+import { emojify } from "node-emoji";
 import pino, { PrettyOptions } from "pino";
 import PinoPretty from "pino-pretty";
 import pump from "pump";
+import pumpify from "pumpify";
 import { Transform } from "readable-stream";
 import { createStream } from "rotating-file-stream";
 import split from "split2";
@@ -28,6 +30,10 @@ export class PinoLogger implements Contracts.Kernel.Logger {
     @Container.inject(Container.Identifiers.ConfigFlags)
     private readonly configFlags!: { processType: string };
 
+    @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/core-logger-pino")
+    private readonly configuration!: Providers.PluginConfiguration;
+
     /**
      * @private
      * @type {Record<string, Chalk>}
@@ -46,10 +52,17 @@ export class PinoLogger implements Contracts.Kernel.Logger {
 
     /**
      * @private
+     * @type {PassThrough}
+     * @memberof PinoLogger
+     */
+    private stream!: PassThrough;
+
+    /**
+     * @private
      * @type {Writable}
      * @memberof PinoLogger
      */
-    private fileStream!: Writable;
+    private combinedFileStream?: Writable;
 
     /**
      * @private
@@ -71,7 +84,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @memberof PinoLogger
      */
     public async make(options?: any): Promise<Contracts.Kernel.Logger> {
-        const stream = new PassThrough();
+        this.stream = new PassThrough();
         this.logger = pino(
             {
                 base: null,
@@ -95,14 +108,12 @@ export class PinoLogger implements Contracts.Kernel.Logger {
                 useOnlyCustomLevels: true,
                 safe: true,
             },
-            stream,
+            this.stream,
         );
-
-        this.fileStream = this.getFileStream(options.fileRotator);
 
         if (this.isValidLevel(options.levels.console)) {
             pump(
-                stream,
+                this.stream,
                 split(),
                 // @ts-ignore - Object literal may only specify known properties, and 'colorize' does not exist in type 'PrettyOptions'.
                 this.createPrettyTransport(options.levels.console, { colorize: true }),
@@ -115,16 +126,18 @@ export class PinoLogger implements Contracts.Kernel.Logger {
         }
 
         if (this.isValidLevel(options.levels.file)) {
-            pump(
-                stream,
+            this.combinedFileStream = pumpify(
                 split(),
                 // @ts-ignore - Object literal may only specify known properties, and 'colorize' does not exist in type 'PrettyOptions'.
                 this.createPrettyTransport(options.levels.file, { colorize: false }),
-                this.fileStream,
-                (err) => {
-                    console.error("File stream closed due to an error:", err);
-                },
+                this.getFileStream(options.fileRotator),
             );
+
+            this.combinedFileStream!.on("error", (err) => {
+                console.error("File stream closed due to an error:", err);
+            });
+
+            this.stream.pipe(this.combinedFileStream!);
         }
 
         return this;
@@ -134,7 +147,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public emergency(message: any): void {
+    public emergency(message: object): void {
         this.log("emergency", message);
     }
 
@@ -142,7 +155,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public alert(message: any): void {
+    public alert(message: object): void {
         this.log("alert", message);
     }
 
@@ -150,7 +163,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public critical(message: any): void {
+    public critical(message: object): void {
         this.log("critical", message);
     }
 
@@ -158,7 +171,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public error(message: any): void {
+    public error(message: object): void {
         this.log("error", message);
     }
 
@@ -166,7 +179,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public warning(message: any): void {
+    public warning(message: object): void {
         this.log("warning", message);
     }
 
@@ -174,7 +187,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public notice(message: any): void {
+    public notice(message: object): void {
         this.log("notice", message);
     }
 
@@ -182,7 +195,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public info(message: any): void {
+    public info(message: object): void {
         this.log("info", message);
     }
 
@@ -190,7 +203,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @param {*} message
      * @memberof PinoLogger
      */
-    public debug(message: any): void {
+    public debug(message: object): void {
         this.log("debug", message);
     }
 
@@ -202,13 +215,29 @@ export class PinoLogger implements Contracts.Kernel.Logger {
         this.silentConsole = suppress;
     }
 
+    public async dispose(): Promise<void> {
+        if (this.combinedFileStream) {
+            this.stream.unpipe(this.combinedFileStream);
+
+            if (!this.combinedFileStream.destroyed) {
+                this.combinedFileStream.end();
+
+                return new Promise((resolve) => {
+                    this.combinedFileStream!.on("finish", () => {
+                        resolve();
+                    });
+                });
+            }
+        }
+    }
+
     /**
      * @param {string} level
      * @param {*} message
      * @returns {boolean}
      * @memberof Logger
      */
-    private log(level: string, message: any): void {
+    private log(level: string, message: string | object): void {
         if (this.silentConsole) {
             return;
         }
@@ -221,7 +250,11 @@ export class PinoLogger implements Contracts.Kernel.Logger {
             message = inspect(message, { depth: 1 });
         }
 
-        this.logger[level](message);
+        if (this.configuration.get("emojify")) {
+            this.logger[level](emojify(message));
+        } else {
+            this.logger[level](emojify(message, undefined, () => ""));
+        }
     }
 
     /**

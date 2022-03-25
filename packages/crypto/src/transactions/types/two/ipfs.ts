@@ -9,7 +9,7 @@ import { Transaction } from "../transaction";
 
 export abstract class IpfsTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.Ipfs;
+    public static type: number = TransactionType.Core.Ipfs;
     public static key = "ipfs";
     public static version: number = 2;
 
@@ -21,6 +21,10 @@ export abstract class IpfsTransaction extends Transaction {
 
     public verify(): boolean {
         return configManager.getMilestone().aip11 && super.verify();
+    }
+
+    public hasVendorField(): boolean {
+        return true;
     }
 
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {

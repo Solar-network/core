@@ -1,5 +1,5 @@
-import { Container } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Container } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 
 import { Resource } from "../interfaces";
 
@@ -12,7 +12,7 @@ export class RoundResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public raw(resource): object {
+    public raw(resource: object): object {
         return resource;
     }
 
@@ -23,7 +23,7 @@ export class RoundResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public transform(resource): object {
+    public transform(resource: { balance: string; publicKey: string }): object {
         return {
             publicKey: resource.publicKey,
             votes: Utils.BigNumber.make(resource.balance).toFixed(),

@@ -1,6 +1,6 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
 import Boom from "@hapi/boom";
 import { Server } from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { protocol } from "../../hapi-nes/utils";
 

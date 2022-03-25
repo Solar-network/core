@@ -116,7 +116,7 @@ export abstract class InstanceManager<T> {
         const creatorFunction = `create${pascalCase(name)}Driver`;
 
         if (typeof this[creatorFunction] !== "function") {
-            throw new Error(`${name} driver is not supported by ${this.constructor.name}.`);
+            throw new Error(`${name} driver is not supported by ${this.constructor.name}`);
         }
 
         this.drivers.set(name, await this[creatorFunction](this.app));

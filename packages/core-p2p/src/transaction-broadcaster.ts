@@ -1,5 +1,5 @@
-import { Container, Contracts, Providers, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Providers, Utils } from "@solar-network/core-kernel";
+import { Interfaces, Transactions } from "@solar-network/crypto";
 
 import { PeerCommunicator } from "./peer-communicator";
 
@@ -9,7 +9,7 @@ export class TransactionBroadcaster implements Contracts.P2P.TransactionBroadcas
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-p2p")
+    @Container.tagged("plugin", "@solar-network/core-p2p")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.PeerRepository)
@@ -29,7 +29,7 @@ export class TransactionBroadcaster implements Contracts.P2P.TransactionBroadcas
 
         const transactionsStr = Utils.pluralize("transaction", transactions.length, true);
         const peersStr = Utils.pluralize("peer", peers.length, true);
-        this.logger.debug(`Broadcasting ${transactionsStr} to ${peersStr}`);
+        this.logger.debug(`Broadcasting ${transactionsStr} to ${peersStr} :moneybag:`);
 
         const transactionsBroadcast: Buffer[] = transactions.map((t) => Transactions.Serializer.serialize(t));
         const promises = peers.map((p) => this.communicator.postTransactions(p, transactionsBroadcast));

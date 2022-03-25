@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@solar-network/core-kernel";
 import { fork } from "child_process";
 import Joi from "joi";
 
@@ -13,6 +13,7 @@ import { DynamicFeeMatcher } from "./dynamic-fee-matcher";
 import { ExpirationService } from "./expiration-service";
 import { Mempool } from "./mempool";
 import { Processor } from "./processor";
+import { ProcessorDynamicFeeExtension } from "./processor-dynamic-fee-extension";
 import { Query } from "./query";
 import { SenderMempool } from "./sender-mempool";
 import { SenderState } from "./sender-state";
@@ -20,7 +21,6 @@ import { Service } from "./service";
 import { Storage } from "./storage";
 import { Worker } from "./worker";
 import { WorkerPool } from "./worker-pool";
-import { ProcessorDynamicFeeExtension } from "./processor-dynamic-fee-extension";
 
 /**
  * @export
@@ -86,8 +86,8 @@ export class ServiceProvider extends Providers.ServiceProvider {
                 cryptoPackages: Joi.array()
                     .items(
                         Joi.object({
-                            typeGroup: Joi.number().integer().min(2).required(),
-                            packageName: Joi.string().required(),
+                            typeGroup: Joi.number().integer().min(3),
+                            packageName: Joi.string(),
                         }),
                     )
                     .required(),

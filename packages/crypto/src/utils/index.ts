@@ -6,6 +6,7 @@ import { BigNumber } from "./bignum";
 import { calculateBlockTime, isNewBlockTime } from "./block-time-calculator";
 import { ByteBuffer } from "./byte-buffer";
 import { isLocalHost, isValidPeer } from "./is-valid-peer";
+import { calculateReward } from "./reward-calculator";
 
 let genesisTransactions: { [key: string]: boolean };
 let whitelistedBlockAndTransactionIds: { [key: string]: boolean };
@@ -108,4 +109,4 @@ export const isSupportedTransactionVersion = (version: number): boolean => {
     return true;
 };
 
-export { Base58, BigNumber, ByteBuffer, isValidPeer, isLocalHost, calculateBlockTime, isNewBlockTime };
+export { Base58, BigNumber, ByteBuffer, isValidPeer, isLocalHost, calculateBlockTime, isNewBlockTime, calculateReward };

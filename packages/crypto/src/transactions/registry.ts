@@ -2,10 +2,10 @@ import {
     TransactionAlreadyRegisteredError,
     TransactionKeyAlreadyRegisteredError,
     TransactionVersionAlreadyRegisteredError,
-    UnkownTransactionError,
+    UnknownTransactionError,
 } from "../errors";
 import { validator } from "../validation";
-import { One, Transaction, TransactionTypeFactory, Two } from "./types";
+import { One, Solar, Transaction, TransactionTypeFactory, Two } from "./types";
 import { InternalTransactionType } from "./types/internal-transaction-type";
 
 export type TransactionConstructor = typeof Transaction;
@@ -40,6 +40,9 @@ class TransactionRegistry {
         this.registerTransactionType(Two.HtlcLockTransaction);
         this.registerTransactionType(Two.HtlcClaimTransaction);
         this.registerTransactionType(Two.HtlcRefundTransaction);
+
+        // Solar transactions
+        this.registerTransactionType(Solar.BurnTransaction);
     }
 
     public registerTransactionType(constructor: TransactionConstructor): void {
@@ -87,14 +90,14 @@ class TransactionRegistry {
 
         const internalType: InternalTransactionType = InternalTransactionType.from(type, typeGroup);
         if (!this.transactionTypes.has(internalType)) {
-            throw new UnkownTransactionError(internalType.toString());
+            throw new UnknownTransactionError(internalType.toString());
         }
 
         this.updateSchemas(constructor, true);
 
         const constructors = this.transactionTypes.get(internalType)!;
         if (!constructors.has(version)) {
-            throw new UnkownTransactionError(internalType.toString());
+            throw new UnknownTransactionError(internalType.toString());
         }
 
         constructors.delete(version);

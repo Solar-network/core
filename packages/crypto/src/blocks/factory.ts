@@ -6,14 +6,13 @@ import { Deserializer } from "./deserializer";
 import { Serializer } from "./serializer";
 
 export class BlockFactory {
-    // @todo: add a proper type hint for data
-    public static make(data: any, keys: IKeyPair): IBlock | undefined {
+    public static make(data: IBlockData, keys: IKeyPair): IBlock | undefined {
         data.generatorPublicKey = keys.publicKey;
 
         const payloadHash: Buffer = Serializer.serialize(data, false);
         const hash: Buffer = HashAlgorithms.sha256(payloadHash);
 
-        data.blockSignature = Hash.signECDSA(hash, keys);
+        data.blockSignature = Hash.signSchnorr(hash, keys);
         data.id = Block.getId(data);
 
         return this.fromData(data);

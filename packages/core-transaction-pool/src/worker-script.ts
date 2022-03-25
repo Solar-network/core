@@ -1,4 +1,4 @@
-import { Utils as AppUtils } from "@arkecosystem/core-kernel";
+import { Utils as AppUtils } from "@solar-network/core-kernel";
 
 import { WorkerScriptHandler } from "./worker-script-handler";
 

@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { headers } from "./shared";
@@ -13,7 +13,7 @@ export const transactionsSchemas = {
                         .getTagged<Providers.PluginConfiguration>(
                             Container.Identifiers.PluginConfiguration,
                             "plugin",
-                            "@arkecosystem/core-transaction-pool",
+                            "@solar-network/core-transaction-pool",
                         )
                         .getOptional<number>("maxTransactionsPerRequest", 40),
                 ),

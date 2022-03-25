@@ -1,10 +1,10 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Blocks, Crypto, Identities, Interfaces, Utils } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Blocks, Crypto, Identities, Interfaces, Managers, Utils } from "@solar-network/crypto";
 import assert from "assert";
 
 @Container.injectable()
-export class RoundState {
+export class RoundState implements Contracts.State.RoundState {
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Contracts.Kernel.Application;
 
@@ -63,6 +63,7 @@ export class RoundState {
         const roundInfo = this.getRound(block.data.height);
 
         this.blocksInCurrentRound = await this.getBlocksForRound();
+        await this.calcPreviousActiveDelegates(roundInfo, this.blocksInCurrentRound);
         await this.setForgingDelegatesOfRound(roundInfo);
 
         await this.databaseService.deleteRound(roundInfo.round + 1);
@@ -92,10 +93,12 @@ export class RoundState {
                 const wallet = this.walletRepository.createWallet(Identities.Address.fromPublicKey(publicKey));
                 wallet.setPublicKey(publicKey);
 
+                const existingWallet = this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate");
                 const delegate = {
                     voteBalance: Utils.BigNumber.make(balance),
-                    username: this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate.username"),
+                    username: existingWallet.username,
                     round: roundInfo!.round,
+                    rank: existingWallet.rank,
                 };
                 AppUtils.assert.defined(delegate.username);
 
@@ -128,11 +131,7 @@ export class RoundState {
             const missedSlot: number = lastSlot + i + 1;
             const delegate: Contracts.State.Wallet = this.forgingDelegates[missedSlot % this.forgingDelegates.length];
 
-            this.logger.debug(
-                `Delegate ${delegate.getAttribute(
-                    "delegate.username",
-                )} (${delegate.getPublicKey()}) just missed a block.`,
-            );
+            this.logger.debug(`Delegate ${delegate.getAttribute("delegate.username")} just missed a block :pensive:`);
 
             this.events.dispatch(Enums.ForgerEvent.Missing, {
                 delegate,
@@ -140,11 +139,34 @@ export class RoundState {
         }
     }
 
+    public async getRewardForBlockInRound(
+        height: number,
+        wallet: Contracts.State.Wallet,
+    ): Promise<{ alreadyForged: boolean; reward: Utils.BigNumber }> {
+        const { dynamicReward } = Managers.configManager.getMilestone(height);
+        let alreadyForged: boolean = false;
+        let reward: Utils.BigNumber | undefined = undefined;
+        if (dynamicReward && dynamicReward.enabled) {
+            alreadyForged = this.blocksInCurrentRound.some(
+                (blockGenerator) => blockGenerator.data.generatorPublicKey === wallet.getPublicKey(),
+            );
+            if (alreadyForged) {
+                reward = Utils.BigNumber.make(dynamicReward.secondaryReward);
+            }
+        }
+
+        if (reward === undefined) {
+            reward = Utils.calculateReward(height, wallet.getAttribute("delegate.rank"));
+        }
+
+        return { alreadyForged, reward };
+    }
+
     private async applyRound(height: number): Promise<void> {
         if (height === 1 || AppUtils.roundCalculator.isNewRound(height + 1)) {
             const roundInfo = this.getRound(height + 1);
 
-            this.logger.info(`Starting Round ${roundInfo.round.toLocaleString()}`);
+            this.logger.info(`Starting Round ${roundInfo.round.toLocaleString()} :dove_of_peace:`);
 
             this.detectMissedRound();
 
@@ -166,7 +188,7 @@ export class RoundState {
         const { round, nextRound } = roundInfo;
 
         if (nextRound === round + 1) {
-            this.logger.info(`Back to previous round: ${round.toLocaleString()}`);
+            this.logger.info(`Back to previous round: ${round.toLocaleString()} :back:`);
 
             await this.setForgingDelegatesOfRound(
                 roundInfo,
@@ -187,9 +209,7 @@ export class RoundState {
                 const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegate.getPublicKey()!);
 
                 this.logger.debug(
-                    `Delegate ${wallet.getAttribute(
-                        "delegate.username",
-                    )} (${wallet.getPublicKey()}) just missed a round.`,
+                    `Delegate ${wallet.getAttribute("delegate.username")} just missed a round :cold_sweat:`,
                 );
 
                 this.events.dispatch(Enums.RoundEvent.Missed, {

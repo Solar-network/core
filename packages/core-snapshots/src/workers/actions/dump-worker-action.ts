@@ -1,4 +1,4 @@
-import { Container } from "@arkecosystem/core-kernel";
+import { Container } from "@solar-network/core-kernel";
 import { parentPort } from "worker_threads";
 
 import { Worker } from "../../contracts";

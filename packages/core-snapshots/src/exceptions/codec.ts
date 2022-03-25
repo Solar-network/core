@@ -1,4 +1,4 @@
-import { Exceptions } from "@arkecosystem/core-kernel";
+import { Exceptions } from "@solar-network/core-kernel";
 
 export class BlockDecodeException extends Exceptions.Base.Exception {
     public constructor(id: string | undefined, message: string) {

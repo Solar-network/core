@@ -1,4 +1,4 @@
-import { Commands, Container, Contracts } from "@arkecosystem/core-cli";
+import { Commands, Container, Contracts } from "@solar-network/core-cli";
 import boxen from "boxen";
 import { blue, cyan } from "kleur";
 
@@ -23,7 +23,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Displays detailed information on all commands available via CLI.";
+    public description: string = "Displays detailed information on all commands available via CLI";
 
     /**
      * Indicates whether the command requires a network to be present.
@@ -65,7 +65,10 @@ export class Command extends Commands.Command {
 
             for (const signature of signatures) {
                 commandsAsString.push(
-                    `  ${signature.padEnd(longestSignature, " ")}        ${commands[signature].description}`,
+                    `  ${signature.padEnd(longestSignature, " ")}        ${commands[signature].description.replace(
+                        /\.$/,
+                        "",
+                    )}`,
                 );
             }
         }
@@ -79,17 +82,17 @@ ${blue().bold("Usage")}
   command [arguments] [flags]
 
 ${blue().bold("Flags")}
-  --help              Display the corresponding help message.
-  --quiet             Do not output any message
+  --help                   Display the corresponding help message
+  --quiet                  Do not output any message
 
 ${blue().bold("Arguments")}
-  -v|vv|vvv          Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+  -v|vv                    Increase verbosity of messages: 1 for verbose output and 2 for debug
 
 ${blue().bold("Available Commands")}
 ${commandsAsString.join("\n")}`,
                 {
                     padding: 1,
-                    borderStyle: boxen.BorderStyle.Classic,
+                    borderStyle: "classic",
                 },
             ),
         );

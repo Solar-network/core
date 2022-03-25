@@ -1,7 +1,7 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
-import Joi from "joi";
+import { Commands, Container } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import { removeSync } from "fs-extra";
+import Joi from "joi";
 
 /**
  * @export
@@ -24,7 +24,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Clear the transaction pool.";
+    public description: string = "Clear the transaction pool";
 
     /**
      * Configure the console command.
@@ -34,8 +34,9 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)));
+            .setFlag("force", "Force the pool to be cleared", Joi.boolean())
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)));
     }
 
     /**
@@ -49,7 +50,7 @@ export class Command extends Commands.Command {
         this.actions.abortRunningProcess(`${this.getFlag("token")}-forger`);
         this.actions.abortRunningProcess(`${this.getFlag("token")}-relay`);
 
-        if (this.getFlag("false")) {
+        if (this.getFlag("force")) {
             return this.removeFiles();
         }
 

@@ -2911,6 +2911,8 @@ $root.peer = (function() {
          * @interface IGetStatusResponse
          * @property {peer.GetStatusResponse.IState|null} [state] GetStatusResponse state
          * @property {peer.GetStatusResponse.IConfig|null} [config] GetStatusResponse config
+         * @property {Array.<string>|null} [publicKeys] GetStatusResponse publicKeys
+         * @property {Array.<string>|null} [signatures] GetStatusResponse signatures
          */
 
         /**
@@ -2922,6 +2924,8 @@ $root.peer = (function() {
          * @param {peer.IGetStatusResponse=} [properties] Properties to set
          */
         function GetStatusResponse(properties) {
+            this.publicKeys = [];
+            this.signatures = [];
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -2943,6 +2947,22 @@ $root.peer = (function() {
          * @instance
          */
         GetStatusResponse.prototype.config = null;
+
+        /**
+         * GetStatusResponse publicKeys.
+         * @member {Array.<string>} publicKeys
+         * @memberof peer.GetStatusResponse
+         * @instance
+         */
+        GetStatusResponse.prototype.publicKeys = $util.emptyArray;
+
+        /**
+         * GetStatusResponse signatures.
+         * @member {Array.<string>} signatures
+         * @memberof peer.GetStatusResponse
+         * @instance
+         */
+        GetStatusResponse.prototype.signatures = $util.emptyArray;
 
         /**
          * Creates a new GetStatusResponse instance using the specified properties.
@@ -2972,6 +2992,12 @@ $root.peer = (function() {
                 $root.peer.GetStatusResponse.State.encode(message.state, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
             if (message.config != null && Object.hasOwnProperty.call(message, "config"))
                 $root.peer.GetStatusResponse.Config.encode(message.config, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+            if (message.publicKeys != null && message.publicKeys.length)
+                for (var i = 0; i < message.publicKeys.length; ++i)
+                    writer.uint32(/* id 3, wireType 2 =*/26).string(message.publicKeys[i]);
+            if (message.signatures != null && message.signatures.length)
+                for (var i = 0; i < message.signatures.length; ++i)
+                    writer.uint32(/* id 4, wireType 2 =*/34).string(message.signatures[i]);
             return writer;
         };
 
@@ -3011,6 +3037,16 @@ $root.peer = (function() {
                     break;
                 case 2:
                     message.config = $root.peer.GetStatusResponse.Config.decode(reader, reader.uint32());
+                    break;
+                case 3:
+                    if (!(message.publicKeys && message.publicKeys.length))
+                        message.publicKeys = [];
+                    message.publicKeys.push(reader.string());
+                    break;
+                case 4:
+                    if (!(message.signatures && message.signatures.length))
+                        message.signatures = [];
+                    message.signatures.push(reader.string());
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -3057,6 +3093,20 @@ $root.peer = (function() {
                 if (error)
                     return "config." + error;
             }
+            if (message.publicKeys != null && message.hasOwnProperty("publicKeys")) {
+                if (!Array.isArray(message.publicKeys))
+                    return "publicKeys: array expected";
+                for (var i = 0; i < message.publicKeys.length; ++i)
+                    if (!$util.isString(message.publicKeys[i]))
+                        return "publicKeys: string[] expected";
+            }
+            if (message.signatures != null && message.hasOwnProperty("signatures")) {
+                if (!Array.isArray(message.signatures))
+                    return "signatures: array expected";
+                for (var i = 0; i < message.signatures.length; ++i)
+                    if (!$util.isString(message.signatures[i]))
+                        return "signatures: string[] expected";
+            }
             return null;
         };
 
@@ -3082,6 +3132,20 @@ $root.peer = (function() {
                     throw TypeError(".peer.GetStatusResponse.config: object expected");
                 message.config = $root.peer.GetStatusResponse.Config.fromObject(object.config);
             }
+            if (object.publicKeys) {
+                if (!Array.isArray(object.publicKeys))
+                    throw TypeError(".peer.GetStatusResponse.publicKeys: array expected");
+                message.publicKeys = [];
+                for (var i = 0; i < object.publicKeys.length; ++i)
+                    message.publicKeys[i] = String(object.publicKeys[i]);
+            }
+            if (object.signatures) {
+                if (!Array.isArray(object.signatures))
+                    throw TypeError(".peer.GetStatusResponse.signatures: array expected");
+                message.signatures = [];
+                for (var i = 0; i < object.signatures.length; ++i)
+                    message.signatures[i] = String(object.signatures[i]);
+            }
             return message;
         };
 
@@ -3098,6 +3162,10 @@ $root.peer = (function() {
             if (!options)
                 options = {};
             var object = {};
+            if (options.arrays || options.defaults) {
+                object.publicKeys = [];
+                object.signatures = [];
+            }
             if (options.defaults) {
                 object.state = null;
                 object.config = null;
@@ -3106,6 +3174,16 @@ $root.peer = (function() {
                 object.state = $root.peer.GetStatusResponse.State.toObject(message.state, options);
             if (message.config != null && message.hasOwnProperty("config"))
                 object.config = $root.peer.GetStatusResponse.Config.toObject(message.config, options);
+            if (message.publicKeys && message.publicKeys.length) {
+                object.publicKeys = [];
+                for (var j = 0; j < message.publicKeys.length; ++j)
+                    object.publicKeys[j] = message.publicKeys[j];
+            }
+            if (message.signatures && message.signatures.length) {
+                object.signatures = [];
+                for (var j = 0; j < message.signatures.length; ++j)
+                    object.signatures[j] = message.signatures[j];
+            }
             return object;
         };
 

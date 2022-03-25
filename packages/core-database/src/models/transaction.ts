@@ -1,5 +1,5 @@
-import { Contracts } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Contracts } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 import { Column, Entity, Index } from "typeorm";
 
 import { transformBigInt, transformVendorField } from "../utils/transform";
@@ -104,6 +104,13 @@ export class Transaction implements Contracts.Database.TransactionModel {
         nullable: false,
     })
     public fee!: Utils.BigNumber;
+
+    @Column({
+        type: "bigint",
+        transformer: transformBigInt,
+        nullable: false,
+    })
+    public burnedFee!: Utils.BigNumber;
 
     @Column({
         type: "bytea",

@@ -97,7 +97,7 @@ export class ServiceProviderRepository {
      * @memberof ServiceProviderRepository
      */
     public get(name: string): ServiceProvider {
-        const serviceProvider: ServiceProvider | undefined = this.serviceProviders.get(this.aliases.get(name) || name);
+        const serviceProvider: ServiceProvider | undefined = this.serviceProviders.get(name);
 
         assert.defined<ServiceProvider>(serviceProvider);
 
@@ -120,14 +120,14 @@ export class ServiceProviderRepository {
      */
     public alias(name: string, alias: string): void {
         if (this.aliases.has(alias)) {
-            throw new InvalidArgumentException(`The alias [${alias}] is already in use.`);
+            throw new InvalidArgumentException(`The alias [${alias}] is already in use`);
         }
 
         if (!this.serviceProviders.has(name)) {
-            throw new InvalidArgumentException(`The service provider [${name}] is unknown.`);
+            throw new InvalidArgumentException(`The service provider [${name}] is unknown`);
         }
 
-        this.aliases.set(alias, name);
+        this.aliases.set(name, alias);
     }
 
     /**
@@ -204,6 +204,13 @@ export class ServiceProviderRepository {
             .bind(Identifiers.PluginConfiguration)
             .toConstantValue(serviceProvider.config())
             .whenTargetTagged("plugin", name);
+
+        if (this.aliases.has(name)) {
+            this.app
+                .bind(Identifiers.PluginConfiguration)
+                .toConstantValue(serviceProvider.config())
+                .whenTargetTagged("plugin", this.aliases.get(name));
+        }
 
         await serviceProvider.register();
         await this.eventDispatcher.dispatch(KernelEvent.ServiceProviderRegistered, { name });

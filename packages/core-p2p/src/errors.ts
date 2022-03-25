@@ -18,7 +18,7 @@ export class P2PError extends Error {
 
 export class PeerStatusResponseError extends P2PError {
     public constructor(ip: string) {
-        super(`Failed to retrieve status from peer ${ip}.`);
+        super(`Failed to retrieve status from peer ${ip}`);
     }
 }
 
@@ -30,12 +30,12 @@ export class PeerPingTimeoutError extends P2PError {
 
 export class PeerVerificationFailedError extends P2PError {
     public constructor() {
-        super("Peer verification failed.");
+        super("Peer verification failed");
     }
 }
 
 export class MissingCommonBlockError extends P2PError {
     public constructor() {
-        super("Couldn't find any common blocks.");
+        super("Couldn't find any common blocks");
     }
 }

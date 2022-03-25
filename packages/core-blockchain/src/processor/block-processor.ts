@@ -1,7 +1,7 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Interfaces, Utils } from "@arkecosystem/crypto";
+import { Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Services, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Interfaces, Utils } from "@solar-network/crypto";
 
 import {
     AcceptBlockHandler,
@@ -9,6 +9,7 @@ import {
     ExceptionHandler,
     IncompatibleTransactionsHandler,
     InvalidGeneratorHandler,
+    InvalidRewardHandler,
     NonceOutOfOrderHandler,
     UnchainedHandler,
     VerificationFailedHandler,
@@ -28,24 +29,27 @@ export class BlockProcessor {
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Contracts.Kernel.Application;
 
-    @Container.inject(Container.Identifiers.LogService)
-    private readonly logger!: Contracts.Kernel.Logger;
-
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
-    @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
-    private readonly transactionRepository!: Repositories.TransactionRepository;
+    @Container.inject(Container.Identifiers.LogService)
+    private readonly logger!: Contracts.Kernel.Logger;
 
-    @Container.inject(Container.Identifiers.WalletRepository)
-    @Container.tagged("state", "blockchain")
-    private readonly walletRepository!: Contracts.State.WalletRepository;
+    @Container.inject(Container.Identifiers.RoundState)
+    private readonly roundState!: Contracts.State.RoundState;
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
 
+    @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
+    private readonly transactionRepository!: Repositories.TransactionRepository;
+
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
+
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
 
     public async process(block: Interfaces.IBlock): Promise<BlockProcessorResult> {
         if (Utils.isException({ ...block.data, transactions: block.transactions.map((tx) => tx.data) })) {
@@ -80,6 +84,10 @@ export class BlockProcessor {
             return this.app.resolve<InvalidGeneratorHandler>(InvalidGeneratorHandler).execute(block);
         }
 
+        if (!(await this.validateReward(block))) {
+            return this.app.resolve<InvalidRewardHandler>(InvalidRewardHandler).execute(block);
+        }
+
         const containsForgedTransactions: boolean = await this.checkBlockContainsForgedTransactions(block);
         if (containsForgedTransactions) {
             return this.app.resolve<AlreadyForgedHandler>(AlreadyForgedHandler).execute(block);
@@ -103,7 +111,7 @@ export class BlockProcessor {
 
                 block.verification = block.verify();
             } catch (error) {
-                this.logger.warning(`Failed to verify block, because: ${error.message}`);
+                this.logger.warning(`Failed to verify block, because: ${error.message} :bangbang:`);
                 block.verification.verified = false;
             }
         }
@@ -113,7 +121,7 @@ export class BlockProcessor {
             this.logger.warning(
                 `Block ${block.data.height.toLocaleString()} (${
                     block.data.id
-                }) disregarded because verification failed`,
+                }) disregarded because verification failed :scroll:`,
             );
 
             this.logger.warning(JSON.stringify(block.verification, undefined, 4));
@@ -153,7 +161,7 @@ export class BlockProcessor {
             /* istanbul ignore else */
             if (forgedIds.length > 0) {
                 this.logger.warning(
-                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains already forged transactions`,
+                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains already forged transactions :scroll:`,
                 );
 
                 this.logger.debug(`${JSON.stringify(forgedIds, undefined, 4)}`);
@@ -208,7 +216,7 @@ export class BlockProcessor {
                     `Block { height: ${block.data.height.toLocaleString()}, id: ${block.data.id} } ` +
                         `not accepted: invalid nonce order for sender ${sender}: ` +
                         `preceding nonce: ${nonceBySender[sender].toFixed()}, ` +
-                        `transaction ${data.id} has nonce ${nonce.toFixed()}.`,
+                        `transaction ${data.id} has nonce ${nonce.toFixed()} :bangbang:`,
                 );
                 return true;
             }
@@ -251,9 +259,7 @@ export class BlockProcessor {
 
         if (!forgingDelegate) {
             this.logger.debug(
-                `Could not decide if delegate ${generatorUsername} (${
-                    block.data.generatorPublicKey
-                }) is allowed to forge block ${block.data.height.toLocaleString()}`,
+                `Could not decide if delegate ${generatorUsername} is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
             );
         } /* istanbul ignore next */ else if (forgingDelegate.getPublicKey() !== block.data.generatorPublicKey) {
             AppUtils.assert.defined<string>(forgingDelegate.getPublicKey());
@@ -264,19 +270,38 @@ export class BlockProcessor {
             const forgingUsername: string = forgingWallet.getAttribute("delegate.username");
 
             this.logger.warning(
-                `Delegate ${generatorUsername} (${
-                    block.data.generatorPublicKey
-                }) not allowed to forge, should be ${forgingUsername} (${forgingDelegate.getPublicKey()})`,
+                `Delegate ${generatorUsername} is not allowed to forge in this slot, should be ${forgingUsername} :-1:`,
             );
 
             return false;
         }
 
         this.logger.debug(
-            `Delegate ${generatorUsername} (${
-                block.data.generatorPublicKey
-            }) allowed to forge block ${block.data.height.toLocaleString()}`,
+            `Delegate ${generatorUsername} is allowed to forge block ${block.data.height.toLocaleString()} :+1:`,
         );
+
+        return true;
+    }
+
+    private async validateReward(block: Interfaces.IBlock): Promise<boolean> {
+        const walletRepository = this.app.getTagged<Contracts.State.WalletRepository>(
+            Container.Identifiers.WalletRepository,
+            "state",
+            "blockchain",
+        );
+
+        const generatorWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(block.data.generatorPublicKey);
+
+        const { reward } = await this.roundState.getRewardForBlockInRound(block.data.height, generatorWallet);
+
+        if (!block.data.reward.isEqualTo(reward)) {
+            this.logger.warning(
+                `Block rejected as reward was ${Utils.formatSatoshi(
+                    block.data.reward,
+                )}, should be ${Utils.formatSatoshi(reward)} :bangbang:`,
+            );
+            return false;
+        }
 
         return true;
     }

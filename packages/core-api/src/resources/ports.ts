@@ -1,4 +1,4 @@
-import { Container, Providers } from "@arkecosystem/core-kernel";
+import { Container, Providers } from "@solar-network/core-kernel";
 
 import { Resource } from "../interfaces";
 
@@ -19,7 +19,7 @@ export class PortsResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public raw(resource): object {
+    public raw(resource: object): object {
         return resource;
     }
 
@@ -30,9 +30,9 @@ export class PortsResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public transform(resource): object {
+    public transform(resource: object): object {
         const result = {};
-        const keys = ["@arkecosystem/core-p2p", "@arkecosystem/core-api", "@arkecosystem/core-webhooks"];
+        const keys = ["@solar-network/core-p2p", "@solar-network/core-api", "@solar-network/core-webhooks"];
 
         for (const serviceProvider of this.serviceProviderRepository.allLoadedProviders()) {
             const name: string = serviceProvider.name()!;

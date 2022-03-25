@@ -1,5 +1,5 @@
-import { Utils } from "@arkecosystem/core-kernel";
-import { Crypto, Enums } from "@arkecosystem/crypto";
+import { Utils } from "@solar-network/core-kernel";
+import { Crypto, Enums } from "@solar-network/crypto";
 import dayjs from "dayjs";
 import { Brackets, EntityRepository, In } from "typeorm";
 
@@ -10,6 +10,7 @@ import { AbstractRepository } from "./abstract-repository";
 type FeeStatistics = {
     type: number;
     typeGroup: number;
+    burned: number;
     avg: number;
     min: number;
     max: number;
@@ -17,9 +18,7 @@ type FeeStatistics = {
 };
 @EntityRepository(Transaction)
 export class TransactionRepository extends AbstractRepository<Transaction> {
-    public async findByBlockIds(
-        blockIds: string[],
-    ): Promise<
+    public async findByBlockIds(blockIds: string[]): Promise<
         Array<{
             id: string;
             blockId: string;
@@ -48,18 +47,20 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
     public async getStatistics(): Promise<{
         count: number;
         totalFee: string;
+        burnedFee: string;
         totalAmount: string;
     }> {
         return this.createQueryBuilder()
             .select([])
             .addSelect("COUNT(DISTINCT(id))", "count")
             .addSelect("COALESCE(SUM(fee), 0)", "totalFee")
+            .addSelect("COALESCE(SUM(burned_fee), 0)", "burnedFee")
             .addSelect("COALESCE(SUM(amount), 0)", "totalAmount")
             .getRawOne();
     }
 
     public async getFeeStatistics(
-        txTypes: Array<{ type: number, typeGroup: number }>,
+        txTypes: Array<{ type: number; typeGroup: number }>,
         days?: number,
         minFee?: number,
     ): Promise<FeeStatistics[]> {
@@ -74,6 +75,7 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
                 .addSelect("COALESCE(MIN(fee), 0)::int8", "min")
                 .addSelect("COALESCE(MAX(fee), 0)::int8", "max")
                 .addSelect("COALESCE(SUM(fee), 0)::int8", "sum")
+                .addSelect("COALESCE(SUM(burned_fee), 0)::int8", "burned")
                 .where("timestamp >= :age AND fee >= :minFee", { age, minFee })
                 .groupBy("type_group")
                 .addGroupBy("type")
@@ -81,45 +83,94 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
                 .getRawMany();
         }
 
-        // no days parameter, take the stats from each type for its last 20 txs
         const feeStatistics: FeeStatistics[] = [];
+
+        // no days parameter, take the stats from each type for its last 20 txs
+        // except burned amount, which is all time
         for (const feeStatsByType of txTypes) {
             // we don't use directly this.createQueryBuilder() because it forces to have FROM transactions
             // instead of just the FROM (...) subquery
-            const feeStatsForType: FeeStatistics = await this.manager.connection.createQueryBuilder()
+            const feeStatsForType: FeeStatistics = await this.manager.connection
+                .createQueryBuilder()
                 .select(['subquery.type_group AS "typeGroup"', "subquery.type"])
                 .addSelect("COALESCE(AVG(subquery.fee), 0)::int8", "avg")
                 .addSelect("COALESCE(MIN(subquery.fee), 0)::int8", "min")
                 .addSelect("COALESCE(MAX(subquery.fee), 0)::int8", "max")
                 .addSelect("COALESCE(SUM(subquery.fee), 0)::int8", "sum")
                 .from(
-                    qb => qb
-                        .subQuery()
-                        .select()
-                        .from("transactions", "txs")
-                        .where(
-                            "txs.type = :type and txs.type_group = :typeGroup",
-                            { type: feeStatsByType.type, typeGroup: feeStatsByType.typeGroup }
-                        )
-                        .orderBy("txs.block_height", "DESC")
-                        .addOrderBy("txs.sequence", "DESC")
-                        .limit(20),
-                    "subquery"
+                    (qb) =>
+                        qb
+                            .subQuery()
+                            .select()
+                            .from("transactions", "txs")
+                            .where("txs.type = :type and txs.type_group = :typeGroup", {
+                                type: feeStatsByType.type,
+                                typeGroup: feeStatsByType.typeGroup,
+                            })
+                            .orderBy("txs.block_height", "DESC")
+                            .addOrderBy("txs.sequence", "DESC")
+                            .limit(20),
+                    "subquery",
                 )
                 .groupBy("subquery.type_group")
                 .addGroupBy("subquery.type")
                 .getRawOne();
-            feeStatistics.push(feeStatsForType ?? {
-                type: feeStatsByType.type,
-                typeGroup: feeStatsByType.typeGroup,
-                avg: 0,
-                min: 0,
-                max: 0,
-                sum: 0,
-            });
+
+            const burnStatsForType: FeeStatistics = await this.manager.connection
+                .createQueryBuilder()
+                .select("COALESCE(SUM(subquery.burned_fee), 0)::int8", "burned")
+                .from(
+                    (qb) =>
+                        qb
+                            .subQuery()
+                            .select()
+                            .from("transactions", "txs")
+                            .where("txs.type = :type and txs.type_group = :typeGroup", {
+                                type: feeStatsByType.type,
+                                typeGroup: feeStatsByType.typeGroup,
+                            }),
+                    "subquery",
+                )
+                .groupBy("subquery.type_group")
+                .addGroupBy("subquery.type")
+                .getRawOne();
+
+            if (feeStatsForType && burnStatsForType) {
+                feeStatsForType.burned = burnStatsForType.burned;
+            }
+
+            feeStatistics.push(
+                feeStatsForType ?? {
+                    type: feeStatsByType.type,
+                    typeGroup: feeStatsByType.typeGroup,
+                    avg: "0",
+                    burned: "0",
+                    min: "0",
+                    max: "0",
+                    sum: "0",
+                },
+            );
         }
 
         return feeStatistics;
+    }
+
+    public async getFeesBurned(): Promise<string> {
+        const { burned } = await this.createQueryBuilder()
+            .select("COALESCE(SUM(burned_fee), 0)::int8", "burned")
+            .getRawOne();
+        return burned;
+    }
+
+    public async getBurnTransactionTotal(): Promise<string> {
+        const { amount } = await this.createQueryBuilder()
+            .select("COALESCE(SUM(amount), 0)::int8", "amount")
+            .where("type = :type and type_group = :typeGroup", {
+                type: Enums.TransactionType.Solar.Burn,
+                typeGroup: Enums.TransactionTypeGroup.Solar,
+            })
+            .getRawOne();
+        return amount;
     }
 
     public async getSentTransactions(): Promise<
@@ -143,7 +194,7 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
             .addSelect("recipient_id", "recipientId")
             .addSelect("SUM(amount)", "amount")
             .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-            .andWhere(`type = ${Enums.TransactionType.Transfer}`)
+            .andWhere(`type = ${Enums.TransactionType.Core.Transfer}`)
             .groupBy("recipient_id")
             .getRawMany();
     }
@@ -190,14 +241,14 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
             .where(
                 new Brackets((qb) => {
                     qb.where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                        .andWhere(`type = ${Enums.TransactionType.HtlcClaim}`)
+                        .andWhere(`type = ${Enums.TransactionType.Core.HtlcClaim}`)
                         .andWhere("asset->'claim'->>'lockTransactionId' IN (:...lockIds)", { lockIds });
                 }),
             )
             .orWhere(
                 new Brackets((qb) => {
                     qb.where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                        .andWhere(`type = ${Enums.TransactionType.HtlcRefund}`)
+                        .andWhere(`type = ${Enums.TransactionType.Core.HtlcRefund}`)
                         .andWhere("asset->'refund'->>'lockTransactionId' IN (:...lockIds)", { lockIds });
                 }),
             )
@@ -208,14 +259,14 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
         return this.createQueryBuilder()
             .select()
             .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-            .andWhere(`type = ${Enums.TransactionType.HtlcLock}`)
+            .andWhere(`type = ${Enums.TransactionType.Core.HtlcLock}`)
             .andWhere((qb) => {
                 const claimedIdsSubQuery = qb
                     .subQuery()
                     .select("asset->'claim'->>'lockTransactionId'")
                     .from(Transaction, "t")
                     .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                    .andWhere(`type = ${Enums.TransactionType.HtlcClaim}`);
+                    .andWhere(`type = ${Enums.TransactionType.Core.HtlcClaim}`);
                 return `id NOT IN ${claimedIdsSubQuery.getQuery()}`;
             })
             .andWhere((qb) => {
@@ -224,7 +275,7 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
                     .select("asset->'refund'->>'lockTransactionId'")
                     .from(Transaction, "t")
                     .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                    .andWhere(`type = ${Enums.TransactionType.HtlcRefund}`);
+                    .andWhere(`type = ${Enums.TransactionType.Core.HtlcRefund}`);
                 return `id NOT IN ${refundedIdsSubQuery.getQuery()}`;
             })
             .getMany();
@@ -235,14 +286,14 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
             .select(`recipient_id AS "recipientId"`)
             .addSelect("SUM(amount)", "claimedBalance")
             .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-            .andWhere(`type = ${Enums.TransactionType.HtlcLock}`)
+            .andWhere(`type = ${Enums.TransactionType.Core.HtlcLock}`)
             .andWhere((qb) => {
                 const claimedLockIdsSubQuery = qb
                     .subQuery()
                     .select("asset->'claim'->>'lockTransactionId'")
                     .from(Transaction, "t")
                     .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                    .andWhere(`type = ${Enums.TransactionType.HtlcClaim}`);
+                    .andWhere(`type = ${Enums.TransactionType.Core.HtlcClaim}`);
                 return `id IN ${claimedLockIdsSubQuery.getQuery()}`;
             })
             .groupBy("recipient_id")
@@ -254,14 +305,14 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
             .select(`sender_public_key AS "senderPublicKey"`)
             .addSelect("SUM(amount)", "refundedBalance")
             .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-            .andWhere(`type = ${Enums.TransactionType.HtlcLock}`)
+            .andWhere(`type = ${Enums.TransactionType.Core.HtlcLock}`)
             .andWhere((qb) => {
                 const refundedLockIdsSubQuery = qb
                     .subQuery()
                     .select("asset->'refund'->>'lockTransactionId'")
                     .from(Transaction, "t")
                     .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                    .andWhere(`type = ${Enums.TransactionType.HtlcRefund}`);
+                    .andWhere(`type = ${Enums.TransactionType.Core.HtlcRefund}`);
                 return `id IN ${refundedLockIdsSubQuery.getQuery()}`;
             })
             .groupBy("sender_public_key")

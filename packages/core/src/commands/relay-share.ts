@@ -1,4 +1,4 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
+import { Commands, Container } from "@solar-network/core-cli";
 import Joi from "joi";
 import ngrok from "ngrok";
 
@@ -23,7 +23,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Share the Relay via ngrok.";
+    public description: string = "Share the Relay via ngrok";
 
     /**
      * Indicates whether the command requires a network to be present.
@@ -41,12 +41,12 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("proto", "Choose one of the available protocols (http|tcp|tls).", Joi.string().default("http"))
-            .setFlag("addr", "Port or network address.", Joi.string().default(4003))
-            .setFlag("auth", "HTTP basic authentication for tunnel.", Joi.string())
-            .setFlag("subdomain", "Reserved tunnel name https://core.ngrok.io.", Joi.string())
-            .setFlag("authtoken", "Your authtoken from ngrok.com.", Joi.string())
-            .setFlag("region", "Choose one of the ngrok regions (us|eu|au|ap).", Joi.string().default("eu"));
+            .setFlag("proto", "Choose one of the available protocols (http|tcp|tls)", Joi.string().default("http"))
+            .setFlag("addr", "Port or network address", Joi.string().default(4003))
+            .setFlag("auth", "HTTP basic authentication for tunnel", Joi.string())
+            .setFlag("subdomain", "Reserved tunnel name https://core.ngrok.io", Joi.string())
+            .setFlag("authtoken", "Your authtoken from ngrok.com", Joi.string())
+            .setFlag("region", "Choose one of the ngrok regions (us|eu|au|ap)", Joi.string().default("eu"));
     }
 
     /**

@@ -1,5 +1,7 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
 import Boom from "@hapi/boom";
+import { Server } from "@hapi/hapi";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
+
 import { RateLimiter } from "../../rate-limiter";
 import { buildRateLimiter } from "../../utils/build-rate-limiter";
 import { BlocksRoute } from "../routes/blocks";
@@ -13,12 +15,12 @@ export class RateLimitPlugin {
     protected readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-p2p")
+    @Container.tagged("plugin", "@solar-network/core-p2p")
     private readonly configuration!: Providers.PluginConfiguration;
 
     private rateLimiter!: RateLimiter;
 
-    public register(server) {
+    public register(server: Server): void {
         this.rateLimiter = buildRateLimiter({
             whitelist: [],
             remoteAccess: this.configuration.getOptional<Array<string>>("remoteAccess", []),

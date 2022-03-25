@@ -1,5 +1,5 @@
-import { Models } from "@arkecosystem/core-database";
-import { Contracts } from "@arkecosystem/core-kernel";
+import { Models } from "@solar-network/core-database";
+import { Contracts } from "@solar-network/core-kernel";
 import { Readable } from "stream";
 import { EntityRepository } from "typeorm";
 

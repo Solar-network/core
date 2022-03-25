@@ -1,12 +1,12 @@
-import { Container, Contracts, Providers, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 import { SenderExceededMaximumTransactionCountError } from "./errors";
 
 @Container.injectable()
 export class SenderMempool implements Contracts.TransactionPool.SenderMempool {
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-transaction-pool")
+    @Container.tagged("plugin", "@solar-network/core-transaction-pool")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.TransactionPoolSenderState)
@@ -41,9 +41,8 @@ export class SenderMempool implements Contracts.TransactionPool.SenderMempool {
             await this.lock.runExclusive(async () => {
                 AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-                const maxTransactionsPerSender: number = this.configuration.getRequired<number>(
-                    "maxTransactionsPerSender",
-                );
+                const maxTransactionsPerSender: number =
+                    this.configuration.getRequired<number>("maxTransactionsPerSender");
                 if (this.transactions.length >= maxTransactionsPerSender) {
                     const allowedSenders: string[] = this.configuration.getOptional<string[]>("allowedSenders", []);
                     if (!allowedSenders.includes(transaction.data.senderPublicKey)) {

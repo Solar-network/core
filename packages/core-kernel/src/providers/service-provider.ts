@@ -115,7 +115,10 @@ export abstract class ServiceProvider {
      */
     public alias(): string | undefined {
         if (this.packageManifest) {
-            return this.packageManifest.get("arkecosystem.core.alias");
+            const name = this.packageManifest.get<string>("name");
+            if (name.startsWith("@solar-network/")) {
+                return name.replace("@solar-network/", "@arkecosystem/");
+            }
         }
 
         return undefined;
@@ -169,7 +172,7 @@ export abstract class ServiceProvider {
      */
     public dependencies(): Kernel.PluginDependency[] {
         if (this.packageManifest) {
-            return this.packageManifest.get("arkecosystem.core.dependencies", []);
+            return this.packageManifest.get("solar-network.core.dependencies", []);
         }
 
         return [];
@@ -215,7 +218,7 @@ export abstract class ServiceProvider {
      */
     public async required(): Promise<boolean> {
         if (this.packageManifest) {
-            return this.packageManifest.get("arkecosystem.core.required", false);
+            return this.packageManifest.get("solar-network.core.required", false);
         }
 
         return false;
@@ -228,5 +231,5 @@ export abstract class ServiceProvider {
      * @returns {Promise<void>}
      * @memberof ServiceProvider
      */
-    public abstract async register(): Promise<void>;
+    public abstract register(): Promise<void>;
 }

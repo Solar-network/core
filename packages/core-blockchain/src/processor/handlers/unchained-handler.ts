@@ -1,5 +1,5 @@
-import { Container, Contracts, Services, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 import { BlockProcessorResult } from "../block-processor";
 import { BlockHandler } from "../contracts";
@@ -73,31 +73,33 @@ export class UnchainedHandler implements BlockHandler {
         // todo: clean up this if-else-if-else-if-else mess
         if (block.data.height > lastBlock.data.height + 1) {
             this.logger.debug(
-                `Blockchain not ready to accept new block at height ${block.data.height.toLocaleString()}. Last block: ${lastBlock.data.height.toLocaleString()}`,
+                `Blockchain not ready to accept new block at height ${block.data.height.toLocaleString()}. Last block: ${lastBlock.data.height.toLocaleString()} :warning:`,
             );
 
             return UnchainedBlockStatus.NotReadyToAcceptNewHeight;
         } else if (block.data.height < lastBlock.data.height) {
-            this.logger.debug(`Block ${block.data.height.toLocaleString()} disregarded because already in blockchain`);
+            this.logger.debug(
+                `Block ${block.data.height.toLocaleString()} disregarded because already in blockchain :warning:`,
+            );
 
             return UnchainedBlockStatus.AlreadyInBlockchain;
         } else if (block.data.height === lastBlock.data.height && block.data.id === lastBlock.data.id) {
-            this.logger.debug(`Block ${block.data.height.toLocaleString()} just received`);
+            this.logger.debug(`Block ${block.data.height.toLocaleString()} just received :chains:`);
 
             return UnchainedBlockStatus.EqualToLastBlock;
         } else if (block.data.timestamp < lastBlock.data.timestamp) {
             this.logger.debug(
-                `Block ${block.data.height.toLocaleString()} disregarded, because the timestamp is lower than the previous timestamp.`,
+                `Block ${block.data.height.toLocaleString()} disregarded, because the timestamp is lower than the previous timestamp :stopwatch:`,
             );
             return UnchainedBlockStatus.InvalidTimestamp;
         } else {
             if (this.isValidGenerator) {
-                this.logger.warning(`Detect double forging by ${block.data.generatorPublicKey}`);
+                this.logger.warning(`Detect double forging by ${block.data.generatorPublicKey} :chains:`);
                 return UnchainedBlockStatus.DoubleForging;
             }
 
             this.logger.info(
-                `Forked block disregarded because it is not allowed to be forged. Caused by delegate: ${block.data.generatorPublicKey}`,
+                `Forked block disregarded because it is not allowed to be forged. Caused by delegate: ${block.data.generatorPublicKey} :bangbang:`,
             );
 
             return UnchainedBlockStatus.GeneratorMismatch;

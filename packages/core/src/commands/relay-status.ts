@@ -1,4 +1,4 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
+import { Commands, Container } from "@solar-network/core-cli";
 import Joi from "joi";
 
 /**
@@ -22,7 +22,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Display the Relay process status.";
+    public description: string = "Display the Relay process status";
 
     /**
      * Configure the console command.
@@ -31,7 +31,7 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public configure(): void {
-        this.definition.setFlag("token", "The name of the token.", Joi.string().default("ark"));
+        this.definition.setFlag("token", "The name of the token", Joi.string().default("solar"));
     }
 
     /**

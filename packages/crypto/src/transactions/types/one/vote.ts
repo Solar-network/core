@@ -6,7 +6,7 @@ import { Transaction } from "../transaction";
 
 export class VoteTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.Vote;
+    public static type: number = TransactionType.Core.Vote;
     public static key = "vote";
     public static version: number = 1;
 

@@ -1,10 +1,6 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container, Contracts } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
-import { existsSync } from "fs-extra";
-import { join } from "path";
-
-import { Git, NPM } from "../source-providers";
 
 /**
  * @export
@@ -13,6 +9,9 @@ import { Git, NPM } from "../source-providers";
  */
 @Container.injectable()
 export class Command extends Commands.Command {
+    @Container.inject(Container.Identifiers.PluginManager)
+    private readonly pluginManager!: Contracts.PluginManager;
+
     /**
      * The console command signature.
      *
@@ -27,7 +26,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Updates a package and any packages that it depends on.";
+    public description: string = "Updates a package and any packages that it depends on";
 
     /**
      * Configure the console command.
@@ -37,9 +36,10 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
-            .setArgument("package", "The name of the package.", Joi.string().required());
+            .setFlag("all", "Whether to update all packages", Joi.boolean())
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setArgument("package", "The name of the package", Joi.string());
     }
 
     /**
@@ -49,22 +49,11 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        const pkg: string = this.getArgument("package");
-
-        const paths = {
-            data: this.app.getCorePath("data", "plugins"),
-            temp: this.app.getCorePath("temp", "plugins"),
-        };
-        const directory: string = join(paths.data, pkg);
-
-        if (!existsSync(directory)) {
-            throw new Error(`The package [${pkg}] does not exist.`);
-        }
-
-        if (existsSync(`${directory}/.git`)) {
-            return new Git(paths).update(pkg);
-        }
-
-        return new NPM(paths).update(pkg);
+        return await this.pluginManager.update(
+            this.getFlag("all"),
+            this.getFlag("token"),
+            this.getFlag("network"),
+            this.getArgument("package"),
+        );
     }
 }

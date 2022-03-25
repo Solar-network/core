@@ -1,6 +1,6 @@
-import { Container, Providers, Services } from "@arkecosystem/core-kernel";
+import { Container, Providers, Services } from "@solar-network/core-kernel";
 
-import { One, Two, TransactionHandlerConstructor } from "./handlers";
+import { One, Solar, TransactionHandlerConstructor, Two } from "./handlers";
 import { TransactionHandlerProvider } from "./handlers/handler-provider";
 import { TransactionHandlerRegistry } from "./handlers/handler-registry";
 
@@ -66,6 +66,9 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Container.Identifiers.TransactionHandler).to(Two.HtlcLockTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Two.HtlcClaimTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Two.HtlcRefundTransactionHandler);
+
+        // Solar transactions
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Solar.BurnTransactionHandler);
 
         this.app
             .bind(Container.Identifiers.TransactionHandlerConstructors)

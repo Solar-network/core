@@ -1,0 +1,18 @@
+{
+    "name": "Solar",
+    "messagePrefix": "Solar message:\n",
+    "bip32": {
+        "public": 70617039,
+        "private": 70615956
+    },
+    "pubKeyHash": 63,
+    "nethash": "16db20c30c52d53638ca537ad0ed113408da3ae686e2c4bfa7e315d4347196dc",
+    "wif": 252,
+    "slip44": 3333,
+    "aip20": 0,
+    "client": {
+        "token": "SXP",
+        "symbol": "SXP",
+        "explorer": "https://explorer.solar.org"
+    }
+}

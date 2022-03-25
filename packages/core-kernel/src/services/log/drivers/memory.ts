@@ -1,4 +1,4 @@
-import { isEmpty, prettyTime } from "@arkecosystem/utils";
+import { isEmpty, prettyTime } from "@solar-network/utils";
 import chalk, { Chalk } from "chalk";
 import dayjs, { Dayjs } from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
@@ -48,7 +48,7 @@ export class MemoryLogger implements Logger {
      * @returns {Promise<Logger>}
      * @memberof MemoryLogger
      */
-    public async make(options?: any): Promise<Logger> {
+    public async make(options?: object): Promise<Logger> {
         return this;
     }
 
@@ -56,7 +56,7 @@ export class MemoryLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public emergency(message: any): void {
+    public emergency(message: object): void {
         this.log("emergency", message);
     }
 
@@ -64,7 +64,7 @@ export class MemoryLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public alert(message: any): void {
+    public alert(message: object): void {
         this.log("alert", message);
     }
 
@@ -72,7 +72,7 @@ export class MemoryLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public critical(message: any): void {
+    public critical(message: object): void {
         this.log("critical", message);
     }
 
@@ -80,7 +80,7 @@ export class MemoryLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public error(message: any): void {
+    public error(message: object): void {
         this.log("error", message);
     }
 
@@ -88,7 +88,7 @@ export class MemoryLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public warning(message: any): void {
+    public warning(message: object): void {
         this.log("warning", message);
     }
 
@@ -96,7 +96,7 @@ export class MemoryLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public notice(message: any): void {
+    public notice(message: object): void {
         this.log("notice", message);
     }
 
@@ -104,7 +104,7 @@ export class MemoryLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public info(message: any): void {
+    public info(message: object): void {
         this.log("info", message);
     }
 
@@ -112,7 +112,7 @@ export class MemoryLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public debug(message: any): void {
+    public debug(message: object): void {
         this.log("debug", message);
     }
 
@@ -125,13 +125,21 @@ export class MemoryLogger implements Logger {
     }
 
     /**
+     * Dispose logger.
+     *
+     * @returns {Promise<void>}
+     * @memberof MemoryLogger
+     */
+    public async dispose(): Promise<void> {}
+
+    /**
      * @private
      * @param {*} level
      * @param {*} message
      * @returns {void}
      * @memberof MemoryLogger
      */
-    private log(level: any, message: any): void {
+    private log(level: string, message: object | string): void {
         if (this.silentConsole) {
             return;
         }

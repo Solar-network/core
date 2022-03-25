@@ -1,6 +1,6 @@
-import { Models } from "@arkecosystem/core-database";
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Managers } from "@arkecosystem/crypto";
+import { Models } from "@solar-network/core-database";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Managers } from "@solar-network/crypto";
 import pluralize from "pluralize";
 import { Readable } from "stream";
 import { pascalize } from "xcase";
@@ -81,7 +81,7 @@ export abstract class AbstractWorkerAction implements Worker.WorkerAction {
         }
     }
 
-    public abstract async start(): Promise<void>;
+    public abstract start(): Promise<void>;
 
     public abstract sync(data: Worker.WorkerSyncData): void;
 }

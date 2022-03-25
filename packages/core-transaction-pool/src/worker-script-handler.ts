@@ -1,5 +1,5 @@
-import { Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers, Transactions } from "@arkecosystem/crypto";
+import { Contracts } from "@solar-network/core-kernel";
+import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
 export class WorkerScriptHandler implements Contracts.TransactionPool.WorkerScriptHandler {
     public loadCryptoPackage(packageName: string): void {
@@ -9,7 +9,7 @@ export class WorkerScriptHandler implements Contracts.TransactionPool.WorkerScri
         }
     }
 
-    public setConfig(networkConfig: any): void {
+    public setConfig(networkConfig: Interfaces.NetworkConfig): void {
         Managers.configManager.setConfig(networkConfig);
     }
 
@@ -18,11 +18,11 @@ export class WorkerScriptHandler implements Contracts.TransactionPool.WorkerScri
     }
 
     public async getTransactionFromData(
-        transactionData: Interfaces.ITransactionData | Buffer,
+        transactionData: Interfaces.ITransactionData | string,
     ): Promise<Contracts.TransactionPool.SerializedTransaction> {
         const tx =
-            transactionData instanceof Buffer
-                ? Transactions.TransactionFactory.fromBytes(transactionData)
+            typeof transactionData === "string"
+                ? Transactions.TransactionFactory.fromBytes(Buffer.from(transactionData, "hex"))
                 : Transactions.TransactionFactory.fromData(transactionData);
         return { id: tx.id!, serialized: tx.serialized.toString("hex"), isVerified: tx.isVerified };
     }

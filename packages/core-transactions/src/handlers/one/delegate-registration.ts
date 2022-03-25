@@ -1,5 +1,5 @@
-import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Enums, Interfaces, Transactions, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
 
 import {
     NotSupportedForMultiSignatureWalletError,
@@ -23,6 +23,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         return [
             "delegate.approval", // Used by the API
             "delegate.forgedFees", // Used by the API
+            "delegate.burnedFees", // Used by the API
             "delegate.forgedRewards", // Used by the API
             "delegate.forgedTotal", // Used by the API
             "delegate.lastBlock",
@@ -30,6 +31,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             "delegate.rank",
             "delegate.round",
             "delegate.username",
+            "delegate.version", // Used by the API
             "delegate.voteBalance",
             "delegate",
         ];
@@ -88,7 +90,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
 
         if (hasSender) {
             throw new Contracts.TransactionPool.PoolError(
-                `Sender ${transaction.data.senderPublicKey} already has a transaction of type '${Enums.TransactionType.DelegateRegistration}' in the pool`,
+                `Sender ${transaction.data.senderPublicKey} already has a delegate registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }
@@ -122,6 +124,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             username: transaction.data.asset.delegate.username,
             voteBalance: Utils.BigNumber.ZERO,
             forgedFees: Utils.BigNumber.ZERO,
+            burnedFees: Utils.BigNumber.ZERO,
             forgedRewards: Utils.BigNumber.ZERO,
             producedBlocks: 0,
             round: 0,

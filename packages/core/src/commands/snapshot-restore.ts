@@ -1,7 +1,6 @@
-import { Commands, Components, Container, Contracts, Utils } from "@arkecosystem/core-cli";
-import { Container as KernelContainer, Contracts as KernelContracts } from "@arkecosystem/core-kernel";
-import { ProgressRenderer } from "@arkecosystem/core-snapshots";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container, Contracts, Utils } from "@solar-network/core-cli";
+import { Container as KernelContainer, Contracts as KernelContracts } from "@solar-network/core-kernel";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
 /**
@@ -25,7 +24,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Import data from specified snapshot.";
+    public description: string = "Import data from specified snapshot";
 
     /**
      * Configure the console command.
@@ -35,11 +34,11 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("blocks", "Blocks to import, correlates to folder name.", Joi.string().required())
-            .setFlag("truncate", "Empty all tables before running import.", Joi.boolean())
-            .setFlag("verify", "Verify signatures of specified snapshot.", Joi.boolean());
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
+            .setFlag("blocks", "Blocks to import, correlates to folder name", Joi.string().required())
+            .setFlag("truncate", "Empty all tables before running import", Joi.boolean())
+            .setFlag("verify", "Verify signatures of specified snapshot", Joi.boolean());
     }
 
     /**
@@ -55,9 +54,6 @@ export class Command extends Commands.Command {
         const app = await Utils.buildApplication({
             flags,
         });
-
-        const spinner = this.app.get<Components.ComponentFactory>(Container.Identifiers.ComponentFactory).spinner();
-        new ProgressRenderer(spinner, app);
 
         await app
             .get<KernelContracts.Snapshot.SnapshotService>(KernelContainer.Identifiers.SnapshotService)

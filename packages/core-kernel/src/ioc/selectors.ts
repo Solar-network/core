@@ -1,6 +1,9 @@
 import { interfaces } from "inversify";
 
-export const anyAncestorOrTargetTaggedFirst = (key: string | number | symbol, value: any) => {
+export const anyAncestorOrTargetTaggedFirst = (
+    key: string | number | symbol,
+    value: string,
+): ((req: interfaces.Request) => boolean) => {
     return (req: interfaces.Request) => {
         for (;;) {
             const targetTags = req.target.getCustomTags();

@@ -1,4 +1,4 @@
-import { Container, Contracts, Services } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Services } from "@solar-network/core-kernel";
 
 import { WalletCriteria, WalletResource } from "../resources-new";
 

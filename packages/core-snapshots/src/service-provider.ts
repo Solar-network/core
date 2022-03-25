@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 import Joi from "joi";
 import { getCustomRepository } from "typeorm";
 
@@ -23,7 +23,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
     public dependencies(): Contracts.Kernel.PluginDependency[] {
         return [
             {
-                name: "@arkecosystem/core-database",
+                name: "@solar-network/core-database",
                 required: true,
             },
         ];
@@ -32,7 +32,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
     public configSchema(): object {
         return Joi.object({
             updateStep: Joi.number().integer().min(1).max(2000).required(),
-            cryptoPackages: Joi.array().items(Joi.string()).required(),
+            cryptoPackages: Joi.array().items(Joi.string()),
         }).unknown(true);
     }
 

@@ -1,6 +1,5 @@
 import { Wallet, WalletDelegateAttributes } from "../contracts/state";
 import { BigNumber } from "../utils";
-import { calculate as calculateSupply } from "./supply-calculator";
 
 const toDecimal = (voteBalance: BigNumber, totalSupply: BigNumber): number => {
     const decimals: number = 2;
@@ -12,8 +11,8 @@ const toDecimal = (voteBalance: BigNumber, totalSupply: BigNumber): number => {
     return +Number(div).toFixed(2);
 };
 
-export const calculateApproval = (delegate: Wallet, height: number = 1): number => {
-    const totalSupply: BigNumber = BigNumber.make(calculateSupply(height));
+export const calculateApproval = (delegate: Wallet, supply: string): number => {
+    const totalSupply: BigNumber = BigNumber.make(supply);
     const voteBalance: BigNumber = delegate.getAttribute("delegate.voteBalance");
 
     return toDecimal(voteBalance, totalSupply);

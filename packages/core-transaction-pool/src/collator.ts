@@ -1,5 +1,6 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Interfaces, Managers } from "@solar-network/crypto";
+
 import { TransactionHasExpiredError } from "./errors";
 
 @Container.injectable()
@@ -69,7 +70,7 @@ export class Collator implements Contracts.TransactionPool.Collator {
                 bytesLeft -= 4;
                 bytesLeft -= transaction.serialized.length;
             } catch (error) {
-                this.logger.warning(`${transaction} failed to collate: ${error.message}`);
+                this.logger.warning(`${transaction} failed to collate: ${error.message} :warning:`);
                 failedTransactions.push(transaction);
             }
         }

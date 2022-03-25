@@ -1,0 +1,37 @@
+<html>
+<body>
+	<link rel="stylesheet" href="swagger-ui.css" type="text/css" />
+	<script src="swagger-ui.js"></script>
+	<div id="swagger-ui"
+		style="background-color:#eee; margin:auto; margin-top:0px; padding-top:1px; padding-bottom:10px; max-width:1200px;">
+	</div>
+	<script type="text/javascript">
+		document.addEventListener("DOMContentLoaded", function (event) {
+			function HideTopbarPlugin() {
+				return {
+					components: {
+						Topbar: function () {
+							return null;
+						}
+					}
+				}
+			}
+			const ui = SwaggerUIBundle({
+				url: "api.json",
+				dom_id: "#swagger-ui",
+				deepLinking: true,
+				presets: [
+					SwaggerUIBundle.presets.apis,
+					SwaggerUIStandalonePreset
+				],
+				plugins: [
+					SwaggerUIBundle.plugins.DownloadUrl,
+					HideTopbarPlugin
+				],
+				layout: "StandaloneLayout"
+			});
+			window.ui = ui
+		});
+	</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import Listr from "listr";
+import Listr from "@alessiodf/listr";
 
 import { injectable } from "../ioc";
 

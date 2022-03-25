@@ -1,7 +1,7 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Enums } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Blocks, Interfaces, Managers } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts, Enums } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Blocks, Interfaces, Managers } from "@solar-network/crypto";
 
 import { RoundState } from "./round-state";
 
@@ -55,14 +55,19 @@ export class DatabaseInteraction {
             await this.initializeLastBlock();
         } catch (error) {
             this.logger.error(error.stack);
-            this.app.terminate("Failed to initialize database service.", error);
+            this.app.terminate("Failed to initialize database service", error);
         }
     }
 
-    public async applyBlock(block: Interfaces.IBlock): Promise<void> {
+    public async applyBlock(
+        block: Interfaces.IBlock,
+        transactionProcessing: {
+            index: number | undefined;
+        },
+    ): Promise<void> {
         await this.roundState.detectMissedBlocks(block);
 
-        await this.blockState.applyBlock(block);
+        await this.blockState.applyBlock(block, transactionProcessing);
         await this.roundState.applyBlock(block);
 
         for (const transaction of block.transactions) {
@@ -85,14 +90,6 @@ export class DatabaseInteraction {
 
     public async restoreCurrentRound(): Promise<void> {
         await this.roundState.restore();
-    }
-
-    // TODO: Remove
-    public async getActiveDelegates(
-        roundInfo?: Contracts.Shared.RoundInfo,
-        delegates?: Contracts.State.Wallet[],
-    ): Promise<Contracts.State.Wallet[]> {
-        return this.roundState.getActiveDelegates(roundInfo, delegates);
     }
 
     private async reset(): Promise<void> {
@@ -127,7 +124,7 @@ export class DatabaseInteraction {
                     await this.databaseService.deleteBlocks([block]);
                     tries--;
                 } else {
-                    this.app.terminate("Unable to deserialize last block from database.", error);
+                    this.app.terminate("Unable to deserialize last block from database", error);
                     throw new Error("Terminated (unreachable)");
                 }
 
@@ -138,7 +135,7 @@ export class DatabaseInteraction {
         lastBlock = await getLastBlock();
 
         if (!lastBlock) {
-            this.logger.warning("No block found in database");
+            this.logger.warning("No block found in database :hushed:");
             lastBlock = await this.createGenesisBlock();
         }
 

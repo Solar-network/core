@@ -58,7 +58,7 @@ export class Serializer {
         let assetSize = 0;
         let assetBytes: Buffer | Uint8Array | undefined;
 
-        if (transaction.type === TransactionType.SecondSignature && transaction.asset) {
+        if (transaction.type === TransactionType.Core.SecondSignature && transaction.asset) {
             const { signature } = transaction.asset;
             const bytebuffer = new ByteBuffer(Buffer.alloc(33));
 
@@ -71,7 +71,7 @@ export class Serializer {
         }
 
         if (
-            transaction.type === TransactionType.DelegateRegistration &&
+            transaction.type === TransactionType.Core.DelegateRegistration &&
             transaction.asset &&
             transaction.asset.delegate
         ) {
@@ -79,13 +79,13 @@ export class Serializer {
             assetSize = assetBytes.length;
         }
 
-        if (transaction.type === TransactionType.Vote && transaction.asset && transaction.asset.votes) {
+        if (transaction.type === TransactionType.Core.Vote && transaction.asset && transaction.asset.votes) {
             assetBytes = Buffer.from(transaction.asset.votes.join(""), "utf8");
             assetSize = assetBytes.length;
         }
 
         if (
-            transaction.type === TransactionType.MultiSignature &&
+            transaction.type === TransactionType.Core.MultiSignature &&
             transaction.asset &&
             transaction.asset.multiSignatureLegacy
         ) {

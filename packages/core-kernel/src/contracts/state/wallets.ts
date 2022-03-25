@@ -1,4 +1,4 @@
-import { Interfaces, Utils } from "@arkecosystem/crypto";
+import { Interfaces, Utils } from "@solar-network/crypto";
 
 // todo: review all interfaces in here and document them properly. Remove ones that are no longer needed.
 
@@ -141,12 +141,14 @@ export interface WalletDelegateAttributes {
     username: string;
     voteBalance: Utils.BigNumber;
     forgedFees: Utils.BigNumber;
+    burnedFees: Utils.BigNumber;
     forgedRewards: Utils.BigNumber;
     producedBlocks: number;
     rank?: number;
     lastBlock?: Interfaces.IBlockData;
     round?: number;
     resigned?: boolean;
+    version?: string;
 }
 
 export type WalletMultiSignatureAttributes = Interfaces.IMultiSignatureAsset & { legacy?: boolean };

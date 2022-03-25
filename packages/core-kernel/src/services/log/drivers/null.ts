@@ -8,7 +8,7 @@ export class NullLogger implements Logger {
      * @returns {Promise<Logger>}
      * @memberof MemoryLogger
      */
-    public async make(options?: any): Promise<Logger> {
+    public async make(options?: object): Promise<Logger> {
         return this;
     }
 
@@ -16,7 +16,7 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public emergency(message: any): void {
+    public emergency(message: object): void {
         //
     }
 
@@ -24,7 +24,7 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public alert(message: any): void {
+    public alert(message: object): void {
         //
     }
 
@@ -32,7 +32,7 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public critical(message: any): void {
+    public critical(message: object): void {
         //
     }
 
@@ -40,7 +40,7 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public error(message: any): void {
+    public error(message: object): void {
         //
     }
 
@@ -48,7 +48,7 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public warning(message: any): void {
+    public warning(message: object): void {
         //
     }
 
@@ -56,7 +56,7 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public notice(message: any): void {
+    public notice(message: object): void {
         //
     }
 
@@ -64,7 +64,7 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public info(message: any): void {
+    public info(message: object): void {
         //
     }
 
@@ -72,7 +72,7 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public debug(message: any): void {
+    public debug(message: object): void {
         //
     }
 
@@ -81,6 +81,16 @@ export class NullLogger implements Logger {
      * @memberof MemoryLogger
      */
     public suppressConsoleOutput(suppress: boolean): void {
+        //
+    }
+
+    /**
+     * Dispose logger.
+     *
+     * @returns {Promise<void>}
+     * @memberof NullLogger
+     */
+    public async dispose(): Promise<void> {
         //
     }
 }

@@ -1,7 +1,8 @@
-import { Container, Contracts, Enums, Providers, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Providers, Utils } from "@solar-network/core-kernel";
+import { Interfaces, Managers } from "@solar-network/crypto";
 import assert from "assert";
 import { OrderedMap, OrderedSet, Seq } from "immutable";
+import { DefaultContext, EventObject, StateMachine, StateSchema } from "xstate";
 
 // todo: extract block and transaction behaviours into their respective stores
 // todo: review the implementation
@@ -11,18 +12,19 @@ export class StateStore implements Contracts.State.StateStore {
     private readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-state")
+    @Container.tagged("plugin", "@solar-network/core-state")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
-    private blockchain: any = {};
+    private blockchain = {};
     private genesisBlock?: Interfaces.IBlock;
     private lastDownloadedBlock?: Interfaces.IBlockData;
     private lastStoredBlockHeight: number = 1;
     private blockPing?: Contracts.State.BlockPing;
     private started = false;
+    private polled = false;
     private forkedBlock?: Interfaces.IBlock;
     private wakeUpTimeout?: NodeJS.Timeout;
     private noBlockCounter: number = 0;
@@ -38,11 +40,11 @@ export class StateStore implements Contracts.State.StateStore {
     // can be configured with the option `state.maxLastTransactionIds`.
     private cachedTransactionIds: OrderedSet<string> = OrderedSet();
 
-    public getBlockchain(): any {
+    public getBlockchain(): Contracts.Blockchain.Blockchain | object {
         return this.blockchain;
     }
 
-    public setBlockchain(blockchain: any): void {
+    public setBlockchain(blockchain: Contracts.Blockchain.Blockchain): void {
         this.blockchain = blockchain;
     }
 
@@ -146,7 +148,7 @@ export class StateStore implements Contracts.State.StateStore {
      * Resets the state.
      * @todo: remove the need for this method.
      */
-    public reset(blockchainMachine): void {
+    public reset(blockchainMachine: StateMachine<DefaultContext, StateSchema, EventObject>): void {
         this.blockchain = blockchainMachine.initialState;
     }
 
@@ -291,9 +293,10 @@ export class StateStore implements Contracts.State.StateStore {
     /**
      * Cache the ids of the given transactions.
      */
-    public cacheTransactions(
-        transactions: Interfaces.ITransactionData[],
-    ): { added: Interfaces.ITransactionData[]; notAdded: Interfaces.ITransactionData[] } {
+    public cacheTransactions(transactions: Interfaces.ITransactionData[]): {
+        added: Interfaces.ITransactionData[];
+        notAdded: Interfaces.ITransactionData[];
+    } {
         const notAdded: Interfaces.ITransactionData[] = [];
         const added: Interfaces.ITransactionData[] = transactions.filter((tx) => {
             Utils.assert.defined<string>(tx.id);
@@ -362,7 +365,7 @@ export class StateStore implements Contracts.State.StateStore {
      */
     public pushPingBlock(block: Interfaces.IBlockData, fromForger = false): void {
         if (this.blockPing) {
-            this.logger.info(
+            this.logger.debug(
                 `Previous block ${this.blockPing.block.height.toLocaleString()} pinged blockchain ${
                     this.blockPing.count
                 } times`,
@@ -376,6 +379,14 @@ export class StateStore implements Contracts.State.StateStore {
             fromForger: fromForger,
             block,
         };
+    }
+
+    public hasPolledForBlocks(): boolean {
+        return this.polled;
+    }
+
+    public polledForBlocks(): void {
+        this.polled = true;
     }
 
     // Map Block instances to block data.

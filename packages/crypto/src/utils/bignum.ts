@@ -1,3 +1,3 @@
-import { BigNumber } from "@arkecosystem/utils";
+import { BigNumber } from "@solar-network/utils";
 
 export { BigNumber };

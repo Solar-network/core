@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import assert from "assert";
 
 import { HtlcLockNotExpiredError, HtlcLockTransactionNotFoundError } from "../../errors";
@@ -39,7 +39,6 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
     }
 
     public dynamicFee(context: Contracts.Shared.DynamicFeeContext): Utils.BigNumber {
-        // override dynamicFee calculation as this is a zero-fee transaction
         return Utils.BigNumber.ZERO;
     }
 
@@ -109,7 +108,7 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
         const data: Interfaces.ITransactionData = transaction.data;
 
         if (Utils.isException(data)) {
-            this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}.`);
+            this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}`);
         }
 
         await this.throwIfCannotBeApplied(transaction, sender);

@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 import { Queue } from "../kernel/queue";
 import { BlockPing } from "../state/state-store";
@@ -49,7 +49,7 @@ export interface Blockchain {
     /**
      * Push a block to the process queue.
      */
-    handleIncomingBlock(block: Interfaces.IBlockData, fromForger): void;
+    handleIncomingBlock(block: Interfaces.IBlockData, fromForger: boolean, fireBlockReceivedEvent?: boolean): void;
 
     enqueueBlocks(blocks: Interfaces.IBlockData[]);
 

@@ -1,4 +1,0 @@
-{
-    "/packages/**/src/**/*.ts": ["yarn lint", "prettier --write", "git add"],
-    "*.{json,md}": ["prettier --write", "git add"]
-}

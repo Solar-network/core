@@ -1,4 +1,4 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
+import { Commands, Container } from "@solar-network/core-cli";
 import Joi from "joi";
 
 /**
@@ -22,7 +22,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Stop the Core process.";
+    public description: string = "Stop the Core process";
 
     /**
      * Configure the console command.
@@ -32,8 +32,8 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("daemon", "Stop the Core process or daemon.", Joi.boolean());
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("daemon", "Stop the Core process or daemon", Joi.boolean());
     }
 
     /**
@@ -43,7 +43,7 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        this.app
+        await this.app
             .get<any>(Container.Identifiers.ProcessFactory)(this.getFlag("token"), "core")
             .stop(this.getFlag("daemon"));
     }

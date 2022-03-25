@@ -1,5 +1,5 @@
-import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Interfaces, Managers, Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 
 import { NotEnoughDelegatesError, WalletAlreadyResignedError, WalletNotADelegateError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
@@ -43,6 +43,10 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     }
     public async isActivated(): Promise<boolean> {
         return Managers.configManager.getMilestone().aip11 === true;
+    }
+
+    public dynamicFee(context: Contracts.Shared.DynamicFeeContext): Utils.BigNumber {
+        return Utils.BigNumber.ZERO;
     }
 
     public async throwIfCannotBeApplied(

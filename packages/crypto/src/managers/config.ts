@@ -21,7 +21,7 @@ export class ConfigManager {
     private milestones: Record<string, any> | undefined;
 
     public constructor() {
-        this.setConfig((networks.devnet as unknown) as NetworkConfig);
+        this.setConfig(networks.testnet as unknown as NetworkConfig);
     }
 
     public setConfig(config: NetworkConfig): void {
@@ -180,7 +180,7 @@ export class ConfigManager {
 
             if ((current.height - previous.height) % previous.activeDelegates !== 0) {
                 throw new InvalidMilestoneConfigurationError(
-                    `Bad milestone at height: ${current.height}. The number of delegates can only be changed at the beginning of a new round.`,
+                    `Bad milestone at height: ${current.height}. The number of delegates can only be changed at the beginning of a new round`,
                 );
             }
         }

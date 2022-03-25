@@ -1,4 +1,5 @@
-import { Utils } from "@arkecosystem/crypto";
+import { Utils } from "@solar-network/crypto";
+import { Semver } from "@solar-network/utils";
 
 import { StandardCriteriaOf, StandardCriteriaOfItem } from "../../contracts/search";
 import { injectable } from "../../ioc";
@@ -15,15 +16,15 @@ export class StandardCriteriaService {
                 //
                 // Example:
                 // [
-                //   { type: Enums.TransactionType.DelegateRegistration },
-                //   { type: Enums.TransactionType.Vote }
+                //   { type: Enums.TransactionType.Core.DelegateRegistration },
+                //   { type: Enums.TransactionType.Core.Vote }
                 // ]
                 //
                 // Alternatively (behaves same as above):
                 // {
                 //   type: [
-                //     Enums.TransactionType.DelegateRegistration,
-                //     Enums.TransactionType.Vote
+                //     Enums.TransactionType.Core.DelegateRegistration,
+                //     Enums.TransactionType.Core.Vote
                 //   ]
                 // }
 
@@ -63,6 +64,10 @@ export class StandardCriteriaService {
                 value,
                 criteriaItem as StandardCriteriaOfItem<BigInt | Utils.BigNumber>,
             );
+        }
+
+        if (value instanceof Semver) {
+            return this.testSemverValueCriteriaItem(value, criteriaItem as StandardCriteriaOfItem<Semver>);
         }
 
         if (typeof value === "object" && !Array.isArray(value)) {
@@ -263,6 +268,57 @@ export class StandardCriteriaService {
                 }
             });
         }
+    }
+
+    private testSemverValueCriteriaItem(value: Semver, criteriaItem: StandardCriteriaOfItem<Semver>): boolean {
+        const svValue = value instanceof Semver ? value : new Semver(value);
+        if (typeof criteriaItem === "string" || criteriaItem instanceof Semver) {
+            try {
+                return svValue.isEqualTo(criteriaItem);
+            } catch (error) {
+                throw new InvalidCriteria(value, criteriaItem, []);
+            }
+        }
+
+        /* istanbul ignore else */
+        if (typeof criteriaItem === "object" && criteriaItem !== null) {
+            try {
+                if ("from" in criteriaItem && "to" in criteriaItem) {
+                    return svValue.isGreaterThanEqual(criteriaItem.from) && svValue.isLessThanEqual(criteriaItem.to);
+                }
+
+                if ("from" in criteriaItem) {
+                    return svValue.isGreaterThanEqual(criteriaItem.from);
+                }
+
+                if ("to" in criteriaItem) {
+                    return svValue.isLessThanEqual(criteriaItem.to);
+                }
+            } catch (error) {
+                if ("from" in criteriaItem) {
+                    try {
+                        new Semver(criteriaItem.from);
+                    } catch (error) {
+                        throw new InvalidCriteria(value, criteriaItem.from, ["from"]);
+                    }
+                }
+
+                /* istanbul ignore else */
+                if ("to" in criteriaItem) {
+                    try {
+                        new Semver(criteriaItem.to);
+                    } catch (error) {
+                        throw new InvalidCriteria(value, criteriaItem.to, ["to"]);
+                    }
+                }
+
+                // unreachable
+                /* istanbul ignore next */
+                throw error;
+            }
+        }
+
+        throw new InvalidCriteria(value, criteriaItem, []);
     }
 
     private rethrowError(error: Error, key: string): never {

@@ -1,37 +1,32 @@
 #!/usr/bin/env node
 
-const child_process = require("child_process");
-
-const jemallocPath = child_process
-    .spawnSync(
-        `ls -d1H $(gcc -print-search-dirs | grep libraries: | awk '{print $2}' | sed -e 's/:/* /g' -e 's/$/*/' -e 's/^.//') | grep libjemalloc.so`,
-        { shell: true },
-    )
-    .stdout.toString()
-    .split("\n")
-    .shift()
-    .trim();
-
-if (jemallocPath) {
-    if (process.env.LD_PRELOAD !== jemallocPath) {
-        process.env.LD_PRELOAD = jemallocPath;
-        let exitCode = 0;
-        try {
-            child_process.execFileSync(process.argv0, process.argv.slice(1), { stdio: [0, 1, 2] });
-        } catch (error) {
-            exitCode = error.status;
-        }
-        process.exitCode = exitCode;
-        return;
-    }
-} else {
-    console.error(
-        "The jemalloc library was not found on your system. It is recommended to install it for better memory management. Falling back to the system default...",
-    );
-}
+const { existsSync, readdirSync, readJSONSync, statSync } = require("fs-extra");
+const { dirname, join } = require("path");
 
 const main = async () => {
     try {
+        const { addAlias } = require("module-alias");
+        const files = readdirSync(`${__dirname}/../../`).map(
+            (file) => `${__dirname}/../../${file}/package.json`)
+            .filter((file) => existsSync(file) && statSync(file).isFile());
+
+         for (const file of files) {
+             if (file.endsWith("/package.json")) {
+                 const { name } = readJSONSync(file);
+                 if (name.startsWith("@solar-network/")) {
+                    const dir = file.substring(0, file.length - 13);
+                    addAlias(name, dir);
+                    addAlias(name.replace("@solar-network/", "@arkecosystem/"), dir);
+                }
+            }
+        }
+
+        const extraPackages = ["joi"];
+
+        for (const pkg of extraPackages) {
+            addAlias(pkg, dirname(require.resolve(join(pkg, "package.json"))));
+        }
+
         const CommandLineInterface = new (require("../dist").CommandLineInterface)(process.argv.slice(2));
 
         await CommandLineInterface.execute();

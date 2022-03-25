@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 import { NetworkState } from "./network-state";
 
@@ -18,18 +18,27 @@ export interface NetworkMonitor {
     cleansePeers({
         fast,
         forcePing,
+        log,
         peerCount,
     }?: {
         fast?: boolean;
         forcePing?: boolean;
+        log?: boolean;
         peerCount?: number;
     }): Promise<void>;
     discoverPeers(initialRun?: boolean): Promise<boolean>;
+    getAllDelegates(): Promise<string[]>;
+    getDelegateName(publicKey: string): string;
     getNetworkHeight(): number;
-    getNetworkState(): Promise<NetworkState>;
+    getNetworkState(log?: boolean): Promise<NetworkState>;
     refreshPeersAfterFork(): Promise<void>;
     checkNetworkHealth(): Promise<NetworkStatus>;
-    downloadBlocksFromHeight(fromBlockHeight: number, maxParallelDownloads?: number): Promise<Interfaces.IBlockData[]>;
+    downloadBlocksFromHeight(
+        fromBlockHeight: number,
+        maxParallelDownloads?: number,
+        silent?: boolean,
+        timeout?: number,
+    ): Promise<Interfaces.IBlockData[]>;
     broadcastBlock(block: Interfaces.IBlock): Promise<void>;
     isColdStart(): boolean;
     completeColdStart(): void;

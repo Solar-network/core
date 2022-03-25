@@ -1,4 +1,4 @@
-import ora, { Options, Ora } from "ora";
+import ora, { Options, Ora } from "@alessiodf/ora";
 
 import { injectable } from "../ioc";
 
@@ -14,7 +14,13 @@ export class Spinner {
      * @returns {Ora}
      * @memberof Spinner
      */
+
+    private ora!: Ora;
+    public get(): Ora {
+        return this.ora;
+    }
     public render(options?: string | Options | undefined): Ora {
-        return ora(options);
+        this.ora = ora(options);
+        return this.ora;
     }
 }

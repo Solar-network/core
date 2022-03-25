@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Interfaces } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces } from "@solar-network/crypto";
 
 import { Resource } from "../interfaces";
 
@@ -45,6 +45,7 @@ export class TransactionResource implements Resource {
             typeGroup: resource.typeGroup,
             amount: resource.amount.toFixed(),
             fee: resource.fee.toFixed(),
+            burnedFee: typeof resource.burnedFee !== "undefined" ? resource.burnedFee.toFixed() : undefined,
             sender,
             senderPublicKey: resource.senderPublicKey,
             recipient: resource.recipientId || sender,

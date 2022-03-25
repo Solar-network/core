@@ -1,15 +1,34 @@
-import { WIF as Identity } from "@arkecosystem/crypto-identities";
+import wif from "wif";
 
 import { IKeyPair } from "../interfaces";
 import { Network } from "../interfaces/networks";
-import { getWifFromNetwork } from "./helpers";
+import { configManager } from "../managers";
+import { Keys } from "./keys";
 
 export class WIF {
     public static fromPassphrase(passphrase: string, network?: Network): string {
-        return Identity.fromPassphrase(passphrase, { wif: getWifFromNetwork(network) });
+        const keys: IKeyPair = Keys.fromPassphrase(passphrase);
+
+        if (!network) {
+            network = configManager.get("network");
+        }
+
+        if (!network) {
+            throw new Error();
+        }
+
+        return wif.encode(network.wif, Buffer.from(keys.privateKey, "hex"), keys.compressed);
     }
 
     public static fromKeys(keys: IKeyPair, network?: Network): string {
-        return Identity.fromKeys(keys, { wif: getWifFromNetwork(network) });
+        if (!network) {
+            network = configManager.get("network");
+        }
+
+        if (!network) {
+            throw new Error();
+        }
+
+        return wif.encode(network.wif, Buffer.from(keys.privateKey, "hex"), keys.compressed);
     }
 }

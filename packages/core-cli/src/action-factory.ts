@@ -9,7 +9,7 @@ import {
     RestartRunningProcess,
     RestartRunningProcessWithPrompt,
 } from "./actions";
-import { Application, ProcessOptions } from "./contracts";
+import { AnyObject, Application, ProcessOptions } from "./contracts";
 import { Identifiers, inject, injectable } from "./ioc";
 
 /**
@@ -77,7 +77,7 @@ export class ActionFactory {
      * @returns {Promise<void>}
      * @memberof ActionFactory
      */
-    public async daemonizeProcess(options: ProcessOptions, flags): Promise<void> {
+    public async daemonizeProcess(options: ProcessOptions, flags: AnyObject): Promise<void> {
         return this.app.get<DaemonizeProcess>(Identifiers.DaemonizeProcess).execute(options, flags);
     }
 

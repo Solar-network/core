@@ -1,5 +1,5 @@
-import { Container, Contracts, Enums, Providers, Utils as KernelUtils } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 
 import { PeerFactory } from "./contracts";
 import { DisconnectInvalidPeers } from "./listeners";
@@ -11,7 +11,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
     private readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@arkecosystem/core-p2p")
+    @Container.tagged("plugin", "@solar-network/core-p2p")
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.PeerCommunicator)
@@ -38,7 +38,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
     }
 
     public isWhitelisted(peer: Contracts.P2P.Peer): boolean {
-        return KernelUtils.isWhitelisted(this.configuration.getOptional<string[]>("remoteAccess", []), peer.ip);
+        return AppUtils.isWhitelisted(this.configuration.getOptional<string[]>("remoteAccess", []), peer.ip);
     }
 
     public async validateAndAcceptPeer(
@@ -51,9 +51,9 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
         }
     }
 
-    public validatePeerIp(peer, options: Contracts.P2P.AcceptNewPeerOptions = {}): boolean {
+    public validatePeerIp(peer: Contracts.P2P.Peer, options: Contracts.P2P.AcceptNewPeerOptions = {}): boolean {
         if (this.configuration.get("disableDiscovery")) {
-            this.logger.warning(`Rejected ${peer.ip} because the relay is in non-discovery mode.`);
+            this.logger.warning(`Rejected ${peer.ip} because the relay is in non-discovery mode :see_no_evil:`);
 
             return false;
         }
@@ -63,12 +63,12 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
         }
 
         // Is Whitelisted
-        if (!KernelUtils.isWhitelisted(this.configuration.get("whitelist") || [], peer.ip)) {
+        if (!AppUtils.isWhitelisted(this.configuration.get("whitelist") || [], peer.ip)) {
             return false;
         }
 
         // Is Blacklisted
-        if (KernelUtils.isBlacklisted(this.configuration.get("blacklist") || [], peer.ip)) {
+        if (AppUtils.isBlacklisted(this.configuration.get("blacklist") || [], peer.ip)) {
             return false;
         }
 
@@ -78,7 +78,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
             /* istanbul ignore else */
             if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
                 this.logger.warning(
-                    `Rejected ${peer.ip} because we are already at the ${maxSameSubnetPeers} limit for peers sharing the same /24 subnet.`,
+                    `Rejected ${peer.ip} because we are already at the ${maxSameSubnetPeers} limit for peers sharing the same /24 subnet :no_entry:`,
                 );
             }
 
@@ -88,8 +88,29 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
         return true;
     }
 
+    private async ping(peer: Contracts.P2P.Peer, verifyTimeout: number): Promise<void> {
+        const lastBlock = this.app.get<Contracts.State.StateStore>(Container.Identifiers.StateStore).getLastBlock();
+        const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(
+            this.app,
+            lastBlock.data.height,
+        );
+        return this.communicator.ping(peer, verifyTimeout, blockTimeLookup);
+    }
+
     private async acceptNewPeer(peer, options: Contracts.P2P.AcceptNewPeerOptions): Promise<void> {
+        const verifyTimeout = this.configuration.getRequired<number>("verifyTimeout");
+
         if (this.repository.hasPeer(peer.ip)) {
+            const oldPeer: Contracts.P2P.Peer = this.repository.getPeer(peer.ip);
+            try {
+                const { stale } = oldPeer;
+                await this.ping(oldPeer, verifyTimeout);
+                if (stale) {
+                    await this.communicator.pingPorts(oldPeer);
+                }
+            } catch {
+                //
+            }
             return;
         }
 
@@ -97,16 +118,16 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
 
         try {
             this.repository.setPendingPeer(peer);
-
-            const verifyTimeout = this.configuration.getRequired<number>("verifyTimeout");
-
-            await this.communicator.ping(newPeer, verifyTimeout);
+            await this.ping(newPeer, verifyTimeout);
+            await this.communicator.pingPorts(newPeer);
 
             this.repository.setPeer(newPeer);
 
             /* istanbul ignore next */
             if (!options.lessVerbose || process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                this.logger.debug(`Accepted new peer ${newPeer.ip}:${newPeer.port} (v${newPeer.version})`);
+                this.logger.debug(
+                    `Accepted new peer ${newPeer.ip}:${newPeer.port} (v${newPeer.version}) :hugging_face:`,
+                );
             }
 
             this.events.dispatch(Enums.PeerEvent.Added, newPeer);

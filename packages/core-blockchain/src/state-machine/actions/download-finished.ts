@@ -1,4 +1,4 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { Action } from "../contracts";
 
@@ -17,7 +17,7 @@ export class DownloadFinished implements Action {
     private readonly stateStore!: Contracts.State.StateStore;
 
     public async handle(): Promise<void> {
-        this.logger.info("Block download finished");
+        this.logger.info("Block download finished :rocket:");
 
         if (this.stateStore.getNetworkStart()) {
             // next time we will use normal behaviour

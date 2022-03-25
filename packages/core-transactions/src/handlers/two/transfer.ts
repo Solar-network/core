@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
-import { Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
+import { Transactions } from "@solar-network/crypto";
 
 import { One } from "../index";
 

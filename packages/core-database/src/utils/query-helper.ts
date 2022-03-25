@@ -1,4 +1,4 @@
-import { Contracts } from "@arkecosystem/core-kernel";
+import { Contracts } from "@solar-network/core-kernel";
 import { EntityMetadata } from "typeorm";
 
 export type SqlExpression = {

@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
 import { Server } from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { InternalRoute } from "../routes/internal";
 
@@ -33,7 +33,7 @@ export class AwaitBlockPlugin {
                     return h.continue;
                 }
 
-                await new Promise((resolve) => {
+                await new Promise<void>((resolve) => {
                     queue.once("drain", () => {
                         resolve();
                     });

@@ -141,16 +141,26 @@ export abstract class Command {
     /**
      * @memberof Command
      */
-    public register(argv: string[]) {
+    public register(argv: string[]): void {
         try {
             this.input = this.app.resolve(Input);
             this.input.parse(argv, this.definition);
             this.input.bind();
             this.input.validate();
 
-            this.input.hasFlag("quiet")
-                ? this.output.setVerbosity(0)
-                : this.output.setVerbosity(this.input.getFlag("v") || 1);
+            if (this.input.hasFlag("quiet")) {
+                this.output.setVerbosity(0);
+            } else {
+                if (this.input.hasFlag("v")) {
+                    if (this.input.getFlag("v") === true) {
+                        this.output.setVerbosity(2);
+                    } else {
+                        this.output.setVerbosity(3);
+                    }
+                } else {
+                    this.output.setVerbosity(1);
+                }
+            }
         } catch (error) {
             this.components.fatal(error.message);
         }
@@ -207,7 +217,9 @@ export abstract class Command {
 
             await this.execute();
         } catch (error) {
-            this.components.fatal(error.message);
+            if (error.name !== "FatalException") {
+                this.components.fatal(error.message);
+            }
         }
     }
 
@@ -228,11 +240,12 @@ export abstract class Command {
 
     /**
      * @template T
-     * @param {string} name
+     * @param {*} name
      * @returns {T}
      * @memberof Command
      */
-    public getArgument(name: string) {
+    public getArgument(name: string): any {
+        // eslint-disable @typescript-eslint/explicit-module-boundary-types
         return this.input.getArgument(name);
     }
 
@@ -264,11 +277,12 @@ export abstract class Command {
 
     /**
      * @template T
-     * @param {string} name
+     * @param {*} name
      * @returns {T}
      * @memberof Command
      */
-    public getFlag(name: string) {
+    public getFlag(name: string): any {
+        // eslint-disable @typescript-eslint/explicit-module-boundary-types
         return this.input.getFlag(name);
     }
 
@@ -326,5 +340,5 @@ export abstract class Command {
      * @returns {Promise<void>}
      * @memberof Command
      */
-    public abstract async execute(): Promise<void>;
+    public abstract execute(): Promise<void>;
 }

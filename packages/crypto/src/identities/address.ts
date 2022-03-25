@@ -1,41 +1,77 @@
-import { Address as Identity } from "@arkecosystem/crypto-identities";
-
-import { IKeyPair, IMultiSignatureAsset, Network } from "../interfaces";
-import { getPubKeyHash, getPubKeyHashFromNetwork, getWifFromNetwork } from "./helpers";
+import { HashAlgorithms } from "../crypto";
+import { PublicKeyError } from "../errors";
+import { IMultiSignatureAsset } from "../interfaces";
+import { configManager } from "../managers";
+import { NetworkType } from "../types";
+import { Base58 } from "../utils";
+import { PublicKey } from "./public-key";
 
 export class Address {
     public static fromPassphrase(passphrase: string, networkVersion?: number): string {
-        return Identity.fromPassphrase(passphrase, { pubKeyHash: getPubKeyHash(networkVersion) });
+        return Address.fromPublicKey(PublicKey.fromPassphrase(passphrase), networkVersion);
     }
 
     public static fromPublicKey(publicKey: string, networkVersion?: number): string {
-        return Identity.fromPublicKey(publicKey, { pubKeyHash: getPubKeyHash(networkVersion) });
+        if (!PublicKey.verify(publicKey)) {
+            throw new PublicKeyError(publicKey);
+        }
+
+        const buffer: Buffer = HashAlgorithms.ripemd160(Buffer.from(publicKey, "hex"));
+        const payload: Buffer = Buffer.alloc(21);
+
+        if (!networkVersion) {
+            networkVersion = configManager.get("network.pubKeyHash");
+        }
+
+        if (!networkVersion) {
+            throw new Error();
+        }
+
+        payload.writeUInt8(networkVersion, 0);
+        buffer.copy(payload, 1);
+
+        return this.fromBuffer(payload);
     }
 
-    public static fromWIF(wif: string, network?: Network): string {
-        return Identity.fromWIF(wif, {
-            pubKeyHash: getPubKeyHashFromNetwork(network),
-            wif: getWifFromNetwork(network),
-        });
+    public static fromWIF(wif: string, network?: NetworkType): string {
+        return Address.fromPublicKey(PublicKey.fromWIF(wif, network));
     }
 
     public static fromMultiSignatureAsset(asset: IMultiSignatureAsset, networkVersion?: number): string {
-        return Identity.fromMultiSignatureAsset(asset, { pubKeyHash: getPubKeyHash(networkVersion) });
+        return this.fromPublicKey(PublicKey.fromMultiSignatureAsset(asset), networkVersion);
     }
 
-    public static fromPrivateKey(privateKey: IKeyPair, networkVersion?: number): string {
-        return Identity.fromPrivateKey(privateKey, { pubKeyHash: getPubKeyHash(networkVersion) });
+    public static fromPrivateKey(privateKey: { publicKey: string }, networkVersion?: number): string {
+        return Address.fromPublicKey(privateKey.publicKey, networkVersion);
     }
 
-    public static fromBuffer(buff: Buffer): string {
-        return Identity.fromBuffer(buff);
+    public static fromBuffer(buffer: Buffer): string {
+        return Base58.encodeCheck(buffer);
     }
 
-    public static toBuffer(address: string, networkVersion?: number): { addressBuffer: Buffer; addressError?: string } {
-        return Identity.toBuffer(address, { pubKeyHash: getPubKeyHash(networkVersion) });
+    public static toBuffer(address: string): { addressBuffer: Buffer; addressError?: string } {
+        const buffer: Buffer = Base58.decodeCheck(address);
+        const networkVersion: number = configManager.get("network.pubKeyHash");
+        const result: { addressBuffer: Buffer; addressError?: string } = {
+            addressBuffer: buffer,
+        };
+
+        if (buffer[0] !== networkVersion) {
+            result.addressError = `Expected address network byte ${networkVersion}, but got ${buffer[0]}.`;
+        }
+
+        return result;
     }
 
     public static validate(address: string, networkVersion?: number): boolean {
-        return Identity.validate(address, { pubKeyHash: getPubKeyHash(networkVersion) });
+        if (!networkVersion) {
+            networkVersion = configManager.get("network.pubKeyHash");
+        }
+
+        try {
+            return Base58.decodeCheck(address)[0] === networkVersion;
+        } catch (err) {
+            return false;
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { Container, Contracts, Providers, Types } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Providers, Types } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { Database } from "./database";

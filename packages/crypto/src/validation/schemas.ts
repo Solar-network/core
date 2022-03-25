@@ -93,7 +93,7 @@ export const schemas = {
             payloadLength: { type: "integer", minimum: 0 },
             payloadHash: { $ref: "hex" },
             generatorPublicKey: { $ref: "publicKey" },
-            blockSignature: { $ref: "hex" },
+            blockSignature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
         },
     },
 

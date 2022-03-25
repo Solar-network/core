@@ -1,12 +1,12 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Ora } from "ora";
+import ora from "@alessiodf/ora";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { SnapshotApplicationEvents } from "./events";
 
 export class ProgressRenderer {
-    private isAnyStarted: boolean = false;
+    public spinner: ora;
 
-    private spinner: Ora;
+    private isAnyStarted: boolean = false;
 
     private count = {
         blocks: 0,
@@ -20,8 +20,8 @@ export class ProgressRenderer {
         rounds: "---.--",
     };
 
-    public constructor(spinner: Ora, app: Contracts.Kernel.Application) {
-        this.spinner = spinner;
+    public constructor(app: Contracts.Kernel.Application) {
+        this.spinner = ora();
 
         const events = app.get<Contracts.Kernel.EventDispatcher>(Container.Identifiers.EventDispatcherService);
 
@@ -52,7 +52,7 @@ export class ProgressRenderer {
             /* istanbul ignore else */
             if (!this.isAnyStarted) {
                 this.isAnyStarted = true;
-
+                this.spinner.start();
                 this.render();
             }
         }
@@ -71,8 +71,8 @@ export class ProgressRenderer {
         /* istanbul ignore else */
         if (data.table) {
             this.progress[data.table] = "100.00";
-            this.render();
         }
+        this.render();
     }
 
     private calculatePercentage(count: number, value: number): string {
@@ -83,7 +83,6 @@ export class ProgressRenderer {
     }
 
     private render(): void {
-        this.spinner.text = `Blocks: ${this.progress.blocks} % Transactions: ${this.progress.transactions} % Rounds: ${this.progress.rounds} % \n`;
-        this.spinner.render();
+        this.spinner.text = `Blocks: ${this.progress.blocks} % Transactions: ${this.progress.transactions} % Rounds: ${this.progress.rounds} %`;
     }
 }

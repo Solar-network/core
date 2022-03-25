@@ -1,39 +1,25 @@
 {
-    "name": "@arkecosystem/crypto",
-    "version": "3.1.0",
-    "description": "Crypto utilities for the ARK Blockchain",
-    "license": "MIT",
+    "name": "@solar-network/crypto",
+    "version": "3.2.0",
+    "description": "Crypto utilities for the Solar Network Blockchain",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
-        "François-Xavier Thoorens <fx.thoorens@ark.io>",
-        "Brian Faust <brian@ark.io>",
-        "Alex Barnsley <alex@ark.io>",
-        "Lúcio Rubens <lucio@ark.io>",
-        "Juan A. Martín <juan@ark.io>",
-        "Joshua Noack <joshua@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"
     ],
-    "main": "dist/index.js",
-    "umd:main": "dist/index.umd.js",
-    "browser": "dist/index.bundled.js",
-    "module": "dist/index.esm.js",
-    "unpkg": "dist/index.bundled.min.js",
-    "jsdelivr": "dist/index.bundled.min.js",
-    "types": "dist/index.d.ts",
+    "main": "dist/index",
+    "types": "dist/index",
     "scripts": {
-        "build": "yarn clean && tsc",
-        "build:rollup": "yarn clean && tsc && rollup -c",
-        "build:watch": "yarn clean && yarn compile -w",
-        "build:docs": "../../node_modules/typedoc/bin/typedoc --out docs src",
+        "build": "pnpm clean && tsc",
         "clean": "rimraf dist",
-        "compile": "node ../../node_modules/typescript/bin/tsc",
-        "prepublishOnly": "yarn build:rollup"
+        "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
-        "@arkecosystem/crypto-identities": "1.2.0",
-        "@solar-network/crypto-networks": "git+https://github.com/Solar-network/crypto-networks.git",
-        "@arkecosystem/utils": "1.3.1",
+        "@solar-network/utils": "workspace:*",
         "ajv": "6.12.6",
         "ajv-keywords": "3.4.1",
         "bcrypto": "5.4.0",
@@ -49,7 +35,8 @@
         "fast-memoize": "2.5.2",
         "ipaddr.js": "2.0.1",
         "lodash.get": "4.4.2",
-        "lodash.set": "4.3.2"
+        "lodash.set": "4.3.2",
+        "wif": "2.0.6"
     },
     "devDependencies": {
         "@rollup/plugin-babel": "5.3.0",
@@ -70,8 +57,5 @@
         "rollup-plugin-node-polyfills": "0.2.1",
         "rollup-plugin-terser": "7.0.0",
         "util": "0.12.4"
-    },
-    "publishConfig": {
-        "access": "public"
     }
 }

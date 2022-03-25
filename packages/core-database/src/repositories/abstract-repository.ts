@@ -1,4 +1,4 @@
-import { Contracts, Utils } from "@arkecosystem/core-kernel";
+import { Contracts, Utils } from "@solar-network/core-kernel";
 import { ObjectLiteral, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 

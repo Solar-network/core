@@ -1,5 +1,5 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 import { Controller } from "./controller";
 

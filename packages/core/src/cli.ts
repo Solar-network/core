@@ -1,17 +1,18 @@
-import {
-    ApplicationFactory,
-    Commands,
-    Container,
-    Contracts,
-    InputParser,
-    Plugins,
-    Services,
-} from "@arkecosystem/core-cli";
+import { ApplicationFactory, Commands, Container, Contracts, InputParser, Plugins } from "@solar-network/core-cli";
+import { dotenv, set } from "@solar-network/utils";
 import envPaths from "env-paths";
-import { existsSync } from "fs-extra";
-import { platform } from "os";
-import { join, resolve } from "path";
-import { PackageJson } from "type-fest";
+import { homedir } from "os";
+import { resolve } from "path";
+import { PackageJson, Primitive } from "type-fest";
+
+type Flags = {
+    [args: string]: any;
+};
+
+type TokenNetworkFlags = {
+    token: string;
+    network?: string;
+} & Flags;
 
 /**
  * @export
@@ -47,20 +48,25 @@ export class CommandLineInterface {
      * @memberof CommandLineInterface
      */
     public async execute(dirname = __dirname): Promise<void> {
-        // Set NODE_PATHS. Only required for plugins that uses @arkecosystem as peer dependencies.
-        this.setNodePath();
-
         // Load the package information. Only needed for updates and installations.
         const pkg: PackageJson = require("../package.json");
 
         // Create the application we will work with
         this.app = ApplicationFactory.make(new Container.Container(), pkg);
 
-        // Check for updates
-        this.app.get<Contracts.Updater>(Container.Identifiers.Updater).check();
-
         // Parse arguments and flags
-        const { args, flags } = InputParser.parseArgv(this.argv);
+        const parsedArgv = InputParser.parseArgv(this.argv);
+
+        const args = parsedArgv.args;
+        const flags = await this.detectNetworkAndToken(parsedArgv.flags);
+
+        const home: string = homedir();
+
+        const config: Record<string, Primitive> = dotenv.parseFile(`${home}/.${flags.token}/.env`);
+
+        for (const [key, value] of Object.entries(config)) {
+            set(process.env, key, value);
+        }
 
         // Discover commands and commands from plugins
         const commands: Contracts.CommandList = await this.discoverCommands(dirname, flags);
@@ -107,30 +113,9 @@ export class CommandLineInterface {
         await commandInstance.run();
     }
 
-    private setNodePath(): void {
-        /* istanbul ignore next */
-        const delimiter = platform() === "win32" ? ";" : ":";
-
-        if (!process.env.NODE_PATH) {
-            process.env.NODE_PATH = "";
-        }
-
-        const setPathIfExists = (path: string) => {
-            /* istanbul ignore else */
-            if (existsSync(path)) {
-                process.env.NODE_PATH += `${delimiter}${path}`;
-            }
-        };
-
-        setPathIfExists(join(__dirname, "../../../"));
-        setPathIfExists(join(__dirname, "../../../node_modules"));
-
-        require("module").Module._initPaths();
-    }
-
-    private async detectNetworkAndToken(flags: any): Promise<{ token: string; network?: string }> {
-        const tempFlags = {
-            token: "ark",
+    private async detectNetworkAndToken(flags: Flags): Promise<TokenNetworkFlags> {
+        const tempFlags: TokenNetworkFlags = {
+            token: "solar",
             ...flags,
         };
 
@@ -151,32 +136,28 @@ export class CommandLineInterface {
                 envPaths(tempFlags.token, {
                     suffix: "core",
                 }).config,
+                false,
             );
+            this.argv.push(`--network=${tempFlags.network}`);
         } catch {}
 
         return tempFlags;
     }
 
-    private async discoverCommands(dirname: string, flags: any): Promise<Contracts.CommandList> {
+    private async discoverCommands(dirname: string, flags: TokenNetworkFlags): Promise<Contracts.CommandList> {
         const commandsDiscoverer = this.app.resolve(Commands.DiscoverCommands);
         const commands: Contracts.CommandList = commandsDiscoverer.within(resolve(dirname, "./commands"));
 
-        const pluginsDiscoverer = this.app.resolve(Commands.DiscoverPlugins);
+        if (flags.network) {
+            const plugins = await this.app
+                .get<Contracts.PluginManager>(Container.Identifiers.PluginManager)
+                .list(flags.token, flags.network);
 
-        const tempFlags = await this.detectNetworkAndToken(flags);
+            const commandsFromPlugins = commandsDiscoverer.from(plugins.map((plugin) => plugin.path));
 
-        const path = join(
-            this.app
-                .get<Services.Environment>(Container.Identifiers.Environment)
-                .getPaths(tempFlags.token, tempFlags.network!).data,
-            "plugins",
-        );
-        const pluginPaths = (await pluginsDiscoverer.discover(path)).map((plugin) => plugin.path);
-
-        const commandsFromPlugins = commandsDiscoverer.from(pluginPaths);
-
-        for (const [key, value] of Object.entries(commandsFromPlugins)) {
-            commands[key] = value;
+            for (const [key, value] of Object.entries(commandsFromPlugins)) {
+                commands[key] = value;
+            }
         }
 
         this.app.bind(Container.Identifiers.Commands).toConstantValue(commands);

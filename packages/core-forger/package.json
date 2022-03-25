@@ -1,48 +1,34 @@
 {
-    "name": "@arkecosystem/core-forger",
-    "version": "3.1.0",
-    "description": "Forger for ARK Core",
-    "license": "MIT",
+    "name": "@solar-network/core-forger",
+    "version": "3.2.0",
+    "description": "Forger for Solar Core",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
-        "François-Xavier Thoorens <fx@ark.io>",
-        "Kristjan Košič <kristjan@ark.io>",
-        "Brian Faust <brian@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"
     ],
     "main": "dist/index",
     "scripts": {
-        "build": "yarn clean && yarn compile",
-        "build:watch": "yarn clean && yarn compile -w",
-        "build:docs": "../../node_modules/typedoc/bin/typedoc --out docs src",
+        "build": "pnpm clean && pnpm compile",
         "clean": "rimraf dist",
-        "compile": "node ../../node_modules/typescript/bin/tsc",
-        "prepublishOnly": "yarn build",
-        "pretest": "bash ../../scripts/pre-test.sh"
+        "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
-        "@arkecosystem/core-kernel": "3.1.0",
-        "@arkecosystem/core-p2p": "3.1.0",
-        "@arkecosystem/core-transactions": "3.1.0",
-        "@arkecosystem/crypto": "3.1.0",
-        "joi": "17.4.2",
+        "@solar-network/core-kernel": "workspace:*",
+        "@solar-network/core-p2p": "workspace:*",
+        "@solar-network/core-transactions": "workspace:*",
+        "@solar-network/crypto": "workspace:*",
+        "delay": "5.0.0",
+        "joi": "17.6.0",
         "node-forge": "1.2.1",
         "wif": "2.0.6"
     },
     "devDependencies": {
         "@types/node-forge": "0.10.4",
         "@types/wif": "2.0.2"
-    },
-    "engines": {
-        "node": ">=10.x"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "arkecosystem": {
-        "core": {
-            "alias": "forger"
-        }
     }
 }

@@ -1,4 +1,4 @@
-import { Application, Container, Contracts } from "@arkecosystem/core-kernel";
+import { Application, Container, Contracts } from "@solar-network/core-kernel";
 
 import { AnyObject } from "../contracts";
 
@@ -17,7 +17,9 @@ export const buildApplication = async (context?: AnyObject): Promise<Contracts.K
     return app;
 };
 
-export const buildPeerFlags = (flags: AnyObject) => {
+export const buildPeerFlags = (
+    flags: AnyObject,
+): { disableDiscovery: boolean; ignoreMinimumNetworkReach: boolean; networkStart: boolean; skipDiscovery: boolean } => {
     const config = {
         networkStart: flags.networkStart,
         disableDiscovery: flags.disableDiscovery,

@@ -1,4 +1,4 @@
-import { Container } from "@arkecosystem/core-kernel";
+import { Container } from "@solar-network/core-kernel";
 import { parentPort } from "worker_threads";
 
 import { Worker } from "../../contracts";
@@ -6,14 +6,14 @@ import { Worker } from "../../contracts";
 // For testing purposes only
 @Container.injectable()
 export class TestWorkerAction implements Worker.WorkerAction {
-    private options: any | undefined;
+    private options!: { table: string };
     private resume: Function | undefined;
 
-    public init(options: any): void {
+    public init(options: { table: string }): void {
         this.options = options;
     }
 
-    public sync(data: any): void {
+    public sync(data: { execute: string }): void {
         /* istanbul ignore next */
         if (this.resume) {
             this.resume();
@@ -34,12 +34,12 @@ export class TestWorkerAction implements Worker.WorkerAction {
                 action: "started",
             });
 
-            await new Promise((resolve) => {
+            await new Promise<void>((resolve) => {
                 this.resume = () => {
                     resolve();
                 };
             });
-            await new Promise((resolve) => {
+            await new Promise<void>((resolve) => {
                 this.resume = () => {
                     resolve();
                 };

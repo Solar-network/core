@@ -1,6 +1,6 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import semver from "semver";
 
 import { PeerResource } from "../resources";
@@ -11,7 +11,10 @@ export class PeersController extends Controller {
     @Container.inject(Container.Identifiers.PeerRepository)
     private readonly peerRepository!: Contracts.P2P.PeerRepository;
 
-    public async index(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async index(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object> | Boom.Boom> {
         const allPeers: Contracts.P2P.Peer[] = [...this.peerRepository.getPeers()];
 
         let results = allPeers;
@@ -84,7 +87,7 @@ export class PeersController extends Controller {
         return super.toPagination(resultsPage, PeerResource);
     }
 
-    public async show(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async show(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object | Boom.Boom> {
         if (!this.peerRepository.hasPeer(request.params.ip)) {
             return Boom.notFound("Peer not found");
         }

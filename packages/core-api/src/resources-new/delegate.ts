@@ -1,5 +1,6 @@
-import { Contracts } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Contracts } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
+import { Semver } from "@solar-network/utils";
 import Joi from "joi";
 
 import * as Schemas from "../schemas";
@@ -24,9 +25,11 @@ export type DelegateResource = {
     };
     forged: {
         fees: Utils.BigNumber;
+        burnedFees: Utils.BigNumber;
         rewards: Utils.BigNumber;
         total: Utils.BigNumber;
     };
+    version?: Semver;
 };
 
 export type DelegateResourceLastBlock = {
@@ -62,10 +65,12 @@ export const delegateCriteriaSchemaObject = {
         approval: Schemas.createRangeCriteriaSchema(Joi.number().min(0)),
     },
     forged: {
+        burnedFees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         fees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         rewards: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         total: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
     },
+    version: Schemas.createRangeCriteriaSchema(Schemas.semver),
 };
 
 export const delegateCriteriaSchema = Schemas.createCriteriaSchema(delegateCriteriaSchemaObject);

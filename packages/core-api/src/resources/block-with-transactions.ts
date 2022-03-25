@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Enums, Interfaces, Utils } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Enums, Interfaces, Utils } from "@solar-network/crypto";
 
 import { Resource } from "../interfaces";
 
@@ -22,7 +22,7 @@ export class BlockWithTransactionsResource implements Resource {
 
         const totalMultiPaymentTransferred: Utils.BigNumber = blockTransactions
             .filter((t) => t.typeGroup === Enums.TransactionTypeGroup.Core)
-            .filter((t) => t.type === Enums.TransactionType.MultiPayment)
+            .filter((t) => t.type === Enums.TransactionType.Core.MultiPayment)
             .flatMap((t) => t.asset!.payments)
             .reduce((sum, payment) => sum.plus(payment!.amount), Utils.BigNumber.ZERO);
 
@@ -38,8 +38,9 @@ export class BlockWithTransactionsResource implements Resource {
             forged: {
                 reward: blockData.reward.toFixed(),
                 fee: blockData.totalFee.toFixed(),
+                burnedFee: blockData.burnedFee!.toFixed(),
                 amount: totalAmountTransferred.toFixed(),
-                total: blockData.reward.plus(blockData.totalFee).toFixed(),
+                total: blockData.reward.plus(blockData.totalFee).minus(blockData.burnedFee!).toFixed(),
             },
             payload: {
                 hash: blockData.payloadHash,

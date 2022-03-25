@@ -1,8 +1,9 @@
-import { Container, Providers } from "@arkecosystem/core-kernel";
 import Hapi from "@hapi/hapi";
+import { Container, Providers } from "@solar-network/core-kernel";
 import Joi from "joi";
 
-import { TransactionsController } from "../controllers/transactions";
+import { StoreRequest, TransactionsController } from "../controllers/transactions";
+import { transactionSortingSchema } from "../resources-new";
 import * as Schemas from "../schemas";
 
 export const register = (server: Hapi.Server): void => {
@@ -12,14 +13,16 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/transactions",
-        handler: (request: Hapi.Request) => controller.index(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.index(request, h),
         options: {
             validate: {
                 query: Joi.object({
                     ...server.app.schemas.transactionCriteriaSchemas,
                     orderBy: server.app.schemas.transactionsOrderBy,
                     transform: Joi.bool().default(true),
-                }).concat(Schemas.pagination),
+                })
+                    .concat(transactionSortingSchema)
+                    .concat(Schemas.pagination),
             },
             plugins: {
                 pagination: {
@@ -32,7 +35,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "POST",
         path: "/transactions",
-        handler: (request: Hapi.Request) => controller.store(request),
+        handler: (request: StoreRequest, h: Hapi.ResponseToolkit) => controller.store(request, h),
         options: {
             plugins: {
                 "hapi-ajv": {
@@ -48,7 +51,7 @@ export const register = (server: Hapi.Server): void => {
                                     .getTagged<Providers.PluginConfiguration>(
                                         Container.Identifiers.PluginConfiguration,
                                         "plugin",
-                                        "@arkecosystem/core-transaction-pool",
+                                        "@solar-network/core-transaction-pool",
                                     )
                                     .get<number>("maxTransactionsPerRequest"),
                             },
@@ -62,7 +65,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/transactions/{id}",
-        handler: (request: Hapi.Request) => controller.show(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.show(request, h),
         options: {
             validate: {
                 params: Joi.object({
@@ -78,7 +81,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/transactions/unconfirmed",
-        handler: (request: Hapi.Request) => controller.unconfirmed(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.unconfirmed(request, h),
         options: {
             validate: {
                 query: Joi.object({
@@ -96,7 +99,7 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/transactions/unconfirmed/{id}",
-        handler: (request: Hapi.Request) => controller.showUnconfirmed(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.showUnconfirmed(request, h),
         options: {
             validate: {
                 params: Joi.object({
@@ -109,18 +112,18 @@ export const register = (server: Hapi.Server): void => {
     server.route({
         method: "GET",
         path: "/transactions/types",
-        handler: (request: Hapi.Request) => controller.types(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.types(request, h),
     });
 
     server.route({
         method: "GET",
         path: "/transactions/schemas",
-        handler: (request: Hapi.Request) => controller.schemas(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.schemas(request, h),
     });
 
     server.route({
         method: "GET",
         path: "/transactions/fees",
-        handler: (request: Hapi.Request) => controller.fees(request),
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.fees(request, h),
     });
 };

@@ -1,7 +1,7 @@
-import { DatabaseService } from "@arkecosystem/core-database";
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Interfaces, Managers } from "@arkecosystem/crypto";
+import { DatabaseService } from "@solar-network/core-database";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Interfaces, Managers } from "@solar-network/crypto";
 
 import { Action } from "../contracts";
 
@@ -36,21 +36,23 @@ export class Initialize implements Action {
             const block: Interfaces.IBlock = this.stateStore.getLastBlock();
 
             if (!this.stateStore.getRestoredDatabaseIntegrity()) {
-                this.logger.info("Verifying database integrity");
+                this.logger.info("Verifying database integrity :hourglass_flowing_sand:");
 
                 if (!(await this.databaseService.verifyBlockchain())) {
                     return this.blockchain.dispatch("ROLLBACK");
                 }
 
-                this.logger.info("Verified database integrity");
+                this.logger.info("Verified database integrity :smile_cat:");
             } else {
-                this.logger.info("Skipping database integrity check after successful database recovery");
+                this.logger.info("Skipping database integrity check after successful database recovery :smile_cat:");
             }
 
             // only genesis block? special case of first round needs to be dealt with
             if (block.data.height === 1) {
                 if (block.data.payloadHash !== Managers.configManager.get("network.nethash")) {
-                    this.logger.error("FATAL: The genesis block payload hash is different from configured the nethash");
+                    this.logger.error(
+                        "FATAL: The genesis block payload hash is different from the configured nethash :rotating_light:",
+                    );
 
                     return this.blockchain.dispatch("FAILURE");
                 }
@@ -75,7 +77,7 @@ export class Initialize implements Action {
             }
 
             if (process.env.NODE_ENV === "test") {
-                this.logger.notice("TEST SUITE DETECTED! SYNCING WALLETS AND STARTING IMMEDIATELY.");
+                this.logger.notice("TEST SUITE DETECTED! SYNCING WALLETS AND STARTING IMMEDIATELY :bangbang:");
 
                 await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
                 await this.databaseInteraction.restoreCurrentRound();

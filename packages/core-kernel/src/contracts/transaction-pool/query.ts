@@ -1,4 +1,4 @@
-import { Enums, Interfaces } from "@arkecosystem/crypto";
+import { Enums, Interfaces } from "@solar-network/crypto";
 
 export type QueryPredicate = (transaction: Interfaces.ITransaction) => boolean;
 
@@ -12,7 +12,7 @@ export interface Query {
 export interface QueryIterable extends Iterable<Interfaces.ITransaction> {
     wherePredicate(predicate: QueryPredicate): QueryIterable;
     whereId(id: string): QueryIterable;
-    whereType(type: Enums.TransactionType | number): QueryIterable;
+    whereType(type: Enums.CoreTransactionType | Enums.SolarTransactionType | number): QueryIterable;
     whereTypeGroup(typeGroup: Enums.TransactionTypeGroup | number): QueryIterable;
     whereVersion(version: number): QueryIterable;
     whereKind(transaction: Interfaces.ITransaction): QueryIterable;

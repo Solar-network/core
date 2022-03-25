@@ -1,5 +1,5 @@
-import { Container, Utils } from "@arkecosystem/core-kernel";
-import { Interfaces, Transactions } from "@arkecosystem/crypto";
+import { Container, Utils } from "@solar-network/core-kernel";
+import { Interfaces, Transactions } from "@solar-network/crypto";
 
 import { DeactivatedTransactionHandlerError, InvalidTransactionTypeError } from "../errors";
 import { TransactionHandlerProvider } from "./handler-provider";
@@ -45,11 +45,9 @@ export class TransactionHandlerRegistry {
     }
 
     public async getActivatedHandlers(): Promise<TransactionHandler[]> {
-        const promises = this.handlers.map(
-            async (handler): Promise<[TransactionHandler, boolean]> => {
-                return [handler, await handler.isActivated()];
-            },
-        );
+        const promises = this.handlers.map(async (handler): Promise<[TransactionHandler, boolean]> => {
+            return [handler, await handler.isActivated()];
+        });
         const results = await Promise.all(promises);
         const activated = results.filter(([_, activated]) => activated);
         return activated.map(([handler, _]) => handler);

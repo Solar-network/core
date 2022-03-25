@@ -1,23 +1,20 @@
 import { Application } from "../../contracts/kernel";
 import { Identifiers, inject, injectable } from "../../ioc";
-import { PluginConfiguration, PluginManifest, ServiceProvider, ServiceProviderRepository } from "../../providers";
+import {
+    PluginConfiguration,
+    PluginDiscoverer,
+    PluginManifest,
+    ServiceProvider,
+    ServiceProviderRepository,
+} from "../../providers";
 import { ConfigRepository } from "../../services/config";
 import { JsonObject } from "../../types";
 import { assert } from "../../utils";
 import { Bootstrapper } from "../interfaces";
-import { join } from "path";
-import { readJSONSync } from "fs-extra";
-import glob from "glob";
 
 interface PluginEntry {
     package: string;
     options: JsonObject;
-}
-
-interface Plugin {
-    path: string;
-    name: string;
-    version: string;
 }
 
 /**
@@ -54,6 +51,14 @@ export class LoadServiceProviders implements Bootstrapper {
     private readonly serviceProviderRepository!: ServiceProviderRepository;
 
     /**
+     * @private
+     * @type {PluginDiscoverer}
+     * @memberof RegisterBasePaths
+     */
+    @inject(Identifiers.PluginDiscoverer)
+    private readonly pluginDiscoverer!: PluginDiscoverer;
+
+    /**
      * @returns {Promise<void>}
      * @memberof RegisterProviders
      */
@@ -62,11 +67,10 @@ export class LoadServiceProviders implements Bootstrapper {
 
         assert.defined<PluginEntry[]>(plugins);
 
-        const installedPlugins = await this.discoverPlugins(this.app.dataPath("plugins"));
+        await this.pluginDiscoverer.initialize();
 
         for (const plugin of plugins) {
-            const installedPlugin = installedPlugins.find((installedPlugin) => installedPlugin.name === plugin.package);
-            const packageId = installedPlugin ? installedPlugin.path : plugin.package;
+            const packageId = this.pluginDiscoverer.get(plugin.package).packageId;
 
             const serviceProvider: ServiceProvider = this.app.resolve(require(packageId).ServiceProvider);
             serviceProvider.setManifest(this.app.resolve(PluginManifest).discover(packageId));
@@ -111,25 +115,5 @@ export class LoadServiceProviders implements Bootstrapper {
         }
 
         return this.app.resolve(PluginConfiguration).discover(serviceProviderName, packageId).merge(options);
-    }
-
-    private async discoverPlugins(path: string): Promise<Plugin[]> {
-        const plugins: Plugin[] = [];
-
-        const packagePaths = glob
-            .sync("{*/*/package.json,*/package.json}", { cwd: path })
-            .map((packagePath) => join(path, packagePath).slice(0, -"/package.json".length));
-
-        for (let packagePath of packagePaths) {
-            const packageJson = readJSONSync(join(packagePath, "package.json"));
-
-            plugins.push({
-                path: packagePath,
-                name: packageJson.name,
-                version: packageJson.version,
-            });
-        }
-
-        return plugins;
     }
 }

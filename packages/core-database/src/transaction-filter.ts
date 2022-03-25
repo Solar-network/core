@@ -1,15 +1,10 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Enums } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Enums } from "@solar-network/crypto";
 
 import { Transaction } from "./models/transaction";
 
-const {
-    handleAndCriteria,
-    handleOrCriteria,
-    handleNumericCriteria,
-    optimizeExpression,
-    hasOrCriteria,
-} = AppUtils.Search;
+const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimizeExpression, hasOrCriteria } =
+    AppUtils.Search;
 
 @Container.injectable()
 export class TransactionFilter implements Contracts.Database.TransactionFilter {
@@ -140,7 +135,7 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
             op: "and",
             expressions: [
                 { op: "equal", property: "typeGroup", value: Enums.TransactionTypeGroup.Core },
-                { op: "equal", property: "type", value: Enums.TransactionType.MultiPayment },
+                { op: "equal", property: "type", value: Enums.TransactionType.Core.MultiPayment },
                 { op: "contains", property: "asset", value: { payments: [{ recipientId: criteria }] } },
             ],
         };
@@ -151,7 +146,7 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
                 op: "and",
                 expressions: [
                     { op: "equal", property: "typeGroup", value: Enums.TransactionTypeGroup.Core },
-                    { op: "equal", property: "type", value: Enums.TransactionType.DelegateRegistration },
+                    { op: "equal", property: "type", value: Enums.TransactionType.Core.DelegateRegistration },
                     { op: "equal", property: "senderPublicKey", value: recipientWallet.getPublicKey() },
                 ],
             };

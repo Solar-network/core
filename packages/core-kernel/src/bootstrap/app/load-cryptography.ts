@@ -1,4 +1,4 @@
-import { Interfaces, Managers } from "@arkecosystem/crypto";
+import { Interfaces, Managers } from "@solar-network/crypto";
 
 import { Application } from "../../contracts/kernel";
 import { Identifiers, inject, injectable } from "../../ioc";

@@ -1,6 +1,6 @@
-import { Commands, Container, Contracts, Utils } from "@arkecosystem/core-cli";
-import { Container as KernelContainer, Contracts as KernelContracts } from "@arkecosystem/core-kernel";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container, Contracts, Utils } from "@solar-network/core-cli";
+import { Container as KernelContainer, Contracts as KernelContracts } from "@solar-network/core-kernel";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
 /**
@@ -24,7 +24,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Truncate blockchain database.";
+    public description: string = "Truncate blockchain database";
 
     /**
      * Configure the console command.
@@ -34,8 +34,8 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)));
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)));
     }
 
     /**

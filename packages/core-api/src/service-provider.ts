@@ -1,4 +1,4 @@
-import { Providers } from "@arkecosystem/core-kernel";
+import { Providers } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import Handlers from "./handlers";
@@ -84,6 +84,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
                 trustProxy: Joi.bool().required(),
             }).required(),
             options: Joi.object({
+                basePath: Joi.string().required(),
                 estimateTotalCount: Joi.bool().required(),
             }).required(),
         }).unknown(true);
@@ -107,7 +108,17 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         await server.register({
             plugin: Handlers,
-            routes: { prefix: "/api" },
+            routes: { prefix: this.config().get("options.basePath") },
+        });
+
+        await server.route({
+            method: "GET",
+            path: "/{param*}",
+            handler: {
+                directory: {
+                    path: `${__dirname}/www`,
+                },
+            },
         });
     }
 }

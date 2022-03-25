@@ -1,10 +1,9 @@
-import { Utils } from "@arkecosystem/crypto";
+import { Utils } from "@solar-network/crypto";
+import createTree from "functional-red-black-tree";
 
 import { Pagination, ResultsPage, Sorting } from "../../contracts/search";
 import { injectable } from "../../ioc";
-import { get } from "../../utils";
-
-import createTree from "functional-red-black-tree";
+import { get, Semver } from "../../utils";
 
 @injectable()
 export class PaginationService {
@@ -29,20 +28,25 @@ export class PaginationService {
 
     public getTop<T>(sorting: Sorting, count: number, items: Iterable<T>): T[] {
         if (count < 0) {
-            throw new RangeError(`Count should be greater or equal than zero.`);
+            throw new RangeError(`Count should be greater or equal than zero`);
         }
 
         if (count === 0) {
             return [];
         }
 
-        let tree = createTree<T, undefined>((a, b) => {
+        let tree = createTree<{ index: number; item: T }, undefined>((a, b) => {
             return this.compare(a, b, sorting);
         });
 
+        let i = 0;
         for (const item of items) {
-            if (tree.length < count || this.compare(item, tree.end.key, sorting) === -1) {
-                tree = tree.insert(item, undefined);
+            const key = {
+                index: i++,
+                item: item,
+            };
+            if (tree.length < count || this.compare(key, tree.end.key!, sorting) === -1) {
+                tree = tree.insert(key, undefined);
             }
 
             if (tree.length > count) {
@@ -50,13 +54,13 @@ export class PaginationService {
             }
         }
 
-        return tree.keys;
+        return tree.keys.map((key) => key.item);
     }
 
-    public compare<T>(a: T, b: T, sorting: Sorting): number {
+    private compare<T>(a: { index: number; item: T }, b: { index: number; item: T }, sorting: Sorting): number {
         for (const { property, direction } of sorting) {
-            let valueA = get(a, property);
-            let valueB = get(b, property);
+            let valueA = get(a.item, property);
+            let valueB = get(b.item, property);
 
             // undefined and null are always at the end regardless of direction
             if (typeof valueA === "undefined" && typeof valueB === "undefined") return 0;
@@ -87,12 +91,21 @@ export class PaginationService {
                 continue;
             }
 
+            if (valueA instanceof Semver && valueB instanceof Semver) {
+                if (valueA.isLessThan(valueB)) return -1;
+                if (valueA.isGreaterThan(valueB)) return 1;
+                continue;
+            }
+
             if (typeof valueA !== typeof valueB) {
                 throw new Error(`Mismatched types '${typeof valueA}' and '${typeof valueB}' at '${property}'`);
             } else {
                 throw new Error(`Unexpected type at '${property}'`);
             }
         }
+
+        if (a.index < b.index) return -1;
+        if (a.index > b.index) return 1;
 
         return 0;
     }

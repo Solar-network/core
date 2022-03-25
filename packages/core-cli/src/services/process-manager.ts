@@ -52,10 +52,10 @@ export class ProcessManager {
     /**
      * @param {Record<string, any>} opts
      * @param {Record<string, any>} [flags]
-     * @returns {ExecaSyncReturnValue}
+     * @returns {ExecaReturnValue}
      * @memberof ProcessManager
      */
-    public start(opts: Record<string, any>, flags: Record<string, any>): ExecaSyncReturnValue {
+    public async start(opts: Record<string, any>, flags: Record<string, any>): Promise<ExecaReturnValue> {
         let command: string = `pm2 start ${opts.script}`;
 
         if (opts.node_args) {
@@ -70,39 +70,42 @@ export class ProcessManager {
             command += ` -- ${opts.args}`;
         }
 
-        return this.shellSync(command);
+        return this.shell(command);
     }
 
     /**
      * @param {ProcessIdentifier} id
      * @param {Record<string, any>} [flags={}]
-     * @returns {ExecaSyncReturnValue}
+     * @returns {ExecaReturnValue}
      * @memberof ProcessManager
      */
-    public stop(id: ProcessIdentifier, flags: Record<string, any> = {}): ExecaSyncReturnValue {
+    public async stop(id: ProcessIdentifier, flags: Record<string, any> = {}): Promise<ExecaReturnValue> {
         let command: string = `pm2 stop ${id}`;
 
         if (Object.keys(flags).length > 0) {
             command += ` ${castFlagsToString(flags)}`;
         }
 
-        return this.shellSync(command);
+        return this.shell(command);
     }
 
     /**
      * @param {ProcessIdentifier} id
      * @param {Record<string, any>} [flags={ "update-env": true }]
-     * @returns {ExecaSyncReturnValue}
+     * @returns {ExecaReturnValue}
      * @memberof ProcessManager
      */
-    public restart(id: ProcessIdentifier, flags: Record<string, any> = { "update-env": true }): ExecaSyncReturnValue {
+    public async restart(
+        id: ProcessIdentifier,
+        flags: Record<string, any> = { "update-env": true },
+    ): Promise<ExecaReturnValue> {
         let command: string = `pm2 restart ${id}`;
 
         if (Object.keys(flags).length > 0) {
             command += ` ${castFlagsToString(flags)}`;
         }
 
-        return this.shellSync(command);
+        return this.shell(command);
     }
 
     /**
@@ -125,11 +128,11 @@ export class ProcessManager {
 
     /**
      * @param {ProcessIdentifier} id
-     * @returns {ExecaSyncReturnValue}
+     * @returns {ExecaReturnValue}
      * @memberof ProcessManager
      */
-    public delete(id: ProcessIdentifier): ExecaSyncReturnValue {
-        return this.shellSync(`pm2 delete ${id}`);
+    public async delete(id: ProcessIdentifier): Promise<ExecaReturnValue> {
+        return this.shell(`pm2 delete ${id}`);
     }
 
     /**

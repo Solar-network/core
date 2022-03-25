@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { Worker } from "worker_threads";
+
 import { WorkerData, WorkerSyncData } from "../contracts/worker";
 
 export class WorkerWrapper extends EventEmitter {
@@ -26,7 +27,7 @@ export class WorkerWrapper extends EventEmitter {
     }
 
     public start(): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             this.once("*", (data) => {
                 if (data.name === "started") {
                     resolve();
@@ -44,7 +45,7 @@ export class WorkerWrapper extends EventEmitter {
     }
 
     public sync(data: WorkerSyncData): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             if (this.isDone) {
                 resolve();
                 return;

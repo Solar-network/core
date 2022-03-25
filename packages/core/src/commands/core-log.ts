@@ -1,4 +1,4 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
+import { Commands, Container } from "@solar-network/core-cli";
 import Joi from "joi";
 
 /**
@@ -22,7 +22,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Display the Core process log.";
+    public description: string = "Display the Core process log";
 
     /**
      * Configure the console command.
@@ -32,9 +32,9 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("error", "Only display the error output.", Joi.boolean())
-            .setFlag("lines", "The number of lines to output.", Joi.number().default(15));
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("error", "Only display the error output", Joi.boolean())
+            .setFlag("lines", "The number of lines to output", Joi.number().default(15));
     }
 
     /**

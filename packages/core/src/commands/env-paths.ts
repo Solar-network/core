@@ -1,5 +1,5 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
+import { Commands, Container } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
 /**
@@ -23,7 +23,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Get all of the environment paths.";
+    public description: string = "Get all of the environment paths";
 
     /**
      * Configure the console command.
@@ -33,8 +33,8 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)));
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)));
     }
 
     /**

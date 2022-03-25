@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Enums, Identities, Interfaces, Managers, Transactions } from "@arkecosystem/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
 import {
     InvalidMultiSignatureError,
@@ -103,7 +103,7 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
 
         if (hasSender) {
             throw new Contracts.TransactionPool.PoolError(
-                `Sender ${transaction.data.senderPublicKey} already has a transaction of type '${Enums.TransactionType.MultiSignature}' in the pool`,
+                `Sender ${transaction.data.senderPublicKey} already has a multisignature registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }

@@ -1,4 +1,4 @@
-import { Contracts } from "@arkecosystem/core-kernel";
+import { Contracts } from "@solar-network/core-kernel";
 import dayjs, { Dayjs } from "dayjs";
 
 import { PeerVerificationResult } from "./peer-verifier";
@@ -22,6 +22,12 @@ export class Peer implements Contracts.P2P.Peer {
     public version: string | undefined;
 
     /**
+     * @type {(Set<number>)}
+     * @memberof Peer
+     */
+    public infractions: Set<number> = new Set();
+
+    /**
      * @type {(number | undefined)}
      * @memberof Peer
      */
@@ -34,16 +40,34 @@ export class Peer implements Contracts.P2P.Peer {
     public lastPinged: Dayjs | undefined;
 
     /**
+     * @type {(string[])}
+     * @memberof Peer
+     */
+    public publicKeys: string[] = [];
+
+    /**
      * @type {(number)}
      * @memberof Peer
      */
     public sequentialErrorCounter: number = 0;
 
     /**
+     * @type {(string[])}
+     * @memberof Peer
+     */
+    public signatures: string[] = [];
+
+    /**
      * @type {(PeerVerificationResult | undefined)}
      * @memberof Peer
      */
     public verificationResult: PeerVerificationResult | undefined;
+
+    /**
+     * @type {(boolean)}
+     * @memberof Peer
+     */
+    public stale: boolean = true;
 
     /**
      * @type {Contracts.P2P.PeerState}
@@ -98,6 +122,14 @@ export class Peer implements Contracts.P2P.Peer {
      * @returns {boolean}
      * @memberof Peer
      */
+    public isActiveDelegate(): boolean {
+        return this.publicKeys.length > 0;
+    }
+
+    /**
+     * @returns {boolean}
+     * @memberof Peer
+     */
     public recentlyPinged(): boolean {
         return !!this.lastPinged && dayjs().diff(this.lastPinged, "minute") < 2;
     }
@@ -111,5 +143,20 @@ export class Peer implements Contracts.P2P.Peer {
             ip: this.ip,
             port: this.port,
         };
+    }
+
+    public addInfraction(): void {
+        const timeNow: number = new Date().getTime() / 1000;
+        this.infractions.add(timeNow);
+    }
+
+    public isIgnored(): boolean {
+        const timeNow: number = new Date().getTime() / 1000;
+        for (const infraction of this.infractions) {
+            if (timeNow - infraction > 600) {
+                this.infractions.delete(infraction);
+            }
+        }
+        return this.infractions.size >= 3;
     }
 }

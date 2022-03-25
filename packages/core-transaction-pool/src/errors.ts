@@ -1,5 +1,5 @@
-import { Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Interfaces, Utils } from "@arkecosystem/crypto";
+import { Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Utils } from "@solar-network/crypto";
 
 export class RetryTransactionError extends Contracts.TransactionPool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
@@ -17,10 +17,7 @@ export class TransactionExceedsMaximumByteSizeError extends Contracts.Transactio
     public readonly maxSize: number;
 
     public constructor(transaction: Interfaces.ITransaction, maxSize: number) {
-        super(
-            `${transaction} exceeds size limit of ${AppUtils.pluralize("byte", maxSize, true)}`,
-            "ERR_TOO_LARGE", // ! should be "ERR_TO_LARGE" instead of "ERR_TOO_LARGE"
-        );
+        super(`${transaction} exceeds size limit of ${AppUtils.pluralize("byte", maxSize, true)}`, "ERR_TOO_LARGE");
         this.maxSize = maxSize;
     }
 }
@@ -34,15 +31,15 @@ export class TransactionHasExpiredError extends Contracts.TransactionPool.PoolEr
     }
 }
 
-export class TransactionFeeToLowError extends Contracts.TransactionPool.PoolError {
+export class TransactionFeeTooLowError extends Contracts.TransactionPool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
-        super(`${transaction} fee is to low to enter the pool`, "ERR_LOW_FEE");
+        super(`${transaction} fee is too low to enter the pool`, "ERR_LOW_FEE");
     }
 }
 
-export class TransactionFeeToHighError extends Contracts.TransactionPool.PoolError {
+export class TransactionFeeTooHighError extends Contracts.TransactionPool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
-        super(`${transaction} fee is to high to enter the pool`, "ERR_HIGH_FEE");
+        super(`${transaction} fee is too high to enter the pool`, "ERR_HIGH_FEE");
     }
 }
 
@@ -81,7 +78,7 @@ export class TransactionFailedToApplyError extends Contracts.TransactionPool.Poo
 
 export class TransactionFailedToVerifyError extends Contracts.TransactionPool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
-        super(`${transaction} didn't passed verification`, "ERR_BAD_DATA");
+        super(`${transaction} failed signature verification check`, "ERR_BAD_DATA");
     }
 }
 

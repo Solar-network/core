@@ -1,11 +1,17 @@
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Interfaces } from "@arkecosystem/crypto";
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Interfaces } from "@solar-network/crypto";
 
 import { TransactionResource, TransactionWithBlockResource } from "../resources";
 import { Controller } from "./controller";
+
+export interface StoreRequest extends Hapi.Request {
+    payload: {
+        transactions: Interfaces.ITransactionData[];
+    };
+}
 
 @Container.injectable()
 export class TransactionsController extends Controller {
@@ -28,7 +34,7 @@ export class TransactionsController extends Controller {
     @Container.inject(Container.Identifiers.TransactionPoolProcessor)
     private readonly processor!: Contracts.TransactionPool.Processor;
 
-    public async index(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async index(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<Contracts.Search.ResultsPage<object>> {
         const criteria: Contracts.Shared.TransactionCriteria = request.query;
         const sorting: Contracts.Search.Sorting = this.getListingOrder(request);
         const pagination: Contracts.Search.Pagination = this.getListingPage(request);
@@ -54,7 +60,7 @@ export class TransactionsController extends Controller {
         }
     }
 
-    public async store(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async store(request: StoreRequest, h: Hapi.ResponseToolkit) {
         const result = await this.processor.process(request.payload.transactions);
         return {
             data: {
@@ -67,7 +73,7 @@ export class TransactionsController extends Controller {
         };
     }
 
-    public async show(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async show(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object | Boom.Boom> {
         const transaction = await this.transactionHistoryService.findOneByCriteria({ id: request.params.id });
         if (!transaction) {
             return Boom.notFound("Transaction not found");
@@ -86,14 +92,20 @@ export class TransactionsController extends Controller {
         }
     }
 
-    public async unconfirmed(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async unconfirmed(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object>> {
         const pagination: Contracts.Search.Pagination = super.getListingPage(request);
         const all: Interfaces.ITransaction[] = Array.from(this.poolQuery.getFromHighestPriority());
         const transactions: Interfaces.ITransaction[] = all.slice(
             pagination.offset,
             pagination.offset + pagination.limit,
         );
-        const results = transactions.map((t) => t.data);
+        const results = transactions.map((t) => {
+            delete t.data.burnedFee;
+            return t.data;
+        });
         const resultsPage = {
             results,
             totalCount: all.length,
@@ -103,7 +115,7 @@ export class TransactionsController extends Controller {
         return super.toPagination(resultsPage, TransactionResource, !!request.query.transform);
     }
 
-    public async showUnconfirmed(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async showUnconfirmed(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object | Boom.Boom> {
         const transactionQuery: Contracts.TransactionPool.QueryIterable = this.poolQuery
             .getFromHighestPriority()
             .whereId(request.params.id);
@@ -113,11 +125,15 @@ export class TransactionsController extends Controller {
         }
 
         const transaction: Interfaces.ITransaction = transactionQuery.first();
+        delete transaction.data.burnedFee;
 
         return super.respondWithResource(transaction.data, TransactionResource, !!request.query.transform);
     }
 
-    public async types(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async types(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<{ data: Record<string | number, Record<string, number>> }> {
         const activatedTransactionHandlers = await this.nullHandlerRegistry.getActivatedHandlers();
         const typeGroups: Record<string | number, Record<string, number>> = {};
 
@@ -142,7 +158,10 @@ export class TransactionsController extends Controller {
         return { data: typeGroups };
     }
 
-    public async schemas(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async schemas(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<{ data: Record<string, Record<string, any>> }> {
         const activatedTransactionHandlers = await this.nullHandlerRegistry.getActivatedHandlers();
         const schemasByType: Record<string, Record<string, any>> = {};
 
@@ -165,7 +184,10 @@ export class TransactionsController extends Controller {
         return { data: schemasByType };
     }
 
-    public async fees(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async fees(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<{ data: Record<string | number, Record<string, string>> }> {
         const currentHeight: number = this.stateStore.getLastHeight();
         const activatedTransactionHandlers = await this.nullHandlerRegistry.getActivatedHandlers();
         const typeGroups: Record<string | number, Record<string, string>> = {};

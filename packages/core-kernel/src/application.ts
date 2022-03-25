@@ -7,7 +7,7 @@ import * as Contracts from "./contracts";
 import { KernelEvent } from "./enums";
 import { DirectoryCannotBeFound } from "./exceptions/filesystem";
 import { Identifiers } from "./ioc";
-import { ServiceProvider, ServiceProviderRepository } from "./providers";
+import { PluginDiscoverer, ServiceProvider, ServiceProviderRepository } from "./providers";
 // import { ShutdownSignal } from "./enums/process";
 import { ConfigRepository } from "./services/config";
 import { ServiceProvider as EventServiceProvider } from "./services/events/service-provider";
@@ -45,6 +45,8 @@ export class Application implements Contracts.Kernel.Application {
         this.bind<ServiceProviderRepository>(Identifiers.ServiceProviderRepository)
             .to(ServiceProviderRepository)
             .inSingletonScope();
+
+        this.bind<PluginDiscoverer>(Identifiers.PluginDiscoverer).to(PluginDiscoverer).inSingletonScope();
     }
 
     /**
@@ -268,7 +270,7 @@ export class Application implements Contracts.Kernel.Application {
      * @memberof Application
      */
     public isDevelopment(): boolean {
-        return this.environment() === "development" || ["devnet", "testnet"].includes(this.network());
+        return this.environment() === "development" || this.network() === "testnet";
     }
 
     /**
@@ -293,7 +295,7 @@ export class Application implements Contracts.Kernel.Application {
     public enableMaintenance(): void {
         writeFileSync(this.tempPath("maintenance"), JSON.stringify({ time: +new Date() }));
 
-        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now in maintenance mode.");
+        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now in maintenance mode");
 
         this.get<Contracts.Kernel.EventDispatcher>(Identifiers.EventDispatcherService).dispatch(
             "kernel.maintenance",
@@ -307,7 +309,7 @@ export class Application implements Contracts.Kernel.Application {
     public disableMaintenance(): void {
         removeSync(this.tempPath("maintenance"));
 
-        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now live.");
+        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now live");
 
         this.get<Contracts.Kernel.EventDispatcher>(Identifiers.EventDispatcherService).dispatch(
             "kernel.maintenance",
@@ -395,14 +397,14 @@ export class Application implements Contracts.Kernel.Application {
      * @template T
      * @param {Contracts.Kernel.Container.ServiceIdentifier<T>} serviceIdentifier
      * @param {string|number|symbol} key
-     * @param {any} value
+     * @param {string} value
      * @returns {T}
      * @memberof Application
      */
     public getTagged<T>(
         serviceIdentifier: Contracts.Kernel.Container.ServiceIdentifier<T>,
         key: string | number | symbol,
-        value: any,
+        value: string,
     ): T {
         return this.container.getTagged(serviceIdentifier, key, value);
     }
@@ -467,7 +469,7 @@ export class Application implements Contracts.Kernel.Application {
         ).allLoadedProviders();
 
         for (const serviceProvider of serviceProviders.reverse()) {
-            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).debug(`Disposing ${serviceProvider.name()}...`);
+            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).debug(`Disposing ${serviceProvider.name()}`);
 
             try {
                 await serviceProvider.dispose();

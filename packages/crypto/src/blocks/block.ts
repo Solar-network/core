@@ -1,3 +1,4 @@
+import { Managers } from "..";
 import { Hash, HashAlgorithms, Slots } from "../crypto";
 import { BlockSchemaError } from "../errors";
 import { IBlock, IBlockData, IBlockJson, IBlockVerification, ITransaction, ITransactionData } from "../interfaces";
@@ -5,7 +6,6 @@ import { configManager } from "../managers/config";
 import { BigNumber, isException } from "../utils";
 import { validator } from "../validation";
 import { Serializer } from "./serializer";
-import { Managers } from "..";
 
 export class Block implements IBlock {
     // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
@@ -17,18 +17,6 @@ export class Block implements IBlock {
     public constructor({ data, transactions, id }: { data: IBlockData; transactions: ITransaction[]; id?: string }) {
         this.data = data;
 
-        // TODO genesis block calculated id is wrong for some reason
-        if (this.data.height === 1) {
-            if (id) {
-                this.applyGenesisBlockFix(id);
-            } else if (data.id) {
-                this.applyGenesisBlockFix(data.id);
-            }
-        }
-
-        // fix on real timestamp, this is overloading transaction
-        // timestamp with block timestamp for storage only
-        // also add sequence to keep database sequence
         this.transactions = transactions.map((transaction, index) => {
             transaction.data.blockId = this.data.id;
             transaction.data.blockHeight = this.data.height;
@@ -39,17 +27,9 @@ export class Block implements IBlock {
 
         delete this.data.transactions;
 
+        this.data.burnedFee = this.getBurnedFees();
+
         this.verification = this.verify();
-
-        // Order of transactions messed up in mainnet V1
-        const { wrongTransactionOrder } = configManager.get("exceptions");
-        if (this.data.id && wrongTransactionOrder && wrongTransactionOrder[this.data.id]) {
-            const fixedOrderIds = wrongTransactionOrder[this.data.id];
-
-            this.transactions = fixedOrderIds.map((id: string) =>
-                this.transactions.find((transaction) => transaction.id === id),
-            );
-        }
     }
 
     public static applySchema(data: IBlockData): IBlockData | undefined {
@@ -97,6 +77,13 @@ export class Block implements IBlock {
         return result.value;
     }
 
+    public static getId(data: IBlockData): string {
+        const constants = configManager.getMilestone(data.height);
+        const idHex: string = Block.getIdHex(data);
+
+        return constants.block.idFullSha256 ? idHex : BigNumber.make(`0x${idHex}`).toString();
+    }
+
     public static getIdHex(data: IBlockData): string {
         const constants = configManager.getMilestone(data.height);
         const payloadHash: Buffer = Serializer.serialize(data);
@@ -116,23 +103,24 @@ export class Block implements IBlock {
         return temp.toString("hex");
     }
 
-    public static toBytesHex(data): string {
+    public static toBytesHex(data: string | undefined): string {
         const temp: string = data ? BigNumber.make(data).toString(16) : "";
 
         return "0".repeat(16 - temp.length) + temp;
     }
 
-    public static getId(data: IBlockData): string {
-        const constants = configManager.getMilestone(data.height);
-        const idHex: string = Block.getIdHex(data);
-
-        return constants.block.idFullSha256 ? idHex : BigNumber.make(`0x${idHex}`).toString();
+    public getBurnedFees(): BigNumber {
+        let fees = BigNumber.ZERO;
+        for (const transaction of this.transactions) {
+            fees = fees.plus(transaction.data.burnedFee!);
+        }
+        return fees;
     }
 
     public getHeader(): IBlockData {
         const header: IBlockData = Object.assign({}, this.data);
+        delete header.burnedFee;
         delete header.transactions;
-
         return header;
     }
 
@@ -144,7 +132,7 @@ export class Block implements IBlock {
             throw new Error();
         }
 
-        return Hash.verifyECDSA(hash, this.data.blockSignature, this.data.generatorPublicKey);
+        return Hash.verifySchnorr(hash, this.data.blockSignature, this.data.generatorPublicKey);
     }
 
     public toJson(): IBlockJson {
@@ -152,6 +140,7 @@ export class Block implements IBlock {
         data.reward = this.data.reward.toString();
         data.totalAmount = this.data.totalAmount.toString();
         data.totalFee = this.data.totalFee.toString();
+        data.burnedFee = this.data.burnedFee!.toString();
         data.transactions = this.transactions.map((transaction) => transaction.toJson());
 
         return data;
@@ -172,10 +161,6 @@ export class Block implements IBlock {
                 if (!block.previousBlock) {
                     result.errors.push("Invalid previous block");
                 }
-            }
-
-            if (!block.reward.isEqualTo(constants.reward)) {
-                result.errors.push(["Invalid block reward:", block.reward, "expected:", constants.reward].join(" "));
             }
 
             const valid = this.verifySignature();
@@ -241,11 +226,7 @@ export class Block implements IBlock {
                     transaction.data.expiration > 0 &&
                     transaction.data.expiration <= this.data.height
                 ) {
-                    const isException =
-                        configManager.get("network.name") === "devnet" && constants.ignoreExpiredTransactions;
-                    if (!isException) {
-                        result.errors.push(`Encountered expired transaction: ${transaction.data.id}`);
-                    }
+                    result.errors.push(`Encountered expired transaction: ${transaction.data.id}`);
                 }
 
                 if (transaction.data.version === 1 && !constants.block.acceptExpiredTransactionTimestamps) {
@@ -283,10 +264,5 @@ export class Block implements IBlock {
         result.verified = result.errors.length === 0;
 
         return result;
-    }
-
-    private applyGenesisBlockFix(id: string): void {
-        this.data.id = id;
-        this.data.idHex = id.length === 64 ? id : Block.toBytesHex(id); // if id.length is 64 it's already hex
     }
 }

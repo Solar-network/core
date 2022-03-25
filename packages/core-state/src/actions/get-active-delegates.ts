@@ -1,4 +1,4 @@
-import { Container, Contracts, Services, Types } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Services, Types } from "@solar-network/core-kernel";
 
 import { RoundState } from "../round-state";
 

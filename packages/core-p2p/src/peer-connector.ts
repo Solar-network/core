@@ -1,4 +1,4 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import delay from "delay";
 
 import { Client } from "./hapi-nes";
@@ -61,7 +61,7 @@ export class PeerConnector implements Contracts.P2P.PeerConnector {
         );
     }
 
-    public async emit(peer: Contracts.P2P.Peer, event: string, payload: any, timeout?: number): Promise<any> {
+    public async emit(peer: Contracts.P2P.Peer, event: string, payload: object, timeout?: number): Promise<any> {
         const connection: Client = await this.connect(peer);
 
         if (timeout) {
@@ -102,7 +102,9 @@ export class PeerConnector implements Contracts.P2P.PeerConnector {
         this.lastConnectionCreate.set(peer.ip, Date.now());
 
         connection.onError = (error) => {
-            this.logger.debug(`Socket error (peer ${Utils.IpAddress.normalizeAddress(peer.ip)}) : ${error.message}`);
+            this.logger.debug(
+                `Socket error (peer ${Utils.IpAddress.normalizeAddress(peer.ip)}) : ${error.message} :warning:`,
+            );
             this.disconnect(peer);
         };
 

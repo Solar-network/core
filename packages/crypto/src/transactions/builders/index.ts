@@ -1,3 +1,4 @@
+import { BurnTransactionBuilder } from "./transactions/burn";
 import { DelegateRegistrationBuilder } from "./transactions/delegate-registration";
 import { DelegateResignationBuilder } from "./transactions/delegate-resignation";
 import { HtlcClaimBuilder } from "./transactions/htlc-claim";
@@ -55,5 +56,10 @@ export class BuilderFactory {
 
     public static htlcRefund(): HtlcRefundBuilder {
         return new HtlcRefundBuilder();
+    }
+
+    // Solar transactions
+    public static burn(): BurnTransactionBuilder {
+        return new BurnTransactionBuilder();
     }
 }

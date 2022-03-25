@@ -1,6 +1,6 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Enums, Interfaces, Managers, Transactions, Utils } from "@arkecosystem/crypto";
+import { Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import assert from "assert";
 
 import {
@@ -12,6 +12,7 @@ import {
     LegacyMultiSignatureRegistrationError,
     MissingMultiSignatureOnSenderError,
     SenderWalletMismatchError,
+    TransactionFeeTooLowError,
     UnexpectedNonceError,
     UnexpectedSecondSignatureError,
     UnsupportedMultiSignatureTransactionError,
@@ -64,6 +65,37 @@ export abstract class TransactionHandler {
         return Utils.BigNumber.make(addonBytes + transactionSizeInBytes).times(satoshiPerByte);
     }
 
+    public getMinimumFee(
+        transaction: Interfaces.ITransaction,
+        dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number } | Record<string, any>,
+    ): Utils.BigNumber {
+        if (dynamicFeesConfiguration && dynamicFeesConfiguration.enabled) {
+            const addonBytes: number = dynamicFeesConfiguration.addonBytes[transaction.key];
+
+            const minFee: Utils.BigNumber = this.dynamicFee({
+                transaction,
+                addonBytes,
+                satoshiPerByte: dynamicFeesConfiguration.minFee,
+            });
+
+            return minFee;
+        }
+        return Utils.BigNumber.ZERO;
+    }
+
+    public enforceMinimumFee(
+        transaction: Interfaces.ITransaction,
+        dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number },
+    ): void {
+        if (dynamicFeesConfiguration && dynamicFeesConfiguration.enabled) {
+            const minFee = this.getMinimumFee(transaction, dynamicFeesConfiguration);
+
+            if (transaction.data.fee.isLessThan(minFee)) {
+                throw new TransactionFeeTooLowError(transaction.data.fee, minFee);
+            }
+        }
+    }
+
     public async throwIfCannotBeApplied(
         transaction: Interfaces.ITransaction,
         sender: Contracts.State.Wallet,
@@ -75,6 +107,9 @@ export abstract class TransactionHandler {
         if (!this.walletRepository.hasByPublicKey(sender.getPublicKey()!) && senderWallet.getBalance().isZero()) {
             throw new ColdWalletError();
         }
+
+        const milestone = Managers.configManager.getMilestone();
+        this.enforceMinimumFee(transaction, milestone.dynamicFees);
 
         return this.performGenericWalletChecks(transaction, sender);
     }
@@ -97,7 +132,7 @@ export abstract class TransactionHandler {
         const data: Interfaces.ITransactionData = transaction.data;
 
         if (Utils.isException(data)) {
-            this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}.`);
+            this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}`);
         }
 
         await this.throwIfCannotBeApplied(transaction, sender);
@@ -215,17 +250,12 @@ export abstract class TransactionHandler {
                 throw new InvalidSecondSignatureError();
             }
         } else if (data.secondSignature || data.signSignature) {
-            const isException =
-                Managers.configManager.get("network.name") === "devnet" &&
-                Managers.configManager.getMilestone().ignoreInvalidSecondSignatureField;
-            if (!isException) {
-                throw new UnexpectedSecondSignatureError();
-            }
+            throw new UnexpectedSecondSignatureError();
         }
 
-        // Prevent legacy multi signatures from being used
+        // Prevent legacy multisignatures from being used
         const isMultiSignatureRegistration: boolean =
-            transaction.type === Enums.TransactionType.MultiSignature &&
+            transaction.type === Enums.TransactionType.Core.MultiSignature &&
             transaction.typeGroup === Enums.TransactionTypeGroup.Core;
         if (isMultiSignatureRegistration && !Managers.configManager.getMilestone().aip11) {
             throw new LegacyMultiSignatureRegistrationError();
@@ -234,7 +264,7 @@ export abstract class TransactionHandler {
         if (sender.hasMultiSignature()) {
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-            // Ensure the database wallet already has a multi signature, in case we checked a pool wallet.
+            // Ensure the database wallet already has a multisignature, in case we checked a pool wallet.
             const dbSender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
                 transaction.data.senderPublicKey,
             );
@@ -300,11 +330,11 @@ export abstract class TransactionHandler {
      * Wallet logic
      */
 
-    public abstract async bootstrap(): Promise<void>;
+    public abstract bootstrap(): Promise<void>;
 
-    public abstract async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void>;
+    public abstract applyToRecipient(transaction: Interfaces.ITransaction): Promise<void>;
 
-    public abstract async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void>;
+    public abstract revertForRecipient(transaction: Interfaces.ITransaction): Promise<void>;
 }
 
 export type TransactionHandlerConstructor = new () => TransactionHandler;

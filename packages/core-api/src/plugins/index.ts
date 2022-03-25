@@ -1,7 +1,12 @@
+import inert from "@hapi/inert";
+
+import { cache } from "./cache";
 import { commaArrayQuery } from "./comma-array-query";
 import { dotSeparatedQuery } from "./dot-separated-query";
 import { hapiAjv } from "./hapi-ajv";
 import { log } from "./log";
+import { pagination } from "./pagination";
+import { rateLimit } from "./rate-limit";
 import { responseHeaders } from "./response-headers";
 import { whitelist } from "./whitelist";
 
@@ -24,18 +29,19 @@ export const preparePlugins = (config) => [
     { plugin: commaArrayQuery },
     { plugin: dotSeparatedQuery },
     {
-        plugin: require("./cache"),
+        plugin: cache,
         options: config.cache,
     },
+    { plugin: inert },
     {
-        plugin: require("./rate-limit"),
+        plugin: rateLimit,
         options: {
             ...config.rateLimit,
             trustProxy: config.trustProxy,
         },
     },
     {
-        plugin: require("./pagination"),
+        plugin: pagination,
         options: {
             query: {
                 limit: {

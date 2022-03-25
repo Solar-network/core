@@ -1,5 +1,6 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
+import { isBoom } from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
 
 export const responseHeaders = {
     name: "response-headers",
@@ -15,11 +16,10 @@ export const responseHeaders = {
                 .get<Contracts.Blockchain.Blockchain>(Container.Identifiers.BlockchainService)
                 .getLastHeight();
 
-            const responsePropToUpdate = request.response.isBoom ? request.response.output : request.response;
-            responsePropToUpdate.headers = responsePropToUpdate.headers ?? {};
+            const responsePropToUpdate = isBoom(request.response) ? request.response.output : request.response;
             responsePropToUpdate.headers["X-Block-Height"] = blockHeight;
 
             return h.continue;
-        }
+        };
     },
 };

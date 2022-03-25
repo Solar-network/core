@@ -1,4 +1,4 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 
 import { ForgerService } from "../forger-service";
 
@@ -9,7 +9,7 @@ export class CurrentDelegateProcessAction implements Contracts.Kernel.ProcessAct
 
     public name = "forger.currentDelegate";
 
-    public async handler() {
+    public async handler(): Promise<object> {
         const round = this.forger.getRound();
 
         Utils.assert.defined(round);

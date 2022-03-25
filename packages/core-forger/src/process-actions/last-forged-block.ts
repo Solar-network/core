@@ -1,4 +1,4 @@
-import { Container, Contracts, Utils } from "@arkecosystem/core-kernel";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 
 import { ForgerService } from "../forger-service";
 
@@ -9,7 +9,7 @@ export class LastForgedBlockRemoteAction implements Contracts.Kernel.ProcessActi
 
     public name = "forger.lastForgedBlock";
 
-    public async handler() {
+    public async handler(): Promise<object> {
         const lastForgedBlock = this.forger.getLastForgedBlock();
 
         Utils.assert.defined(lastForgedBlock);

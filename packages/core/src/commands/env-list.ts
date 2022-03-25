@@ -1,8 +1,8 @@
-import { Commands, Container } from "@arkecosystem/core-cli";
-import { Networks } from "@arkecosystem/crypto";
-import Joi from "joi";
+import { Commands, Container } from "@solar-network/core-cli";
+import { Networks } from "@solar-network/crypto";
 import { parseFileSync } from "envfile";
 import { existsSync } from "fs-extra";
+import Joi from "joi";
 
 /**
  * @export
@@ -25,7 +25,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "List all environment variables.";
+    public description: string = "List all environment variables";
 
     /**
      * Configure the console command.
@@ -35,8 +35,8 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string().default("ark"))
-            .setFlag("network", "The name of the network.", Joi.string().valid(...Object.keys(Networks)));
+            .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)));
     }
 
     /**
@@ -49,7 +49,7 @@ export class Command extends Commands.Command {
         const envFile: string = this.app.getCorePath("config", ".env");
 
         if (!existsSync(envFile)) {
-            this.components.fatal(`No environment file found at ${envFile}.`);
+            this.components.fatal(`No environment file found at ${envFile}`);
         }
 
         this.components.table(["Key", "Value"], (table) => {

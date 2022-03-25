@@ -1,7 +1,7 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Enums } from "@arkecosystem/crypto";
 import { Boom, notFound } from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Enums } from "@solar-network/crypto";
 
 import { Identifiers } from "../identifiers";
 import { BlockResource, BlockWithTransactionsResource } from "../resources";
@@ -27,7 +27,7 @@ export class DelegatesController extends Controller {
     @Container.inject(Container.Identifiers.BlockHistoryService)
     private readonly blockHistoryService!: Contracts.Shared.BlockHistoryService;
 
-    public index(request: Hapi.Request): Contracts.Search.ResultsPage<DelegateResource> {
+    public index(request: Hapi.Request, h: Hapi.ResponseToolkit): Contracts.Search.ResultsPage<DelegateResource> {
         const pagination = this.getQueryPagination(request.query);
         const sorting = request.query.orderBy as Contracts.Search.Sorting;
         const criteria = this.getQueryCriteria(request.query, delegateCriteriaSchemaObject) as DelegateCriteria;
@@ -35,7 +35,7 @@ export class DelegatesController extends Controller {
         return this.delegateSearchService.getDelegatesPage(pagination, sorting, criteria);
     }
 
-    public show(request: Hapi.Request): { data: DelegateResource } | Boom {
+    public show(request: Hapi.Request, h: Hapi.ResponseToolkit): { data: DelegateResource } | Boom {
         const walletId = request.params.id as string;
 
         const walletResource = this.walletSearchService.getWallet(walletId);
@@ -51,7 +51,7 @@ export class DelegatesController extends Controller {
         return { data: delegateResource };
     }
 
-    public voters(request: Hapi.Request): Contracts.Search.ResultsPage<WalletResource> | Boom {
+    public voters(request: Hapi.Request, h: Hapi.ResponseToolkit): Contracts.Search.ResultsPage<WalletResource> | Boom {
         const walletId = request.params.id as string;
 
         const walletResource = this.walletSearchService.getWallet(walletId);
@@ -75,7 +75,10 @@ export class DelegatesController extends Controller {
         });
     }
 
-    public async blocks(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async blocks(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object> | Boom> {
         const walletId = request.params.id as string;
 
         const walletResource = this.walletSearchService.getWallet(walletId);
@@ -92,7 +95,7 @@ export class DelegatesController extends Controller {
             const blockCriteria = { generatorPublicKey: delegateResource.publicKey };
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
                 blockCriteria,
-                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.MultiPayment },
+                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.MultiPayment },
                 this.getListingOrder(request),
                 this.getListingPage(request),
                 this.getListingOptions(),

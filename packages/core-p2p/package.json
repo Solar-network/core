@@ -1,13 +1,12 @@
 {
-    "name": "@arkecosystem/core-p2p",
-    "version": "3.1.0",
-    "description": "P2P API for ARK Core",
-    "license": "MIT",
+    "name": "@solar-network/core-p2p",
+    "version": "3.2.0",
+    "description": "P2P API for Solar Core",
+    "license": "CC-BY-ND-4.0",
     "contributors": [
-        "François-Xavier Thoorens <fx@ark.io>",
-        "Kristjan Košič <kristjan@ark.io>",
-        "Brian Faust <brian@ark.io>",
-        "Alex Barnsley <alex@ark.io>"
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
     ],
     "files": [
         "dist"
@@ -15,33 +14,30 @@
     "main": "dist/index",
     "types": "dist/index",
     "scripts": {
-        "build": "yarn clean && yarn compile",
-        "build:watch": "yarn clean && yarn compile -w",
-        "build:docs": "../../node_modules/typedoc/bin/typedoc --out docs src",
-        "pbjs": "pbjs -t static-module -w commonjs src/socket-server/codecs/proto/*.proto -o src/socket-server/codecs/proto/protos.js",
-        "pbts": "pbts src/socket-server/codecs/proto/protos.js -o src/socket-server/codecs/proto/protos.d.ts",
-        "build:proto": "yarn pbjs && yarn pbts",
+        "build": "pnpm clean && pnpm compile",
+        "build:proto": "pnpm pbjs && pnpm pbts",
+        "build:watch": "pnpm clean && pnpm compile -w",
         "clean": "rimraf dist",
         "compile": "node ../../node_modules/typescript/bin/tsc",
-        "prepublishOnly": "yarn build",
-        "pretest": "bash ../../scripts/pre-test.sh"
+        "pbjs": "pbjs -t static-module -w commonjs src/socket-server/codecs/proto/*.proto -o src/socket-server/codecs/proto/protos.js",
+        "pbts": "pbts src/socket-server/codecs/proto/protos.js -o src/socket-server/codecs/proto/protos.d.ts"
     },
     "dependencies": {
-        "@arkecosystem/core-database": "3.1.0",
-        "@arkecosystem/core-kernel": "3.1.0",
-        "@arkecosystem/core-state": "3.1.0",
-        "@arkecosystem/crypto": "3.1.0",
-        "@hapi/boom": "9.0.0",
+        "@solar-network/core-database": "workspace:*",
+        "@solar-network/core-kernel": "workspace:*",
+        "@solar-network/core-state": "workspace:*",
+        "@solar-network/crypto": "workspace:*",
+        "@hapi/boom": "9.1.4",
         "@hapi/bounce": "2.0.0",
-        "@hapi/hapi": "20.1.5",
-        "@hapi/hoek": "9.2.0",
+        "@hapi/hapi": "20.2.1",
+        "@hapi/hoek": "9.2.1",
         "@hapi/sntp": "4.0.0",
         "@hapi/teamwork": "5.1.0",
         "dayjs": "1.10.7",
-        "delay": "4.4.1",
+        "delay": "5.0.0",
         "ip": "1.1.5",
         "ipaddr.js": "2.0.1",
-        "joi": "17.4.2",
+        "joi": "17.6.0",
         "pluralize": "8.0.0",
         "pretty-ms": "7.0.1",
         "protobufjs": "6.10.2",
@@ -52,19 +48,9 @@
     "devDependencies": {
         "@types/better-sqlite3": "5.4.3",
         "@types/fs-extra": "8.1.2",
+        "@types/hapi__hapi": "20.0.9",
         "@types/hapi__sntp": "3.1.2",
         "@types/ip": "1.1.0",
         "@types/semver": "6.2.3"
-    },
-    "engines": {
-        "node": ">=10.x"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "arkecosystem": {
-        "core": {
-            "alias": "p2p"
-        }
     }
 }

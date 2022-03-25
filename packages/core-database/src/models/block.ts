@@ -1,5 +1,5 @@
-import { Contracts } from "@arkecosystem/core-kernel";
-import { Utils } from "@arkecosystem/crypto";
+import { Contracts } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 import { Column, Entity, Index } from "typeorm";
 
 import { transformBigInt } from "../utils/transform";
@@ -62,6 +62,13 @@ export class Block implements Contracts.Database.BlockModel {
         transformer: transformBigInt,
     })
     public totalFee!: Utils.BigNumber;
+
+    @Column({
+        type: "bigint",
+        nullable: false,
+        transformer: transformBigInt,
+    })
+    public burnedFee!: Utils.BigNumber;
 
     @Column({
         type: "bigint",

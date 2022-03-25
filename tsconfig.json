@@ -7,7 +7,7 @@
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
-        "lib": ["es2020"],
+        "lib": ["es2021"],
         "module": "CommonJS",
         "moduleResolution": "node",
         "newLine": "lf",
@@ -20,7 +20,6 @@
         "pretty": true,
         "paths": {
             "@packages/*": ["packages/*"],
-            "@tests/*": ["__tests__/*"]
         },
         "resolveJsonModule": true,
         "skipLibCheck": true,
@@ -29,6 +28,7 @@
         "stripInternal": true,
         "target": "es2020",
         "typeRoots": ["reflect-metadata", "node_modules/@types"],
+        "useUnknownInCatchVariables": false
     },
     "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }

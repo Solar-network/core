@@ -134,11 +134,11 @@ export class NullFilesystem implements Filesystem {
     /**
      * Create a directory.
      *
-     * @param {*} path
+     * @param {string} path
      * @returns {Promise<boolean>}
      * @memberof LocalFilesystem
      */
-    public async makeDirectory(path): Promise<boolean> {
+    public async makeDirectory(path: string): Promise<boolean> {
         return false;
     }
 

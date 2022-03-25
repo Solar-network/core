@@ -1,7 +1,7 @@
-import { Container, Contracts } from "@arkecosystem/core-kernel";
-import { Enums } from "@arkecosystem/crypto";
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
+import { Container, Contracts } from "@solar-network/core-kernel";
+import { Enums } from "@solar-network/crypto";
 
 import { BlockResource, BlockWithTransactionsResource, TransactionResource } from "../resources";
 import { Controller } from "./controller";
@@ -20,11 +20,11 @@ export class BlocksController extends Controller {
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
 
-    public async index(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async index(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
         if (request.query.transform) {
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
                 request.query,
-                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.MultiPayment },
+                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.MultiPayment },
                 this.getListingOrder(request),
                 this.getListingPage(request),
                 this.getListingOptions(),
@@ -42,7 +42,7 @@ export class BlocksController extends Controller {
         }
     }
 
-    public async first(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async first(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
         const block = this.stateStore.getGenesisBlock();
 
         if (request.query.transform) {
@@ -52,7 +52,7 @@ export class BlocksController extends Controller {
         }
     }
 
-    public async last(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async last(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
         const block = this.blockchain.getLastBlock();
 
         if (request.query.transform) {
@@ -62,12 +62,12 @@ export class BlocksController extends Controller {
         }
     }
 
-    public async show(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async show(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
         if (request.query.transform) {
             const blockCriteria = this.getBlockCriteriaByIdOrHeight(request.params.id);
             const transactionCriteria = {
                 typeGroup: Enums.TransactionTypeGroup.Core,
-                type: Enums.TransactionType.MultiPayment,
+                type: Enums.TransactionType.Core.MultiPayment,
             };
             const block = await this.blockHistoryService.findOneByCriteriaJoinTransactions(
                 blockCriteria,
@@ -87,7 +87,7 @@ export class BlocksController extends Controller {
         }
     }
 
-    public async transactions(request: Hapi.Request, h: Hapi.ResponseToolkit) {
+    public async transactions(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
         const blockCriteria = this.getBlockCriteriaByIdOrHeight(request.params.id);
         const blockData = await this.blockHistoryService.findOneByCriteria(blockCriteria);
         if (!blockData) {

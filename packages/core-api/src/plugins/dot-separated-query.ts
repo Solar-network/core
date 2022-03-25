@@ -1,5 +1,5 @@
-import { Utils } from "@arkecosystem/core-kernel";
 import Hapi from "@hapi/hapi";
+import { Utils } from "@solar-network/core-kernel";
 
 export const dotSeparatedQuery = {
     name: "dot-separated-query",
@@ -10,11 +10,10 @@ export const dotSeparatedQuery = {
     },
 
     onRequest(request: Hapi.Request, h: Hapi.ResponseToolkit): Hapi.Lifecycle.ReturnValue {
-        const query = {};
         for (const [key, value] of Object.entries(request.query)) {
-            Utils.set(query, key, value);
+            delete request.query[key];
+            Utils.set(request.query, key, value);
         }
-        request.query = query;
         return h.continue;
     },
 };

@@ -1,4 +1,4 @@
-import { Utils } from "@arkecosystem/core-kernel";
+import { Utils } from "@solar-network/core-kernel";
 import { RateLimiterMemory, RLWrapperBlackAndWhite } from "rate-limiter-flexible";
 
 export interface RateLimiterConfiguration {
@@ -62,7 +62,7 @@ export class RateLimiter {
 
     public async hasExceededRateLimitNoConsume(ip: string, endpoint?: string): Promise<boolean> {
         const global = await this.global.get(ip);
-        if(global !== null && global.remainingPoints <= 0) {
+        if (global !== null && global.remainingPoints <= 0) {
             return true;
         }
 
@@ -72,7 +72,7 @@ export class RateLimiter {
             Utils.assert.defined<RateLimiterMemory>(endpointLimiters);
 
             const endpointLimiter = await endpointLimiters.get(ip);
-            if(endpointLimiter !== null && endpointLimiter.remainingPoints <= 0) {
+            if (endpointLimiter !== null && endpointLimiter.remainingPoints <= 0) {
                 return true;
             }
         }

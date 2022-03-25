@@ -1,4 +1,5 @@
-import { Errors, Managers } from "@arkecosystem/crypto";
+import { Errors, Managers } from "@solar-network/crypto";
+
 import { RoundInfo } from "../contracts/shared";
 import { getMilestonesWhichAffectActiveDelegateCount } from "./calculate-forging-info";
 
@@ -45,7 +46,7 @@ export const calculateRound = (height: number): RoundInfo => {
         const spanHeight = nextMilestone.height - milestoneHeight;
         if (spanHeight % activeDelegates !== 0) {
             throw new Errors.InvalidMilestoneConfigurationError(
-                `Bad milestone at height: ${height}. The number of delegates can only be changed at the beginning of a new round.`,
+                `Bad milestone at height: ${height}. The number of delegates can only be changed at the beginning of a new round`,
             );
         }
 

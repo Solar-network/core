@@ -4,6 +4,7 @@ import Boom from "@hapi/boom";
 import Bounce from "@hapi/bounce";
 import Hoek from "@hapi/hoek";
 import Teamwork from "@hapi/teamwork";
+
 import { parseNesMessage, protocol, stringifyNesMessage } from "./utils";
 
 const internals = {
@@ -27,7 +28,11 @@ export class Socket {
     private _sending;
     private _lastPinged;
 
-    public constructor(ws, req, listener) {
+    public constructor(
+        ws: object,
+        req: { headers: string[]; socket: { remoteAddress: string; remotePort: number } },
+        listener: object,
+    ) {
         this._ws = ws;
         this._listener = listener;
         this._helloed = false;
@@ -47,32 +52,46 @@ export class Socket {
             "x-forwarded-for": req.headers["x-forwarded-for"],
         };
 
+        this._ws.on("error", (error) => {
+            if (error instanceof RangeError) {
+                this.terminate(true, error.message.replaceAll("WebSocket", "websocket").replaceAll(":", " -"));
+            }
+        });
         this._ws.on("message", (message) => this._onMessage(message));
-        this._ws.on("ping", () => this.terminate());
-        this._ws.on("pong", () => this.terminate());
+        this._ws.on("ping", () => this.terminate(true, "Malicious ping frame received"));
+        this._ws.on("pong", () => this.terminate(true, "Malicious pong frame received"));
     }
 
-    public disconnect() {
+    public getWebSocket() {
+        if (this._ws && this._ws._socket) {
+            return this._ws._socket;
+        }
+    }
+
+    public disconnect(): void {
         this._ws.close();
         return this._removed;
     }
 
-    public terminate() {
+    public terminate(ban: boolean, reason?: string): void {
+        if (ban && this._ws && this._ws._socket) {
+            this._ws._socket.ban = reason;
+        }
         this._ws.terminate();
         return this._removed;
     }
 
-    public isOpen() {
+    public isOpen(): boolean {
         return this._ws.readyState === 1;
     }
 
     // public even though it starts with _ ; this is to match the original code
-    public _active() {
+    public _active(): boolean {
         return this._pinged || this._sending || this._processingCount;
     }
 
     // public because used in listener ; from original code
-    public _send(message, options?) {
+    public _send(message: { id?: number; type: string }, options?: { replace?: string }): Promise<unknown> {
         options = options || {};
 
         if (!this.isOpen()) {
@@ -85,7 +104,7 @@ export class Socket {
             string = stringifyNesMessage(message);
             if (options.replace) {
                 Object.keys(options.replace).forEach((token) => {
-                    string = string.replace(`"${token}"`, options.replace[token]);
+                    string = string.replace(`"${token}"`, options!.replace![token]);
                 });
             }
         } catch (err) {
@@ -93,7 +112,7 @@ export class Socket {
 
             /* istanbul ignore else */
             if (message.id) {
-                return this._error(Boom.internal("Failed serializing message"), message);
+                return this._error(Boom.internal("Failed serialising message"), message);
             }
 
             /* istanbul ignore next */
@@ -183,7 +202,7 @@ export class Socket {
 
             return this._send(message);
         } else {
-            this.terminate();
+            this.terminate(true, err.output.payload.message);
             return Promise.resolve();
         }
     }
@@ -192,11 +211,11 @@ export class Socket {
         let request;
         try {
             if (!(message instanceof Buffer)) {
-                return this.terminate();
+                return this.terminate(true, "Invalid message received");
             }
             request = parseNesMessage(message);
         } catch (err) {
-            return this.terminate();
+            return this.terminate(true, "Invaild payload received");
         }
 
         this._pinged = true;
@@ -220,7 +239,7 @@ export class Socket {
             }
         } catch (err) {
             Bounce.rethrow(err, "system");
-            this.terminate();
+            this.terminate(false);
         }
 
         --this._processingCount;
@@ -238,7 +257,7 @@ export class Socket {
         // Initialization and Authentication
 
         if (request.type === "ping") {
-            if (this._lastPinged && (Date.now() < this._lastPinged + 1000)) {
+            if (this._lastPinged && Date.now() < this._lastPinged + 1000) {
                 this._lastPinged = Date.now();
                 throw Boom.badRequest("Exceeded ping limit");
             }
@@ -251,7 +270,7 @@ export class Socket {
         }
 
         if (!this._helloed) {
-            throw Boom.badRequest("Connection is not initialized");
+            throw Boom.badRequest("Connection is not initialised");
         }
 
         // Endpoint request
@@ -269,7 +288,7 @@ export class Socket {
     private async _processHello(request) {
         /* istanbul ignore next */
         if (this._helloed) {
-            throw Boom.badRequest("Connection already initialized");
+            throw Boom.badRequest("Connection already initialised");
         }
 
         if (request.version !== internals.version) {

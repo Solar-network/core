@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 export interface BlockPing {
     count: number;
@@ -130,9 +130,9 @@ export interface StateStore {
     /**
      * Cache the ids of the given transactions.
      */
-    cacheTransactions(
-        transactions: Interfaces.ITransactionData[],
-    ): { [key in "added" | "notAdded"]: Interfaces.ITransactionData[] };
+    cacheTransactions(transactions: Interfaces.ITransactionData[]): {
+        [key in "added" | "notAdded"]: Interfaces.ITransactionData[];
+    };
 
     /**
      * Drop all cached transaction ids.
@@ -153,4 +153,8 @@ export interface StateStore {
      * Push ping block
      */
     pushPingBlock(block: Interfaces.IBlockData, fromForger?: boolean): void;
+
+    hasPolledForBlocks(): boolean;
+
+    polledForBlocks(): void;
 }

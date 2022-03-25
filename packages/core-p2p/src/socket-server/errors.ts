@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 export class ServerError extends Error {
     public constructor(message: string) {
@@ -21,13 +21,13 @@ export class ServerError extends Error {
 export class TooManyTransactionsError extends ServerError {
     public constructor(block: Interfaces.IBlockData) {
         super(
-            `Received block ${block.id} at height ${block.height} contained too many transactions (${block.numberOfTransactions}).`,
+            `Received block ${block.id} at height ${block.height} contained too many transactions (${block.numberOfTransactions})`,
         );
     }
 }
 
 export class UnchainedBlockError extends ServerError {
     public constructor(lastHeight: number, nextHeight: number) {
-        super(`Last received block ${nextHeight} cannot be chained to ${lastHeight}.`);
+        super(`Last received block ${nextHeight} cannot be chained to ${lastHeight}`);
     }
 }

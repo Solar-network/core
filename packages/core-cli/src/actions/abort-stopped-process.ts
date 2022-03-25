@@ -22,7 +22,7 @@ export class AbortStoppedProcess {
      */
     public execute(processName: string): void {
         if (this.processManager.isStopped(processName)) {
-            throw new Error(`The "${processName}" process is not running.`);
+            throw new Error(`The "${processName}" process is not running`);
         }
     }
 }

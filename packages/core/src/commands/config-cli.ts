@@ -1,4 +1,4 @@
-import { Commands, Container, Services } from "@arkecosystem/core-cli";
+import { Commands, Container, Services } from "@solar-network/core-cli";
 import Joi from "joi";
 
 /**
@@ -30,7 +30,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Update the CLI configuration.";
+    public description: string = "Update the CLI configuration";
 
     /**
      * Indicates whether the command requires a network to be present.
@@ -48,10 +48,10 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("token", "The name of the token.", Joi.string())
+            .setFlag("token", "The name of the token", Joi.string())
             .setFlag(
                 "channel",
-                "The NPM registry channel that should be used.",
+                "Whether to install stable (latest) or prerelease (next) versions of Core",
                 Joi.string().valid(...["next", "latest"]),
             );
     }
@@ -72,22 +72,27 @@ export class Command extends Commands.Command {
             const oldChannel: string = this.config.get("channel");
 
             if (oldChannel === newChannel) {
-                this.components.fatal(`You are already on the "${newChannel}" channel.`);
+                this.components.fatal(`Already on the "${newChannel}" channel`);
             }
 
             this.config.set("channel", newChannel);
 
-            const spinner = this.components.spinner(`Installing ${this.pkg.name}@${newChannel}`);
+            const spinner = this.components.spinner(`Installing ${newChannel}`);
 
             spinner.start();
 
-            this.installer.install(this.pkg.name!, newChannel);
+            try {
+                await this.installer.install(this.pkg.name!, newChannel);
 
-            spinner.succeed();
+                spinner.succeed();
 
-            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
-            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
-            await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
+                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
+                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+            } catch (error) {
+                spinner.fail();
+                this.components.error(error);
+            }
         }
     }
 }

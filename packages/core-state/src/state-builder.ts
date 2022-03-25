@@ -1,7 +1,7 @@
-import { Repositories } from "@arkecosystem/core-database";
-import { Application, Container, Contracts, Enums, Services, Utils as AppUtils } from "@arkecosystem/core-kernel";
-import { Handlers } from "@arkecosystem/core-transactions";
-import { Managers, Utils } from "@arkecosystem/crypto";
+import { Repositories } from "@solar-network/core-database";
+import { Application, Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Handlers } from "@solar-network/core-transactions";
+import { Managers, Utils } from "@solar-network/crypto";
 
 // todo: review the implementation
 @Container.injectable()
@@ -111,9 +111,6 @@ export class StateBuilder {
                 // Senders of whitelisted transactions that result in a negative balance,
                 // also need to be special treated during bootstrap. Therefore, specific
                 // senderPublicKey/nonce pairs are allowed to be negative.
-                // Example:
-                //          https://explorer.ark.io/transaction/608c7aeba0895da4517496590896eb325a0b5d367e1b186b1c07d7651a568b9e
-                //          Results in a negative balance (-2 ARK) from height 93478 to 187315
                 const negativeBalanceExceptions: Record<string, Record<string, string>> = this.configRepository.get(
                     "crypto.exceptions.negativeBalances",
                     {},
@@ -125,7 +122,7 @@ export class StateBuilder {
 
                 if (!whitelistedNegativeBalances) {
                     logNegativeBalance(wallet, "balance", wallet.getBalance());
-                    throw new Error("Non-genesis wallet with negative balance.");
+                    throw new Error("Non-genesis wallet with negative balance");
                 }
 
                 const allowedNegativeBalance = wallet
@@ -134,7 +131,7 @@ export class StateBuilder {
 
                 if (!allowedNegativeBalance) {
                     logNegativeBalance(wallet, "balance", wallet.getBalance());
-                    throw new Error("Non-genesis wallet with negative balance.");
+                    throw new Error("Non-genesis wallet with negative balance");
                 }
             }
 
@@ -143,7 +140,7 @@ export class StateBuilder {
 
                 if (voteBalance.isLessThan(0)) {
                     logNegativeBalance(wallet, "vote balance", voteBalance);
-                    throw new Error("Wallet with negative vote balance.");
+                    throw new Error("Wallet with negative vote balance");
                 }
             }
         }

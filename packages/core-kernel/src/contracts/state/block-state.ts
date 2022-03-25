@@ -1,10 +1,10 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 
 import { BigNumber } from "../../utils";
 import { Wallet } from "./wallets";
 
 export interface BlockState {
-    applyBlock(block: Interfaces.IBlock): Promise<void>;
+    applyBlock(block: Interfaces.IBlock, transactionProcessing: { index: number | undefined }): Promise<void>;
 
     revertBlock(block: Interfaces.IBlock): Promise<void>;
 

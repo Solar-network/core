@@ -1,7 +1,7 @@
-import { DatabaseService, Repositories } from "@arkecosystem/core-database";
-import { Container, Contracts, Services, Utils } from "@arkecosystem/core-kernel";
-import { DatabaseInteraction } from "@arkecosystem/core-state";
-import { Blocks, Crypto, Interfaces, Utils as CryptoUtils } from "@arkecosystem/crypto";
+import { Repositories } from "@solar-network/core-database";
+import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
+import { DatabaseInteraction } from "@solar-network/core-state";
+import { Blocks, Crypto, Interfaces, Utils as CryptoUtils } from "@solar-network/crypto";
 
 import { BlockProcessor, BlockProcessorResult } from "./processor";
 import { RevertBlockHandler } from "./processor/handlers";
@@ -20,9 +20,6 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
-
-    @Container.inject(Container.Identifiers.DatabaseService)
-    private readonly database!: DatabaseService;
 
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
     private readonly blockRepository!: Repositories.BlockRepository;
@@ -105,7 +102,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
 
                 if (blockSlot > currentSlot) {
                     this.logger.error(
-                        `Discarded block ${block.height.toLocaleString()} because it takes a future slot.`,
+                        `Discarded block ${block.height.toLocaleString()} because it takes a future slot :crystal_ball:`,
                     );
                     break;
                 }
@@ -180,9 +177,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
     private async revertBlocks(blocksToRevert: Interfaces.IBlock[]): Promise<void> {
         // Rounds are saved while blocks are being processed and may now be out of sync with the last
         // block that was written into the database.
-
         const lastHeight: number = blocksToRevert[0].data.height;
-        const deleteRoundsAfter: number = Utils.roundCalculator.calculateRound(lastHeight).round;
 
         this.logger.info(
             `Reverting ${Utils.pluralize(
@@ -201,8 +196,6 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
             }
         }
 
-        // TODO: Remove, because next rounds are deleted on restore
-        await this.database.deleteRound(deleteRoundsAfter + 1);
         await this.databaseInteraction.restoreCurrentRound();
 
         this.blockchain.clearQueue();
@@ -210,7 +203,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
     }
 
     private async handleCorrupted() {
-        this.logger.error("Shutting down app, because state is corrupted");
+        this.logger.error("Shutting down app, because state is corrupted :boom:");
         process.exit(1);
     }
 }
