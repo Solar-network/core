@@ -4,8 +4,6 @@ import { sync } from "execa";
 import { white } from "kleur";
 import { spawn } from "node-pty";
 
-import { Application } from "../application";
-import { Spinner } from "../components";
 import { Identifiers, inject, injectable } from "../ioc";
 import { Output } from "../output";
 import { Logger } from "./logger";
@@ -16,9 +14,6 @@ import { Logger } from "./logger";
  */
 @injectable()
 export class Installer {
-    @inject(Identifiers.Application)
-    private readonly app!: Application;
-
     @inject(Identifiers.Logger)
     private readonly logger!: Logger;
 
@@ -246,8 +241,6 @@ export class Installer {
                 task: () => packagesListr,
             },
         ]);
-
-        this.app.get<Spinner>(Identifiers.Spinner).get().stop();
 
         if (this.output.isNormal()) {
             await tasks.run(tasks);

@@ -4,7 +4,7 @@ import * as semver from "semver";
 import { PackageJson } from "type-fest";
 
 import { Application } from "../application";
-import { Confirm, Spinner, Warning } from "../components";
+import { Confirm, Warning } from "../components";
 import { Config } from "../contracts";
 import * as Contracts from "../contracts";
 import { Identifiers, inject, injectable } from "../ioc";
@@ -125,21 +125,10 @@ export class Updater implements Contracts.Updater {
             }
         }
 
-        const spinner = this.app.get<Spinner>(Identifiers.Spinner).render(`Installing ${this.latestVersion}`);
+        await this.installer.install(this.packageName, this.packageChannel);
 
-        spinner.start();
-
-        try {
-            await this.installer.install(this.packageName, this.packageChannel);
-
-            if (updateProcessManager) {
-                this.processManager.update();
-            }
-
-            spinner.succeed();
-        } catch (error) {
-            spinner.fail();
-            throw error;
+        if (updateProcessManager) {
+            this.processManager.update();
         }
 
         return true;
