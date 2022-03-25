@@ -47,6 +47,15 @@ class QuorumDetails {
      */
     public forgingNotAllowed = 0;
 
+    /**
+     * Delegates that participated in quorum calculations.
+     */
+    public delegates: { hasQuorum: string[]; noQuorum: string[]; noResponse: string[] } = {
+        hasQuorum: [],
+        noQuorum: [],
+        noResponse: [],
+    };
+
     public getQuorum() {
         const quorum = this.hasQuorum / (this.hasQuorum + this.noQuorum);
 
@@ -140,16 +149,16 @@ export class NetworkState implements Contracts.P2P.NetworkState {
 
         if (monitor.isColdStart()) {
             monitor.completeColdStart();
-            return await new NetworkState(NetworkStateStatus.ColdStart, lastBlock, monitor);
+            return new NetworkState(NetworkStateStatus.ColdStart, lastBlock, monitor);
         } else if (process.env.CORE_ENV === "test") {
-            return await new NetworkState(NetworkStateStatus.Test, lastBlock, monitor);
+            return new NetworkState(NetworkStateStatus.Test, lastBlock, monitor);
         } else if (!milestone.onlyActiveDelegatesInCalculations && repository.getPeers().length < minimumNetworkReach) {
-            return await new NetworkState(NetworkStateStatus.BelowMinimumPeers, lastBlock, monitor);
+            return new NetworkState(NetworkStateStatus.BelowMinimumPeers, lastBlock, monitor);
         } else if (
             milestone.onlyActiveDelegatesInCalculations &&
             peers.flatMap((peer) => peer.publicKeys).length < minimumDelegateReach
         ) {
-            return await new NetworkState(NetworkStateStatus.BelowMinimumDelegates, lastBlock, monitor);
+            return new NetworkState(NetworkStateStatus.BelowMinimumDelegates, lastBlock, monitor);
         }
 
         return await this.analyzeNetwork(lastBlock, peers, blockTimeLookup, monitor);
@@ -164,10 +173,10 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         status?: NetworkStateStatus;
     }): Promise<Contracts.P2P.NetworkState> {
         if (!data || data.status === undefined) {
-            return await new NetworkState(NetworkStateStatus.Unknown);
+            return new NetworkState(NetworkStateStatus.Unknown);
         }
 
-        const networkState = await new NetworkState(data.status);
+        const networkState = new NetworkState(data.status);
         networkState.nodeHeight = data.nodeHeight;
         networkState.lastBlockId = data.lastBlockId;
         networkState.lastGenerator = data.lastGenerator;
@@ -184,12 +193,21 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         getTimeStampForBlock: (height: number) => number,
         monitor: Contracts.P2P.NetworkMonitor,
     ): Promise<Contracts.P2P.NetworkState> {
-        const networkState = await new NetworkState(NetworkStateStatus.Default, lastBlock, monitor);
+        const networkState = new NetworkState(NetworkStateStatus.Default, lastBlock, monitor);
         const currentSlot = Crypto.Slots.getSlotNumber(getTimeStampForBlock);
 
         for (const peer of peers) {
-            networkState.update(peer, currentSlot);
+            networkState.update(peer, currentSlot, monitor);
         }
+
+        const allDelegates: string[] = await monitor.getAllDelegates();
+        const quorumDetails: QuorumDetails = networkState.quorumDetails;
+
+        quorumDetails.delegates.noResponse = allDelegates.filter(
+            (delegate) =>
+                !quorumDetails.delegates.hasQuorum.includes(delegate) &&
+                !quorumDetails.delegates.noQuorum.includes(delegate),
+        );
 
         return networkState;
     }
@@ -257,7 +275,13 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         }
     }
 
-    private update(peer: Contracts.P2P.Peer, currentSlot: number): void {
+    private addToList(hasQuorum: boolean, peer: Contracts.P2P.Peer, monitor: Contracts.P2P.NetworkMonitor): void {
+        this.quorumDetails.delegates[hasQuorum ? "hasQuorum" : "noQuorum"].push(
+            ...peer.publicKeys.map((publicKey) => monitor.getDelegateName(publicKey)),
+        );
+    }
+
+    private update(peer: Contracts.P2P.Peer, currentSlot: number, monitor: Contracts.P2P.NetworkMonitor): void {
         Utils.assert.defined<number>(this.nodeHeight);
 
         const milestone = Managers.configManager.getMilestone();
@@ -268,6 +292,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         if (typeof peer.state.header === "object" && typeof peer.state.header.height === "number") {
             if (peer.state.header.height != this.nodeHeight) {
                 this.quorumDetails.noQuorum += increment;
+                this.addToList(false, peer, monitor);
                 if (peer.state.header.height > this.nodeHeight) {
                     this.quorumDetails.overHeight += increment;
                     this.quorumDetails.overHeightBlockHeaders[peer.ip] = peer.state.header;
@@ -276,8 +301,10 @@ export class NetworkState implements Contracts.P2P.NetworkState {
                 if (peer.isForked()) {
                     this.quorumDetails.noQuorum += increment;
                     this.quorumDetails.forked += increment;
+                    this.addToList(false, peer, monitor);
                 } else {
                     this.quorumDetails.hasQuorum += increment;
+                    this.addToList(true, peer, monitor);
                 }
             }
         }

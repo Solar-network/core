@@ -187,7 +187,11 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                     pingResponse.state &&
                     pingResponse.state.currentSlot
                 ) {
-                    if (pingResponse.state.currentSlot === slotInfo.slotNumber) {
+                    if (
+                        pingResponse.state.currentSlot === slotInfo.slotNumber - 1 ||
+                        pingResponse.state.currentSlot === slotInfo.slotNumber ||
+                        pingResponse.state.currentSlot === slotInfo.slotNumber + 1
+                    ) {
                         if (
                             !delegates.includes(publicKey) ||
                             !Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey)

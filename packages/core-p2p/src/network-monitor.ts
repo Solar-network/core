@@ -41,6 +41,10 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
 
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
+
     public config: any;
     public nextUpdateNetworkStatusScheduled: boolean | undefined;
     private coldStart: boolean = false;
@@ -412,6 +416,25 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
 
         return { forked: false };
+    }
+
+    public async getAllDelegates(): Promise<string[]> {
+        const lastBlock: Interfaces.IBlock = this.app
+            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
+            .getLastBlock();
+
+        const height = lastBlock.data.height + 1;
+        const roundInfo = Utils.roundCalculator.calculateRound(height);
+
+        return (
+            (await this.triggers.call("getActiveDelegates", {
+                roundInfo,
+            })) as Contracts.State.Wallet[]
+        ).map((wallet) => wallet.getAttribute("delegate.username"));
+    }
+
+    public getDelegateName(publicKey: string): string {
+        return this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate.username");
     }
 
     public async downloadBlocksFromHeight(
