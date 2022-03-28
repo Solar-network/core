@@ -53,8 +53,15 @@ export class VoteTransactionHandler extends TransactionHandler {
         }
 
         for (const vote of transaction.data.asset.votes) {
-            const delegatePublicKey: string = vote.slice(1);
-            const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegatePublicKey);
+            let delegateVote: string = vote.slice(1);
+            let delegateWallet: Contracts.State.Wallet;
+
+            if (delegateVote.length === 66) {
+                delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
+            } else {
+                delegateWallet = this.walletRepository.findByUsername(delegateVote);
+                delegateVote = delegateWallet.getPublicKey()!;
+            }
 
             if (vote.startsWith("+")) {
                 if (walletVote) {
@@ -65,11 +72,11 @@ export class VoteTransactionHandler extends TransactionHandler {
                     throw new VotedForResignedDelegateError(vote);
                 }
 
-                walletVote = vote.slice(1);
+                walletVote = delegateVote;
             } else {
                 if (!walletVote) {
                     throw new NoVoteError();
-                } else if (walletVote !== vote.slice(1)) {
+                } else if (walletVote !== delegateVote) {
                     throw new UnvoteMismatchError();
                 }
 
@@ -87,7 +94,13 @@ export class VoteTransactionHandler extends TransactionHandler {
     public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        for (const vote of transaction.data.asset.votes) {
+        for (let vote of transaction.data.asset.votes) {
+            const delegateVote: string = vote.slice(1);
+            if (delegateVote.length !== 66) {
+                const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegateVote);
+                vote = vote[0] + delegateWallet.getPublicKey();
+            }
+
             emitter.dispatch(vote.startsWith("+") ? AppEnums.VoteEvent.Vote : AppEnums.VoteEvent.Unvote, {
                 delegate: vote,
                 transaction: transaction.data,
@@ -122,7 +135,12 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         for (const vote of transaction.data.asset.votes) {
             if (vote.startsWith("+")) {
-                sender.setAttribute("vote", vote.slice(1));
+                let delegateVote: string = vote.slice(1);
+                if (delegateVote.length !== 66) {
+                    const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegateVote);
+                    delegateVote = delegateWallet.getPublicKey()!;
+                }
+                sender.setAttribute("vote", delegateVote);
             } else {
                 sender.forgetAttribute("vote");
             }
@@ -142,7 +160,12 @@ export class VoteTransactionHandler extends TransactionHandler {
             if (vote.startsWith("+")) {
                 sender.forgetAttribute("vote");
             } else {
-                sender.setAttribute("vote", vote.slice(1));
+                let delegateVote: string = vote.slice(1);
+                if (delegateVote.length !== 66) {
+                    const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegateVote);
+                    delegateVote = delegateWallet.getPublicKey()!;
+                }
+                sender.setAttribute("vote", delegateVote);
             }
         }
     }
