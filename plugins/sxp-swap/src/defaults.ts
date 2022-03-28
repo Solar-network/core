@@ -289,8 +289,8 @@ export const defaults = {
         eth: "0x8ce9137d39326ad0cd6491fb5cc0cba0e089b6a9",
     },
     swapContractAddresses: {
-        bsc: "0x66b44A53b55d2e4d69976cCF196D6beD2861D5a6",
-        eth: "0x3996E6837D7F43b046a95517436D1aAFc3BcC135",
+        bsc: "0x44Cf30Ea4E58818BfaE4b8499Be409CD4fDd5a20",
+        eth: "0x71f7505A78Fd1E044EBf38aB6876700A907fC53A",
     },
     swapWalletPublicKey: "",
 };
