@@ -95,7 +95,7 @@ export class BanHammerPlugin {
                                     this.ban(ip, nesBanReason);
                                 } else if (this.synced && nesOpen && !established) {
                                     this.ban(ip, "Did not make an endpoint request");
-                                } else if (!nesOpen) {
+                                } else if (this.synced && !nesOpen) {
                                     this.ban(ip, "Failed to complete websocket handshake");
                                 }
                             }
