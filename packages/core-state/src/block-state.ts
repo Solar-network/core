@@ -243,7 +243,14 @@ export class BlockState implements Contracts.State.BlockState {
 
             for (let i = 0; i < transaction.asset.votes.length; i++) {
                 const vote: string = transaction.asset.votes[i];
-                const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(vote.substr(1));
+                let delegate: Contracts.State.Wallet;
+
+                const delegateVote: string = vote.slice(1);
+                if (delegateVote.length === 66) {
+                    delegate = this.walletRepository.findByPublicKey(delegateVote);
+                } else {
+                    delegate = this.walletRepository.findByUsername(delegateVote);
+                }
 
                 // first unvote also changes vote balance by fee
                 const senderVoteDelegatedAmount =
