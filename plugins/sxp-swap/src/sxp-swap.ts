@@ -273,7 +273,7 @@ export class SXPSwap {
                         throw new TransactionNotValidError();
                     }
 
-                    if (swapContractAddresses[network] !== txInfo.to) {
+                    if (swapContractAddresses[network] !== txInfo.to.toLowerCase()) {
                         throw new WrongContractError();
                     }
 
@@ -297,7 +297,7 @@ export class SXPSwap {
 
                     const tokenContract = txReceipt.logs[0].address;
 
-                    if (sxpTokenContracts[network] !== tokenContract) {
+                    if (sxpTokenContracts[network] !== tokenContract.toLowerCase()) {
                         throw new WrongTokenError();
                     }
 
