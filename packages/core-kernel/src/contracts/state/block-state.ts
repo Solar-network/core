@@ -8,9 +8,9 @@ export interface BlockState {
 
     revertBlock(block: Interfaces.IBlock): Promise<void>;
 
-    applyTransaction(transaction: Interfaces.ITransaction): Promise<void>;
+    applyTransaction(height: number, transaction: Interfaces.ITransaction): Promise<void>;
 
-    revertTransaction(transaction: Interfaces.ITransaction): Promise<void>;
+    revertTransaction(height: number, transaction: Interfaces.ITransaction): Promise<void>;
 
     increaseWalletDelegateVoteBalance(wallet: Wallet, amount: BigNumber): void;
 

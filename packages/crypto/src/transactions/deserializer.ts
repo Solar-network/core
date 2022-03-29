@@ -6,7 +6,6 @@ import {
 } from "../errors";
 import { Address } from "../identities";
 import { IDeserializeOptions, ITransaction, ITransactionData } from "../interfaces";
-import { configManager } from "../managers";
 import { BigNumber, ByteBuffer, isSupportedTransactionVersion } from "../utils";
 import { TransactionTypeFactory } from "./types";
 
@@ -34,8 +33,6 @@ export class Deserializer {
 
         const buff: ByteBuffer = this.getByteBuffer(serialized);
         this.deserializeCommon(data, buff);
-
-        this.burnFee(data);
 
         const instance: ITransaction = TransactionTypeFactory.create(data);
         this.deserializeVendorField(instance, buff);
@@ -141,16 +138,5 @@ export class Deserializer {
         }
 
         return new ByteBuffer(serialized);
-    }
-
-    private static burnFee(data: ITransactionData): void {
-        const milestone = configManager.getMilestone();
-        data.burnedFee = BigNumber.ZERO;
-        if (milestone.burnPercentage !== undefined) {
-            const burnPercentage = parseInt(milestone.burnPercentage);
-            if (burnPercentage >= 0 && burnPercentage <= 100) {
-                data.burnedFee = data.fee.minus(data.fee.times(100 - burnPercentage).dividedBy(100));
-            }
-        }
     }
 }
