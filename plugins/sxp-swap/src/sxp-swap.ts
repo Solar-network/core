@@ -277,7 +277,7 @@ export class SXPSwap {
                         throw new WrongContractError();
                     }
 
-                    if (txInfo.chainId && txInfo.chainId !== chainId[network]) {
+                    if (txInfo.chainId && Number(txInfo.chainId) !== Number(chainId[network])) {
                         throw new WrongChainError(txInfo.chainId, chainId[network]);
                     }
 
