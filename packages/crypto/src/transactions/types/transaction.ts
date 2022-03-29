@@ -70,6 +70,18 @@ export abstract class Transaction implements ITransaction {
         return this.defaultStaticFee;
     }
 
+    public setBurnedFee(height: number): void {
+        const milestone = configManager.getMilestone(height);
+
+        this.data.burnedFee = BigNumber.ZERO;
+        if (milestone.burnPercentage !== undefined) {
+            const burnPercentage = parseInt(milestone.burnPercentage);
+            if (burnPercentage >= 0 && burnPercentage <= 100) {
+                this.data.burnedFee = this.data.fee.times(burnPercentage).dividedBy(100);
+            }
+        }
+    }
+
     public verify(options?: ISerializeOptions): boolean {
         return Verifier.verify(this.data, options);
     }

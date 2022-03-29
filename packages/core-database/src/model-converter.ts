@@ -45,6 +45,8 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
             // set_row_nonce trigger
             data.nonce = model.nonce;
 
+            data.burnedFee = model.burnedFee;
+
             // block constructor
             data.blockId = model.blockId;
             data.blockHeight = model.blockHeight;
