@@ -327,7 +327,7 @@ async function core() {
                 pm2 set pm2-logrotate:retain 7 &&
                 ln -sf "$SOLAR_DATA_PATH"/bin/node "$SOLAR_DATA_PATH"/.pnpm/bin/node &&
                 rm -rf /tmp/pm2-logrotate &&
-                (crontab -l; echo "@reboot /bin/bash -lc \\"source "$SOLAR_DATA_PATH"/.env; "$SOLAR_DATA_PATH"/.pnpm/bin/pm2 resurrect\\"") | sort -u - | crontab - 2>/dev/null &&
+                ((crontab -l; echo "@reboot /bin/bash -lc \\"source "$SOLAR_DATA_PATH"/.env; "$SOLAR_DATA_PATH"/.pnpm/bin/pm2 resurrect\\"") | sort -u - | crontab - 2>/dev/null) || true &&
                 cd "$SOLAR_CORE_PATH" &&
                 CFLAGS="$CFLAGS" CPATH="$CPATH" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" pnpm install ${pnpmFlags} &&
                 pnpm build ${pnpmFlags} &&
