@@ -15,14 +15,18 @@
         "dynamicFees": {
             "enabled": true,
             "addonBytes": {
-                "transfer": 99,
-                "secondSignature": 99,
+                "burn": 0,
                 "delegateRegistration": 663703,
-                "vote": 98,
-                "multiSignature": 16,
+                "delegateResignation": 0,
+                "htlcClaim": 0,
+                "htlcLock": 82,
+                "htlcRefund": 0,
                 "ipfs": 98,
                 "multiPayment": 85,
-                "htlcLock": 82
+                "multiSignature": 16,
+                "secondSignature": 99,
+                "transfer": 99,
+                "vote": 98
             },
             "minFee": 11299
         },
