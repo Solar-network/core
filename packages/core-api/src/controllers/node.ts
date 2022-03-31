@@ -64,9 +64,23 @@ export class NodeController extends Controller {
     }
 
     public async configuration(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<unknown> {
-        const dynamicFees = this.transactionPoolConfiguration.getRequired<{
+        const constants = { ...Managers.configManager.getMilestone(this.blockchain.getLastHeight()) };
+
+        let dynamicFees = this.transactionPoolConfiguration.getRequired<{
             enabled?: boolean;
+            minFee?: number;
         }>("dynamicFees");
+
+        if (constants.dynamicFees && constants.dynamicFees.enabled) {
+            dynamicFees = {
+                ...constants.dynamicFees,
+                minFeeBroadcast: constants.dynamicFees.minFee,
+                minFeePool: constants.dynamicFees.minFee,
+            };
+            delete dynamicFees.minFee;
+        }
+
+        delete constants.dynamicFees;
 
         const network = Managers.configManager.get("network");
 
@@ -83,7 +97,7 @@ export class NodeController extends Controller {
                 explorer: network.client.explorer,
                 version: network.pubKeyHash,
                 ports: super.toResource(this.configRepository, PortsResource),
-                constants: Managers.configManager.getMilestone(this.blockchain.getLastHeight()),
+                constants,
                 transactionPool: {
                     dynamicFees: dynamicFees.enabled ? dynamicFees : { enabled: false },
                     maxTransactionsInPool:
