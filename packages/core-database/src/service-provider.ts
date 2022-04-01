@@ -1,6 +1,6 @@
 import { Container, Contracts, Enums, Providers } from "@solar-network/core-kernel";
 import { sync } from "execa";
-import { existsSync, readFileSync, unlinkSync } from "fs";
+import { chmodSync, existsSync, readFileSync, unlinkSync } from "fs";
 import Joi from "joi";
 import { Connection, createConnection, getCustomRepository } from "typeorm";
 
@@ -79,6 +79,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
             }
 
             if (startPostgres) {
+                chmodSync(connection.extra.host, "700");
                 sync(`${process.env.POSTGRES_DIR}/bin/pg_ctl -D ${connection.extra.host} start >/dev/null`, {
                     shell: true,
                 });
