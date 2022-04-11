@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/core-blockchain",
-    "version": "3.2.1",
+    "version": "3.2.2-next.0",
     "description": "Blockchain Manager for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
