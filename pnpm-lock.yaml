@@ -39,7 +39,7 @@ importers:
       husky: 7.0.4
       js-yaml: 4.1.0
       lint-staged: 11.2.6
-      moment: 2.29.1
+      moment: 2.29.2
       moment-timezone: 0.5.33
       npm-check-updates: 11.8.5
       prettier: 2.4.1
@@ -87,7 +87,7 @@ importers:
       husky: 7.0.4
       js-yaml: 4.1.0
       lint-staged: 11.2.6
-      moment: 2.29.1
+      moment: 2.29.2
       moment-timezone: 0.5.33
       npm-check-updates: 11.8.5
       prettier: 2.4.1
@@ -9803,7 +9803,7 @@ packages:
   /moment-timezone/0.5.33:
     resolution: {integrity: sha512-PTc2vcT8K9J5/9rDEPe5czSIKgLoGsH8UNpA4qZTVw0Vd/Uz19geE9abbIOQKaAQFcnQ3v5YEXrbSc5BpshH+w==}
     dependencies:
-      moment: 2.29.1
+      moment: 2.29.2
     dev: true
 
   /moment-timezone/0.5.34:
@@ -9814,6 +9814,10 @@ packages:
 
   /moment/2.29.1:
     resolution: {integrity: sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==}
+
+  /moment/2.29.2:
+    resolution: {integrity: sha512-UgzG4rvxYpN15jgCmVJwac49h9ly9NurikMWGPdVxm8GZD6XjkKPxDTjQQ43gtGgnV3X0cAyWDdP2Wexoquifg==}
+    dev: true
 
   /mri/1.1.4:
     resolution: {integrity: sha512-6y7IjGPm8AzlvoUrwAaw1tLnUBudaS3752vcd8JtrpGGQn+rXIe63LFVHm/YMwtqAuh+LJPCFdlLYPWM1nYn6w==}
