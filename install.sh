@@ -753,7 +753,7 @@ async function start() {
 
         const rc =
             `alias ${process.env.SOLAR_CORE_TOKEN}="${process.env.SOLAR_DATA_PATH}/bin/node ${process.env.SOLAR_CORE_PATH}/packages/core/bin/run $@ --token=${process.env.SOLAR_CORE_TOKEN}"\n` +
-            `alias pm2="${process.env.SOLAR_DATA_PATH}/.pnpm/bin/pm2"`;
+            `alias pm2="/bin/bash --rcfile "${process.env.SOLAR_DATA_PATH}"/.env -i ${process.env.SOLAR_DATA_PATH}/.pnpm/bin/pm2 $@"`;
         writeFileSync(`${home}/.${process.env.SOLAR_CORE_TOKEN}rc`, rc);
 
         for (const file of [".bashrc", ".kshrc", ".zshrc"]) {
