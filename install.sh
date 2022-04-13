@@ -327,7 +327,7 @@ async function core() {
                 pm2 set pm2-logrotate:retain 7 &&
                 ln -sf "$SOLAR_DATA_PATH"/bin/node "$SOLAR_DATA_PATH"/.pnpm/bin/node &&
                 rm -rf /tmp/pm2-logrotate &&
-                (crontab -l; echo "@reboot /bin/bash -lc \\"source "$SOLAR_DATA_PATH"/.env; "$SOLAR_DATA_PATH"/.pnpm/bin/pm2 resurrect\\"") | sort -u - | crontab - 2>/dev/null &&
+                ((crontab -l; echo "@reboot /bin/bash -lc \\"source "$SOLAR_DATA_PATH"/.env; "$SOLAR_DATA_PATH"/.pnpm/bin/pm2 resurrect\\"") | sort -u - | crontab - 2>/dev/null) || true &&
                 cd "$SOLAR_CORE_PATH" &&
                 CFLAGS="$CFLAGS" CPATH="$CPATH" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" pnpm install ${pnpmFlags} &&
                 pnpm build ${pnpmFlags} &&
@@ -753,7 +753,7 @@ async function start() {
 
         const rc =
             `alias ${process.env.SOLAR_CORE_TOKEN}="${process.env.SOLAR_DATA_PATH}/bin/node ${process.env.SOLAR_CORE_PATH}/packages/core/bin/run $@ --token=${process.env.SOLAR_CORE_TOKEN}"\n` +
-            `alias pm2="${process.env.SOLAR_DATA_PATH}/.pnpm/bin/pm2"`;
+            `alias pm2="/bin/bash --rcfile "${process.env.SOLAR_DATA_PATH}"/.env -i ${process.env.SOLAR_DATA_PATH}/.pnpm/bin/pm2 $@"`;
         writeFileSync(`${home}/.${process.env.SOLAR_CORE_TOKEN}rc`, rc);
 
         for (const file of [".bashrc", ".kshrc", ".zshrc"]) {
