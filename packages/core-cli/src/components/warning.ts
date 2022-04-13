@@ -23,6 +23,6 @@ export class Warning {
      * @memberof Warning
      */
     public render(message: string): void {
-        this.logger.warning(white().bgYellow(`[WARNING] ${message}`));
+        this.logger.warning(white().bgRed(`[WARNING] ${message}`));
     }
 }
