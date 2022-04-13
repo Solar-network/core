@@ -1,6 +1,6 @@
 import { minBy } from "@solar-network/utils";
 import Levenshtein from "fast-levenshtein";
-import { blue, red } from "kleur";
+import { blue, yellow } from "kleur";
 import { JsonObject } from "type-fest";
 
 import { Application } from "../application";
@@ -41,7 +41,7 @@ export class SuggestCommand {
 
         const suggestion: string = minBy(signatures, (c) => Levenshtein.get(signature, c));
 
-        this.app.get<any>(Identifiers.Warning).render(`${red(signature)} is not a ${context.bin} command`);
+        this.app.get<any>(Identifiers.Warning).render(`${yellow(signature)} is not a ${context.bin} command`);
 
         if (
             await this.app
