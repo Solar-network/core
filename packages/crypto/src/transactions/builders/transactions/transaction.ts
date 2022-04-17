@@ -1,6 +1,10 @@
 import { Slots } from "../../../crypto";
 import { TransactionTypeGroup } from "../../../enums";
-import { MissingTransactionSignatureError, VendorFieldLengthExceededError } from "../../../errors";
+import {
+    MissingTransactionSignatureError,
+    TransactionSchemaError,
+    VendorFieldLengthExceededError,
+} from "../../../errors";
 import { Address, Keys } from "../../../identities";
 import { IKeyPair, ITransaction, ITransactionData } from "../../../interfaces";
 import { configManager } from "../../../managers/config";
@@ -175,6 +179,14 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         }
 
         return struct;
+    }
+
+    protected validate(struct: ITransactionData) {
+        const { error } = Verifier.verifySchema(struct, true);
+
+        if (error) {
+            throw new TransactionSchemaError(error);
+        }
     }
 
     private signWithKeyPair(keys: IKeyPair): TBuilder {

@@ -16,6 +16,8 @@ export class BurnTransactionBuilder extends TransactionBuilder<BurnTransactionBu
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
         struct.amount = this.data.amount;
+
+        super.validate(struct);
         return struct;
     }
 

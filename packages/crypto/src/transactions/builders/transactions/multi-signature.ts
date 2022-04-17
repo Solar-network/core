@@ -53,6 +53,7 @@ export class MultiSignatureBuilder extends TransactionBuilder<MultiSignatureBuil
         struct.recipientId = this.data.recipientId;
         struct.asset = this.data.asset;
 
+        super.validate(struct);
         return struct;
     }
 

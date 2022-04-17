@@ -30,6 +30,7 @@ export class TransferBuilder extends TransactionBuilder<TransferBuilder> {
         struct.vendorField = this.data.vendorField;
         struct.expiration = this.data.expiration;
 
+        super.validate(struct);
         return struct;
     }
 
