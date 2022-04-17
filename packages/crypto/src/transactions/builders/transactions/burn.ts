@@ -3,7 +3,7 @@ import { BigNumber } from "../../../utils";
 import { Solar } from "../../types";
 import { TransactionBuilder } from "./transaction";
 
-export class BurnTransactionBuilder extends TransactionBuilder<BurnTransactionBuilder> {
+export class BurnBuilder extends TransactionBuilder<BurnBuilder> {
     public constructor() {
         super();
 
@@ -21,7 +21,7 @@ export class BurnTransactionBuilder extends TransactionBuilder<BurnTransactionBu
         return struct;
     }
 
-    protected instance(): BurnTransactionBuilder {
+    protected instance(): BurnBuilder {
         return this;
     }
 }
