@@ -23,6 +23,7 @@ export class BurnTransaction extends Transaction {
             },
         });
     }
+
     public serialize(): ByteBuffer {
         const { data } = this;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(8));
