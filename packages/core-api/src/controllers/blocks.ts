@@ -17,9 +17,6 @@ export class BlocksController extends Controller {
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
-    @Container.inject(Container.Identifiers.StateStore)
-    private readonly stateStore!: Contracts.State.StateStore;
-
     public async index(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
         if (request.query.transform) {
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
@@ -43,23 +40,13 @@ export class BlocksController extends Controller {
     }
 
     public async first(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
-        const block = this.stateStore.getGenesisBlock();
-
-        if (request.query.transform) {
-            return this.respondWithResource(block, BlockWithTransactionsResource, true);
-        } else {
-            return this.respondWithResource(block.data, BlockResource, false);
-        }
+        request.params.id = 1;
+        return this.show(request, h);
     }
 
     public async last(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
-        const block = this.blockchain.getLastBlock();
-
-        if (request.query.transform) {
-            return this.respondWithResource(block, BlockWithTransactionsResource, true);
-        } else {
-            return this.respondWithResource(block.data, BlockResource, false);
-        }
+        request.params.id = this.blockchain.getLastHeight();
+        return this.show(request, h);
     }
 
     public async show(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
