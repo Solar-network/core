@@ -63,7 +63,7 @@ export class Command extends Commands.Command {
                 if (existsSync(pidFile) && statSync(pidFile).isFile()) {
                     try {
                         const pid: string = readFileSync(pidFile).toString().split("\n")[0];
-                        process.kill(+pid);
+                        process.kill(+pid, "SIGKILL");
                     } catch {
                         //
                     }

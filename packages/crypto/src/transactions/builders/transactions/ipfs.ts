@@ -28,6 +28,8 @@ export class IPFSBuilder extends TransactionBuilder<IPFSBuilder> {
         struct.vendorField = this.data.vendorField;
         struct.amount = this.data.amount;
         struct.asset = this.data.asset;
+
+        super.validate(struct);
         return struct;
     }
 

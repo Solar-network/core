@@ -26,6 +26,8 @@ export class HtlcRefundBuilder extends TransactionBuilder<HtlcRefundBuilder> {
         const struct: ITransactionData = super.getStruct();
         struct.amount = this.data.amount;
         struct.asset = this.data.asset;
+
+        super.validate(struct);
         return struct;
     }
 

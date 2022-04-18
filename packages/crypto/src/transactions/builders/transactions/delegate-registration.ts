@@ -29,6 +29,8 @@ export class DelegateRegistrationBuilder extends TransactionBuilder<DelegateRegi
         struct.amount = this.data.amount;
         struct.recipientId = this.data.recipientId;
         struct.asset = this.data.asset;
+
+        super.validate(struct);
         return struct;
     }
 

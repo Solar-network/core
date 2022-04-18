@@ -112,12 +112,6 @@ export class MaximumPaymentCountExceededError extends CryptoError {
     }
 }
 
-export class MinimumPaymentCountSubceededError extends CryptoError {
-    public constructor() {
-        super(`Number of payments less than the required minimum of 2`);
-    }
-}
-
 export class VendorFieldLengthExceededError extends CryptoError {
     public constructor(limit: number) {
         super(`Length of vendor field exceeded the allowed maximum ${limit}`);

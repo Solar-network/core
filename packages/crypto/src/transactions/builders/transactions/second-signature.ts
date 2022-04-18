@@ -30,6 +30,8 @@ export class SecondSignatureBuilder extends TransactionBuilder<SecondSignatureBu
         struct.amount = this.data.amount;
         struct.recipientId = this.data.recipientId;
         struct.asset = this.data.asset;
+
+        super.validate(struct);
         return struct;
     }
 

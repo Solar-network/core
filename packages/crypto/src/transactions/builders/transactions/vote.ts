@@ -31,6 +31,8 @@ export class VoteBuilder extends TransactionBuilder<VoteBuilder> {
         struct.amount = this.data.amount;
         struct.recipientId = this.data.recipientId;
         struct.asset = this.data.asset;
+
+        super.validate(struct);
         return struct;
     }
 

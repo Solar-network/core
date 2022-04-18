@@ -1,4 +1,4 @@
-import { BurnTransactionBuilder } from "./transactions/burn";
+import { BurnBuilder } from "./transactions/burn";
 import { DelegateRegistrationBuilder } from "./transactions/delegate-registration";
 import { DelegateResignationBuilder } from "./transactions/delegate-resignation";
 import { HtlcClaimBuilder } from "./transactions/htlc-claim";
@@ -59,7 +59,7 @@ export class BuilderFactory {
     }
 
     // Solar transactions
-    public static burn(): BurnTransactionBuilder {
-        return new BurnTransactionBuilder();
+    public static burn(): BurnBuilder {
+        return new BurnBuilder();
     }
 }

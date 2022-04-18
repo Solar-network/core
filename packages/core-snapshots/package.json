@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/core-snapshots",
-    "version": "3.2.2",
+    "version": "3.2.3",
     "description": "Provides live local streamed snapshots functionality for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
