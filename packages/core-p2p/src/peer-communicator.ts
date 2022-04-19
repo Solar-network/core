@@ -447,7 +447,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             default:
                 /* istanbul ignore else */
                 if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                    this.logger.debug(`Socket error (peer ${peer.ip}) : ${error.message} :warning:`);
+                    this.logger.debug(`Socket error (peer ${peer.ip}): ${error.message} :warning:`);
                 }
                 /* istanbul ignore else */
                 if (disconnect) {
