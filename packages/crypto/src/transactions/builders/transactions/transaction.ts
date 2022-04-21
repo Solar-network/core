@@ -27,7 +27,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             timestamp: Slots.getTime(),
             typeGroup: TransactionTypeGroup.Test,
             nonce: BigNumber.ZERO,
-            version: configManager.getMilestone().aip11 ? 0x02 : 0x01,
+            version: configManager.getMilestone().bip340 ? 0x03 : 0x02,
         } as ITransactionData;
     }
 
@@ -213,7 +213,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             this.data.signatures = [];
         }
 
-        this.version(2);
         Signer.multiSign(this.getSigningObject(), keys, index);
 
         return this.instance();

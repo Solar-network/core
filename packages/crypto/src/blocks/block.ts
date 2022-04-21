@@ -126,6 +126,7 @@ export class Block implements IBlock {
     }
 
     public verifySignature(): boolean {
+        const { bip340 } = configManager.getMilestone(this.data.height);
         const bytes: Buffer = Serializer.serialize(this.data, false);
         const hash: Buffer = HashAlgorithms.sha256(bytes);
 
@@ -133,7 +134,7 @@ export class Block implements IBlock {
             throw new Error();
         }
 
-        return Hash.verifySchnorr(hash, this.data.blockSignature, this.data.generatorPublicKey);
+        return Hash.verifySchnorr(hash, this.data.blockSignature, this.data.generatorPublicKey, bip340);
     }
 
     public toJson(): IBlockJson {

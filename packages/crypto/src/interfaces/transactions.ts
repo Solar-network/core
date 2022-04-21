@@ -50,7 +50,7 @@ export interface ITransactionAsset {
 }
 
 export interface ITransactionData {
-    version?: number;
+    version: number;
     network?: number;
 
     typeGroup?: number;
