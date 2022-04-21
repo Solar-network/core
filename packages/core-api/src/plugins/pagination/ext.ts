@@ -2,7 +2,7 @@
 
 import Hoek from "@hapi/hoek";
 import { Utils } from "@solar-network/core-kernel";
-import Qs from "querystring";
+import qs from "qs";
 
 export class Ext {
     private readonly routePathPrefix = "/api";
@@ -67,43 +67,16 @@ export class Ext {
             pageCount = Math.trunc(totalCount / currentLimit) + (totalCount % currentLimit === 0 ? 0 : 1);
         }
 
-        const toDotNotation = (object: object, prefix: string = ""): Record<string, any> => {
-            let dotObject: object = {};
-
-            const recurse = (recursedObject: object, recursedPrefix: string, array: boolean = false): object => {
-                for (const [key, value] of Object.entries(recursedObject)) {
-                    if (value && typeof value === "object") {
-                        if (Array.isArray(value))
-                            dotObject = recurse(value, (recursedPrefix ? recursedPrefix + "." : "") + key, true);
-                        else {
-                            if (array) {
-                                dotObject = recurse(value, recursedPrefix ? recursedPrefix : "");
-                            } else {
-                                dotObject = recurse(value, (recursedPrefix ? recursedPrefix + "." : "") + key);
-                            }
-                        }
-                    } else {
-                        if (array) {
-                            dotObject[recursedPrefix] = value;
-                        } else if (recursedPrefix) {
-                            dotObject[recursedPrefix + "." + key] = value;
-                        } else {
-                            dotObject[key] = value;
-                        }
-                    }
-                }
-                return dotObject;
-            };
-
-            return recurse(object, prefix);
-        };
-
         const getUri = (page: number | null): string | null =>
             /* istanbul ignore next */
             // tslint:disable-next-line: no-null-keyword
             page
                 ? baseUri +
-                  Qs.stringify(Hoek.applyToDefaults(toDotNotation({ ...query, ...request.orig.query }), { page }))
+                  qs.stringify(Hoek.applyToDefaults({ ...query, ...request.orig.query }, { page }), {
+                      allowDots: true,
+                      arrayFormat: "comma",
+                      encode: false,
+                  })
                 : null;
 
         const newSource = {
