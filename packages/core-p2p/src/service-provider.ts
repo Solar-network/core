@@ -66,7 +66,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
             minimumNetworkReach: Joi.number().integer().min(0).required(),
             verifyTimeout: Joi.number().integer().min(0).required(),
             getBlocksTimeout: Joi.number().integer().min(0).required(),
-            maxPeersBroadcast: Joi.number().integer().min(0).required(),
             maxSameSubnetPeers: Joi.number().integer().min(0).required(),
             maxPeerSequentialErrors: Joi.number().integer().min(0).required(),
             whitelist: Joi.array().items(Joi.string()).required(),

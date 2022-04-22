@@ -102,9 +102,11 @@ export class PeerConnector implements Contracts.P2P.PeerConnector {
         this.lastConnectionCreate.set(peer.ip, Date.now());
 
         connection.onError = (error) => {
-            this.logger.debug(
-                `Socket error (peer ${Utils.IpAddress.normalizeAddress(peer.ip)}) : ${error.message} :warning:`,
-            );
+            if (error.message !== "Connection timed out") {
+                this.logger.debug(
+                    `Socket error (peer ${Utils.IpAddress.normalizeAddress(peer.ip)}): ${error.message} :warning:`,
+                );
+            }
             this.disconnect(peer);
         };
 

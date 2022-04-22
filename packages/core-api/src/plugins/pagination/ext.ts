@@ -2,7 +2,7 @@
 
 import Hoek from "@hapi/hoek";
 import { Utils } from "@solar-network/core-kernel";
-import Qs from "querystring";
+import qs from "qs";
 
 export class Ext {
     private readonly routePathPrefix = "/api";
@@ -70,7 +70,14 @@ export class Ext {
         const getUri = (page: number | null): string | null =>
             /* istanbul ignore next */
             // tslint:disable-next-line: no-null-keyword
-            page ? baseUri + Qs.stringify(Hoek.applyToDefaults({ ...query, ...request.orig.query }, { page })) : null;
+            page
+                ? baseUri +
+                  qs.stringify(Hoek.applyToDefaults({ ...query, ...request.orig.query }, { page }), {
+                      allowDots: true,
+                      arrayFormat: "comma",
+                      encode: false,
+                  })
+                : null;
 
         const newSource = {
             meta: {

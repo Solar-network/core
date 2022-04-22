@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/core-database",
-    "version": "3.2.3",
+    "version": "3.2.4",
     "description": "Database Interface for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
