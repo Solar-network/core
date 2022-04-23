@@ -1,6 +1,6 @@
 import { ErrorObject } from "ajv";
 
-import { HtlcLockExpirationType } from "../enums";
+import { HtlcLockExpirationType, HtlcSecretHashType } from "../enums";
 import { BigNumber, ByteBuffer } from "../utils";
 
 export interface ITransaction {
@@ -144,6 +144,7 @@ export interface IHtlcLockAsset {
 }
 
 export interface IHtlcClaimAsset {
+    hashType: HtlcSecretHashType;
     lockTransactionId: string;
     unlockSecret: string;
 }
