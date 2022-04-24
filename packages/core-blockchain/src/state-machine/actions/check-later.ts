@@ -118,7 +118,7 @@ export class CheckLater implements Action {
                                     )} and was downloaded from ${blocks[0].ip}`,
                                 );
 
-                                this.blockchain.handleIncomingBlock(blocks[0], false, false);
+                                this.blockchain.handleIncomingBlock(blocks[0], false, blocks[0].ip!, false);
                             } else {
                                 this.blockchain.enqueueBlocks(blocks);
                                 this.blockchain.dispatch("DOWNLOADED");
@@ -130,9 +130,11 @@ export class CheckLater implements Action {
                 }, 500);
 
                 const stopDownloading = {
-                    handle: () => {
-                        this.events.forget(Enums.BlockEvent.Received, stopDownloading);
-                        clearInterval(downloadInterval);
+                    handle: ({ data }) => {
+                        if (data.ip !== "127.0.0.1") {
+                            this.events.forget(Enums.BlockEvent.Received, stopDownloading);
+                            clearInterval(downloadInterval);
+                        }
                     },
                 };
 
