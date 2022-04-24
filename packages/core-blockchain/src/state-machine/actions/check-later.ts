@@ -1,4 +1,4 @@
-import { Container, Contracts, Enums, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Crypto, Managers, Utils } from "@solar-network/crypto";
 import delay from "delay";
 
@@ -11,6 +11,10 @@ export class CheckLater implements Action {
 
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
+
+    @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/core-p2p")
+    private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.EventDispatcherService)
     private readonly events!: Contracts.Kernel.EventDispatcher;
@@ -131,7 +135,11 @@ export class CheckLater implements Action {
 
                 const stopDownloading = {
                     handle: ({ data }) => {
-                        if (data.ip !== "127.0.0.1") {
+                        const remoteAccess: string[] = this.configuration.getOptional<Array<string>>(
+                            "remoteAccess",
+                            [],
+                        );
+                        if (!remoteAccess.includes(data.ip)) {
                             this.events.forget(Enums.BlockEvent.Received, stopDownloading);
                             clearInterval(downloadInterval);
                         }
