@@ -134,16 +134,26 @@ export class VoteTransactionHandler extends TransactionHandler {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
         for (const vote of transaction.data.asset.votes) {
+            let delegateWallet: Contracts.State.Wallet;
+            let delegateVote: string = vote.slice(1);
+            if (delegateVote.length !== 66) {
+                delegateWallet = this.walletRepository.findByUsername(delegateVote);
+                delegateVote = delegateWallet.getPublicKey()!;
+            } else {
+                delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
+            }
+
+            let voters: number = delegateWallet.getAttribute("delegate.voters");
+
             if (vote.startsWith("+")) {
-                let delegateVote: string = vote.slice(1);
-                if (delegateVote.length !== 66) {
-                    const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegateVote);
-                    delegateVote = delegateWallet.getPublicKey()!;
-                }
+                voters++;
                 sender.setAttribute("vote", delegateVote);
             } else {
+                voters--;
                 sender.forgetAttribute("vote");
             }
+
+            delegateWallet.setAttribute("delegate.voters", voters);
         }
     }
 
@@ -157,16 +167,26 @@ export class VoteTransactionHandler extends TransactionHandler {
         Utils.assert.defined<Interfaces.ITransactionAsset>(transaction.data.asset?.votes);
 
         for (const vote of transaction.data.asset.votes.slice().reverse()) {
+            let delegateWallet: Contracts.State.Wallet;
+            let delegateVote: string = vote.slice(1);
+            if (delegateVote.length !== 66) {
+                delegateWallet = this.walletRepository.findByUsername(delegateVote);
+                delegateVote = delegateWallet.getPublicKey()!;
+            } else {
+                delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
+            }
+
+            let voters: number = delegateWallet.getAttribute("delegate.voters");
+
             if (vote.startsWith("+")) {
+                voters--;
                 sender.forgetAttribute("vote");
             } else {
-                let delegateVote: string = vote.slice(1);
-                if (delegateVote.length !== 66) {
-                    const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegateVote);
-                    delegateVote = delegateWallet.getPublicKey()!;
-                }
+                voters++;
                 sender.setAttribute("vote", delegateVote);
             }
+
+            delegateWallet.setAttribute("delegate.voters", voters);
         }
     }
 
