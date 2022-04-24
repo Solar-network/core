@@ -4,4 +4,5 @@ package shared;
 
 message Headers {
     string version = 1;
+    uint32 port = 2;
 }
