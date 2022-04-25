@@ -1,4 +1,4 @@
-import { Container, Contracts, Enums, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Crypto, Managers, Utils } from "@solar-network/crypto";
 import delay from "delay";
 
@@ -17,6 +17,10 @@ export class CheckLater implements Action {
 
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
+
+    @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/core-p2p")
+    private readonly p2pConfiguration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.PeerNetworkMonitor)
     private readonly peerNetworkMonitor!: Contracts.P2P.NetworkMonitor;
@@ -118,7 +122,7 @@ export class CheckLater implements Action {
                                     )} and was downloaded from ${blocks[0].ip}`,
                                 );
 
-                                this.blockchain.handleIncomingBlock(blocks[0], false, false);
+                                this.blockchain.handleIncomingBlock(blocks[0], false, blocks[0].ip!, false);
                             } else {
                                 this.blockchain.enqueueBlocks(blocks);
                                 this.blockchain.dispatch("DOWNLOADED");
@@ -130,9 +134,15 @@ export class CheckLater implements Action {
                 }, 500);
 
                 const stopDownloading = {
-                    handle: () => {
-                        this.events.forget(Enums.BlockEvent.Received, stopDownloading);
-                        clearInterval(downloadInterval);
+                    handle: ({ data }) => {
+                        const remoteAccess: string[] = this.p2pConfiguration.getOptional<Array<string>>(
+                            "remoteAccess",
+                            [],
+                        );
+                        if (!remoteAccess.includes(data.ip)) {
+                            this.events.forget(Enums.BlockEvent.Received, stopDownloading);
+                            clearInterval(downloadInterval);
+                        }
                     },
                 };
 

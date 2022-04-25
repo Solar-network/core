@@ -198,6 +198,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     public async handleIncomingBlock(
         block: Interfaces.IBlockData,
         fromForger = false,
+        ip: string,
         fireBlockReceivedEvent = true,
     ): Promise<void> {
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.height);
@@ -230,12 +231,12 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             this.enqueueBlocks([block]);
 
             if (fireBlockReceivedEvent) {
-                this.events.dispatch(Enums.BlockEvent.Received, block);
+                this.events.dispatch(Enums.BlockEvent.Received, { ...block, ip });
             }
         } else {
             this.logger.info(`Block disregarded because blockchain is not ready :exclamation:`);
 
-            this.events.dispatch(Enums.BlockEvent.Disregarded, block);
+            this.events.dispatch(Enums.BlockEvent.Disregarded, { ...block, ip });
         }
     }
 
