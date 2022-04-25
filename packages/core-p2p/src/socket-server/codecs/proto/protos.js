@@ -4978,6 +4978,7 @@ $root.shared = (function() {
          * @memberof shared
          * @interface IHeaders
          * @property {string|null} [version] Headers version
+         * @property {number|null} [port] Headers port
          */
 
         /**
@@ -5002,6 +5003,14 @@ $root.shared = (function() {
          * @instance
          */
         Headers.prototype.version = "";
+
+        /**
+         * Headers port.
+         * @member {number} port
+         * @memberof shared.Headers
+         * @instance
+         */
+        Headers.prototype.port = 0;
 
         /**
          * Creates a new Headers instance using the specified properties.
@@ -5029,6 +5038,8 @@ $root.shared = (function() {
                 writer = $Writer.create();
             if (message.version != null && Object.hasOwnProperty.call(message, "version"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.version);
+            if (message.port != null && Object.hasOwnProperty.call(message, "port"))
+                writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.port);
             return writer;
         };
 
@@ -5065,6 +5076,9 @@ $root.shared = (function() {
                 switch (tag >>> 3) {
                 case 1:
                     message.version = reader.string();
+                    break;
+                case 2:
+                    message.port = reader.uint32();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -5104,6 +5118,9 @@ $root.shared = (function() {
             if (message.version != null && message.hasOwnProperty("version"))
                 if (!$util.isString(message.version))
                     return "version: string expected";
+            if (message.port != null && message.hasOwnProperty("port"))
+                if (!$util.isInteger(message.port))
+                    return "port: integer expected";
             return null;
         };
 
@@ -5121,6 +5138,8 @@ $root.shared = (function() {
             var message = new $root.shared.Headers();
             if (object.version != null)
                 message.version = String(object.version);
+            if (object.port != null)
+                message.port = object.port >>> 0;
             return message;
         };
 
@@ -5137,10 +5156,14 @@ $root.shared = (function() {
             if (!options)
                 options = {};
             var object = {};
-            if (options.defaults)
+            if (options.defaults) {
                 object.version = "";
+                object.port = 0;
+            }
             if (message.version != null && message.hasOwnProperty("version"))
                 object.version = message.version;
+            if (message.port != null && message.hasOwnProperty("port"))
+                object.port = message.port;
             return object;
         };
 

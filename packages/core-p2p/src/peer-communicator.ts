@@ -48,6 +48,8 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
     private postTransactionsQueueByIp: Map<string, Contracts.Kernel.Queue> = new Map();
 
+    private serverPort!: number;
+
     @Container.postConstruct()
     public initialize(): void {
         this.outgoingRateLimiter = buildRateLimiter({
@@ -63,6 +65,8 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         this.events.listen(Enums.PeerEvent.Disconnect, {
             handle: ({ data }) => this.postTransactionsQueueByIp.delete(data.peer.ip),
         });
+
+        this.serverPort = Number(this.configuration.get<number>("server.port"));
     }
 
     public async postBlock(peer: Contracts.P2P.Peer, block: Interfaces.IBlock): Promise<void> {
@@ -385,6 +389,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 codec.request.serialize({
                     ...payload,
                     headers: {
+                        port: this.serverPort,
                         version: this.app.version(),
                     },
                 }),
