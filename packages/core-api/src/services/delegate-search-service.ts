@@ -72,6 +72,7 @@ export class DelegateSearchService {
             address: wallet.getAddress(),
             publicKey: publicKey!,
             votes: delegateAttribute.voteBalance,
+            voters: delegateAttribute.voters,
             rank: delegateAttribute.rank,
             isResigned: !!delegateAttribute.resigned,
             blocks: {

@@ -1,5 +1,5 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Crypto, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Crypto, Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { strict } from "assert";
 
 import { HtlcLockExpiredError, HtlcLockTransactionNotFoundError, HtlcSecretHashMismatchError } from "../../errors";
@@ -71,7 +71,49 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
         }
 
         const unlockSecretBytes = Buffer.from(claimAsset.unlockSecret, "hex");
-        const unlockSecretHash: string = Crypto.HashAlgorithms.sha256(unlockSecretBytes).toString("hex");
+
+        let hashAlgorithm: any;
+
+        switch (claimAsset.hashType) {
+            case Enums.HtlcSecretHashType.SHA256: {
+                hashAlgorithm = Crypto.HashAlgorithms.sha256;
+                break;
+            }
+            case Enums.HtlcSecretHashType.SHA384: {
+                hashAlgorithm = Crypto.HashAlgorithms.sha384;
+                break;
+            }
+            case Enums.HtlcSecretHashType.SHA512: {
+                hashAlgorithm = Crypto.HashAlgorithms.sha512;
+                break;
+            }
+            case Enums.HtlcSecretHashType.SHA3256: {
+                hashAlgorithm = Crypto.HashAlgorithms.sha3256;
+                break;
+            }
+            case Enums.HtlcSecretHashType.SHA3384: {
+                hashAlgorithm = Crypto.HashAlgorithms.sha3384;
+                break;
+            }
+            case Enums.HtlcSecretHashType.SHA3512: {
+                hashAlgorithm = Crypto.HashAlgorithms.sha3512;
+                break;
+            }
+            case Enums.HtlcSecretHashType.Keccak256: {
+                hashAlgorithm = Crypto.HashAlgorithms.keccak256;
+                break;
+            }
+            case Enums.HtlcSecretHashType.Keccak384: {
+                hashAlgorithm = Crypto.HashAlgorithms.keccak384;
+                break;
+            }
+            case Enums.HtlcSecretHashType.Keccak512: {
+                hashAlgorithm = Crypto.HashAlgorithms.keccak512;
+                break;
+            }
+        }
+
+        const unlockSecretHash: string = hashAlgorithm(unlockSecretBytes).toString("hex");
         if (lock.secretHash !== unlockSecretHash) {
             throw new HtlcSecretHashMismatchError();
         }

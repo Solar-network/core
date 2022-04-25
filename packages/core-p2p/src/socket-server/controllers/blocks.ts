@@ -110,15 +110,17 @@ export class BlocksController extends Controller {
 
         this.logger.debug(`The id of the new block is ${block.id}`);
 
+        const ip: string = mapAddr(request.info.remoteAddress);
+
         this.logger.debug(
             `It contains ${AppUtils.pluralize(
                 "transaction",
                 block.numberOfTransactions,
                 true,
-            )} and was received from ${mapAddr(request.info.remoteAddress)}`,
+            )} and was received from ${ip}`,
         );
 
-        await this.blockchain.handleIncomingBlock(block, fromForger);
+        this.blockchain.handleIncomingBlock(block, fromForger, ip);
 
         return { status: true, height: this.blockchain.getLastHeight() };
     }

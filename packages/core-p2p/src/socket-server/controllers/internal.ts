@@ -5,9 +5,6 @@ import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
 import { Controller } from "./controller";
 
 export class InternalController extends Controller {
-    @Container.inject(Container.Identifiers.PeerProcessor)
-    private readonly peerProcessor!: Contracts.P2P.PeerProcessor;
-
     @Container.inject(Container.Identifiers.PeerNetworkMonitor)
     private readonly peerNetworkMonitor!: Contracts.P2P.NetworkMonitor;
 
@@ -32,12 +29,6 @@ export class InternalController extends Controller {
 
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
-
-    public async acceptNewPeer(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<void> {
-        return this.peerProcessor.validateAndAcceptPeer({
-            ip: (request.payload as any).ip,
-        } as Contracts.P2P.Peer);
-    }
 
     public emitEvent(request: Hapi.Request, h: Hapi.ResponseToolkit): boolean {
         this.events.dispatch((request.payload as any).event, (request.payload as any).body);

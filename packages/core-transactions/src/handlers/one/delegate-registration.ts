@@ -33,6 +33,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             "delegate.username",
             "delegate.version", // Used by the API
             "delegate.voteBalance",
+            "delegate.voters", // Used by the API
             "delegate",
         ];
     }
@@ -128,6 +129,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             forgedRewards: Utils.BigNumber.ZERO,
             producedBlocks: 0,
             round: 0,
+            voters: 0,
         });
 
         this.walletRepository.index(sender);

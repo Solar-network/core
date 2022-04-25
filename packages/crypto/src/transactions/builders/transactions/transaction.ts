@@ -215,7 +215,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             this.data.signatures = [];
         }
 
-        this.version(2);
         Signer.multiSign(this.getSigningObject(), keys, index);
 
         return this.instance();

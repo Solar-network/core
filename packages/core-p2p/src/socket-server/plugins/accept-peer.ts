@@ -1,4 +1,4 @@
-import { Container, Contracts } from "@solar-network/core-kernel";
+import { Container, Contracts, Providers } from "@solar-network/core-kernel";
 
 import { getPeerIp } from "../../utils/get-peer-ip";
 import { BlocksRoute } from "../routes/blocks";
@@ -9,6 +9,10 @@ import { TransactionsRoute } from "../routes/transactions";
 export class AcceptPeerPlugin {
     @Container.inject(Container.Identifiers.Application)
     protected readonly app!: Contracts.Kernel.Application;
+
+    @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/core-p2p")
+    private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.PeerProcessor)
     private readonly peerProcessor!: Contracts.P2P.PeerProcessor;
@@ -24,11 +28,15 @@ export class AcceptPeerPlugin {
 
         server.ext({
             type: "onPreHandler",
-            async method(request, h) {
+            method: async (request, h) => {
                 if (routesConfigByPath[request.path]) {
                     const peerIp = request.socket ? getPeerIp(request.socket) : request.info.remoteAddress;
+                    const peerPort: number =
+                        request.payload.headers.port || Number(this.configuration.get<number>("server.port"));
+
                     peerProcessor.validateAndAcceptPeer({
                         ip: peerIp,
+                        port: peerPort,
                     } as Contracts.P2P.Peer);
                 }
                 return h.continue;

@@ -49,7 +49,12 @@ export interface Blockchain {
     /**
      * Push a block to the process queue.
      */
-    handleIncomingBlock(block: Interfaces.IBlockData, fromForger: boolean, fireBlockReceivedEvent?: boolean): void;
+    handleIncomingBlock(
+        block: Interfaces.IBlockData,
+        fromForger: boolean,
+        ip: string,
+        fireBlockReceivedEvent?: boolean,
+    ): void;
 
     enqueueBlocks(blocks: Interfaces.IBlockData[]);
 

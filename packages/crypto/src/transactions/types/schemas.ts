@@ -22,7 +22,7 @@ export const transactionBaseSchema: Record<string, any> = {
     else: { required: ["type", "senderPublicKey", "fee", "amount", "nonce"] },
     properties: {
         id: { anyOf: [{ $ref: "transactionId" }, { type: "null" }] },
-        version: { enum: [1, 2] },
+        version: { enum: [2, 3] },
         network: { $ref: "networkByte" },
         timestamp: { type: "integer", minimum: 0 },
         nonce: { bignumber: { minimum: 0 } },
@@ -278,7 +278,13 @@ export const htlcLock = extend(transactionBaseSchema, {
                     type: "object",
                     required: ["secretHash", "expiration"],
                     properties: {
-                        secretHash: { allOf: [{ minLength: 64, maxLength: 64 }, { $ref: "hex" }] },
+                        secretHash: {
+                            oneOf: [
+                                { allOf: [{ minLength: 64, maxLength: 64 }, { $ref: "hex" }] },
+                                { allOf: [{ minLength: 96, maxLength: 96 }, { $ref: "hex" }] },
+                                { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
+                            ],
+                        },
                         expiration: {
                             type: "object",
                             required: ["type", "value"],
@@ -308,8 +314,15 @@ export const htlcClaim = extend(transactionBaseSchema, {
                     type: "object",
                     required: ["lockTransactionId", "unlockSecret"],
                     properties: {
+                        hashType: { enum: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
                         lockTransactionId: { $ref: "transactionId" },
-                        unlockSecret: { allOf: [{ minLength: 64, maxLength: 64 }, { $ref: "hex" }] },
+                        unlockSecret: {
+                            oneOf: [
+                                { allOf: [{ minLength: 64, maxLength: 64 }, { $ref: "hex" }] },
+                                { allOf: [{ minLength: 96, maxLength: 96 }, { $ref: "hex" }] },
+                                { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
+                            ],
+                        },
                     },
                 },
             },

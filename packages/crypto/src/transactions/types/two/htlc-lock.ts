@@ -26,12 +26,14 @@ export abstract class HtlcLockTransaction extends Transaction {
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
         const { data } = this;
 
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(8 + 32 + 1 + 4 + 21));
+        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(99));
 
         buff.writeBigUInt64LE(data.amount.toBigInt());
 
         if (data.asset && data.asset.lock) {
-            buff.writeBuffer(Buffer.from(data.asset.lock.secretHash, "hex"));
+            const secretHash: Buffer = Buffer.from(data.asset.lock.secretHash, "hex");
+            buff.writeUInt8(secretHash.length);
+            buff.writeBuffer(secretHash);
             buff.writeUInt8(data.asset.lock.expiration.type);
             buff.writeUInt32LE(data.asset.lock.expiration.value);
         }
@@ -53,7 +55,8 @@ export abstract class HtlcLockTransaction extends Transaction {
         const { data } = this;
 
         const amount: BigNumber = BigNumber.make(buf.readBigUInt64LE().toString());
-        const secretHash: string = buf.readBuffer(32).toString("hex");
+        const secretHashLength: number = buf.readUInt8();
+        const secretHash: string = buf.readBuffer(secretHashLength).toString("hex");
         const expirationType: number = buf.readUInt8();
         const expirationValue: number = buf.readUInt32LE();
         const recipientId: string = Address.fromBuffer(buf.readBuffer(21));

@@ -2064,6 +2064,9 @@ export namespace shared {
 
         /** Headers version */
         version?: (string|null);
+
+        /** Headers port */
+        port?: (number|null);
     }
 
     /** Represents a Headers. */
@@ -2077,6 +2080,9 @@ export namespace shared {
 
         /** Headers version. */
         public version: string;
+
+        /** Headers port. */
+        public port: number;
 
         /**
          * Creates a new Headers instance using the specified properties.
