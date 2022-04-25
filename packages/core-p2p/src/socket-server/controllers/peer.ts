@@ -5,7 +5,6 @@ import { Crypto, Identities, Interfaces, Managers } from "@solar-network/crypto"
 import { readJSONSync } from "fs-extra";
 
 import { constants } from "../../constants";
-import { MissingCommonBlockError } from "../../errors";
 import { Socket } from "../../hapi-nes/socket";
 import { getPeerIp } from "../../utils/get-peer-ip";
 import { getPeerConfig } from "../utils/get-peer-config";
@@ -57,10 +56,6 @@ export class PeerController extends Controller {
         const commonBlocks: Interfaces.IBlockData[] = await this.databaseInterceptor.getCommonBlocks(
             (request.payload as any).ids,
         );
-
-        if (!commonBlocks.length) {
-            throw new MissingCommonBlockError();
-        }
 
         return {
             common: commonBlocks.sort((a, b) => a.height - b.height)[commonBlocks.length - 1],
