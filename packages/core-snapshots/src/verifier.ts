@@ -1,5 +1,5 @@
 import { Models } from "@solar-network/core-database";
-import { Blocks, Crypto, Interfaces, Transactions } from "@solar-network/crypto";
+import { Blocks, Crypto, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
 import * as Exceptions from "./exceptions/verifier";
 
@@ -41,7 +41,14 @@ export class Verifier {
             const bytes = Blocks.Serializer.serialize(block.data, false);
             const hash = Crypto.HashAlgorithms.sha256(bytes);
 
-            isVerified = Crypto.Hash.verifySchnorr(hash, blockEntity.blockSignature, blockEntity.generatorPublicKey);
+            const { bip340 } = Managers.configManager.getMilestone(blockEntity.height);
+
+            isVerified = Crypto.Hash.verifySchnorr(
+                hash,
+                blockEntity.blockSignature,
+                blockEntity.generatorPublicKey,
+                bip340,
+            );
         } catch (err) {
             throw new Exceptions.BlockVerifyException(blockEntity.id, err.message);
         }

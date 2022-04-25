@@ -10,7 +10,7 @@ export class Signer {
         }
 
         const hash: Buffer = Utils.toHash(transaction, options);
-        const signature: string = Hash.signSchnorr(hash, keys);
+        const signature: string = Hash.signSchnorr(hash, keys, transaction.version > 2);
 
         if (!transaction.signature && !options.excludeMultiSignature) {
             transaction.signature = signature;
@@ -21,7 +21,7 @@ export class Signer {
 
     public static secondSign(transaction: ITransactionData, keys: IKeyPair): string {
         const hash: Buffer = Utils.toHash(transaction, { excludeSecondSignature: true });
-        const signature: string = Hash.signSchnorr(hash, keys);
+        const signature: string = Hash.signSchnorr(hash, keys, transaction.version > 2);
 
         if (!transaction.secondSignature) {
             transaction.secondSignature = signature;
@@ -43,7 +43,7 @@ export class Signer {
             excludeMultiSignature: true,
         });
 
-        const signature: string = Hash.signSchnorr(hash, keys);
+        const signature: string = Hash.signSchnorr(hash, keys, transaction.version > 2);
         const indexedSignature = `${numberToHex(index)}${signature}`;
         transaction.signatures.push(indexedSignature);
 

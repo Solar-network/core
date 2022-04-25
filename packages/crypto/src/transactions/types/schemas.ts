@@ -22,7 +22,7 @@ export const transactionBaseSchema: Record<string, any> = {
     else: { required: ["type", "senderPublicKey", "fee", "amount", "nonce"] },
     properties: {
         id: { anyOf: [{ $ref: "transactionId" }, { type: "null" }] },
-        version: { enum: [1, 2] },
+        version: { enum: [2, 3] },
         network: { $ref: "networkByte" },
         timestamp: { type: "integer", minimum: 0 },
         nonce: { bignumber: { minimum: 0 } },
