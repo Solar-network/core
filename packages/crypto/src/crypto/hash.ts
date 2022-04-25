@@ -41,10 +41,6 @@ export class Hash {
         const digest: Buffer = hash.length !== 32 ? HashAlgorithms.sha256(hash) : hash;
         let key: Buffer = Buffer.from(keys.privateKey, "hex");
 
-        if (key.length === 33) {
-            key = key.slice(1);
-        }
-
         return schnorr.sign(digest, key).toString("hex");
     }
 
