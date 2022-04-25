@@ -33,9 +33,3 @@ export class PeerVerificationFailedError extends P2PError {
         super("Peer verification failed");
     }
 }
-
-export class MissingCommonBlockError extends P2PError {
-    public constructor() {
-        super("Couldn't find any common blocks");
-    }
-}
