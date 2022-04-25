@@ -28,7 +28,6 @@ class TransactionRegistry {
         this.registerTransactionType(One.VoteTransaction);
         this.registerTransactionType(Two.VoteTransaction);
 
-        this.registerTransactionType(One.MultiSignatureRegistrationTransaction);
         this.registerTransactionType(Two.MultiSignatureRegistrationTransaction);
 
         this.registerTransactionType(Two.IpfsTransaction);

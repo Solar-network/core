@@ -152,12 +152,6 @@ export class NotSupportedForMultiSignatureWalletError extends TransactionError {
     }
 }
 
-export class SwitchVoteDisabledError extends TransactionError {
-    public constructor() {
-        super(`Failed to apply transaction, because switch-vote is disabled`);
-    }
-}
-
 export class AlreadyVotedError extends TransactionError {
     public constructor() {
         super(`Failed to apply transaction, because the sender wallet has already voted`);
@@ -203,18 +197,6 @@ export class MultiSignatureAlreadyRegisteredError extends TransactionError {
 export class InvalidMultiSignatureError extends TransactionError {
     public constructor() {
         super(`Failed to apply transaction, because the multisignature could not be verified`);
-    }
-}
-
-export class LegacyMultiSignatureError extends TransactionError {
-    public constructor() {
-        super(`Failed to apply transaction, because legacy multisignature is no longer supported`);
-    }
-}
-
-export class LegacyMultiSignatureRegistrationError extends TransactionError {
-    public constructor() {
-        super(`Failed to apply transaction, because legacy multisignature registrations are no longer supported`);
     }
 }
 

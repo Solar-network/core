@@ -19,7 +19,7 @@ export abstract class HtlcRefundTransaction extends Transaction {
 
     public verify(): boolean {
         const milestone = configManager.getMilestone();
-        return milestone.aip11 === true && milestone.htlcEnabled === true && super.verify();
+        return milestone.htlcEnabled === true && super.verify();
     }
 
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {

@@ -294,9 +294,6 @@ export class ForgerService {
                 const block: Interfaces.IBlock | undefined = delegate.forge(this.transactions, {
                     previousBlock: {
                         id: networkState.getLastBlockId(),
-                        idHex: Managers.configManager.getMilestone().block.idFullSha256
-                            ? networkState.getLastBlockId()
-                            : Blocks.Block.toBytesHex(networkState.getLastBlockId()),
                         height: networkStateHeight,
                     },
                     timestamp: round.timestamp,

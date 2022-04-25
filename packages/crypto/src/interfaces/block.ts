@@ -25,12 +25,9 @@ export interface IBlock {
 
 export interface IBlockData {
     id?: string;
-    idHex?: string;
-
     timestamp: number;
     version: number;
     height: number;
-    previousBlockHex?: string;
     previousBlock: string;
     numberOfTransactions: number;
     totalAmount: BigNumber;
@@ -49,12 +46,9 @@ export interface IBlockData {
 
 export interface IBlockJson {
     id?: string;
-    idHex?: string;
-
     timestamp: number;
     version: number;
     height: number;
-    previousBlockHex?: string;
     previousBlock: string;
     numberOfTransactions: number;
     totalAmount: string;

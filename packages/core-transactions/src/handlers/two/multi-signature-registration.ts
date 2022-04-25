@@ -1,5 +1,5 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
+import { Identities, Interfaces, Transactions } from "@solar-network/crypto";
 
 import {
     InvalidMultiSignatureError,
@@ -54,7 +54,7 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
     }
 
     public async isActivated(): Promise<boolean> {
-        return Managers.configManager.getMilestone().aip11 === true;
+        return true;
     }
 
     public async throwIfCannotBeApplied(

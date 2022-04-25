@@ -30,7 +30,7 @@ export class Collator implements Contracts.TransactionPool.Collator {
             4 + // version
             4 + // timestamp
             4 + // height
-            (milestone.block.idFullSha256 ? 32 : 8) + // previousBlockId
+            32 + // previousBlockId
             4 + // numberOfTransactions
             8 + // totalAmount
             8 + // totalFee
@@ -55,8 +55,8 @@ export class Collator implements Contracts.TransactionPool.Collator {
             }
 
             try {
-                if (await this.expirationService.isExpired(transaction)) {
-                    const expirationHeight: number = await this.expirationService.getExpirationHeight(transaction);
+                if (this.expirationService.isExpired(transaction)) {
+                    const expirationHeight: number = this.expirationService.getExpirationHeight(transaction);
                     throw new TransactionHasExpiredError(transaction, expirationHeight);
                 }
 

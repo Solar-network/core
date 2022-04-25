@@ -8,8 +8,6 @@ import {
     InsufficientBalanceError,
     InvalidMultiSignaturesError,
     InvalidSecondSignatureError,
-    LegacyMultiSignatureError,
-    LegacyMultiSignatureRegistrationError,
     MissingMultiSignatureOnSenderError,
     SenderWalletMismatchError,
     TransactionFeeTooLowError,
@@ -257,9 +255,6 @@ export abstract class TransactionHandler {
         const isMultiSignatureRegistration: boolean =
             transaction.type === Enums.TransactionType.Core.MultiSignature &&
             transaction.typeGroup === Enums.TransactionTypeGroup.Core;
-        if (isMultiSignatureRegistration && !Managers.configManager.getMilestone().aip11) {
-            throw new LegacyMultiSignatureRegistrationError();
-        }
 
         if (sender.hasMultiSignature()) {
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
@@ -271,10 +266,6 @@ export abstract class TransactionHandler {
 
             if (!dbSender.hasMultiSignature()) {
                 throw new MissingMultiSignatureOnSenderError();
-            }
-
-            if (dbSender.hasAttribute("multiSignature.legacy")) {
-                throw new LegacyMultiSignatureError();
             }
 
             if (!this.verifySignatures(dbSender, data, dbSender.getAttribute("multiSignature"))) {

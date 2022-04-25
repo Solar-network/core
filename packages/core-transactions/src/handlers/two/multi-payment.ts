@@ -1,5 +1,5 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
 
 import { InsufficientBalanceError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
@@ -41,7 +41,7 @@ export class MultiPaymentTransactionHandler extends TransactionHandler {
     }
 
     public async isActivated(): Promise<boolean> {
-        return Managers.configManager.getMilestone().aip11 === true;
+        return true;
     }
 
     public async throwIfCannotBeApplied(

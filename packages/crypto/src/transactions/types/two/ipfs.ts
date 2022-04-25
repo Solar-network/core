@@ -2,7 +2,6 @@ import { base58 } from "bstring";
 
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
 import { ISerializeOptions } from "../../../interfaces";
-import { configManager } from "../../../managers";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -17,10 +16,6 @@ export abstract class IpfsTransaction extends Transaction {
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.ipfs;
-    }
-
-    public verify(): boolean {
-        return configManager.getMilestone().aip11 && super.verify();
     }
 
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {

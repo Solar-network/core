@@ -1,10 +1,9 @@
 import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/core-kernel";
-import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
+import { Interfaces, Transactions } from "@solar-network/crypto";
 
 import {
     AlreadyVotedError,
     NoVoteError,
-    SwitchVoteDisabledError,
     UnvoteMismatchError,
     VotedForNonDelegateError,
     VotedForResignedDelegateError,
@@ -42,10 +41,6 @@ export class VoteTransactionHandler extends TransactionHandler {
         wallet: Contracts.State.Wallet,
     ): Promise<void> {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
-
-        if (transaction.data.asset.votes.length > 1 && !Managers.configManager.getMilestone().aip37) {
-            throw new SwitchVoteDisabledError();
-        }
 
         let walletVote: string | undefined;
         if (wallet.hasAttribute("vote")) {

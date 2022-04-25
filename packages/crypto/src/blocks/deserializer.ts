@@ -1,7 +1,6 @@
 import ByteBuffer from "bytebuffer";
 
 import { IBlockData, ITransaction } from "../interfaces";
-import { configManager } from "../managers";
 import { TransactionFactory } from "../transactions";
 import { BigNumber } from "../utils";
 import { Block } from "./block";
@@ -26,22 +25,7 @@ export class Deserializer {
             transactions = this.deserializeTransactions(block, buf, options.deserializeTransactionsUnchecked);
         }
 
-        block.idHex = Block.getIdHex(block);
         block.id = Block.getId(block);
-
-        const { outlookTable } = configManager.get("exceptions");
-
-        if (outlookTable && outlookTable[block.id]) {
-            const constants = configManager.getMilestone(block.height);
-
-            if (constants.block.idFullSha256) {
-                block.id = outlookTable[block.id];
-                block.idHex = block.id;
-            } else {
-                block.id = outlookTable[block.id];
-                block.idHex = Block.toBytesHex(block.id);
-            }
-        }
 
         return { data: block, transactions };
     }
@@ -50,18 +34,7 @@ export class Deserializer {
         block.version = buf.readUint32();
         block.timestamp = buf.readUint32();
         block.height = buf.readUint32();
-
-        const constants = configManager.getMilestone(block.height - 1 || 1);
-
-        if (constants.block.idFullSha256) {
-            const previousBlockFullSha256 = buf.readBytes(32).toString("hex");
-            block.previousBlockHex = previousBlockFullSha256;
-            block.previousBlock = previousBlockFullSha256;
-        } else {
-            block.previousBlockHex = buf.readBytes(8).toString("hex");
-            block.previousBlock = BigNumber.make(`0x${block.previousBlockHex}`).toString();
-        }
-
+        block.previousBlock = buf.readBytes(32).toString("hex");
         block.numberOfTransactions = buf.readUint32();
         block.totalAmount = BigNumber.make(buf.readUint64().toString());
         block.totalFee = BigNumber.make(buf.readUint64().toString());

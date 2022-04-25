@@ -1,33 +1,14 @@
-import { TransactionType, TransactionTypeGroup } from "../enums";
 import {
     DuplicateParticipantInMultiSignatureError,
     InvalidTransactionBytesError,
     TransactionVersionError,
 } from "../errors";
-import { Address } from "../identities";
 import { IDeserializeOptions, ITransaction, ITransactionData } from "../interfaces";
 import { BigNumber, ByteBuffer, isSupportedTransactionVersion } from "../utils";
 import { TransactionTypeFactory } from "./types";
 
 // Reference: https://github.com/ArkEcosystem/AIPs/blob/master/AIPS/aip-11.md
 export class Deserializer {
-    public static applyV1Compatibility(transaction: ITransactionData): void {
-        transaction.secondSignature = transaction.secondSignature || transaction.signSignature;
-        transaction.typeGroup = TransactionTypeGroup.Core;
-
-        if (transaction.type === TransactionType.Core.Vote && transaction.senderPublicKey) {
-            transaction.recipientId = Address.fromPublicKey(transaction.senderPublicKey, transaction.network);
-        } else if (
-            transaction.type === TransactionType.Core.MultiSignature &&
-            transaction.asset &&
-            transaction.asset.multiSignatureLegacy
-        ) {
-            transaction.asset.multiSignatureLegacy.keysgroup = transaction.asset.multiSignatureLegacy.keysgroup.map(
-                (k) => (k.startsWith("+") ? k : `+${k}`),
-            );
-        }
-    }
-
     public static deserialize(serialized: string | Buffer, options: IDeserializeOptions = {}): ITransaction {
         const data = {} as ITransactionData;
 
@@ -48,9 +29,6 @@ export class Deserializer {
                 options.disableVersionCheck ||
                 isSupportedTransactionVersion(data.version)
             ) {
-                if (data.version === 1) {
-                    this.applyV1Compatibility(data);
-                }
             } else {
                 throw new TransactionVersionError(data.version);
             }
@@ -67,14 +45,9 @@ export class Deserializer {
         transaction.version = buf.readUInt8();
         transaction.network = buf.readUInt8();
 
-        if (transaction.version === 1) {
-            transaction.type = buf.readUInt8();
-            transaction.timestamp = buf.readUInt32LE();
-        } else {
-            transaction.typeGroup = buf.readUInt32LE();
-            transaction.type = buf.readUInt16LE();
-            transaction.nonce = BigNumber.make(buf.readBigUInt64LE());
-        }
+        transaction.typeGroup = buf.readUInt32LE();
+        transaction.type = buf.readUInt16LE();
+        transaction.nonce = BigNumber.make(buf.readBigUInt64LE());
 
         transaction.senderPublicKey = buf.readBuffer(33).toString("hex");
         transaction.fee = BigNumber.make(buf.readBigUInt64LE().toString());
