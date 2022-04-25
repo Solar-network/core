@@ -1,6 +1,6 @@
 import { calculateForgingInfo } from "./calculate-forging-info";
 import { calculateApproval, calculateForgedTotal } from "./delegate-calculator";
-import { calculateLockExpirationStatus, calculateTransactionExpiration } from "./expiration-calculator";
+import { calculateLockExpirationStatus } from "./expiration-calculator";
 import { formatSeconds } from "./format-seconds";
 import { formatTimestamp } from "./format-timestamp";
 import { getBlockTimeLookup } from "./get-blocktime-lookup";
@@ -22,7 +22,7 @@ export * from "./ipc-subprocess";
 export * from "./lock";
 
 export const delegateCalculator = { calculateApproval, calculateForgedTotal };
-export const expirationCalculator = { calculateTransactionExpiration, calculateLockExpirationStatus };
+export const expirationCalculator = { calculateLockExpirationStatus };
 export const roundCalculator = { calculateRound, isNewRound };
 export const supplyCalculator = { calculate };
 export const forgingInfoCalculator = { calculateForgingInfo, getBlockTimeLookup };

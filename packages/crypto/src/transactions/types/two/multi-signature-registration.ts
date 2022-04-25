@@ -1,6 +1,5 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
 import { IMultiSignatureAsset, ISerializeOptions, ITransactionData } from "../../../interfaces";
-import { configManager } from "../../../managers";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -23,10 +22,6 @@ export class MultiSignatureRegistrationTransaction extends Transaction {
         }
 
         return super.staticFee(feeContext);
-    }
-
-    public verify(): boolean {
-        return configManager.getMilestone().aip11 && super.verify();
     }
 
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {

@@ -2,11 +2,8 @@
     {
         "height": 1,
         "activeDelegates": 53,
-        "aip11": true,
-        "aip37": true,
         "block": {
             "version": 0,
-            "idFullSha256": true,
             "maxTransactions": 150,
             "maxPayload": 2097152
         },

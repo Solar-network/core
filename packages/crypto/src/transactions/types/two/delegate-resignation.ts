@@ -1,6 +1,5 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
 import { ISerializeOptions } from "../../../interfaces";
-import { configManager } from "../../../managers";
 import { BigNumber } from "../../../utils/bignum";
 import { ByteBuffer } from "../../../utils/byte-buffer";
 import * as schemas from "../schemas";
@@ -16,10 +15,6 @@ export abstract class DelegateResignationTransaction extends Transaction {
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.delegateResignation;
-    }
-
-    public verify(): boolean {
-        return configManager.getMilestone().aip11 && super.verify();
     }
 
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {

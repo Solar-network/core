@@ -1,7 +1,6 @@
 import { Hash } from "../crypto/hash";
 import { DuplicateParticipantInMultiSignatureError, InvalidMultiSignatureAssetError } from "../errors";
 import { IMultiSignatureAsset, ISchemaValidationResult, ITransactionData, IVerifyOptions } from "../interfaces";
-import { configManager } from "../managers";
 import { isException } from "../utils";
 import { validator } from "../validation";
 import { TransactionTypeFactory } from "./types/factory";
@@ -11,10 +10,6 @@ export class Verifier {
     public static verify(data: ITransactionData, options?: IVerifyOptions): boolean {
         if (isException(data)) {
             return true;
-        }
-
-        if (configManager.getMilestone().aip11 && (!data.version || data.version === 1)) {
-            return false;
         }
 
         return Verifier.verifyHash(data, options?.disableVersionCheck);

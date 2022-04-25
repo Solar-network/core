@@ -29,6 +29,4 @@ export interface Network {
 export interface IExceptions {
     blocks?: string[];
     transactions?: string[];
-    outlookTable?: Record<string, string>;
-    transactionIdFixTable?: Record<string, string>;
 }

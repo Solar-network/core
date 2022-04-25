@@ -78,29 +78,11 @@ export class Block implements IBlock {
     }
 
     public static getId(data: IBlockData): string {
-        const constants = configManager.getMilestone(data.height);
-        const idHex: string = Block.getIdHex(data);
-
-        return constants.block.idFullSha256 ? idHex : BigNumber.make(`0x${idHex}`).toString();
-    }
-
-    public static getIdHex(data: IBlockData): string {
-        const constants = configManager.getMilestone(data.height);
         const payloadHash: Buffer = Serializer.serialize(data);
 
         const hash: Buffer = HashAlgorithms.sha256(payloadHash);
 
-        if (constants.block.idFullSha256) {
-            return hash.toString("hex");
-        }
-
-        const temp: Buffer = Buffer.alloc(8);
-
-        for (let i = 0; i < 8; i++) {
-            temp[i] = hash[7 - i];
-        }
-
-        return temp.toString("hex");
+        return hash.toString("hex");
     }
 
     public static toBytesHex(data: string | undefined): string {

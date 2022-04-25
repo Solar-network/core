@@ -44,7 +44,7 @@ export type DelegateResourceLastBlock = {
 };
 
 export const delegateCriteriaSchemaObject = {
-    username: Joi.string().max(256),
+    username: Joi.string().pattern(/^[a-z0-9!@$&_.]{1,20}$/),
     address: walletCriteriaSchemaObject.address,
     publicKey: walletCriteriaSchemaObject.publicKey,
     votes: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),

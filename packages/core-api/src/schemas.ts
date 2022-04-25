@@ -120,16 +120,6 @@ export const pagination = Joi.object({
     limit: Joi.number().integer().min(1).default(100).max(Joi.ref("$configuration.plugins.pagination.limit")),
 }); // .without("offset", "page"); // conflict with pagination plugin
 
-// Old
-
-export const blockId = Joi.alternatives().try(
-    Joi.string()
-        .min(1)
-        .max(20)
-        .regex(/^[0-9]+$/, "decimal non-negative integer"),
-    Joi.string().length(64).hex(),
-);
-
 export const address = Joi.string().alphanum().length(34);
 
 export const delegateIdentifier = Joi.string()
@@ -194,10 +184,10 @@ const orLikeCriteria = (value: any) => orCriteria(likeCriteria(value));
 const orContainsCriteria = (value: any) => orCriteria(containsCriteria(value));
 
 export const blockCriteriaSchemas = {
-    id: orEqualCriteria(blockId),
+    id: orEqualCriteria(Joi.string().length(64).hex()),
     version: orEqualCriteria(Joi.number().integer().min(0)),
     timestamp: orNumericCriteria(Joi.number().integer().min(0)),
-    previousBlock: orEqualCriteria(blockId),
+    previousBlock: orEqualCriteria(Joi.string().length(64).hex()),
     height: orNumericCriteria(Joi.number().integer().min(0)),
     numberOfTransactions: orNumericCriteria(Joi.number().integer().min(0)),
     totalAmount: orNumericCriteria(Joi.number().integer().min(0)),
@@ -216,7 +206,7 @@ export const transactionCriteriaSchemas = {
     recipientId: orEqualCriteria(address),
     id: orEqualCriteria(Joi.string().hex().length(64)),
     version: orEqualCriteria(Joi.number().integer().positive()),
-    blockId: orEqualCriteria(blockId),
+    blockId: orEqualCriteria(Joi.string().length(64).hex()),
     sequence: orNumericCriteria(Joi.number().integer().positive()),
     timestamp: orNumericCriteria(Joi.number().integer().min(0)),
     nonce: orNumericCriteria(Joi.number().integer().positive()),

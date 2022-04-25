@@ -42,7 +42,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
         }
     }
     public async isActivated(): Promise<boolean> {
-        return Managers.configManager.getMilestone().aip11 === true;
+        return true;
     }
 
     public dynamicFee(context: Contracts.Shared.DynamicFeeContext): Utils.BigNumber {
