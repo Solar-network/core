@@ -25,12 +25,16 @@ export abstract class HtlcClaimTransaction extends Transaction {
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
         const { data } = this;
 
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(32 + 32));
-
-        if (data.asset && data.asset.claim) {
-            buff.writeBuffer(Buffer.from(data.asset.claim.lockTransactionId, "hex"));
-            buff.writeBuffer(Buffer.from(data.asset.claim.unlockSecret, "hex"));
+        if (!data.asset || !data.asset.claim) {
+            return new ByteBuffer(Buffer.alloc(0));
         }
+
+        const unlockSecret: Buffer = Buffer.from(data.asset.claim.unlockSecret, "hex");
+        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(34 + unlockSecret.length));
+        buff.writeUInt8(data.asset.claim.hashType);
+        buff.writeBuffer(Buffer.from(data.asset.claim.lockTransactionId, "hex"));
+        buff.writeUInt8(unlockSecret.length);
+        buff.writeBuffer(unlockSecret);
 
         return buff;
     }
@@ -38,11 +42,15 @@ export abstract class HtlcClaimTransaction extends Transaction {
     public deserialize(buf: ByteBuffer): void {
         const { data } = this;
 
+        const hashType: number = buf.readUInt8();
         const lockTransactionId: string = buf.readBuffer(32).toString("hex");
-        const unlockSecret: string = buf.readBuffer(32).toString("hex");
+
+        const unlockSecretLength: number = buf.readUInt8();
+        const unlockSecret: string = buf.readBuffer(unlockSecretLength).toString("hex");
 
         data.asset = {
             claim: {
+                hashType,
                 lockTransactionId,
                 unlockSecret,
             },
