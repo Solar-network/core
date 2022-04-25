@@ -128,10 +128,6 @@ export abstract class Transaction implements ITransaction {
         return parts.join(" ");
     }
 
-    public hasVendorField(): boolean {
-        return false;
-    }
-
     public abstract serialize(): ByteBuffer | undefined;
     public abstract deserialize(buf: ByteBuffer): void;
 }

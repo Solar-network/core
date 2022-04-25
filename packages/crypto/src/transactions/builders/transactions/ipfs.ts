@@ -25,7 +25,6 @@ export class IPFSBuilder extends TransactionBuilder<IPFSBuilder> {
 
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
-        struct.vendorField = this.data.vendorField;
         struct.amount = this.data.amount;
         struct.asset = this.data.asset;
 

@@ -17,10 +17,6 @@ export abstract class TransferTransaction extends Transaction {
         return schemas.transfer;
     }
 
-    public hasVendorField(): boolean {
-        return true;
-    }
-
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
         const { data } = this;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(33));

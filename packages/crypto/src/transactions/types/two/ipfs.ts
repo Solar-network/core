@@ -23,10 +23,6 @@ export abstract class IpfsTransaction extends Transaction {
         return configManager.getMilestone().aip11 && super.verify();
     }
 
-    public hasVendorField(): boolean {
-        return true;
-    }
-
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
         const { data } = this;
 

@@ -27,7 +27,6 @@ export class TransferBuilder extends TransactionBuilder<TransferBuilder> {
         struct.amount = this.data.amount;
         struct.recipientId = this.data.recipientId;
         struct.asset = this.data.asset;
-        struct.vendorField = this.data.vendorField;
         struct.expiration = this.data.expiration;
 
         super.validate(struct);

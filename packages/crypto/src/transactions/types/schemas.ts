@@ -31,6 +31,7 @@ export const transactionBaseSchema: Record<string, any> = {
         fee: { bignumber: { minimum: 0, bypassGenesis: true } },
         burnedFee: { bignumber: { minimum: 0 } },
         senderPublicKey: { $ref: "publicKey" },
+        vendorField: { anyOf: [{ type: "null" }, { type: "string", format: "vendorField" }] },
         signature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
         secondSignature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
         signSignature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
@@ -68,7 +69,6 @@ export const transfer = extend(transactionBaseSchema, {
     properties: {
         type: { transactionType: TransactionType.Core.Transfer },
         fee: { bignumber: { minimum: 1, bypassGenesis: true } },
-        vendorField: { anyOf: [{ type: "null" }, { type: "string", format: "vendorField" }] },
         recipientId: { $ref: "address" },
         expiration: { type: "integer", minimum: 0 },
     },
@@ -249,7 +249,6 @@ export const ipfs = extend(transactionBaseSchema, {
         type: { transactionType: TransactionType.Core.Ipfs },
         amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
-        vendorField: { anyOf: [{ type: "null" }, { type: "string", format: "vendorField" }] },
         asset: {
             type: "object",
             required: ["ipfs"],
@@ -271,7 +270,6 @@ export const htlcLock = extend(transactionBaseSchema, {
         amount: { bignumber: { minimum: 1 } },
         fee: { bignumber: { minimum: 1 } },
         recipientId: { $ref: "address" },
-        vendorField: { anyOf: [{ type: "null" }, { type: "string", format: "vendorField" }] },
         asset: {
             type: "object",
             required: ["lock"],
@@ -347,7 +345,6 @@ export const multiPayment = extend(transactionBaseSchema, {
         type: { transactionType: TransactionType.Core.MultiPayment },
         amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
-        vendorField: { anyOf: [{ type: "null" }, { type: "string", format: "vendorField" }] },
         asset: {
             type: "object",
             required: ["payments"],

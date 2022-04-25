@@ -28,7 +28,6 @@ export class HtlcLockBuilder extends TransactionBuilder<HtlcLockBuilder> {
         const struct: ITransactionData = super.getStruct();
         struct.recipientId = this.data.recipientId;
         struct.amount = this.data.amount;
-        struct.vendorField = this.data.vendorField;
         struct.asset = JSON.parse(JSON.stringify(this.data.asset));
 
         super.validate(struct);

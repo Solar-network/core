@@ -198,7 +198,7 @@ export class Serializer {
     private static serializeVendorField(transaction: ITransaction, buff: ByteBuffer): void {
         const { data }: ITransaction = transaction;
 
-        if (transaction.hasVendorField() && data.vendorField) {
+        if (data.vendorField) {
             const vf: Buffer = Buffer.from(data.vendorField, "utf8");
             buff.writeUInt8(vf.length);
             buff.writeBuffer(vf);

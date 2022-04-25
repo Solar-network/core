@@ -84,12 +84,8 @@ export class Deserializer {
     private static deserializeVendorField(transaction: ITransaction, buf: ByteBuffer): void {
         const vendorFieldLength: number = buf.readUInt8();
         if (vendorFieldLength > 0) {
-            if (transaction.hasVendorField()) {
-                const vendorFieldBuffer: Buffer = buf.readBuffer(vendorFieldLength);
-                transaction.data.vendorField = vendorFieldBuffer.toString("utf8");
-            } else {
-                buf.jump(vendorFieldLength);
-            }
+            const vendorFieldBuffer: Buffer = buf.readBuffer(vendorFieldLength);
+            transaction.data.vendorField = vendorFieldBuffer.toString("utf8");
         }
     }
 
