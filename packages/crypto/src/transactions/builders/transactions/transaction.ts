@@ -27,6 +27,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             timestamp: Slots.getTime(),
             typeGroup: TransactionTypeGroup.Test,
             nonce: BigNumber.ZERO,
+            vendorField: undefined,
             version: configManager.getMilestone().bip340 ? 0x03 : 0x02,
         } as ITransactionData;
     }
@@ -165,6 +166,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             fee: this.data.fee,
             senderPublicKey: this.data.senderPublicKey,
             network: this.data.network,
+            vendorField: this.data.vendorField,
         } as ITransactionData;
 
         if (this.data.version === 1) {

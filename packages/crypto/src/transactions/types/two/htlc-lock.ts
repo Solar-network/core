@@ -23,10 +23,6 @@ export abstract class HtlcLockTransaction extends Transaction {
         return milestone.aip11 === true && milestone.htlcEnabled === true && super.verify();
     }
 
-    public hasVendorField(): boolean {
-        return true;
-    }
-
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
         const { data } = this;
 

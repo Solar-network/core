@@ -38,7 +38,6 @@ export class MultiPaymentBuilder extends TransactionBuilder<MultiPaymentBuilder>
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
         struct.senderPublicKey = this.data.senderPublicKey;
-        struct.vendorField = this.data.vendorField;
         struct.amount = this.data.amount;
         struct.asset = this.data.asset;
 

@@ -26,8 +26,6 @@ export interface ITransaction {
     verifySchema(strict?: boolean): ISchemaValidationResult;
 
     toJson(): ITransactionJson;
-
-    hasVendorField(): boolean;
 }
 
 export interface ITransactionAsset {
