@@ -14,6 +14,7 @@ export type DelegateResource = {
     address: string;
     publicKey: string;
     votes: Utils.BigNumber;
+    voters: number;
     rank: number;
     isResigned: boolean;
     blocks: {
@@ -47,6 +48,7 @@ export const delegateCriteriaSchemaObject = {
     address: walletCriteriaSchemaObject.address,
     publicKey: walletCriteriaSchemaObject.publicKey,
     votes: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
+    voters: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
     rank: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(1)),
     isResigned: Joi.boolean(),
     blocks: {

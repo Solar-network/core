@@ -33,6 +33,7 @@ export class DelegateRegistrationTransactionHandler extends One.DelegateRegistra
                 forgedRewards: Utils.BigNumber.ZERO,
                 producedBlocks: 0,
                 rank: undefined,
+                voters: 0,
             });
 
             this.walletRepository.index(wallet);
