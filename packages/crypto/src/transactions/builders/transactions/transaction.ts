@@ -28,7 +28,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             typeGroup: TransactionTypeGroup.Test,
             nonce: BigNumber.ZERO,
             vendorField: undefined,
-            version: configManager.getMilestone().aip11 ? 0x02 : 0x01,
+            version: configManager.getMilestone().bip340 ? 0x03 : 0x02,
         } as ITransactionData;
     }
 
