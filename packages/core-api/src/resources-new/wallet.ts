@@ -16,7 +16,7 @@ export type WalletResource = {
 
 const walletAddressSchema = Joi.string().alphanum().length(34);
 const walletPublicKeySchema = Joi.string().hex().length(66);
-const walletUsernameSchema = Joi.string().max(20);
+const walletUsernameSchema = Joi.string().pattern(/^[a-z0-9!@$&_.]{1,20}$/);
 
 export const walletCriteriaSchemaObject = {
     address: Joi.alternatives(
