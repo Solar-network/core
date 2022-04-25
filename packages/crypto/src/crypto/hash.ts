@@ -39,9 +39,8 @@ export class Hash {
 
     public static signSchnorrBip340(hash: Buffer, keys: IKeyPair): string {
         const digest: Buffer = hash.length !== 32 ? HashAlgorithms.sha256(hash) : hash;
-        let key: Buffer = Buffer.from(keys.privateKey, "hex");
 
-        return schnorr.sign(digest, key).toString("hex");
+        return schnorr.sign(digest, Buffer.from(keys.privateKey, "hex")).toString("hex");
     }
 
     public static verifySchnorrBip340(hash: Buffer, signature: Buffer | string, publicKey: Buffer | string): boolean {
