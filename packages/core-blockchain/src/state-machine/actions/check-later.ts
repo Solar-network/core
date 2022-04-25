@@ -12,15 +12,15 @@ export class CheckLater implements Action {
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
-    @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@solar-network/core-p2p")
-    private readonly configuration!: Providers.PluginConfiguration;
-
     @Container.inject(Container.Identifiers.EventDispatcherService)
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
+
+    @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/core-p2p")
+    private readonly p2pConfiguration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.PeerNetworkMonitor)
     private readonly peerNetworkMonitor!: Contracts.P2P.NetworkMonitor;
@@ -135,7 +135,7 @@ export class CheckLater implements Action {
 
                 const stopDownloading = {
                     handle: ({ data }) => {
-                        const remoteAccess: string[] = this.configuration.getOptional<Array<string>>(
+                        const remoteAccess: string[] = this.p2pConfiguration.getOptional<Array<string>>(
                             "remoteAccess",
                             [],
                         );
