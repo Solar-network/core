@@ -97,7 +97,7 @@ global-bin-dir=""$SOLAR_DATA_PATH""/.pnpm/bin
 store-dir=""$SOLAR_DATA_PATH""/.pnpm/store" > "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc
 ln -sf "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc "$SOLAR_DATA_PATH"/etc/npmrc
 
-npm install -g cli-cursor@3.1.0 delay@5.0.0 env-paths@2.2.1 kleur@4.1.4 @alessiodf/listr pnpm prompts@2.4.2 >/dev/null 2>/dev/null
+npm install -g cli-cursor@3.1.0 delay@5.0.0 env-paths@2.2.1 kleur@4.1.4 @alessiodf/listr pnpm@6.32.11 prompts@2.4.2 >/dev/null 2>/dev/null
 
 cat << 'EOF' > "$SOLAR_TEMP_PATH"/install.js
 const Listr = require("@alessiodf/listr");
@@ -319,7 +319,6 @@ async function core() {
         const pnpm = spawn(
             `
                 . "${process.env.SOLAR_DATA_PATH}"/.env &&
-                npm -g install pnpm &&
                 pnpm -g install pm2 &&
                 pm2 install pm2-logrotate &&
                 pm2 set pm2-logrotate:max_size 500M &&
