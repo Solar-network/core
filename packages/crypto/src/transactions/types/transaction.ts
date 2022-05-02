@@ -16,7 +16,6 @@ import { TransactionSchema } from "./schemas";
 export abstract class Transaction implements ITransaction {
     public static type: number | undefined = undefined;
     public static typeGroup: number | undefined = undefined;
-    public static version: number = 1;
     public static key: string | undefined = undefined;
 
     protected static defaultStaticFee: BigNumber = BigNumber.ZERO;
@@ -101,11 +100,7 @@ export abstract class Transaction implements ITransaction {
             delete data.typeGroup;
         }
 
-        if (data.version === 1) {
-            delete data.nonce;
-        } else {
-            delete data.timestamp;
-        }
+        delete data.timestamp;
 
         return data;
     }

@@ -9,7 +9,6 @@ export abstract class MultiPaymentTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.MultiPayment;
     public static key = "multiPayment";
-    public static version: number = 2;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("10000000");
 

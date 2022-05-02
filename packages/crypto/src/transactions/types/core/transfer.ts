@@ -9,7 +9,6 @@ export abstract class TransferTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.Transfer;
     public static key = "transfer";
-    public static version: number = 1;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("10000000");
 

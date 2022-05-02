@@ -88,12 +88,6 @@ export class TransactionKeyAlreadyRegisteredError extends CryptoError {
     }
 }
 
-export class TransactionVersionAlreadyRegisteredError extends CryptoError {
-    public constructor(name: string, version: number) {
-        super(`Transaction type ${name} is already registered in version ${version}`);
-    }
-}
-
 export class CoreTransactionTypeGroupImmutableError extends CryptoError {
     public constructor() {
         super(`The Core transaction type group is immutable`);

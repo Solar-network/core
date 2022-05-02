@@ -1,7 +1,6 @@
 import { base58 } from "bstring";
 
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { ISerializeOptions } from "../../../interfaces";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -10,7 +9,6 @@ export abstract class IpfsTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.Ipfs;
     public static key = "ipfs";
-    public static version: number = 2;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("500000000");
 
@@ -18,7 +16,7 @@ export abstract class IpfsTransaction extends Transaction {
         return schemas.ipfs;
     }
 
-    public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
+    public serialize(): ByteBuffer | undefined {
         const { data } = this;
 
         if (data.asset) {

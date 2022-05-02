@@ -10,7 +10,6 @@ export abstract class HtlcLockTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.HtlcLock;
     public static key = "htlcLock";
-    public static version: number = 2;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("10000000");
 

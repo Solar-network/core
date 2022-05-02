@@ -1,5 +1,5 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { IMultiSignatureAsset, ISerializeOptions, ITransactionData } from "../../../interfaces";
+import { IMultiSignatureAsset, ITransactionData } from "../../../interfaces";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -8,7 +8,6 @@ export class MultiSignatureRegistrationTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.MultiSignature;
     public static key = "multiSignature";
-    public static version: number = 2;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("500000000");
 
@@ -24,7 +23,7 @@ export class MultiSignatureRegistrationTransaction extends Transaction {
         return super.staticFee(feeContext);
     }
 
-    public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
+    public serialize(): ByteBuffer | undefined {
         const { data } = this;
         const { min, publicKeys } = data.asset!.multiSignature!;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(2 + publicKeys.length * 33));
