@@ -1,7 +1,7 @@
 {
     "name": "@solar-network/utils",
-    "version": "3.2.4",
-    "description": "Performance oriented implementations of commonly used functions in TypeScript.",
+    "version": "3.3.0-next.0",
+    "description": "Performance oriented implementations of commonly used functions",
     "license": "CC-BY-ND-4.0",
     "contributors": [
         "alessiodf <gym@solar.org>",
