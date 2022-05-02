@@ -51,10 +51,9 @@ export class StateBuilder {
             for (let i = 0; i < registeredHandlers.length; i++) {
                 const handler = registeredHandlers[i];
                 const ctorKey: string | undefined = handler.getConstructor().key;
-                const version = handler.getConstructor().version;
                 AppUtils.assert.defined<string>(ctorKey);
 
-                this.logger.info(`State Generation - Step ${3 + i} of ${steps}: ${capitalize(ctorKey)} v${version}`);
+                this.logger.info(`State Generation - Step ${3 + i} of ${steps}: ${capitalize(ctorKey)}`);
                 await handler.bootstrap();
             }
 
