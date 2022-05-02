@@ -24,10 +24,7 @@ export class TransactionHandlerRegistry {
         return this.handlers;
     }
 
-    public getRegisteredHandlerByType(
-        internalType: Transactions.InternalTransactionType,
-        version: number = 1,
-    ): TransactionHandler {
+    public getRegisteredHandlerByType(internalType: Transactions.InternalTransactionType): TransactionHandler {
         for (const handler of this.handlers) {
             const transactionConstructor = handler.getConstructor();
             Utils.assert.defined<number>(transactionConstructor.type);
@@ -36,7 +33,7 @@ export class TransactionHandlerRegistry {
                 transactionConstructor.type,
                 transactionConstructor.typeGroup,
             );
-            if (handlerInternalType === internalType && transactionConstructor.version === version) {
+            if (handlerInternalType === internalType) {
                 return handler;
             }
         }
@@ -55,9 +52,8 @@ export class TransactionHandlerRegistry {
 
     public async getActivatedHandlerByType(
         internalType: Transactions.InternalTransactionType,
-        version: number = 1,
     ): Promise<TransactionHandler> {
-        const handler = this.getRegisteredHandlerByType(internalType, version);
+        const handler = this.getRegisteredHandlerByType(internalType);
         if (await handler.isActivated()) {
             return handler;
         }
@@ -66,6 +62,6 @@ export class TransactionHandlerRegistry {
 
     public async getActivatedHandlerForData(transactionData: Interfaces.ITransactionData): Promise<TransactionHandler> {
         const internalType = Transactions.InternalTransactionType.from(transactionData.type, transactionData.typeGroup);
-        return this.getActivatedHandlerByType(internalType, transactionData.version);
+        return this.getActivatedHandlerByType(internalType);
     }
 }

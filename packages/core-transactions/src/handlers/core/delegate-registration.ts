@@ -8,10 +8,11 @@ import {
 } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
-// todo: revisit the implementation, container usage and arguments after core-database rework
-// todo: replace unnecessary function arguments with dependency injection to avoid passing around references
 @Container.injectable()
 export class DelegateRegistrationTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.TransactionHistoryService)
+    private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
+
     @Container.inject(Container.Identifiers.TransactionPoolQuery)
     private readonly poolQuery!: Contracts.TransactionPool.Query;
 
@@ -39,10 +40,63 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.One.DelegateRegistrationTransaction;
+        return Transactions.Core.DelegateRegistrationTransaction;
     }
 
-    public async bootstrap(): Promise<void> {}
+    public async bootstrap(): Promise<void> {
+        const criteria = {
+            typeGroup: this.getConstructor().typeGroup,
+            type: this.getConstructor().type,
+        };
+
+        for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
+            AppUtils.assert.defined<string>(transaction.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.asset?.delegate?.username);
+
+            const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+
+            wallet.setAttribute<Contracts.State.WalletDelegateAttributes>("delegate", {
+                username: transaction.asset.delegate.username,
+                voteBalance: Utils.BigNumber.ZERO,
+                forgedFees: Utils.BigNumber.ZERO,
+                burnedFees: Utils.BigNumber.ZERO,
+                forgedRewards: Utils.BigNumber.ZERO,
+                producedBlocks: 0,
+                rank: undefined,
+                voters: 0,
+            });
+
+            this.walletRepository.index(wallet);
+        }
+
+        const forgedBlocks = await this.blockRepository.getDelegatesForgedBlocks();
+        const lastForgedBlocks = await this.blockRepository.getLastForgedBlocks();
+        for (const block of forgedBlocks) {
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
+
+            // Genesis wallet is empty
+            if (!wallet.hasAttribute("delegate")) {
+                continue;
+            }
+
+            const delegate: Contracts.State.WalletDelegateAttributes = wallet.getAttribute("delegate");
+            delegate.burnedFees = delegate.forgedFees.plus(block.burnedFees);
+            delegate.forgedFees = delegate.forgedFees.plus(block.totalFees);
+            delegate.forgedRewards = delegate.forgedRewards.plus(block.totalRewards);
+            delegate.producedBlocks += +block.totalProduced;
+        }
+
+        for (const block of lastForgedBlocks) {
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
+
+            // Genesis wallet is empty
+            if (!wallet.hasAttribute("delegate")) {
+                continue;
+            }
+
+            wallet.setAttribute("delegate.lastBlock", block);
+        }
+    }
 
     public async isActivated(): Promise<boolean> {
         return true;

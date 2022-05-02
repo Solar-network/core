@@ -1,5 +1,4 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { ISerializeOptions } from "../../../interfaces";
 import { configManager } from "../../../managers";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
@@ -9,7 +8,6 @@ export abstract class HtlcClaimTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.HtlcClaim;
     public static key = "htlcClaim";
-    public static version: number = 2;
 
     protected static defaultStaticFee: BigNumber = BigNumber.ZERO;
 
@@ -22,7 +20,7 @@ export abstract class HtlcClaimTransaction extends Transaction {
         return milestone.htlcEnabled === true && super.verify();
     }
 
-    public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
+    public serialize(): ByteBuffer | undefined {
         const { data } = this;
 
         if (!data.asset || !data.asset.claim) {

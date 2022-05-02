@@ -18,7 +18,7 @@ export class MultiPaymentTransactionHandler extends TransactionHandler {
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.Two.MultiPaymentTransaction;
+        return Transactions.Core.MultiPaymentTransaction;
     }
 
     public async bootstrap(): Promise<void> {

@@ -1,5 +1,4 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { ISerializeOptions } from "../../../interfaces";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -8,7 +7,6 @@ export abstract class SecondSignatureRegistrationTransaction extends Transaction
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.SecondSignature;
     public static key = "secondSignature";
-    public static version: number = 1;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("500000000");
 
@@ -16,7 +14,7 @@ export abstract class SecondSignatureRegistrationTransaction extends Transaction
         return schemas.secondSignature;
     }
 
-    public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
+    public serialize(): ByteBuffer | undefined {
         const { data } = this;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(33));
 

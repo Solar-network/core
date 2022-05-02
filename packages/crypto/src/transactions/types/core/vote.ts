@@ -1,5 +1,4 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { ISerializeOptions } from "../../../interfaces";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -8,7 +7,6 @@ export class VoteTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.Vote;
     public static key = "vote";
-    public static version: number = 1;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("100000000");
 
@@ -16,7 +14,7 @@ export class VoteTransaction extends Transaction {
         return schemas.vote;
     }
 
-    public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
+    public serialize(): ByteBuffer | undefined {
         const { data } = this;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(69));
 

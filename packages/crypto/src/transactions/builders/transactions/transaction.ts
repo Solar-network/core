@@ -1,4 +1,3 @@
-import { Slots } from "../../../crypto";
 import { TransactionTypeGroup } from "../../../enums";
 import {
     MissingTransactionSignatureError,
@@ -24,7 +23,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
     public constructor() {
         this.data = {
             id: undefined,
-            timestamp: Slots.getTime(),
             typeGroup: TransactionTypeGroup.Test,
             nonce: BigNumber.ZERO,
             vendorField: undefined,
@@ -104,12 +102,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         return this.instance();
     }
 
-    public timestamp(timestamp: number): TBuilder {
-        this.data.timestamp = timestamp;
-
-        return this.instance();
-    }
-
     public sign(passphrase: string): TBuilder {
         const keys: IKeyPair = Keys.fromPassphrase(passphrase);
         return this.signWithKeyPair(keys);
@@ -169,12 +161,8 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             vendorField: this.data.vendorField,
         } as ITransactionData;
 
-        if (this.data.version === 1) {
-            struct.timestamp = this.data.timestamp;
-        } else {
-            struct.typeGroup = this.data.typeGroup;
-            struct.nonce = this.data.nonce;
-        }
+        struct.typeGroup = this.data.typeGroup;
+        struct.nonce = this.data.nonce;
 
         if (Array.isArray(this.data.signatures)) {
             struct.signatures = this.data.signatures;

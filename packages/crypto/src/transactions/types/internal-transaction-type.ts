@@ -19,8 +19,19 @@ export class InternalTransactionType {
     }
 
     public toString(): string {
-        if (this.typeGroup === TransactionTypeGroup.Core) {
-            return `Core/${this.type}`;
+        switch (this.typeGroup) {
+            case TransactionTypeGroup.Core: {
+                return `Core/${this.type}`;
+            }
+            case TransactionTypeGroup.Reserved: {
+                return `Reserved/${this.type}`;
+            }
+            case TransactionTypeGroup.Solar: {
+                return `Solar/${this.type}`;
+            }
+            case TransactionTypeGroup.Test: {
+                return `Test/${this.type}`;
+            }
         }
 
         return `${this.typeGroup}/${this.type}`;
