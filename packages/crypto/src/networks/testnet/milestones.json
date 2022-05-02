@@ -119,5 +119,14 @@
             },
             "secondaryReward": 675000000
         }
+    },
+    {
+        "height": 500000,
+        "acceptLegacySchnorrTransactions": true,
+        "bip340": true,
+        "htlcEnabled": true,
+        "p2p": {
+            "minimumVersions": ["^3.3.0 || ^3.3.0-next.0"]
+        }
     }
 ]
