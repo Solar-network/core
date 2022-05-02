@@ -123,6 +123,21 @@ export const delegateRegistration = extend(transactionBaseSchema, {
 export const vote = extend(transactionBaseSchema, {
     $id: "vote",
     required: ["asset"],
+    if: { properties: { version: { anyOf: [{ const: 2 }] } } },
+    then: {
+        properties: {
+            asset: {
+                properties: { votes: { items: { $ref: "walletVoteUsernameOrPublicKey" } } },
+            },
+        },
+    },
+    else: {
+        properties: {
+            asset: {
+                properties: { votes: { items: { $ref: "walletVoteUsername" } } },
+            },
+        },
+    },
     properties: {
         type: { transactionType: TransactionType.Core.Vote },
         amount: { bignumber: { minimum: 0, maximum: 0 } },
@@ -137,7 +152,6 @@ export const vote = extend(transactionBaseSchema, {
                     minItems: 1,
                     maxItems: 2,
                     additionalItems: false,
-                    items: { $ref: "walletVote" },
                 },
             },
         },
