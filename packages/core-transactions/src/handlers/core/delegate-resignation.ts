@@ -5,8 +5,6 @@ import { NotEnoughDelegatesError, WalletAlreadyResignedError, WalletNotADelegate
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 import { DelegateRegistrationTransactionHandler } from "./delegate-registration";
 
-// todo: revisit the implementation, container usage and arguments after core-database rework
-// todo: replace unnecessary function arguments with dependency injection to avoid passing around references
 @Container.injectable()
 export class DelegateResignationTransactionHandler extends TransactionHandler {
     @Container.inject(Container.Identifiers.TransactionPoolQuery)
@@ -24,7 +22,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.Two.DelegateResignationTransaction;
+        return Transactions.Core.DelegateResignationTransaction;
     }
 
     public async bootstrap(): Promise<void> {

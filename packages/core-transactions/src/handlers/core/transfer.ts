@@ -17,10 +17,16 @@ export class TransferTransactionHandler extends TransactionHandler {
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.One.TransferTransaction;
+        return Transactions.Core.TransferTransaction;
     }
 
-    public async bootstrap(): Promise<void> {}
+    public async bootstrap(): Promise<void> {
+        const transactions = await this.transactionRepository.findReceivedTransactions();
+        for (const transaction of transactions) {
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.recipientId);
+            wallet.increaseBalance(Utils.BigNumber.make(transaction.amount));
+        }
+    }
 
     public async isActivated(): Promise<boolean> {
         return true;

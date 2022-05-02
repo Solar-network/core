@@ -38,7 +38,7 @@ export class TransactionHandlerProvider {
             transactionConstructor.typeGroup,
         );
 
-        if (this.hasOtherHandlerHandling(handlerConstructor, internalType, transactionConstructor.version)) {
+        if (this.hasOtherHandlerHandling(handlerConstructor, internalType)) {
             throw new AlreadyRegisteredError(internalType);
         }
 
@@ -65,7 +65,6 @@ export class TransactionHandlerProvider {
     private hasOtherHandlerHandling(
         handlerConstructor: TransactionHandlerConstructor,
         internalType: Transactions.InternalTransactionType,
-        version: number,
     ) {
         for (const otherHandlerConstructor of this.handlerConstructors) {
             if (otherHandlerConstructor === handlerConstructor) continue;
@@ -81,7 +80,7 @@ export class TransactionHandlerProvider {
                 otherTransactionConstructor.typeGroup,
             );
 
-            if (otherInternalType === internalType && otherTransactionConstructor.version === version) {
+            if (otherInternalType === internalType) {
                 return true;
             }
         }

@@ -4,8 +4,6 @@ import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network
 import { HtlcLockExpiredError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
-// todo: revisit the implementation, container usage and arguments after core-database rework
-// todo: replace unnecessary function arguments with dependency injection to avoid passing around references
 @Container.injectable()
 export class HtlcLockTransactionHandler extends TransactionHandler {
     public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
@@ -17,7 +15,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.Two.HtlcLockTransaction;
+        return Transactions.Core.HtlcLockTransaction;
     }
 
     public async bootstrap(): Promise<void> {

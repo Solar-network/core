@@ -4,10 +4,11 @@ import { Interfaces, Transactions } from "@solar-network/crypto";
 import { NotSupportedForMultiSignatureWalletError, SecondSignatureAlreadyRegisteredError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
-// todo: revisit the implementation, container usage and arguments after core-database rework
-// todo: replace unnecessary function arguments with dependency injection to avoid passing around references
 @Container.injectable()
 export class SecondSignatureRegistrationTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.TransactionHistoryService)
+    private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
+
     @Container.inject(Container.Identifiers.TransactionPoolQuery)
     private readonly poolQuery!: Contracts.TransactionPool.Query;
 
@@ -20,10 +21,23 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.One.SecondSignatureRegistrationTransaction;
+        return Transactions.Core.SecondSignatureRegistrationTransaction;
     }
 
-    public async bootstrap(): Promise<void> {}
+    public async bootstrap(): Promise<void> {
+        const criteria = {
+            typeGroup: this.getConstructor().typeGroup,
+            type: this.getConstructor().type,
+        };
+
+        for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
+            Utils.assert.defined<string>(transaction.senderPublicKey);
+            Utils.assert.defined<string>(transaction.asset?.signature?.publicKey);
+
+            const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            wallet.setAttribute("secondPublicKey", transaction.asset.signature.publicKey);
+        }
+    }
 
     public async isActivated(): Promise<boolean> {
         return true;

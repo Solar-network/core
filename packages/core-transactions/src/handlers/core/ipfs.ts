@@ -4,8 +4,6 @@ import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { IpfsHashAlreadyExists } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
-// todo: revisit the implementation, container usage and arguments after core-database rework
-// todo: replace unnecessary function arguments with dependency injection to avoid passing around references
 @Container.injectable()
 export class IpfsTransactionHandler extends TransactionHandler {
     @Container.inject(Container.Identifiers.TransactionPoolQuery)
@@ -23,7 +21,7 @@ export class IpfsTransactionHandler extends TransactionHandler {
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.Two.IpfsTransaction;
+        return Transactions.Core.IpfsTransaction;
     }
 
     public async bootstrap(): Promise<void> {

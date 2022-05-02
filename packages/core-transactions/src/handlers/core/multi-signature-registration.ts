@@ -26,12 +26,11 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.Two.MultiSignatureRegistrationTransaction;
+        return Transactions.Core.MultiSignatureRegistrationTransaction;
     }
 
     public async bootstrap(): Promise<void> {
         const criteria = {
-            version: this.getConstructor().version,
             typeGroup: this.getConstructor().typeGroup,
             type: this.getConstructor().type,
         };
