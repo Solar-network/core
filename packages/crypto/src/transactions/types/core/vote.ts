@@ -27,9 +27,14 @@ export class VoteTransaction extends Transaction {
                         return prefix + sliced;
                     }
 
-                    return (
-                        "ff" + vote.length.toString(16).padStart(2, "0") + prefix + Buffer.from(sliced).toString("hex")
-                    );
+                    const hex: string =
+                        vote.length.toString(16).padStart(2, "0") + prefix + Buffer.from(sliced).toString("hex");
+
+                    if (data.version === 2) {
+                        return "ff" + hex;
+                    }
+
+                    return hex;
                 })
                 .join("");
             buff.writeUInt8(data.asset.votes.length);
@@ -45,9 +50,8 @@ export class VoteTransaction extends Transaction {
         data.asset = { votes: [] };
 
         for (let i = 0; i < voteLength; i++) {
-            const firstByte: number = buf.readUInt8();
             let vote: string;
-            if (firstByte !== 0xff) {
+            if (data.version === 2 && buf.readUInt8() !== 0xff) {
                 buf.jump(-1);
                 vote = buf.readBuffer(34).toString("hex");
                 vote = (vote[1] === "1" ? "+" : "-") + vote.slice(2);
