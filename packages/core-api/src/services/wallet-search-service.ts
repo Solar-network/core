@@ -1,4 +1,5 @@
 import { Container, Contracts, Services } from "@solar-network/core-kernel";
+import { Identities } from "@solar-network/crypto";
 
 import { WalletCriteria, WalletResource } from "../resources-new";
 
@@ -29,11 +30,15 @@ export class WalletSearchService {
             wallet = this.walletRepository.findByUsername(walletId);
         }
 
+        if (!wallet && Identities.Address.validate(walletId)) {
+            wallet = this.walletRepository.createWallet(walletId);
+        }
+
         if (wallet) {
             return this.getWalletResourceFromWallet(wallet);
-        } else {
-            return undefined;
         }
+
+        return undefined;
     }
 
     public getWalletsPage(

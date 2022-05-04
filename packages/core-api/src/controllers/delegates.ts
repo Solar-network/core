@@ -40,7 +40,7 @@ export class DelegatesController extends Controller {
 
         const walletResource = this.walletSearchService.getWallet(walletId);
         if (!walletResource) {
-            return notFound("Wallet not found");
+            return notFound("Delegate not found");
         }
 
         const delegateResource = this.delegateSearchService.getDelegate(walletResource.address);
@@ -56,7 +56,7 @@ export class DelegatesController extends Controller {
 
         const walletResource = this.walletSearchService.getWallet(walletId);
         if (!walletResource) {
-            return notFound("Wallet not found");
+            return notFound("Delegate not found");
         }
 
         const delegateResource = this.delegateSearchService.getDelegate(walletResource.address);
@@ -83,7 +83,7 @@ export class DelegatesController extends Controller {
 
         const walletResource = this.walletSearchService.getWallet(walletId);
         if (!walletResource) {
-            return notFound("Wallet not found");
+            return notFound("Delegate not found");
         }
 
         const delegateResource = this.delegateSearchService.getDelegate(walletResource.address);
