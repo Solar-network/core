@@ -1462,6 +1462,14 @@
                         }
                     },
                     {
+                        "name": "version",
+                        "in": "query",
+                        "description": "The version of the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/transactionVersions"
+                        }
+                    },
+                    {
                         "name": "blockId",
                         "in": "query",
                         "description": "The block ID containing the transaction(s) to be returned",
@@ -2545,6 +2553,10 @@
                 "enum": []
             },
             "transactionTypes": {
+                "type": "integer",
+                "enum": []
+            },
+            "transactionVersions": {
                 "type": "integer",
                 "enum": []
             },
