@@ -7,7 +7,6 @@ import {
     AcceptBlockHandler,
     AlreadyForgedHandler,
     ExceptionHandler,
-    IncompatibleTransactionsHandler,
     InvalidGeneratorHandler,
     InvalidRewardHandler,
     NonceOutOfOrderHandler,
@@ -58,10 +57,6 @@ export class BlockProcessor {
 
         if (!(await this.verifyBlock(block))) {
             return this.app.resolve<VerificationFailedHandler>(VerificationFailedHandler).execute(block);
-        }
-
-        if (this.blockContainsIncompatibleTransactions(block)) {
-            return this.app.resolve<IncompatibleTransactionsHandler>(IncompatibleTransactionsHandler).execute();
         }
 
         if (this.blockContainsOutOfOrderNonce(block)) {
@@ -174,30 +169,13 @@ export class BlockProcessor {
     }
 
     /**
-     * Check if a block contains incompatible transactions and should thus be rejected.
-     */
-    private blockContainsIncompatibleTransactions(block: Interfaces.IBlock): boolean {
-        for (let i = 1; i < block.transactions.length; i++) {
-            if (block.transactions[i].data.version !== block.transactions[0].data.version) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * For a given sender, v2 transactions must have strictly increasing nonce without gaps.
+     * For a given sender, transactions must have strictly increasing nonce without gaps.
      */
     private blockContainsOutOfOrderNonce(block: Interfaces.IBlock): boolean {
         const nonceBySender = {};
 
         for (const transaction of block.transactions) {
             const data = transaction.data;
-
-            if (data.version && data.version < 2) {
-                break;
-            }
 
             AppUtils.assert.defined<string>(data.senderPublicKey);
 
