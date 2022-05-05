@@ -7,7 +7,7 @@ import { Deserializer } from "./deserializer";
 import { Serializer } from "./serializer";
 
 export class BlockFactory {
-    public static make(data: IBlockData, keys: IKeyPair): IBlock | undefined {
+    public static make(data: IBlockData, keys: IKeyPair, aux?: Buffer): IBlock | undefined {
         const { bip340 } = configManager.getMilestone(data.height);
 
         data.generatorPublicKey = keys.publicKey;
@@ -15,7 +15,7 @@ export class BlockFactory {
         const payloadHash: Buffer = Serializer.serialize(data, false);
         const hash: Buffer = HashAlgorithms.sha256(payloadHash);
 
-        data.blockSignature = Hash.signSchnorr(hash, keys, bip340);
+        data.blockSignature = Hash.signSchnorr(hash, keys, bip340, aux);
         data.id = Block.getId(data);
 
         return this.fromData(data);

@@ -4,12 +4,12 @@ import { IKeyPair } from "../interfaces";
 import { HashAlgorithms } from "./hash-algorithms";
 
 export class Hash {
-    public static signSchnorr(hash: Buffer, keys: IKeyPair, bip340?: boolean): string {
+    public static signSchnorr(hash: Buffer, keys: IKeyPair, bip340?: boolean, aux?: Buffer): string {
         if (!bip340) {
             return Hash.signSchnorrLegacy(hash, keys);
         }
 
-        return Hash.signSchnorrBip340(hash, keys);
+        return Hash.signSchnorrBip340(hash, keys, aux);
     }
 
     public static verifySchnorr(
@@ -37,10 +37,10 @@ export class Hash {
         );
     }
 
-    public static signSchnorrBip340(hash: Buffer, keys: IKeyPair): string {
+    public static signSchnorrBip340(hash: Buffer, keys: IKeyPair, aux?: Buffer): string {
         const digest: Buffer = hash.length !== 32 ? HashAlgorithms.sha256(hash) : hash;
 
-        return schnorr.sign(digest, Buffer.from(keys.privateKey, "hex")).toString("hex");
+        return schnorr.sign(digest, Buffer.from(keys.privateKey, "hex"), aux).toString("hex");
     }
 
     public static verifySchnorrBip340(hash: Buffer, signature: Buffer | string, publicKey: Buffer | string): boolean {
