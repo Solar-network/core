@@ -1,4 +1,4 @@
-import { Boom, notFound } from "@hapi/boom";
+import { badData, Boom, notFound } from "@hapi/boom";
 import Hapi from "@hapi/hapi";
 import { Container, Contracts, Services } from "@solar-network/core-kernel";
 import { Enums } from "@solar-network/crypto";
@@ -238,6 +238,10 @@ export class WalletsController extends Controller {
     }
 
     private raiseError(walletId: string): Boom {
-        return notFound(walletId.length === 34 ? "Wallet not valid" : "Wallet not found");
+        if (walletId.length === 34) {
+            return badData("Wallet not valid");
+        }
+
+        return notFound("Wallet not found");
     }
 }
