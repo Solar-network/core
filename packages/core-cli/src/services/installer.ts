@@ -80,6 +80,7 @@ export class Installer {
                 git checkout tags/${gitTag} &&
                 CFLAGS="$CFLAGS" CPATH="$CPATH" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" pnpm install ${pnpmFlags} &&
                 pnpm build ${pnpmFlags} &&
+                pnpm install ${pnpmFlags} &&
                 exit 0) || exit $?`,
             ],
             { cols: process.stdout.columns, cwd: corePath, env: process.env as { [key: string]: string } },
