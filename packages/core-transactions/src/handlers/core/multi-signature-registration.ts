@@ -1,12 +1,7 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Identities, Interfaces, Transactions } from "@solar-network/crypto";
 
-import {
-    InvalidMultiSignatureError,
-    MultiSignatureAlreadyRegisteredError,
-    MultiSignatureKeyCountMismatchError,
-    MultiSignatureMinimumKeysError,
-} from "../../errors";
+import { MultiSignatureAlreadyRegisteredError, MultiSignatureMinimumKeysError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
 @Container.injectable()
@@ -69,12 +64,6 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
             throw new MultiSignatureMinimumKeysError();
         }
 
-        AppUtils.assert.defined<string[]>(data.signatures);
-
-        if (publicKeys.length !== data.signatures.length) {
-            throw new MultiSignatureKeyCountMismatchError();
-        }
-
         AppUtils.assert.defined<Interfaces.IMultiSignatureAsset>(data.asset.multiSignature);
 
         const multiSigPublicKey: string = Identities.PublicKey.fromMultiSignatureAsset(data.asset.multiSignature);
@@ -82,10 +71,6 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
 
         if (recipientWallet.hasMultiSignature()) {
             throw new MultiSignatureAlreadyRegisteredError();
-        }
-
-        if (!this.verifySignatures(wallet, data, data.asset.multiSignature)) {
-            throw new InvalidMultiSignatureError();
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);

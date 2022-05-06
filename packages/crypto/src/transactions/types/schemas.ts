@@ -160,7 +160,7 @@ export const vote = extend(transactionBaseSchema, {
 
 export const multiSignature = extend(transactionBaseSchema, {
     $id: "multiSignature",
-    required: ["asset", "signatures"],
+    required: ["asset"],
     properties: {
         type: { transactionType: TransactionType.Core.MultiSignature },
         amount: { bignumber: { minimum: 0, maximum: 0 } },
@@ -189,14 +189,6 @@ export const multiSignature = extend(transactionBaseSchema, {
                     },
                 },
             },
-        },
-        signatures: {
-            type: "array",
-            minItems: { $data: "1/asset/multiSignature/min" },
-            maxItems: { $data: "1/asset/multiSignature/publicKeys/length" },
-            additionalItems: false,
-            uniqueItems: true,
-            items: { allOf: [{ minLength: 130, maxLength: 130 }, { $ref: "hex" }] },
         },
     },
 });
