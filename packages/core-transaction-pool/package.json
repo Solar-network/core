@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/core-transaction-pool",
-    "version": "3.2.4",
+    "version": "3.2.5",
     "description": "Transaction Pool Manager for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
