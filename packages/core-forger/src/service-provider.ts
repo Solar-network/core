@@ -1,9 +1,8 @@
-import { Container, Contracts, Enums, Providers, Services } from "@solar-network/core-kernel";
+import { Container, Contracts, Providers, Services } from "@solar-network/core-kernel";
 import Joi from "joi";
 
 import { ForgeNewBlockAction, IsForgingAllowedAction } from "./actions";
 import { DelegateFactory } from "./delegate-factory";
-import { DelegateTracker } from "./delegate-tracker";
 import { ForgerService } from "./forger-service";
 import { Delegate, RelayHost } from "./interfaces";
 import { CurrentDelegateProcessAction, LastForgedBlockRemoteAction, NextSlotProcessAction } from "./process-actions";
@@ -31,14 +30,18 @@ export class ServiceProvider extends Providers.ServiceProvider {
      * @memberof ServiceProvider
      */
     public async boot(): Promise<void> {
+        const aux: string | undefined = this.config().get("aux");
         const delegates: Delegate[] = this.makeDelegates();
 
         const forgerService = this.app.get<ForgerService>(Container.Identifiers.ForgerService);
 
         forgerService.register(this.config().get("hosts") as RelayHost[]);
-        await forgerService.boot(delegates);
 
-        this.startTracker(delegates);
+        if (aux) {
+            await forgerService.boot(delegates, Buffer.from(aux, "hex"));
+        } else {
+            await forgerService.boot(delegates);
+        }
     }
 
     /**
@@ -65,6 +68,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
     public configSchema(): object {
         return Joi.object({
+            aux: Joi.string().hex().length(64),
             hosts: Joi.array()
                 .items(
                     Joi.object({
@@ -77,7 +81,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
                     }),
                 )
                 .required(),
-            tracker: Joi.bool().required(),
         }).unknown(true);
     }
 
@@ -103,25 +106,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app
             .get<Contracts.Kernel.ProcessActionsService>(Container.Identifiers.ProcessActionsService)
             .register(this.app.resolve(LastForgedBlockRemoteAction));
-    }
-
-    /**
-     * @private
-     * @memberof ServiceProvider
-     */
-    private startTracker(delegates: Delegate[]): void {
-        if (!Array.isArray(delegates) || !delegates.length) {
-            return;
-        }
-
-        if (this.config().get("tracker") === true) {
-            this.app
-                .get<Contracts.Kernel.EventDispatcher>(Container.Identifiers.EventDispatcherService)
-                .listen(
-                    Enums.BlockEvent.Applied,
-                    this.app.resolve<DelegateTracker>(DelegateTracker).initialize(delegates),
-                );
-        }
     }
 
     /**

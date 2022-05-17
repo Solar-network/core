@@ -5,5 +5,4 @@ export const defaults = {
             port: process.env.CORE_P2P_PORT || 4000,
         },
     ],
-    tracker: false,
 };

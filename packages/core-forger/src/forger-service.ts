@@ -52,6 +52,13 @@ export class ForgerService {
 
     /**
      * @private
+     * @type {Buffer | undefined}
+     * @memberof ForgerService
+     */
+    private aux: Buffer | undefined;
+
+    /**
+     * @private
      * @type {Client}
      * @memberof ForgerService
      */
@@ -153,10 +160,12 @@ export class ForgerService {
      * @returns {Promise<void>}
      * @memberof ForgerService
      */
-    public async boot(delegates: Delegate[]): Promise<void> {
+    public async boot(delegates: Delegate[], aux?: Buffer): Promise<void> {
         if (this.handlerProvider.isRegistrationRequired()) {
             this.handlerProvider.registerHandlers();
         }
+
+        this.aux = aux;
 
         this.delegates = delegates.filter((value, index, self) => {
             return index === self.findIndex((delegate) => delegate.publicKey === value.publicKey);
@@ -292,6 +301,7 @@ export class ForgerService {
                 }
 
                 const block: Interfaces.IBlock | undefined = delegate.forge(this.transactions, {
+                    aux: this.aux,
                     previousBlock: {
                         id: networkState.getLastBlockId(),
                         height: networkStateHeight,
