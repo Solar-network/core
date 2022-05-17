@@ -77,6 +77,9 @@ export class CheckLater implements Action {
                 this.stateStore.polledForBlocks();
                 this.peerNetworkMonitor.cleansePeers({ fast: true, forcePing: true, log: false });
                 const downloadInterval = setInterval(async () => {
+                    if (this.stateStore.getBlockchain().value !== "idle") {
+                        return;
+                    }
                     try {
                         let lastBlock = this.app
                             .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
