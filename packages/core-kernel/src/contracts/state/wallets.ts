@@ -144,6 +144,7 @@ export interface WalletDelegateAttributes {
     forgedFees: Utils.BigNumber;
     burnedFees: Utils.BigNumber;
     forgedRewards: Utils.BigNumber;
+    devFunds: Utils.BigNumber;
     producedBlocks: number;
     rank?: number;
     lastBlock?: Interfaces.IBlockData;

@@ -86,9 +86,11 @@ export class DelegateSearchService {
                 fees: delegateAttribute.forgedFees,
                 burnedFees: delegateAttribute.burnedFees,
                 rewards: delegateAttribute.forgedRewards,
+                devFunds: delegateAttribute.devFunds,
                 total: delegateAttribute.forgedFees
                     .minus(delegateAttribute.burnedFees)
-                    .plus(delegateAttribute.forgedRewards),
+                    .plus(delegateAttribute.forgedRewards)
+                    .minus(delegateAttribute.devFunds),
             },
             version:
                 delegateAttribute.version && delegateAttribute.rank && delegateAttribute.rank <= activeDelegates

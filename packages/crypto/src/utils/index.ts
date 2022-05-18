@@ -109,4 +109,19 @@ export const isSupportedTransactionVersion = (version: number): boolean => {
     return false;
 };
 
+export const calculateDevFund = (height: number, reward: BigNumber): Record<string, BigNumber> => {
+    const constants = configManager.getMilestone(height);
+    const devFund = {};
+
+    if (!constants.devFund) {
+        return {};
+    }
+
+    for (const [wallet, percentage] of Object.entries(constants.devFund)) {
+        devFund[wallet] = reward.times(Math.round((percentage as number) * 100)).dividedBy(10000);
+    }
+
+    return devFund;
+};
+
 export { Base58, BigNumber, ByteBuffer, isValidPeer, isLocalHost, calculateBlockTime, isNewBlockTime, calculateReward };
