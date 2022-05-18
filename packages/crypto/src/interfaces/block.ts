@@ -43,6 +43,7 @@ export interface IBlockData {
     serialized?: string;
     transactions?: ITransactionData[];
     ip?: string;
+    fromForger?: boolean;
 }
 
 export interface IBlockJson {
