@@ -103,11 +103,21 @@ export class Block implements IBlock {
     }
 
     public getHeader(): IBlockData {
-        const header: IBlockData = Object.assign({}, this.data);
-        delete header.burnedFee;
-        delete header.devFund;
-        delete header.transactions;
-        return header;
+        return {
+            blockSignature: this.data.blockSignature,
+            generatorPublicKey: this.data.generatorPublicKey,
+            height: this.data.height,
+            id: this.data.id,
+            numberOfTransactions: this.data.numberOfTransactions,
+            payloadHash: this.data.payloadHash,
+            payloadLength: this.data.payloadLength,
+            previousBlock: this.data.previousBlock,
+            reward: this.data.reward,
+            timestamp: this.data.timestamp,
+            totalAmount: this.data.totalAmount,
+            totalFee: this.data.totalFee,
+            version: this.data.version,
+        };
     }
 
     public verifySignature(): boolean {
