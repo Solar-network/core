@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/core-cli",
-    "version": "3.3.0-next.1",
+    "version": "3.3.0-next.2",
     "description": "Command Line Interface to manage the Core of the Solar Network Blockchain",
     "license": "CC-BY-ND-4.0",
     "contributors": [
