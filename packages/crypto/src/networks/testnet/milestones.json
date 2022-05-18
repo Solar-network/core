@@ -128,5 +128,11 @@
         "p2p": {
             "minimumVersions": ["^3.3.0 || ^3.3.0-next.0"]
         }
+    },
+    {
+        "height": 671352,
+        "devFund": {
+            "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": 5
+        }
     }
 ]
