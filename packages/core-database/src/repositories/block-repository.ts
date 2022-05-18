@@ -120,12 +120,13 @@ export class BlockRepository extends AbstractRepository<Block> {
         {
             generatorPublicKey: string;
             totalRewards: string;
+            devFunds: string;
             burnedFees: string;
             totalFees: string;
             totalProduced: number;
         }[]
     > {
-        return this.createQueryBuilder()
+        const rewardsAndFees = await this.createQueryBuilder()
             .select([])
             .addSelect("generator_public_key", "generatorPublicKey")
             .addSelect("SUM(total_fee)", "totalFees")
@@ -133,6 +134,40 @@ export class BlockRepository extends AbstractRepository<Block> {
             .addSelect("SUM(reward)", "totalRewards")
             .addSelect("COUNT(total_amount)", "totalProduced")
             .groupBy("generator_public_key")
+            .getRawMany();
+
+        const devFunds = await this.createQueryBuilder()
+            .select([])
+            .addSelect("generator_public_key", "generatorPublicKey")
+            .addSelect("sum(amount::bigint)", "amount")
+            .leftJoin(
+                "(SELECT 1)",
+                "_",
+                "TRUE CROSS JOIN LATERAL jsonb_each_text(dev_fund::jsonb) json(address, amount)",
+            )
+            .groupBy("generator_public_key")
+            .getRawMany();
+
+        for (const devFund of devFunds) {
+            rewardsAndFees.find((block) => block.generatorPublicKey === devFund.generatorPublicKey).devFunds =
+                devFund.amount;
+        }
+
+        return rewardsAndFees;
+    }
+
+    public async getDevFunds(): Promise<{ address: string; amount: string; generatorPublicKey: string }[]> {
+        return this.createQueryBuilder()
+            .select([])
+            .addSelect("generator_public_key", "generatorPublicKey")
+            .addSelect("address", "address")
+            .addSelect("sum(amount::bigint)", "amount")
+            .leftJoin(
+                "(SELECT 1)",
+                "_",
+                "TRUE CROSS JOIN LATERAL jsonb_each_text(dev_fund::jsonb) json(address, amount)",
+            )
+            .groupBy("generator_public_key, address")
             .getRawMany();
     }
 

@@ -82,6 +82,18 @@ export class StateBuilder {
             const wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
             wallet.increaseBalance(Utils.BigNumber.make(block.rewards));
         }
+
+        const devFunds = await this.blockRepository.getDevFunds();
+
+        for (const devFund of devFunds) {
+            const amount: Utils.BigNumber = Utils.BigNumber.make(devFund.amount);
+
+            const devFundWallet = this.walletRepository.findByAddress(devFund.address);
+            devFundWallet.increaseBalance(amount);
+
+            const delegateWallet = this.walletRepository.findByPublicKey(devFund.generatorPublicKey);
+            delegateWallet.decreaseBalance(amount);
+        }
     }
 
     private async buildSentTransactions(): Promise<void> {

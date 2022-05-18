@@ -3,7 +3,7 @@ import { Hash, HashAlgorithms, Slots } from "../crypto";
 import { BlockSchemaError } from "../errors";
 import { IBlock, IBlockData, IBlockJson, IBlockVerification, ITransaction, ITransactionData } from "../interfaces";
 import { configManager } from "../managers/config";
-import { BigNumber, isException } from "../utils";
+import { BigNumber, calculateDevFund, isException } from "../utils";
 import { validator } from "../validation";
 import { Serializer } from "./serializer";
 
@@ -28,6 +28,8 @@ export class Block implements IBlock {
         delete this.data.transactions;
 
         this.data.burnedFee = this.getBurnedFees();
+
+        this.data.devFund = calculateDevFund(this.data.height, this.data.reward);
 
         this.verification = this.verify();
     }
@@ -92,7 +94,7 @@ export class Block implements IBlock {
     }
 
     public getBurnedFees(): BigNumber {
-        let fees = BigNumber.ZERO;
+        let fees: BigNumber = BigNumber.ZERO;
         for (const transaction of this.transactions) {
             transaction.setBurnedFee(this.data.height);
             fees = fees.plus(transaction.data.burnedFee!);
@@ -103,6 +105,7 @@ export class Block implements IBlock {
     public getHeader(): IBlockData {
         const header: IBlockData = Object.assign({}, this.data);
         delete header.burnedFee;
+        delete header.devFund;
         delete header.transactions;
         return header;
     }

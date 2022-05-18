@@ -28,6 +28,7 @@ export type DelegateResource = {
         fees: Utils.BigNumber;
         burnedFees: Utils.BigNumber;
         rewards: Utils.BigNumber;
+        devFunds: Utils.BigNumber;
         total: Utils.BigNumber;
     };
     version?: Semver;
@@ -70,6 +71,7 @@ export const delegateCriteriaSchemaObject = {
         burnedFees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         fees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         rewards: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
+        devFunds: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         total: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
     },
     version: Schemas.createRangeCriteriaSchema(Schemas.semver),

@@ -746,6 +746,29 @@
                         }
                     },
                     {
+                        "name": "forged.devFunds",
+                        "in": "query",
+                        "description": "Exact amount, in satoshis, of all development funds raised by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "forged.devFunds.from",
+                        "in": "query",
+                        "description": "Minimum amount, in satoshis, of all development funds raised by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "forged.devFunds.to",
+                        "in": "query",
+                        "description": "Maximum amount, in satoshis, of all all development funds raised by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },                    {
                         "name": "forged.total",
                         "in": "query",
                         "description": "Exact amount, in satoshis, of all unburned fees plus block rewards earned by the delegate(s) to be returned",
@@ -902,6 +925,8 @@
                                 "blocks.produced:desc",
                                 "forged.burnedFees:asc",
                                 "forged.burnedFees:desc",
+                                "forged.devFunds:asc",
+                                "forged.devFunds:desc",
                                 "forged.fees:asc",
                                 "forged.fees:desc",
                                 "forged.rewards:asc",
