@@ -227,6 +227,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         this.pushPingBlock(block, fromForger);
 
         if (this.stateStore.isStarted()) {
+            block.fromForger = fromForger;
             this.dispatch("NEWBLOCK");
             this.enqueueBlocks([block]);
 
