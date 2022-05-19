@@ -97,7 +97,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
                 continue;
             }
 
-            wallet.setAttribute("delegate.lastBlock", block);
+            wallet.setAttribute("delegate.lastBlock", block.id);
         }
     }
 

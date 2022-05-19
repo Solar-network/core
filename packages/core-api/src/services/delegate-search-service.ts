@@ -2,7 +2,7 @@ import { Container, Contracts, Services, Utils as AppUtils } from "@solar-networ
 import { Managers } from "@solar-network/crypto";
 import { Semver } from "@solar-network/utils";
 
-import { DelegateCriteria, DelegateResource, DelegateResourceLastBlock } from "../resources-new";
+import { DelegateCriteria, DelegateResource } from "../resources-new";
 
 @Container.injectable()
 export class DelegateSearchService {
@@ -51,17 +51,7 @@ export class DelegateSearchService {
 
         const delegateAttribute = wallet.getAttribute("delegate");
 
-        let delegateLastBlock: DelegateResourceLastBlock | undefined;
-
         const activeDelegates: number = Managers.configManager.getMilestone().activeDelegates;
-
-        if (delegateAttribute.lastBlock) {
-            delegateLastBlock = {
-                id: delegateAttribute.lastBlock.id,
-                height: delegateAttribute.lastBlock.height,
-                timestamp: AppUtils.formatTimestamp(delegateAttribute.lastBlock.timestamp),
-            };
-        }
 
         if (!delegateAttribute.version && ourKeys.includes(publicKey!)) {
             wallet.setAttribute("delegate.version", this.app.version());
@@ -77,7 +67,7 @@ export class DelegateSearchService {
             isResigned: !!delegateAttribute.resigned,
             blocks: {
                 produced: delegateAttribute.producedBlocks,
-                last: delegateLastBlock,
+                last: delegateAttribute.lastBlock,
             },
             production: {
                 approval: AppUtils.delegateCalculator.calculateApproval(wallet, supply),

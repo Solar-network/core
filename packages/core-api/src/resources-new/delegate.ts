@@ -19,7 +19,7 @@ export type DelegateResource = {
     isResigned: boolean;
     blocks: {
         produced: number;
-        last: DelegateResourceLastBlock | undefined;
+        last: string | undefined;
     };
     production: {
         approval: number;
@@ -32,16 +32,6 @@ export type DelegateResource = {
         total: Utils.BigNumber;
     };
     version?: Semver;
-};
-
-export type DelegateResourceLastBlock = {
-    id: string;
-    height: number;
-    timestamp: {
-        epoch: number;
-        unix: number;
-        human: string;
-    };
 };
 
 export const delegateCriteriaSchemaObject = {

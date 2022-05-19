@@ -198,7 +198,7 @@ export class BlockState implements Contracts.State.BlockState {
         delegateAttribute.forgedFees = delegateAttribute.forgedFees.plus(block.data.totalFee);
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.plus(block.data.reward);
         delegateAttribute.devFunds = delegateAttribute.devFunds.plus(devFund);
-        delegateAttribute.lastBlock = block.data;
+        delegateAttribute.lastBlock = block.data.id;
 
         const balanceIncrease = block.data.reward.minus(devFund).plus(block.data.totalFee.minus(block.data.burnedFee!));
 

@@ -147,7 +147,7 @@ export interface WalletDelegateAttributes {
     devFunds: Utils.BigNumber;
     producedBlocks: number;
     rank?: number;
-    lastBlock?: Interfaces.IBlockData;
+    lastBlock?: string;
     round?: number;
     resigned?: boolean;
     version?: string;
