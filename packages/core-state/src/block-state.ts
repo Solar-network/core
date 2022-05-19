@@ -5,17 +5,20 @@ import { Enums, Identities, Interfaces, Utils } from "@solar-network/crypto";
 // todo: review the implementation
 @Container.injectable()
 export class BlockState implements Contracts.State.BlockState {
-    @Container.inject(Container.Identifiers.WalletRepository)
-    private walletRepository!: Contracts.State.WalletRepository;
+    @Container.inject(Container.Identifiers.BlockHistoryService)
+    private readonly blockHistoryService!: Contracts.Shared.BlockHistoryService;
 
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
     private handlerRegistry!: Handlers.Registry;
 
+    @Container.inject(Container.Identifiers.LogService)
+    private logger!: Contracts.Kernel.Logger;
+
     @Container.inject(Container.Identifiers.StateStore)
     private readonly state!: Contracts.State.StateStore;
 
-    @Container.inject(Container.Identifiers.LogService)
-    private logger!: Contracts.Kernel.Logger;
+    @Container.inject(Container.Identifiers.WalletRepository)
+    private walletRepository!: Contracts.State.WalletRepository;
 
     public async applyBlock(
         block: Interfaces.IBlock,
@@ -57,7 +60,7 @@ export class BlockState implements Contracts.State.BlockState {
 
         const revertedTransactions: Interfaces.ITransaction[] = [];
         try {
-            this.revertBlockFromForger(forgerWallet, block);
+            await this.revertBlockFromForger(forgerWallet, block);
 
             for (const transaction of block.transactions.slice().reverse()) {
                 await this.revertTransaction(block.data.height, transaction);
@@ -212,7 +215,7 @@ export class BlockState implements Contracts.State.BlockState {
         }
     }
 
-    private revertBlockFromForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
+    private async revertBlockFromForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
         const delegateAttribute = forgerWallet.getAttribute<Contracts.State.WalletDelegateAttributes>("delegate");
         const devFund: Utils.BigNumber = Object.values(block.data.devFund!).reduce(
             (curr, prev) => prev.plus(curr),
@@ -224,7 +227,18 @@ export class BlockState implements Contracts.State.BlockState {
         delegateAttribute.forgedFees = delegateAttribute.forgedFees.minus(block.data.totalFee);
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.minus(block.data.reward);
         delegateAttribute.devFunds = delegateAttribute.devFunds.minus(devFund);
-        delegateAttribute.lastBlock = undefined;
+
+        const { results } = await this.blockHistoryService.listByCriteria(
+            { generatorPublicKey: block.data.generatorPublicKey, height: { to: block.data.height - 1 } },
+            [{ property: "height", direction: "desc" }],
+            { offset: 0, limit: 1 },
+        );
+
+        if (results[0] && results[0].id) {
+            delegateAttribute.lastBlock = results[0].id;
+        } else {
+            delegateAttribute.lastBlock = undefined;
+        }
 
         const balanceDecrease = block.data.reward.minus(devFund).plus(block.data.totalFee.minus(block.data.burnedFee!));
 
