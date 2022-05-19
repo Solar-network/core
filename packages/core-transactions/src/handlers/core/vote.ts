@@ -47,9 +47,9 @@ export class VoteTransactionHandler extends TransactionHandler {
                 const hasVoted: boolean = wallet.hasAttribute("vote");
 
                 let delegateVote: string = vote.slice(1);
-                if (delegateVote.length !== 66) {
-                    const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegateVote);
-                    delegateVote = delegateWallet.getPublicKey()!;
+                if (delegateVote.length === 66) {
+                    const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegateVote);
+                    delegateVote = delegateWallet.getAttribute("delegate.username");
                 }
 
                 if (vote.startsWith("+")) {
@@ -92,9 +92,9 @@ export class VoteTransactionHandler extends TransactionHandler {
 
             if (delegateVote.length === 66) {
                 delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
+                delegateVote = delegateWallet.getAttribute("delegate.username");
             } else {
                 delegateWallet = this.walletRepository.findByUsername(delegateVote);
-                delegateVote = delegateWallet.getPublicKey()!;
             }
 
             if (vote.startsWith("+")) {
@@ -130,9 +130,9 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         for (let vote of transaction.data.asset.votes) {
             const delegateVote: string = vote.slice(1);
-            if (delegateVote.length !== 66) {
-                const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegateVote);
-                vote = vote[0] + delegateWallet.getPublicKey();
+            if (delegateVote.length === 66) {
+                const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegateVote);
+                vote = vote[0] + delegateWallet.getAttribute("delegate.username");
             }
 
             emitter.dispatch(vote.startsWith("+") ? AppEnums.VoteEvent.Vote : AppEnums.VoteEvent.Unvote, {
@@ -170,11 +170,11 @@ export class VoteTransactionHandler extends TransactionHandler {
         for (const vote of transaction.data.asset.votes) {
             let delegateWallet: Contracts.State.Wallet;
             let delegateVote: string = vote.slice(1);
-            if (delegateVote.length !== 66) {
-                delegateWallet = this.walletRepository.findByUsername(delegateVote);
-                delegateVote = delegateWallet.getPublicKey()!;
-            } else {
+            if (delegateVote.length === 66) {
                 delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
+                delegateVote = delegateWallet.getAttribute("delegate.username");
+            } else {
+                delegateWallet = this.walletRepository.findByUsername(delegateVote);
             }
 
             let voters: number = delegateWallet.getAttribute("delegate.voters");
@@ -203,11 +203,11 @@ export class VoteTransactionHandler extends TransactionHandler {
         for (const vote of transaction.data.asset.votes.slice().reverse()) {
             let delegateWallet: Contracts.State.Wallet;
             let delegateVote: string = vote.slice(1);
-            if (delegateVote.length !== 66) {
-                delegateWallet = this.walletRepository.findByUsername(delegateVote);
-                delegateVote = delegateWallet.getPublicKey()!;
-            } else {
+            if (delegateVote.length === 66) {
                 delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
+                delegateVote = delegateWallet.getAttribute("delegate.username");
+            } else {
+                delegateWallet = this.walletRepository.findByUsername(delegateVote);
             }
 
             let voters: number = delegateWallet.getAttribute("delegate.voters");

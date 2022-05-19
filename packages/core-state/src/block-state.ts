@@ -147,8 +147,8 @@ export class BlockState implements Contracts.State.BlockState {
 
     public increaseWalletDelegateVoteBalance(wallet: Contracts.State.Wallet, amount: AppUtils.BigNumber): void {
         if (wallet.hasVoted()) {
-            const delegatePublicKey = wallet.getAttribute<string>("vote");
-            const delegateWallet = this.walletRepository.findByPublicKey(delegatePublicKey);
+            const delegateUsername = wallet.getAttribute<string>("vote");
+            const delegateWallet = this.walletRepository.findByUsername(delegateUsername);
             const oldDelegateVoteBalance = delegateWallet.getAttribute<AppUtils.BigNumber>("delegate.voteBalance");
             const newDelegateVoteBalance = oldDelegateVoteBalance.plus(amount);
             delegateWallet.setAttribute("delegate.voteBalance", newDelegateVoteBalance);
@@ -157,8 +157,8 @@ export class BlockState implements Contracts.State.BlockState {
 
     public decreaseWalletDelegateVoteBalance(wallet: Contracts.State.Wallet, amount: AppUtils.BigNumber): void {
         if (wallet.hasVoted()) {
-            const delegatePublicKey = wallet.getAttribute<string>("vote");
-            const delegateWallet = this.walletRepository.findByPublicKey(delegatePublicKey);
+            const delegateUsername = wallet.getAttribute<string>("vote");
+            const delegateWallet = this.walletRepository.findByUsername(delegateUsername);
             const oldDelegateVoteBalance = delegateWallet.getAttribute<AppUtils.BigNumber>("delegate.voteBalance");
             const newDelegateVoteBalance = oldDelegateVoteBalance.minus(amount);
             delegateWallet.setAttribute("delegate.voteBalance", newDelegateVoteBalance);
@@ -299,7 +299,7 @@ export class BlockState implements Contracts.State.BlockState {
         } else {
             // Update vote balance of the sender's delegate
             if (sender.hasVoted()) {
-                const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                const delegate: Contracts.State.Wallet = this.walletRepository.findByUsername(
                     sender.getAttribute("vote"),
                 );
 
@@ -351,7 +351,7 @@ export class BlockState implements Contracts.State.BlockState {
                 lockWallet.hasAttribute("vote")
             ) {
                 // HTLC Claim transfers the locked amount to the lock recipient's (= claim sender) delegate vote balance
-                const lockWalletDelegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                const lockWalletDelegate: Contracts.State.Wallet = this.walletRepository.findByUsername(
                     lockWallet.getAttribute("vote"),
                 );
                 const lockWalletDelegateVoteBalance: Utils.BigNumber = lockWalletDelegate.getAttribute(
@@ -377,7 +377,7 @@ export class BlockState implements Contracts.State.BlockState {
                     const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(recipientId);
                     if (recipientWallet.hasVoted()) {
                         const vote = recipientWallet.getAttribute("vote");
-                        const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(vote);
+                        const delegate: Contracts.State.Wallet = this.walletRepository.findByUsername(vote);
                         const voteBalance: Utils.BigNumber = delegate.getAttribute(
                             "delegate.voteBalance",
                             Utils.BigNumber.ZERO,
@@ -397,7 +397,7 @@ export class BlockState implements Contracts.State.BlockState {
                 (transaction.type !== Enums.TransactionType.Core.HtlcLock ||
                     transaction.typeGroup !== Enums.TransactionTypeGroup.Core)
             ) {
-                const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                const delegate: Contracts.State.Wallet = this.walletRepository.findByUsername(
                     recipient.getAttribute("vote"),
                 );
                 const voteBalance: Utils.BigNumber = delegate.getAttribute(

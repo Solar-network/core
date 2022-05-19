@@ -70,7 +70,7 @@ export class DelegatesController extends Controller {
 
         return this.walletSearchService.getActiveWalletsPage(pagination, sorting, criteria, {
             attributes: {
-                vote: delegateResource.publicKey,
+                vote: delegateResource.username,
             },
         });
     }
