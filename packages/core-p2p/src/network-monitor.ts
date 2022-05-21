@@ -328,7 +328,9 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
             .getLastBlock();
 
-        const delegatesAndPeers: Contracts.P2P.Peer[] = [];
+        const includedPeers: Contracts.P2P.Peer[] = [];
+        const relayPeers: Contracts.P2P.Peer[] = [];
+
         const peers: Contracts.P2P.Peer[] = this.repository.getPeers();
 
         const milestone = Managers.configManager.getMilestone();
@@ -352,17 +354,21 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             for (const peer of peers) {
                 if (peer.isActiveDelegate()) {
                     for (let i = 0; i < peer.publicKeys.length; i++) {
-                        delegatesAndPeers.push(peer);
+                        includedPeers.push(peer);
                     }
-                } else if (peer.state && peer.state.height! >= lastBlock.data.height) {
-                    delegatesAndPeers.push(peer);
+                } else if (peer.state && peer.state.height! > lastBlock.data.height) {
+                    relayPeers.push(peer);
                 }
             }
+
+            if (includedPeers.length < Math.floor(milestone.activeDelegates / 2) + 1) {
+                includedPeers.push(...relayPeers);
+            }
         } else {
-            delegatesAndPeers.push(...peers);
+            includedPeers.push(...peers);
         }
 
-        const verificationResults: Contracts.P2P.PeerVerificationResult[] = delegatesAndPeers
+        const verificationResults: Contracts.P2P.PeerVerificationResult[] = includedPeers
             .filter((peer) => peer.verificationResult)
             .map((peer) => peer.verificationResult!);
 
