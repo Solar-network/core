@@ -51,10 +51,9 @@ export class StateBuilder {
             for (let i = 0; i < registeredHandlers.length; i++) {
                 const handler = registeredHandlers[i];
                 const ctorKey: string | undefined = handler.getConstructor().key;
-                const version = handler.getConstructor().version;
                 AppUtils.assert.defined<string>(ctorKey);
 
-                this.logger.info(`State Generation - Step ${3 + i} of ${steps}: ${capitalize(ctorKey)} v${version}`);
+                this.logger.info(`State Generation - Step ${3 + i} of ${steps}: ${capitalize(ctorKey)}`);
                 await handler.bootstrap();
             }
 
@@ -82,6 +81,18 @@ export class StateBuilder {
         for (const block of blocks) {
             const wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
             wallet.increaseBalance(Utils.BigNumber.make(block.rewards));
+        }
+
+        const devFunds = await this.blockRepository.getDevFunds();
+
+        for (const devFund of devFunds) {
+            const amount: Utils.BigNumber = Utils.BigNumber.make(devFund.amount);
+
+            const devFundWallet = this.walletRepository.findByAddress(devFund.address);
+            devFundWallet.increaseBalance(amount);
+
+            const delegateWallet = this.walletRepository.findByPublicKey(devFund.generatorPublicKey);
+            delegateWallet.decreaseBalance(amount);
         }
     }
 

@@ -36,10 +36,11 @@ export class DposState implements Contracts.State.DposState {
     public buildVoteBalances(): void {
         for (const voter of this.walletRepository.allByPublicKey()) {
             if (voter.hasVoted()) {
-                const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                const delegate: Contracts.State.Wallet = this.walletRepository.findByUsername(
                     voter.getAttribute("vote"),
                 );
 
+                delegate.setAttribute("delegate.voters", delegate.getAttribute("delegate.voters") + 1);
                 const voteBalance: Utils.BigNumber = delegate.getAttribute("delegate.voteBalance");
 
                 const lockedBalance = voter.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO);

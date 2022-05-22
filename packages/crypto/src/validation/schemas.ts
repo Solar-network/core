@@ -37,17 +37,25 @@ export const schemas = {
         allOf: [{ minLength: 66, maxLength: 66 }, { $ref: "hex" }, { transform: ["toLowerCase"] }],
     },
 
-    walletVote: {
-        $id: "walletVote",
+    walletVotePublicKey: {
+        $id: "walletVotePublicKey",
         allOf: [
-            {
-                oneOf: [
-                    { type: "string", pattern: "^[+|-][a-zA-Z0-9]{66}$" },
-                    { type: "string", pattern: "^[+|-][a-z0-9!@$&_.]+$", minLength: 2, maxLength: 21 },
-                ],
-            },
-            { transform: ["toLowerCase"] },
+            { type: "string", pattern: "^[+|-][a-f0-9]{66}$" },
+            { minLength: 67, maxLength: 67 },
         ],
+    },
+
+    walletVoteUsername: {
+        $id: "walletVoteUsername",
+        allOf: [
+            { type: "string", pattern: "^[+|-][a-z0-9!@$&_.]+$" },
+            { minLength: 2, maxLength: 21 },
+        ],
+    },
+
+    walletVoteUsernameOrPublicKey: {
+        $id: "walletVoteUsernameOrPublicKey",
+        oneOf: [{ $ref: "walletVoteUsername" }, { $ref: "walletVotePublicKey" }],
     },
 
     username: {
@@ -55,7 +63,6 @@ export const schemas = {
         allOf: [
             { type: "string", pattern: "^[a-z0-9!@$&_.]+$" },
             { minLength: 1, maxLength: 20 },
-            { transform: ["toLowerCase"] },
         ],
     },
 
@@ -88,11 +95,9 @@ export const schemas = {
         ],
         properties: {
             id: { blockId: {} },
-            idHex: { blockId: {} },
             version: { type: "integer", minimum: 0 },
             timestamp: { type: "integer", minimum: 0 },
             previousBlock: { blockId: { allowNullWhenGenesis: true, isPreviousBlock: true } },
-            previousBlockHex: { blockId: { allowNullWhenGenesis: true, isPreviousBlock: true } },
             height: { type: "integer", minimum: 1 },
             numberOfTransactions: { type: "integer" },
             totalAmount: { bignumber: { minimum: 0, bypassGenesis: true, block: true } },

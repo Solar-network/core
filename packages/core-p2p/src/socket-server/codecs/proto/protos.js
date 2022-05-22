@@ -933,11 +933,9 @@ $root.blocks = (function() {
              * @memberof blocks.GetBlocksResponse
              * @interface IBlockHeader
              * @property {string|null} [id] BlockHeader id
-             * @property {string|null} [idHex] BlockHeader idHex
              * @property {number|null} [version] BlockHeader version
              * @property {number|null} [timestamp] BlockHeader timestamp
              * @property {string|null} [previousBlock] BlockHeader previousBlock
-             * @property {string|null} [previousBlockHex] BlockHeader previousBlockHex
              * @property {number|null} [height] BlockHeader height
              * @property {number|null} [numberOfTransactions] BlockHeader numberOfTransactions
              * @property {string|null} [totalAmount] BlockHeader totalAmount
@@ -974,14 +972,6 @@ $root.blocks = (function() {
             BlockHeader.prototype.id = "";
 
             /**
-             * BlockHeader idHex.
-             * @member {string} idHex
-             * @memberof blocks.GetBlocksResponse.BlockHeader
-             * @instance
-             */
-            BlockHeader.prototype.idHex = "";
-
-            /**
              * BlockHeader version.
              * @member {number} version
              * @memberof blocks.GetBlocksResponse.BlockHeader
@@ -1004,14 +994,6 @@ $root.blocks = (function() {
              * @instance
              */
             BlockHeader.prototype.previousBlock = "";
-
-            /**
-             * BlockHeader previousBlockHex.
-             * @member {string} previousBlockHex
-             * @memberof blocks.GetBlocksResponse.BlockHeader
-             * @instance
-             */
-            BlockHeader.prototype.previousBlockHex = "";
 
             /**
              * BlockHeader height.
@@ -1119,16 +1101,12 @@ $root.blocks = (function() {
                     writer = $Writer.create();
                 if (message.id != null && Object.hasOwnProperty.call(message, "id"))
                     writer.uint32(/* id 1, wireType 2 =*/10).string(message.id);
-                if (message.idHex != null && Object.hasOwnProperty.call(message, "idHex"))
-                    writer.uint32(/* id 2, wireType 2 =*/18).string(message.idHex);
                 if (message.version != null && Object.hasOwnProperty.call(message, "version"))
                     writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.version);
                 if (message.timestamp != null && Object.hasOwnProperty.call(message, "timestamp"))
                     writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.timestamp);
                 if (message.previousBlock != null && Object.hasOwnProperty.call(message, "previousBlock"))
                     writer.uint32(/* id 5, wireType 2 =*/42).string(message.previousBlock);
-                if (message.previousBlockHex != null && Object.hasOwnProperty.call(message, "previousBlockHex"))
-                    writer.uint32(/* id 6, wireType 2 =*/50).string(message.previousBlockHex);
                 if (message.height != null && Object.hasOwnProperty.call(message, "height"))
                     writer.uint32(/* id 7, wireType 0 =*/56).uint32(message.height);
                 if (message.numberOfTransactions != null && Object.hasOwnProperty.call(message, "numberOfTransactions"))
@@ -1186,9 +1164,6 @@ $root.blocks = (function() {
                     case 1:
                         message.id = reader.string();
                         break;
-                    case 2:
-                        message.idHex = reader.string();
-                        break;
                     case 3:
                         message.version = reader.uint32();
                         break;
@@ -1197,9 +1172,6 @@ $root.blocks = (function() {
                         break;
                     case 5:
                         message.previousBlock = reader.string();
-                        break;
-                    case 6:
-                        message.previousBlockHex = reader.string();
                         break;
                     case 7:
                         message.height = reader.uint32();
@@ -1269,9 +1241,6 @@ $root.blocks = (function() {
                 if (message.id != null && message.hasOwnProperty("id"))
                     if (!$util.isString(message.id))
                         return "id: string expected";
-                if (message.idHex != null && message.hasOwnProperty("idHex"))
-                    if (!$util.isString(message.idHex))
-                        return "idHex: string expected";
                 if (message.version != null && message.hasOwnProperty("version"))
                     if (!$util.isInteger(message.version))
                         return "version: integer expected";
@@ -1281,9 +1250,6 @@ $root.blocks = (function() {
                 if (message.previousBlock != null && message.hasOwnProperty("previousBlock"))
                     if (!$util.isString(message.previousBlock))
                         return "previousBlock: string expected";
-                if (message.previousBlockHex != null && message.hasOwnProperty("previousBlockHex"))
-                    if (!$util.isString(message.previousBlockHex))
-                        return "previousBlockHex: string expected";
                 if (message.height != null && message.hasOwnProperty("height"))
                     if (!$util.isInteger(message.height))
                         return "height: integer expected";
@@ -1331,16 +1297,12 @@ $root.blocks = (function() {
                 var message = new $root.blocks.GetBlocksResponse.BlockHeader();
                 if (object.id != null)
                     message.id = String(object.id);
-                if (object.idHex != null)
-                    message.idHex = String(object.idHex);
                 if (object.version != null)
                     message.version = object.version >>> 0;
                 if (object.timestamp != null)
                     message.timestamp = object.timestamp >>> 0;
                 if (object.previousBlock != null)
                     message.previousBlock = String(object.previousBlock);
-                if (object.previousBlockHex != null)
-                    message.previousBlockHex = String(object.previousBlockHex);
                 if (object.height != null)
                     message.height = object.height >>> 0;
                 if (object.numberOfTransactions != null)
@@ -1382,11 +1344,9 @@ $root.blocks = (function() {
                 var object = {};
                 if (options.defaults) {
                     object.id = "";
-                    object.idHex = "";
                     object.version = 0;
                     object.timestamp = 0;
                     object.previousBlock = "";
-                    object.previousBlockHex = "";
                     object.height = 0;
                     object.numberOfTransactions = 0;
                     object.totalAmount = "";
@@ -1406,16 +1366,12 @@ $root.blocks = (function() {
                 }
                 if (message.id != null && message.hasOwnProperty("id"))
                     object.id = message.id;
-                if (message.idHex != null && message.hasOwnProperty("idHex"))
-                    object.idHex = message.idHex;
                 if (message.version != null && message.hasOwnProperty("version"))
                     object.version = message.version;
                 if (message.timestamp != null && message.hasOwnProperty("timestamp"))
                     object.timestamp = message.timestamp;
                 if (message.previousBlock != null && message.hasOwnProperty("previousBlock"))
                     object.previousBlock = message.previousBlock;
-                if (message.previousBlockHex != null && message.hasOwnProperty("previousBlockHex"))
-                    object.previousBlockHex = message.previousBlockHex;
                 if (message.height != null && message.hasOwnProperty("height"))
                     object.height = message.height;
                 if (message.numberOfTransactions != null && message.hasOwnProperty("numberOfTransactions"))
@@ -3461,11 +3417,9 @@ $root.peer = (function() {
                  * @memberof peer.GetStatusResponse.State
                  * @interface IBlockHeader
                  * @property {string|null} [id] BlockHeader id
-                 * @property {string|null} [idHex] BlockHeader idHex
                  * @property {number|null} [version] BlockHeader version
                  * @property {number|null} [timestamp] BlockHeader timestamp
                  * @property {string|null} [previousBlock] BlockHeader previousBlock
-                 * @property {string|null} [previousBlockHex] BlockHeader previousBlockHex
                  * @property {number|null} [height] BlockHeader height
                  * @property {number|null} [numberOfTransactions] BlockHeader numberOfTransactions
                  * @property {string|null} [totalAmount] BlockHeader totalAmount
@@ -3501,14 +3455,6 @@ $root.peer = (function() {
                 BlockHeader.prototype.id = "";
 
                 /**
-                 * BlockHeader idHex.
-                 * @member {string} idHex
-                 * @memberof peer.GetStatusResponse.State.BlockHeader
-                 * @instance
-                 */
-                BlockHeader.prototype.idHex = "";
-
-                /**
                  * BlockHeader version.
                  * @member {number} version
                  * @memberof peer.GetStatusResponse.State.BlockHeader
@@ -3531,14 +3477,6 @@ $root.peer = (function() {
                  * @instance
                  */
                 BlockHeader.prototype.previousBlock = "";
-
-                /**
-                 * BlockHeader previousBlockHex.
-                 * @member {string} previousBlockHex
-                 * @memberof peer.GetStatusResponse.State.BlockHeader
-                 * @instance
-                 */
-                BlockHeader.prototype.previousBlockHex = "";
 
                 /**
                  * BlockHeader height.
@@ -3638,16 +3576,12 @@ $root.peer = (function() {
                         writer = $Writer.create();
                     if (message.id != null && Object.hasOwnProperty.call(message, "id"))
                         writer.uint32(/* id 1, wireType 2 =*/10).string(message.id);
-                    if (message.idHex != null && Object.hasOwnProperty.call(message, "idHex"))
-                        writer.uint32(/* id 2, wireType 2 =*/18).string(message.idHex);
                     if (message.version != null && Object.hasOwnProperty.call(message, "version"))
                         writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.version);
                     if (message.timestamp != null && Object.hasOwnProperty.call(message, "timestamp"))
                         writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.timestamp);
                     if (message.previousBlock != null && Object.hasOwnProperty.call(message, "previousBlock"))
                         writer.uint32(/* id 5, wireType 2 =*/42).string(message.previousBlock);
-                    if (message.previousBlockHex != null && Object.hasOwnProperty.call(message, "previousBlockHex"))
-                        writer.uint32(/* id 6, wireType 2 =*/50).string(message.previousBlockHex);
                     if (message.height != null && Object.hasOwnProperty.call(message, "height"))
                         writer.uint32(/* id 7, wireType 0 =*/56).uint32(message.height);
                     if (message.numberOfTransactions != null && Object.hasOwnProperty.call(message, "numberOfTransactions"))
@@ -3703,9 +3637,6 @@ $root.peer = (function() {
                         case 1:
                             message.id = reader.string();
                             break;
-                        case 2:
-                            message.idHex = reader.string();
-                            break;
                         case 3:
                             message.version = reader.uint32();
                             break;
@@ -3714,9 +3645,6 @@ $root.peer = (function() {
                             break;
                         case 5:
                             message.previousBlock = reader.string();
-                            break;
-                        case 6:
-                            message.previousBlockHex = reader.string();
                             break;
                         case 7:
                             message.height = reader.uint32();
@@ -3783,9 +3711,6 @@ $root.peer = (function() {
                     if (message.id != null && message.hasOwnProperty("id"))
                         if (!$util.isString(message.id))
                             return "id: string expected";
-                    if (message.idHex != null && message.hasOwnProperty("idHex"))
-                        if (!$util.isString(message.idHex))
-                            return "idHex: string expected";
                     if (message.version != null && message.hasOwnProperty("version"))
                         if (!$util.isInteger(message.version))
                             return "version: integer expected";
@@ -3795,9 +3720,6 @@ $root.peer = (function() {
                     if (message.previousBlock != null && message.hasOwnProperty("previousBlock"))
                         if (!$util.isString(message.previousBlock))
                             return "previousBlock: string expected";
-                    if (message.previousBlockHex != null && message.hasOwnProperty("previousBlockHex"))
-                        if (!$util.isString(message.previousBlockHex))
-                            return "previousBlockHex: string expected";
                     if (message.height != null && message.hasOwnProperty("height"))
                         if (!$util.isInteger(message.height))
                             return "height: integer expected";
@@ -3842,16 +3764,12 @@ $root.peer = (function() {
                     var message = new $root.peer.GetStatusResponse.State.BlockHeader();
                     if (object.id != null)
                         message.id = String(object.id);
-                    if (object.idHex != null)
-                        message.idHex = String(object.idHex);
                     if (object.version != null)
                         message.version = object.version >>> 0;
                     if (object.timestamp != null)
                         message.timestamp = object.timestamp >>> 0;
                     if (object.previousBlock != null)
                         message.previousBlock = String(object.previousBlock);
-                    if (object.previousBlockHex != null)
-                        message.previousBlockHex = String(object.previousBlockHex);
                     if (object.height != null)
                         message.height = object.height >>> 0;
                     if (object.numberOfTransactions != null)
@@ -3888,11 +3806,9 @@ $root.peer = (function() {
                     var object = {};
                     if (options.defaults) {
                         object.id = "";
-                        object.idHex = "";
                         object.version = 0;
                         object.timestamp = 0;
                         object.previousBlock = "";
-                        object.previousBlockHex = "";
                         object.height = 0;
                         object.numberOfTransactions = 0;
                         object.totalAmount = "";
@@ -3905,16 +3821,12 @@ $root.peer = (function() {
                     }
                     if (message.id != null && message.hasOwnProperty("id"))
                         object.id = message.id;
-                    if (message.idHex != null && message.hasOwnProperty("idHex"))
-                        object.idHex = message.idHex;
                     if (message.version != null && message.hasOwnProperty("version"))
                         object.version = message.version;
                     if (message.timestamp != null && message.hasOwnProperty("timestamp"))
                         object.timestamp = message.timestamp;
                     if (message.previousBlock != null && message.hasOwnProperty("previousBlock"))
                         object.previousBlock = message.previousBlock;
-                    if (message.previousBlockHex != null && message.hasOwnProperty("previousBlockHex"))
-                        object.previousBlockHex = message.previousBlockHex;
                     if (message.height != null && message.hasOwnProperty("height"))
                         object.height = message.height;
                     if (message.numberOfTransactions != null && message.hasOwnProperty("numberOfTransactions"))
@@ -4978,6 +4890,7 @@ $root.shared = (function() {
          * @memberof shared
          * @interface IHeaders
          * @property {string|null} [version] Headers version
+         * @property {number|null} [port] Headers port
          */
 
         /**
@@ -5002,6 +4915,14 @@ $root.shared = (function() {
          * @instance
          */
         Headers.prototype.version = "";
+
+        /**
+         * Headers port.
+         * @member {number} port
+         * @memberof shared.Headers
+         * @instance
+         */
+        Headers.prototype.port = 0;
 
         /**
          * Creates a new Headers instance using the specified properties.
@@ -5029,6 +4950,8 @@ $root.shared = (function() {
                 writer = $Writer.create();
             if (message.version != null && Object.hasOwnProperty.call(message, "version"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.version);
+            if (message.port != null && Object.hasOwnProperty.call(message, "port"))
+                writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.port);
             return writer;
         };
 
@@ -5065,6 +4988,9 @@ $root.shared = (function() {
                 switch (tag >>> 3) {
                 case 1:
                     message.version = reader.string();
+                    break;
+                case 2:
+                    message.port = reader.uint32();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -5104,6 +5030,9 @@ $root.shared = (function() {
             if (message.version != null && message.hasOwnProperty("version"))
                 if (!$util.isString(message.version))
                     return "version: string expected";
+            if (message.port != null && message.hasOwnProperty("port"))
+                if (!$util.isInteger(message.port))
+                    return "port: integer expected";
             return null;
         };
 
@@ -5121,6 +5050,8 @@ $root.shared = (function() {
             var message = new $root.shared.Headers();
             if (object.version != null)
                 message.version = String(object.version);
+            if (object.port != null)
+                message.port = object.port >>> 0;
             return message;
         };
 
@@ -5137,10 +5068,14 @@ $root.shared = (function() {
             if (!options)
                 options = {};
             var object = {};
-            if (options.defaults)
+            if (options.defaults) {
                 object.version = "";
+                object.port = 0;
+            }
             if (message.version != null && message.hasOwnProperty("version"))
                 object.version = message.version;
+            if (message.port != null && message.hasOwnProperty("port"))
+                object.port = message.port;
             return object;
         };
 

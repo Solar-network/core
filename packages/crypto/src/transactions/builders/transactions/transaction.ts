@@ -1,4 +1,3 @@
-import { Slots } from "../../../crypto";
 import { TransactionTypeGroup } from "../../../enums";
 import {
     MissingTransactionSignatureError,
@@ -24,10 +23,10 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
     public constructor() {
         this.data = {
             id: undefined,
-            timestamp: Slots.getTime(),
             typeGroup: TransactionTypeGroup.Test,
             nonce: BigNumber.ZERO,
-            version: configManager.getMilestone().aip11 ? 0x02 : 0x01,
+            vendorField: undefined,
+            version: configManager.getMilestone().bip340 ? 0x03 : 0x02,
         } as ITransactionData;
     }
 
@@ -103,12 +102,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         return this.instance();
     }
 
-    public timestamp(timestamp: number): TBuilder {
-        this.data.timestamp = timestamp;
-
-        return this.instance();
-    }
-
     public sign(passphrase: string): TBuilder {
         const keys: IKeyPair = Keys.fromPassphrase(passphrase);
         return this.signWithKeyPair(keys);
@@ -165,14 +158,11 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             fee: this.data.fee,
             senderPublicKey: this.data.senderPublicKey,
             network: this.data.network,
+            vendorField: this.data.vendorField,
         } as ITransactionData;
 
-        if (this.data.version === 1) {
-            struct.timestamp = this.data.timestamp;
-        } else {
-            struct.typeGroup = this.data.typeGroup;
-            struct.nonce = this.data.nonce;
-        }
+        struct.typeGroup = this.data.typeGroup;
+        struct.nonce = this.data.nonce;
 
         if (Array.isArray(this.data.signatures)) {
             struct.signatures = this.data.signatures;
@@ -213,7 +203,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             this.data.signatures = [];
         }
 
-        this.version(2);
         Signer.multiSign(this.getSigningObject(), keys, index);
 
         return this.instance();

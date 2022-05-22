@@ -2,11 +2,8 @@
     {
         "height": 1,
         "activeDelegates": 53,
-        "aip11": true,
-        "aip37": true,
         "block": {
             "version": 0,
-            "idFullSha256": true,
             "maxTransactions": 150,
             "maxPayload": 2097152
         },
@@ -121,6 +118,17 @@
                 "53": 1325000000
             },
             "secondaryReward": 675000000
+        }
+    },
+    {
+        "height": 671988,
+        "acceptLegacySchnorrTransactions": true,
+        "bip340": true,
+        "devFund": {
+            "Sgymbo4rg9aBeJJ2YmV12xdRY2xo6b94U9": 5
+        },
+        "p2p": {
+            "minimumVersions": ["^3.3.0 || ^3.3.0-next.0"]
         }
     }
 ]

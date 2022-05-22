@@ -1,15 +1,15 @@
 import { ITransactionData } from "../../../interfaces";
 import { BigNumber } from "../../../utils";
-import { Two } from "../../types";
+import { Core } from "../../types";
 import { TransactionBuilder } from "./transaction";
 
 export class VoteBuilder extends TransactionBuilder<VoteBuilder> {
     public constructor() {
         super();
 
-        this.data.type = Two.VoteTransaction.type;
-        this.data.typeGroup = Two.VoteTransaction.typeGroup;
-        this.data.fee = Two.VoteTransaction.staticFee();
+        this.data.type = Core.VoteTransaction.type;
+        this.data.typeGroup = Core.VoteTransaction.typeGroup;
+        this.data.fee = Core.VoteTransaction.staticFee();
         this.data.amount = BigNumber.ZERO;
         this.data.recipientId = undefined;
         this.data.senderPublicKey = undefined;

@@ -18,7 +18,7 @@ export class AddBurnedFeeColumnToBlocksAndTransactionsTables20220304000000 imple
             DROP INDEX transactions_burned_fee;
             DROP INDEX transactions_burned_fee_sequence;
             DROP INDEX transactions_burned_fee_asc_sequence;
-            DROP INDEX burned_fee;
+            DROP INDEX blocks_burned_fee;
 
             ALTER TABLE transactions DROP COLUMN burned_fee;
             ALTER TABLE blocks DROP COLUMN burned_fee;

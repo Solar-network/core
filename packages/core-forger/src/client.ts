@@ -92,6 +92,7 @@ export class Client {
                     ...block.data,
                     transactions: block.transactions.map((tx) => tx.data),
                 }),
+                headers: { port: 0, version: this.app.version() },
             });
         } catch (error) {
             this.logger.error(`Broadcast block failed: ${error.message} :bangbang:`);
@@ -143,7 +144,7 @@ export class Client {
     public async getStatus(): Promise<Contracts.P2P.Status> {
         return await this.emit<Contracts.P2P.Status>(
             "p2p.peer.getStatus",
-            { headers: { version: this.app.version() } },
+            { headers: { port: 0, version: this.app.version() } },
             2000,
         );
     }

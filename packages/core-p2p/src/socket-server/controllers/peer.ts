@@ -1,11 +1,10 @@
 import Hapi from "@hapi/hapi";
 import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
 import { DatabaseInterceptor } from "@solar-network/core-state";
-import { Crypto, Identities, Interfaces } from "@solar-network/crypto";
+import { Crypto, Identities, Interfaces, Managers } from "@solar-network/crypto";
 import { readJSONSync } from "fs-extra";
 
 import { constants } from "../../constants";
-import { MissingCommonBlockError } from "../../errors";
 import { Socket } from "../../hapi-nes/socket";
 import { getPeerIp } from "../../utils/get-peer-ip";
 import { getPeerConfig } from "../utils/get-peer-config";
@@ -58,10 +57,6 @@ export class PeerController extends Controller {
             (request.payload as any).ids,
         );
 
-        if (!commonBlocks.length) {
-            throw new MissingCommonBlockError();
-        }
-
         return {
             common: commonBlocks.sort((a, b) => a.height - b.height)[commonBlocks.length - 1],
             lastBlockHeight: this.blockchain.getLastBlock().data.height,
@@ -92,6 +87,11 @@ export class PeerController extends Controller {
             },
             config: getPeerConfig(this.app),
         };
+
+        // This will be removed in the next release, it is just transitional so we accept delegates on old nodes for consensus until they update.
+        if (!Managers.configManager.getMilestone().bip340) {
+            header.state.header.previousBlockHex = header.state.header.previousBlock;
+        }
 
         const stateBuffer = Buffer.from(Utils.stringify(header));
 

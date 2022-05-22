@@ -1,6 +1,6 @@
 import { Container, Providers, Services } from "@solar-network/core-kernel";
 
-import { One, Solar, TransactionHandlerConstructor, Two } from "./handlers";
+import { Core, Solar, TransactionHandlerConstructor } from "./handlers";
 import { TransactionHandlerProvider } from "./handlers/handler-provider";
 import { TransactionHandlerRegistry } from "./handlers/handler-registry";
 
@@ -50,22 +50,18 @@ export class ServiceProvider extends Providers.ServiceProvider {
             .toConstantValue(null)
             .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("state", "null"));
 
-        this.app.bind(Container.Identifiers.TransactionHandler).to(One.TransferTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.TransferTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(One.SecondSignatureRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.SecondSignatureRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(One.DelegateRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.DelegateRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(One.VoteTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.VoteTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(One.MultiSignatureRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.MultiSignatureRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.IpfsTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.MultiPaymentTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.DelegateResignationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.HtlcLockTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.HtlcClaimTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Two.HtlcRefundTransactionHandler);
+        // Core transactions
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.TransferTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.SecondSignatureRegistrationTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.DelegateRegistrationTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.VoteTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.MultiSignatureRegistrationTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.IpfsTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.MultiPaymentTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.DelegateResignationTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.HtlcLockTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.HtlcClaimTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.HtlcRefundTransactionHandler);
 
         // Solar transactions
         this.app.bind(Container.Identifiers.TransactionHandler).to(Solar.BurnTransactionHandler);

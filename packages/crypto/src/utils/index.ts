@@ -96,17 +96,32 @@ export const numberToHex = (num: number, padding = 2): string => {
 export const maxVendorFieldLength = (height?: number): number => configManager.getMilestone(height).vendorFieldLength;
 
 export const isSupportedTransactionVersion = (version: number): boolean => {
-    const aip11: boolean = configManager.getMilestone().aip11;
+    const { acceptLegacySchnorrTransactions, bip340 } = configManager.getMilestone();
 
-    if (aip11 && version !== 2) {
-        return false;
+    if (bip340 && (version === 3 || (version === 2 && acceptLegacySchnorrTransactions))) {
+        return true;
     }
 
-    if (!aip11 && version !== 1) {
-        return false;
+    if (!bip340 && version === 2) {
+        return true;
     }
 
-    return true;
+    return false;
+};
+
+export const calculateDevFund = (height: number, reward: BigNumber): Record<string, BigNumber> => {
+    const constants = configManager.getMilestone(height);
+    const devFund = {};
+
+    if (!constants.devFund) {
+        return {};
+    }
+
+    for (const [wallet, percentage] of Object.entries(constants.devFund)) {
+        devFund[wallet] = reward.times(Math.round((percentage as number) * 100)).dividedBy(10000);
+    }
+
+    return devFund;
 };
 
 export { Base58, BigNumber, ByteBuffer, isValidPeer, isLocalHost, calculateBlockTime, isNewBlockTime, calculateReward };

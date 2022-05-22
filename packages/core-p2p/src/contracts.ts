@@ -1,6 +1,6 @@
 import { Contracts } from "@solar-network/core-kernel";
 
-export type PeerFactory = (ip: string) => Contracts.P2P.Peer;
+export type PeerFactory = (ip: string, port: number) => Contracts.P2P.Peer;
 
 export interface PeerService {
     connector: Contracts.P2P.PeerConnector;

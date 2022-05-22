@@ -1,7 +1,6 @@
 import { Hash } from "../crypto/hash";
 import { DuplicateParticipantInMultiSignatureError, InvalidMultiSignatureAssetError } from "../errors";
 import { IMultiSignatureAsset, ISchemaValidationResult, ITransactionData, IVerifyOptions } from "../interfaces";
-import { configManager } from "../managers";
 import { isException } from "../utils";
 import { validator } from "../validation";
 import { TransactionTypeFactory } from "./types/factory";
@@ -11,10 +10,6 @@ export class Verifier {
     public static verify(data: ITransactionData, options?: IVerifyOptions): boolean {
         if (isException(data)) {
             return true;
-        }
-
-        if (configManager.getMilestone().aip11 && (!data.version || data.version === 1)) {
-            return false;
         }
 
         return Verifier.verifyHash(data, options?.disableVersionCheck);
@@ -35,7 +30,7 @@ export class Verifier {
             disableVersionCheck: options?.disableVersionCheck,
             excludeSecondSignature: true,
         });
-        return this.internalVerifySignature(hash, secondSignature, publicKey);
+        return this.internalVerifySignature(hash, secondSignature, publicKey, transaction.version > 2);
     }
 
     public static verifySignatures(transaction: ITransactionData, multiSignature: IMultiSignatureAsset): boolean {
@@ -70,7 +65,7 @@ export class Verifier {
                 const partialSignature: string = signature.slice(2, 130);
                 const publicKey: string = publicKeys[publicKeyIndex];
 
-                if (Hash.verifySchnorr(hash, partialSignature, publicKey)) {
+                if (Hash.verifySchnorr(hash, partialSignature, publicKey, transaction.version > 2)) {
                     verifiedSignatures++;
                 }
 
@@ -99,7 +94,7 @@ export class Verifier {
             excludeSecondSignature: true,
         });
 
-        return this.internalVerifySignature(hash, signature, senderPublicKey);
+        return this.internalVerifySignature(hash, signature, senderPublicKey, data.version > 2);
     }
 
     public static verifySchema(data: ITransactionData, strict = true): ISchemaValidationResult {
@@ -114,7 +109,12 @@ export class Verifier {
         return validator.validate(strict ? `${$id}Strict` : `${$id}`, data);
     }
 
-    private static internalVerifySignature(hash: Buffer, signature: string, publicKey: string): boolean {
-        return Hash.verifySchnorr(hash, signature, publicKey);
+    private static internalVerifySignature(
+        hash: Buffer,
+        signature: string,
+        publicKey: string,
+        bip340: boolean,
+    ): boolean {
+        return Hash.verifySchnorr(hash, signature, publicKey, bip340);
     }
 }

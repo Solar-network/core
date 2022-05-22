@@ -48,6 +48,8 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
     private postTransactionsQueueByIp: Map<string, Contracts.Kernel.Queue> = new Map();
 
+    private serverPort!: number;
+
     @Container.postConstruct()
     public initialize(): void {
         this.outgoingRateLimiter = buildRateLimiter({
@@ -63,6 +65,8 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         this.events.listen(Enums.PeerEvent.Disconnect, {
             handle: ({ data }) => this.postTransactionsQueueByIp.delete(data.peer.ip),
         });
+
+        this.serverPort = Number(this.configuration.get<number>("server.port"));
     }
 
     public async postBlock(peer: Contracts.P2P.Peer, block: Interfaces.IBlock): Promise<void> {
@@ -162,9 +166,31 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             if (slotInfo.slotNumber < 0 && pingResponse.state.currentSlot) {
                 pingResponse.state.currentSlot = pingResponse.state.currentSlot >> 0;
             }
+
+            // This will be removed in the next release, it is just transitional so we accept delegates on old nodes for consensus until they update.
+            if (!Managers.configManager.getMilestone().bip340) {
+                pingResponse.state.header.previousBlockHex = pingResponse.state.header.previousBlock;
+            }
+
             const stateBuffer = Buffer.from(
                 Utils.stringify({ state: pingResponse.state, config: pingResponse.config }),
             );
+
+            // This will be removed in the next release, it is just transitional so we accept delegates on old nodes for consensus until they update.
+            const stateBufferLegacy = Buffer.from(
+                Utils.stringify({
+                    state: {
+                        ...pingResponse.state,
+                        header: {
+                            ...pingResponse.state.header,
+                            idHex: pingResponse.state.header.id,
+                            previousBlockHex: pingResponse.state.header.previousBlock,
+                        },
+                    },
+                    config: pingResponse.config,
+                }),
+            );
+
             const alreadyCheckedSignatures: string[] = [];
             const lastBlock: Interfaces.IBlock = this.app
                 .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
@@ -194,7 +220,8 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                     ) {
                         if (
                             !delegates.includes(publicKey) ||
-                            !Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey)
+                            (!Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey) &&
+                                !Crypto.Hash.verifySchnorr(stateBufferLegacy, signature, publicKey))
                         ) {
                             break;
                         }
@@ -222,10 +249,6 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                     }
                 }
             }
-        }
-
-        if (peer.plugins["@solar-network/core-api"]) {
-            peer.plugins["@arkecosystem/core-api"] = peer.plugins["@solar-network/core-api"];
         }
 
         return pingResponse.state;
@@ -385,6 +408,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 codec.request.serialize({
                     ...payload,
                     headers: {
+                        port: this.serverPort,
                         version: this.app.version(),
                     },
                 }),

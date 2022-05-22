@@ -140,12 +140,14 @@ export type WalletFactory = (address: string) => Wallet;
 export interface WalletDelegateAttributes {
     username: string;
     voteBalance: Utils.BigNumber;
+    voters: number;
     forgedFees: Utils.BigNumber;
     burnedFees: Utils.BigNumber;
     forgedRewards: Utils.BigNumber;
+    devFunds: Utils.BigNumber;
     producedBlocks: number;
     rank?: number;
-    lastBlock?: Interfaces.IBlockData;
+    lastBlock?: string;
     round?: number;
     resigned?: boolean;
     version?: string;

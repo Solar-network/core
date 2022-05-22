@@ -406,9 +406,6 @@ export namespace blocks {
             /** BlockHeader id */
             id?: (string|null);
 
-            /** BlockHeader idHex */
-            idHex?: (string|null);
-
             /** BlockHeader version */
             version?: (number|null);
 
@@ -417,9 +414,6 @@ export namespace blocks {
 
             /** BlockHeader previousBlock */
             previousBlock?: (string|null);
-
-            /** BlockHeader previousBlockHex */
-            previousBlockHex?: (string|null);
 
             /** BlockHeader height */
             height?: (number|null);
@@ -464,9 +458,6 @@ export namespace blocks {
             /** BlockHeader id. */
             public id: string;
 
-            /** BlockHeader idHex. */
-            public idHex: string;
-
             /** BlockHeader version. */
             public version: number;
 
@@ -475,9 +466,6 @@ export namespace blocks {
 
             /** BlockHeader previousBlock. */
             public previousBlock: string;
-
-            /** BlockHeader previousBlockHex. */
-            public previousBlockHex: string;
 
             /** BlockHeader height. */
             public height: number;
@@ -1465,9 +1453,6 @@ export namespace peer {
                 /** BlockHeader id */
                 id?: (string|null);
 
-                /** BlockHeader idHex */
-                idHex?: (string|null);
-
                 /** BlockHeader version */
                 version?: (number|null);
 
@@ -1476,9 +1461,6 @@ export namespace peer {
 
                 /** BlockHeader previousBlock */
                 previousBlock?: (string|null);
-
-                /** BlockHeader previousBlockHex */
-                previousBlockHex?: (string|null);
 
                 /** BlockHeader height */
                 height?: (number|null);
@@ -1520,9 +1502,6 @@ export namespace peer {
                 /** BlockHeader id. */
                 public id: string;
 
-                /** BlockHeader idHex. */
-                public idHex: string;
-
                 /** BlockHeader version. */
                 public version: number;
 
@@ -1531,9 +1510,6 @@ export namespace peer {
 
                 /** BlockHeader previousBlock. */
                 public previousBlock: string;
-
-                /** BlockHeader previousBlockHex. */
-                public previousBlockHex: string;
 
                 /** BlockHeader height. */
                 public height: number;
@@ -2064,6 +2040,9 @@ export namespace shared {
 
         /** Headers version */
         version?: (string|null);
+
+        /** Headers port */
+        port?: (number|null);
     }
 
     /** Represents a Headers. */
@@ -2077,6 +2056,9 @@ export namespace shared {
 
         /** Headers version. */
         public version: string;
+
+        /** Headers port. */
+        public port: number;
 
         /**
          * Creates a new Headers instance using the specified properties.

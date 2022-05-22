@@ -37,11 +37,9 @@ message GetStatusResponse {
     message State {
         message BlockHeader {
             string id = 1;
-            string idHex = 2;
             uint32 version = 3;
             uint32 timestamp = 4;
             string previousBlock = 5;
-            string previousBlockHex = 6;
             uint32 height = 7;
             uint32 numberOfTransactions = 8;
             string totalAmount = 9; // bignumber in core

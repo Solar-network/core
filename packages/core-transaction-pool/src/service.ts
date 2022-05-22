@@ -322,7 +322,7 @@ export class Service implements Contracts.TransactionPool.Service {
             AppUtils.assert.defined<string>(transaction.id);
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-            if (await this.expirationService.isExpired(transaction)) {
+            if (this.expirationService.isExpired(transaction)) {
                 const removedTransactions = await this.mempool.removeTransaction(
                     transaction.data.senderPublicKey,
                     transaction.id,

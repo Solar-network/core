@@ -19,11 +19,19 @@ export class MessagePackCodec implements Codec {
         return itemToReturn;
     }
 
-    public encodeBlock(block: { Block_burned_fee: Utils.BigNumber; Block_id: string }): Buffer {
+    public encodeBlock(block: {
+        Block_burned_fee: Utils.BigNumber;
+        Block_dev_fund: Utils.BigNumber;
+        Block_id: string;
+    }): Buffer {
         try {
             const blockCamelized = camelizeKeys(MessagePackCodec.removePrefix(block, "Block_"));
 
-            return encode([block.Block_burned_fee, Blocks.Serializer.serialize(blockCamelized, true)]);
+            return encode([
+                block.Block_burned_fee,
+                block.Block_dev_fund,
+                Blocks.Serializer.serialize(blockCamelized, true),
+            ]);
         } catch (err) {
             throw new CodecException.BlockEncodeException(block.Block_id, err.message);
         }
@@ -31,9 +39,10 @@ export class MessagePackCodec implements Codec {
 
     public decodeBlock(buffer: Buffer): Models.Block {
         try {
-            const [burnedFee, serialized] = decode(buffer);
+            const [burnedFee, devFund, serialized] = decode(buffer);
             const data = Blocks.Deserializer.deserialize(serialized, false).data as Models.Block;
             data.burnedFee = burnedFee;
+            data.devFund = devFund;
             return data;
         } catch (err) {
             throw new CodecException.BlockDecodeException(undefined, err.message);

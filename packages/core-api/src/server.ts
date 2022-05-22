@@ -2,7 +2,7 @@ import { badData, isBoom } from "@hapi/boom";
 import { RequestRoute, Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
 import { Container, Contracts, Providers, Types, Utils } from "@solar-network/core-kernel";
 import { Handlers } from "@solar-network/core-transactions";
-import { Identities } from "@solar-network/crypto";
+import { Identities, Transactions } from "@solar-network/crypto";
 import { readFileSync } from "fs";
 import { readJsonSync } from "fs-extra";
 
@@ -136,11 +136,11 @@ export class Server {
             swaggerJson.components.schemas.transactions.properties.transactions.maxItems =
                 this.poolConfiguration.getRequired<number>("maxTransactionsPerRequest");
 
-            const activatedTransactionHandlers = await this.nullHandlerRegistry.getActivatedHandlers();
+            const registeredTransactionHandlers = await this.nullHandlerRegistry.getRegisteredHandlers();
             const typeGroups: Set<number> = new Set();
             const types: Set<number> = new Set();
 
-            for (const handler of activatedTransactionHandlers) {
+            for (const handler of registeredTransactionHandlers) {
                 const constructor = handler.getConstructor();
                 const type: number = constructor.type!;
                 const typeGroup: number = constructor.typeGroup!;
@@ -150,6 +150,8 @@ export class Server {
 
             swaggerJson.components.schemas.transactionTypes.enum = [...types];
             swaggerJson.components.schemas.transactionTypeGroups.enum = [...typeGroups];
+            swaggerJson.components.schemas.transactionVersions.enum =
+                Transactions.schemas.transactionBaseSchema.properties.version.enum;
 
             await this.server.route({
                 method: "GET",

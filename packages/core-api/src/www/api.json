@@ -676,7 +676,7 @@
                     {
                         "name": "forged.fees",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all fees forged by the delegates(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all fees forged by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -684,7 +684,7 @@
                     {
                         "name": "forged.fees.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all fees forged by the delegates(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all fees forged by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -692,7 +692,7 @@
                     {
                         "name": "forged.fees.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all fees forged by the delegates(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all fees forged by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -700,7 +700,7 @@
                     {
                         "name": "forged.burnedFees",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all fees burned by the delegates(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all fees burned by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -708,7 +708,7 @@
                     {
                         "name": "forged.burnedFees.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all fees burned by the delegates(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all fees burned by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -716,7 +716,7 @@
                     {
                         "name": "forged.burnedFees.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all fees burned by the delegates(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all fees burned by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -724,7 +724,7 @@
                     {
                         "name": "forged.rewards",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all block rewards earned by the delegates(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all block rewards earned by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -732,7 +732,7 @@
                     {
                         "name": "forged.rewards.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all block rewards earned by the delegates(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all block rewards earned by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -740,15 +740,38 @@
                     {
                         "name": "forged.rewards.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all block rewards earned by the delegates(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all block rewards earned by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
+                        "name": "forged.devFunds",
+                        "in": "query",
+                        "description": "Exact amount, in satoshis, of all development funds raised by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "forged.devFunds.from",
+                        "in": "query",
+                        "description": "Minimum amount, in satoshis, of all development funds raised by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "forged.devFunds.to",
+                        "in": "query",
+                        "description": "Maximum amount, in satoshis, of all all development funds raised by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },                    {
                         "name": "forged.total",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all unburned fees plus block rewards earned by the delegates(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all unburned fees plus block rewards earned by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -756,7 +779,7 @@
                     {
                         "name": "forged.total.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all unburned fees plus block rewards earned by the delegates(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all unburned fees plus block rewards earned by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -764,7 +787,7 @@
                     {
                         "name": "forged.total.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all unburned fees plus block rewards earned by the delegates(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all unburned fees plus block rewards earned by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -772,7 +795,7 @@
                     {
                         "name": "votes",
                         "in": "query",
-                        "description": "Exact amount of vote weight for the delegates(s) to be returned",
+                        "description": "Exact amount of vote weight for the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -780,7 +803,7 @@
                     {
                         "name": "votes.from",
                         "in": "query",
-                        "description": "Minimum amount of vote weight for the delegates(s) to be returned",
+                        "description": "Minimum amount of vote weight for the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -788,7 +811,31 @@
                     {
                         "name": "votes.to",
                         "in": "query",
-                        "description": "Maximum amount of vote weight for the delegates(s) to be returned",
+                        "description": "Maximum amount of vote weight for the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "voters",
+                        "in": "query",
+                        "description": "Exact number of voters for the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "voters.from",
+                        "in": "query",
+                        "description": "Minimum number of voters for the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "voters.to",
+                        "in": "query",
+                        "description": "Maximum number of voters for the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -796,7 +843,7 @@
                     {
                         "name": "blocks.produced",
                         "in": "query",
-                        "description": "Exact number of blocks produced by the delegates(s) to be returned",
+                        "description": "Exact number of blocks produced by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -804,7 +851,7 @@
                     {
                         "name": "blocks.produced.from",
                         "in": "query",
-                        "description": "Minimum number of blocks produced by the delegates(s) to be returned",
+                        "description": "Minimum number of blocks produced by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -812,7 +859,7 @@
                     {
                         "name": "blocks.produced.to",
                         "in": "query",
-                        "description": "Maximum number of blocks produced by the delegates(s) to be returned",
+                        "description": "Maximum number of blocks produced by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -828,7 +875,7 @@
                     {
                         "name": "rank.from",
                         "in": "query",
-                        "description": "Lowest rank of the delegates(s) to be returned",
+                        "description": "Lowest rank of the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -836,7 +883,7 @@
                     {
                         "name": "rank.to",
                         "in": "query",
-                        "description": "Highest rank of the delegates(s) to be returned",
+                        "description": "Highest rank of the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -852,7 +899,7 @@
                     {
                         "name": "version.from",
                         "in": "query",
-                        "description": "Earliest node version running on the delegates(s) to be returned",
+                        "description": "Earliest node version running on the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/semver"
                         }
@@ -860,7 +907,7 @@
                     {
                         "name": "version.to",
                         "in": "query",
-                        "description": "Latest node version running on the delegates(s) to be returned",
+                        "description": "Latest node version running on the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/semver"
                         }
@@ -878,6 +925,8 @@
                                 "blocks.produced:desc",
                                 "forged.burnedFees:asc",
                                 "forged.burnedFees:desc",
+                                "forged.devFunds:asc",
+                                "forged.devFunds:desc",
                                 "forged.fees:asc",
                                 "forged.fees:desc",
                                 "forged.rewards:asc",
@@ -895,7 +944,9 @@
                                 "version:asc",
                                 "version:desc",
                                 "votes:asc",
-                                "votes:desc"
+                                "votes:desc",
+                                "voters:asc",
+                                "voters:desc"
                             ]
                         }
                     }
@@ -1433,6 +1484,14 @@
                         "description": "The type group of the transaction(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/transactionTypeGroups"
+                        }
+                    },
+                    {
+                        "name": "version",
+                        "in": "query",
+                        "description": "The version of the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/transactionVersions"
                         }
                     },
                     {
@@ -2519,6 +2578,10 @@
                 "enum": []
             },
             "transactionTypes": {
+                "type": "integer",
+                "enum": []
+            },
+            "transactionVersions": {
                 "type": "integer",
                 "enum": []
             },

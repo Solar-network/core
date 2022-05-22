@@ -2,11 +2,8 @@
     {
         "height": 1,
         "activeDelegates": 53,
-        "aip11": true,
-        "aip37": true,
         "block": {
             "version": 0,
-            "idFullSha256": true,
             "maxTransactions": 150,
             "maxPayload": 2097152
         },
@@ -121,6 +118,21 @@
                 "53": 1325000000
             },
             "secondaryReward": 675000000
+        }
+    },
+    {
+        "height": 500000,
+        "acceptLegacySchnorrTransactions": true,
+        "bip340": true,
+        "htlcEnabled": true,
+        "p2p": {
+            "minimumVersions": ["^3.3.0 || ^3.3.0-next.0"]
+        }
+    },
+    {
+        "height": 671352,
+        "devFund": {
+            "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": 5
         }
     }
 ]

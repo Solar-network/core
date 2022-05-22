@@ -110,6 +110,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
                 const blockInstance = Blocks.BlockFactory.fromData(block);
                 Utils.assert.defined<Interfaces.IBlock>(blockInstance);
 
+                blockInstance.data.fromForger = block.fromForger;
                 lastProcessResult = await this.triggers.call("processBlock", {
                     blockProcessor: this.app.get<BlockProcessor>(Container.Identifiers.BlockProcessor),
                     block: blockInstance,
@@ -162,6 +163,28 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
             lastProcessedBlock
         ) {
             if (this.stateStore.isStarted() && this.stateMachine.getState() === "newBlock") {
+                if (lastProcessedBlock.data.fromForger) {
+                    const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(
+                        this.app,
+                        lastProcessedBlock.data.height,
+                    );
+
+                    const currentSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup);
+                    const processedSlot: number = Crypto.Slots.getSlotNumber(
+                        blockTimeLookup,
+                        lastProcessedBlock.data.timestamp,
+                    );
+
+                    const minimumMs: number = 2000;
+                    const timeLeftInMs: number = Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup);
+                    if (currentSlot !== processedSlot || timeLeftInMs < minimumMs) {
+                        this.logger.info(
+                            `Discarded block ${lastProcessedBlock.data.height.toLocaleString()} because it was processed too late :exclamation:`,
+                        );
+                        this.blockchain.forkBlock(lastProcessedBlock, 1);
+                        return;
+                    }
+                }
                 this.networkMonitor.broadcastBlock(lastProcessedBlock);
             }
         } else if (forkBlock) {

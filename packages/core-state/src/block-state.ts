@@ -5,17 +5,20 @@ import { Enums, Identities, Interfaces, Utils } from "@solar-network/crypto";
 // todo: review the implementation
 @Container.injectable()
 export class BlockState implements Contracts.State.BlockState {
-    @Container.inject(Container.Identifiers.WalletRepository)
-    private walletRepository!: Contracts.State.WalletRepository;
+    @Container.inject(Container.Identifiers.BlockHistoryService)
+    private readonly blockHistoryService!: Contracts.Shared.BlockHistoryService;
 
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
     private handlerRegistry!: Handlers.Registry;
 
+    @Container.inject(Container.Identifiers.LogService)
+    private logger!: Contracts.Kernel.Logger;
+
     @Container.inject(Container.Identifiers.StateStore)
     private readonly state!: Contracts.State.StateStore;
 
-    @Container.inject(Container.Identifiers.LogService)
-    private logger!: Contracts.Kernel.Logger;
+    @Container.inject(Container.Identifiers.WalletRepository)
+    private walletRepository!: Contracts.State.WalletRepository;
 
     public async applyBlock(
         block: Interfaces.IBlock,
@@ -57,7 +60,7 @@ export class BlockState implements Contracts.State.BlockState {
 
         const revertedTransactions: Interfaces.ITransaction[] = [];
         try {
-            this.revertBlockFromForger(forgerWallet, block);
+            await this.revertBlockFromForger(forgerWallet, block);
 
             for (const transaction of block.transactions.slice().reverse()) {
                 await this.revertTransaction(block.data.height, transaction);
@@ -146,11 +149,9 @@ export class BlockState implements Contracts.State.BlockState {
     }
 
     public increaseWalletDelegateVoteBalance(wallet: Contracts.State.Wallet, amount: AppUtils.BigNumber): void {
-        // ? packages/core-transactions/src/handlers/one/vote.ts:L120 blindly sets "vote" attribute
-        // ? is it guaranteed that delegate wallet exists, so delegateWallet.getAttribute("delegate.voteBalance") is safe?
         if (wallet.hasVoted()) {
-            const delegatePublicKey = wallet.getAttribute<string>("vote");
-            const delegateWallet = this.walletRepository.findByPublicKey(delegatePublicKey);
+            const delegateUsername = wallet.getAttribute<string>("vote");
+            const delegateWallet = this.walletRepository.findByUsername(delegateUsername);
             const oldDelegateVoteBalance = delegateWallet.getAttribute<AppUtils.BigNumber>("delegate.voteBalance");
             const newDelegateVoteBalance = oldDelegateVoteBalance.plus(amount);
             delegateWallet.setAttribute("delegate.voteBalance", newDelegateVoteBalance);
@@ -159,8 +160,8 @@ export class BlockState implements Contracts.State.BlockState {
 
     public decreaseWalletDelegateVoteBalance(wallet: Contracts.State.Wallet, amount: AppUtils.BigNumber): void {
         if (wallet.hasVoted()) {
-            const delegatePublicKey = wallet.getAttribute<string>("vote");
-            const delegateWallet = this.walletRepository.findByPublicKey(delegatePublicKey);
+            const delegateUsername = wallet.getAttribute<string>("vote");
+            const delegateWallet = this.walletRepository.findByUsername(delegateUsername);
             const oldDelegateVoteBalance = delegateWallet.getAttribute<AppUtils.BigNumber>("delegate.voteBalance");
             const newDelegateVoteBalance = oldDelegateVoteBalance.minus(amount);
             delegateWallet.setAttribute("delegate.voteBalance", newDelegateVoteBalance);
@@ -190,28 +191,65 @@ export class BlockState implements Contracts.State.BlockState {
 
     private applyBlockToForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
         const delegateAttribute = forgerWallet.getAttribute<Contracts.State.WalletDelegateAttributes>("delegate");
+        const devFund: Utils.BigNumber = Object.values(block.data.devFund!).reduce(
+            (curr, prev) => prev.plus(curr),
+            Utils.BigNumber.ZERO,
+        );
+
         delegateAttribute.producedBlocks++;
         delegateAttribute.burnedFees = delegateAttribute.burnedFees.plus(block.data.burnedFee!);
         delegateAttribute.forgedFees = delegateAttribute.forgedFees.plus(block.data.totalFee);
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.plus(block.data.reward);
-        delegateAttribute.lastBlock = block.data;
+        delegateAttribute.devFunds = delegateAttribute.devFunds.plus(devFund);
+        delegateAttribute.lastBlock = block.data.id;
 
-        const balanceIncrease = block.data.reward.plus(block.data.totalFee.minus(block.data.burnedFee!));
+        const balanceIncrease = block.data.reward.minus(devFund).plus(block.data.totalFee.minus(block.data.burnedFee!));
+
         this.increaseWalletDelegateVoteBalance(forgerWallet, balanceIncrease);
         forgerWallet.increaseBalance(balanceIncrease);
+
+        for (const [address, amount] of Object.entries(block.data.devFund!)) {
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(address);
+            this.increaseWalletDelegateVoteBalance(wallet, amount);
+            wallet.increaseBalance(amount);
+        }
     }
 
-    private revertBlockFromForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
+    private async revertBlockFromForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
         const delegateAttribute = forgerWallet.getAttribute<Contracts.State.WalletDelegateAttributes>("delegate");
+        const devFund: Utils.BigNumber = Object.values(block.data.devFund!).reduce(
+            (curr, prev) => prev.plus(curr),
+            Utils.BigNumber.ZERO,
+        );
+
         delegateAttribute.producedBlocks--;
         delegateAttribute.burnedFees = delegateAttribute.burnedFees.minus(block.data.burnedFee!);
         delegateAttribute.forgedFees = delegateAttribute.forgedFees.minus(block.data.totalFee);
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.minus(block.data.reward);
-        delegateAttribute.lastBlock = undefined;
+        delegateAttribute.devFunds = delegateAttribute.devFunds.minus(devFund);
 
-        const balanceDecrease = block.data.reward.plus(block.data.totalFee.minus(block.data.burnedFee!));
+        const { results } = await this.blockHistoryService.listByCriteria(
+            { generatorPublicKey: block.data.generatorPublicKey, height: { to: block.data.height - 1 } },
+            [{ property: "height", direction: "desc" }],
+            { offset: 0, limit: 1 },
+        );
+
+        if (results[0] && results[0].id) {
+            delegateAttribute.lastBlock = results[0].id;
+        } else {
+            delegateAttribute.lastBlock = undefined;
+        }
+
+        const balanceDecrease = block.data.reward.minus(devFund).plus(block.data.totalFee.minus(block.data.burnedFee!));
+
         this.decreaseWalletDelegateVoteBalance(forgerWallet, balanceDecrease);
         forgerWallet.decreaseBalance(balanceDecrease);
+
+        for (const [address, amount] of Object.entries(block.data.devFund!)) {
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(address);
+            this.decreaseWalletDelegateVoteBalance(wallet, amount);
+            wallet.decreaseBalance(amount);
+        }
     }
 
     /**
@@ -275,7 +313,7 @@ export class BlockState implements Contracts.State.BlockState {
         } else {
             // Update vote balance of the sender's delegate
             if (sender.hasVoted()) {
-                const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                const delegate: Contracts.State.Wallet = this.walletRepository.findByUsername(
                     sender.getAttribute("vote"),
                 );
 
@@ -327,7 +365,7 @@ export class BlockState implements Contracts.State.BlockState {
                 lockWallet.hasAttribute("vote")
             ) {
                 // HTLC Claim transfers the locked amount to the lock recipient's (= claim sender) delegate vote balance
-                const lockWalletDelegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                const lockWalletDelegate: Contracts.State.Wallet = this.walletRepository.findByUsername(
                     lockWallet.getAttribute("vote"),
                 );
                 const lockWalletDelegateVoteBalance: Utils.BigNumber = lockWalletDelegate.getAttribute(
@@ -353,7 +391,7 @@ export class BlockState implements Contracts.State.BlockState {
                     const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(recipientId);
                     if (recipientWallet.hasVoted()) {
                         const vote = recipientWallet.getAttribute("vote");
-                        const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(vote);
+                        const delegate: Contracts.State.Wallet = this.walletRepository.findByUsername(vote);
                         const voteBalance: Utils.BigNumber = delegate.getAttribute(
                             "delegate.voteBalance",
                             Utils.BigNumber.ZERO,
@@ -373,7 +411,7 @@ export class BlockState implements Contracts.State.BlockState {
                 (transaction.type !== Enums.TransactionType.Core.HtlcLock ||
                     transaction.typeGroup !== Enums.TransactionTypeGroup.Core)
             ) {
-                const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                const delegate: Contracts.State.Wallet = this.walletRepository.findByUsername(
                     recipient.getAttribute("vote"),
                 );
                 const voteBalance: Utils.BigNumber = delegate.getAttribute(

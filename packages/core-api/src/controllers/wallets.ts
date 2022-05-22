@@ -1,4 +1,4 @@
-import { Boom, notFound } from "@hapi/boom";
+import { badData, Boom, notFound } from "@hapi/boom";
 import Hapi from "@hapi/hapi";
 import { Container, Contracts, Services } from "@solar-network/core-kernel";
 import { Enums } from "@solar-network/crypto";
@@ -51,7 +51,7 @@ export class WalletsController extends Controller {
         const walletResource = this.walletSearchService.getWallet(walletId);
 
         if (!walletResource) {
-            return notFound("Wallet not found");
+            return this.raiseError(walletId);
         }
 
         return { data: walletResource };
@@ -62,7 +62,7 @@ export class WalletsController extends Controller {
         const walletResource = this.walletSearchService.getWallet(walletId);
 
         if (!walletResource) {
-            return notFound("Wallet not found");
+            return this.raiseError(walletId);
         }
 
         const pagination = this.getQueryPagination(request.query);
@@ -80,7 +80,7 @@ export class WalletsController extends Controller {
         const walletResource = this.walletSearchService.getWallet(walletId);
 
         if (!walletResource) {
-            return notFound("Wallet not found");
+            return this.raiseError(walletId);
         }
 
         const criteria: Contracts.Shared.TransactionCriteria = { ...request.query, address: walletResource.address };
@@ -117,7 +117,7 @@ export class WalletsController extends Controller {
         const walletResource = this.walletSearchService.getWallet(walletId);
 
         if (!walletResource) {
-            return notFound("Wallet not found");
+            return this.raiseError(walletId);
         }
         if (!walletResource.publicKey) {
             return this.paginationService.getEmptyPage();
@@ -160,7 +160,7 @@ export class WalletsController extends Controller {
         const walletResource = this.walletSearchService.getWallet(walletId);
 
         if (!walletResource) {
-            return notFound("Wallet not found");
+            return this.raiseError(walletId);
         }
 
         const criteria: Contracts.Shared.TransactionCriteria = {
@@ -200,7 +200,7 @@ export class WalletsController extends Controller {
         const walletResource = this.walletSearchService.getWallet(walletId);
 
         if (!walletResource) {
-            return notFound("Wallet not found");
+            return this.raiseError(walletId);
         }
         if (!walletResource.publicKey) {
             return this.paginationService.getEmptyPage();
@@ -235,5 +235,13 @@ export class WalletsController extends Controller {
 
             return this.toPagination(transactionListResult, TransactionResource, false);
         }
+    }
+
+    private raiseError(walletId: string): Boom {
+        if (walletId.length === 34) {
+            return badData("Wallet not valid");
+        }
+
+        return notFound("Wallet not found");
     }
 }

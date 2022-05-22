@@ -3,7 +3,7 @@ import { Hash, HashAlgorithms, Slots } from "../crypto";
 import { BlockSchemaError } from "../errors";
 import { IBlock, IBlockData, IBlockJson, IBlockVerification, ITransaction, ITransactionData } from "../interfaces";
 import { configManager } from "../managers/config";
-import { BigNumber, isException } from "../utils";
+import { BigNumber, calculateDevFund, isException } from "../utils";
 import { validator } from "../validation";
 import { Serializer } from "./serializer";
 
@@ -28,6 +28,8 @@ export class Block implements IBlock {
         delete this.data.transactions;
 
         this.data.burnedFee = this.getBurnedFees();
+
+        this.data.devFund = calculateDevFund(this.data.height, this.data.reward);
 
         this.verification = this.verify();
     }
@@ -78,29 +80,11 @@ export class Block implements IBlock {
     }
 
     public static getId(data: IBlockData): string {
-        const constants = configManager.getMilestone(data.height);
-        const idHex: string = Block.getIdHex(data);
-
-        return constants.block.idFullSha256 ? idHex : BigNumber.make(`0x${idHex}`).toString();
-    }
-
-    public static getIdHex(data: IBlockData): string {
-        const constants = configManager.getMilestone(data.height);
         const payloadHash: Buffer = Serializer.serialize(data);
 
         const hash: Buffer = HashAlgorithms.sha256(payloadHash);
 
-        if (constants.block.idFullSha256) {
-            return hash.toString("hex");
-        }
-
-        const temp: Buffer = Buffer.alloc(8);
-
-        for (let i = 0; i < 8; i++) {
-            temp[i] = hash[7 - i];
-        }
-
-        return temp.toString("hex");
+        return hash.toString("hex");
     }
 
     public static toBytesHex(data: string | undefined): string {
@@ -110,7 +94,7 @@ export class Block implements IBlock {
     }
 
     public getBurnedFees(): BigNumber {
-        let fees = BigNumber.ZERO;
+        let fees: BigNumber = BigNumber.ZERO;
         for (const transaction of this.transactions) {
             transaction.setBurnedFee(this.data.height);
             fees = fees.plus(transaction.data.burnedFee!);
@@ -119,13 +103,25 @@ export class Block implements IBlock {
     }
 
     public getHeader(): IBlockData {
-        const header: IBlockData = Object.assign({}, this.data);
-        delete header.burnedFee;
-        delete header.transactions;
-        return header;
+        return {
+            blockSignature: this.data.blockSignature,
+            generatorPublicKey: this.data.generatorPublicKey,
+            height: this.data.height,
+            id: this.data.id,
+            numberOfTransactions: this.data.numberOfTransactions,
+            payloadHash: this.data.payloadHash,
+            payloadLength: this.data.payloadLength,
+            previousBlock: this.data.previousBlock,
+            reward: this.data.reward,
+            timestamp: this.data.timestamp,
+            totalAmount: this.data.totalAmount,
+            totalFee: this.data.totalFee,
+            version: this.data.version,
+        };
     }
 
     public verifySignature(): boolean {
+        const { bip340 } = configManager.getMilestone(this.data.height);
         const bytes: Buffer = Serializer.serialize(this.data, false);
         const hash: Buffer = HashAlgorithms.sha256(bytes);
 
@@ -133,7 +129,7 @@ export class Block implements IBlock {
             throw new Error();
         }
 
-        return Hash.verifySchnorr(hash, this.data.blockSignature, this.data.generatorPublicKey);
+        return Hash.verifySchnorr(hash, this.data.blockSignature, this.data.generatorPublicKey, bip340);
     }
 
     public toJson(): IBlockJson {

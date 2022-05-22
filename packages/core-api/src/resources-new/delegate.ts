@@ -14,11 +14,12 @@ export type DelegateResource = {
     address: string;
     publicKey: string;
     votes: Utils.BigNumber;
+    voters: number;
     rank: number;
     isResigned: boolean;
     blocks: {
         produced: number;
-        last: DelegateResourceLastBlock | undefined;
+        last: string | undefined;
     };
     production: {
         approval: number;
@@ -27,26 +28,18 @@ export type DelegateResource = {
         fees: Utils.BigNumber;
         burnedFees: Utils.BigNumber;
         rewards: Utils.BigNumber;
+        devFunds: Utils.BigNumber;
         total: Utils.BigNumber;
     };
     version?: Semver;
 };
 
-export type DelegateResourceLastBlock = {
-    id: string;
-    height: number;
-    timestamp: {
-        epoch: number;
-        unix: number;
-        human: string;
-    };
-};
-
 export const delegateCriteriaSchemaObject = {
-    username: Joi.string().max(256),
+    username: Joi.string().pattern(/^[a-z0-9!@$&_.]{1,20}$/),
     address: walletCriteriaSchemaObject.address,
     publicKey: walletCriteriaSchemaObject.publicKey,
     votes: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
+    voters: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
     rank: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(1)),
     isResigned: Joi.boolean(),
     blocks: {
@@ -68,6 +61,7 @@ export const delegateCriteriaSchemaObject = {
         burnedFees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         fees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         rewards: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
+        devFunds: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         total: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
     },
     version: Schemas.createRangeCriteriaSchema(Schemas.semver),

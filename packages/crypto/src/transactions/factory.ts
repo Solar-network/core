@@ -64,11 +64,6 @@ export class TransactionFactory {
 
         const transaction: ITransaction = TransactionTypeFactory.create(value);
 
-        const { version } = transaction.data;
-        if (version === 1) {
-            Deserializer.applyV1Compatibility(transaction.data);
-        }
-
         Serializer.serialize(transaction);
 
         return this.fromBytes(transaction.serialized, strict, options);

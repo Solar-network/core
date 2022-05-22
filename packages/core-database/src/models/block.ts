@@ -78,6 +78,12 @@ export class Block implements Contracts.Database.BlockModel {
     public reward!: Utils.BigNumber;
 
     @Column({
+        type: "jsonb",
+        nullable: false,
+    })
+    public devFund!: Record<string, Utils.BigNumber>;
+
+    @Column({
         type: "integer",
         nullable: false,
     })

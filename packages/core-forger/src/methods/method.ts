@@ -45,7 +45,6 @@ export abstract class Method {
                 generatorPublicKey: keys.publicKey,
                 timestamp: options.timestamp,
                 previousBlock: options.previousBlock.id,
-                previousBlockHex: options.previousBlock.idHex,
                 height: options.previousBlock.height + 1,
                 numberOfTransactions: transactions.length,
                 totalAmount: totals.amount,
@@ -56,6 +55,7 @@ export abstract class Method {
                 transactions,
             },
             keys,
+            options.aux,
         )!; // todo: this method should never return undefined
     }
 }

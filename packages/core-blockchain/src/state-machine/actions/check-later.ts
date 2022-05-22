@@ -1,4 +1,4 @@
-import { Container, Contracts, Enums, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Crypto, Managers, Utils } from "@solar-network/crypto";
 import delay from "delay";
 
@@ -11,9 +11,6 @@ export class CheckLater implements Action {
 
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
-
-    @Container.inject(Container.Identifiers.EventDispatcherService)
-    private readonly events!: Contracts.Kernel.EventDispatcher;
 
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
@@ -29,7 +26,7 @@ export class CheckLater implements Action {
     private readonly walletRepository!: Contracts.State.WalletRepository;
 
     public async handle(): Promise<void> {
-        const { blocktime } = await Managers.configManager.getMilestone();
+        const { blocktime } = Managers.configManager.getMilestone();
         const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, 1);
 
         const epoch = Math.floor(new Date(Managers.configManager.getMilestone().epoch).getTime() / 1000);
@@ -72,7 +69,10 @@ export class CheckLater implements Action {
             if (!this.stateStore.hasPolledForBlocks()) {
                 this.stateStore.polledForBlocks();
                 this.peerNetworkMonitor.cleansePeers({ fast: true, forcePing: true, log: false });
-                const downloadInterval = setInterval(async () => {
+                setInterval(async () => {
+                    if (this.stateStore.getBlockchain().value !== "idle") {
+                        return;
+                    }
                     try {
                         let lastBlock = this.app
                             .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
@@ -118,7 +118,7 @@ export class CheckLater implements Action {
                                     )} and was downloaded from ${blocks[0].ip}`,
                                 );
 
-                                this.blockchain.handleIncomingBlock(blocks[0], false, false);
+                                this.blockchain.handleIncomingBlock(blocks[0], false, blocks[0].ip!, false);
                             } else {
                                 this.blockchain.enqueueBlocks(blocks);
                                 this.blockchain.dispatch("DOWNLOADED");
@@ -128,15 +128,6 @@ export class CheckLater implements Action {
                         //
                     }
                 }, 500);
-
-                const stopDownloading = {
-                    handle: () => {
-                        this.events.forget(Enums.BlockEvent.Received, stopDownloading);
-                        clearInterval(downloadInterval);
-                    },
-                };
-
-                this.events.listen(Enums.BlockEvent.Received, stopDownloading);
             }
 
             this.blockchain.setWakeUp();

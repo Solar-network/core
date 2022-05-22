@@ -1,45 +1,32 @@
 import {
     TransactionAlreadyRegisteredError,
     TransactionKeyAlreadyRegisteredError,
-    TransactionVersionAlreadyRegisteredError,
     UnknownTransactionError,
 } from "../errors";
 import { validator } from "../validation";
-import { One, Solar, Transaction, TransactionTypeFactory, Two } from "./types";
+import { Core, Solar, Transaction, TransactionTypeFactory } from "./types";
 import { InternalTransactionType } from "./types/internal-transaction-type";
 
 export type TransactionConstructor = typeof Transaction;
 
 class TransactionRegistry {
-    private readonly transactionTypes: Map<InternalTransactionType, Map<number, TransactionConstructor>> = new Map();
+    private readonly transactionTypes: Map<InternalTransactionType, TransactionConstructor> = new Map();
 
     public constructor() {
         TransactionTypeFactory.initialize(this.transactionTypes);
 
-        this.registerTransactionType(One.TransferTransaction);
-        this.registerTransactionType(Two.TransferTransaction);
-
-        this.registerTransactionType(One.SecondSignatureRegistrationTransaction);
-        this.registerTransactionType(Two.SecondSignatureRegistrationTransaction);
-
-        this.registerTransactionType(One.DelegateRegistrationTransaction);
-        this.registerTransactionType(Two.DelegateRegistrationTransaction);
-
-        this.registerTransactionType(One.VoteTransaction);
-        this.registerTransactionType(Two.VoteTransaction);
-
-        this.registerTransactionType(One.MultiSignatureRegistrationTransaction);
-        this.registerTransactionType(Two.MultiSignatureRegistrationTransaction);
-
-        this.registerTransactionType(Two.IpfsTransaction);
-
-        this.registerTransactionType(Two.MultiPaymentTransaction);
-
-        this.registerTransactionType(Two.DelegateResignationTransaction);
-
-        this.registerTransactionType(Two.HtlcLockTransaction);
-        this.registerTransactionType(Two.HtlcClaimTransaction);
-        this.registerTransactionType(Two.HtlcRefundTransaction);
+        // Core transactions
+        this.registerTransactionType(Core.TransferTransaction);
+        this.registerTransactionType(Core.SecondSignatureRegistrationTransaction);
+        this.registerTransactionType(Core.DelegateRegistrationTransaction);
+        this.registerTransactionType(Core.VoteTransaction);
+        this.registerTransactionType(Core.MultiSignatureRegistrationTransaction);
+        this.registerTransactionType(Core.IpfsTransaction);
+        this.registerTransactionType(Core.MultiPaymentTransaction);
+        this.registerTransactionType(Core.DelegateResignationTransaction);
+        this.registerTransactionType(Core.HtlcLockTransaction);
+        this.registerTransactionType(Core.HtlcClaimTransaction);
+        this.registerTransactionType(Core.HtlcRefundTransaction);
 
         // Solar transactions
         this.registerTransactionType(Solar.BurnTransaction);
@@ -53,36 +40,21 @@ class TransactionRegistry {
         }
 
         const internalType: InternalTransactionType = InternalTransactionType.from(type, typeGroup);
-        for (const registeredConstructors of this.transactionTypes.values()) {
-            if (registeredConstructors.size) {
-                const first = [...registeredConstructors.values()][0];
-                if (
-                    first.key === constructor.key &&
-                    InternalTransactionType.from(first.type!, first.typeGroup) !== internalType
-                ) {
-                    throw new TransactionKeyAlreadyRegisteredError(first.key!);
-                }
 
-                for (const registeredConstructor of registeredConstructors.values()) {
-                    if (registeredConstructor === constructor) {
-                        throw new TransactionAlreadyRegisteredError(constructor.name);
-                    }
-                }
+        if (this.transactionTypes.has(internalType)) {
+            const registeredConstructor = this.transactionTypes.get(internalType);
+            if (registeredConstructor === constructor) {
+                throw new TransactionAlreadyRegisteredError(constructor.name);
             }
+            throw new TransactionKeyAlreadyRegisteredError(registeredConstructor!.name);
         }
 
-        if (!this.transactionTypes.has(internalType)) {
-            this.transactionTypes.set(internalType, new Map());
-        } else if (this.transactionTypes.get(internalType)?.has(constructor.version)) {
-            throw new TransactionVersionAlreadyRegisteredError(constructor.name, constructor.version);
-        }
-
-        this.transactionTypes.get(internalType)!.set(constructor.version, constructor);
+        this.transactionTypes.set(internalType, constructor);
         this.updateSchemas(constructor);
     }
 
     public deregisterTransactionType(constructor: TransactionConstructor): void {
-        const { typeGroup, type, version } = constructor;
+        const { typeGroup, type } = constructor;
 
         if (typeof type === "undefined" || typeof typeGroup === "undefined") {
             throw new Error();
@@ -95,16 +67,7 @@ class TransactionRegistry {
 
         this.updateSchemas(constructor, true);
 
-        const constructors = this.transactionTypes.get(internalType)!;
-        if (!constructors.has(version)) {
-            throw new UnknownTransactionError(internalType.toString());
-        }
-
-        constructors.delete(version);
-
-        if (constructors.size === 0) {
-            this.transactionTypes.delete(internalType);
-        }
+        this.transactionTypes.delete(internalType);
     }
 
     private updateSchemas(transaction: TransactionConstructor, remove?: boolean): void {

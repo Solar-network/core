@@ -97,7 +97,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
         return this.communicator.ping(peer, verifyTimeout, blockTimeLookup);
     }
 
-    private async acceptNewPeer(peer, options: Contracts.P2P.AcceptNewPeerOptions): Promise<void> {
+    private async acceptNewPeer(peer: Contracts.P2P.Peer, options: Contracts.P2P.AcceptNewPeerOptions): Promise<void> {
         const verifyTimeout = this.configuration.getRequired<number>("verifyTimeout");
 
         if (this.repository.hasPeer(peer.ip)) {
@@ -114,7 +114,10 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
             return;
         }
 
-        const newPeer: Contracts.P2P.Peer = this.app.get<PeerFactory>(Container.Identifiers.PeerFactory)(peer.ip);
+        const newPeer: Contracts.P2P.Peer = this.app.get<PeerFactory>(Container.Identifiers.PeerFactory)(
+            peer.ip,
+            peer.port,
+        );
 
         try {
             this.repository.setPendingPeer(peer);

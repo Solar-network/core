@@ -1,6 +1,6 @@
 import { Repositories } from "@solar-network/core-database";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import assert from "assert";
 
 import {
@@ -8,8 +8,6 @@ import {
     InsufficientBalanceError,
     InvalidMultiSignaturesError,
     InvalidSecondSignatureError,
-    LegacyMultiSignatureError,
-    LegacyMultiSignatureRegistrationError,
     MissingMultiSignatureOnSenderError,
     SenderWalletMismatchError,
     TransactionFeeTooLowError,
@@ -137,16 +135,11 @@ export abstract class TransactionHandler {
 
         await this.throwIfCannotBeApplied(transaction, sender);
 
-        // TODO: extract version specific code
-        if (data.version && data.version > 1) {
-            this.verifyTransactionNonceApply(sender, transaction);
+        this.verifyTransactionNonceApply(sender, transaction);
 
-            AppUtils.assert.defined<AppUtils.BigNumber>(data.nonce);
+        AppUtils.assert.defined<AppUtils.BigNumber>(data.nonce);
 
-            sender.setNonce(data.nonce);
-        } else {
-            sender.increaseNonce();
-        }
+        sender.setNonce(data.nonce);
 
         const newBalance: Utils.BigNumber = sender.getBalance().minus(data.amount).minus(data.fee);
 
@@ -182,7 +175,6 @@ export abstract class TransactionHandler {
 
         sender.increaseBalance(data.amount.plus(data.fee));
 
-        // TODO: extract version specific code
         this.verifyTransactionNonceRevert(sender, transaction);
 
         sender.decreaseNonce();
@@ -253,14 +245,6 @@ export abstract class TransactionHandler {
             throw new UnexpectedSecondSignatureError();
         }
 
-        // Prevent legacy multisignatures from being used
-        const isMultiSignatureRegistration: boolean =
-            transaction.type === Enums.TransactionType.Core.MultiSignature &&
-            transaction.typeGroup === Enums.TransactionTypeGroup.Core;
-        if (isMultiSignatureRegistration && !Managers.configManager.getMilestone().aip11) {
-            throw new LegacyMultiSignatureRegistrationError();
-        }
-
         if (sender.hasMultiSignature()) {
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
@@ -273,14 +257,10 @@ export abstract class TransactionHandler {
                 throw new MissingMultiSignatureOnSenderError();
             }
 
-            if (dbSender.hasAttribute("multiSignature.legacy")) {
-                throw new LegacyMultiSignatureError();
-            }
-
             if (!this.verifySignatures(dbSender, data, dbSender.getAttribute("multiSignature"))) {
                 throw new InvalidMultiSignaturesError();
             }
-        } else if (transaction.data.signatures && !isMultiSignatureRegistration) {
+        } else if (transaction.data.signatures) {
             throw new UnsupportedMultiSignatureTransactionError();
         }
     }
@@ -293,10 +273,9 @@ export abstract class TransactionHandler {
      * @memberof Wallet
      */
     protected verifyTransactionNonceApply(wallet: Contracts.State.Wallet, transaction: Interfaces.ITransaction): void {
-        const version: number = transaction.data.version || 1;
         const nonce: AppUtils.BigNumber = transaction.data.nonce || AppUtils.BigNumber.ZERO;
 
-        if (version > 1 && !wallet.getNonce().plus(1).isEqualTo(nonce)) {
+        if (!wallet.getNonce().plus(1).isEqualTo(nonce)) {
             throw new UnexpectedNonceError(nonce, wallet, false);
         }
     }
@@ -310,10 +289,9 @@ export abstract class TransactionHandler {
      * @memberof Wallet
      */
     protected verifyTransactionNonceRevert(wallet: Contracts.State.Wallet, transaction: Interfaces.ITransaction): void {
-        const version: number = transaction.data.version || 1;
         const nonce: AppUtils.BigNumber = transaction.data.nonce || AppUtils.BigNumber.ZERO;
 
-        if (version > 1 && !wallet.getNonce().isEqualTo(nonce)) {
+        if (!wallet.getNonce().isEqualTo(nonce)) {
             throw new UnexpectedNonceError(nonce, wallet, true);
         }
     }

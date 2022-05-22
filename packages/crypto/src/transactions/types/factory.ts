@@ -6,18 +6,16 @@ import { Transaction } from "./transaction";
 type TransactionConstructor = typeof Transaction;
 
 export class TransactionTypeFactory {
-    private static transactionTypes: Map<InternalTransactionType, Map<number, TransactionConstructor>>;
+    private static transactionTypes: Map<InternalTransactionType, TransactionConstructor>;
 
-    public static initialize(
-        transactionTypes: Map<InternalTransactionType, Map<number, TransactionConstructor>>,
-    ): void {
+    public static initialize(transactionTypes: Map<InternalTransactionType, TransactionConstructor>): void {
         this.transactionTypes = transactionTypes;
     }
 
     public static create(data: ITransactionData): ITransaction {
         const instance: ITransaction = new (this.get(data.type, data.typeGroup, data.version) as any)() as ITransaction;
         instance.data = data;
-        instance.data.version = data.version || 1;
+        instance.data.version = data.version || 3;
 
         return instance;
     }
@@ -29,10 +27,6 @@ export class TransactionTypeFactory {
             throw new UnknownTransactionError(internalType.toString());
         }
 
-        // Either there is a match for the provided version or use the first available constructor as a fallback
-        const constructor: TransactionConstructor | undefined = this.transactionTypes
-            .get(internalType)
-            ?.get(version || 1);
-        return constructor ?? [...this.transactionTypes.get(internalType)!.values()][0];
+        return this.transactionTypes.get(internalType);
     }
 }

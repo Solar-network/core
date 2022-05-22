@@ -25,18 +25,16 @@ export interface IBlock {
 
 export interface IBlockData {
     id?: string;
-    idHex?: string;
-
     timestamp: number;
     version: number;
     height: number;
-    previousBlockHex?: string;
     previousBlock: string;
     numberOfTransactions: number;
     totalAmount: BigNumber;
     totalFee: BigNumber;
     burnedFee?: BigNumber;
     reward: BigNumber;
+    devFund?: Record<string, BigNumber>;
     payloadLength: number;
     payloadHash: string;
     generatorPublicKey: string;
@@ -45,22 +43,21 @@ export interface IBlockData {
     serialized?: string;
     transactions?: ITransactionData[];
     ip?: string;
+    fromForger?: boolean;
 }
 
 export interface IBlockJson {
     id?: string;
-    idHex?: string;
-
     timestamp: number;
     version: number;
     height: number;
-    previousBlockHex?: string;
     previousBlock: string;
     numberOfTransactions: number;
     totalAmount: string;
     totalFee: string;
     burnedFee: string;
     reward: string;
+    devFund: string;
     payloadLength: number;
     payloadHash: string;
     generatorPublicKey: string;
