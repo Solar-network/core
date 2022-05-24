@@ -76,8 +76,7 @@ export class ColdWalletError extends TransactionError {
 }
 
 export class InsufficientBalanceError extends TransactionError {
-    public constructor(amount: Utils.BigNumber, sender: Contracts.State.Wallet) {
-        const balance: Utils.BigNumber = sender.getBalance();
+    public constructor(amount: Utils.BigNumber, balance: Utils.BigNumber) {
         super(
             `Insufficient balance in the wallet: tried to send ${Utils.formatSatoshi(
                 amount,

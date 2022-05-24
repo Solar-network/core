@@ -54,7 +54,7 @@ export class MultiPaymentTransactionHandler extends TransactionHandler {
         const totalPaymentsAmount = payments.reduce((a, p) => a.plus(p.amount), Utils.BigNumber.ZERO);
 
         if (wallet.getBalance().minus(totalPaymentsAmount).minus(transaction.data.fee).isNegative()) {
-            throw new InsufficientBalanceError(totalPaymentsAmount.plus(transaction.data.fee), wallet);
+            throw new InsufficientBalanceError(totalPaymentsAmount.plus(transaction.data.fee), wallet.getBalance());
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);
