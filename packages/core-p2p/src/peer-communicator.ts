@@ -167,28 +167,8 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 pingResponse.state.currentSlot = pingResponse.state.currentSlot >> 0;
             }
 
-            // This will be removed in the next release, it is just transitional so we accept delegates on old nodes for consensus until they update.
-            if (!Managers.configManager.getMilestone().bip340) {
-                pingResponse.state.header.previousBlockHex = pingResponse.state.header.previousBlock;
-            }
-
             const stateBuffer = Buffer.from(
                 Utils.stringify({ state: pingResponse.state, config: pingResponse.config }),
-            );
-
-            // This will be removed in the next release, it is just transitional so we accept delegates on old nodes for consensus until they update.
-            const stateBufferLegacy = Buffer.from(
-                Utils.stringify({
-                    state: {
-                        ...pingResponse.state,
-                        header: {
-                            ...pingResponse.state.header,
-                            idHex: pingResponse.state.header.id,
-                            previousBlockHex: pingResponse.state.header.previousBlock,
-                        },
-                    },
-                    config: pingResponse.config,
-                }),
             );
 
             const alreadyCheckedSignatures: string[] = [];
@@ -220,8 +200,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                     ) {
                         if (
                             !delegates.includes(publicKey) ||
-                            (!Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey) &&
-                                !Crypto.Hash.verifySchnorr(stateBufferLegacy, signature, publicKey))
+                            !Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey)
                         ) {
                             break;
                         }
