@@ -20,11 +20,7 @@ export class BurnTransactionHandler extends TransactionHandler {
 
     public async isActivated(): Promise<boolean> {
         const milestone = Managers.configManager.getMilestone();
-        return (
-            typeof milestone.solarTransactions === "object" &&
-            typeof milestone.solarTransactions.burn === "object" &&
-            typeof milestone.solarTransactions.burn.minimumAmount === "number"
-        );
+        return typeof milestone.burn === "object" && typeof milestone.burn.txAmount === "number";
     }
 
     public async throwIfCannotBeApplied(
@@ -34,10 +30,10 @@ export class BurnTransactionHandler extends TransactionHandler {
         const milestone = Managers.configManager.getMilestone();
 
         const { data }: Interfaces.ITransaction = transaction;
-        const minimumAmount = +milestone.solarTransactions.burn.minimumAmount;
+        const txAmount = +milestone.burn.txAmount;
 
-        if (data.amount.isLessThan(minimumAmount)) {
-            throw new InsufficientBurnAmountError(data.amount, Utils.BigNumber.make(minimumAmount));
+        if (data.amount.isLessThan(txAmount)) {
+            throw new InsufficientBurnAmountError(data.amount, Utils.BigNumber.make(txAmount));
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);

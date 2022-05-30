@@ -8,7 +8,10 @@
             "maxPayload": 2097152
         },
         "blocktime": 8,
-        "burnPercentage": 90,
+        "burn": {
+            "feePercentage": 90,
+            "txAmount": 2000000
+        },
         "dynamicFees": {
             "enabled": true,
             "addonBytes": {
@@ -47,11 +50,6 @@
         "multiPaymentLimit": 256,
         "onlyActiveDelegatesInCalculations": true,
         "reward": "0",
-        "solarTransactions": {
-            "burn": {
-                "minimumAmount": 2000000
-            }
-        },
         "vendorFieldLength": 255
     },
     {
