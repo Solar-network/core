@@ -1,6 +1,7 @@
 import inert from "@hapi/inert";
 
 import { cache } from "./cache";
+import { closeConnection } from "./close-connection";
 import { commaArrayQuery } from "./comma-array-query";
 import { dotSeparatedQuery } from "./dot-separated-query";
 import { hapiAjv } from "./hapi-ajv";
@@ -26,6 +27,7 @@ export const preparePlugins = (config) => [
             trustProxy: config.trustProxy,
         },
     },
+    { plugin: closeConnection },
     { plugin: commaArrayQuery },
     { plugin: dotSeparatedQuery },
     {
