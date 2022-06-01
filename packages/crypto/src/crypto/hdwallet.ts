@@ -5,7 +5,7 @@ import { IKeyPair } from "../interfaces";
 import { configManager } from "../managers";
 
 export class HDWallet {
-    public static readonly slip44 = 111;
+    public static readonly slip44 = 3333;
 
     /**
      * Get root node from the given mnemonic with an optional passphrase.
