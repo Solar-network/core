@@ -67,7 +67,8 @@ export class WalletSearchService {
             publicKey: wallet.getPublicKey(),
             balance: wallet.getBalance(),
             nonce: wallet.getNonce(),
-            attributes: wallet.getAttributes(),
+            attributes: { ...wallet.getAttributes(), votes: undefined },
+            votingFor: wallet.getVoteDistribution(),
         };
     }
 

@@ -1,18 +1,12 @@
 import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/core-kernel";
 import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
-import {
-    AlreadyVotedError,
-    NoVoteError,
-    UnvoteMismatchError,
-    VotedForNonDelegateError,
-    VotedForResignedDelegateError,
-} from "../../errors";
+import { VotedForNonDelegateError, VotedForResignedDelegateError } from "../../errors";
+import { DelegateRegistrationTransactionHandler } from "../core/delegate-registration";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
-import { DelegateRegistrationTransactionHandler } from "./delegate-registration";
 
 @Container.injectable()
-export class LegacyVoteTransactionHandler extends TransactionHandler {
+export class VoteTransactionHandler extends TransactionHandler {
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
@@ -28,7 +22,7 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.Core.LegacyVoteTransaction;
+        return Transactions.Solar.VoteTransaction;
     }
 
     public async bootstrap(): Promise<void> {
@@ -43,40 +37,12 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
             const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
 
-            let walletVote: { [vote: string]: number } = wallet.getAttribute("votes");
-
-            for (const vote of transaction.asset.votes) {
-                let delegateVote: string = vote.slice(1);
-                const votingFor: string = Object.keys(walletVote)[0];
-
-                if (delegateVote.length === 66) {
-                    const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegateVote);
-                    delegateVote = delegateWallet.getAttribute("delegate.username");
-                }
-
-                if (vote.startsWith("+")) {
-                    if (votingFor) {
-                        throw new AlreadyVotedError();
-                    }
-
-                    walletVote = { [delegateVote]: 100 };
-                } else {
-                    if (votingFor === undefined) {
-                        throw new NoVoteError();
-                    } else if (votingFor !== delegateVote) {
-                        throw new UnvoteMismatchError();
-                    }
-
-                    walletVote = {};
-                }
-            }
-
-            wallet.changeVotes(walletVote);
+            wallet.changeVotes(transaction.asset.votes);
         }
     }
 
     public async isActivated(): Promise<boolean> {
-        return Managers.configManager.getMilestone().legacyVote;
+        return !Managers.configManager.getMilestone().legacyVote;
     }
 
     public async throwIfCannotBeApplied(
@@ -85,48 +51,14 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
     ): Promise<void> {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        let walletVote: string | undefined;
-        if (wallet.hasVoted()) {
-            walletVote = Object.keys(wallet.getAttribute("votes"))[0];
-        }
-
-        for (const vote of transaction.data.asset.votes) {
-            let delegateVote: string = vote.slice(1);
-            let delegateWallet: Contracts.State.Wallet;
-
-            if (delegateVote.length === 66) {
-                delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
-
-                if (!delegateWallet.isDelegate()) {
-                    throw new VotedForNonDelegateError();
-                }
-
-                delegateVote = delegateWallet.getAttribute("delegate.username");
-            } else {
-                if (!this.walletRepository.hasByUsername(delegateVote)) {
-                    throw new VotedForNonDelegateError(delegateVote);
-                }
-                delegateWallet = this.walletRepository.findByUsername(delegateVote);
+        for (const delegate of Object.keys(transaction.data.asset.votes)) {
+            if (!this.walletRepository.hasByUsername(delegate)) {
+                throw new VotedForNonDelegateError(delegate);
             }
 
-            if (vote.startsWith("+")) {
-                if (walletVote) {
-                    throw new AlreadyVotedError();
-                }
-
-                if (delegateWallet.hasAttribute("delegate.resigned")) {
-                    throw new VotedForResignedDelegateError(delegateVote);
-                }
-
-                walletVote = delegateVote;
-            } else {
-                if (!walletVote) {
-                    throw new NoVoteError();
-                } else if (walletVote !== delegateVote) {
-                    throw new UnvoteMismatchError();
-                }
-
-                walletVote = undefined;
+            const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegate);
+            if (delegateWallet.hasAttribute("delegate.resigned")) {
+                throw new VotedForResignedDelegateError(delegate);
             }
         }
 
@@ -136,18 +68,10 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
     public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        for (let vote of transaction.data.asset.votes) {
-            const delegateVote: string = vote.slice(1);
-            if (delegateVote.length === 66) {
-                const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegateVote);
-                vote = vote[0] + Object.keys(delegateWallet.getAttribute("delegate.username"))[0];
-            }
-
-            emitter.dispatch(vote.startsWith("+") ? AppEnums.VoteEvent.Vote : AppEnums.VoteEvent.Unvote, {
-                delegate: vote,
-                transaction: transaction.data,
-            });
-        }
+        emitter.dispatch(AppEnums.VoteEvent.Vote, {
+            delegates: transaction.data.asset?.votes,
+            transaction: transaction.data,
+        });
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
@@ -175,27 +99,8 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        let walletVote!: { [vote: string]: number };
-
-        for (const vote of transaction.data.asset.votes) {
-            let delegateWallet: Contracts.State.Wallet;
-            let delegateVote: string = vote.slice(1);
-            if (delegateVote.length === 66) {
-                delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
-                delegateVote = delegateWallet.getAttribute("delegate.username");
-            } else {
-                delegateWallet = this.walletRepository.findByUsername(delegateVote);
-            }
-
-            if (vote.startsWith("+")) {
-                walletVote = { [delegateVote]: 100 };
-            } else {
-                walletVote = {};
-            }
-        }
-
         this.resetVotes(sender, false);
-        sender.changeVotes(walletVote);
+        sender.changeVotes(transaction.data.asset?.votes);
         sender.updateVoteBalance();
         this.resetVotes(sender, true);
     }

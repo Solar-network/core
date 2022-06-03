@@ -1,6 +1,11 @@
 import deepmerge from "deepmerge";
 
 import { TransactionType } from "../../enums";
+import { configManager } from "../../managers";
+
+const maxDelegates = configManager
+    .getMilestones()
+    .reduce((acc: number, curr: { activeDelegates: number }) => Math.max(acc, curr.activeDelegates), 0);
 
 const signedTransaction = {
     anyOf: [
@@ -120,8 +125,8 @@ export const delegateRegistration = extend(transactionBaseSchema, {
     },
 });
 
-export const vote = extend(transactionBaseSchema, {
-    $id: "vote",
+export const legacyVote = extend(transactionBaseSchema, {
+    $id: "legacyVote",
     required: ["asset"],
     if: { properties: { version: { anyOf: [{ const: 2 }] } } },
     then: {
@@ -153,6 +158,36 @@ export const vote = extend(transactionBaseSchema, {
                     maxItems: 2,
                     additionalItems: false,
                 },
+            },
+        },
+    },
+});
+
+export const vote = extend(transactionBaseSchema, {
+    $id: "vote",
+    required: ["typeGroup", "asset"],
+    properties: {
+        type: { transactionType: TransactionType.Solar.Vote },
+        amount: { bignumber: { minimum: 0, maximum: 0 } },
+        fee: { bignumber: { minimum: 1 } },
+        asset: {
+            type: "object",
+            required: ["votes"],
+            properties: {
+                votes: {
+                    patternProperties: {
+                        "^[a-z0-9!@$&_.]{1,20}$": {
+                            type: "number",
+                            multipleOf: 0.01,
+                            minimum: 0.01,
+                            maximum: 100,
+                        },
+                    },
+                    additionalProperties: false,
+                    maxProperties: maxDelegates,
+                    sumOfVotesEquals100: true,
+                },
+                additionalProperties: false,
             },
         },
     },

@@ -1,7 +1,7 @@
-import { ITransactionData } from "../../../interfaces";
-import { BigNumber } from "../../../utils";
-import { Core } from "../../types";
-import { TransactionBuilder } from "./transaction";
+import { ITransactionData } from "../../../../interfaces";
+import { BigNumber } from "../../../../utils";
+import { Core } from "../../../types";
+import { TransactionBuilder } from "../transaction";
 
 export class DelegateResignationBuilder extends TransactionBuilder<DelegateResignationBuilder> {
     public constructor() {

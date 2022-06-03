@@ -1,7 +1,7 @@
-import { IHtlcLockAsset, ITransactionData } from "../../../interfaces";
-import { BigNumber } from "../../../utils";
-import { Core } from "../../types";
-import { TransactionBuilder } from "./transaction";
+import { IHtlcLockAsset, ITransactionData } from "../../../../interfaces";
+import { BigNumber } from "../../../../utils";
+import { Core } from "../../../types";
+import { TransactionBuilder } from "../transaction";
 
 export class HtlcLockBuilder extends TransactionBuilder<HtlcLockBuilder> {
     public constructor() {

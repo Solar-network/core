@@ -12,6 +12,7 @@ export type WalletResource = {
     balance: Utils.BigNumber;
     nonce: Utils.BigNumber;
     attributes: object;
+    votingFor: object;
 };
 
 const walletAddressSchema = Joi.string().alphanum().length(34);

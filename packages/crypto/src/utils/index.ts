@@ -7,6 +7,7 @@ import { calculateBlockTime, isNewBlockTime } from "./block-time-calculator";
 import { ByteBuffer } from "./byte-buffer";
 import { isLocalHost, isValidPeer } from "./is-valid-peer";
 import { calculateReward } from "./reward-calculator";
+import { sortVotes } from "./sort-votes";
 
 let genesisTransactions: { [key: string]: boolean };
 let whitelistedBlockAndTransactionIds: { [key: string]: boolean };
@@ -124,4 +125,14 @@ export const calculateDevFund = (height: number, reward: BigNumber): Record<stri
     return devFund;
 };
 
-export { Base58, BigNumber, ByteBuffer, isValidPeer, isLocalHost, calculateBlockTime, isNewBlockTime, calculateReward };
+export {
+    Base58,
+    BigNumber,
+    ByteBuffer,
+    isValidPeer,
+    isLocalHost,
+    calculateBlockTime,
+    isNewBlockTime,
+    calculateReward,
+    sortVotes,
+};
