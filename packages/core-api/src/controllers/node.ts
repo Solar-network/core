@@ -84,7 +84,16 @@ export class NodeController extends Controller {
 
         const network = Managers.configManager.get("network");
 
-        return {
+        const removeFalsy = (obj: object) => {
+            Object.keys(obj).forEach(
+                (key) =>
+                    (!obj[key] && delete obj[key]) ||
+                    (obj[key] && typeof obj[key] === "object" && removeFalsy(obj[key])),
+            );
+            return obj;
+        };
+
+        return removeFalsy({
             data: {
                 core: {
                     version: this.app.version(),
@@ -110,7 +119,7 @@ export class NodeController extends Controller {
                     maxTransactionBytes: this.transactionPoolConfiguration.getRequired<number>("maxTransactionBytes"),
                 },
             },
-        };
+        });
     }
 
     public async configurationCrypto(request: Hapi.Request, h: Hapi.ResponseToolkit) {
