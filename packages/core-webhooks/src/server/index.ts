@@ -9,6 +9,7 @@ import { readJsonSync } from "fs-extra";
 import { Database } from "../database";
 import { Identifiers } from "../identifiers";
 import { Webhook } from "../interfaces";
+import { closeConnection } from "./plugins/close-connection";
 import { whitelist } from "./plugins/whitelist";
 import * as schema from "./schema";
 import * as utils from "./utils";
@@ -171,6 +172,10 @@ export class Server {
      * @memberof Server
      */
     private async registerPlugins(config: Types.JsonObject): Promise<void> {
+        await this.server.register({
+            plugin: closeConnection,
+        });
+
         await this.server.register({
             plugin: whitelist,
             options: {
