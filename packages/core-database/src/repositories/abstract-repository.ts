@@ -20,7 +20,11 @@ export abstract class AbstractRepository<TEntity extends ObjectLiteral> extends 
         const queryBuilder: SelectQueryBuilder<TEntity> = this.createQueryBuilder().select();
         this.addWhere(queryBuilder, expression);
         this.addOrderBy(queryBuilder, sorting);
-        return queryBuilder.getMany();
+        try {
+            return queryBuilder.getMany();
+        } catch {
+            return [];
+        }
     }
 
     public async *streamByExpression(
@@ -90,7 +94,7 @@ export abstract class AbstractRepository<TEntity extends ObjectLiteral> extends 
                 }
             } catch (error) {
                 await queryRunner.rollbackTransaction();
-                throw error;
+                return { results: [], totalCount: 0, meta: { totalCountIsEstimate: !!options?.estimateTotalCount } };
             }
         } finally {
             await queryRunner.release();
