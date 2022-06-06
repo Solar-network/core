@@ -318,7 +318,7 @@ export class Wallet implements Contracts.State.Wallet {
 
         for (const [key, value] of Object.entries(remainders)) {
             for (let i = 0; i < value.toBigInt(); i++) {
-                votes[keys[i % keys.length]][key] = votes[keys[i % keys.length]][key].plus(1);
+                votes[keys[i]][key] = votes[keys[i]][key].plus(1);
             }
         }
 
