@@ -37,7 +37,7 @@ export interface ITransactionAsset {
     delegate?: {
         username: string;
     };
-    votes?: string[];
+    votes?: string[] | object;
     multiSignatureLegacy?: IMultiSignatureLegacyAsset;
     multiSignature?: IMultiSignatureAsset;
     ipfs?: string;

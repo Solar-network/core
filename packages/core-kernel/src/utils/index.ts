@@ -13,6 +13,7 @@ export * as IpAddress from "./ip-address";
 export * as Search from "./search";
 import { stringify } from "./stringify";
 import { calculate } from "./supply-calculator";
+import { decreaseVoteBalances, increaseVoteBalances } from "./vote-balances";
 
 export * from "@solar-network/utils";
 export * from "./expiration-calculator";
@@ -28,11 +29,13 @@ export const supplyCalculator = { calculate };
 export const forgingInfoCalculator = { calculateForgingInfo, getBlockTimeLookup };
 
 export {
+    decreaseVoteBalances,
     formatSeconds,
     formatTimestamp,
     isBlockChained,
     getBlockNotChainedErrorMessage,
     getForgerDelegates,
+    increaseVoteBalances,
     isBlacklisted,
     isWhitelisted,
     sendForgerSignal,

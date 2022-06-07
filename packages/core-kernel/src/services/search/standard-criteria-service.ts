@@ -97,7 +97,7 @@ export class StandardCriteriaService {
 
     private testBooleanValueCriteriaItem(value: boolean, criteriaItem: StandardCriteriaOfItem<boolean>): boolean {
         // In most cases criteria is cast to the same type as value during validation (by joi).
-        // Wallet's attributes property is an exception. There is currently now way to know what types may be there.
+        // Wallet's attributes property is an exception. There is currently no way to know what types may be there.
         // To test properties within it string values are also checked.
         // For example boolean `true` value is checked against boolean `true` and string `"true"`.
 
@@ -237,21 +237,6 @@ export class StandardCriteriaService {
         const criteriaKeys = Object.keys(criteriaItem);
 
         if (criteriaKeys.length === 1 && criteriaKeys[0] === "*") {
-            // Wildcard criteria that checks if any property matches
-            //
-            // Example:
-            // {
-            //   attributes: {
-            //     htlc: {
-            //       locks: {
-            //         ["*"]: {
-            //           secretHash: "03da05c1c1d4f9c6bda13695b2f29fbc65d9589edc070fc61fe97974be3e59c1"
-            //         }
-            //       }
-            //     }
-            //   }
-            // }
-
             try {
                 return Object.values(value).some((v) => {
                     return this.testStandardCriterias(v, criteriaItem["*"]);
@@ -262,6 +247,21 @@ export class StandardCriteriaService {
         } else {
             return criteriaKeys.every((key) => {
                 try {
+                    if (
+                        key === "votingFor" &&
+                        typeof value[key] === "object" &&
+                        value[key] !== null &&
+                        typeof criteriaItem[key] === "object" &&
+                        criteriaItem[key] !== null
+                    ) {
+                        const valueKey = Object.keys(value[key]);
+                        const criteriaKey = Object.keys(criteriaItem[key][0])[0];
+                        const criteriaValue = criteriaItem[key][0][criteriaKey];
+                        if (criteriaValue === "*") {
+                            return valueKey.includes(criteriaKey);
+                        }
+                    }
+
                     return this.testStandardCriterias(value[key], criteriaItem[key]);
                 } catch (error) {
                     this.rethrowError(error, key);

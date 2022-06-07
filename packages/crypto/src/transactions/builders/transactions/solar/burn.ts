@@ -1,7 +1,7 @@
-import { ITransactionData } from "../../../interfaces";
-import { BigNumber } from "../../../utils";
-import { Solar } from "../../types";
-import { TransactionBuilder } from "./transaction";
+import { ITransactionData } from "../../../../interfaces";
+import { BigNumber } from "../../../../utils";
+import { Solar } from "../../../types";
+import { TransactionBuilder } from "../transaction";
 
 export class BurnBuilder extends TransactionBuilder<BurnBuilder> {
     public constructor() {

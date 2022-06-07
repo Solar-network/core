@@ -19,7 +19,7 @@ class TransactionRegistry {
         this.registerTransactionType(Core.TransferTransaction);
         this.registerTransactionType(Core.SecondSignatureRegistrationTransaction);
         this.registerTransactionType(Core.DelegateRegistrationTransaction);
-        this.registerTransactionType(Core.VoteTransaction);
+        this.registerTransactionType(Core.LegacyVoteTransaction);
         this.registerTransactionType(Core.MultiSignatureRegistrationTransaction);
         this.registerTransactionType(Core.IpfsTransaction);
         this.registerTransactionType(Core.MultiPaymentTransaction);
@@ -30,6 +30,7 @@ class TransactionRegistry {
 
         // Solar transactions
         this.registerTransactionType(Solar.BurnTransaction);
+        this.registerTransactionType(Solar.VoteTransaction);
     }
 
     public registerTransactionType(constructor: TransactionConstructor): void {

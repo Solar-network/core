@@ -1,15 +1,17 @@
-import { BurnBuilder } from "./transactions/burn";
-import { DelegateRegistrationBuilder } from "./transactions/delegate-registration";
-import { DelegateResignationBuilder } from "./transactions/delegate-resignation";
-import { HtlcClaimBuilder } from "./transactions/htlc-claim";
-import { HtlcLockBuilder } from "./transactions/htlc-lock";
-import { HtlcRefundBuilder } from "./transactions/htlc-refund";
-import { IPFSBuilder } from "./transactions/ipfs";
-import { MultiPaymentBuilder } from "./transactions/multi-payment";
-import { MultiSignatureBuilder } from "./transactions/multi-signature";
-import { SecondSignatureBuilder } from "./transactions/second-signature";
-import { TransferBuilder } from "./transactions/transfer";
-import { VoteBuilder } from "./transactions/vote";
+import { configManager } from "../../managers";
+import { DelegateRegistrationBuilder } from "./transactions/core/delegate-registration";
+import { DelegateResignationBuilder } from "./transactions/core/delegate-resignation";
+import { HtlcClaimBuilder } from "./transactions/core/htlc-claim";
+import { HtlcLockBuilder } from "./transactions/core/htlc-lock";
+import { HtlcRefundBuilder } from "./transactions/core/htlc-refund";
+import { IPFSBuilder } from "./transactions/core/ipfs";
+import { MultiPaymentBuilder } from "./transactions/core/multi-payment";
+import { MultiSignatureBuilder } from "./transactions/core/multi-signature";
+import { SecondSignatureBuilder } from "./transactions/core/second-signature";
+import { TransferBuilder } from "./transactions/core/transfer";
+import { VoteBuilder as LegacyVoteBuilder } from "./transactions/core/vote";
+import { BurnBuilder } from "./transactions/solar/burn";
+import { VoteBuilder } from "./transactions/solar/vote";
 
 export * from "./transactions/transaction";
 
@@ -24,10 +26,6 @@ export class BuilderFactory {
 
     public static delegateRegistration(): DelegateRegistrationBuilder {
         return new DelegateRegistrationBuilder();
-    }
-
-    public static vote(): VoteBuilder {
-        return new VoteBuilder();
     }
 
     public static multiSignature(): MultiSignatureBuilder {
@@ -58,8 +56,15 @@ export class BuilderFactory {
         return new HtlcRefundBuilder();
     }
 
-    // Solar transactions
     public static burn(): BurnBuilder {
         return new BurnBuilder();
+    }
+
+    public static vote(): LegacyVoteBuilder | VoteBuilder {
+        if (configManager.getMilestone().legacyVote) {
+            return new LegacyVoteBuilder();
+        }
+
+        return new VoteBuilder();
     }
 }

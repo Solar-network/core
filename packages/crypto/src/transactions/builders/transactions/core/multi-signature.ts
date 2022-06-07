@@ -1,7 +1,7 @@
-import { IMultiSignatureAsset, ITransactionData } from "../../../interfaces";
-import { BigNumber } from "../../../utils";
-import { Core } from "../../types";
-import { TransactionBuilder } from "./transaction";
+import { IMultiSignatureAsset, ITransactionData } from "../../../../interfaces";
+import { BigNumber } from "../../../../utils";
+import { Core } from "../../../types";
+import { TransactionBuilder } from "../transaction";
 
 export class MultiSignatureBuilder extends TransactionBuilder<MultiSignatureBuilder> {
     public constructor() {
