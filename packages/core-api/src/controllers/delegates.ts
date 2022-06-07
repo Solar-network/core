@@ -69,9 +69,7 @@ export class DelegatesController extends Controller {
         const criteria = this.getQueryCriteria(request.query, walletCriteriaSchemaObject) as WalletCriteria;
 
         return this.walletSearchService.getActiveWalletsPage(pagination, sorting, criteria, {
-            attributes: {
-                vote: delegateResource.username,
-            },
+            votingFor: [{ [delegateResource.username]: "*" }],
         });
     }
 

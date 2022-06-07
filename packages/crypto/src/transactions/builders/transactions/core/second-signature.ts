@@ -1,8 +1,8 @@
-import { Keys } from "../../../identities";
-import { ITransactionAsset, ITransactionData } from "../../../interfaces";
-import { BigNumber } from "../../../utils";
-import { Core } from "../../types";
-import { TransactionBuilder } from "./transaction";
+import { Keys } from "../../../../identities";
+import { ITransactionAsset, ITransactionData } from "../../../../interfaces";
+import { BigNumber } from "../../../../utils";
+import { Core } from "../../../types";
+import { TransactionBuilder } from "../transaction";
 
 export class SecondSignatureBuilder extends TransactionBuilder<SecondSignatureBuilder> {
     public constructor() {

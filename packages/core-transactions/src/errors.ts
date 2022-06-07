@@ -177,14 +177,24 @@ export class UnvoteMismatchError extends TransactionError {
 }
 
 export class VotedForNonDelegateError extends TransactionError {
-    public constructor(vote: string) {
-        super(`Failed to apply transaction, because only delegates can be voted`);
+    public constructor(vote?: string) {
+        if (vote) {
+            super(`Failed to apply transaction, because '${vote}' is not a delegate`);
+        } else {
+            super(`Failed to apply transaction, because only delegates can be voted`);
+        }
     }
 }
 
 export class VotedForResignedDelegateError extends TransactionError {
     public constructor(vote: string) {
-        super(`Failed to apply transaction, because it votes for a resigned delegate`);
+        super(`Failed to apply transaction, because '${vote}' is a resigned delegate`);
+    }
+}
+
+export class VotedForTooManyDelegatesError extends TransactionError {
+    public constructor(maximumVotes: number) {
+        super(`Failed to apply transaction, because there are more than ${maximumVotes.toLocaleString()} votes`);
     }
 }
 

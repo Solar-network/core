@@ -47,6 +47,7 @@
                 "vote": 5000000
             }
         },
+        "legacyVote": true,
         "multiPaymentLimit": 256,
         "onlyActiveDelegatesInCalculations": true,
         "reward": "0",

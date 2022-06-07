@@ -7,12 +7,18 @@ export class Wallet implements Contracts.State.Wallet {
     protected publicKey: string | undefined;
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
+    protected voteBalance: object = {};
+    protected votes: object[] = [{}];
 
     public constructor(
         protected readonly address: string,
         protected readonly attributes: Services.Attributes.AttributeMap,
         protected readonly events?: Contracts.Kernel.EventDispatcher,
-    ) {}
+    ) {
+        if (!this.hasAttribute("votes")) {
+            this.setAttribute("votes", this.votes.at(-1));
+        }
+    }
 
     public getAddress(): string {
         return this.address;
@@ -183,7 +189,66 @@ export class Wallet implements Contracts.State.Wallet {
      * @memberof Wallet
      */
     public hasVoted(): boolean {
-        return this.hasAttribute("vote");
+        return Object.keys(this.getAttribute("votes")).length > 0;
+    }
+
+    /**
+     * @returns {object[]}
+     * @memberof Wallet
+     */
+    public getVotes(): object[] {
+        return this.votes;
+    }
+
+    /**
+     * @returns {object}
+     * @memberof Wallet
+     */
+    public getVoteBalance(): object {
+        return this.voteBalance;
+    }
+
+    /**
+     * @returns {Record<string, Contracts.State.WalletVoteDistribution>}
+     * @memberof Wallet
+     */
+    public getVoteDistribution(): Record<string, Contracts.State.WalletVoteDistribution> {
+        const balances: object = this.voteBalance;
+        const votes: object = this.getAttribute("votes");
+
+        const distribution: Record<string, Contracts.State.WalletVoteDistribution> = {};
+
+        for (const username of Object.keys(votes)) {
+            distribution[username] = { percent: votes[username], votes: balances[username] };
+        }
+
+        return distribution;
+    }
+
+    /**
+     * @param {object} value
+     * @memberof Wallet
+     */
+    public changeVotes(value: Record<string, number>): void {
+        const sortedVotes: Record<string, number> = Utils.sortVotes(value);
+        this.votes.push(sortedVotes);
+        this.setAttribute("votes", sortedVotes);
+    }
+
+    public updateVoteBalance(): void {
+        const votes: Record<string, number> = this.getAttribute("votes");
+        this.voteBalance = {};
+
+        const voteAmounts = this.calculateVoteAmount({
+            balance: this.getBalance() || Utils.BigNumber.ZERO,
+            lockedBalance: this.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO),
+        });
+
+        for (const delegate of Object.keys(votes)) {
+            this.voteBalance[delegate] = Utils.BigNumber.make(voteAmounts[delegate].balance).plus(
+                voteAmounts[delegate].lockedBalance,
+            );
+        }
     }
 
     /**
@@ -211,6 +276,52 @@ export class Wallet implements Contracts.State.Wallet {
         cloned.publicKey = this.publicKey;
         cloned.balance = this.balance;
         cloned.nonce = this.nonce;
+        cloned.voteBalance = { ...this.voteBalance };
+        cloned.votes = this.votes.map((vote) => {
+            return { ...vote };
+        });
         return cloned;
+    }
+
+    /**
+     * @returns {Record<string, any>}
+     * @memberof Wallet
+     */
+    public calculateVoteAmount(
+        balances: Record<string, Utils.BigNumber>,
+        delegates?: Record<string, number>,
+    ): Record<string, any> {
+        if (!delegates) {
+            delegates = this.getAttribute("votes") as Record<string, number>;
+        }
+
+        const remainders: { [key: string]: Utils.BigNumber } = {};
+        const votes: { [delegate: string]: object } = {};
+
+        for (const [delegate, percent] of Object.entries(delegates)) {
+            votes[delegate] = {};
+            for (const [key, value] of Object.entries(balances)) {
+                votes[delegate][key] = value.times(Math.trunc(percent * 100)).dividedBy(10000);
+            }
+        }
+
+        for (const vote of Object.values(votes)) {
+            for (const [key, value] of Object.entries(vote)) {
+                if (remainders[key] === undefined) {
+                    remainders[key] = Utils.BigNumber.make(balances[key]);
+                }
+                remainders[key] = remainders[key].minus(value);
+            }
+        }
+
+        const keys = Object.keys(votes);
+
+        for (const [key, value] of Object.entries(remainders)) {
+            for (let i = 0; i < value.toBigInt(); i++) {
+                votes[keys[i]][key] = votes[keys[i]][key].plus(1);
+            }
+        }
+
+        return votes;
     }
 }

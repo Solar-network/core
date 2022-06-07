@@ -54,7 +54,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.TransferTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.SecondSignatureRegistrationTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.DelegateRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.VoteTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.LegacyVoteTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.MultiSignatureRegistrationTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.IpfsTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.MultiPaymentTransactionHandler);
@@ -65,6 +65,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         // Solar transactions
         this.app.bind(Container.Identifiers.TransactionHandler).to(Solar.BurnTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Solar.VoteTransactionHandler);
 
         this.app
             .bind(Container.Identifiers.TransactionHandlerConstructors)

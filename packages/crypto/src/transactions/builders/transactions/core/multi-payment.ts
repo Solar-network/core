@@ -1,9 +1,9 @@
-import { MaximumPaymentCountExceededError } from "../../../errors";
-import { ITransactionData } from "../../../interfaces";
-import { configManager } from "../../../managers";
-import { BigNumber } from "../../../utils";
-import { Core } from "../../types";
-import { TransactionBuilder } from "./transaction";
+import { MaximumPaymentCountExceededError } from "../../../../errors";
+import { ITransactionData } from "../../../../interfaces";
+import { configManager } from "../../../../managers";
+import { BigNumber } from "../../../../utils";
+import { Core } from "../../../types";
+import { TransactionBuilder } from "../transaction";
 
 export class MultiPaymentBuilder extends TransactionBuilder<MultiPaymentBuilder> {
     public constructor() {

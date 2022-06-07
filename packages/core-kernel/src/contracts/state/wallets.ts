@@ -117,6 +117,32 @@ export interface Wallet {
     hasVoted(): boolean;
 
     /**
+     * @returns {object[]}
+     * @memberof Wallet
+     */
+    getVotes(): object[];
+
+    /**
+     * @returns {object}
+     * @memberof Wallet
+     */
+    getVoteBalance(): object;
+
+    /**
+     * @returns {Record<string, WalletVoteDistribution>}
+     * @memberof Wallet
+     */
+    getVoteDistribution(): Record<string, WalletVoteDistribution>;
+
+    /**
+     * @param {object} value
+     * @memberof Wallet
+     */
+    changeVotes(value: object): void;
+
+    updateVoteBalance(): void;
+
+    /**
      * @returns {boolean}
      * @memberof Wallet
      */
@@ -133,6 +159,11 @@ export interface Wallet {
      * @memberof Wallet
      */
     clone(): Wallet;
+
+    calculateVoteAmount(
+        balances: { [delegate: string]: Utils.BigNumber },
+        delegates?: Record<string, number>,
+    ): Record<string, any>;
 }
 
 export type WalletFactory = (address: string) => Wallet;
@@ -154,6 +185,11 @@ export interface WalletDelegateAttributes {
 }
 
 export type WalletMultiSignatureAttributes = Interfaces.IMultiSignatureAsset & { legacy?: boolean };
+
+export interface WalletVoteDistribution {
+    percent: number;
+    votes: Utils.BigNumber;
+}
 
 export interface WalletIpfsAttributes {
     [hash: string]: boolean;

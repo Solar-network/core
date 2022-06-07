@@ -1,7 +1,7 @@
-import { IHtlcClaimAsset, ITransactionData } from "../../../interfaces";
-import { BigNumber } from "../../../utils";
-import { Core } from "../../types";
-import { TransactionBuilder } from "./transaction";
+import { IHtlcClaimAsset, ITransactionData } from "../../../../interfaces";
+import { BigNumber } from "../../../../utils";
+import { Core } from "../../../types";
+import { TransactionBuilder } from "../transaction";
 
 export class HtlcClaimBuilder extends TransactionBuilder<HtlcClaimBuilder> {
     public constructor() {

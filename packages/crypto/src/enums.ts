@@ -14,6 +14,7 @@ export enum CoreTransactionType {
 
 export enum SolarTransactionType {
     Burn = 0,
+    Vote = 2,
 }
 
 export const TransactionType = {

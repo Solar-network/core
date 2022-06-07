@@ -1,7 +1,7 @@
-import { IHtlcRefundAsset, ITransactionData } from "../../../interfaces";
-import { BigNumber } from "../../../utils";
-import { Core } from "../../types";
-import { TransactionBuilder } from "./transaction";
+import { IHtlcRefundAsset, ITransactionData } from "../../../../interfaces";
+import { BigNumber } from "../../../../utils";
+import { Core } from "../../../types";
+import { TransactionBuilder } from "../transaction";
 
 export class HtlcRefundBuilder extends TransactionBuilder<HtlcRefundBuilder> {
     public constructor() {

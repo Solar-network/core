@@ -1,6 +1,5 @@
 import { Interfaces } from "@solar-network/crypto";
 
-import { BigNumber } from "../../utils";
 import { Wallet } from "./wallets";
 
 export interface BlockState {
@@ -12,7 +11,5 @@ export interface BlockState {
 
     revertTransaction(height: number, transaction: Interfaces.ITransaction): Promise<void>;
 
-    increaseWalletDelegateVoteBalance(wallet: Wallet, amount: BigNumber): void;
-
-    decreaseWalletDelegateVoteBalance(wallet: Wallet, amount: BigNumber): void;
+    updateWalletVoteBalance(wallet: Wallet): void;
 }
