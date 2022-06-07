@@ -32,8 +32,7 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
     }
 
     public async isActivated(): Promise<boolean> {
-        const milestone = Managers.configManager.getMilestone();
-        return milestone.htlcEnabled === true;
+        return Managers.configManager.getMilestone().htlcEnabled;
     }
 
     public dynamicFee(context: Contracts.Shared.DynamicFeeContext): Utils.BigNumber {

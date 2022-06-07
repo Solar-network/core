@@ -120,7 +120,7 @@ export class TransactionsController extends Controller {
             .getFromHighestPriority()
             .whereId(request.params.id);
 
-        if (transactionQuery.has() === false) {
+        if (!transactionQuery.has()) {
             return Boom.notFound("Transaction not found");
         }
 

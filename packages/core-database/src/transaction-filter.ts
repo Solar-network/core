@@ -232,7 +232,7 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
     private async getAutoTypeGroupExpression(
         criteria: Contracts.Shared.TransactionCriteria,
     ): Promise<Contracts.Search.Expression<Transaction>> {
-        if (hasOrCriteria(criteria.type) && hasOrCriteria(criteria.typeGroup) === false) {
+        if (hasOrCriteria(criteria.type) && !hasOrCriteria(criteria.typeGroup)) {
             return { op: "equal", property: "typeGroup", value: Enums.TransactionTypeGroup.Core };
         } else {
             return { op: "true" };

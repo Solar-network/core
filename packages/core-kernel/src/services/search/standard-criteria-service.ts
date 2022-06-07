@@ -101,7 +101,7 @@ export class StandardCriteriaService {
         // To test properties within it string values are also checked.
         // For example boolean `true` value is checked against boolean `true` and string `"true"`.
 
-        if ([true, false, "true", "false"].includes(criteriaItem) === false) {
+        if (![true, false, "true", "false"].includes(criteriaItem)) {
             throw new InvalidCriteria(value, criteriaItem, []);
         }
 

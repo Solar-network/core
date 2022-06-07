@@ -23,7 +23,7 @@ export class WalletRepositoryCopyOnWrite extends WalletRepository {
         if (super.hasByIndex(index, key)) {
             return true;
         }
-        if (this.blockchainWalletRepository.hasByIndex(index, key) === false) {
+        if (!this.blockchainWalletRepository.hasByIndex(index, key)) {
             return false;
         }
 

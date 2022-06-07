@@ -15,7 +15,7 @@ export class TransactionHandlerProvider {
     private registered: boolean = false;
 
     public isRegistrationRequired(): boolean {
-        return this.registered === false;
+        return !this.registered;
     }
 
     public registerHandlers(): void {
@@ -43,7 +43,7 @@ export class TransactionHandlerProvider {
         }
 
         for (const dependency of handler.dependencies()) {
-            if (this.hasOtherHandler(handlerConstructor, dependency) === false) {
+            if (!this.hasOtherHandler(handlerConstructor, dependency)) {
                 throw new UnsatisfiedDependencyError(internalType);
             }
         }

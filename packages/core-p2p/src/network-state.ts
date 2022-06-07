@@ -290,7 +290,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
             increment = peer.publicKeys.length;
         }
         if (typeof peer.state.header === "object" && typeof peer.state.header.height === "number") {
-            if (peer.state.header.height != this.nodeHeight) {
+            if (peer.state.header.height !== this.nodeHeight) {
                 this.quorumDetails.noQuorum += increment;
                 this.addToList(false, peer, monitor);
                 if (peer.state.header.height > this.nodeHeight) {
