@@ -221,7 +221,7 @@ export class Service implements Contracts.TransactionPool.Service {
             AppUtils.assert.defined<string>(transaction.id);
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-            if (this.storage.hasTransaction(transaction.id) === false) {
+            if (!this.storage.hasTransaction(transaction.id)) {
                 this.logger.error(`Failed to remove ${transaction} that isn't in pool :warning:`);
                 return;
             }
@@ -255,7 +255,7 @@ export class Service implements Contracts.TransactionPool.Service {
             AppUtils.assert.defined<string>(transaction.id);
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-            if (this.storage.hasTransaction(transaction.id) === false) {
+            if (!this.storage.hasTransaction(transaction.id)) {
                 return;
             }
 

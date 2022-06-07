@@ -52,7 +52,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
      * @memberof ServiceProvider
      */
     public async bootWhen(): Promise<boolean> {
-        return this.config().get("enabled") === true;
+        return !!this.config().get("enabled");
     }
 
     public configSchema(): object {

@@ -16,8 +16,7 @@ export abstract class HtlcClaimTransaction extends Transaction {
     }
 
     public verify(): boolean {
-        const milestone = configManager.getMilestone();
-        return milestone.htlcEnabled === true && super.verify();
+        return configManager.getMilestone().htlcEnabled && super.verify();
     }
 
     public serialize(): ByteBuffer | undefined {

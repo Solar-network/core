@@ -87,7 +87,7 @@ export class NodeController extends Controller {
         const removeFalsy = (obj: object) => {
             Object.keys(obj).forEach(
                 (key) =>
-                    (!obj[key] && delete obj[key]) ||
+                    (obj[key] === false && delete obj[key]) ||
                     (obj[key] && typeof obj[key] === "object" && removeFalsy(obj[key])),
             );
             return obj;

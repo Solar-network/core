@@ -152,7 +152,7 @@ export abstract class Command {
                 this.output.setVerbosity(0);
             } else {
                 if (this.input.hasFlag("v")) {
-                    if (this.input.getFlag("v") === true) {
+                    if (this.input.getFlag("v")) {
                         this.output.setVerbosity(2);
                     } else {
                         this.output.setVerbosity(3);

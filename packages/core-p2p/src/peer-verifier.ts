@@ -571,9 +571,9 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      */
     private log(severity: Severity, msg: string, success: boolean | null = false): void {
         let fullMsg = `${this.logPrefix} ${msg}`;
-        if (success === true) {
+        if (success) {
             fullMsg += " :white_check_mark:";
-        } else if (success === false) {
+        } else if (success !== null) {
             fullMsg += " :no_entry_sign:";
         }
         switch (severity) {

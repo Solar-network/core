@@ -18,8 +18,7 @@ export abstract class HtlcLockTransaction extends Transaction {
     }
 
     public verify(): boolean {
-        const milestone = configManager.getMilestone();
-        return milestone.htlcEnabled === true && super.verify();
+        return configManager.getMilestone().htlcEnabled && super.verify();
     }
 
     public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
