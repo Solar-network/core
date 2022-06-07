@@ -1,11 +1,6 @@
 import deepmerge from "deepmerge";
 
 import { TransactionType } from "../../enums";
-import { configManager } from "../../managers";
-
-const maxDelegates = configManager
-    .getMilestones()
-    .reduce((acc: number, curr: { activeDelegates: number }) => Math.max(acc, curr.activeDelegates), 0);
 
 const signedTransaction = {
     anyOf: [
@@ -184,7 +179,6 @@ export const vote = extend(transactionBaseSchema, {
                         },
                     },
                     additionalProperties: false,
-                    maxProperties: maxDelegates,
                     sumOfVotesEquals100: true,
                 },
                 additionalProperties: false,

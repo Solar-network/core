@@ -1,7 +1,7 @@
 import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/core-kernel";
 import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
-import { VotedForNonDelegateError, VotedForResignedDelegateError } from "../../errors";
+import { VotedForNonDelegateError, VotedForResignedDelegateError, VotedForTooManyDelegatesError } from "../../errors";
 import { DelegateRegistrationTransactionHandler } from "../core/delegate-registration";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
@@ -51,7 +51,14 @@ export class VoteTransactionHandler extends TransactionHandler {
     ): Promise<void> {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        for (const delegate of Object.keys(transaction.data.asset.votes)) {
+        const { activeDelegates } = Managers.configManager.getMilestone();
+        const votes = Object.keys(transaction.data.asset.votes);
+
+        if (votes.length > activeDelegates) {
+            throw new VotedForTooManyDelegatesError(activeDelegates);
+        }
+
+        for (const delegate of votes) {
             if (!this.walletRepository.hasByUsername(delegate)) {
                 throw new VotedForNonDelegateError(delegate);
             }

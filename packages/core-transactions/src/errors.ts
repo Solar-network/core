@@ -192,6 +192,12 @@ export class VotedForResignedDelegateError extends TransactionError {
     }
 }
 
+export class VotedForTooManyDelegatesError extends TransactionError {
+    public constructor(maximumVotes: number) {
+        super(`Failed to apply transaction, because there are more than ${maximumVotes.toLocaleString()} votes`);
+    }
+}
+
 export class NotEnoughDelegatesError extends TransactionError {
     public constructor() {
         super(`Failed to apply transaction, because not enough delegates to allow resignation`);
