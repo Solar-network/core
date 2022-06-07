@@ -99,10 +99,10 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        this.resetVotes(sender, false);
+        Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
         sender.changeVotes(transaction.data.asset?.votes);
         sender.updateVoteBalance();
-        this.resetVotes(sender, true);
+        Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -117,34 +117,13 @@ export class VoteTransactionHandler extends TransactionHandler {
         votes.pop()!;
         const previousVotes = votes.at(-1)!;
 
-        this.resetVotes(sender, false);
+        Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
         sender.setAttribute("votes", previousVotes);
         sender.updateVoteBalance();
-        this.resetVotes(sender, true);
+        Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
-
-    private resetVotes(wallet: Contracts.State.Wallet, add: boolean = true) {
-        const delegates: Record<string, Contracts.State.WalletVoteDistribution> = wallet.getVoteDistribution();
-        for (const delegate of Object.keys(delegates)) {
-            if (delegates[delegate].votes !== undefined) {
-                const delegateWallet = this.walletRepository.findByUsername(delegate);
-                const voteBalance: Utils.BigNumber = delegateWallet.getAttribute(
-                    "delegate.voteBalance",
-                    Utils.BigNumber.ZERO,
-                );
-
-                if (add) {
-                    delegateWallet.setAttribute("delegate.voteBalance", voteBalance.plus(delegates[delegate].votes));
-                    delegateWallet.setAttribute("delegate.voters", delegateWallet.getAttribute("delegate.voters") + 1);
-                } else {
-                    delegateWallet.setAttribute("delegate.voteBalance", voteBalance.minus(delegates[delegate].votes));
-                    delegateWallet.setAttribute("delegate.voters", delegateWallet.getAttribute("delegate.voters") - 1);
-                }
-            }
-        }
-    }
 }

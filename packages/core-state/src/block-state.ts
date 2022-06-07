@@ -165,9 +165,9 @@ export class BlockState implements Contracts.State.BlockState {
     }
 
     public updateWalletVoteBalance(wallet: Contracts.State.Wallet): void {
-        this.resetVoteBalances(wallet, false);
+        AppUtils.decreaseVoteBalances(wallet, { walletRepository: this.walletRepository });
         wallet.updateVoteBalance();
-        this.resetVoteBalances(wallet);
+        AppUtils.increaseVoteBalances(wallet, { walletRepository: this.walletRepository });
     }
 
     private applyBlockToForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
@@ -266,25 +266,6 @@ export class BlockState implements Contracts.State.BlockState {
 
         if (lockRecipientWallet) {
             this.updateWalletVoteBalance(lockRecipientWallet);
-        }
-    }
-
-    private resetVoteBalances(wallet: Contracts.State.Wallet, add: boolean = true) {
-        const delegates: Record<string, Contracts.State.WalletVoteDistribution> = wallet.getVoteDistribution();
-        for (const delegate of Object.keys(delegates)) {
-            if (delegates[delegate].votes !== undefined) {
-                const delegateWallet = this.walletRepository.findByUsername(delegate);
-                const voteBalance: Utils.BigNumber = delegateWallet.getAttribute(
-                    "delegate.voteBalance",
-                    Utils.BigNumber.ZERO,
-                );
-
-                if (add) {
-                    delegateWallet.setAttribute("delegate.voteBalance", voteBalance.plus(delegates[delegate].votes));
-                } else {
-                    delegateWallet.setAttribute("delegate.voteBalance", voteBalance.minus(delegates[delegate].votes));
-                }
-            }
         }
     }
 
