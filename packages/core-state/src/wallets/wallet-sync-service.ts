@@ -60,7 +60,7 @@ export class WalletSyncService implements Contracts.Kernel.EventListener {
     public handle({ name, data }: { name: string; data: { height: number; wallet: { address: string } } }): void {
         switch (name) {
             case Enums.StateEvent.BuilderFinished:
-                this.initializeWalletsTable(this.stateStore.getLastHeight());
+                this.initialiseWalletsTable(this.stateStore.getLastHeight());
                 break;
             case WalletEvent.AttributeSet:
             case WalletEvent.AttributeForget:
@@ -76,21 +76,21 @@ export class WalletSyncService implements Contracts.Kernel.EventListener {
         }
     }
 
-    private async initializeWalletsTable(blockHeight: number): Promise<void> {
+    private async initialiseWalletsTable(blockHeight: number): Promise<void> {
         await this.lock.runExclusive(async () => {
             if (this.disposed) {
                 return;
             }
 
             try {
-                this.logger.debug(`Initializing wallets table at height ${blockHeight.toLocaleString()}`);
+                this.logger.debug(`Initialising wallets table at height ${blockHeight.toLocaleString()}`);
 
                 await this.walletsTableService.flush();
                 await this.walletsTableService.sync(this.walletRepository.allByAddress());
 
-                this.logger.info(`Wallets table initialized at height ${blockHeight.toLocaleString()}`);
+                this.logger.info(`Wallets table initialised at height ${blockHeight.toLocaleString()}`);
             } catch (error) {
-                this.app.terminate("Failed to initialize wallets table", error);
+                this.app.terminate("Failed to initialise wallets table", error);
             }
         });
     }
@@ -112,9 +112,9 @@ export class WalletSyncService implements Contracts.Kernel.EventListener {
 
                 await this.walletsTableService.sync(updatedWallets);
 
-                this.logger.info(`Wallets table synchronized at height ${blockHeight.toLocaleString()}`);
+                this.logger.info(`Wallets table synchronised at height ${blockHeight.toLocaleString()}`);
             } catch (error) {
-                this.app.terminate("Failed to synchronize wallets table", error);
+                this.app.terminate("Failed to synchronise wallets table", error);
             }
         });
     }

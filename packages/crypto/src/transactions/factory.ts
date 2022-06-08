@@ -5,30 +5,30 @@ import {
     TransactionVersionError,
 } from "../errors";
 import {
-    IDeserializeOptions,
-    ISerializeOptions,
+    IDeserialiseOptions,
+    ISerialiseOptions,
     ITransaction,
     ITransactionData,
     ITransactionJson,
 } from "../interfaces";
 import { BigNumber, isException } from "../utils";
-import { Deserializer } from "./deserializer";
-import { Serializer } from "./serializer";
+import { Deserialiser } from "./deserialiser";
+import { Serialiser } from "./serialiser";
 import { TransactionTypeFactory } from "./types";
 import { Utils } from "./utils";
 import { Verifier } from "./verifier";
 
 export class TransactionFactory {
     public static fromHex(hex: string): ITransaction {
-        return this.fromSerialized(hex);
+        return this.fromSerialised(hex);
     }
 
-    public static fromBytes(buff: Buffer, strict = true, options: IDeserializeOptions = {}): ITransaction {
-        return this.fromSerialized(buff.toString("hex"), strict, options);
+    public static fromBytes(buff: Buffer, strict = true, options: IDeserialiseOptions = {}): ITransaction {
+        return this.fromSerialised(buff.toString("hex"), strict, options);
     }
 
     /**
-     * Deserializes a transaction from `buffer` with the given `id`. It is faster
+     * Deserialises a transaction from `buffer` with the given `id`. It is faster
      * than `fromBytes` at the cost of vital safety checks (validation, verification and id calculation).
      *
      * NOTE: Only use this internally when it is safe to assume the buffer has already been
@@ -36,8 +36,8 @@ export class TransactionFactory {
      */
     public static fromBytesUnsafe(buff: Buffer, id?: string): ITransaction {
         try {
-            const options: IDeserializeOptions | ISerializeOptions = { acceptLegacyVersion: true };
-            const transaction = Deserializer.deserialize(buff, options);
+            const options: IDeserialiseOptions | ISerialiseOptions = { acceptLegacyVersion: true };
+            const transaction = Deserialiser.deserialise(buff, options);
             transaction.data.id = id || Utils.getId(transaction.data, options);
             transaction.isVerified = true;
 
@@ -55,7 +55,7 @@ export class TransactionFactory {
         return this.fromData(data);
     }
 
-    public static fromData(data: ITransactionData, strict = true, options: IDeserializeOptions = {}): ITransaction {
+    public static fromData(data: ITransactionData, strict = true, options: IDeserialiseOptions = {}): ITransaction {
         const { value, error } = Verifier.verifySchema(data, strict);
 
         if (error && !isException(value)) {
@@ -64,14 +64,14 @@ export class TransactionFactory {
 
         const transaction: ITransaction = TransactionTypeFactory.create(value);
 
-        Serializer.serialize(transaction);
+        Serialiser.serialise(transaction);
 
-        return this.fromBytes(transaction.serialized, strict, options);
+        return this.fromBytes(transaction.serialised, strict, options);
     }
 
-    private static fromSerialized(serialized: string, strict = true, options: IDeserializeOptions = {}): ITransaction {
+    private static fromSerialised(serialised: string, strict = true, options: IDeserialiseOptions = {}): ITransaction {
         try {
-            const transaction = Deserializer.deserialize(serialized, options);
+            const transaction = Deserialiser.deserialise(serialised, options);
             transaction.data.id = Utils.getId(transaction.data, options);
 
             const { value, error } = Verifier.verifySchema(transaction.data, strict);

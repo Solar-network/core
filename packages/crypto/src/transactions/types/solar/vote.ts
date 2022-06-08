@@ -16,7 +16,7 @@ export class VoteTransaction extends Transaction {
         return schemas.vote;
     }
 
-    public serialize(): ByteBuffer {
+    public serialise(): ByteBuffer {
         const { data } = this;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(1024));
 
@@ -32,7 +32,7 @@ export class VoteTransaction extends Transaction {
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
         const numberOfVotes: number = buf.readUInt8();
         data.asset = { votes: {} };

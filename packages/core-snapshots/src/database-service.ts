@@ -52,11 +52,11 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
 
     public async truncate(): Promise<void> {
         this.logger.info(
-            `Clearing:  ${Utils.pluralize("block", await this.blockRepository.fastCount(), true)},   ${Utils.pluralize(
+            `Clearing:  ${Utils.pluralise("block", await this.blockRepository.fastCount(), true)},   ${Utils.pluralise(
                 "transaction",
                 await this.transactionRepository.fastCount(),
                 true,
-            )},  ${Utils.pluralize("round", await this.roundRepository.fastCount(), true)}`,
+            )},  ${Utils.pluralise("round", await this.roundRepository.fastCount(), true)}`,
         );
 
         await this.blockRepository.truncate();
@@ -82,11 +82,11 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
             const meta = this.prepareMetaData(options, dumpRage);
 
             this.logger.info(
-                `Started running dump for ${Utils.pluralize("block", dumpRage.blocksCount, true)}, ${Utils.pluralize(
+                `Started running dump for ${Utils.pluralise("block", dumpRage.blocksCount, true)}, ${Utils.pluralise(
                     "round",
                     dumpRage.roundsCount,
                     true,
-                )} and ${Utils.pluralize("transaction", dumpRage.transactionsCount, true)}`,
+                )} and ${Utils.pluralise("transaction", dumpRage.transactionsCount, true)}`,
             );
 
             this.filesystem.setSnapshot(meta.folder);
@@ -135,11 +135,11 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
             await this.truncate();
         }
 
-        await this.runSynchronizedAction("restore", meta);
+        await this.runSynchronisedAction("restore", meta);
     }
 
     public async verify(meta: Meta.MetaData): Promise<void> {
-        await this.runSynchronizedAction("verify", meta);
+        await this.runSynchronisedAction("verify", meta);
     }
 
     public async getLastBlock(): Promise<Interfaces.IBlock> {
@@ -150,7 +150,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
         return Blocks.BlockFactory.fromData(block)!;
     }
 
-    private runSynchronizedAction(action: string, meta: Meta.MetaData): Promise<void> {
+    private runSynchronisedAction(action: string, meta: Meta.MetaData): Promise<void> {
         return new Promise(async (resolve, reject) => {
             const blocksWorker = new WorkerWrapper(this.prepareWorkerData(action, "blocks", meta));
             const transactionsWorker = new WorkerWrapper(this.prepareWorkerData(action, "transactions", meta));

@@ -71,11 +71,11 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             renderer.spinner.succeed();
 
             this.logger.info(
-                `Successfully restored ${Utils.pluralize("block", meta!.blocks.count, true)}, ${Utils.pluralize(
+                `Successfully restored ${Utils.pluralise("block", meta!.blocks.count, true)}, ${Utils.pluralise(
                     "transaction",
                     meta!.transactions.count,
                     true,
-                )}, ${Utils.pluralize("round", meta!.rounds.count, true)}`,
+                )}, ${Utils.pluralise("round", meta!.rounds.count, true)}`,
             );
         } catch (err) {
             renderer.spinner.fail();

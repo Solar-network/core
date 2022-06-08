@@ -6,7 +6,7 @@ export const defaults = {
             host: `${process.env.CORE_PATH_DATA}/database`,
         },
         logging: false,
-        synchronize: false,
+        synchronise: false,
         type: "postgres",
         username: process.env.USER,
     },

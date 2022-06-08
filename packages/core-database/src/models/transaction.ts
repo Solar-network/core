@@ -116,7 +116,7 @@ export class Transaction implements Contracts.Database.TransactionModel {
         type: "bytea",
         nullable: false,
     })
-    public serialized!: Buffer;
+    public serialised!: Buffer;
 
     @Column({
         type: "jsonb",

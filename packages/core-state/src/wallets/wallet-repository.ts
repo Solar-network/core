@@ -16,7 +16,7 @@ export class WalletRepository implements Contracts.State.WalletRepository {
     protected readonly indexes: Record<string, Contracts.State.WalletIndex> = {};
 
     @Container.postConstruct()
-    public initialize(): void {
+    public initialise(): void {
         for (const { name, indexer, autoIndex } of this.indexerIndexes) {
             if (this.indexes[name]) {
                 throw new WalletIndexAlreadyRegisteredError(name);

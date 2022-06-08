@@ -63,7 +63,7 @@ export class Command extends Commands.Command {
 
         checkForPassphrase(this.app.getCorePath("config"));
 
-        await this.actions.daemonizeProcess(
+        await this.actions.daemoniseProcess(
             {
                 name: `${flags.token}-core`,
                 script: resolve(__dirname, "../../bin/run"),

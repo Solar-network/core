@@ -90,7 +90,7 @@ export class Processor implements Contracts.TransactionPool.Processor {
         try {
             const transactionCommon = {} as Interfaces.ITransactionData;
             const txByteBuffer = new Utils.ByteBuffer(transactionData);
-            Transactions.Deserializer.deserializeCommon(transactionCommon, txByteBuffer);
+            Transactions.Deserialiser.deserialiseCommon(transactionCommon, txByteBuffer);
 
             if (this.workerPool.isTypeGroupSupported(transactionCommon.typeGroup || Enums.TransactionTypeGroup.Core)) {
                 return await this.workerPool.getTransactionFromData(transactionData);

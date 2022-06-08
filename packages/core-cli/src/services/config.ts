@@ -38,7 +38,7 @@ export class Config {
      * @memberof Config
      */
     @postConstruct()
-    public initialize(): void {
+    public initialise(): void {
         this.file = this.app.getConsolePath("config", "config.json");
 
         this.restoreDefaults();

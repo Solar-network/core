@@ -42,7 +42,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
     }
 
     public async boot(): Promise<void> {
-        await this.app.get<DatabaseService>(Container.Identifiers.DatabaseService).initialize();
+        await this.app.get<DatabaseService>(Container.Identifiers.DatabaseService).initialise();
     }
 
     public async dispose(): Promise<void> {
@@ -119,7 +119,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
                     host: Joi.string().required(),
                 }),
                 logging: Joi.bool().required(),
-                synchronize: Joi.bool().required(),
+                synchronise: Joi.bool().required(),
                 type: Joi.string().required(),
                 username: Joi.string().required(),
             }).required(),

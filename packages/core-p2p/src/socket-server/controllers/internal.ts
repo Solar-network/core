@@ -43,7 +43,7 @@ export class InternalController extends Controller {
 
         return {
             poolSize: this.transactionPool.getPoolSize(),
-            transactions: transactions.map((t) => t.serialized.toString("hex")),
+            transactions: transactions.map((t) => t.serialised.toString("hex")),
         };
     }
 

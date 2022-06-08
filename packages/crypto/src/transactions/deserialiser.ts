@@ -3,25 +3,24 @@ import {
     InvalidTransactionBytesError,
     TransactionVersionError,
 } from "../errors";
-import { IDeserializeOptions, ITransaction, ITransactionData } from "../interfaces";
+import { IDeserialiseOptions, ITransaction, ITransactionData } from "../interfaces";
 import { BigNumber, ByteBuffer, isSupportedTransactionVersion } from "../utils";
 import { TransactionTypeFactory } from "./types";
 
-// Reference: https://github.com/ArkEcosystem/AIPs/blob/master/AIPS/aip-11.md
-export class Deserializer {
-    public static deserialize(serialized: string | Buffer, options: IDeserializeOptions = {}): ITransaction {
+export class Deserialiser {
+    public static deserialise(serialised: string | Buffer, options: IDeserialiseOptions = {}): ITransaction {
         const data = {} as ITransactionData;
 
-        const buff: ByteBuffer = this.getByteBuffer(serialized);
-        this.deserializeCommon(data, buff);
+        const buff: ByteBuffer = this.getByteBuffer(serialised);
+        this.deserialiseCommon(data, buff);
 
         const instance: ITransaction = TransactionTypeFactory.create(data);
-        this.deserializeVendorField(instance, buff);
+        this.deserialiseVendorField(instance, buff);
 
-        // Deserialize type specific parts
-        instance.deserialize(buff);
+        // Deserialise type specific parts
+        instance.deserialise(buff);
 
-        this.deserializeSchnorr(data, buff);
+        this.deserialiseSchnorr(data, buff);
 
         if (data.version) {
             if (
@@ -34,12 +33,12 @@ export class Deserializer {
             }
         }
 
-        instance.serialized = buff.getResult();
+        instance.serialised = buff.getResult();
 
         return instance;
     }
 
-    public static deserializeCommon(transaction: ITransactionData, buf: ByteBuffer): void {
+    public static deserialiseCommon(transaction: ITransactionData, buf: ByteBuffer): void {
         // buf.skip(1); // Skip 0xFF marker
         buf.jump(1); // Skip 0xFF marker
         transaction.version = buf.readUInt8();
@@ -54,7 +53,7 @@ export class Deserializer {
         transaction.amount = BigNumber.ZERO;
     }
 
-    private static deserializeVendorField(transaction: ITransaction, buf: ByteBuffer): void {
+    private static deserialiseVendorField(transaction: ITransaction, buf: ByteBuffer): void {
         const vendorFieldLength: number = buf.readUInt8();
         if (vendorFieldLength > 0) {
             const vendorFieldBuffer: Buffer = buf.readBuffer(vendorFieldLength);
@@ -62,7 +61,7 @@ export class Deserializer {
         }
     }
 
-    private static deserializeSchnorr(transaction: ITransactionData, buf: ByteBuffer): void {
+    private static deserialiseSchnorr(transaction: ITransactionData, buf: ByteBuffer): void {
         const canReadNonMultiSignature = () => {
             return (
                 buf.getRemainderLength() && (buf.getRemainderLength() % 64 === 0 || buf.getRemainderLength() % 65 !== 0)
@@ -101,11 +100,11 @@ export class Deserializer {
         }
     }
 
-    private static getByteBuffer(serialized: Buffer | string): ByteBuffer {
-        if (!(serialized instanceof Buffer)) {
-            serialized = Buffer.from(serialized, "hex");
+    private static getByteBuffer(serialised: Buffer | string): ByteBuffer {
+        if (!(serialised instanceof Buffer)) {
+            serialised = Buffer.from(serialised, "hex");
         }
 
-        return new ByteBuffer(serialized);
+        return new ByteBuffer(serialised);
     }
 }

@@ -14,7 +14,7 @@ export class TransactionHandlerRegistry {
     private readonly handlers!: TransactionHandler[];
 
     @Container.postConstruct()
-    public initialize(): void {
+    public initialise(): void {
         if (this.provider.isRegistrationRequired()) {
             this.provider.registerHandlers();
         }

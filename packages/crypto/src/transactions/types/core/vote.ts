@@ -14,7 +14,7 @@ export class LegacyVoteTransaction extends Transaction {
         return schemas.legacyVote;
     }
 
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         const { data } = this;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(69));
 
@@ -45,7 +45,7 @@ export class LegacyVoteTransaction extends Transaction {
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
         const voteLength: number = buf.readUInt8();
         data.asset = { votes: [] };

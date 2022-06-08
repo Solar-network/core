@@ -49,10 +49,10 @@ export class DownloadBlocks implements Action {
 
         if (chained) {
             this.logger.info(
-                `Downloaded ${blocks.length} new ${AppUtils.pluralize(
+                `Downloaded ${blocks.length} new ${AppUtils.pluralise(
                     "block",
                     blocks.length,
-                )} accounting for a total of ${AppUtils.pluralize(
+                )} accounting for a total of ${AppUtils.pluralise(
                     "transaction",
                     blocks.reduce((sum, b) => sum + b.numberOfTransactions, 0),
                     true,

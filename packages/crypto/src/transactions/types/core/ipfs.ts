@@ -16,7 +16,7 @@ export abstract class IpfsTransaction extends Transaction {
         return schemas.ipfs;
     }
 
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         const { data } = this;
 
         if (data.asset) {
@@ -31,7 +31,7 @@ export abstract class IpfsTransaction extends Transaction {
         return undefined;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
 
         const hashFunction: number = buf.readUInt8();

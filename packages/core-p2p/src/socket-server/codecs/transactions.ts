@@ -5,7 +5,7 @@ const hardLimitNumberOfTransactions = 1000;
 
 export const postTransactions = {
     request: {
-        serialize: (obj: transactions.IPostTransactionsRequest): Buffer => {
+        serialise: (obj: transactions.IPostTransactionsRequest): Buffer => {
             const size = (obj.transactions as unknown as Buffer[]).reduce(
                 (sum: number, tx: Buffer) => sum + 4 + tx.length,
                 0,
@@ -22,7 +22,7 @@ export const postTransactions = {
 
             return Buffer.from(transactions.PostTransactionsRequest.encode(obj).finish());
         },
-        deserialize: (payload: Buffer): object => {
+        deserialise: (payload: Buffer): object => {
             const decoded = transactions.PostTransactionsRequest.decode(payload);
             const txsBuffer = Buffer.from(decoded.transactions);
             const txs: Buffer[] = [];
@@ -42,8 +42,8 @@ export const postTransactions = {
         },
     },
     response: {
-        serialize: (accept: string[]): Buffer =>
+        serialise: (accept: string[]): Buffer =>
             Buffer.from(transactions.PostTransactionsResponse.encode({ accept }).finish()),
-        deserialize: (payload: Buffer): object => transactions.PostTransactionsResponse.decode(payload).accept,
+        deserialise: (payload: Buffer): object => transactions.PostTransactionsResponse.decode(payload).accept,
     },
 };

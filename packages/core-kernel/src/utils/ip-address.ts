@@ -12,7 +12,7 @@ export const isIPv6Address = (ip: string): boolean => {
     return false;
 };
 
-export const normalizeAddress = (ip: string): string => {
+export const normaliseAddress = (ip: string): string => {
     ip = cleanAddress(ip);
 
     if (isIPv6Address(ip)) {

@@ -5,24 +5,24 @@ import { TransactionFactory } from "../transactions";
 import { BigNumber } from "../utils";
 import { Block } from "./block";
 
-export class Deserializer {
-    public static deserialize(
-        serialized: Buffer,
+export class Deserialiser {
+    public static deserialise(
+        serialised: Buffer,
         headerOnly: boolean = false,
-        options: { deserializeTransactionsUnchecked?: boolean } = {},
+        options: { deserialiseTransactionsUnchecked?: boolean } = {},
     ): { data: IBlockData; transactions: ITransaction[] } {
         const block = {} as IBlockData;
         let transactions: ITransaction[] = [];
 
-        const buf: ByteBuffer = new ByteBuffer(serialized.length, true);
-        buf.append(serialized);
+        const buf: ByteBuffer = new ByteBuffer(serialised.length, true);
+        buf.append(serialised);
         buf.reset();
 
-        this.deserializeHeader(block, buf);
+        this.deserialiseHeader(block, buf);
 
         headerOnly = headerOnly || buf.remaining() === 0;
         if (!headerOnly) {
-            transactions = this.deserializeTransactions(block, buf, options.deserializeTransactionsUnchecked);
+            transactions = this.deserialiseTransactions(block, buf, options.deserialiseTransactionsUnchecked);
         }
 
         block.id = Block.getId(block);
@@ -30,7 +30,7 @@ export class Deserializer {
         return { data: block, transactions };
     }
 
-    private static deserializeHeader(block: IBlockData, buf: ByteBuffer): void {
+    private static deserialiseHeader(block: IBlockData, buf: ByteBuffer): void {
         block.version = buf.readUint32();
         block.timestamp = buf.readUint32();
         block.height = buf.readUint32();
@@ -45,10 +45,10 @@ export class Deserializer {
         block.blockSignature = buf.readBytes(64).toString("hex");
     }
 
-    private static deserializeTransactions(
+    private static deserialiseTransactions(
         block: IBlockData,
         buf: ByteBuffer,
-        deserializeTransactionsUnchecked: boolean = false,
+        deserialiseTransactionsUnchecked: boolean = false,
     ): ITransaction[] {
         const transactionLengths: number[] = [];
 
@@ -60,7 +60,7 @@ export class Deserializer {
         block.transactions = [];
         for (const length of transactionLengths) {
             const transactionBytes = buf.readBytes(length).toBuffer();
-            const transaction = deserializeTransactionsUnchecked
+            const transaction = deserialiseTransactionsUnchecked
                 ? TransactionFactory.fromBytesUnsafe(transactionBytes)
                 : TransactionFactory.fromBytes(transactionBytes);
             transactions.push(transaction);

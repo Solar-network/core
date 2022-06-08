@@ -37,7 +37,7 @@ export class ChangeServiceProviderState implements EventListener {
      * @returns {this}
      * @memberof ChangeServiceProviderState
      */
-    public initialize(name: string, serviceProvider: ServiceProvider): this {
+    public initialise(name: string, serviceProvider: ServiceProvider): this {
         this.name = name;
         this.serviceProvider = serviceProvider;
 

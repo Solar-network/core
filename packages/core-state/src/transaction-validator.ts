@@ -10,8 +10,8 @@ export class TransactionValidator implements Contracts.State.TransactionValidato
     private readonly handlerRegistry!: Handlers.Registry;
 
     public async validate(transaction: Interfaces.ITransaction): Promise<void> {
-        const deserialized: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(transaction.serialized);
-        strictEqual(transaction.id, deserialized.id);
+        const deserialised: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(transaction.serialised);
+        strictEqual(transaction.id, deserialised.id);
         const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
         await handler.apply(transaction);
     }

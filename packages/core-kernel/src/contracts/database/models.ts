@@ -34,6 +34,6 @@ export interface TransactionModel {
     amount: Utils.BigNumber;
     fee: Utils.BigNumber;
     burnedFee: Utils.BigNumber;
-    serialized: Buffer;
+    serialised: Buffer;
     asset: Record<string, any>;
 }

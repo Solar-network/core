@@ -21,7 +21,7 @@ export const isLocalHost = (ip: string, includeNetworkInterfaces: boolean = true
     }
 };
 
-const sanitizeRemoteAddress = (ip: string): string | undefined => {
+const sanitiseRemoteAddress = (ip: string): string | undefined => {
     try {
         return ipAddr.process(ip).toString();
     } catch (error) {
@@ -33,13 +33,13 @@ export const isValidPeer = (
     peer: { ip: string; status?: string | number },
     includeNetworkInterfaces: boolean = true,
 ): boolean => {
-    const sanitizedAddress: string | undefined = sanitizeRemoteAddress(peer.ip);
+    const sanitisedAddress: string | undefined = sanitiseRemoteAddress(peer.ip);
 
-    if (!sanitizedAddress) {
+    if (!sanitisedAddress) {
         return false;
     }
 
-    peer.ip = sanitizedAddress;
+    peer.ip = sanitisedAddress;
 
     if (isLocalHost(peer.ip, includeNetworkInterfaces)) {
         return false;

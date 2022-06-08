@@ -420,10 +420,10 @@ export class SXPSwap {
         };
 
         TransactionValidator.prototype.validate = async function (transaction: Interfaces.ITransaction): Promise<void> {
-            const deserialized: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(
-                transaction.serialized,
+            const deserialised: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(
+                transaction.serialised,
             );
-            assert.strictEqual(transaction.id, deserialized.id);
+            assert.strictEqual(transaction.id, deserialised.id);
             const handler = await (this as any).handlerRegistry.getActivatedHandlerForData(transaction.data);
             await handler.apply(transaction, "validate");
         };

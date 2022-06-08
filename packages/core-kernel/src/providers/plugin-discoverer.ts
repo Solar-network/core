@@ -13,7 +13,7 @@ export class PluginDiscoverer {
 
     private plugins: Plugin[] = [];
 
-    public async initialize(): Promise<void> {
+    public async initialise(): Promise<void> {
         this.plugins = [];
 
         const discoverOnPath = async (patter: string, path: string): Promise<void> => {

@@ -14,7 +14,7 @@ export abstract class SecondSignatureRegistrationTransaction extends Transaction
         return schemas.secondSignature;
     }
 
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         const { data } = this;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(33));
 
@@ -25,7 +25,7 @@ export abstract class SecondSignatureRegistrationTransaction extends Transaction
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
 
         data.asset = {

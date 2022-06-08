@@ -17,7 +17,7 @@ export class TransactionExceedsMaximumByteSizeError extends Contracts.Transactio
     public readonly maxSize: number;
 
     public constructor(transaction: Interfaces.ITransaction, maxSize: number) {
-        super(`${transaction} exceeds size limit of ${AppUtils.pluralize("byte", maxSize, true)}`, "ERR_TOO_LARGE");
+        super(`${transaction} exceeds size limit of ${AppUtils.pluralise("byte", maxSize, true)}`, "ERR_TOO_LARGE");
         this.maxSize = maxSize;
     }
 }
@@ -48,7 +48,7 @@ export class SenderExceededMaximumTransactionCountError extends Contracts.Transa
 
     public constructor(transaction: Interfaces.ITransaction, maxCount: number) {
         super(
-            `${transaction} exceeds sender's ${AppUtils.pluralize("transaction", maxCount, true)} count limit`,
+            `${transaction} exceeds sender's ${AppUtils.pluralise("transaction", maxCount, true)} count limit`,
             "ERR_EXCEEDS_MAX_COUNT",
         );
         this.maxCount = maxCount;
@@ -86,7 +86,7 @@ export class TransactionFromFutureError extends Contracts.TransactionPool.PoolEr
     public secondsInFuture: number;
 
     public constructor(transaction: Interfaces.ITransaction, secondsInFuture: number) {
-        super(`${transaction} is ${AppUtils.pluralize("second", secondsInFuture, true)} in future`, "ERR_FROM_FUTURE");
+        super(`${transaction} is ${AppUtils.pluralise("second", secondsInFuture, true)} in future`, "ERR_FROM_FUTURE");
         this.secondsInFuture = secondsInFuture;
     }
 }

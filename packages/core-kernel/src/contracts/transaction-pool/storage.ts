@@ -2,7 +2,7 @@ export type StoredTransaction = {
     height: number;
     id: string;
     senderPublicKey: string;
-    serialized: Buffer;
+    serialised: Buffer;
 };
 
 export interface Storage {

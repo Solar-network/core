@@ -33,14 +33,14 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
         return transactions.map((t) => {
             return Object.assign(new Transaction(), t.data, {
                 timestamp: t.timestamp,
-                serialized: t.serialized,
+                serialised: t.serialised,
             });
         });
     }
 
     public getTransactionData(models: Contracts.Database.TransactionModel[]): Interfaces.ITransactionData[] {
         return models.map((model) => {
-            const data = Transactions.TransactionFactory.fromBytesUnsafe(model.serialized, model.id).data;
+            const data = Transactions.TransactionFactory.fromBytesUnsafe(model.serialised, model.id).data;
 
             // set_row_nonce trigger
             data.nonce = model.nonce;

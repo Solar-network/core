@@ -6,7 +6,7 @@ import { Interfaces, Managers } from "@solar-network/crypto";
 import { Action } from "../contracts";
 
 @Container.injectable()
-export class Initialize implements Action {
+export class Initialise implements Action {
     @Container.inject(Container.Identifiers.Application)
     public readonly app!: Contracts.Kernel.Application;
 

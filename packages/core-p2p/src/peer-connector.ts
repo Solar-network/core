@@ -95,7 +95,7 @@ export class PeerConnector implements Contracts.P2P.PeerConnector {
     }
 
     private async create(peer: Contracts.P2P.Peer): Promise<Client> {
-        const connection = new Client(`ws://${Utils.IpAddress.normalizeAddress(peer.ip)}:${peer.port}`, {
+        const connection = new Client(`ws://${Utils.IpAddress.normaliseAddress(peer.ip)}:${peer.port}`, {
             timeout: 10000,
         });
         this.connections.set(peer.ip, connection);
@@ -104,7 +104,7 @@ export class PeerConnector implements Contracts.P2P.PeerConnector {
         connection.onError = (error) => {
             if (error.message !== "Connection timed out") {
                 this.logger.debug(
-                    `Socket error (peer ${Utils.IpAddress.normalizeAddress(peer.ip)}): ${error.message} :warning:`,
+                    `Socket error (peer ${Utils.IpAddress.normaliseAddress(peer.ip)}): ${error.message} :warning:`,
                 );
             }
             this.disconnect(peer);

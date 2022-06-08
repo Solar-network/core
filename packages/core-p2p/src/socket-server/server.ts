@@ -58,7 +58,7 @@ export class Server {
      * @returns {Promise<void>}
      * @memberof Server
      */
-    public async initialize(
+    public async initialise(
         name: string,
         optionsServer: { banSeconds: number; hostname: string; port: number },
     ): Promise<void> {

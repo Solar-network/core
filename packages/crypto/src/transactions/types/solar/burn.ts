@@ -24,14 +24,14 @@ export class BurnTransaction extends Transaction {
         });
     }
 
-    public serialize(): ByteBuffer {
+    public serialise(): ByteBuffer {
         const { data } = this;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(8));
         buff.writeBigUInt64LE(data.amount.toBigInt());
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
         data.amount = BigNumber.make(buf.readBigUInt64LE().toString());
     }

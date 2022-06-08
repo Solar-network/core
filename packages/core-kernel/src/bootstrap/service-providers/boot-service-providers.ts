@@ -81,7 +81,7 @@ export class BootServiceProviders implements Bootstrapper {
 
             const eventListener: Contracts.Kernel.EventListener = this.app
                 .resolve(ChangeServiceProviderState)
-                .initialize(serviceProviderName, serviceProvider);
+                .initialise(serviceProviderName, serviceProvider);
 
             // Register the "enable/disposeWhen" listeners to be triggered on every block. Use with care!
             this.events.listen(BlockEvent.Applied, eventListener);

@@ -45,7 +45,7 @@ export class Process {
      * @param {string} suffix
      * @memberof Process
      */
-    public initialize(token: string, suffix: string): void {
+    public initialise(token: string, suffix: string): void {
         this.processName = `${token}-${suffix}`;
     }
 

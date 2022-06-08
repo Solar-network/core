@@ -10,10 +10,10 @@ import { AbortUnknownProcess } from "./abort-unknown-process";
 
 /**
  * @export
- * @class DaemonizeProcess
+ * @class DaemoniseProcess
  */
 @injectable()
-export class DaemonizeProcess {
+export class DaemoniseProcess {
     /**
      * @private
      * @type {Application}
@@ -34,7 +34,7 @@ export class DaemonizeProcess {
      * @static
      * @param {ProcessOptions} options
      * @param {*} flags
-     * @memberof DaemonizeProcess
+     * @memberof DaemoniseProcess
      */
     public async execute(options: ProcessOptions, flags: AnyObject): Promise<void> {
         const processName: string = options.name;

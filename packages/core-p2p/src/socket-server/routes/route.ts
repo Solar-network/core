@@ -6,12 +6,12 @@ import { Controller } from "../controllers/controller";
 
 export type Codec = {
     request: {
-        serialize: any;
-        deserialize: any;
+        serialise: any;
+        deserialise: any;
     };
     response: {
-        serialize: any;
-        deserialize: any;
+        serialise: any;
+        deserialise: any;
     };
 };
 

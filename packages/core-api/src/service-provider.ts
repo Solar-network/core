@@ -95,7 +95,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         const server: Server = this.app.get<Server>(id);
 
-        await server.initialize(`Public API (${type.toUpperCase()})`, {
+        await server.initialise(`Public API (${type.toUpperCase()})`, {
             ...this.config().get(`server.${type}`),
             ...{
                 routes: {

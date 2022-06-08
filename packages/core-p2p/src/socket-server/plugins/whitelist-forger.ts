@@ -23,7 +23,7 @@ export class WhitelistForgerPlugin {
                     if (peerProcessor.isWhitelisted({ ip: request.info.remoteAddress } as Contracts.P2P.Peer)) {
                         return h.continue;
                     } else {
-                        return Boom.forbidden("IP unauthorized on internal route");
+                        return Boom.forbidden("IP unauthorised on internal route");
                     }
                 } else {
                     return h.continue;

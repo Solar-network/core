@@ -51,7 +51,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     private serverPort!: number;
 
     @Container.postConstruct()
-    public initialize(): void {
+    public initialise(): void {
         this.outgoingRateLimiter = buildRateLimiter({
             // White listing anybody here means we would not throttle ourselves when sending
             // them requests, ie we could spam them.
@@ -76,7 +76,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             peer,
             "p2p.blocks.postBlock",
             {
-                block: Blocks.Serializer.serializeWithTransactions({
+                block: Blocks.Serialiser.serialiseWithTransactions({
                     ...block.data,
                     transactions: block.transactions.map((tx) => tx.data),
                 }),
@@ -104,7 +104,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 await this.emit(peer, "p2p.transactions.postTransactions", { transactions }, postTransactionsTimeout);
                 await delay(Math.ceil(1000 / postTransactionsRateLimit));
                 // to space up between consecutive calls to postTransactions according to rate limit
-                // optimized here because default throttling would not be effective for postTransactions
+                // optimised here because default throttling would not be effective for postTransactions
             },
         });
     }
@@ -141,7 +141,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 throw new PeerVerificationFailedError();
             }
 
-            const peerVerifier = this.app.resolve(PeerVerifier).initialize(peer);
+            const peerVerifier = this.app.resolve(PeerVerifier).initialise(peer);
 
             if (deadline <= new Date().getTime()) {
                 throw new PeerPingTimeoutError(timeoutMsec);
@@ -285,7 +285,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 lastBlockHeight: fromBlockHeight,
                 blockLimit,
                 headersOnly,
-                serialized: true,
+                serialised: true,
             },
             timeout ? timeout : this.configuration.getRequired<number>("getBlocksTimeout"),
             maxPayload,
@@ -384,7 +384,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             response = await this.connector.emit(
                 peer,
                 event,
-                codec.request.serialize({
+                codec.request.serialise({
                     ...payload,
                     headers: {
                         port: this.serverPort,
@@ -393,7 +393,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 }),
                 timeout,
             );
-            parsedResponsePayload = codec.response.deserialize(response.payload);
+            parsedResponsePayload = codec.response.deserialise(response.payload);
 
             peer.sequentialErrorCounter = 0; // reset counter if response is successful, keep it after emit
 

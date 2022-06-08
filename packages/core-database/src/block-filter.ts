@@ -2,7 +2,7 @@ import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-ker
 
 import { Block } from "./models/block";
 
-const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimizeExpression } = AppUtils.Search;
+const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimiseExpression } = AppUtils.Search;
 
 @Container.injectable()
 export class BlockFilter implements Contracts.Database.BlockFilter {
@@ -13,7 +13,7 @@ export class BlockFilter implements Contracts.Database.BlockFilter {
             criteria.map((c) => handleOrCriteria(c, (c) => this.handleBlockCriteria(c))),
         );
 
-        return optimizeExpression({ op: "and", expressions });
+        return optimiseExpression({ op: "and", expressions });
     }
 
     private async handleBlockCriteria(

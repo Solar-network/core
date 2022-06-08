@@ -10,11 +10,11 @@ import {
     OrExpression,
 } from "../contracts/search";
 
-export const optimizeExpression = <TEntity>(expression: Expression<TEntity>): Expression<TEntity> => {
+export const optimiseExpression = <TEntity>(expression: Expression<TEntity>): Expression<TEntity> => {
     switch (expression.op) {
         case "and": {
-            const optimized = expression.expressions.map(optimizeExpression);
-            const flattened = optimized.reduce((acc, e) => {
+            const optimised = expression.expressions.map(optimiseExpression);
+            const flattened = optimised.reduce((acc, e) => {
                 return e.op === "and" ? [...acc, ...e.expressions] : [...acc, e];
             }, [] as Expression<TEntity>[]);
 
@@ -30,8 +30,8 @@ export const optimizeExpression = <TEntity>(expression: Expression<TEntity>): Ex
         }
 
         case "or": {
-            const optimized = expression.expressions.map(optimizeExpression);
-            const flattened = optimized.reduce((acc, e) => {
+            const optimised = expression.expressions.map(optimiseExpression);
+            const flattened = optimised.reduce((acc, e) => {
                 return e.op === "or" ? [...acc, ...e.expressions] : [...acc, e];
             }, [] as Expression<TEntity>[]);
 

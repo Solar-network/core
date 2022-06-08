@@ -212,7 +212,7 @@ export class BlockRepository extends AbstractRepository<Block> {
                             Object.assign(new Transaction(), {
                                 ...tx.data,
                                 timestamp: tx.timestamp,
-                                serialized: tx.serialized,
+                                serialised: tx.serialised,
                             }),
                         )
                         .sort((a: Transaction, b: Transaction) => {
@@ -337,7 +337,7 @@ export class BlockRepository extends AbstractRepository<Block> {
             `
                 SELECT *,
                     ARRAY
-                        (SELECT serialized
+                        (SELECT serialised
                         FROM transactions
                         WHERE transactions.block_id = blocks.id
                         ORDER BY transactions.sequence ASC

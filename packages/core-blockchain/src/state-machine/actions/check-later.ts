@@ -56,7 +56,7 @@ export class CheckLater implements Action {
                 this.logger.info(`The network launches in ${countdown} ${emoji[seconds % 5]}`);
             } else {
                 this.logger.info(
-                    `The network has launched and the next block is due in ${AppUtils.pluralize(
+                    `The network has launched and the next block is due in ${AppUtils.pluralise(
                         "second",
                         blocktime,
                         true,
@@ -111,7 +111,7 @@ export class CheckLater implements Action {
                                 this.logger.debug(`The id of the new block is ${blocks[0].id}`);
 
                                 this.logger.debug(
-                                    `It contains ${AppUtils.pluralize(
+                                    `It contains ${AppUtils.pluralise(
                                         "transaction",
                                         blocks[0].numberOfTransactions,
                                         true,

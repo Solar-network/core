@@ -461,7 +461,7 @@ $root.blocks = (function() {
          * @property {number|null} [lastBlockHeight] GetBlocksRequest lastBlockHeight
          * @property {number|null} [blockLimit] GetBlocksRequest blockLimit
          * @property {boolean|null} [headersOnly] GetBlocksRequest headersOnly
-         * @property {boolean|null} [serialized] GetBlocksRequest serialized
+         * @property {boolean|null} [serialised] GetBlocksRequest serialised
          * @property {shared.IHeaders|null} [headers] GetBlocksRequest headers
          */
 
@@ -505,12 +505,12 @@ $root.blocks = (function() {
         GetBlocksRequest.prototype.headersOnly = false;
 
         /**
-         * GetBlocksRequest serialized.
-         * @member {boolean} serialized
+         * GetBlocksRequest serialised.
+         * @member {boolean} serialised
          * @memberof blocks.GetBlocksRequest
          * @instance
          */
-        GetBlocksRequest.prototype.serialized = false;
+        GetBlocksRequest.prototype.serialised = false;
 
         /**
          * GetBlocksRequest headers.
@@ -550,8 +550,8 @@ $root.blocks = (function() {
                 writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.blockLimit);
             if (message.headersOnly != null && Object.hasOwnProperty.call(message, "headersOnly"))
                 writer.uint32(/* id 3, wireType 0 =*/24).bool(message.headersOnly);
-            if (message.serialized != null && Object.hasOwnProperty.call(message, "serialized"))
-                writer.uint32(/* id 4, wireType 0 =*/32).bool(message.serialized);
+            if (message.serialised != null && Object.hasOwnProperty.call(message, "serialised"))
+                writer.uint32(/* id 4, wireType 0 =*/32).bool(message.serialised);
             if (message.headers != null && Object.hasOwnProperty.call(message, "headers"))
                 $root.shared.Headers.encode(message.headers, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
             return writer;
@@ -598,7 +598,7 @@ $root.blocks = (function() {
                     message.headersOnly = reader.bool();
                     break;
                 case 4:
-                    message.serialized = reader.bool();
+                    message.serialised = reader.bool();
                     break;
                 case 5:
                     message.headers = $root.shared.Headers.decode(reader, reader.uint32());
@@ -647,9 +647,9 @@ $root.blocks = (function() {
             if (message.headersOnly != null && message.hasOwnProperty("headersOnly"))
                 if (typeof message.headersOnly !== "boolean")
                     return "headersOnly: boolean expected";
-            if (message.serialized != null && message.hasOwnProperty("serialized"))
-                if (typeof message.serialized !== "boolean")
-                    return "serialized: boolean expected";
+            if (message.serialised != null && message.hasOwnProperty("serialised"))
+                if (typeof message.serialised !== "boolean")
+                    return "serialised: boolean expected";
             if (message.headers != null && message.hasOwnProperty("headers")) {
                 var error = $root.shared.Headers.verify(message.headers);
                 if (error)
@@ -676,8 +676,8 @@ $root.blocks = (function() {
                 message.blockLimit = object.blockLimit >>> 0;
             if (object.headersOnly != null)
                 message.headersOnly = Boolean(object.headersOnly);
-            if (object.serialized != null)
-                message.serialized = Boolean(object.serialized);
+            if (object.serialised != null)
+                message.serialised = Boolean(object.serialised);
             if (object.headers != null) {
                 if (typeof object.headers !== "object")
                     throw TypeError(".blocks.GetBlocksRequest.headers: object expected");
@@ -703,7 +703,7 @@ $root.blocks = (function() {
                 object.lastBlockHeight = 0;
                 object.blockLimit = 0;
                 object.headersOnly = false;
-                object.serialized = false;
+                object.serialised = false;
                 object.headers = null;
             }
             if (message.lastBlockHeight != null && message.hasOwnProperty("lastBlockHeight"))
@@ -712,8 +712,8 @@ $root.blocks = (function() {
                 object.blockLimit = message.blockLimit;
             if (message.headersOnly != null && message.hasOwnProperty("headersOnly"))
                 object.headersOnly = message.headersOnly;
-            if (message.serialized != null && message.hasOwnProperty("serialized"))
-                object.serialized = message.serialized;
+            if (message.serialised != null && message.hasOwnProperty("serialised"))
+                object.serialised = message.serialised;
             if (message.headers != null && message.hasOwnProperty("headers"))
                 object.headers = $root.shared.Headers.toObject(message.headers, options);
             return object;

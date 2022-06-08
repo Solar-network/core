@@ -146,7 +146,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
                 this.stateStore.setLastStoredBlockHeight(acceptedBlocks[acceptedBlocks.length - 1].data.height);
             } catch (error) {
                 this.logger.error(
-                    `Could not save ${Utils.pluralize("block", acceptedBlocks.length, true)}) to database : ${
+                    `Could not save ${Utils.pluralise("block", acceptedBlocks.length, true)}) to database : ${
                         error.stack
                     }`,
                 );
@@ -203,7 +203,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
         const lastHeight: number = blocksToRevert[0].data.height;
 
         this.logger.info(
-            `Reverting ${Utils.pluralize(
+            `Reverting ${Utils.pluralise(
                 "block",
                 blocksToRevert.length,
                 true,

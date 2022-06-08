@@ -2,7 +2,7 @@ import { Models } from "@solar-network/core-database";
 import { Container } from "@solar-network/core-kernel";
 import { Blocks, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { decode, encode } from "msgpack-lite";
-import { camelizeKeys } from "xcase";
+import { camelizeKeys as cameliseKeys } from "xcase";
 
 import { Codec } from "../contracts";
 import { Codec as CodecException } from "../exceptions";
@@ -25,12 +25,12 @@ export class MessagePackCodec implements Codec {
         Block_id: string;
     }): Buffer {
         try {
-            const blockCamelized = camelizeKeys(MessagePackCodec.removePrefix(block, "Block_"));
+            const blockCamelised = cameliseKeys(MessagePackCodec.removePrefix(block, "Block_"));
 
             return encode([
                 block.Block_burned_fee,
                 block.Block_dev_fund,
-                Blocks.Serializer.serialize(blockCamelized, true),
+                Blocks.Serialiser.serialise(blockCamelised, true),
             ]);
         } catch (err) {
             throw new CodecException.BlockEncodeException(block.Block_id, err.message);
@@ -39,8 +39,8 @@ export class MessagePackCodec implements Codec {
 
     public decodeBlock(buffer: Buffer): Models.Block {
         try {
-            const [burnedFee, devFund, serialized] = decode(buffer);
-            const data = Blocks.Deserializer.deserialize(serialized, false).data as Models.Block;
+            const [burnedFee, devFund, serialised] = decode(buffer);
+            const data = Blocks.Deserialiser.deserialise(serialised, false).data as Models.Block;
             data.burnedFee = burnedFee;
             data.devFund = devFund;
             return data;
@@ -56,7 +56,7 @@ export class MessagePackCodec implements Codec {
         Transaction_burned_fee: Utils.BigNumber;
         Transaction_sequence: number;
         Transaction_timestamp: number;
-        Transaction_serialized: Buffer;
+        Transaction_serialised: Buffer;
     }): Buffer {
         try {
             return encode([
@@ -66,7 +66,7 @@ export class MessagePackCodec implements Codec {
                 transaction.Transaction_burned_fee,
                 transaction.Transaction_sequence,
                 transaction.Transaction_timestamp,
-                transaction.Transaction_serialized,
+                transaction.Transaction_serialised,
             ]);
         } catch (err) {
             throw new CodecException.TransactionEncodeException(transaction.Transaction_id, err.message);
@@ -76,11 +76,11 @@ export class MessagePackCodec implements Codec {
     public decodeTransaction(buffer: Buffer): Models.Transaction {
         let transactionId = undefined;
         try {
-            const [id, blockId, blockHeight, burnedFee, sequence, timestamp, serialized] = decode(buffer);
+            const [id, blockId, blockHeight, burnedFee, sequence, timestamp, serialised] = decode(buffer);
             transactionId = id;
 
             const transaction: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytesUnsafe(
-                serialized,
+                serialised,
                 id,
             );
 
@@ -100,7 +100,7 @@ export class MessagePackCodec implements Codec {
                 amount: transaction.data.amount,
                 fee: transaction.data.fee,
                 burnedFee: burnedFee,
-                serialized: serialized,
+                serialised: serialised,
                 typeGroup: transaction.data.typeGroup || 1,
                 nonce: Utils.BigNumber.make(transaction.data.nonce || 0),
                 // @ts-ignore
@@ -113,9 +113,9 @@ export class MessagePackCodec implements Codec {
 
     public encodeRound(round: { Round_round: string }): Buffer {
         try {
-            const roundCamelized = camelizeKeys(MessagePackCodec.removePrefix(round, "Round_"));
+            const roundCamelised = cameliseKeys(MessagePackCodec.removePrefix(round, "Round_"));
 
-            return encode([roundCamelized.publicKey, roundCamelized.balance, roundCamelized.round]);
+            return encode([roundCamelised.publicKey, roundCamelised.balance, roundCamelised.round]);
         } catch (err) {
             throw new CodecException.RoundEncodeException(round.Round_round, err.message);
         }

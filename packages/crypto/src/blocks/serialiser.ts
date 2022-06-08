@@ -4,43 +4,43 @@ import ByteBuffer from "bytebuffer";
 import { IBlock, IBlockData, ITransactionData } from "../interfaces";
 import { Utils } from "../transactions";
 
-export class Serializer {
+export class Serialiser {
     public static size(block: IBlock): number {
         let size = this.headerSize(block.data) + block.data.blockSignature!.length / 2;
 
         for (const transaction of block.transactions) {
-            size += 4 /* tx length */ + transaction.serialized.length;
+            size += 4 /* tx length */ + transaction.serialised.length;
         }
 
         return size;
     }
 
-    public static serializeWithTransactions(block: IBlockData): Buffer {
+    public static serialiseWithTransactions(block: IBlockData): Buffer {
         const transactions: ITransactionData[] = block.transactions || [];
         block.numberOfTransactions = block.numberOfTransactions || transactions.length;
 
-        const serializedHeader: Buffer = this.serialize(block);
+        const serialisedHeader: Buffer = this.serialise(block);
 
-        const buff: ByteBuffer = new ByteBuffer(serializedHeader.length + transactions.length * 4, true)
-            .append(serializedHeader)
+        const buff: ByteBuffer = new ByteBuffer(serialisedHeader.length + transactions.length * 4, true)
+            .append(serialisedHeader)
             .skip(transactions.length * 4);
 
         for (let i = 0; i < transactions.length; i++) {
-            const serialized: Buffer = Utils.toBytes(transactions[i]);
-            buff.writeUint32(serialized.length, serializedHeader.length + i * 4);
-            buff.append(serialized);
+            const serialised: Buffer = Utils.toBytes(transactions[i]);
+            buff.writeUint32(serialised.length, serialisedHeader.length + i * 4);
+            buff.append(serialised);
         }
 
         return buff.flip().toBuffer();
     }
 
-    public static serialize(block: IBlockData, includeSignature = true): Buffer {
+    public static serialise(block: IBlockData, includeSignature = true): Buffer {
         const buff: ByteBuffer = new ByteBuffer(512, true);
 
-        this.serializeHeader(block, buff);
+        this.serialiseHeader(block, buff);
 
         if (includeSignature) {
-            this.serializeSignature(block, buff);
+            this.serialiseSignature(block, buff);
         }
 
         return buff.flip().toBuffer();
@@ -62,7 +62,7 @@ export class Serializer {
         );
     }
 
-    private static serializeHeader(block: IBlockData, buff: ByteBuffer): void {
+    private static serialiseHeader(block: IBlockData, buff: ByteBuffer): void {
         buff.writeUint32(block.version);
         buff.writeUint32(block.timestamp);
         buff.writeUint32(block.height);
@@ -81,7 +81,7 @@ export class Serializer {
         assert.strictEqual(buff.offset, this.headerSize(block));
     }
 
-    private static serializeSignature(block: IBlockData, buff: ByteBuffer): void {
+    private static serialiseSignature(block: IBlockData, buff: ByteBuffer): void {
         if (block.blockSignature) {
             buff.append(block.blockSignature, "hex");
         }

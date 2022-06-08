@@ -8,11 +8,11 @@ const hardLimitNumberOfTransactions = 500;
 
 export const getBlocks = {
     request: {
-        serialize: (obj: blocks.IGetBlocksRequest): Buffer => Buffer.from(blocks.GetBlocksRequest.encode(obj).finish()),
-        deserialize: (payload: Buffer): blocks.IGetBlocksRequest => blocks.GetBlocksRequest.decode(payload),
+        serialise: (obj: blocks.IGetBlocksRequest): Buffer => Buffer.from(blocks.GetBlocksRequest.encode(obj).finish()),
+        deserialise: (payload: Buffer): blocks.IGetBlocksRequest => blocks.GetBlocksRequest.decode(payload),
     },
     response: {
-        serialize: (obj: blocks.IGetBlocksResponse): Buffer => {
+        serialise: (obj: blocks.IGetBlocksResponse): Buffer => {
             const blockBuffers: Buffer[] = [];
 
             for (const block of obj as Interfaces.IBlockData[]) {
@@ -43,7 +43,7 @@ export const getBlocks = {
 
             return Buffer.concat(blockBuffers);
         },
-        deserialize: (payload: Buffer): object => {
+        deserialise: (payload: Buffer): object => {
             const blocksBuffer = Buffer.from(payload);
             const blocksBuffers: Buffer[] = [];
             for (let offset = 0; offset < blocksBuffer.byteLength - 4; ) {
@@ -81,8 +81,8 @@ export const getBlocks = {
 
 export const postBlock = {
     request: {
-        serialize: (obj: blocks.IPostBlockRequest): Buffer => Buffer.from(blocks.PostBlockRequest.encode(obj).finish()),
-        deserialize: (payload: Buffer): object => {
+        serialise: (obj: blocks.IPostBlockRequest): Buffer => Buffer.from(blocks.PostBlockRequest.encode(obj).finish()),
+        deserialise: (payload: Buffer): object => {
             const decoded = blocks.PostBlockRequest.decode(payload);
             return {
                 ...decoded,
@@ -91,10 +91,10 @@ export const postBlock = {
         },
     },
     response: {
-        serialize: (obj: blocks.IPostBlockResponse): Buffer => {
+        serialise: (obj: blocks.IPostBlockResponse): Buffer => {
             return Buffer.from(blocks.PostBlockResponse.encode(obj).finish());
         },
-        deserialize: (payload: Buffer): Contracts.P2P.PostBlockResponse => {
+        deserialise: (payload: Buffer): Contracts.P2P.PostBlockResponse => {
             return blocks.PostBlockResponse.decode(payload);
         },
     },

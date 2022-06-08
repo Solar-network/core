@@ -107,7 +107,7 @@ export class DposState implements Contracts.State.DposState {
             this.roundDelegates.push(this.activeDelegates[i]);
         }
         this.logger.debug(
-            `Loaded ${roundInfo.maxDelegates} active ` + AppUtils.pluralize("delegate", roundInfo.maxDelegates),
+            `Loaded ${roundInfo.maxDelegates} active ` + AppUtils.pluralise("delegate", roundInfo.maxDelegates),
         );
     }
 }

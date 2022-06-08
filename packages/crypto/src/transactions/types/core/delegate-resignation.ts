@@ -15,11 +15,11 @@ export abstract class DelegateResignationTransaction extends Transaction {
         return schemas.delegateResignation;
     }
 
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         return new ByteBuffer(Buffer.alloc(0));
     }
 
-    public deserialize(): void {
+    public deserialise(): void {
         return;
     }
 }

@@ -3,7 +3,7 @@ import { Crypto, Interfaces } from "@solar-network/crypto";
 import { Peer } from "./peer";
 
 export interface PeerCommunicator {
-    initialize();
+    initialise();
 
     postBlock(peer: Peer, block: Interfaces.IBlock);
 

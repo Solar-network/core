@@ -22,11 +22,11 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
         Array<{
             id: string;
             blockId: string;
-            serialized: Buffer;
+            serialised: Buffer;
         }>
     > {
         return this.find({
-            select: ["id", "blockId", "serialized"],
+            select: ["id", "blockId", "serialised"],
             where: {
                 blockId: In(blockIds),
             },

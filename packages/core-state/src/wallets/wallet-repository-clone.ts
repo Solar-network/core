@@ -14,8 +14,8 @@ export class WalletRepositoryClone extends WalletRepository {
     private readonly forgetIndexes: Record<string, Contracts.State.WalletIndex> = {};
 
     @Container.postConstruct()
-    public initialize(): void {
-        super.initialize();
+    public initialise(): void {
+        super.initialise();
 
         for (const { name, indexer, autoIndex } of this.indexerIndexes) {
             this.forgetIndexes[name] = new WalletIndex(indexer, autoIndex);

@@ -1,6 +1,6 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
 import { Address } from "../../../identities";
-import { IMultiPaymentItem, ISerializeOptions } from "../../../interfaces";
+import { IMultiPaymentItem, ISerialiseOptions } from "../../../interfaces";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -16,7 +16,7 @@ export abstract class MultiPaymentTransaction extends Transaction {
         return schemas.multiPayment;
     }
 
-    public serialize(options: ISerializeOptions = {}): ByteBuffer | undefined {
+    public serialise(options: ISerialiseOptions = {}): ByteBuffer | undefined {
         const { data } = this;
 
         if (data.asset && data.asset.payments) {
@@ -38,7 +38,7 @@ export abstract class MultiPaymentTransaction extends Transaction {
         return undefined;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
         const payments: IMultiPaymentItem[] = [];
         const total: number = buf.readUInt16LE();

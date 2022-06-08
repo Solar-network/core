@@ -72,7 +72,7 @@ export class BlockProcessor {
             blockTimeLookup,
         );
         if (!isChained) {
-            return this.app.resolve<UnchainedHandler>(UnchainedHandler).initialize(isValidGenerator).execute(block);
+            return this.app.resolve<UnchainedHandler>(UnchainedHandler).initialise(isValidGenerator).execute(block);
         }
 
         if (!isValidGenerator) {

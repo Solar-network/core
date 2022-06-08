@@ -26,7 +26,7 @@ export class CodecPlugin {
             type: "onPostAuth",
             async method(request, h) {
                 try {
-                    request.payload = allRoutesConfigByPath[request.path].codec.request.deserialize(request.payload);
+                    request.payload = allRoutesConfigByPath[request.path].codec.request.deserialise(request.payload);
                 } catch (e) {
                     return Boom.badRequest(`Payload deserialising failed: ${e}`);
                 }
@@ -39,7 +39,7 @@ export class CodecPlugin {
             method: async (request, h) => {
                 try {
                     if (typeof request.response.source !== "undefined") {
-                        request.response.source = allRoutesConfigByPath[request.path].codec.response.serialize(
+                        request.response.source = allRoutesConfigByPath[request.path].codec.response.serialise(
                             request.response.source,
                         );
                     } else {

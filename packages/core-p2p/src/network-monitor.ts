@@ -51,11 +51,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     private downloadChunkSize: number = defaultDownloadChunkSize;
 
-    private initializing = true;
+    private initialising = true;
     private lastPinged: number = 0;
 
     @Container.postConstruct()
-    public initialize(): void {
+    public initialise(): void {
         this.config = this.configuration.all(); // >_<
     }
 
@@ -76,7 +76,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 // @ts-ignore
                 Utils.groupBy(this.repository.getPeers(), (peer) => peer.version),
             )) {
-                let discovery = `Discovered ${Utils.pluralize("peer", peers.length, true)} with v${version}`;
+                let discovery = `Discovered ${Utils.pluralise("peer", peers.length, true)} with v${version}`;
 
                 if (gt(version, ourVersion)) {
                     discovery += " :eyes:";
@@ -106,7 +106,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             },
         });
 
-        this.initializing = false;
+        this.initialising = false;
     }
 
     public async updateNetworkStatus(initialRun?: boolean): Promise<void> {
@@ -163,7 +163,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
 
         if (log) {
-            this.logger.info(`Checking ${Utils.pluralize("peer", max, true)} :telescope:`);
+            this.logger.info(`Checking ${Utils.pluralise("peer", max, true)} :telescope:`);
         }
         const peerErrors = {};
 
@@ -215,12 +215,12 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         for (const key of Object.keys(peerErrors)) {
             const peerCount = peerErrors[key].length;
-            this.logger.debug(`Removed ${Utils.pluralize("peer", peerCount, true)} because of "${key}" :wastebasket:`);
+            this.logger.debug(`Removed ${Utils.pluralise("peer", peerCount, true)} because of "${key}" :wastebasket:`);
         }
 
-        if (this.initializing) {
+        if (this.initialising) {
             this.logger.info(
-                `${max - unresponsivePeers} of ${Utils.pluralize("peer", max, true)} on the network are responsive`,
+                `${max - unresponsivePeers} of ${Utils.pluralise("peer", max, true)} on the network are responsive`,
             );
             this.logger.info(`Median Network Height: ${this.getNetworkHeight().toLocaleString()}`);
         }
@@ -310,7 +310,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     public async refreshPeersAfterFork(): Promise<void> {
         this.logger.info(
-            `Refreshing ${Utils.pluralize(
+            `Refreshing ${Utils.pluralise(
                 "peer",
                 this.repository.getPeers().length,
                 true,
@@ -405,7 +405,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                     return { forked: true, blocksToRollback: 5000 };
                 } else {
                     this.logger.info(
-                        `Rolling back ${Utils.pluralize(
+                        `Rolling back ${Utils.pluralise(
                             "block",
                             blocksToRollback,
                             true,
@@ -638,7 +638,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
 
         this.logger.info(
-            `Broadcasting block ${block.data.height.toLocaleString()} to ${Utils.pluralize(
+            `Broadcasting block ${block.data.height.toLocaleString()} to ${Utils.pluralise(
                 "peer",
                 peers.length,
                 true,
@@ -654,7 +654,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             peers = Utils.shuffle(peers).slice(0, Math.floor(peers.length / 2));
         }
 
-        this.logger.debug(`Checking ports of ${Utils.pluralize("peer", peers.length, true)}`);
+        this.logger.debug(`Checking ports of ${Utils.pluralise("peer", peers.length, true)}`);
 
         Promise.all(peers.map((peer) => this.communicator.pingPorts(peer)));
     }

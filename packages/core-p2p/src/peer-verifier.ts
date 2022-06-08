@@ -2,7 +2,6 @@ import { Container, Contracts, Services, Utils } from "@solar-network/core-kerne
 import { DatabaseInterceptor } from "@solar-network/core-state";
 import { Blocks, Interfaces } from "@solar-network/crypto";
 import assert from "assert";
-import pluralize from "pluralize";
 import { inspect } from "util";
 
 import { Severity } from "./enums";
@@ -42,7 +41,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
     private peer!: Contracts.P2P.Peer;
 
-    public initialize(peer: Contracts.P2P.Peer): PeerVerifier {
+    public initialise(peer: Contracts.P2P.Peer): PeerVerifier {
         this.peer = peer;
 
         this.logPrefix = `Peer verify ${peer.ip}:`;
@@ -202,7 +201,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             const blocksAhead = claimedHeight - ourHeight;
             this.log(
                 Severity.DEBUG_EXTRA,
-                `peer's claimed chain is ${pluralize("block", blocksAhead, true)} higher than ` +
+                `peer's claimed chain is ${Utils.pluralise("block", blocksAhead, true)} higher than ` +
                     `ours (our height ${ourHeight}, his claimed height ${claimedHeight})`,
                 null,
             );
@@ -235,7 +234,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
                     Severity.DEBUG_EXTRA,
                     `success: peer's latest block ` +
                         `(height=${claimedHeight}, id=${claimedState.header.id}) is part of our chain. ` +
-                        `Peer is ${pluralize("block", ourHeight - claimedHeight, true)} behind us`,
+                        `Peer is ${Utils.pluralise("block", ourHeight - claimedHeight, true)} behind us`,
                     true,
                 );
             }
