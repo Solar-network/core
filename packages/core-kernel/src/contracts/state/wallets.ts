@@ -129,6 +129,13 @@ export interface Wallet {
     getVoteBalance(): object;
 
     /**
+     * @param {string} delegate
+     * @param {Utils.BigNumber} balance
+     * @memberof Wallet
+     */
+    setVoteBalance(delegate: string, balance: Utils.BigNumber): void;
+
+    /**
      * @returns {Record<string, WalletVoteDistribution>}
      * @memberof Wallet
      */

@@ -1,17 +1,17 @@
-import { Machine } from "xstate";
+import { createMachine } from "xstate";
 
-export const blockchainMachine: any = Machine({
+export const blockchainMachine: any = createMachine({
     key: "blockchain",
     initial: "uninitialised",
     states: {
         uninitialised: {
             on: {
-                START: "initialize",
+                START: "initialise",
                 STOP: "stopped",
             },
         },
-        initialize: {
-            onEntry: ["initialize"],
+        initialise: {
+            onEntry: ["initialise"],
             on: {
                 NETWORKSTART: "idle",
                 STARTED: "syncWithNetwork",
@@ -102,7 +102,7 @@ export const blockchainMachine: any = Machine({
         rollback: {
             onEntry: ["rollbackDatabase"],
             on: {
-                SUCCESS: "initialize",
+                SUCCESS: "initialise",
                 FAILURE: "exit",
                 STOP: "stopped",
             },

@@ -5,6 +5,7 @@ import { Base58 } from "./base58";
 import { BigNumber } from "./bignum";
 import { calculateBlockTime, isNewBlockTime } from "./block-time-calculator";
 import { ByteBuffer } from "./byte-buffer";
+import { ByteBufferArray } from "./byte-buffer-array";
 import { isLocalHost, isValidPeer } from "./is-valid-peer";
 import { calculateReward } from "./reward-calculator";
 import { sortVotes } from "./sort-votes";
@@ -129,6 +130,7 @@ export {
     Base58,
     BigNumber,
     ByteBuffer,
+    ByteBufferArray,
     isValidPeer,
     isLocalHost,
     calculateBlockTime,

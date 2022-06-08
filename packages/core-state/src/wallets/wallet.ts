@@ -208,6 +208,10 @@ export class Wallet implements Contracts.State.Wallet {
         return this.voteBalance;
     }
 
+    public setVoteBalance(delegate: string, balance: Utils.BigNumber) {
+        this.voteBalance[delegate] = balance;
+    }
+
     /**
      * @returns {Record<string, Contracts.State.WalletVoteDistribution>}
      * @memberof Wallet
@@ -245,8 +249,9 @@ export class Wallet implements Contracts.State.Wallet {
         });
 
         for (const delegate of Object.keys(votes)) {
-            this.voteBalance[delegate] = Utils.BigNumber.make(voteAmounts[delegate].balance).plus(
-                voteAmounts[delegate].lockedBalance,
+            this.setVoteBalance(
+                delegate,
+                Utils.BigNumber.make(voteAmounts[delegate].balance).plus(voteAmounts[delegate].lockedBalance),
             );
         }
     }

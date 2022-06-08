@@ -34,17 +34,26 @@ export class Initialize implements Action {
     public async handle(): Promise<void> {
         try {
             const block: Interfaces.IBlock = this.stateStore.getLastBlock();
+            this.logger.info(`Last block in database: ${block.data.height.toLocaleString()}`);
 
-            if (!this.stateStore.getRestoredDatabaseIntegrity()) {
-                this.logger.info("Verifying database integrity :hourglass_flowing_sand:");
+            const loadedState: boolean = await this.app
+                .get<Contracts.State.StateLoader>(Container.Identifiers.StateLoader)
+                .run();
 
-                if (!(await this.databaseService.verifyBlockchain())) {
-                    return this.blockchain.dispatch("ROLLBACK");
+            if (!loadedState) {
+                if (!this.stateStore.getRestoredDatabaseIntegrity()) {
+                    this.logger.info("Verifying database integrity :hourglass_flowing_sand:");
+
+                    if (!(await this.databaseService.verifyBlockchain())) {
+                        return this.blockchain.dispatch("ROLLBACK");
+                    }
+
+                    this.logger.info("Verified database integrity :smile_cat:");
+                } else {
+                    this.logger.info(
+                        "Skipping database integrity check after successful database recovery :smile_cat:",
+                    );
                 }
-
-                this.logger.info("Verified database integrity :smile_cat:");
-            } else {
-                this.logger.info("Skipping database integrity check after successful database recovery :smile_cat:");
             }
 
             // only genesis block? special case of first round needs to be dealt with
@@ -68,7 +77,9 @@ export class Initialize implements Action {
             await this.databaseService.deleteRound(roundInfo.round + 1);
 
             if (this.stateStore.getNetworkStart()) {
-                await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
+                if (!loadedState) {
+                    await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
+                }
                 await this.databaseInteraction.restoreCurrentRound();
                 await this.transactionPool.readdTransactions();
                 await this.networkMonitor.boot();
@@ -79,22 +90,23 @@ export class Initialize implements Action {
             if (process.env.NODE_ENV === "test") {
                 this.logger.notice("TEST SUITE DETECTED! SYNCING WALLETS AND STARTING IMMEDIATELY :bangbang:");
 
-                await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
+                if (!loadedState) {
+                    await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
+                }
                 await this.databaseInteraction.restoreCurrentRound();
                 await this.networkMonitor.boot();
 
                 return this.blockchain.dispatch("STARTED");
             }
 
-            this.logger.info(`Last block in database: ${block.data.height.toLocaleString()}`);
-
             /** *******************************
              * database init                 *
              ******************************* */
             // Integrity Verification
 
-            await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
-
+            if (!loadedState) {
+                await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
+            }
             await this.databaseInteraction.restoreCurrentRound();
             await this.transactionPool.readdTransactions();
 
