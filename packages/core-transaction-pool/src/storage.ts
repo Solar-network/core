@@ -33,7 +33,7 @@ export class Storage implements Contracts.TransactionPool.Storage {
                 height             INTEGER      NOT NULL,
                 id                 VARCHAR(64)  NOT NULL,
                 senderPublicKey    VARCHAR(66)  NOT NULL,
-                serialized         BLOB         NOT NULL
+                serialised         BLOB         NOT NULL
             );
 
             CREATE UNIQUE INDEX IF NOT EXISTS ${table}_id ON ${table} (id);
@@ -41,17 +41,17 @@ export class Storage implements Contracts.TransactionPool.Storage {
         `);
 
         this.addTransactionStmt = this.database.prepare(
-            `INSERT INTO ${table} (height, id, senderPublicKey, serialized) VALUES (:height, :id, :senderPublicKey, :serialized)`,
+            `INSERT INTO ${table} (height, id, senderPublicKey, serialised) VALUES (:height, :id, :senderPublicKey, :serialised)`,
         );
 
         this.hasTransactionStmt = this.database.prepare(`SELECT COUNT(*) FROM ${table} WHERE id = :id`).pluck(true);
 
         this.getAllTransactionsStmt = this.database.prepare(
-            `SELECT height, id, senderPublicKey, serialized FROM ${table} ORDER BY n`,
+            `SELECT height, id, senderPublicKey, serialised FROM ${table} ORDER BY n`,
         );
 
         this.getOldTransactionsStmt = this.database.prepare(
-            `SELECT height, id, senderPublicKey, serialized FROM ${table} WHERE height <= :height ORDER BY n DESC`,
+            `SELECT height, id, senderPublicKey, serialised FROM ${table} WHERE height <= :height ORDER BY n DESC`,
         );
 
         this.removeTransactionStmt = this.database.prepare(`DELETE FROM ${table} WHERE id = :id`);

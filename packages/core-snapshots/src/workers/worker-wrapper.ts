@@ -52,7 +52,7 @@ export class WorkerWrapper extends EventEmitter {
             }
 
             this.once("*", (data) => {
-                if (data.name === "synchronized") {
+                if (data.name === "synchronised") {
                     resolve(data.data);
                 } else if (data.name === "exit") {
                     resolve();

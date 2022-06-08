@@ -19,11 +19,11 @@ export class WorkerScriptHandler implements Contracts.TransactionPool.WorkerScri
 
     public async getTransactionFromData(
         transactionData: Interfaces.ITransactionData | string,
-    ): Promise<Contracts.TransactionPool.SerializedTransaction> {
+    ): Promise<Contracts.TransactionPool.SerialisedTransaction> {
         const tx =
             typeof transactionData === "string"
                 ? Transactions.TransactionFactory.fromBytes(Buffer.from(transactionData, "hex"))
                 : Transactions.TransactionFactory.fromData(transactionData);
-        return { id: tx.id!, serialized: tx.serialized.toString("hex"), isVerified: tx.isVerified };
+        return { id: tx.id!, serialised: tx.serialised.toString("hex"), isVerified: tx.isVerified };
     }
 }

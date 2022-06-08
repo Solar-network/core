@@ -95,7 +95,7 @@ export class Service implements Contracts.TransactionPool.Service {
                 height: this.stateStore.getLastHeight(),
                 id: transaction.id,
                 senderPublicKey: transaction.data.senderPublicKey,
-                serialized: transaction.serialized,
+                serialised: transaction.serialised,
             });
 
             try {
@@ -131,9 +131,9 @@ export class Service implements Contracts.TransactionPool.Service {
 
             const previouslyForgedStoredIds: string[] = [];
 
-            for (const { id, serialized } of previouslyForgedTransactions) {
+            for (const { id, serialised } of previouslyForgedTransactions) {
                 try {
-                    const previouslyForgedTransaction = Transactions.TransactionFactory.fromBytes(serialized);
+                    const previouslyForgedTransaction = Transactions.TransactionFactory.fromBytes(serialised);
 
                     AppUtils.assert.defined<string>(previouslyForgedTransaction.id);
                     AppUtils.assert.defined<string>(previouslyForgedTransaction.data.senderPublicKey);
@@ -144,7 +144,7 @@ export class Service implements Contracts.TransactionPool.Service {
                         height: this.stateStore.getLastHeight(),
                         id: previouslyForgedTransaction.id,
                         senderPublicKey: previouslyForgedTransaction.data.senderPublicKey,
-                        serialized: previouslyForgedTransaction.serialized,
+                        serialised: previouslyForgedTransaction.serialised,
                     });
 
                     previouslyForgedStoredIds.push(previouslyForgedTransaction.id);
@@ -162,14 +162,14 @@ export class Service implements Contracts.TransactionPool.Service {
             const lastHeight: number = this.stateStore.getLastHeight();
             const expiredHeight: number = lastHeight - maxTransactionAge;
 
-            for (const { height, id, serialized } of this.storage.getAllTransactions()) {
+            for (const { height, id, serialised } of this.storage.getAllTransactions()) {
                 if (previouslyForgedStoredIds.includes(id)) {
                     continue;
                 }
 
                 if (height > expiredHeight) {
                     try {
-                        const previouslyStoredTransaction = Transactions.TransactionFactory.fromBytes(serialized);
+                        const previouslyStoredTransaction = Transactions.TransactionFactory.fromBytes(serialised);
                         await this.addTransactionToMempool(previouslyStoredTransaction);
                         previouslyStoredSuccesses++;
                     } catch (error) {

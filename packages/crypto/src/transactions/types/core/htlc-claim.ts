@@ -19,7 +19,7 @@ export abstract class HtlcClaimTransaction extends Transaction {
         return configManager.getMilestone().htlcEnabled && super.verify();
     }
 
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         const { data } = this;
 
         if (!data.asset || !data.asset.claim) {
@@ -36,7 +36,7 @@ export abstract class HtlcClaimTransaction extends Transaction {
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
 
         const hashType: number = buf.readUInt8();

@@ -10,7 +10,7 @@ export class Worker implements Contracts.TransactionPool.Worker {
     private lastHeight = 0;
 
     @Container.postConstruct()
-    public initialize(): void {
+    public initialise(): void {
         this.ipcSubprocess = this.createWorkerSubprocess();
     }
 
@@ -32,11 +32,11 @@ export class Worker implements Contracts.TransactionPool.Worker {
             this.ipcSubprocess.sendAction("setHeight", currentHeight);
         }
 
-        const { id, serialized, isVerified } = await this.ipcSubprocess.sendRequest(
+        const { id, serialised, isVerified } = await this.ipcSubprocess.sendRequest(
             "getTransactionFromData",
             transactionData instanceof Buffer ? transactionData.toString("hex") : transactionData,
         );
-        const transaction = Transactions.TransactionFactory.fromBytesUnsafe(Buffer.from(serialized, "hex"), id);
+        const transaction = Transactions.TransactionFactory.fromBytesUnsafe(Buffer.from(serialised, "hex"), id);
         transaction.isVerified = isVerified;
 
         return transaction;

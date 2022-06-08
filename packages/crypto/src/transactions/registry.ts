@@ -13,7 +13,7 @@ class TransactionRegistry {
     private readonly transactionTypes: Map<InternalTransactionType, TransactionConstructor> = new Map();
 
     public constructor() {
-        TransactionTypeFactory.initialize(this.transactionTypes);
+        TransactionTypeFactory.initialise(this.transactionTypes);
 
         // Core transactions
         this.registerTransactionType(Core.TransferTransaction);

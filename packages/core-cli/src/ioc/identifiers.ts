@@ -26,7 +26,7 @@ export const Identifiers = {
     AbortRunningProcess: Symbol.for("Action<AbortRunningProcess>"),
     AbortStoppedProcess: Symbol.for("Action<AbortStoppedProcess>"),
     AbortUnknownProcess: Symbol.for("Action<AbortUnknownProcess>"),
-    DaemonizeProcess: Symbol.for("Action<DaemonizeProcess>"),
+    DaemoniseProcess: Symbol.for("Action<DaemoniseProcess>"),
     RestartProcess: Symbol.for("Action<RestartProcess>"),
     RestartRunningProcessWithPrompt: Symbol.for("Action<RestartRunningProcessWithPrompt>"),
     RestartRunningProcess: Symbol.for("Action<RestartRunningProcess>"),

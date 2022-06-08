@@ -125,7 +125,7 @@ export class ForgerService {
      * @type {boolean}
      * @memberof ForgerService
      */
-    private initialized: boolean = false;
+    private initialised: boolean = false;
 
     /**
      * @private
@@ -225,7 +225,7 @@ export class ForgerService {
                     const username = this.usernames[this.round.nextForger.publicKey];
 
                     this.logger.info(
-                        `Delegate ${username} is due to forge in ${AppUtils.pluralize(
+                        `Delegate ${username} is due to forge in ${AppUtils.pluralise(
                             "second",
                             blocktime,
                             true,
@@ -349,7 +349,7 @@ export class ForgerService {
                         AppUtils.assert.defined<Interfaces.IBlock>(block);
                         if ((await this.client.getSlotNumber(block.data.timestamp)) !== lastBlockSlot) {
                             this.logger.info(
-                                `Delegate ${prettyName} forged a new block at height ${block.data.height.toLocaleString()} with ${AppUtils.pluralize(
+                                `Delegate ${prettyName} forged a new block at height ${block.data.height.toLocaleString()} with ${AppUtils.pluralise(
                                     "transaction",
                                     block.data.numberOfTransactions,
                                     true,
@@ -418,8 +418,8 @@ export class ForgerService {
             (hex) => Transactions.TransactionFactory.fromBytesUnsafe(Buffer.from(hex, "hex")).data,
         );
         this.logger.debug(
-            `Received ${AppUtils.pluralize("transaction", transactions.length, true)} ` +
-                `from the pool containing ${AppUtils.pluralize(
+            `Received ${AppUtils.pluralise("transaction", transactions.length, true)} ` +
+                `from the pool containing ${AppUtils.pluralise(
                     "transaction",
                     response.poolSize,
                     true,
@@ -468,7 +468,7 @@ export class ForgerService {
 
         if (distinctOverHeightBlockHeaders.length > 0) {
             this.logger.info(
-                `Detected ${AppUtils.pluralize(
+                `Detected ${AppUtils.pluralise(
                     "distinct overheight block header",
                     distinctOverHeightBlockHeaders.length,
                     true,
@@ -559,7 +559,7 @@ export class ForgerService {
             return !this.activeDelegates.includes(delegate);
         });
 
-        if (!this.initialized) {
+        if (!this.initialised) {
             AppUtils.sendForgerSignal("SIGTERM");
 
             const jsonFile: string = `${process.env.CORE_PATH_TEMP}/forger.json`;
@@ -619,7 +619,7 @@ export class ForgerService {
             }
         }
 
-        this.initialized = true;
+        this.initialised = true;
     }
 
     /**
@@ -638,7 +638,7 @@ export class ForgerService {
     private printLoadedDelegates(): void {
         if (this.activeDelegates.length > 0) {
             this.logger.info(
-                `Loaded ${AppUtils.pluralize(
+                `Loaded ${AppUtils.pluralise(
                     "active delegate",
                     this.activeDelegates.length,
                     true,
@@ -654,7 +654,7 @@ export class ForgerService {
 
         if (this.delegates.length > this.activeDelegates.length) {
             this.logger.info(
-                `Loaded ${AppUtils.pluralize(
+                `Loaded ${AppUtils.pluralise(
                     "inactive delegate",
                     this.inactiveDelegates.length,
                     true,

@@ -6,7 +6,7 @@ import { DownloadBlocks } from "./download-blocks";
 import { DownloadFinished } from "./download-finished";
 import { DownloadPaused } from "./download-paused";
 import { ExitApp } from "./exit-app";
-import { Initialize } from "./initialize";
+import { Initialise } from "./initialise";
 import { RollbackDatabase } from "./rollback-database";
 import { StartForkRecovery } from "./start-fork-recovery";
 import { Stopped } from "./stopped";
@@ -21,7 +21,7 @@ export const actions = {
     downloadFinished: DownloadFinished,
     downloadPaused: DownloadPaused,
     exitApp: ExitApp,
-    initialise: Initialize,
+    initialise: Initialise,
     rollbackDatabase: RollbackDatabase,
     startForkRecovery: StartForkRecovery,
     stopped: Stopped,

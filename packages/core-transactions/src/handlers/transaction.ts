@@ -59,7 +59,7 @@ export abstract class TransactionHandler {
             satoshiPerByte = 1;
         }
 
-        const transactionSizeInBytes: number = Math.round(transaction.serialized.length / 2);
+        const transactionSizeInBytes: number = Math.round(transaction.serialised.length / 2);
         return Utils.BigNumber.make(addonBytes + transactionSizeInBytes).times(satoshiPerByte);
     }
 

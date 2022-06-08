@@ -16,7 +16,7 @@ message GetBlocksRequest {
     uint32 lastBlockHeight = 1;
     uint32 blockLimit = 2;
     bool headersOnly = 3;
-    bool serialized = 4;
+    bool serialised = 4;
     shared.Headers headers = 5;
 }
 

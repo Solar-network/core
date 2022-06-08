@@ -4,7 +4,7 @@ import {
     AbortRunningProcess,
     AbortStoppedProcess,
     AbortUnknownProcess,
-    DaemonizeProcess,
+    DaemoniseProcess,
     RestartProcess,
     RestartRunningProcess,
     RestartRunningProcessWithPrompt,
@@ -77,8 +77,8 @@ export class ActionFactory {
      * @returns {Promise<void>}
      * @memberof ActionFactory
      */
-    public async daemonizeProcess(options: ProcessOptions, flags: AnyObject): Promise<void> {
-        return this.app.get<DaemonizeProcess>(Identifiers.DaemonizeProcess).execute(options, flags);
+    public async daemoniseProcess(options: ProcessOptions, flags: AnyObject): Promise<void> {
+        return this.app.get<DaemoniseProcess>(Identifiers.DaemoniseProcess).execute(options, flags);
     }
 
     /**

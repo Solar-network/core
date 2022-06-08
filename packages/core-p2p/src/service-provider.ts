@@ -35,7 +35,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
      * @memberof ServiceProvider
      */
     public async boot(): Promise<void> {
-        this.app.get<EventListener>(Container.Identifiers.PeerEventListener).initialize();
+        this.app.get<EventListener>(Container.Identifiers.PeerEventListener).initialise();
 
         await this.buildServer();
 
@@ -118,7 +118,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
             this.config().getRequired<{ banSeconds: number; hostname: string; port: number }>("server");
         Utils.assert.defined<Types.JsonObject>(serverConfig);
 
-        await server.initialize("P2P Server", serverConfig);
+        await server.initialise("P2P Server", serverConfig);
     }
 
     private registerActions(): void {

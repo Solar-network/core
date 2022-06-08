@@ -38,7 +38,7 @@ export class Verifier {
             /* istanbul ignore next */
             const block = Blocks.BlockFactory.fromData(blockEntity as Interfaces.IBlockData)!;
 
-            const bytes = Blocks.Serializer.serialize(block.data, false);
+            const bytes = Blocks.Serialiser.serialise(block.data, false);
             const hash = Crypto.HashAlgorithms.sha256(bytes);
 
             const { bip340 } = Managers.configManager.getMilestone(blockEntity.height);
@@ -65,11 +65,11 @@ export class Verifier {
 
         let isVerified = false;
         try {
-            const transactionDeserialized = Transactions.TransactionFactory.fromBytes(transaction.serialized);
-            if (transactionDeserialized.data.signatures) {
+            const transactionDeserialised = Transactions.TransactionFactory.fromBytes(transaction.serialised);
+            if (transactionDeserialised.data.signatures) {
                 return;
             } else {
-                isVerified = transactionDeserialized.isVerified;
+                isVerified = transactionDeserialised.isVerified;
             }
         } catch (err) {
             throw new Exceptions.TransactionVerifyException(transaction.id, err.message);

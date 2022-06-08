@@ -23,7 +23,7 @@ export const defaults = {
      */
     getBlocksTimeout: 30000,
     /**
-     * The maximum authorized number of peers sharing same ip /24 subnet
+     * The maximum authorised number of peers sharing same ip /24 subnet
      */
     maxSameSubnetPeers: process.env.CORE_P2P_MAX_PEERS_SAME_SUBNET || 256,
     /**

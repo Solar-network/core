@@ -137,14 +137,14 @@ export class ReadProcessor {
             };
 
             if (emit) {
-                this.emitSynchronized();
+                this.emitSynchronised();
             }
         });
     }
 
-    private emitSynchronized() {
+    private emitSynchronised() {
         parentPort!.postMessage({
-            action: "synchronized",
+            action: "synchronised",
             data: {
                 numberOfTransactions: this.transactionsCount,
                 height: this.height,

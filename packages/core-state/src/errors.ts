@@ -24,7 +24,7 @@ export class StaleSavedStateError extends Error {
     public constructor(height: number, snapshotHeight: number) {
         const blocksAgo = snapshotHeight - height;
         super(
-            `The saved state from height ${height.toLocaleString()} is too old (${blocksAgo.toLocaleString()} ${Utils.pluralize(
+            `The saved state from height ${height.toLocaleString()} is too old (${blocksAgo.toLocaleString()} ${Utils.pluralise(
                 "block",
                 blocksAgo,
             )} ago)`,

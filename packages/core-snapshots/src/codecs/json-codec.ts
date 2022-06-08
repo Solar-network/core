@@ -1,6 +1,6 @@
 import { Models } from "@solar-network/core-database";
 import { Container } from "@solar-network/core-kernel";
-import { camelizeKeys } from "xcase";
+import { camelizeKeys as cameliseKeys } from "xcase";
 
 import { Codec } from "../contracts";
 import { Codec as CodecException } from "../exceptions";
@@ -47,7 +47,7 @@ export class JSONCodec implements Codec {
 
     public encodeBlock(block: { Block_id: string }): Buffer {
         try {
-            const blockStringified = JSONCodec.stringify(camelizeKeys(JSONCodec.removePrefix(block, "Block_")));
+            const blockStringified = JSONCodec.stringify(cameliseKeys(JSONCodec.removePrefix(block, "Block_")));
 
             return Buffer.from(blockStringified);
         } catch (err) {
@@ -66,7 +66,7 @@ export class JSONCodec implements Codec {
     public encodeTransaction(transaction: { Transaction_id: string }): Buffer {
         try {
             let tmp = JSONCodec.removePrefix(transaction, "Transaction_");
-            tmp = camelizeKeys(tmp);
+            tmp = cameliseKeys(tmp);
 
             tmp = JSONCodec.stringify(tmp);
 
@@ -80,13 +80,13 @@ export class JSONCodec implements Codec {
         try {
             const tmp = JSONCodec.parse(buffer.toString());
 
-            const serialized = [] as any[];
+            const serialised = [] as any[];
 
-            for (const value of Object.values(tmp.serialized.data)) {
-                serialized.push(value);
+            for (const value of Object.values(tmp.serialised.data)) {
+                serialised.push(value);
             }
 
-            tmp.serialized = Buffer.from(serialized);
+            tmp.serialised = Buffer.from(serialised);
 
             return tmp;
         } catch (err) {
@@ -96,7 +96,7 @@ export class JSONCodec implements Codec {
 
     public encodeRound(round: { Round_round: string }): Buffer {
         try {
-            return Buffer.from(JSONCodec.stringify(camelizeKeys(JSONCodec.removePrefix(round, "Round_"))));
+            return Buffer.from(JSONCodec.stringify(cameliseKeys(JSONCodec.removePrefix(round, "Round_"))));
         } catch (err) {
             throw new CodecException.RoundEncodeException(round.Round_round, err.message);
         }

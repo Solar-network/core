@@ -47,13 +47,13 @@ export class StateBuilder {
             this.logger.info(`State Generation - Step 2 of ${steps}: Fees & Nonces`);
             await this.buildSentTransactions();
 
-            const capitalize = (key: string) => key[0].toUpperCase() + key.slice(1);
+            const capitalise = (key: string) => key[0].toUpperCase() + key.slice(1);
             for (let i = 0; i < registeredHandlers.length; i++) {
                 const handler = registeredHandlers[i];
                 const ctorKey: string | undefined = handler.getConstructor().key;
                 AppUtils.assert.defined<string>(ctorKey);
 
-                this.logger.info(`State Generation - Step ${3 + i} of ${steps}: ${capitalize(ctorKey)}`);
+                this.logger.info(`State Generation - Step ${3 + i} of ${steps}: ${capitalise(ctorKey)}`);
                 await handler.bootstrap();
             }
 

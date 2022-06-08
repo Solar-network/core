@@ -1,7 +1,7 @@
 import { Peer, PeerState, PeerVerificationResult } from "./peer";
 
 export interface PeerVerifier {
-    initialize(peer: Peer);
+    initialise(peer: Peer);
 
     checkState(claimedState: PeerState, deadline: number): Promise<PeerVerificationResult | undefined>;
 }

@@ -243,7 +243,7 @@ export class RoundState implements Contracts.State.RoundState {
         assert(blocks.length === maxBlocks);
 
         return blocks.map((block: Interfaces.IBlockData) => {
-            return Blocks.BlockFactory.fromData(block, { deserializeTransactionsUnchecked: true })!;
+            return Blocks.BlockFactory.fromData(block, { deserialiseTransactionsUnchecked: true })!;
         });
     }
 

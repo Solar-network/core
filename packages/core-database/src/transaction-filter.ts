@@ -3,7 +3,7 @@ import { Enums } from "@solar-network/crypto";
 
 import { Transaction } from "./models/transaction";
 
-const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimizeExpression, hasOrCriteria } =
+const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimiseExpression, hasOrCriteria } =
     AppUtils.Search;
 
 @Container.injectable()
@@ -19,7 +19,7 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
             criteria.map((c) => handleOrCriteria(c, (c) => this.handleTransactionCriteria(c))),
         );
 
-        return optimizeExpression({ op: "and", expressions });
+        return optimiseExpression({ op: "and", expressions });
     }
 
     private async handleTransactionCriteria(

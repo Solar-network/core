@@ -3,7 +3,7 @@ import { NotImplemented } from "../../errors";
 import { Address } from "../../identities";
 import {
     ISchemaValidationResult,
-    ISerializeOptions,
+    ISerialiseOptions,
     ITransaction,
     ITransactionData,
     ITransactionJson,
@@ -24,7 +24,7 @@ export abstract class Transaction implements ITransaction {
     // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
     public data: ITransactionData;
     // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
-    public serialized: Buffer;
+    public serialised: Buffer;
     // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
     public timestamp: number;
 
@@ -81,7 +81,7 @@ export abstract class Transaction implements ITransaction {
         }
     }
 
-    public verify(options?: ISerializeOptions): boolean {
+    public verify(options?: ISerialiseOptions): boolean {
         return Verifier.verify(this.data, options);
     }
 
@@ -123,6 +123,6 @@ export abstract class Transaction implements ITransaction {
         return parts.join(" ");
     }
 
-    public abstract serialize(): ByteBuffer | undefined;
-    public abstract deserialize(buf: ByteBuffer): void;
+    public abstract serialise(): ByteBuffer | undefined;
+    public abstract deserialise(buf: ByteBuffer): void;
 }

@@ -31,14 +31,14 @@ export class DatabaseService {
     @Container.inject(Container.Identifiers.EventDispatcherService)
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
-    public async initialize(): Promise<void> {
+    public async initialise(): Promise<void> {
         try {
             if (process.env.CORE_RESET_DATABASE) {
                 await this.reset();
             }
         } catch (error) {
             this.logger.error(error.stack);
-            this.app.terminate("Failed to initialize database service :boom:", error);
+            this.app.terminate("Failed to initialise database service :boom:", error);
         }
     }
 
@@ -68,16 +68,16 @@ export class DatabaseService {
         }
 
         const transactions: Array<{
-            serialized: Buffer;
+            serialised: Buffer;
             id: string;
         }> = await this.transactionRepository.find({ blockId: block.id });
 
         block.transactions = transactions.map(
-            ({ serialized, id }) => Transactions.TransactionFactory.fromBytesUnsafe(serialized, id).data,
+            ({ serialised, id }) => Transactions.TransactionFactory.fromBytesUnsafe(serialised, id).data,
         );
 
         return Blocks.BlockFactory.fromData(block, {
-            deserializeTransactionsUnchecked: true,
+            deserialiseTransactionsUnchecked: true,
         });
     }
 
@@ -128,15 +128,15 @@ export class DatabaseService {
         const transactions: Array<{
             id: string;
             blockId: string;
-            serialized: Buffer;
+            serialised: Buffer;
         }> = await this.transactionRepository.findByBlockIds([block.id!]);
 
         block.transactions = transactions.map(
-            ({ serialized, id }) => Transactions.TransactionFactory.fromBytesUnsafe(serialized, id).data,
+            ({ serialised, id }) => Transactions.TransactionFactory.fromBytesUnsafe(serialised, id).data,
         );
 
         const lastBlock: Interfaces.IBlock = Blocks.BlockFactory.fromData(block, {
-            deserializeTransactionsUnchecked: true,
+            deserialiseTransactionsUnchecked: true,
         })!;
 
         return lastBlock;
@@ -264,11 +264,11 @@ export class DatabaseService {
         const dbTransactions: Array<{
             id: string;
             blockId: string;
-            serialized: Buffer;
+            serialised: Buffer;
         }> = await this.getTransactionsForBlocks(blocks);
 
         const transactions = dbTransactions.map((tx) => {
-            const { data } = Transactions.TransactionFactory.fromBytesUnsafe(tx.serialized, tx.id);
+            const { data } = Transactions.TransactionFactory.fromBytesUnsafe(tx.serialised, tx.id);
             data.blockId = tx.blockId;
             return data;
         });
@@ -284,7 +284,7 @@ export class DatabaseService {
         Array<{
             id: string;
             blockId: string;
-            serialized: Buffer;
+            serialised: Buffer;
         }>
     > {
         if (!blocks.length) {

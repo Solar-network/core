@@ -60,7 +60,7 @@ export class Collator implements Contracts.TransactionPool.Collator {
                     throw new TransactionHasExpiredError(transaction, expirationHeight);
                 }
 
-                if (bytesLeft - 4 - transaction.serialized.length < 0) {
+                if (bytesLeft - 4 - transaction.serialised.length < 0) {
                     break;
                 }
 
@@ -68,7 +68,7 @@ export class Collator implements Contracts.TransactionPool.Collator {
                 candidateTransactions.push(transaction);
 
                 bytesLeft -= 4;
-                bytesLeft -= transaction.serialized.length;
+                bytesLeft -= transaction.serialised.length;
             } catch (error) {
                 this.logger.warning(`${transaction} failed to collate: ${error.message} :warning:`);
                 failedTransactions.push(transaction);

@@ -14,7 +14,7 @@ export abstract class DelegateRegistrationTransaction extends Transaction {
         return schemas.delegateRegistration;
     }
 
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         const { data } = this;
 
         if (data.asset && data.asset.delegate) {
@@ -30,7 +30,7 @@ export abstract class DelegateRegistrationTransaction extends Transaction {
         return undefined;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
         const usernameLength = buf.readUInt8();
 

@@ -2,9 +2,9 @@ import { Enums, Interfaces } from "@solar-network/crypto";
 
 import { IpcSubprocess } from "../../utils/ipc-subprocess";
 
-export type SerializedTransaction = {
+export type SerialisedTransaction = {
     id: string;
-    serialized: string;
+    serialised: string;
     isVerified: boolean;
 };
 
@@ -12,7 +12,7 @@ export interface WorkerScriptHandler {
     loadCryptoPackage(packageName: string): void;
     setConfig(networkConfig: any): void;
     setHeight(height: number): void;
-    getTransactionFromData(transactionData: Interfaces.ITransactionData | string): Promise<SerializedTransaction>;
+    getTransactionFromData(transactionData: Interfaces.ITransactionData | string): Promise<SerialisedTransaction>;
 }
 
 export type WorkerIpcSubprocess = IpcSubprocess<WorkerScriptHandler>;

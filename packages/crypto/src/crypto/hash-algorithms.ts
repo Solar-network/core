@@ -14,7 +14,7 @@ import {
 
 export class HashAlgorithms {
     public static ripemd160(buff: Buffer | string): Buffer {
-        return RIPEMD160.digest(this.bufferize(buff));
+        return RIPEMD160.digest(this.bufferise(buff));
     }
 
     public static keccak256(buff: Buffer | string | Buffer[]): Buffer {
@@ -54,10 +54,10 @@ export class HashAlgorithms {
     }
 
     public static hash256(buff: Buffer | string): Buffer {
-        return Hash256.digest(this.bufferize(buff));
+        return Hash256.digest(this.bufferise(buff));
     }
 
-    private static bufferize(buff: Buffer | string) {
+    private static bufferise(buff: Buffer | string) {
         return buff instanceof Buffer ? buff : Buffer.from(buff);
     }
 
@@ -74,6 +74,6 @@ export class HashAlgorithms {
             return hasherCtx.final();
         }
 
-        return hasher.digest(this.bufferize(buff));
+        return hasher.digest(this.bufferise(buff));
     }
 }

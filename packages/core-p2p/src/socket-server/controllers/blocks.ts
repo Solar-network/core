@@ -38,22 +38,22 @@ export class BlocksController extends Controller {
     ): Promise<{ status: boolean; height: number }> {
         const blockBuffer: Buffer = request.payload.block;
 
-        const deserializedHeader = Blocks.Deserializer.deserialize(blockBuffer, true);
+        const deserialisedHeader = Blocks.Deserialiser.deserialise(blockBuffer, true);
 
         if (
-            deserializedHeader.data.numberOfTransactions > Managers.configManager.getMilestone().block.maxTransactions
+            deserialisedHeader.data.numberOfTransactions > Managers.configManager.getMilestone().block.maxTransactions
         ) {
-            throw new TooManyTransactionsError(deserializedHeader.data);
+            throw new TooManyTransactionsError(deserialisedHeader.data);
         }
 
-        const deserialized: {
+        const deserialised: {
             data: Interfaces.IBlockData;
             transactions: Interfaces.ITransaction[];
-        } = Blocks.Deserializer.deserialize(blockBuffer);
+        } = Blocks.Deserialiser.deserialise(blockBuffer);
 
         const block: Interfaces.IBlockData = {
-            ...deserialized.data,
-            transactions: deserialized.transactions.map((tx) => tx.data),
+            ...deserialised.data,
+            transactions: deserialised.transactions.map((tx) => tx.data),
         };
 
         const fromForger: boolean = AppUtils.isWhitelisted(
@@ -113,7 +113,7 @@ export class BlocksController extends Controller {
         const ip: string = mapAddr(request.info.remoteAddress);
 
         this.logger.debug(
-            `It contains ${AppUtils.pluralize(
+            `It contains ${AppUtils.pluralise(
                 "transaction",
                 block.numberOfTransactions,
                 true,
@@ -156,7 +156,7 @@ export class BlocksController extends Controller {
         }
 
         this.logger.info(
-            `${mapAddr(request.info.remoteAddress)} has downloaded ${AppUtils.pluralize(
+            `${mapAddr(request.info.remoteAddress)} has downloaded ${AppUtils.pluralise(
                 "block",
                 blocksToReturn.length,
                 true,

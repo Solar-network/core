@@ -54,7 +54,7 @@ export class TransactionTypeError extends CryptoError {
 
 export class InvalidTransactionBytesError extends CryptoError {
     public constructor(message: string) {
-        super(`Failed to deserialize transaction, encountered invalid bytes: ${message}`);
+        super(`Failed to deserialise transaction, encountered invalid bytes: ${message}`);
     }
 }
 

@@ -223,7 +223,7 @@ export class Client {
 
         const reconnect = (event) => {
             if (ws.onopen) {
-                finalize(NesError("Connection terminated while waiting to connect", errorTypes.WS));
+                finalise(NesError("Connection terminated while waiting to connect", errorTypes.WS));
             }
 
             const wasRequested = this._disconnectRequested; // Get value before _cleanup()
@@ -243,7 +243,7 @@ export class Client {
             this._reconnect();
         };
 
-        const finalize = (err) => {
+        const finalise = (err) => {
             if (next) {
                 // Call only once when connect() is called
                 const nextHolder = next;
@@ -257,7 +257,7 @@ export class Client {
         const timeoutHandler = () => {
             this._cleanup();
 
-            finalize(NesError("Connection timed out", errorTypes.TIMEOUT));
+            finalise(NesError("Connection timed out", errorTypes.TIMEOUT));
 
             if (initial) {
                 return this._reconnect();
@@ -275,10 +275,10 @@ export class Client {
             this._hello(options.auth)
                 .then(() => {
                     this.onConnect();
-                    finalize(undefined);
+                    finalise(undefined);
                 })
                 .catch((err) => {
-                    this._disconnect(() => nextTick(finalize)(err), true); // Stop reconnection when the hello message returns error
+                    this._disconnect(() => nextTick(finalise)(err), true); // Stop reconnection when the hello message returns error
                 });
         };
 
@@ -294,7 +294,7 @@ export class Client {
 
             this._cleanup();
             const error = NesError("Socket error", errorTypes.WS);
-            return finalize(error);
+            return finalise(error);
         };
 
         ws.onclose = reconnect;

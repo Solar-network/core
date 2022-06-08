@@ -39,7 +39,7 @@ export class DatabaseInteraction {
     @Container.inject(Container.Identifiers.RoundState)
     private readonly roundState!: RoundState;
 
-    public async initialize(): Promise<void> {
+    public async initialise(): Promise<void> {
         try {
             this.events.dispatch(Enums.StateEvent.Starting);
 
@@ -52,10 +52,10 @@ export class DatabaseInteraction {
                 await this.reset();
             }
 
-            await this.initializeLastBlock();
+            await this.initialiseLastBlock();
         } catch (error) {
             this.logger.error(error.stack);
-            this.app.terminate("Failed to initialize database service", error);
+            this.app.terminate("Failed to initialise database service", error);
         }
     }
 
@@ -97,13 +97,13 @@ export class DatabaseInteraction {
         await this.createGenesisBlock();
     }
 
-    private async initializeLastBlock(): Promise<void> {
+    private async initialiseLastBlock(): Promise<void> {
         // ? attempt to remove potentially corrupt blocks from database
 
         let lastBlock: Interfaces.IBlock | undefined;
         let tries = 5; // ! actually 6, but only 5 will be removed
 
-        // Ensure the config manager is initialized, before attempting to call `fromData`
+        // Ensure the config manager is initialised, before attempting to call `fromData`
         // which otherwise uses potentially wrong milestones.
         let lastHeight: number = 1;
         const latest: Interfaces.IBlockData | undefined = await this.databaseService.findLatestBlock();
@@ -124,7 +124,7 @@ export class DatabaseInteraction {
                     await this.databaseService.deleteBlocks([block]);
                     tries--;
                 } else {
-                    this.app.terminate("Unable to deserialize last block from database", error);
+                    this.app.terminate("Unable to deserialise last block from database", error);
                     throw new Error("Terminated (unreachable)");
                 }
 

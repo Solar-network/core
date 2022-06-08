@@ -89,7 +89,7 @@ export class Server {
      * @returns {Promise<void>}
      * @memberof Server
      */
-    public async initialize(name: string, optionsServer: Types.JsonObject): Promise<void> {
+    public async initialise(name: string, optionsServer: Types.JsonObject): Promise<void> {
         this.name = name;
         this.server = new HapiServer(this.getServerOptions(optionsServer));
         const timeout: number = this.configuration.getRequired<number>("plugins.socketTimeout");

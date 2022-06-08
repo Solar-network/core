@@ -254,7 +254,7 @@ export class Socket {
             throw Boom.badRequest("Message missing id");
         }
 
-        // Initialization and Authentication
+        // Initialisation and Authentication
 
         if (request.type === "ping") {
             if (this._lastPinged && Date.now() < this._lastPinged + 1000) {

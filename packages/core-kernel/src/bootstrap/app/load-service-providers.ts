@@ -67,7 +67,7 @@ export class LoadServiceProviders implements Bootstrapper {
 
         assert.defined<PluginEntry[]>(plugins);
 
-        await this.pluginDiscoverer.initialize();
+        await this.pluginDiscoverer.initialise();
 
         for (const plugin of plugins) {
             const packageId = this.pluginDiscoverer.get(plugin.package).packageId;

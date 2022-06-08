@@ -27,7 +27,7 @@ export class UnchainedHandler implements BlockHandler {
     private isValidGenerator: boolean = false;
 
     // todo: remove the need for this method
-    public initialize(isValidGenerator: boolean): this {
+    public initialise(isValidGenerator: boolean): this {
         this.isValidGenerator = isValidGenerator;
 
         return this;

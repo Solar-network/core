@@ -206,8 +206,8 @@ export namespace blocks {
         /** GetBlocksRequest headersOnly */
         headersOnly?: (boolean|null);
 
-        /** GetBlocksRequest serialized */
-        serialized?: (boolean|null);
+        /** GetBlocksRequest serialised */
+        serialised?: (boolean|null);
 
         /** GetBlocksRequest headers */
         headers?: (shared.IHeaders|null);
@@ -231,8 +231,8 @@ export namespace blocks {
         /** GetBlocksRequest headersOnly. */
         public headersOnly: boolean;
 
-        /** GetBlocksRequest serialized. */
-        public serialized: boolean;
+        /** GetBlocksRequest serialised. */
+        public serialised: boolean;
 
         /** GetBlocksRequest headers. */
         public headers?: (shared.IHeaders|null);

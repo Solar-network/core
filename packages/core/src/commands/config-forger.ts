@@ -48,10 +48,10 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        return await this.initializeAndExecute(BIP39Command);
+        return await this.initialiseAndExecute(BIP39Command);
     }
 
-    private async initializeAndExecute(commandSignature): Promise<void> {
+    private async initialiseAndExecute(commandSignature): Promise<void> {
         const cmd = this.app.resolve<Commands.Command>(commandSignature);
 
         const flags = this.getFlags();

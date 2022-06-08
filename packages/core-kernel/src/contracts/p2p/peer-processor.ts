@@ -6,7 +6,7 @@ export interface AcceptNewPeerOptions {
 }
 
 export interface PeerProcessor {
-    initialize();
+    initialise();
 
     validateAndAcceptPeer(peer: Peer, options?: AcceptNewPeerOptions): Promise<void>;
 

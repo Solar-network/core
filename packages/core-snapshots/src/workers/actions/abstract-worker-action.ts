@@ -1,9 +1,9 @@
 import { Models } from "@solar-network/core-database";
 import { Container, Contracts } from "@solar-network/core-kernel";
 import { Managers } from "@solar-network/crypto";
-import pluralize from "pluralize";
+import { singular } from "pluralize";
 import { Readable } from "stream";
-import { pascalize } from "xcase";
+import { pascalize as pascalise } from "xcase";
 
 import { Codec, Repository, RepositoryFactory, Stream, Worker } from "../../contracts";
 import { StreamReader, StreamWriter } from "../../filesystem";
@@ -39,8 +39,8 @@ export abstract class AbstractWorkerAction implements Worker.WorkerAction {
         return repositoryFactory(this.table!);
     }
 
-    protected getSingularCapitalizedTableName(): string {
-        return pascalize(pluralize.singular(this.table));
+    protected getSingularCapitalisedTableName(): string {
+        return pascalise(singular(this.table));
     }
 
     protected getStreamReader(): StreamReader {
@@ -50,7 +50,7 @@ export abstract class AbstractWorkerAction implements Worker.WorkerAction {
         return streamReaderFactory(
             this.filePath!,
             !this.skipCompression!,
-            this.getCodec()[`decode${this.getSingularCapitalizedTableName()}`],
+            this.getCodec()[`decode${this.getSingularCapitalisedTableName()}`],
         );
     }
 
@@ -62,7 +62,7 @@ export abstract class AbstractWorkerAction implements Worker.WorkerAction {
             dbStream,
             this.filePath!,
             !this.skipCompression!,
-            this.getCodec()[`encode${this.getSingularCapitalizedTableName()}`],
+            this.getCodec()[`encode${this.getSingularCapitalisedTableName()}`],
         );
     }
 
@@ -72,7 +72,7 @@ export abstract class AbstractWorkerAction implements Worker.WorkerAction {
 
     protected getVerifyFunction(): Function {
         // passing a codec method as last parameter. Example: Verifier.verifyBlock
-        return Verifier[`verify${this.getSingularCapitalizedTableName()}`];
+        return Verifier[`verify${this.getSingularCapitalisedTableName()}`];
     }
 
     protected applyGenesisBlockFix(block: Models.Block): void {

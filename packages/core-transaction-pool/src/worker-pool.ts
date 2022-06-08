@@ -20,7 +20,7 @@ export class WorkerPool implements Contracts.TransactionPool.WorkerPool {
     private workers: Contracts.TransactionPool.Worker[] = [];
 
     @Container.postConstruct()
-    public initialize(): void {
+    public initialise(): void {
         const workerCount: number = this.pluginConfiguration.getRequired("workerPool.workerCount");
         const cryptoPackages: CryptoPackagesConfig = this.pluginConfiguration.getOptional(
             "workerPool.cryptoPackages",

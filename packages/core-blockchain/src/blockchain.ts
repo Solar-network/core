@@ -55,7 +55,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     private lastCheckNetworkHealthTs: number = 0;
 
     @Container.postConstruct()
-    public async initialize(): Promise<void> {
+    public async initialise(): Promise<void> {
         this.stopped = false;
 
         // flag to force a network start
@@ -77,7 +77,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             const blocks = (job as ProcessBlocksJob).getBlocks();
 
             this.logger.error(
-                `Failed to process ${Utils.pluralize(
+                `Failed to process ${Utils.pluralise(
                     "block",
                     blocks.length,
                     true,
@@ -332,7 +332,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                     const tempNewLastBlock: Interfaces.IBlock | undefined = Blocks.BlockFactory.fromData(
                         tempNewLastBlockData,
                         {
-                            deserializeTransactionsUnchecked: true,
+                            deserialiseTransactionsUnchecked: true,
                         },
                     );
 
@@ -364,7 +364,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
             const resetHeight: number = lastBlock.data.height - nblocks;
             this.logger.info(
-                `Removing ${Utils.pluralize(
+                `Removing ${Utils.pluralise(
                     "block",
                     nblocks,
                     true,
@@ -404,7 +404,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
      * @return {void}
      */
     public async removeTopBlocks(count: number): Promise<void> {
-        this.logger.info(`Removing top ${Utils.pluralize("block", count, true)}`);
+        this.logger.info(`Removing top ${Utils.pluralise("block", count, true)}`);
 
         await this.blockRepository.deleteTopBlocks(count);
     }

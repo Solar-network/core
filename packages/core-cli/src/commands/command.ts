@@ -126,14 +126,14 @@ export abstract class Command {
      *
      * @remarks
      * This is executed before arguments are available in any way, shape or form.
-     * If your task requires arguments to be parsed and validated you should consider to use the initialize method.
+     * If your task requires arguments to be parsed and validated you should consider to use the initialise method.
      *
      * @returns {void}
      * @memberof Command
      */
     /* istanbul ignore next */
     @postConstruct()
-    // todo: for some reason this isn't recognized in tests for being called
+    // todo: for some reason this isn't recognised in tests for being called
     public configure(): void {
         // Do nothing...
     }
@@ -167,12 +167,12 @@ export abstract class Command {
     }
 
     /**
-     * Initialize the command after the input has been bound and before the input is validated.
+     * Initialise the command after the input has been bound and before the input is validated.
      *
      * @returns {Promise<void>}
      * @memberof Command
      */
-    public async initialize(): Promise<void> {
+    public async initialise(): Promise<void> {
         // Do nothing...
     }
 
@@ -209,7 +209,7 @@ export abstract class Command {
                     .toConstantValue(this.env.getPaths(this.input.getFlag("token"), this.input.getFlag("network")));
             }
 
-            await this.initialize();
+            await this.initialise();
 
             if (this.input.isInteractive()) {
                 await this.interact();

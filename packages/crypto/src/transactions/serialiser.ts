@@ -1,51 +1,50 @@
 import { TransactionTypeGroup } from "../enums";
 import { TransactionVersionError } from "../errors";
-import { ISerializeOptions } from "../interfaces";
+import { ISerialiseOptions } from "../interfaces";
 import { ITransaction, ITransactionData } from "../interfaces";
 import { configManager } from "../managers/config";
 import { ByteBuffer, isSupportedTransactionVersion } from "../utils";
 import { TransactionTypeFactory } from "./types";
 
-// Reference: https://github.com/ArkEcosystem/AIPs/blob/master/AIPS/aip-11.md
-export class Serializer {
-    public static getBytes(transaction: ITransactionData, options: ISerializeOptions = {}): Buffer {
+export class Serialiser {
+    public static getBytes(transaction: ITransactionData, options: ISerialiseOptions = {}): Buffer {
         const version: number = transaction.version || 1;
 
         if (options.acceptLegacyVersion || options.disableVersionCheck || isSupportedTransactionVersion(version)) {
-            return this.serialize(TransactionTypeFactory.create(transaction), options);
+            return this.serialise(TransactionTypeFactory.create(transaction), options);
         } else {
             throw new TransactionVersionError(version);
         }
     }
 
     /**
-     * Serializes the given transaction
+     * Serialises the given transaction
      */
-    public static serialize(transaction: ITransaction, options: ISerializeOptions = {}): Buffer {
+    public static serialise(transaction: ITransaction, options: ISerialiseOptions = {}): Buffer {
         const buff: ByteBuffer = new ByteBuffer(
             Buffer.alloc(configManager.getMilestone(configManager.getHeight()).block?.maxPayload ?? 8192),
         );
 
-        this.serializeCommon(transaction.data, buff);
-        this.serializeVendorField(transaction, buff);
+        this.serialiseCommon(transaction.data, buff);
+        this.serialiseVendorField(transaction, buff);
 
-        const serialized: ByteBuffer | undefined = transaction.serialize(options);
+        const serialised: ByteBuffer | undefined = transaction.serialise(options);
 
-        if (!serialized) {
+        if (!serialised) {
             throw new Error();
         }
 
-        buff.writeBuffer(serialized.getResult());
+        buff.writeBuffer(serialised.getResult());
 
-        this.serializeSignatures(transaction.data, buff, options);
+        this.serialiseSignatures(transaction.data, buff, options);
 
         const bufferBuffer = buff.getResult();
-        transaction.serialized = bufferBuffer;
+        transaction.serialised = bufferBuffer;
 
         return bufferBuffer;
     }
 
-    private static serializeCommon(transaction: ITransactionData, buff: ByteBuffer): void {
+    private static serialiseCommon(transaction: ITransactionData, buff: ByteBuffer): void {
         transaction.version = transaction.version || 0x01;
         if (transaction.typeGroup === undefined) {
             transaction.typeGroup = TransactionTypeGroup.Core;
@@ -68,7 +67,7 @@ export class Serializer {
         buff.writeBigInt64LE(transaction.fee.toBigInt());
     }
 
-    private static serializeVendorField(transaction: ITransaction, buff: ByteBuffer): void {
+    private static serialiseVendorField(transaction: ITransaction, buff: ByteBuffer): void {
         const { data }: ITransaction = transaction;
 
         if (data.vendorField) {
@@ -80,10 +79,10 @@ export class Serializer {
         }
     }
 
-    private static serializeSignatures(
+    private static serialiseSignatures(
         transaction: ITransactionData,
         buff: ByteBuffer,
-        options: ISerializeOptions = {},
+        options: ISerialiseOptions = {},
     ): void {
         if (transaction.signature && !options.excludeSignature) {
             buff.writeBuffer(Buffer.from(transaction.signature, "hex"));
