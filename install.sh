@@ -289,11 +289,6 @@ async function addPlugins() {
     const listr = new Listr();
     const plugins = [
         {
-            package: "@alessiodf/rocket-boot",
-            command:
-                `"$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run plugin:install @alessiodf/rocket-boot --network=${network} --token="$SOLAR_CORE_TOKEN" && "$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run rocket:enable --force --network=${network} --token="$SOLAR_CORE_TOKEN"`,
-        },
-        {
             package: "@alessiodf/round-monitor",
             command:
                 `"$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run plugin:install @alessiodf/round-monitor --network=${network} --token="$SOLAR_CORE_TOKEN" && "$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run monitor:enable --disableServer --restartTimeBuffer=45 --force --network=${network} --token="$SOLAR_CORE_TOKEN"`,
