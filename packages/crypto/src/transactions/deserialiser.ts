@@ -7,7 +7,6 @@ import { IDeserialiseOptions, ITransaction, ITransactionData } from "../interfac
 import { BigNumber, ByteBuffer, isSupportedTransactionVersion } from "../utils";
 import { TransactionTypeFactory } from "./types";
 
-// Reference: https://github.com/ArkEcosystem/AIPs/blob/master/AIPS/aip-11.md
 export class Deserialiser {
     public static deserialise(serialised: string | Buffer, options: IDeserialiseOptions = {}): ITransaction {
         const data = {} as ITransactionData;
