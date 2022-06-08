@@ -77,6 +77,8 @@ export const Identifiers = {
     StateBlockStore: Symbol.for("State<BlockStore>"),
     StateStore: Symbol.for("State<StateStore>"),
     StateBuilder: Symbol.for("State<StateBuilder>"),
+    StateLoader: Symbol.for("State<StateLoader>"),
+    StateSaver: Symbol.for("State<StateSaver>"),
     StateTransactionStore: Symbol.for("State<TransactionStore>"),
     StateWalletSyncService: Symbol.for("State<WalletSyncService>"),
     WalletFactory: Symbol.for("State<WalletFactory>"),
