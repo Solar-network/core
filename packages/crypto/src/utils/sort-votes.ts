@@ -6,11 +6,7 @@ export const sortVotes = (votes: { [vote: string]: number }) => {
             } else if (b[1] < a[1]) {
                 return -1;
             } else {
-                if (a[0] > b[0]) {
-                    return 1;
-                } else {
-                    return -1;
-                }
+                return a[0].localeCompare(b[0], "en", { numeric: true });
             }
         }),
     );
