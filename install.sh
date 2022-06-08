@@ -85,8 +85,10 @@ echo "$(source <(echo "echo \"$RC\""))" > "$SOLAR_DATA_PATH"/.env &&
 
 if [ ! -f ""$SOLAR_DATA_PATH"/bin/node" ]; then
     wget -qO "$SOLAR_TEMP_PATH"/n https://raw.githubusercontent.com/tj/n/master/bin/n
-    N_PREFIX="$SOLAR_DATA_PATH" /bin/bash "$SOLAR_TEMP_PATH"/n 16 >/dev/null 2>/dev/null
+    N_PREFIX="$SOLAR_DATA_PATH" /bin/bash "$SOLAR_TEMP_PATH"/n 18 >/dev/null 2>/dev/null
 fi
+
+exit
 
 rm -rf "$SOLAR_DATA_PATH"/.pnpm
 mkdir -p "$SOLAR_DATA_PATH"/.pnpm/bin
