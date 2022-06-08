@@ -36,7 +36,7 @@ export class DposState implements Contracts.State.DposState {
     public buildVoteBalances(): void {
         for (const voter of this.walletRepository.allByPublicKey()) {
             if (voter.hasVoted()) {
-                voter.updateVoteBalance();
+                voter.updateVoteBalances();
                 const delegates: Record<string, Contracts.State.WalletVoteDistribution> = voter.getVoteDistribution();
                 for (const delegate of Object.keys(delegates)) {
                     const delegateWallet = this.walletRepository.findByUsername(delegate);

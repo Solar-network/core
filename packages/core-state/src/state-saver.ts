@@ -78,7 +78,7 @@ export class StateSaver {
                     bits += 8;
                 }
 
-                if (Object.keys(wallet.getVoteBalance()).length > 0) {
+                if (Object.keys(wallet.getVoteBalances()).length > 0) {
                     bits += 16;
                 }
 
@@ -131,11 +131,11 @@ export class StateSaver {
                     buffer.writeBuffer(encoded);
                 }
 
-                if (Object.keys(wallet.getVoteBalance()).length > 0) {
+                if (Object.keys(wallet.getVoteBalances()).length > 0) {
                     secondaryBuffer.reset();
                     this.byteBufferArray.reset();
 
-                    const encoded: Buffer = this.encode(wallet.getVoteBalance(), secondaryBuffer);
+                    const encoded: Buffer = this.encode(wallet.getVoteBalances(), secondaryBuffer);
                     if (buffer.getRemainderLength() < 8) {
                         flush();
                     }

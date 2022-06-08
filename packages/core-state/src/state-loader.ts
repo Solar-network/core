@@ -223,7 +223,7 @@ export class StateLoader {
                     let balance: bigint | number = 0;
                     let nonce: bigint | number = 1;
                     let publicKey: string | undefined;
-                    let voteBalance: object = {};
+                    let voteBalances: object = {};
 
                     if ((1 & bits) !== 0) {
                         balance = buffer.readBigInt64LE();
@@ -244,7 +244,7 @@ export class StateLoader {
 
                     if ((16 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        voteBalance = this.decode(new Utils.ByteBuffer(buffer.readBuffer(length)));
+                        voteBalances = this.decode(new Utils.ByteBuffer(buffer.readBuffer(length)));
                     }
 
                     const wallet: Contracts.State.Wallet = this.walletRepository.createWallet(address);
@@ -260,8 +260,8 @@ export class StateLoader {
                         wallet.setAttribute(attribute, attributes[attribute]);
                     }
 
-                    for (const delegate of Object.keys(voteBalance)) {
-                        wallet.setVoteBalance(delegate, voteBalance[delegate]);
+                    for (const delegate of Object.keys(voteBalances)) {
+                        wallet.setVoteBalance(delegate, voteBalances[delegate]);
                     }
 
                     this.walletRepository.index(wallet);
