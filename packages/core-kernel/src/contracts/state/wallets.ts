@@ -123,10 +123,17 @@ export interface Wallet {
     getVotes(): object[];
 
     /**
+     * @param {string} delegate
+     * @returns {Utils.BigNumber}
+     * @memberof Wallet
+     */
+    getVoteBalance(delegate: string): Utils.BigNumber;
+
+    /**
      * @returns {object}
      * @memberof Wallet
      */
-    getVoteBalance(): object;
+    getVoteBalances(): object;
 
     /**
      * @param {string} delegate
@@ -147,7 +154,7 @@ export interface Wallet {
      */
     changeVotes(value: object): void;
 
-    updateVoteBalance(): void;
+    updateVoteBalances(): void;
 
     /**
      * @returns {boolean}

@@ -108,7 +108,7 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
         sender.changeVotes(transaction.data.asset?.votes);
-        sender.updateVoteBalance();
+        sender.updateVoteBalances();
         Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
     }
 
@@ -126,7 +126,7 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
         sender.setAttribute("votes", previousVotes);
-        sender.updateVoteBalance();
+        sender.updateVoteBalances();
         Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
     }
 

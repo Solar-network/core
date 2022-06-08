@@ -7,7 +7,7 @@ export class Wallet implements Contracts.State.Wallet {
     protected publicKey: string | undefined;
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
-    protected voteBalance: object = {};
+    protected voteBalances: object = {};
     protected votes: object[] = [{}];
 
     public constructor(
@@ -201,15 +201,24 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     /**
+     * @param {string} delegate
+     * @returns {Utils.BigNumber}
+     * @memberof Wallet
+     */
+    public getVoteBalance(delegate: string): Utils.BigNumber {
+        return this.voteBalances[delegate];
+    }
+
+    /**
      * @returns {object}
      * @memberof Wallet
      */
-    public getVoteBalance(): object {
-        return this.voteBalance;
+    public getVoteBalances(): object {
+        return this.voteBalances;
     }
 
     public setVoteBalance(delegate: string, balance: Utils.BigNumber) {
-        this.voteBalance[delegate] = balance;
+        this.voteBalances[delegate] = balance;
     }
 
     /**
@@ -217,7 +226,7 @@ export class Wallet implements Contracts.State.Wallet {
      * @memberof Wallet
      */
     public getVoteDistribution(): Record<string, Contracts.State.WalletVoteDistribution> {
-        const balances: object = this.voteBalance;
+        const balances: object = this.voteBalances;
         const votes: object = this.getAttribute("votes");
 
         const distribution: Record<string, Contracts.State.WalletVoteDistribution> = {};
@@ -239,9 +248,9 @@ export class Wallet implements Contracts.State.Wallet {
         this.setAttribute("votes", sortedVotes);
     }
 
-    public updateVoteBalance(): void {
+    public updateVoteBalances(): void {
         const votes: Record<string, number> = this.getAttribute("votes");
-        this.voteBalance = {};
+        this.voteBalances = {};
 
         const voteAmounts = this.calculateVoteAmount({
             balance: this.getBalance() || Utils.BigNumber.ZERO,
@@ -281,7 +290,7 @@ export class Wallet implements Contracts.State.Wallet {
         cloned.publicKey = this.publicKey;
         cloned.balance = this.balance;
         cloned.nonce = this.nonce;
-        cloned.voteBalance = { ...this.voteBalance };
+        cloned.voteBalances = { ...this.voteBalances };
         cloned.votes = this.votes.map((vote) => {
             return { ...vote };
         });

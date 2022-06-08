@@ -166,7 +166,7 @@ export class BlockState implements Contracts.State.BlockState {
 
     public updateWalletVoteBalance(wallet: Contracts.State.Wallet): void {
         AppUtils.decreaseVoteBalances(wallet, { walletRepository: this.walletRepository });
-        wallet.updateVoteBalance();
+        wallet.updateVoteBalances();
         AppUtils.increaseVoteBalances(wallet, { walletRepository: this.walletRepository });
     }
 
