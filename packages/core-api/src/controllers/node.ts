@@ -1,6 +1,6 @@
 import Hapi from "@hapi/hapi";
 import { Repositories } from "@solar-network/core-database";
-import { Container, Contracts, Providers, Services } from "@solar-network/core-kernel";
+import { Container, Contracts, Providers, Services, Utils } from "@solar-network/core-kernel";
 import { Handlers } from "@solar-network/core-transactions";
 import { Crypto, Managers } from "@solar-network/crypto";
 
@@ -93,33 +93,36 @@ export class NodeController extends Controller {
             return obj;
         };
 
-        return removeFalsy({
-            data: {
-                core: {
-                    version: this.app.version(),
+        return removeFalsy(
+            Utils.cloneDeep({
+                data: {
+                    core: {
+                        version: this.app.version(),
+                    },
+                    nethash: network.nethash,
+                    slip44: network.slip44,
+                    wif: network.wif,
+                    token: network.client.token,
+                    symbol: network.client.symbol,
+                    explorer: network.client.explorer,
+                    version: network.pubKeyHash,
+                    ports: super.toResource(this.configRepository, PortsResource),
+                    constants,
+                    transactionPool: {
+                        dynamicFees: dynamicFees.enabled ? dynamicFees : { enabled: false },
+                        maxTransactionsInPool:
+                            this.transactionPoolConfiguration.getRequired<number>("maxTransactionsInPool"),
+                        maxTransactionsPerSender:
+                            this.transactionPoolConfiguration.getRequired<number>("maxTransactionsPerSender"),
+                        maxTransactionsPerRequest:
+                            this.transactionPoolConfiguration.getRequired<number>("maxTransactionsPerRequest"),
+                        maxTransactionAge: this.transactionPoolConfiguration.getRequired<number>("maxTransactionAge"),
+                        maxTransactionBytes:
+                            this.transactionPoolConfiguration.getRequired<number>("maxTransactionBytes"),
+                    },
                 },
-                nethash: network.nethash,
-                slip44: network.slip44,
-                wif: network.wif,
-                token: network.client.token,
-                symbol: network.client.symbol,
-                explorer: network.client.explorer,
-                version: network.pubKeyHash,
-                ports: super.toResource(this.configRepository, PortsResource),
-                constants,
-                transactionPool: {
-                    dynamicFees: dynamicFees.enabled ? dynamicFees : { enabled: false },
-                    maxTransactionsInPool:
-                        this.transactionPoolConfiguration.getRequired<number>("maxTransactionsInPool"),
-                    maxTransactionsPerSender:
-                        this.transactionPoolConfiguration.getRequired<number>("maxTransactionsPerSender"),
-                    maxTransactionsPerRequest:
-                        this.transactionPoolConfiguration.getRequired<number>("maxTransactionsPerRequest"),
-                    maxTransactionAge: this.transactionPoolConfiguration.getRequired<number>("maxTransactionAge"),
-                    maxTransactionBytes: this.transactionPoolConfiguration.getRequired<number>("maxTransactionBytes"),
-                },
-            },
-        });
+            }),
+        );
     }
 
     public async configurationCrypto(request: Hapi.Request, h: Hapi.ResponseToolkit) {
