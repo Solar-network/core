@@ -21,7 +21,7 @@ export const actions = {
     downloadFinished: DownloadFinished,
     downloadPaused: DownloadPaused,
     exitApp: ExitApp,
-    initialize: Initialize,
+    initialise: Initialize,
     rollbackDatabase: RollbackDatabase,
     startForkRecovery: StartForkRecovery,
     stopped: Stopped,

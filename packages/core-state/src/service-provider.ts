@@ -9,6 +9,8 @@ import { DatabaseInterceptor } from "./database-interceptor";
 import { DposPreviousRoundState, DposState } from "./dpos";
 import { RoundState } from "./round-state";
 import { StateBuilder } from "./state-builder";
+import { StateLoader } from "./state-loader";
+import { StateSaver } from "./state-saver";
 import { BlockStore } from "./stores/blocks";
 import { StateStore } from "./stores/state";
 import { TransactionStore } from "./stores/transactions";
@@ -99,6 +101,8 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Container.Identifiers.StateWalletSyncService).to(WalletSyncService).inSingletonScope();
 
         this.app.bind(Container.Identifiers.StateBuilder).to(StateBuilder);
+        this.app.bind(Container.Identifiers.StateLoader).to(StateLoader);
+        this.app.bind(Container.Identifiers.StateSaver).to(StateSaver);
 
         this.registerActions();
     }
