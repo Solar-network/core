@@ -323,6 +323,10 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         return peerBlocks;
     }
 
+    public async wouldThrottleOnDownload(peer: Contracts.P2P.Peer): Promise<boolean> {
+        return await this.wouldThrottle(peer, "p2p.blocks.getBlocks");
+    }
+
     private validatePeerConfig(peer: Contracts.P2P.Peer, config: Contracts.P2P.PeerConfig): boolean {
         if (config.network.nethash !== Managers.configManager.get("network.nethash")) {
             return false;
@@ -414,9 +418,13 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         return parsedResponsePayload;
     }
 
+    private async wouldThrottle(peer: Contracts.P2P.Peer, event: string): Promise<boolean> {
+        return await this.outgoingRateLimiter.hasExceededRateLimitNoConsume(peer.ip, event);
+    }
+
     private async throttle(peer: Contracts.P2P.Peer, event: string): Promise<void> {
         const msBeforeReCheck = 1000;
-        while (await this.outgoingRateLimiter.hasExceededRateLimitNoConsume(peer.ip, event)) {
+        while (await this.wouldThrottle(peer, event)) {
             await delay(msBeforeReCheck);
         }
         try {

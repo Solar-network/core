@@ -30,4 +30,6 @@ export interface PeerCommunicator {
             headersOnly,
         }: { fromBlockHeight: number; blockLimit?: number; headersOnly?: boolean },
     ): Promise<Interfaces.IBlockData[]>;
+
+    wouldThrottleOnDownload(peer: Peer): Promise<boolean>;
 }

@@ -82,6 +82,7 @@ export class CheckLater implements Action {
                             undefined,
                             true,
                             2000,
+                            true,
                         );
                         lastBlock = this.app
                             .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)

@@ -38,6 +38,7 @@ export interface NetworkMonitor {
         maxParallelDownloads?: number,
         silent?: boolean,
         timeout?: number,
+        checkThrottle?: boolean,
     ): Promise<Interfaces.IBlockData[]>;
     broadcastBlock(block: Interfaces.IBlock): Promise<void>;
     isColdStart(): boolean;

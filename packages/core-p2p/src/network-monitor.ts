@@ -448,6 +448,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         maxParallelDownloads = 10,
         silent = false,
         timeout: number,
+        checkThrottle: boolean = false,
     ): Promise<Interfaces.IBlockData[]> {
         const peersAll: Contracts.P2P.Peer[] = this.repository.getPeers();
 
@@ -458,7 +459,14 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             return [];
         }
 
-        const peersNotForked: Contracts.P2P.Peer[] = Utils.shuffle(peersAll.filter((peer) => !peer.isForked()));
+        let peersNotForked: Contracts.P2P.Peer[] = Utils.shuffle(peersAll.filter((peer) => !peer.isForked()));
+
+        if (checkThrottle) {
+            const peersThatWouldThrottle: boolean[] = await Promise.all(
+                peersNotForked.map((peer) => this.communicator.wouldThrottleOnDownload(peer)),
+            );
+            peersNotForked = peersNotForked.filter((peer, index) => !peersThatWouldThrottle[index]);
+        }
 
         if (peersNotForked.length === 0) {
             if (!silent) {
