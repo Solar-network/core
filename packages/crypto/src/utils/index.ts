@@ -119,8 +119,8 @@ export const calculateDevFund = (height: number, reward: BigNumber): Record<stri
         return {};
     }
 
-    for (const [wallet, percentage] of Object.entries(constants.devFund)) {
-        devFund[wallet] = reward.times(Math.round((percentage as number) * 100)).dividedBy(10000);
+    for (const [wallet, percent] of Object.entries(constants.devFund)) {
+        devFund[wallet] = reward.times(Math.round((percent as number) * 100)).dividedBy(10000);
     }
 
     return devFund;

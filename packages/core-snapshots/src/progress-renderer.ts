@@ -76,10 +76,10 @@ export class ProgressRenderer {
     }
 
     private calculatePercentage(count: number, value: number): string {
-        const percentage: string = ((value / count) * 100).toFixed(2);
+        const percent: string = ((value / count) * 100).toFixed(2);
 
         // Append spaces to match ---.-- pattern
-        return `${" ".repeat(6 - percentage.length)}${percentage}`;
+        return `${" ".repeat(6 - percent.length)}${percent}`;
     }
 
     private render(): void {

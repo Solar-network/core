@@ -73,10 +73,10 @@ export abstract class Transaction implements ITransaction {
         const milestone = configManager.getMilestone(height);
 
         this.data.burnedFee = BigNumber.ZERO;
-        if (typeof milestone.burn === "object" && typeof milestone.burn.feePercentage === "number") {
-            const feePercentage = parseInt(milestone.burn.feePercentage);
-            if (feePercentage >= 0 && feePercentage <= 100) {
-                this.data.burnedFee = this.data.fee.times(feePercentage).dividedBy(100);
+        if (typeof milestone.burn === "object" && typeof milestone.burn.feePercent === "number") {
+            const feePercent = parseInt(milestone.burn.feePercent);
+            if (feePercent >= 0 && feePercent <= 100) {
+                this.data.burnedFee = this.data.fee.times(feePercent).dividedBy(100);
             }
         }
     }

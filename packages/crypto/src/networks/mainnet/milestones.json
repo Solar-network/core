@@ -9,7 +9,7 @@
         },
         "blocktime": 8,
         "burn": {
-            "feePercentage": 90,
+            "feePercent": 90,
             "txAmount": 2000000
         },
         "dynamicFees": {
