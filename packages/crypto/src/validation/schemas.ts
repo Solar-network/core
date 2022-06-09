@@ -48,7 +48,7 @@ export const schemas = {
     walletVoteUsername: {
         $id: "walletVoteUsername",
         allOf: [
-            { type: "string", pattern: "^[+|-][a-z0-9!@$&_.]+$" },
+            { type: "string", pattern: "^[+|-](?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$" },
             { minLength: 2, maxLength: 21 },
         ],
     },
@@ -61,7 +61,7 @@ export const schemas = {
     username: {
         $id: "delegateUsername",
         allOf: [
-            { type: "string", pattern: "^[a-z0-9!@$&_.]+$" },
+            { type: "string", pattern: "^(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$" },
             { minLength: 1, maxLength: 20 },
         ],
     },
