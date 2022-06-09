@@ -33,9 +33,16 @@ echo '
 ╚══════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
 '
 DEB=$(which apt-get 2>/dev/null || :)
+GLIBC=$(ldd --version | grep ldd | sed 's/[[:blank:]]*$//;s/.*[[:blank:]]//; s/\.//g')
 
 if [[ -z $DEB ]]; then
     echo Sorry, Solar Core is only compatible with Debian-based Linux distributions
+    echo
+    exit 1
+fi
+
+if [ $GLIBC -lt 227 ]; then
+    echo Sorry, your glibc version is too old. Try updating your operating system
     echo
     exit 1
 fi
