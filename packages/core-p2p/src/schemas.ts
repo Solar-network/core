@@ -6,6 +6,10 @@ const maxDelegates = Managers.configManager
     .getMilestones()
     .reduce((acc, curr) => Math.max(acc, curr.activeDelegates), 0);
 
+const maxTransactions = Managers.configManager
+    .getMilestones()
+    .reduce((acc, curr) => Math.max(acc, curr.block.maxTransactions), 0);
+
 export const replySchemas = {
     "p2p.peer.getCommonBlocks": {
         type: "object",
@@ -226,6 +230,14 @@ export const replySchemas = {
         properties: {
             status: { type: "boolean" },
             height: { type: "integer", minimum: 1 },
+        },
+    },
+    "p2p.transactions.getUnconfirmedTransactions": {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+            poolSize: { type: "integer", minimum: 0 },
+            transactions: { type: "array", maxItems: maxTransactions },
         },
     },
     "p2p.transactions.postTransactions": {

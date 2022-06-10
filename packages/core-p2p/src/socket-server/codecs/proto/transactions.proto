@@ -2,6 +2,17 @@ syntax = "proto3";
 
 package transactions;
 
+message GetUnconfirmedTransactionsRequest {
+    bool countOnly = 1;
+    shared.Headers headers = 2;
+}
+
+message GetUnconfirmedTransactionsResponse {
+    uint32 poolSize = 1;
+    bytes transactions = 2;
+    shared.Headers headers = 3;
+}
+
 message PostTransactionsRequest {
     bytes transactions = 1;
     shared.Headers headers = 2;

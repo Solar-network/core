@@ -154,7 +154,9 @@ export class Client {
      * @memberof Client
      */
     public async getTransactions(): Promise<Contracts.P2P.ForgingTransactions> {
-        return this.emit<Contracts.P2P.ForgingTransactions>("p2p.internal.getUnconfirmedTransactions");
+        return this.emit<Contracts.P2P.ForgingTransactions>("p2p.transactions.getUnconfirmedTransactions", {
+            headers: { port: 0, version: this.app.version() },
+        });
     }
 
     /**
@@ -245,13 +247,13 @@ export class Client {
     private getCodec(event: string) {
         const codecs = {
             "p2p.internal.emitEvent": Codecs.emitEvent,
-            "p2p.internal.getUnconfirmedTransactions": Codecs.getUnconfirmedTransactions,
             "p2p.internal.getCurrentRound": Codecs.getCurrentRound,
             "p2p.internal.getNetworkState": Codecs.getNetworkState,
             "p2p.internal.getSlotNumber": Codecs.getSlotNumber,
             "p2p.internal.syncBlockchain": Codecs.syncBlockchain,
             "p2p.blocks.postBlock": Codecs.postBlock,
             "p2p.peer.getStatus": Codecs.getStatus,
+            "p2p.transactions.getUnconfirmedTransactions": Codecs.getUnconfirmedTransactions,
         };
 
         return codecs[event];

@@ -5105,6 +5105,467 @@ $root.transactions = (function() {
      */
     var transactions = {};
 
+    transactions.GetUnconfirmedTransactionsRequest = (function() {
+
+        /**
+         * Properties of a GetUnconfirmedTransactionsRequest.
+         * @memberof transactions
+         * @interface IGetUnconfirmedTransactionsRequest
+         * @property {boolean|null} [countOnly] GetUnconfirmedTransactionsRequest countOnly
+         * @property {shared.IHeaders|null} [headers] GetUnconfirmedTransactionsRequest headers
+         */
+
+        /**
+         * Constructs a new GetUnconfirmedTransactionsRequest.
+         * @memberof transactions
+         * @classdesc Represents a GetUnconfirmedTransactionsRequest.
+         * @implements IGetUnconfirmedTransactionsRequest
+         * @constructor
+         * @param {transactions.IGetUnconfirmedTransactionsRequest=} [properties] Properties to set
+         */
+        function GetUnconfirmedTransactionsRequest(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * GetUnconfirmedTransactionsRequest countOnly.
+         * @member {boolean} countOnly
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @instance
+         */
+        GetUnconfirmedTransactionsRequest.prototype.countOnly = false;
+
+        /**
+         * GetUnconfirmedTransactionsRequest headers.
+         * @member {shared.IHeaders|null|undefined} headers
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @instance
+         */
+        GetUnconfirmedTransactionsRequest.prototype.headers = null;
+
+        /**
+         * Creates a new GetUnconfirmedTransactionsRequest instance using the specified properties.
+         * @function create
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @static
+         * @param {transactions.IGetUnconfirmedTransactionsRequest=} [properties] Properties to set
+         * @returns {transactions.GetUnconfirmedTransactionsRequest} GetUnconfirmedTransactionsRequest instance
+         */
+        GetUnconfirmedTransactionsRequest.create = function create(properties) {
+            return new GetUnconfirmedTransactionsRequest(properties);
+        };
+
+        /**
+         * Encodes the specified GetUnconfirmedTransactionsRequest message. Does not implicitly {@link transactions.GetUnconfirmedTransactionsRequest.verify|verify} messages.
+         * @function encode
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @static
+         * @param {transactions.IGetUnconfirmedTransactionsRequest} message GetUnconfirmedTransactionsRequest message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        GetUnconfirmedTransactionsRequest.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.countOnly != null && Object.hasOwnProperty.call(message, "countOnly"))
+                writer.uint32(/* id 1, wireType 0 =*/8).bool(message.countOnly);
+            if (message.headers != null && Object.hasOwnProperty.call(message, "headers"))
+                $root.shared.Headers.encode(message.headers, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified GetUnconfirmedTransactionsRequest message, length delimited. Does not implicitly {@link transactions.GetUnconfirmedTransactionsRequest.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @static
+         * @param {transactions.IGetUnconfirmedTransactionsRequest} message GetUnconfirmedTransactionsRequest message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        GetUnconfirmedTransactionsRequest.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a GetUnconfirmedTransactionsRequest message from the specified reader or buffer.
+         * @function decode
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {transactions.GetUnconfirmedTransactionsRequest} GetUnconfirmedTransactionsRequest
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        GetUnconfirmedTransactionsRequest.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.transactions.GetUnconfirmedTransactionsRequest();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.countOnly = reader.bool();
+                    break;
+                case 2:
+                    message.headers = $root.shared.Headers.decode(reader, reader.uint32());
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a GetUnconfirmedTransactionsRequest message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {transactions.GetUnconfirmedTransactionsRequest} GetUnconfirmedTransactionsRequest
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        GetUnconfirmedTransactionsRequest.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a GetUnconfirmedTransactionsRequest message.
+         * @function verify
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        GetUnconfirmedTransactionsRequest.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.countOnly != null && message.hasOwnProperty("countOnly"))
+                if (typeof message.countOnly !== "boolean")
+                    return "countOnly: boolean expected";
+            if (message.headers != null && message.hasOwnProperty("headers")) {
+                var error = $root.shared.Headers.verify(message.headers);
+                if (error)
+                    return "headers." + error;
+            }
+            return null;
+        };
+
+        /**
+         * Creates a GetUnconfirmedTransactionsRequest message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {transactions.GetUnconfirmedTransactionsRequest} GetUnconfirmedTransactionsRequest
+         */
+        GetUnconfirmedTransactionsRequest.fromObject = function fromObject(object) {
+            if (object instanceof $root.transactions.GetUnconfirmedTransactionsRequest)
+                return object;
+            var message = new $root.transactions.GetUnconfirmedTransactionsRequest();
+            if (object.countOnly != null)
+                message.countOnly = Boolean(object.countOnly);
+            if (object.headers != null) {
+                if (typeof object.headers !== "object")
+                    throw TypeError(".transactions.GetUnconfirmedTransactionsRequest.headers: object expected");
+                message.headers = $root.shared.Headers.fromObject(object.headers);
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a GetUnconfirmedTransactionsRequest message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @static
+         * @param {transactions.GetUnconfirmedTransactionsRequest} message GetUnconfirmedTransactionsRequest
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        GetUnconfirmedTransactionsRequest.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.countOnly = false;
+                object.headers = null;
+            }
+            if (message.countOnly != null && message.hasOwnProperty("countOnly"))
+                object.countOnly = message.countOnly;
+            if (message.headers != null && message.hasOwnProperty("headers"))
+                object.headers = $root.shared.Headers.toObject(message.headers, options);
+            return object;
+        };
+
+        /**
+         * Converts this GetUnconfirmedTransactionsRequest to JSON.
+         * @function toJSON
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        GetUnconfirmedTransactionsRequest.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return GetUnconfirmedTransactionsRequest;
+    })();
+
+    transactions.GetUnconfirmedTransactionsResponse = (function() {
+
+        /**
+         * Properties of a GetUnconfirmedTransactionsResponse.
+         * @memberof transactions
+         * @interface IGetUnconfirmedTransactionsResponse
+         * @property {number|null} [poolSize] GetUnconfirmedTransactionsResponse poolSize
+         * @property {Uint8Array|null} [transactions] GetUnconfirmedTransactionsResponse transactions
+         * @property {shared.IHeaders|null} [headers] GetUnconfirmedTransactionsResponse headers
+         */
+
+        /**
+         * Constructs a new GetUnconfirmedTransactionsResponse.
+         * @memberof transactions
+         * @classdesc Represents a GetUnconfirmedTransactionsResponse.
+         * @implements IGetUnconfirmedTransactionsResponse
+         * @constructor
+         * @param {transactions.IGetUnconfirmedTransactionsResponse=} [properties] Properties to set
+         */
+        function GetUnconfirmedTransactionsResponse(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * GetUnconfirmedTransactionsResponse poolSize.
+         * @member {number} poolSize
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @instance
+         */
+        GetUnconfirmedTransactionsResponse.prototype.poolSize = 0;
+
+        /**
+         * GetUnconfirmedTransactionsResponse transactions.
+         * @member {Uint8Array} transactions
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @instance
+         */
+        GetUnconfirmedTransactionsResponse.prototype.transactions = $util.newBuffer([]);
+
+        /**
+         * GetUnconfirmedTransactionsResponse headers.
+         * @member {shared.IHeaders|null|undefined} headers
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @instance
+         */
+        GetUnconfirmedTransactionsResponse.prototype.headers = null;
+
+        /**
+         * Creates a new GetUnconfirmedTransactionsResponse instance using the specified properties.
+         * @function create
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @static
+         * @param {transactions.IGetUnconfirmedTransactionsResponse=} [properties] Properties to set
+         * @returns {transactions.GetUnconfirmedTransactionsResponse} GetUnconfirmedTransactionsResponse instance
+         */
+        GetUnconfirmedTransactionsResponse.create = function create(properties) {
+            return new GetUnconfirmedTransactionsResponse(properties);
+        };
+
+        /**
+         * Encodes the specified GetUnconfirmedTransactionsResponse message. Does not implicitly {@link transactions.GetUnconfirmedTransactionsResponse.verify|verify} messages.
+         * @function encode
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @static
+         * @param {transactions.IGetUnconfirmedTransactionsResponse} message GetUnconfirmedTransactionsResponse message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        GetUnconfirmedTransactionsResponse.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.poolSize != null && Object.hasOwnProperty.call(message, "poolSize"))
+                writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.poolSize);
+            if (message.transactions != null && Object.hasOwnProperty.call(message, "transactions"))
+                writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.transactions);
+            if (message.headers != null && Object.hasOwnProperty.call(message, "headers"))
+                $root.shared.Headers.encode(message.headers, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified GetUnconfirmedTransactionsResponse message, length delimited. Does not implicitly {@link transactions.GetUnconfirmedTransactionsResponse.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @static
+         * @param {transactions.IGetUnconfirmedTransactionsResponse} message GetUnconfirmedTransactionsResponse message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        GetUnconfirmedTransactionsResponse.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a GetUnconfirmedTransactionsResponse message from the specified reader or buffer.
+         * @function decode
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {transactions.GetUnconfirmedTransactionsResponse} GetUnconfirmedTransactionsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        GetUnconfirmedTransactionsResponse.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.transactions.GetUnconfirmedTransactionsResponse();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.poolSize = reader.uint32();
+                    break;
+                case 2:
+                    message.transactions = reader.bytes();
+                    break;
+                case 3:
+                    message.headers = $root.shared.Headers.decode(reader, reader.uint32());
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a GetUnconfirmedTransactionsResponse message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {transactions.GetUnconfirmedTransactionsResponse} GetUnconfirmedTransactionsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        GetUnconfirmedTransactionsResponse.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a GetUnconfirmedTransactionsResponse message.
+         * @function verify
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        GetUnconfirmedTransactionsResponse.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.poolSize != null && message.hasOwnProperty("poolSize"))
+                if (!$util.isInteger(message.poolSize))
+                    return "poolSize: integer expected";
+            if (message.transactions != null && message.hasOwnProperty("transactions"))
+                if (!(message.transactions && typeof message.transactions.length === "number" || $util.isString(message.transactions)))
+                    return "transactions: buffer expected";
+            if (message.headers != null && message.hasOwnProperty("headers")) {
+                var error = $root.shared.Headers.verify(message.headers);
+                if (error)
+                    return "headers." + error;
+            }
+            return null;
+        };
+
+        /**
+         * Creates a GetUnconfirmedTransactionsResponse message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {transactions.GetUnconfirmedTransactionsResponse} GetUnconfirmedTransactionsResponse
+         */
+        GetUnconfirmedTransactionsResponse.fromObject = function fromObject(object) {
+            if (object instanceof $root.transactions.GetUnconfirmedTransactionsResponse)
+                return object;
+            var message = new $root.transactions.GetUnconfirmedTransactionsResponse();
+            if (object.poolSize != null)
+                message.poolSize = object.poolSize >>> 0;
+            if (object.transactions != null)
+                if (typeof object.transactions === "string")
+                    $util.base64.decode(object.transactions, message.transactions = $util.newBuffer($util.base64.length(object.transactions)), 0);
+                else if (object.transactions.length)
+                    message.transactions = object.transactions;
+            if (object.headers != null) {
+                if (typeof object.headers !== "object")
+                    throw TypeError(".transactions.GetUnconfirmedTransactionsResponse.headers: object expected");
+                message.headers = $root.shared.Headers.fromObject(object.headers);
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a GetUnconfirmedTransactionsResponse message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @static
+         * @param {transactions.GetUnconfirmedTransactionsResponse} message GetUnconfirmedTransactionsResponse
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        GetUnconfirmedTransactionsResponse.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.poolSize = 0;
+                if (options.bytes === String)
+                    object.transactions = "";
+                else {
+                    object.transactions = [];
+                    if (options.bytes !== Array)
+                        object.transactions = $util.newBuffer(object.transactions);
+                }
+                object.headers = null;
+            }
+            if (message.poolSize != null && message.hasOwnProperty("poolSize"))
+                object.poolSize = message.poolSize;
+            if (message.transactions != null && message.hasOwnProperty("transactions"))
+                object.transactions = options.bytes === String ? $util.base64.encode(message.transactions, 0, message.transactions.length) : options.bytes === Array ? Array.prototype.slice.call(message.transactions) : message.transactions;
+            if (message.headers != null && message.hasOwnProperty("headers"))
+                object.headers = $root.shared.Headers.toObject(message.headers, options);
+            return object;
+        };
+
+        /**
+         * Converts this GetUnconfirmedTransactionsResponse to JSON.
+         * @function toJSON
+         * @memberof transactions.GetUnconfirmedTransactionsResponse
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        GetUnconfirmedTransactionsResponse.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return GetUnconfirmedTransactionsResponse;
+    })();
+
     transactions.PostTransactionsRequest = (function() {
 
         /**

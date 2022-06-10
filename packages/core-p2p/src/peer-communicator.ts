@@ -323,8 +323,31 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         return peerBlocks;
     }
 
+    public async getUnconfirmedTransactions(peer: Contracts.P2P.Peer): Promise<Buffer[]> {
+        const getUnconfirmedTransactionsTimeout = 10000;
+        const { maxPayload, maxTransactions } = Managers.configManager.getMilestone().block;
+        const { transactions } = await this.emit(
+            peer,
+            "p2p.transactions.getUnconfirmedTransactions",
+            {},
+            getUnconfirmedTransactionsTimeout,
+            maxPayload,
+            false,
+        );
+
+        if (!transactions || !transactions.length || transactions.length > maxTransactions) {
+            return [];
+        }
+
+        return transactions;
+    }
+
     public async wouldThrottleOnDownload(peer: Contracts.P2P.Peer): Promise<boolean> {
         return await this.wouldThrottle(peer, "p2p.blocks.getBlocks");
+    }
+
+    public async wouldThrottleOnFetchingTransactions(peer: Contracts.P2P.Peer): Promise<boolean> {
+        return await this.wouldThrottle(peer, "p2p.transactions.getUnconfirmedTransactions");
     }
 
     private validatePeerConfig(peer: Contracts.P2P.Peer, config: Contracts.P2P.PeerConfig): boolean {

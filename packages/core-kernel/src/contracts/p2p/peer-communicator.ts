@@ -31,5 +31,9 @@ export interface PeerCommunicator {
         }: { fromBlockHeight: number; blockLimit?: number; headersOnly?: boolean },
     ): Promise<Interfaces.IBlockData[]>;
 
+    getUnconfirmedTransactions(peer: Peer): Promise<Buffer[]>;
+
     wouldThrottleOnDownload(peer: Peer): Promise<boolean>;
+
+    wouldThrottleOnFetchingTransactions(peer: Peer): Promise<boolean>;
 }

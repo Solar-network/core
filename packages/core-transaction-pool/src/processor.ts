@@ -1,7 +1,8 @@
+import { Repositories } from "@solar-network/core-database";
 import { Container, Contracts } from "@solar-network/core-kernel";
 import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 
-import { InvalidTransactionDataError } from "./errors";
+import { AlreadyForgedTransactionError, InvalidTransactionDataError } from "./errors";
 
 @Container.injectable()
 export class Processor implements Contracts.TransactionPool.Processor {
@@ -19,6 +20,9 @@ export class Processor implements Contracts.TransactionPool.Processor {
     @Container.optional()
     private readonly transactionBroadcaster!: Contracts.P2P.TransactionBroadcaster | undefined;
 
+    @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
+    private readonly transactionRepository!: Repositories.TransactionRepository;
+
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
@@ -32,6 +36,25 @@ export class Processor implements Contracts.TransactionPool.Processor {
         let errors: { [id: string]: Contracts.TransactionPool.ProcessorError } | undefined = undefined;
 
         const broadcastTransactions: Interfaces.ITransaction[] = [];
+        const transactions: Interfaces.ITransaction[] = [];
+
+        const handleError = (entryId: string, error: Error) => {
+            invalid.push(entryId);
+
+            if (error instanceof Contracts.TransactionPool.PoolError) {
+                if (error.type === "ERR_EXCEEDS_MAX_COUNT") {
+                    excess.push(entryId);
+                }
+
+                if (!errors) errors = {};
+                errors[entryId] = {
+                    type: error.type,
+                    message: error.message,
+                };
+            } else {
+                throw error;
+            }
+        };
 
         try {
             for (let i = 0; i < data.length; i++) {
@@ -43,6 +66,26 @@ export class Processor implements Contracts.TransactionPool.Processor {
                         transactionData instanceof Buffer
                             ? await this.getTransactionFromBuffer(transactionData)
                             : await this.getTransactionFromData(transactionData);
+                    transactions.push(transaction);
+                } catch (error) {
+                    handleError(entryId, error);
+                }
+            }
+
+            const forgedTransactionIds: string[] =
+                transactions.length > 0
+                    ? await this.transactionRepository.getForgedTransactionsIds(
+                          transactions.map((transaction) => transaction.data.id!),
+                      )
+                    : [];
+
+            for (let i = 0; i < transactions.length; i++) {
+                const transaction = transactions[i];
+                const entryId = transaction.data && transaction.data.id ? transaction.data.id : String(i);
+                try {
+                    if (forgedTransactionIds.includes(entryId)) {
+                        throw new AlreadyForgedTransactionError(transaction);
+                    }
                     await this.pool.addTransaction(transaction);
                     accept.push(entryId);
 
@@ -50,23 +93,11 @@ export class Processor implements Contracts.TransactionPool.Processor {
                         await Promise.all(this.extensions.map((e) => e.throwIfCannotBroadcast(transaction)));
                         broadcastTransactions.push(transaction);
                         broadcast.push(entryId);
-                    } catch {}
-                } catch (error) {
-                    invalid.push(entryId);
-
-                    if (error instanceof Contracts.TransactionPool.PoolError) {
-                        if (error.type === "ERR_EXCEEDS_MAX_COUNT") {
-                            excess.push(entryId);
-                        }
-
-                        if (!errors) errors = {};
-                        errors[entryId] = {
-                            type: error.type,
-                            message: error.message,
-                        };
-                    } else {
-                        throw error;
+                    } catch {
+                        //
                     }
+                } catch (error) {
+                    handleError(entryId, error);
                 }
             }
         } finally {

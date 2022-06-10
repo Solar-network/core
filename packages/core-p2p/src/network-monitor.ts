@@ -1,9 +1,9 @@
 import { Container, Contracts, Enums, Providers, Services, Utils } from "@solar-network/core-kernel";
-import { Identities, Interfaces, Managers } from "@solar-network/crypto";
+import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 import delay from "delay";
 import { readJSONSync } from "fs-extra";
 import prettyMs from "pretty-ms";
-import { gt, lt } from "semver";
+import { gt, lt, satisfies } from "semver";
 
 import { NetworkState } from "./network-state";
 import { Peer } from "./peer";
@@ -53,6 +53,8 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     private initialising = true;
     private lastPinged: number = 0;
+
+    private cachedTransactions: Map<string, number> = new Map();
 
     @Container.postConstruct()
     public initialise(): void {
@@ -624,6 +626,58 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             downloadedBlocks.length === 0 ? Math.ceil(this.downloadChunkSize / 10) : defaultDownloadChunkSize;
 
         return downloadedBlocks;
+    }
+
+    public async downloadTransactions(): Promise<Buffer[]> {
+        const transactions: Set<String> = new Set();
+
+        const peersCompatible: Contracts.P2P.Peer[] = this.repository
+            .getPeers()
+            .filter((peer) => satisfies(peer.version!, ">=3.4", { includePrerelease: true }));
+
+        const peersThatWouldThrottle: boolean[] = await Promise.all(
+            peersCompatible.map((peer) => this.communicator.wouldThrottleOnFetchingTransactions(peer)),
+        );
+
+        const peersToTry = Utils.shuffle(peersCompatible)
+            .filter((peer, index) => !peersThatWouldThrottle[index])
+            .slice(0, 5);
+
+        for (const peer of peersToTry) {
+            try {
+                const downloadedTransactions: Buffer[] = await this.communicator.getUnconfirmedTransactions(peer);
+                for (const transaction of downloadedTransactions) {
+                    transactions.add(transaction.toString("hex"));
+                }
+            } catch {
+                //
+            }
+        }
+
+        const acceptedTransactions: Buffer[] = [];
+        const timeNow: number = new Date().getTime() / 1000;
+
+        for (const transaction of transactions) {
+            try {
+                const { data, serialised } = Transactions.TransactionFactory.fromBytesUnsafe(
+                    Buffer.from(transaction, "hex"),
+                );
+                if (data.id && !this.cachedTransactions.has(data.id)) {
+                    this.cachedTransactions.set(data.id, timeNow);
+                    acceptedTransactions.push(serialised);
+                }
+            } catch {
+                //
+            }
+        }
+
+        for (const [id, expiryTime] of this.cachedTransactions.entries()) {
+            if (timeNow - expiryTime > 30) {
+                this.cachedTransactions.delete(id);
+            }
+        }
+
+        return acceptedTransactions;
     }
 
     public async broadcastBlock(block: Interfaces.IBlock): Promise<void> {

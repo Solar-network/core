@@ -40,6 +40,7 @@ export interface NetworkMonitor {
         timeout?: number,
         checkThrottle?: boolean,
     ): Promise<Interfaces.IBlockData[]>;
+    downloadTransactions(): Promise<Buffer[]>;
     broadcastBlock(block: Interfaces.IBlock): Promise<void>;
     isColdStart(): boolean;
     completeColdStart(): void;

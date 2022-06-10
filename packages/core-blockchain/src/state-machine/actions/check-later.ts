@@ -25,6 +25,9 @@ export class CheckLater implements Action {
     @Container.tagged("state", "blockchain")
     private readonly walletRepository!: Contracts.State.WalletRepository;
 
+    @Container.inject(Container.Identifiers.TransactionPoolProcessor)
+    private readonly processor!: Contracts.TransactionPool.Processor;
+
     public async handle(): Promise<void> {
         const { blocktime } = Managers.configManager.getMilestone();
         const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, 1);
@@ -129,6 +132,16 @@ export class CheckLater implements Action {
                         //
                     }
                 }, 500);
+
+                setInterval(async () => {
+                    if (this.stateStore.getBlockchain().value !== "idle") {
+                        return;
+                    }
+                    const transactions: Buffer[] = await this.peerNetworkMonitor.downloadTransactions();
+                    if (transactions.length > 0) {
+                        await this.processor.process(transactions);
+                    }
+                }, 4000);
             }
 
             this.blockchain.setWakeUp();
