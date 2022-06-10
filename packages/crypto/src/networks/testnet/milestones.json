@@ -133,5 +133,10 @@
         "devFund": {
             "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": 5
         }
+    },
+    {
+        "height": 918650,
+        "acceptLegacySchnorrTransactions": false,
+        "legacyVote": false
     }
 ]
