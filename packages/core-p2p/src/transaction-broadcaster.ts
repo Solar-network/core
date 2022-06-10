@@ -1,10 +1,13 @@
-import { Container, Contracts, Utils } from "@solar-network/core-kernel";
+import { Container, Contracts, Providers, Utils } from "@solar-network/core-kernel";
 import { Interfaces, Transactions } from "@solar-network/crypto";
 
 import { PeerCommunicator } from "./peer-communicator";
 
 @Container.injectable()
 export class TransactionBroadcaster implements Contracts.P2P.TransactionBroadcaster {
+    @Container.inject(Container.Identifiers.Application)
+    private readonly app!: Contracts.Kernel.Application;
+
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
@@ -22,13 +25,25 @@ export class TransactionBroadcaster implements Contracts.P2P.TransactionBroadcas
 
         const peers: Contracts.P2P.Peer[] = this.repository.getPeers();
 
-        const transactionsStr = Utils.pluralise("transaction", transactions.length, true);
         const peersStr = Utils.pluralise("peer", peers.length, true);
-        this.logger.debug(`Broadcasting ${transactionsStr} to ${peersStr} :moneybag:`);
 
-        const transactionsBroadcast: Buffer[] = transactions.map((t) => Transactions.Serialiser.serialise(t));
-        const promises = peers.map((p) => this.communicator.postTransactions(p, transactionsBroadcast));
+        const maxTransactions: number = this.app
+            .getTagged<Providers.PluginConfiguration>(
+                Container.Identifiers.PluginConfiguration,
+                "plugin",
+                "@solar-network/core-transaction-pool",
+            )
+            .getOptional<number>("maxTransactionsPerRequest", 40);
+        const transactionBatches: Interfaces.ITransaction[][] = Utils.chunk(transactions, maxTransactions);
 
-        await Promise.all(promises);
+        for (const batch of transactionBatches) {
+            const transactionsStr = Utils.pluralise("transaction", batch.length, true);
+            this.logger.debug(`Broadcasting ${transactionsStr} to ${peersStr} :moneybag:`);
+
+            const transactionsBroadcast: Buffer[] = batch.map((t) => Transactions.Serialiser.serialise(t));
+            const promises = peers.map((p) => this.communicator.postTransactions(p, transactionsBroadcast));
+
+            await Promise.all(promises);
+        }
     }
 }

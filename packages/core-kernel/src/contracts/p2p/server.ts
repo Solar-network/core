@@ -38,6 +38,6 @@ export interface Status {
 }
 
 export interface UnconfirmedTransactions {
-    transactions: string[];
+    transactions: Buffer[];
     poolSize: number;
 }

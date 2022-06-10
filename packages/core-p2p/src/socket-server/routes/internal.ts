@@ -1,11 +1,4 @@
-import {
-    emitEvent,
-    getCurrentRound,
-    getNetworkState,
-    getSlotNumber,
-    getUnconfirmedTransactions,
-    syncBlockchain,
-} from "../codecs/internal";
+import { emitEvent, getCurrentRound, getNetworkState, getSlotNumber, syncBlockchain } from "../codecs/internal";
 import { InternalController } from "../controllers/internal";
 import { internalSchemas } from "../schemas/internal";
 import { Route, RouteConfig } from "./route";
@@ -19,11 +12,6 @@ export class InternalRoute extends Route {
                 handler: controller.emitEvent,
                 validation: internalSchemas.emitEvent,
                 codec: emitEvent,
-            },
-            "/p2p/internal/getUnconfirmedTransactions": {
-                id: "p2p.internal.getUnconfirmedTransactions",
-                handler: controller.getUnconfirmedTransactions,
-                codec: getUnconfirmedTransactions,
             },
             "/p2p/internal/getCurrentRound": {
                 id: "p2p.internal.getCurrentRound",

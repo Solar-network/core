@@ -1,6 +1,12 @@
 import { Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Interfaces, Utils } from "@solar-network/crypto";
 
+export class AlreadyForgedTransactionError extends Contracts.TransactionPool.PoolError {
+    public constructor(transaction: Interfaces.ITransaction) {
+        super(`${transaction} was already forged`, "ERR_FORGED");
+    }
+}
+
 export class RetryTransactionError extends Contracts.TransactionPool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
         super(`${transaction} cannot be added to pool, please retry`, "ERR_RETRY");

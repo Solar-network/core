@@ -19,6 +19,7 @@
         "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
+        "@solar-network/core-database": "workspace:*",
         "@solar-network/core-kernel": "workspace:*",
         "@solar-network/core-transactions": "workspace:*",
         "@solar-network/crypto": "workspace:*",

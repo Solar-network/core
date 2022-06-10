@@ -1,6 +1,6 @@
 import Hapi from "@hapi/hapi";
 import { Container, Contracts, Services, Utils } from "@solar-network/core-kernel";
-import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
+import { Crypto, Managers } from "@solar-network/crypto";
 
 import { Controller } from "./controller";
 
@@ -13,12 +13,6 @@ export class InternalController extends Controller {
 
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
-
-    @Container.inject(Container.Identifiers.TransactionPoolService)
-    private readonly transactionPool!: Contracts.TransactionPool.Service;
-
-    @Container.inject(Container.Identifiers.TransactionPoolCollator)
-    private readonly collator!: Contracts.TransactionPool.Collator;
 
     @Container.inject(Container.Identifiers.RoundState)
     private readonly roundState!: Contracts.State.RoundState;
@@ -33,18 +27,6 @@ export class InternalController extends Controller {
     public emitEvent(request: Hapi.Request, h: Hapi.ResponseToolkit): boolean {
         this.events.dispatch((request.payload as any).event, (request.payload as any).body);
         return true;
-    }
-
-    public async getUnconfirmedTransactions(
-        request: Hapi.Request,
-        h: Hapi.ResponseToolkit,
-    ): Promise<Contracts.P2P.UnconfirmedTransactions> {
-        const transactions: Interfaces.ITransaction[] = await this.collator.getBlockCandidateTransactions();
-
-        return {
-            poolSize: this.transactionPool.getPoolSize(),
-            transactions: transactions.map((t) => t.serialised.toString("hex")),
-        };
     }
 
     public async getCurrentRound(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<Contracts.P2P.CurrentRound> {

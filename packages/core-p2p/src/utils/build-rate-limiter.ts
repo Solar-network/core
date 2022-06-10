@@ -37,6 +37,11 @@ export const buildRateLimiter = (options: {
                     endpoint: "p2p.peer.getCommonBlocks",
                 },
                 {
+                    rateLimit: options.isOutgoing ? 1 : 2,
+                    duration: options.isOutgoing ? 2 : 1,
+                    endpoint: "p2p.transactions.getUnconfirmedTransactions",
+                },
+                {
                     rateLimit: options.rateLimitPostTransactions || 25,
                     endpoint: "p2p.transactions.postTransactions",
                 },

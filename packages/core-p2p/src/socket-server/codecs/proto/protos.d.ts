@@ -2135,6 +2135,204 @@ export namespace shared {
 /** Namespace transactions. */
 export namespace transactions {
 
+    /** Properties of a GetUnconfirmedTransactionsRequest. */
+    interface IGetUnconfirmedTransactionsRequest {
+
+        /** GetUnconfirmedTransactionsRequest countOnly */
+        countOnly?: (boolean|null);
+
+        /** GetUnconfirmedTransactionsRequest headers */
+        headers?: (shared.IHeaders|null);
+    }
+
+    /** Represents a GetUnconfirmedTransactionsRequest. */
+    class GetUnconfirmedTransactionsRequest implements IGetUnconfirmedTransactionsRequest {
+
+        /**
+         * Constructs a new GetUnconfirmedTransactionsRequest.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: transactions.IGetUnconfirmedTransactionsRequest);
+
+        /** GetUnconfirmedTransactionsRequest countOnly. */
+        public countOnly: boolean;
+
+        /** GetUnconfirmedTransactionsRequest headers. */
+        public headers?: (shared.IHeaders|null);
+
+        /**
+         * Creates a new GetUnconfirmedTransactionsRequest instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns GetUnconfirmedTransactionsRequest instance
+         */
+        public static create(properties?: transactions.IGetUnconfirmedTransactionsRequest): transactions.GetUnconfirmedTransactionsRequest;
+
+        /**
+         * Encodes the specified GetUnconfirmedTransactionsRequest message. Does not implicitly {@link transactions.GetUnconfirmedTransactionsRequest.verify|verify} messages.
+         * @param message GetUnconfirmedTransactionsRequest message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: transactions.IGetUnconfirmedTransactionsRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified GetUnconfirmedTransactionsRequest message, length delimited. Does not implicitly {@link transactions.GetUnconfirmedTransactionsRequest.verify|verify} messages.
+         * @param message GetUnconfirmedTransactionsRequest message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: transactions.IGetUnconfirmedTransactionsRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a GetUnconfirmedTransactionsRequest message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns GetUnconfirmedTransactionsRequest
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): transactions.GetUnconfirmedTransactionsRequest;
+
+        /**
+         * Decodes a GetUnconfirmedTransactionsRequest message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns GetUnconfirmedTransactionsRequest
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): transactions.GetUnconfirmedTransactionsRequest;
+
+        /**
+         * Verifies a GetUnconfirmedTransactionsRequest message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a GetUnconfirmedTransactionsRequest message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns GetUnconfirmedTransactionsRequest
+         */
+        public static fromObject(object: { [k: string]: any }): transactions.GetUnconfirmedTransactionsRequest;
+
+        /**
+         * Creates a plain object from a GetUnconfirmedTransactionsRequest message. Also converts values to other types if specified.
+         * @param message GetUnconfirmedTransactionsRequest
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: transactions.GetUnconfirmedTransactionsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this GetUnconfirmedTransactionsRequest to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a GetUnconfirmedTransactionsResponse. */
+    interface IGetUnconfirmedTransactionsResponse {
+
+        /** GetUnconfirmedTransactionsResponse poolSize */
+        poolSize?: (number|null);
+
+        /** GetUnconfirmedTransactionsResponse transactions */
+        transactions?: (Uint8Array|null);
+
+        /** GetUnconfirmedTransactionsResponse headers */
+        headers?: (shared.IHeaders|null);
+    }
+
+    /** Represents a GetUnconfirmedTransactionsResponse. */
+    class GetUnconfirmedTransactionsResponse implements IGetUnconfirmedTransactionsResponse {
+
+        /**
+         * Constructs a new GetUnconfirmedTransactionsResponse.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: transactions.IGetUnconfirmedTransactionsResponse);
+
+        /** GetUnconfirmedTransactionsResponse poolSize. */
+        public poolSize: number;
+
+        /** GetUnconfirmedTransactionsResponse transactions. */
+        public transactions: Uint8Array;
+
+        /** GetUnconfirmedTransactionsResponse headers. */
+        public headers?: (shared.IHeaders|null);
+
+        /**
+         * Creates a new GetUnconfirmedTransactionsResponse instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns GetUnconfirmedTransactionsResponse instance
+         */
+        public static create(properties?: transactions.IGetUnconfirmedTransactionsResponse): transactions.GetUnconfirmedTransactionsResponse;
+
+        /**
+         * Encodes the specified GetUnconfirmedTransactionsResponse message. Does not implicitly {@link transactions.GetUnconfirmedTransactionsResponse.verify|verify} messages.
+         * @param message GetUnconfirmedTransactionsResponse message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: transactions.IGetUnconfirmedTransactionsResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified GetUnconfirmedTransactionsResponse message, length delimited. Does not implicitly {@link transactions.GetUnconfirmedTransactionsResponse.verify|verify} messages.
+         * @param message GetUnconfirmedTransactionsResponse message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: transactions.IGetUnconfirmedTransactionsResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a GetUnconfirmedTransactionsResponse message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns GetUnconfirmedTransactionsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): transactions.GetUnconfirmedTransactionsResponse;
+
+        /**
+         * Decodes a GetUnconfirmedTransactionsResponse message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns GetUnconfirmedTransactionsResponse
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): transactions.GetUnconfirmedTransactionsResponse;
+
+        /**
+         * Verifies a GetUnconfirmedTransactionsResponse message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a GetUnconfirmedTransactionsResponse message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns GetUnconfirmedTransactionsResponse
+         */
+        public static fromObject(object: { [k: string]: any }): transactions.GetUnconfirmedTransactionsResponse;
+
+        /**
+         * Creates a plain object from a GetUnconfirmedTransactionsResponse message. Also converts values to other types if specified.
+         * @param message GetUnconfirmedTransactionsResponse
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: transactions.GetUnconfirmedTransactionsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this GetUnconfirmedTransactionsResponse to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
     /** Properties of a PostTransactionsRequest. */
     interface IPostTransactionsRequest {
 
