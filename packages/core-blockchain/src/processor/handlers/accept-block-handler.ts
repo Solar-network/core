@@ -51,8 +51,8 @@ export class AcceptBlockHandler implements BlockHandler {
             }
 
             // Ensure the lastDownloadedBlock is never behind the last accepted block.
-            const lastDownloadedBock = this.state.getLastDownloadedBlock();
-            if (lastDownloadedBock && lastDownloadedBock.height < block.data.height) {
+            const lastDownloadedBlock = this.state.getLastDownloadedBlock();
+            if (lastDownloadedBlock && lastDownloadedBlock.height < block.data.height) {
                 this.state.setLastDownloadedBlock(block.data);
             }
 
