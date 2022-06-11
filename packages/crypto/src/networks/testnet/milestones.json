@@ -22,6 +22,7 @@
                 "htlcLock": 82,
                 "htlcRefund": 0,
                 "ipfs": 98,
+                "legacyVote": 98,
                 "multiPayment": 85,
                 "multiSignature": 16,
                 "secondSignature": 99,
@@ -40,11 +41,12 @@
                 "htlcLock": 5000000,
                 "htlcRefund": 0,
                 "ipfs": 5000000,
+                "legacyVote": 5000000,
                 "multiPayment": 50000000,
                 "multiSignature": 5000000,
                 "secondSignature": 5000000,
                 "transfer": 5000000,
-                "vote": 5000000
+                "vote": 9000000
             }
         },
         "legacyVote": true,
