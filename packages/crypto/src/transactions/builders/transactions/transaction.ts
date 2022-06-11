@@ -18,7 +18,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
 
     protected signWithSenderAsRecipient = false;
 
-    private disableVersionCheck = false;
+    private disableVersionCheck = true;
 
     public constructor() {
         this.data = {
@@ -26,7 +26,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             typeGroup: TransactionTypeGroup.Test,
             nonce: BigNumber.ZERO,
             vendorField: undefined,
-            version: configManager.getMilestone().bip340 ? 0x03 : 0x02,
+            version: 3,
         } as ITransactionData;
     }
 
@@ -150,7 +150,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         }
 
         const struct: ITransactionData = {
-            id: Utils.getId(this.data).toString(),
+            id: Utils.getId(this.data, { disableVersionCheck: this.disableVersionCheck }).toString(),
             signature: this.data.signature,
             secondSignature: this.data.secondSignature,
             version: this.data.version,

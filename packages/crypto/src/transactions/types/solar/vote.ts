@@ -8,7 +8,6 @@ export class VoteTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Solar;
     public static type: number = TransactionType.Solar.Vote;
     public static key: string = "vote";
-    public static version: number = 2;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("100000000");
 

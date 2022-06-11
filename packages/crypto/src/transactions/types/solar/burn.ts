@@ -8,7 +8,6 @@ export class BurnTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Solar;
     public static type: number = TransactionType.Solar.Burn;
     public static key: string = "burn";
-    public static version: number = 2;
 
     protected static defaultStaticFee = BigNumber.ZERO;
 
