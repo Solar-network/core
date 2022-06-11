@@ -46,6 +46,28 @@ export class BlocksController extends Controller {
             throw new TooManyTransactionsError(deserialisedHeader.data);
         }
 
+        const fromForger: boolean = AppUtils.isWhitelisted(
+            this.configuration.getOptional<string[]>("remoteAccess", []),
+            request.info.remoteAddress,
+        );
+
+        if (!fromForger) {
+            if (this.blockchain.pingBlock(deserialisedHeader.data)) {
+                return { status: true, height: this.blockchain.getLastHeight() };
+            }
+
+            const lastDownloadedBlock: Interfaces.IBlockData = this.blockchain.getLastDownloadedBlock();
+
+            const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(
+                this.app,
+                deserialisedHeader.data.height,
+            );
+
+            if (!AppUtils.isBlockChained(lastDownloadedBlock, deserialisedHeader.data, blockTimeLookup)) {
+                return { status: false, height: this.blockchain.getLastHeight() };
+            }
+        }
+
         const deserialised: {
             data: Interfaces.IBlockData;
             transactions: Interfaces.ITransaction[];
@@ -55,25 +77,6 @@ export class BlocksController extends Controller {
             ...deserialised.data,
             transactions: deserialised.transactions.map((tx) => tx.data),
         };
-
-        const fromForger: boolean = AppUtils.isWhitelisted(
-            this.configuration.getOptional<string[]>("remoteAccess", []),
-            request.info.remoteAddress,
-        );
-
-        if (!fromForger) {
-            if (this.blockchain.pingBlock(block)) {
-                return { status: true, height: this.blockchain.getLastHeight() };
-            }
-
-            const lastDownloadedBlock: Interfaces.IBlockData = this.blockchain.getLastDownloadedBlock();
-
-            const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.height);
-
-            if (!AppUtils.isBlockChained(lastDownloadedBlock, block, blockTimeLookup)) {
-                return { status: false, height: this.blockchain.getLastHeight() };
-            }
-        }
 
         const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
 

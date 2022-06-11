@@ -23,7 +23,7 @@ export class Collator implements Contracts.TransactionPool.Collator {
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
-    public async getBlockCandidateTransactions(): Promise<Interfaces.ITransaction[]> {
+    public async getBlockCandidateTransactions(validate: boolean): Promise<Interfaces.ITransaction[]> {
         const height: number = this.blockchain.getLastBlock().data.height;
         const milestone = Managers.configManager.getMilestone(height);
         const blockHeaderSize =
@@ -64,7 +64,10 @@ export class Collator implements Contracts.TransactionPool.Collator {
                     break;
                 }
 
-                await validator.validate(transaction);
+                if (validate) {
+                    await validator.validate(transaction);
+                }
+
                 candidateTransactions.push(transaction);
 
                 bytesLeft -= 4;

@@ -1,6 +1,7 @@
 import { Repositories } from "@solar-network/core-database";
 import { Container, Contracts } from "@solar-network/core-kernel";
 import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import delay from "delay";
 
 import { AlreadyForgedTransactionError, InvalidTransactionDataError } from "./errors";
 
@@ -70,6 +71,7 @@ export class Processor implements Contracts.TransactionPool.Processor {
                 } catch (error) {
                     handleError(entryId, error);
                 }
+                await delay(1);
             }
 
             const forgedTransactionIds: string[] =
@@ -99,6 +101,7 @@ export class Processor implements Contracts.TransactionPool.Processor {
                 } catch (error) {
                     handleError(entryId, error);
                 }
+                await delay(1);
             }
         } finally {
             if (this.transactionBroadcaster && broadcastTransactions.length !== 0) {

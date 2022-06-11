@@ -669,6 +669,8 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             } catch {
                 //
             }
+
+            await delay(1);
         }
 
         for (const [id, expiryTime] of this.cachedTransactions.entries()) {

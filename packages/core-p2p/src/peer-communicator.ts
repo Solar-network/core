@@ -37,6 +37,9 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     @Container.inject(Container.Identifiers.QueueFactory)
     private readonly createQueue!: Types.QueueFactory;
 
+    @Container.inject(Container.Identifiers.StateStore)
+    private readonly stateStore!: Contracts.State.StateStore;
+
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
 
@@ -313,11 +316,17 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 continue;
             }
 
-            block.transactions = block.transactions.map((transaction) => {
-                const { data } = Transactions.TransactionFactory.fromBytesUnsafe(Buffer.from(transaction, "hex"));
+            for (const transaction in block.transactions) {
+                const { data } = Transactions.TransactionFactory.fromBytesUnsafe(
+                    Buffer.from(block.transactions[transaction], "hex"),
+                );
                 data.blockId = block.id;
-                return data;
-            });
+                block.transactions[transaction] = data;
+
+                if (this.stateStore.getBlockchain().value === "idle") {
+                    await delay(1);
+                }
+            }
         }
 
         return peerBlocks;
