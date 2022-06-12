@@ -43,7 +43,11 @@ export class RollbackDatabase implements Action {
             maxBlockRewind -= steps;
             lastBlockHeight -= steps;
 
-            await this.blockchain.removeTopBlocks(steps);
+            try {
+                await this.blockchain.removeTopBlocks(steps);
+            } catch (error) {
+                this.logger.error(`${error.message} :warning:`);
+            }
 
             isVerified = await this.databaseService.verifyBlockchain();
         }

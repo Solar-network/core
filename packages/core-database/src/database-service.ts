@@ -209,7 +209,7 @@ export class DatabaseService {
             // Last block height equals the number of stored blocks
             if (block.data.height !== +numberOfBlocks) {
                 errors.push(
-                    `Last block height: ${block.data.height.toLocaleString()}, number of stored blocks: ${numberOfBlocks}`,
+                    `Last block height: ${block.data.height.toLocaleString()}, number of stored blocks: ${numberOfBlocks.toLocaleString()}`,
                 );
             }
         }
