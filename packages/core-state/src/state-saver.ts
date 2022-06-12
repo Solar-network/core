@@ -82,6 +82,10 @@ export class StateSaver {
                     bits += 16;
                 }
 
+                if (wallet.getVotes().length > 1) {
+                    bits += 32;
+                }
+
                 if (buffer.getRemainderLength() === 0) {
                     flush();
                 }
@@ -136,6 +140,22 @@ export class StateSaver {
                     this.byteBufferArray.reset();
 
                     const encoded: Buffer = this.encode(wallet.getVoteBalances(), secondaryBuffer);
+                    if (buffer.getRemainderLength() < 8) {
+                        flush();
+                    }
+                    buffer.writeUInt32LE(encoded.length);
+
+                    if (buffer.getRemainderLength() < encoded.length) {
+                        flush();
+                    }
+                    buffer.writeBuffer(encoded);
+                }
+
+                if (wallet.getVotes().length > 1) {
+                    secondaryBuffer.reset();
+                    this.byteBufferArray.reset();
+
+                    const encoded: Buffer = this.encode(wallet.getVotes(), secondaryBuffer);
                     if (buffer.getRemainderLength() < 8) {
                         flush();
                     }

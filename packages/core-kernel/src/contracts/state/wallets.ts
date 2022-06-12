@@ -123,6 +123,12 @@ export interface Wallet {
     getVotes(): object[];
 
     /**
+     * @param {object[]}
+     * @memberof Wallet
+     */
+    setVotes(votes: object[]): void;
+
+    /**
      * @param {string} delegate
      * @returns {Utils.BigNumber}
      * @memberof Wallet
@@ -136,11 +142,10 @@ export interface Wallet {
     getVoteBalances(): object;
 
     /**
-     * @param {string} delegate
-     * @param {Utils.BigNumber} balance
+     * @param {object} balances
      * @memberof Wallet
      */
-    setVoteBalance(delegate: string, balance: Utils.BigNumber): void;
+    setVoteBalances(balances: object): void;
 
     /**
      * @returns {Record<string, WalletVoteDistribution>}
