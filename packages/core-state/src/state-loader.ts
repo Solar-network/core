@@ -288,7 +288,7 @@ export class StateLoader {
                         blocksFromOurHeight,
                     )} behind so the blockchain will roll back to height ${height.toLocaleString()} :repeat:`,
                 );
-                await this.blockRepository.deleteTopBlocks(blocksFromOurHeight);
+                await this.blockRepository.deleteTopBlocks(this.app, blocksFromOurHeight);
                 block = await this.databaseService.getLastBlock();
                 this.stateMachine.stateStore.setLastBlock(block);
                 this.stateMachine.stateStore.setLastStoredBlockHeight(block.data.height);

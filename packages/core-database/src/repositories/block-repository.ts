@@ -1,4 +1,4 @@
-import { Contracts, Utils } from "@solar-network/core-kernel";
+import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import { Interfaces, Transactions } from "@solar-network/crypto";
 import { EntityRepository, In } from "typeorm";
 
@@ -284,7 +284,7 @@ export class BlockRepository extends AbstractRepository<Block> {
         });
     }
 
-    public async deleteTopBlocks(count: number): Promise<void> {
+    public async deleteTopBlocks(app: Contracts.Kernel.Application, count: number): Promise<void> {
         await this.manager.transaction(async (manager) => {
             const maxHeightRow = await manager
                 .createQueryBuilder()
@@ -305,9 +305,13 @@ export class BlockRepository extends AbstractRepository<Block> {
 
             const blockIds = blockIdRows.map((row) => row["id"]);
 
-            if (blockIds.length !== count) {
+            if (blockIds.length === 0) {
                 throw new Error("Corrupt database");
             }
+
+            app.get<Contracts.Kernel.Logger>(Container.Identifiers.LogService).info(
+                `Removing the latest ${Utils.pluralise("block", blockIds.length, true)}`,
+            );
 
             await manager
                 .createQueryBuilder()

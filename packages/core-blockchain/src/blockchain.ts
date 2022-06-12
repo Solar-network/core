@@ -399,14 +399,12 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     /**
      * Remove the top blocks from database.
-     * NOTE: Only used when trying to restore database integrity.
+     * NOTE: Only used when trying to restore database integrity or loading an earlier saved state.
      * @param  {Number} count
      * @return {void}
      */
     public async removeTopBlocks(count: number): Promise<void> {
-        this.logger.info(`Removing top ${Utils.pluralise("block", count, true)}`);
-
-        await this.blockRepository.deleteTopBlocks(count);
+        await this.blockRepository.deleteTopBlocks(this.app, count);
     }
 
     /**
