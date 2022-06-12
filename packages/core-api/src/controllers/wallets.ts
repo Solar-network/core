@@ -206,19 +206,27 @@ export class WalletsController extends Controller {
             return this.paginationService.getEmptyPage();
         }
 
-        const criteria: Contracts.Shared.TransactionCriteria = {
+        const legacyCriteria: Contracts.Shared.TransactionCriteria = {
             ...request.query,
             typeGroup: Enums.TransactionTypeGroup.Core,
             type: Enums.TransactionType.Core.Vote,
             senderPublicKey: walletResource.publicKey,
         };
+
+        const criteria: Contracts.Shared.TransactionCriteria = {
+            ...request.query,
+            typeGroup: Enums.TransactionTypeGroup.Solar,
+            type: Enums.TransactionType.Solar.Vote,
+            senderPublicKey: walletResource.publicKey,
+        };
+
         const sorting: Contracts.Search.Sorting = this.getListingOrder(request);
         const pagination: Contracts.Search.Pagination = this.getListingPage(request);
         const options: Contracts.Search.Options = this.getListingOptions();
 
         if (request.query.transform) {
             const transactionListResult = await this.transactionHistoryService.listByCriteriaJoinBlock(
-                criteria,
+                [legacyCriteria, criteria],
                 sorting,
                 pagination,
                 options,
@@ -227,7 +235,7 @@ export class WalletsController extends Controller {
             return this.toPagination(transactionListResult, TransactionWithBlockResource, true);
         } else {
             const transactionListResult = await this.transactionHistoryService.listByCriteria(
-                criteria,
+                [legacyCriteria, criteria],
                 sorting,
                 pagination,
                 options,
