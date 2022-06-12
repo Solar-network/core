@@ -139,6 +139,9 @@
     {
         "height": 918650,
         "acceptLegacySchnorrTransactions": false,
-        "legacyVote": false
+        "legacyVote": false,
+        "p2p": {
+            "minimumVersions": ["^3.4.0 || ^3.4.0-next.0"]
+        }
     }
 ]
