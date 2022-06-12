@@ -222,10 +222,6 @@ export class Client {
         this._reconnectionTimer = null;
 
         const reconnect = (event) => {
-            if (ws.onopen) {
-                finalise(NesError("Connection terminated while waiting to connect", errorTypes.WS));
-            }
-
             const wasRequested = this._disconnectRequested; // Get value before _cleanup()
 
             this._cleanup();
