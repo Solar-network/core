@@ -100,15 +100,7 @@ export const maxVendorFieldLength = (height?: number): number => configManager.g
 export const isSupportedTransactionVersion = (version: number): boolean => {
     const { acceptLegacySchnorrTransactions, bip340 } = configManager.getMilestone();
 
-    if (bip340 && (version === 3 || (version === 2 && acceptLegacySchnorrTransactions))) {
-        return true;
-    }
-
-    if (!bip340 && version === 2) {
-        return true;
-    }
-
-    return false;
+    return version === 3 || (version === 2 && (acceptLegacySchnorrTransactions || !bip340));
 };
 
 export const calculateDevFund = (height: number, reward: BigNumber): Record<string, BigNumber> => {
