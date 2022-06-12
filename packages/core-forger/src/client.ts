@@ -50,17 +50,6 @@ export class Client {
      */
     public register(hosts: RelayHost[]): void {
         this.hosts = hosts.map((host: RelayHost) => {
-            const url = `ws://${Utils.IpAddress.normaliseAddress(host.hostname)}:${host.port}`;
-            const options = { ws: { maxPayload: MAX_PAYLOAD_CLIENT } };
-            const connection = new Nes.Client(url, options);
-            connection.connect().catch((e) => {}); // connect promise can fail when p2p is not ready, it's fine it will retry
-
-            connection.onError = (e) => {
-                this.logger.error(`${e.message} :bangbang:`);
-            };
-
-            host.socket = connection;
-
             return host;
         });
 
@@ -201,10 +190,27 @@ export class Client {
                 if (host.socket && host.socket._isReady()) {
                     this.host = host;
                     return;
+                } else {
+                    if (host.socket) {
+                        host.socket.onError = (e) => {};
+                        host.socket.disconnect();
+                        host.socket = undefined;
+                    }
+
+                    const url = `ws://${Utils.IpAddress.normaliseAddress(host.hostname)}:${host.port}`;
+                    const options = { ws: { maxPayload: MAX_PAYLOAD_CLIENT } };
+                    const connection = new Nes.Client(url, options);
+                    connection.connect().catch((e) => {});
+
+                    connection.onError = (e) => {
+                        this.logger.error(`${e.message} :bangbang:`);
+                    };
+
+                    host.socket = connection;
                 }
             }
 
-            await Utils.sleep(100);
+            await Utils.sleep(250);
         }
 
         this.logger.debug(
