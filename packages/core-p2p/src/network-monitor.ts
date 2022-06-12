@@ -247,8 +247,8 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                         .slice(0, 8)
                         .map(async (peer: Contracts.P2P.Peer) => {
                             try {
-                                const hisPeers = await this.communicator.getPeers(peer, silent);
-                                return hisPeers || [];
+                                const theirPeers = await this.communicator.getPeers(peer, silent);
+                                return theirPeers || [];
                             } catch (error) {
                                 if (!silent) {
                                     this.logger.debug(
