@@ -228,22 +228,33 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
     }
 
-    public async discoverPeers(pingAll?: boolean): Promise<boolean> {
+    public async discoverPeers(pingAll?: boolean, addAll?: boolean, silent?: boolean): Promise<boolean> {
         const maxPeersPerPeer = 50;
         const ownPeers: Contracts.P2P.Peer[] = this.repository.getPeers();
+        let peersToTry: Contracts.P2P.Peer[] = [...ownPeers];
+
+        if (addAll) {
+            const peersThatWouldThrottle: boolean[] = await Promise.all(
+                peersToTry.map((peer) => this.communicator.wouldThrottleOnFetchingPeers(peer)),
+            );
+            peersToTry = peersToTry.filter((peer, index) => !peersThatWouldThrottle[index]);
+        }
+
         const theirPeers: Contracts.P2P.Peer[] = Object.values(
             (
                 await Promise.all(
-                    Utils.shuffle(this.repository.getPeers())
+                    Utils.shuffle(peersToTry)
                         .slice(0, 8)
                         .map(async (peer: Contracts.P2P.Peer) => {
                             try {
-                                const hisPeers = await this.communicator.getPeers(peer);
+                                const hisPeers = await this.communicator.getPeers(peer, silent);
                                 return hisPeers || [];
                             } catch (error) {
-                                this.logger.debug(
-                                    `Failed to get peers from ${peer.ip}: ${error.message} :exclamation:`,
-                                );
+                                if (!silent) {
+                                    this.logger.debug(
+                                        `Failed to get peers from ${peer.ip}: ${error.message} :exclamation:`,
+                                    );
+                                }
                                 return [];
                             }
                         }),
@@ -264,7 +275,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 .reduce((acc: object, curr: { [ip: string]: Contracts.P2P.Peer }) => ({ ...acc, ...curr }), {}),
         );
 
-        if (pingAll || !this.hasMinimumPeers() || ownPeers.length < theirPeers.length * 0.75) {
+        if (pingAll || addAll || !this.hasMinimumPeers() || ownPeers.length < theirPeers.length * 0.75) {
             await Promise.all(
                 theirPeers.map((p) =>
                     this.app
@@ -272,12 +283,12 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                         .call("validateAndAcceptPeer", { peer: p, options: { lessVerbose: true } }),
                 ),
             );
-            this.pingPeerPorts(pingAll);
+            this.pingPeerPorts(pingAll, silent);
 
             return true;
         }
 
-        this.pingPeerPorts();
+        this.pingPeerPorts(false, silent);
 
         return false;
     }
@@ -712,13 +723,66 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         await Promise.all(peers.map((peer) => this.communicator.postBlock(peer, block)));
     }
 
-    private async pingPeerPorts(pingAll?: boolean): Promise<void> {
+    public hasMinimumPeers(silent?: boolean): boolean {
+        if (this.config.ignoreMinimumNetworkReach) {
+            if (!silent) {
+                this.logger.warning(
+                    "Ignored the minimum network reach because the relay is in seed mode :exclamation:",
+                );
+            }
+
+            return true;
+        }
+
+        return Object.keys(this.repository.getPeers()).length >= this.config.minimumNetworkReach;
+    }
+
+    public async populateSeedPeers(): Promise<any> {
+        const peerList: Contracts.P2P.PeerData[] = this.app.config("peers").list;
+
+        try {
+            const peersFromUrl = await this.loadPeersFromUrlList();
+            for (const peer of peersFromUrl) {
+                if (!peerList.find((p) => p.ip === peer.ip)) {
+                    peerList.push({
+                        ip: peer.ip,
+                        port: peer.port,
+                    });
+                }
+            }
+        } catch {}
+
+        if (!peerList || !peerList.length) {
+            this.app.terminate("No seed peers defined in peers.json :interrobang:");
+        }
+
+        const peers: Contracts.P2P.Peer[] = peerList.map((peer) => {
+            const peerInstance = new Peer(peer.ip, peer.port);
+            peerInstance.version = this.app.version();
+            return peerInstance;
+        });
+
+        return Promise.all(
+            // @ts-ignore
+            Object.values(peers).map((peer: Contracts.P2P.Peer) => {
+                this.repository.forgetPeer(peer);
+
+                return this.app
+                    .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
+                    .call("validateAndAcceptPeer", { peer, options: { seed: true, lessVerbose: true } });
+            }),
+        );
+    }
+
+    private async pingPeerPorts(pingAll?: boolean, silent?: boolean): Promise<void> {
         let peers = this.repository.getPeers();
         if (!pingAll) {
             peers = Utils.shuffle(peers).slice(0, Math.floor(peers.length / 2));
         }
 
-        this.logger.debug(`Checking ports of ${Utils.pluralise("peer", peers.length, true)}`);
+        if (!silent) {
+            this.logger.debug(`Checking ports of ${Utils.pluralise("peer", peers.length, true)}`);
+        }
 
         Promise.all(peers.map((peer) => this.communicator.pingPorts(peer)));
     }
@@ -789,59 +853,12 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         this.updateNetworkStatus();
     }
 
-    private hasMinimumPeers(): boolean {
-        if (this.config.ignoreMinimumNetworkReach) {
-            this.logger.warning("Ignored the minimum network reach because the relay is in seed mode :exclamation:");
-
-            return true;
-        }
-
-        return Object.keys(this.repository.getPeers()).length >= this.config.minimumNetworkReach;
-    }
-
     private pingAll(): void {
         const timeNow: number = new Date().getTime() / 1000;
         if (timeNow - this.lastPinged > 10) {
             this.cleansePeers({ fast: true, forcePing: true, log: false });
             this.lastPinged = timeNow;
         }
-    }
-
-    private async populateSeedPeers(): Promise<any> {
-        const peerList: Contracts.P2P.PeerData[] = this.app.config("peers").list;
-
-        try {
-            const peersFromUrl = await this.loadPeersFromUrlList();
-            for (const peer of peersFromUrl) {
-                if (!peerList.find((p) => p.ip === peer.ip)) {
-                    peerList.push({
-                        ip: peer.ip,
-                        port: peer.port,
-                    });
-                }
-            }
-        } catch {}
-
-        if (!peerList || !peerList.length) {
-            this.app.terminate("No seed peers defined in peers.json :interrobang:");
-        }
-
-        const peers: Contracts.P2P.Peer[] = peerList.map((peer) => {
-            const peerInstance = new Peer(peer.ip, peer.port);
-            peerInstance.version = this.app.version();
-            return peerInstance;
-        });
-
-        return Promise.all(
-            // @ts-ignore
-            Object.values(peers).map((peer: Contracts.P2P.Peer) => {
-                this.repository.forgetPeer(peer);
-
-                return this.app
-                    .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-                    .call("validateAndAcceptPeer", { peer, options: { seed: true, lessVerbose: true } });
-            }),
-        );
     }
 
     private async loadPeersFromUrlList(): Promise<Array<{ ip: string; port: number }>> {

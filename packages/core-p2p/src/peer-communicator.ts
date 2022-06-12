@@ -251,8 +251,10 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         );
     }
 
-    public async getPeers(peer: Contracts.P2P.Peer): Promise<Contracts.P2P.PeerBroadcast[]> {
-        this.logger.debug(`Fetching a fresh peer list from ${peer.url}`);
+    public async getPeers(peer: Contracts.P2P.Peer, silent?: boolean): Promise<Contracts.P2P.PeerBroadcast[]> {
+        if (!silent) {
+            this.logger.debug(`Fetching a fresh peer list from ${peer.url}`);
+        }
 
         const getPeersTimeout = 5000;
         return this.emit(peer, "p2p.peer.getPeers", {}, getPeersTimeout);
@@ -353,6 +355,10 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
     public async wouldThrottleOnDownload(peer: Contracts.P2P.Peer): Promise<boolean> {
         return await this.wouldThrottle(peer, "p2p.blocks.getBlocks");
+    }
+
+    public async wouldThrottleOnFetchingPeers(peer: Contracts.P2P.Peer): Promise<boolean> {
+        return await this.wouldThrottle(peer, "p2p.peer.getPeers");
     }
 
     public async wouldThrottleOnFetchingTransactions(peer: Contracts.P2P.Peer): Promise<boolean> {

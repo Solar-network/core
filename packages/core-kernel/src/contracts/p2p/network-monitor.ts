@@ -26,7 +26,7 @@ export interface NetworkMonitor {
         log?: boolean;
         peerCount?: number;
     }): Promise<void>;
-    discoverPeers(initialRun?: boolean): Promise<boolean>;
+    discoverPeers(pingAll?: boolean, addAll?: boolean, silent?: boolean): Promise<boolean>;
     getAllDelegates(): Promise<string[]>;
     getDelegateName(publicKey: string): string;
     getNetworkHeight(): number;
@@ -44,4 +44,6 @@ export interface NetworkMonitor {
     broadcastBlock(block: Interfaces.IBlock): Promise<void>;
     isColdStart(): boolean;
     completeColdStart(): void;
+    hasMinimumPeers(silent?: boolean): boolean;
+    populateSeedPeers(): Promise<void>;
 }

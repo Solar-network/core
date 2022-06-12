@@ -18,7 +18,7 @@ export interface PeerCommunicator {
 
     pingPorts(peer: Peer): Promise<void>;
 
-    getPeers(peer: Peer): Promise<any>;
+    getPeers(peer: Peer, silent?: boolean): Promise<any>;
 
     hasCommonBlocks(peer: Peer, ids: string[], timeoutMsec?: number): Promise<any>;
 
@@ -34,6 +34,8 @@ export interface PeerCommunicator {
     getUnconfirmedTransactions(peer: Peer): Promise<Buffer[]>;
 
     wouldThrottleOnDownload(peer: Peer): Promise<boolean>;
+
+    wouldThrottleOnFetchingPeers(peer: Peer): Promise<boolean>;
 
     wouldThrottleOnFetchingTransactions(peer: Peer): Promise<boolean>;
 }

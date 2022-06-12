@@ -142,6 +142,26 @@ export class CheckLater implements Action {
                         await this.processor.process(transactions);
                     }
                 }, 4000);
+
+                setInterval(async () => {
+                    if (this.stateStore.getBlockchain().value !== "idle") {
+                        return;
+                    }
+
+                    if (!this.peerNetworkMonitor.hasMinimumPeers(true)) {
+                        await this.peerNetworkMonitor.populateSeedPeers();
+                    }
+                }, 1000);
+
+                setInterval(async () => {
+                    if (this.stateStore.getBlockchain().value !== "idle") {
+                        return;
+                    }
+
+                    if (await this.peerNetworkMonitor.discoverPeers(false, true, true)) {
+                        await this.peerNetworkMonitor.cleansePeers({ log: false });
+                    }
+                }, 30000);
             }
 
             this.blockchain.setWakeUp();
