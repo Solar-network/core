@@ -1,5 +1,6 @@
 import { Container, Contracts, Utils } from "@solar-network/core-kernel";
 import { Interfaces } from "@solar-network/crypto";
+import { closeSync, openSync } from "fs";
 
 import { Database, Meta } from "./contracts";
 import { Filesystem } from "./filesystem/filesystem";
@@ -68,6 +69,9 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             this.database.init(meta!.codec, meta!.skipCompression, options.verify);
 
             await this.database.restore(meta!, { truncate: !!options.truncate });
+
+            this.forceIntegrityCheckOnNextBoot();
+
             renderer.spinner.succeed();
 
             this.logger.info(
@@ -147,6 +151,8 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             this.logger.info(
                 `Rolling back blockchain to last finished round ${roundInfo.round.toLocaleString()} with last block height ${newLastBlock.data.height.toLocaleString()}`,
             );
+
+            this.forceIntegrityCheckOnNextBoot();
         } catch (err) {
             this.logger.error("ROLLBACK failed");
             this.logger.error(err.stack);
@@ -166,9 +172,14 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             this.logger.info("Running TRUNCATE");
 
             await this.database.truncate();
+            this.forceIntegrityCheckOnNextBoot();
         } catch (err) {
             this.logger.error("TRUNCATE failed");
             this.logger.error(err.stack);
         }
+    }
+
+    private forceIntegrityCheckOnNextBoot(): void {
+        closeSync(openSync(`${process.env.CORE_PATH_TEMP}/force-integrity-check.lock`, "w"));
     }
 }

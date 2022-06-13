@@ -2,6 +2,7 @@ import { DatabaseService } from "@solar-network/core-database";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 import { DatabaseInteraction } from "@solar-network/core-state";
 import { Interfaces, Managers } from "@solar-network/crypto";
+import { existsSync, unlinkSync } from "fs";
 
 import { Action } from "../contracts";
 
@@ -40,7 +41,19 @@ export class Initialise implements Action {
                 .get<Contracts.State.StateLoader>(Container.Identifiers.StateLoader)
                 .run();
 
-            if (!loadedState) {
+            const forceIntegrityCheckLock: string = `${process.env.CORE_PATH_TEMP}/force-integrity-check.lock`;
+            let forceIntegrityCheck: boolean = false;
+
+            if (existsSync(forceIntegrityCheckLock)) {
+                try {
+                    unlinkSync(forceIntegrityCheckLock);
+                } catch {
+                    //
+                }
+                forceIntegrityCheck = true;
+            }
+
+            if (!loadedState || forceIntegrityCheck) {
                 if (!this.stateStore.getRestoredDatabaseIntegrity()) {
                     this.logger.info("Verifying database integrity :hourglass_flowing_sand:");
 
