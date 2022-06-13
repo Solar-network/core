@@ -25,7 +25,7 @@ export class VoteBuilder extends TransactionBuilder<VoteBuilder> {
                 .map((vote) => (vote.startsWith("+") ? vote.slice(1) : vote));
             const voteObject: Record<string, number> = {};
 
-            const weight: number = Math.round((Math.trunc((100 / voteArray.length) * 100) / 100) * 100);
+            const weight: number = Math.trunc((((100 / voteArray.length) * 100) / 100) * 100);
             let remainder: number = 10000;
 
             if (voteArray.length > 0) {

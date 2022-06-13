@@ -24,7 +24,7 @@ export class VoteTransaction extends Transaction {
             for (const [vote, percent] of Object.entries(data.asset.votes)) {
                 buff.writeUInt8(vote.length);
                 buff.writeBuffer(Buffer.from(vote));
-                buff.writeUInt16LE(percent * 100);
+                buff.writeUInt16LE(Math.round(percent * 100));
             }
         }
 

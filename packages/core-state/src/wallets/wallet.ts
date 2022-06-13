@@ -319,7 +319,7 @@ export class Wallet implements Contracts.State.Wallet {
         for (const [delegate, percent] of Object.entries(delegates)) {
             votes[delegate] = {};
             for (const [key, value] of Object.entries(balances)) {
-                votes[delegate][key] = value.times(Math.trunc(percent * 100)).dividedBy(10000);
+                votes[delegate][key] = value.times(Math.round(percent * 100)).dividedBy(10000);
             }
         }
 
