@@ -25,10 +25,10 @@ export class VoteBuilder extends TransactionBuilder<VoteBuilder> {
                 .map((vote) => (vote.startsWith("+") ? vote.slice(1) : vote));
             const voteObject: Record<string, number> = {};
 
-            const weight: number = Math.trunc((((100 / voteArray.length) * 100) / 100) * 100);
-            let remainder: number = 10000;
-
             if (voteArray.length > 0) {
+                const weight: number = Math.trunc((((100 / voteArray.length) * 100) / 100) * 100);
+                let remainder: number = 10000;
+
                 for (const vote of voteArray) {
                     voteObject[vote] = weight / 100;
                     remainder -= weight;
