@@ -19,7 +19,7 @@ export class BuilderFactory {
     public static transfer(): LegacyTransferBuilder | TransferBuilder {
         if (
             configManager.getMilestone().legacyTransfer &&
-            configManager.getMilestone().transferRecipients.minimum > 1
+            configManager.getMilestone().transfer.minimum > 1
         ) {
             return new LegacyTransferBuilder();
         }

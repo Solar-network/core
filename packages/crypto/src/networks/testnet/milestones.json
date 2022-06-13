@@ -51,7 +51,7 @@
         },
         "legacyVote": true,
         "legacyTransfer": true,
-        "transferRecipients": {
+        "transfer": {
             "maximum": 256,
             "minimum": 2
         },

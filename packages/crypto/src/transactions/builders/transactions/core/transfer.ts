@@ -1,4 +1,4 @@
-import { MaximumRecipientCountExceededError } from "../../../../errors";
+import { MaximumTransferCountExceededError } from "../../../../errors";
 import { ITransactionData } from "../../../../interfaces";
 import { configManager } from "../../../../managers";
 import { BigNumber } from "../../../../utils";
@@ -44,9 +44,9 @@ export class TransferBuilder extends TransactionBuilder<TransferBuilder> {
 
     public addTransfer(recipientId: string, amount: string): TransferBuilder {
         if (this.data.asset && this.data.asset.transfers) {
-            const limit: number = configManager.getMilestone().transferRecipients.maximum || 256;
+            const limit: number = configManager.getMilestone().transfer.maximum || 256;
             if (this.data.asset.transfers.length >= limit) {
-                throw new MaximumRecipientCountExceededError(limit);
+                throw new MaximumTransferCountExceededError(limit);
             }
 
             this.data.asset.transfers.push({

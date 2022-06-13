@@ -100,9 +100,9 @@ export class MissingMilestoneFeeError extends CryptoError {
     }
 }
 
-export class MaximumRecipientCountExceededError extends CryptoError {
+export class MaximumTransferCountExceededError extends CryptoError {
     public constructor(limit: number) {
-        super(`Number of recipients exceeded the allowed maximum of ${limit}`);
+        super(`Number of transfers exceeded the allowed maximum of ${limit}`);
     }
 }
 

@@ -38,8 +38,8 @@ const transactionType = (ajv: Ajv): void => {
                     (!parentObject.typeGroup || parentObject.typeGroup === TransactionTypeGroup.Core)
                 ) {
                     if (parentObject.asset && parentObject.asset.transfers) {
-                        const maxLimit: number = configManager.getMilestone().transferRecipients.maximum || 256;
-                        const minLimit: number = configManager.getMilestone().transferRecipients.minimum || 1;
+                        const maxLimit: number = configManager.getMilestone().transfer.maximum || 256;
+                        const minLimit: number = configManager.getMilestone().transfer.minimum || 1;
                         return (
                             parentObject.asset.transfers.length >= minLimit &&
                             parentObject.asset.transfers.length <= maxLimit
