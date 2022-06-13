@@ -22,11 +22,11 @@
                 "htlcLock": 82,
                 "htlcRefund": 0,
                 "ipfs": 98,
+                "legacyTransfer": 99,
                 "legacyVote": 98,
-                "multiPayment": 85,
                 "multiSignature": 16,
                 "secondSignature": 99,
-                "transfer": 99,
+                "transfer": 85,
                 "vote": 98
             },
             "minFee": 11299
@@ -41,16 +41,20 @@
                 "htlcLock": 5000000,
                 "htlcRefund": 0,
                 "ipfs": 5000000,
+                "legacyTransfer": 5000000,
                 "legacyVote": 5000000,
-                "multiPayment": 50000000,
                 "multiSignature": 5000000,
                 "secondSignature": 5000000,
-                "transfer": 5000000,
+                "transfer": 50000000,
                 "vote": 9000000
             }
         },
         "legacyVote": true,
-        "multiPaymentLimit": 256,
+        "legacyTransfer": true,
+        "transferRecipients": {
+            "maximum": 256,
+            "minimum": 2
+        },
         "onlyActiveDelegatesInCalculations": true,
         "reward": "0",
         "vendorFieldLength": 255

@@ -5,7 +5,7 @@ import { HtlcClaimBuilder } from "./transactions/core/htlc-claim";
 import { HtlcLockBuilder } from "./transactions/core/htlc-lock";
 import { HtlcRefundBuilder } from "./transactions/core/htlc-refund";
 import { IPFSBuilder } from "./transactions/core/ipfs";
-import { MultiPaymentBuilder } from "./transactions/core/multi-payment";
+import { LegacyTransferBuilder } from "./transactions/core/legacy-transfer";
 import { MultiSignatureBuilder } from "./transactions/core/multi-signature";
 import { SecondSignatureBuilder } from "./transactions/core/second-signature";
 import { TransferBuilder } from "./transactions/core/transfer";
@@ -16,7 +16,14 @@ import { VoteBuilder } from "./transactions/solar/vote";
 export * from "./transactions/transaction";
 
 export class BuilderFactory {
-    public static transfer(): TransferBuilder {
+    public static transfer(): LegacyTransferBuilder | TransferBuilder {
+        if (
+            configManager.getMilestone().legacyTransfer &&
+            configManager.getMilestone().transferRecipients.minimum > 1
+        ) {
+            return new LegacyTransferBuilder();
+        }
+
         return new TransferBuilder();
     }
 
@@ -36,8 +43,8 @@ export class BuilderFactory {
         return new IPFSBuilder();
     }
 
-    public static multiPayment(): MultiPaymentBuilder {
-        return new MultiPaymentBuilder();
+    public static multiPayment(): TransferBuilder {
+        return new TransferBuilder();
     }
 
     public static delegateResignation(): DelegateResignationBuilder {

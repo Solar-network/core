@@ -1,13 +1,14 @@
-import { Container, Contracts, Utils } from "@solar-network/core-kernel";
-import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
 
-import { isRecipientOnActiveNetwork } from "../../utils";
+import { InsufficientBalanceError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
-// todo: revisit the implementation, container usage and arguments after core-database rework
-// todo: replace unnecessary function arguments with dependency injection to avoid passing around references
 @Container.injectable()
 export class TransferTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.TransactionHistoryService)
+    private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
+
     public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
         return [];
     }
@@ -21,10 +22,21 @@ export class TransferTransactionHandler extends TransactionHandler {
     }
 
     public async bootstrap(): Promise<void> {
-        const transactions = await this.transactionRepository.findReceivedTransactions();
-        for (const transaction of transactions) {
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.recipientId);
-            wallet.increaseBalance(Utils.BigNumber.make(transaction.amount));
+        const criteria = {
+            typeGroup: this.getConstructor().typeGroup,
+            type: this.getConstructor().type,
+        };
+
+        for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
+            AppUtils.assert.defined<string>(transaction.senderPublicKey);
+            AppUtils.assert.defined<object>(transaction.asset?.transfers);
+
+            const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            for (const transfer of transaction.asset.transfers) {
+                const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
+                recipient.increaseBalance(transfer.amount);
+                sender.decreaseBalance(transfer.amount);
+            }
         }
     }
 
@@ -34,41 +46,71 @@ export class TransferTransactionHandler extends TransactionHandler {
 
     public async throwIfCannotBeApplied(
         transaction: Interfaces.ITransaction,
-        sender: Contracts.State.Wallet,
+        wallet: Contracts.State.Wallet,
     ): Promise<void> {
-        return super.throwIfCannotBeApplied(transaction, sender);
-    }
+        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
 
-    public hasVendorField(): boolean {
-        return true;
-    }
+        const transfers: Interfaces.ITransferItem[] = transaction.data.asset.transfers;
+        const totalTransfersAmount = transfers.reduce((a, p) => a.plus(p.amount), Utils.BigNumber.ZERO);
 
-    public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        Utils.assert.defined<string>(transaction.data.recipientId);
-        const recipientId: string = transaction.data.recipientId;
-
-        if (!isRecipientOnActiveNetwork(recipientId)) {
-            const network: string = Managers.configManager.get<string>("network.pubKeyHash");
-            throw new Contracts.TransactionPool.PoolError(
-                `Recipient ${recipientId} is not on the same network: ${network} `,
-                "ERR_INVALID_RECIPIENT",
-            );
+        if (wallet.getBalance().minus(totalTransfersAmount).minus(transaction.data.fee).isNegative()) {
+            throw new InsufficientBalanceError(totalTransfersAmount.plus(transaction.data.fee), wallet.getBalance());
         }
+
+        return super.throwIfCannotBeApplied(transaction, wallet);
+    }
+
+    public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
+        await super.applyToSender(transaction);
+
+        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
+
+        const totalTransfersAmount = transaction.data.asset.transfers.reduce(
+            (a, p) => a.plus(p.amount),
+            Utils.BigNumber.ZERO,
+        );
+
+        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+
+        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+
+        sender.decreaseBalance(totalTransfersAmount);
+    }
+
+    public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
+        await super.revertForSender(transaction);
+
+        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
+
+        const totalPaymentsAmount = transaction.data.asset.transfers.reduce(
+            (a, p) => a.plus(p.amount),
+            Utils.BigNumber.ZERO,
+        );
+
+        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+
+        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+
+        sender.increaseBalance(totalPaymentsAmount);
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
-        Utils.assert.defined<string>(transaction.data.recipientId);
+        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
 
-        const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.recipientId);
+        for (const transfer of transaction.data.asset.transfers) {
+            const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
-        recipient.increaseBalance(transaction.data.amount);
+            recipient.increaseBalance(transfer.amount);
+        }
     }
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
-        Utils.assert.defined<string>(transaction.data.recipientId);
+        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
 
-        const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.recipientId);
+        for (const transfer of transaction.data.asset.transfers) {
+            const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
-        recipient.decreaseBalance(transaction.data.amount);
+            recipient.decreaseBalance(transfer.amount);
+        }
     }
 }

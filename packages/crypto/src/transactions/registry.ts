@@ -16,13 +16,13 @@ class TransactionRegistry {
         TransactionTypeFactory.initialise(this.transactionTypes);
 
         // Core transactions
-        this.registerTransactionType(Core.TransferTransaction);
+        this.registerTransactionType(Core.LegacyTransferTransaction);
         this.registerTransactionType(Core.SecondSignatureRegistrationTransaction);
         this.registerTransactionType(Core.DelegateRegistrationTransaction);
         this.registerTransactionType(Core.LegacyVoteTransaction);
         this.registerTransactionType(Core.MultiSignatureRegistrationTransaction);
         this.registerTransactionType(Core.IpfsTransaction);
-        this.registerTransactionType(Core.MultiPaymentTransaction);
+        this.registerTransactionType(Core.TransferTransaction);
         this.registerTransactionType(Core.DelegateResignationTransaction);
         this.registerTransactionType(Core.HtlcLockTransaction);
         this.registerTransactionType(Core.HtlcClaimTransaction);

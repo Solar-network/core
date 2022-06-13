@@ -194,7 +194,7 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
             .addSelect("recipient_id", "recipientId")
             .addSelect("SUM(amount)", "amount")
             .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-            .andWhere(`type = ${Enums.TransactionType.Core.Transfer}`)
+            .andWhere(`type = ${Enums.TransactionType.Core.LegacyTransfer}`)
             .groupBy("recipient_id")
             .getRawMany();
     }

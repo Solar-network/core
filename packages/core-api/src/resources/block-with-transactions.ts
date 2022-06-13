@@ -20,13 +20,13 @@ export class BlockWithTransactionsResource implements Resource {
         const blockData: Interfaces.IBlockData = resource.data;
         const blockTransactions: Interfaces.ITransactionData[] = resource.transactions;
 
-        const totalMultiPaymentTransferred: Utils.BigNumber = blockTransactions
+        const totalTransferred: Utils.BigNumber = blockTransactions
             .filter((t) => t.typeGroup === Enums.TransactionTypeGroup.Core)
-            .filter((t) => t.type === Enums.TransactionType.Core.MultiPayment)
-            .flatMap((t) => t.asset!.payments)
-            .reduce((sum, payment) => sum.plus(payment!.amount), Utils.BigNumber.ZERO);
+            .filter((t) => t.type === Enums.TransactionType.Core.Transfer)
+            .flatMap((t) => t.asset!.transfers)
+            .reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO);
 
-        const totalAmountTransferred: Utils.BigNumber = blockData.totalAmount.plus(totalMultiPaymentTransferred);
+        const totalAmountTransferred: Utils.BigNumber = blockData.totalAmount.plus(totalTransferred);
         const generator: Contracts.State.Wallet = this.walletRepository.findByPublicKey(blockData.generatorPublicKey);
         const lastBlock: Interfaces.IBlock = this.blockchainService.getLastBlock();
 

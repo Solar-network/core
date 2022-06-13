@@ -207,9 +207,9 @@ export class SXPSwap {
             return (this as any).performGenericWalletChecks(transaction, sender);
         };
 
-        (Handlers.Core.TransferTransactionHandler as any).prototype._throwIfCannotBeApplied =
-            Handlers.Core.TransferTransactionHandler.prototype.throwIfCannotBeApplied;
-        Handlers.Core.TransferTransactionHandler.prototype.throwIfCannotBeApplied = async function (
+        (Handlers.Core.LegacyTransferTransactionHandler as any).prototype._throwIfCannotBeApplied =
+            Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotBeApplied;
+        Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotBeApplied = async function (
             transaction: Interfaces.ITransaction,
             sender: Contracts.State.Wallet,
             status?: string,
@@ -387,9 +387,9 @@ export class SXPSwap {
             }
         };
 
-        (Handlers.Core.TransferTransactionHandler as any).prototype._throwIfCannotEnterPool =
-            Handlers.Core.TransferTransactionHandler.prototype.throwIfCannotEnterPool;
-        Handlers.Core.TransferTransactionHandler.prototype.throwIfCannotEnterPool = async function (
+        (Handlers.Core.LegacyTransferTransactionHandler as any).prototype._throwIfCannotEnterPool =
+            Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotEnterPool;
+        Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotEnterPool = async function (
             transaction: Interfaces.ITransaction,
         ): Promise<void> {
             await (this as any)._throwIfCannotEnterPool(transaction);

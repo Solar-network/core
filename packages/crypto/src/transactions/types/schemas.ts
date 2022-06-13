@@ -60,11 +60,11 @@ export const strictSchema = (schema: TransactionSchema): TransactionSchema => {
     return strict;
 };
 
-export const transfer = extend(transactionBaseSchema, {
-    $id: "transfer",
+export const legacyTransfer = extend(transactionBaseSchema, {
+    $id: "legacyTransfer",
     required: ["recipientId"],
     properties: {
-        type: { transactionType: TransactionType.Core.Transfer },
+        type: { transactionType: TransactionType.Core.LegacyTransfer },
         fee: { bignumber: { minimum: 1, bypassGenesis: true } },
         recipientId: { $ref: "address" },
         expiration: { type: "integer", minimum: 0 },
@@ -331,19 +331,19 @@ export const htlcRefund = extend(transactionBaseSchema, {
     },
 });
 
-export const multiPayment = extend(transactionBaseSchema, {
-    $id: "multiPayment",
+export const transfer = extend(transactionBaseSchema, {
+    $id: "transfer",
     properties: {
-        type: { transactionType: TransactionType.Core.MultiPayment },
+        type: { transactionType: TransactionType.Core.Transfer },
         amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
         asset: {
             type: "object",
-            required: ["payments"],
+            required: ["transfers"],
             properties: {
-                payments: {
+                transfers: {
                     type: "array",
-                    minItems: 2,
+                    minItems: 1,
                     additionalItems: false,
                     uniqueItems: false,
                     items: {

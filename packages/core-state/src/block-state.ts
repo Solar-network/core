@@ -241,12 +241,12 @@ export class BlockState implements Contracts.State.BlockState {
         lockRecipientWallet: Contracts.State.Wallet,
     ): void {
         if (
-            transaction.type === Enums.TransactionType.Core.MultiPayment &&
+            transaction.type === Enums.TransactionType.Core.Transfer &&
             transaction.typeGroup === Enums.TransactionTypeGroup.Core
         ) {
-            AppUtils.assert.defined<Interfaces.IMultiPaymentItem[]>(transaction.asset?.payments);
+            AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.asset?.transfers);
 
-            for (const { recipientId } of transaction.asset.payments) {
+            for (const { recipientId } of transaction.asset.transfers) {
                 const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(recipientId);
                 this.updateWalletVoteBalance(recipientWallet);
             }

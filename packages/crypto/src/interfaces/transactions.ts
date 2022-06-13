@@ -41,7 +41,7 @@ export interface ITransactionAsset {
     multiSignatureLegacy?: IMultiSignatureLegacyAsset;
     multiSignature?: IMultiSignatureAsset;
     ipfs?: string;
-    payments?: IMultiPaymentItem[];
+    transfers?: ITransferItem[];
     lock?: IHtlcLockAsset;
     claim?: IHtlcClaimAsset;
     refund?: IHtlcRefundAsset;
@@ -117,7 +117,7 @@ export interface ISchemaValidationResult<T = any> {
     errors?: ErrorObject[] | undefined;
 }
 
-export interface IMultiPaymentItem {
+export interface ITransferItem {
     amount: BigNumber;
     recipientId: string;
 }
