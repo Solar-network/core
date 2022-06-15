@@ -17,10 +17,7 @@ export * from "./transactions/transaction";
 
 export class BuilderFactory {
     public static transfer(): LegacyTransferBuilder | TransferBuilder {
-        if (
-            configManager.getMilestone().legacyTransfer &&
-            configManager.getMilestone().transfer.minimum > 1
-        ) {
+        if (configManager.getMilestone().legacyTransfer && configManager.getMilestone().transfer.minimum > 1) {
             return new LegacyTransferBuilder();
         }
 
