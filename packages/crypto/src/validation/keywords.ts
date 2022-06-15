@@ -31,7 +31,7 @@ const transactionType = (ajv: Ajv): void => {
         // @ts-ignore
         compile(schema) {
             return (data, dataPath, parentObject: ITransactionData) => {
-                // Impose dynamic recipient limit based on milestone
+                // Impose dynamic limit based on milestone
                 if (
                     data === TransactionType.Core.Transfer &&
                     parentObject &&
