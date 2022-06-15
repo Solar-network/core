@@ -33,7 +33,7 @@ export abstract class Method {
         for (const transaction of transactions) {
             AppUtils.assert.defined<string>(transaction.id);
 
-            totals.amount = totals.amount.plus(transaction.amount);
+            totals.amount = totals.amount.plus(transaction.amount || Utils.BigNumber.ZERO);
             totals.fee = totals.fee.plus(transaction.fee);
 
             payloadBuffers.push(Buffer.from(transaction.id, "hex"));
@@ -56,6 +56,6 @@ export abstract class Method {
             },
             keys,
             options.aux,
-        )!; // todo: this method should never return undefined
+        );
     }
 }
