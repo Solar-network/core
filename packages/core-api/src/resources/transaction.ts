@@ -43,18 +43,21 @@ export class TransactionResource implements Resource {
             version: resource.version,
             type: resource.type,
             typeGroup: resource.typeGroup,
-            amount: resource.amount.toFixed(),
+            amount:
+                typeof resource.amount !== "undefined" && !resource.amount.isZero()
+                    ? resource.amount.toFixed()
+                    : undefined,
             fee: resource.fee.toFixed(),
             burnedFee: typeof resource.burnedFee !== "undefined" ? resource.burnedFee.toFixed() : undefined,
             sender,
             senderPublicKey: resource.senderPublicKey,
-            recipient: resource.recipientId || sender,
+            recipient: resource.recipientId,
             signature: resource.signature,
             signSignature: resource.signSignature || resource.secondSignature,
             signatures: resource.signatures,
             vendorField: resource.vendorField,
             asset: resource.asset,
-            confirmations: 0, // ! resource.block ? lastBlock.data.height - resource.block.height + 1 : 0
+            confirmations: 0,
             timestamp:
                 typeof resource.timestamp !== "undefined" ? AppUtils.formatTimestamp(resource.timestamp) : undefined,
             nonce: resource.nonce?.toFixed(),

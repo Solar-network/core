@@ -50,7 +50,6 @@ export abstract class TransferTransaction extends Transaction {
             });
         }
 
-        data.amount = BigNumber.ZERO;
         data.asset = { transfers };
     }
 }

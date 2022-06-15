@@ -24,6 +24,18 @@ export class HtlcLockBuilder extends TransactionBuilder<HtlcLockBuilder> {
         return this;
     }
 
+    public amount(amount: string): HtlcLockBuilder {
+        this.data.amount = BigNumber.make(amount);
+
+        return this.instance();
+    }
+
+    public recipientId(recipientId: string): HtlcLockBuilder {
+        this.data.recipientId = recipientId;
+
+        return this.instance();
+    }
+
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
         struct.recipientId = this.data.recipientId;

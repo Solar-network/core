@@ -22,6 +22,18 @@ export class LegacyTransferBuilder extends TransactionBuilder<LegacyTransferBuil
         return this.instance();
     }
 
+    public amount(amount: string): LegacyTransferBuilder {
+        this.data.amount = BigNumber.make(amount);
+
+        return this.instance();
+    }
+
+    public recipientId(recipientId: string): LegacyTransferBuilder {
+        this.data.recipientId = recipientId;
+
+        return this.instance();
+    }
+
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
         struct.amount = this.data.amount;

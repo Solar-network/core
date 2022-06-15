@@ -137,31 +137,16 @@ export abstract class TransactionHandler {
 
         this.verifyTransactionNonceApply(sender, transaction);
 
-        AppUtils.assert.defined<AppUtils.BigNumber>(data.nonce);
+        AppUtils.assert.defined<Utils.BigNumber>(data.nonce);
 
         sender.setNonce(data.nonce);
 
-        const newBalance: Utils.BigNumber = sender.getBalance().minus(data.amount).minus(data.fee);
+        const newBalance: Utils.BigNumber = sender
+            .getBalance()
+            .minus(data.amount || Utils.BigNumber.ZERO)
+            .minus(data.fee);
 
         assert(Utils.isException(transaction.data) || !newBalance.isNegative());
-
-        // negativeBalanceExceptions check is never executed, because performGenericWalletChecks already checks balance
-        // if (process.env.CORE_ENV === "test") {
-        //     assert(Utils.isException(transaction.data.id) || !newBalance.isNegative());
-        // } else {
-        //     if (newBalance.isNegative()) {
-        //         const negativeBalanceExceptions: Record<string, Record<string, string>> =
-        //             Managers.configManager.get("exceptions.negativeBalances") || {};
-        //
-        //         AppUtils.assert.defined<string>(sender.publicKey);
-        //
-        //         const negativeBalances: Record<string, string> = negativeBalanceExceptions[sender.publicKey] || {};
-        //
-        //         if (!newBalance.isEqualTo(negativeBalances[sender.nonce.toString()] || 0)) {
-        //             throw new InsufficientBalanceError();
-        //         }
-        //     }
-        // }
 
         sender.setBalance(newBalance);
     }
@@ -173,7 +158,8 @@ export abstract class TransactionHandler {
 
         const data: Interfaces.ITransactionData = transaction.data;
 
-        sender.increaseBalance(data.amount.plus(data.fee));
+        const amount: Utils.BigNumber = data.amount || Utils.BigNumber.ZERO;
+        sender.increaseBalance(amount.plus(data.fee));
 
         this.verifyTransactionNonceRevert(sender, transaction);
 
@@ -220,8 +206,10 @@ export abstract class TransactionHandler {
 
         this.verifyTransactionNonceApply(sender, transaction);
 
-        if (sender.getBalance().minus(data.amount).minus(data.fee).isNegative()) {
-            throw new InsufficientBalanceError(data.amount.plus(data.fee), sender.getBalance());
+        const amount: Utils.BigNumber = data.amount || Utils.BigNumber.ZERO;
+
+        if (sender.getBalance().minus(amount).minus(data.fee).isNegative()) {
+            throw new InsufficientBalanceError(amount.plus(data.fee), sender.getBalance());
         }
 
         if (data.senderPublicKey !== sender.getPublicKey()) {
@@ -273,7 +261,7 @@ export abstract class TransactionHandler {
      * @memberof Wallet
      */
     protected verifyTransactionNonceApply(wallet: Contracts.State.Wallet, transaction: Interfaces.ITransaction): void {
-        const nonce: AppUtils.BigNumber = transaction.data.nonce || AppUtils.BigNumber.ZERO;
+        const nonce: Utils.BigNumber = transaction.data.nonce || Utils.BigNumber.ZERO;
 
         if (!wallet.getNonce().plus(1).isEqualTo(nonce)) {
             throw new UnexpectedNonceError(nonce, wallet, false);
@@ -289,7 +277,7 @@ export abstract class TransactionHandler {
      * @memberof Wallet
      */
     protected verifyTransactionNonceRevert(wallet: Contracts.State.Wallet, transaction: Interfaces.ITransaction): void {
-        const nonce: AppUtils.BigNumber = transaction.data.nonce || AppUtils.BigNumber.ZERO;
+        const nonce: Utils.BigNumber = transaction.data.nonce || Utils.BigNumber.ZERO;
 
         if (!wallet.getNonce().isEqualTo(nonce)) {
             throw new UnexpectedNonceError(nonce, wallet, true);

@@ -16,7 +16,6 @@ export class TransferBuilder extends TransactionBuilder<TransferBuilder> {
         this.data.asset = {
             transfers: [],
         };
-        this.data.amount = BigNumber.make(0);
     }
 
     public amount(amountString: string): TransferBuilder {
