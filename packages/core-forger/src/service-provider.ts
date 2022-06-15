@@ -31,6 +31,8 @@ export class ServiceProvider extends Providers.ServiceProvider {
      */
     public async boot(): Promise<void> {
         const aux: string | undefined = this.config().get("aux");
+        const delay: number = this.config().get("delay") || 0;
+
         const delegates: Delegate[] = this.makeDelegates();
 
         const forgerService = this.app.get<ForgerService>(Container.Identifiers.ForgerService);
@@ -38,9 +40,9 @@ export class ServiceProvider extends Providers.ServiceProvider {
         forgerService.register(this.config().get("hosts") as RelayHost[]);
 
         if (aux) {
-            await forgerService.boot(delegates, Buffer.from(aux, "hex"));
+            await forgerService.boot(delegates, delay, Buffer.from(aux, "hex"));
         } else {
-            await forgerService.boot(delegates);
+            await forgerService.boot(delegates, delay);
         }
     }
 

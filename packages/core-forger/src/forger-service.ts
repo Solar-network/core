@@ -76,6 +76,13 @@ export class ForgerService {
      * @type {number}
      * @memberof ForgerService
      */
+    private delay: number = 0;
+
+    /**
+     * @private
+     * @type {number}
+     * @memberof ForgerService
+     */
     private errorCount: number = 0;
 
     /**
@@ -160,12 +167,13 @@ export class ForgerService {
      * @returns {Promise<void>}
      * @memberof ForgerService
      */
-    public async boot(delegates: Delegate[], aux?: Buffer): Promise<void> {
+    public async boot(delegates: Delegate[], delay: number, aux?: Buffer): Promise<void> {
         if (this.handlerProvider.isRegistrationRequired()) {
             this.handlerProvider.registerHandlers();
         }
 
         this.aux = aux;
+        this.delay = delay;
 
         this.delegates = delegates.filter((value, index, self) => {
             return index === self.findIndex((delegate) => delegate.publicKey === value.publicKey);
@@ -282,6 +290,10 @@ export class ForgerService {
         firstAttempt: boolean,
         round: Contracts.P2P.CurrentRound,
     ): Promise<void> {
+        if (this.delay > 0) {
+            await delay(this.delay);
+        }
+
         setImmediate(async () => {
             let errored = false;
             const minimumMs = 2000;
