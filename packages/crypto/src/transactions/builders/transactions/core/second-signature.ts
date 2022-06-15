@@ -1,6 +1,5 @@
 import { Keys } from "../../../../identities";
 import { ITransactionAsset, ITransactionData } from "../../../../interfaces";
-import { BigNumber } from "../../../../utils";
 import { Core } from "../../../types";
 import { TransactionBuilder } from "../transaction";
 
@@ -11,8 +10,6 @@ export class SecondSignatureBuilder extends TransactionBuilder<SecondSignatureBu
         this.data.type = Core.SecondSignatureRegistrationTransaction.type;
         this.data.typeGroup = Core.SecondSignatureRegistrationTransaction.typeGroup;
         this.data.fee = Core.SecondSignatureRegistrationTransaction.staticFee();
-        this.data.amount = BigNumber.ZERO;
-        this.data.recipientId = undefined;
         this.data.senderPublicKey = undefined;
         this.data.asset = { signature: {} } as ITransactionAsset;
     }
@@ -27,8 +24,6 @@ export class SecondSignatureBuilder extends TransactionBuilder<SecondSignatureBu
 
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
-        struct.amount = this.data.amount;
-        struct.recipientId = this.data.recipientId;
         struct.asset = this.data.asset;
 
         super.validate(struct);

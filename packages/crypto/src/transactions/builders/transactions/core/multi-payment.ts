@@ -16,7 +16,6 @@ export class MultiPaymentBuilder extends TransactionBuilder<MultiPaymentBuilder>
         this.data.asset = {
             payments: [],
         };
-        this.data.amount = BigNumber.make(0);
     }
 
     public addPayment(recipientId: string, amount: string): MultiPaymentBuilder {
@@ -38,7 +37,6 @@ export class MultiPaymentBuilder extends TransactionBuilder<MultiPaymentBuilder>
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
         struct.senderPublicKey = this.data.senderPublicKey;
-        struct.amount = this.data.amount;
         struct.asset = this.data.asset;
 
         super.validate(struct);

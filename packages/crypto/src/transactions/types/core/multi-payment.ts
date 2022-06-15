@@ -50,7 +50,6 @@ export abstract class MultiPaymentTransaction extends Transaction {
             });
         }
 
-        data.amount = BigNumber.ZERO;
         data.asset = { payments };
     }
 }

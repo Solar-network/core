@@ -22,6 +22,18 @@ export class TransferBuilder extends TransactionBuilder<TransferBuilder> {
         return this.instance();
     }
 
+    public amount(amount: string): TransferBuilder {
+        this.data.amount = BigNumber.make(amount);
+
+        return this.instance();
+    }
+
+    public recipientId(recipientId: string): TransferBuilder {
+        this.data.recipientId = recipientId;
+
+        return this.instance();
+    }
+
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
         struct.amount = this.data.amount;
