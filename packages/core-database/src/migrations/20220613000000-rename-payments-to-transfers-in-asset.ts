@@ -6,7 +6,7 @@ export class RenamePaymentsToTransfersInAsset20220613000000 implements Migration
         await queryRunner.query(`
             UPDATE transactions SET asset = JSONB_SET(asset #- '{payments}', '{transfers}', asset #> '{payments}') WHERE type_group = ${Enums.TransactionTypeGroup.Core} AND type = ${Enums.TransactionType.Core.Transfer};
             DROP INDEX transactions_asset_payments;
-            CREATE INDEX IF NOT EXISTS transactions_asset_transfers ON transactions USING GIN ((asset->'transfers'));
+            CREATE INDEX transactions_asset_transfers ON transactions USING GIN ((asset->'transfers')) WITH (fastupdate = off);
         `);
     }
 
@@ -14,7 +14,7 @@ export class RenamePaymentsToTransfersInAsset20220613000000 implements Migration
         await queryRunner.query(`
             UPDATE transactions SET asset = JSONB_SET(asset #- '{transfers}', '{payments}', asset #> '{transfers}') WHERE type_group = ${Enums.TransactionTypeGroup.Core} AND type = ${Enums.TransactionType.Core.Transfer};
             DROP INDEX transactions_asset_transfers;
-            CREATE INDEX IF NOT EXISTS transactions_asset_payments ON transactions USING GIN ((asset->'payments'));
+            CREATE INDEX transactions_asset_payments ON transactions USING GIN ((asset->'payments')) WITH (fastupdate = off);
         `);
     }
 }
