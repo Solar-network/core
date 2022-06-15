@@ -51,13 +51,13 @@ export class ServiceProvider extends Providers.ServiceProvider {
             .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("state", "null"));
 
         // Core transactions
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.TransferTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.LegacyTransferTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.SecondSignatureRegistrationTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.DelegateRegistrationTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.LegacyVoteTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.MultiSignatureRegistrationTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.IpfsTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.MultiPaymentTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.TransferTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.DelegateResignationTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.HtlcLockTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(Core.HtlcClaimTransactionHandler);

@@ -1,4 +1,5 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Enums } from "@solar-network/crypto";
 
 import { Resource } from "../interfaces";
 
@@ -25,17 +26,27 @@ export class TransactionWithBlockResource implements Resource {
         const signSignature: string | undefined = transactionData.signSignature ?? transactionData.secondSignature;
         const confirmations: number = this.stateStore.getLastHeight() - blockData.height + 1;
 
+        let amount: string | undefined =
+            typeof transactionData.amount !== "undefined" && !transactionData.amount.isZero()
+                ? transactionData.amount.toFixed()
+                : undefined;
+
+        if (
+            transactionData.typeGroup === Enums.TransactionTypeGroup.Core &&
+            transactionData.type === Enums.TransactionType.Core.Transfer
+        ) {
+            amount = transactionData
+                .asset!.transfers!.reduce((sum, transfer) => sum.plus(transfer!.amount), AppUtils.BigNumber.ZERO)
+                .toFixed();
+        }
+
         return {
             id: transactionData.id,
             blockId: transactionData.blockId,
             version: transactionData.version,
             type: transactionData.type,
             typeGroup: transactionData.typeGroup,
-            amount:
-                typeof transactionData.amount !== "undefined" && !transactionData.amount.isZero()
-                    ? transactionData.amount.toFixed()
-                    : undefined,
-            fee: transactionData.fee.toFixed(),
+            amount,
             burnedFee:
                 typeof transactionData.burnedFee !== "undefined" ? transactionData.burnedFee.toFixed() : undefined,
             sender,

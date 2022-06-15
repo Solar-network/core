@@ -93,7 +93,7 @@ export class DelegatesController extends Controller {
             const blockCriteria = { generatorPublicKey: delegateResource.publicKey };
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
                 blockCriteria,
-                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.MultiPayment },
+                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.Transfer },
                 this.getListingOrder(request),
                 this.getListingPage(request),
                 this.getListingOptions(),

@@ -1,7 +1,7 @@
 import { Ajv } from "ajv";
 import ajvKeywords from "ajv-keywords";
 
-import { TransactionType } from "../enums";
+import { TransactionType, TransactionTypeGroup } from "../enums";
 import { ITransactionData } from "../interfaces";
 import { configManager } from "../managers";
 import { BigNumber, isGenesisTransaction } from "../utils";
@@ -31,15 +31,19 @@ const transactionType = (ajv: Ajv): void => {
         // @ts-ignore
         compile(schema) {
             return (data, dataPath, parentObject: ITransactionData) => {
-                // Impose dynamic multipayment limit based on milestone
+                // Impose dynamic limit based on milestone
                 if (
-                    data === TransactionType.Core.MultiPayment &&
+                    data === TransactionType.Core.Transfer &&
                     parentObject &&
-                    (!parentObject.typeGroup || parentObject.typeGroup === 1)
+                    (!parentObject.typeGroup || parentObject.typeGroup === TransactionTypeGroup.Core)
                 ) {
-                    if (parentObject.asset && parentObject.asset.payments) {
-                        const limit: number = configManager.getMilestone().multiPaymentLimit || 256;
-                        return parentObject.asset.payments.length <= limit;
+                    if (parentObject.asset && parentObject.asset.transfers) {
+                        const maxLimit: number = configManager.getMilestone().transfer.maximum || 256;
+                        const minLimit: number = configManager.getMilestone().transfer.minimum || 1;
+                        return (
+                            parentObject.asset.transfers.length >= minLimit &&
+                            parentObject.asset.transfers.length <= maxLimit
+                        );
                     }
                 }
 

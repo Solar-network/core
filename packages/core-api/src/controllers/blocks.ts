@@ -21,7 +21,7 @@ export class BlocksController extends Controller {
         if (request.query.transform) {
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
                 request.query,
-                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.MultiPayment },
+                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.Transfer },
                 this.getListingOrder(request),
                 this.getListingPage(request),
                 this.getListingOptions(),
@@ -54,7 +54,7 @@ export class BlocksController extends Controller {
             const blockCriteria = this.getBlockCriteriaByIdOrHeight(request.params.id);
             const transactionCriteria = {
                 typeGroup: Enums.TransactionTypeGroup.Core,
-                type: Enums.TransactionType.Core.MultiPayment,
+                type: Enums.TransactionType.Core.Transfer,
             };
             const block = await this.blockHistoryService.findOneByCriteriaJoinTransactions(
                 blockCriteria,

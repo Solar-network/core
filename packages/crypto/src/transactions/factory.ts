@@ -1,3 +1,4 @@
+import { CoreTransactionType, TransactionTypeGroup } from "../enums";
 import {
     DuplicateParticipantInMultiSignatureError,
     InvalidTransactionBytesError,
@@ -58,6 +59,13 @@ export class TransactionFactory {
     }
 
     public static fromData(data: ITransactionData, strict = true, options: IDeserialiseOptions = {}): ITransaction {
+        if (data.typeGroup === TransactionTypeGroup.Core && data.type === CoreTransactionType.Transfer) {
+            if (data.asset && data.asset.payments && !data.asset.transfers) {
+                data.asset.transfers = data.asset.payments;
+                delete data.asset.payments;
+            }
+        }
+
         const { value, error } = Verifier.verifySchema(data, strict);
 
         if (error && !isException(value)) {

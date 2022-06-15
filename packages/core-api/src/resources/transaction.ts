@@ -1,5 +1,5 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Interfaces } from "@solar-network/crypto";
+import { Enums, Interfaces } from "@solar-network/crypto";
 
 import { Resource } from "../interfaces";
 
@@ -37,16 +37,25 @@ export class TransactionResource implements Resource {
 
         const sender: string = this.walletRepository.findByPublicKey(resource.senderPublicKey).getAddress();
 
+        let amount: string | undefined =
+            typeof resource.amount !== "undefined" && !resource.amount.isZero() ? resource.amount.toFixed() : undefined;
+
+        if (
+            resource.typeGroup === Enums.TransactionTypeGroup.Core &&
+            resource.type === Enums.TransactionType.Core.Transfer
+        ) {
+            amount = resource
+                .asset!.transfers!.reduce((sum, transfer) => sum.plus(transfer!.amount), AppUtils.BigNumber.ZERO)
+                .toFixed();
+        }
+
         return {
             id: resource.id,
             blockId: resource.blockId,
             version: resource.version,
             type: resource.type,
             typeGroup: resource.typeGroup,
-            amount:
-                typeof resource.amount !== "undefined" && !resource.amount.isZero()
-                    ? resource.amount.toFixed()
-                    : undefined,
+            amount,
             fee: resource.fee.toFixed(),
             burnedFee: typeof resource.burnedFee !== "undefined" ? resource.burnedFee.toFixed() : undefined,
             sender,
