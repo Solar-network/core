@@ -1,5 +1,5 @@
 import { ITransactionData } from "../../../../interfaces";
-import { BigNumber, sortVotes } from "../../../../utils";
+import { sortVotes } from "../../../../utils";
 import { Solar } from "../../../types";
 import { TransactionBuilder } from "../transaction";
 
@@ -10,12 +10,8 @@ export class VoteBuilder extends TransactionBuilder<VoteBuilder> {
         this.data.type = Solar.VoteTransaction.type;
         this.data.typeGroup = Solar.VoteTransaction.typeGroup;
         this.data.fee = Solar.VoteTransaction.staticFee();
-        this.data.amount = BigNumber.ZERO;
-        this.data.recipientId = undefined;
         this.data.senderPublicKey = undefined;
         this.data.asset = { votes: {} };
-
-        this.signWithSenderAsRecipient = true;
     }
 
     public votesAsset(votes: { [vote: string]: number }): VoteBuilder {
@@ -60,8 +56,6 @@ export class VoteBuilder extends TransactionBuilder<VoteBuilder> {
 
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
-        struct.amount = this.data.amount;
-        struct.recipientId = this.data.recipientId;
         struct.asset = this.data.asset;
 
         super.validate(struct);

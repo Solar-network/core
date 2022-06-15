@@ -4,7 +4,7 @@ import {
     TransactionSchemaError,
     VendorFieldLengthExceededError,
 } from "../../../errors";
-import { Address, Keys } from "../../../identities";
+import { Keys } from "../../../identities";
 import { IKeyPair, ITransaction, ITransactionData } from "../../../interfaces";
 import { configManager } from "../../../managers/config";
 import { NetworkType } from "../../../types";
@@ -15,8 +15,6 @@ import { Verifier } from "../../verifier";
 
 export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBuilder>> {
     public data: ITransactionData;
-
-    protected signWithSenderAsRecipient = false;
 
     private disableVersionCheck = true;
 
@@ -66,18 +64,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         if (fee) {
             this.data.fee = BigNumber.make(fee);
         }
-
-        return this.instance();
-    }
-
-    public amount(amount: string): TBuilder {
-        this.data.amount = BigNumber.make(amount);
-
-        return this.instance();
-    }
-
-    public recipientId(recipientId: string): TBuilder {
-        this.data.recipientId = recipientId;
 
         return this.instance();
     }
@@ -181,10 +167,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
 
     private signWithKeyPair(keys: IKeyPair): TBuilder {
         this.data.senderPublicKey = keys.publicKey;
-
-        if (this.signWithSenderAsRecipient) {
-            this.data.recipientId = Address.fromPublicKey(keys.publicKey, this.data.network);
-        }
 
         this.data.signature = Signer.sign(this.getSigningObject(), keys, {
             disableVersionCheck: this.disableVersionCheck,

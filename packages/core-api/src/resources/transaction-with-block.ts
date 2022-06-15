@@ -22,7 +22,7 @@ export class TransactionWithBlockResource implements Resource {
         AppUtils.assert.defined<string>(transactionData.senderPublicKey);
 
         const sender: string = this.walletRepository.findByPublicKey(transactionData.senderPublicKey).getAddress();
-        const recipient: string = transactionData.recipientId ?? sender;
+        const recipient: string | undefined = transactionData.recipientId ?? undefined;
         const signSignature: string | undefined = transactionData.signSignature ?? transactionData.secondSignature;
         const confirmations: number = this.stateStore.getLastHeight() - blockData.height + 1;
 
@@ -32,7 +32,10 @@ export class TransactionWithBlockResource implements Resource {
             version: transactionData.version,
             type: transactionData.type,
             typeGroup: transactionData.typeGroup,
-            amount: transactionData.amount.toFixed(),
+            amount:
+                typeof transactionData.amount !== "undefined" && !transactionData.amount.isZero()
+                    ? transactionData.amount.toFixed()
+                    : undefined,
             fee: transactionData.fee.toFixed(),
             burnedFee:
                 typeof transactionData.burnedFee !== "undefined" ? transactionData.burnedFee.toFixed() : undefined,

@@ -96,13 +96,23 @@ export class BlockState implements Contracts.State.BlockState {
             const lockId = transaction.data.asset.claim.lockTransactionId;
             lockSenderWallet = this.walletRepository.findByIndex(Contracts.State.WalletIndexes.Locks, lockId);
 
-            const lockTransaction: Interfaces.ITransactionData = (
-                await this.transactionRepository.findByIds([lockId])
-            )[0];
+            const locks: Interfaces.IHtlcLocks = lockSenderWallet.getAttribute("htlc.locks", {});
 
-            AppUtils.assert.defined<Interfaces.ITransactionData>(lockTransaction.recipientId);
+            let recipientId: string | undefined;
 
-            lockRecipientWallet = this.walletRepository.findByAddress(lockTransaction.recipientId);
+            if (locks[lockId] && locks[lockId].recipientId) {
+                recipientId = locks[lockId].recipientId;
+            } else {
+                const lockTransaction: Interfaces.ITransactionData = (
+                    await this.transactionRepository.findByIds([lockId])
+                )[0];
+
+                recipientId = lockTransaction.recipientId;
+            }
+
+            AppUtils.assert.defined<Interfaces.ITransactionData>(recipientId);
+
+            lockRecipientWallet = this.walletRepository.findByAddress(recipientId);
         }
 
         await transactionHandler.apply(transaction);

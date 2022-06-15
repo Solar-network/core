@@ -237,7 +237,7 @@ export class Block implements IBlock {
 
                 appliedTransactions[transaction.data.id] = transaction.data;
 
-                totalAmount = totalAmount.plus(transaction.data.amount);
+                totalAmount = totalAmount.plus(transaction.data.amount || 0);
                 totalFee = totalFee.plus(transaction.data.fee);
 
                 payloadBuffers.push(bytes);

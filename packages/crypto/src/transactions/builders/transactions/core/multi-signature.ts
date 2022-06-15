@@ -1,5 +1,4 @@
 import { IMultiSignatureAsset, ITransactionData } from "../../../../interfaces";
-import { BigNumber } from "../../../../utils";
 import { Core } from "../../../types";
 import { TransactionBuilder } from "../transaction";
 
@@ -9,9 +8,7 @@ export class MultiSignatureBuilder extends TransactionBuilder<MultiSignatureBuil
 
         this.data.type = Core.MultiSignatureRegistrationTransaction.type;
         this.data.typeGroup = Core.MultiSignatureRegistrationTransaction.typeGroup;
-        this.data.fee = BigNumber.ZERO;
-        this.data.amount = BigNumber.ZERO;
-        this.data.recipientId = undefined;
+        this.data.fee = Core.MultiSignatureRegistrationTransaction.staticFee();
         this.data.senderPublicKey = undefined;
         this.data.asset = { multiSignature: { min: 0, publicKeys: [] } };
     }
@@ -48,8 +45,6 @@ export class MultiSignatureBuilder extends TransactionBuilder<MultiSignatureBuil
 
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
-        struct.amount = this.data.amount;
-        struct.recipientId = this.data.recipientId;
         struct.asset = this.data.asset;
 
         super.validate(struct);

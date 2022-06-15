@@ -50,7 +50,6 @@ export class Deserialiser {
 
         transaction.senderPublicKey = buf.readBuffer(33).toString("hex");
         transaction.fee = BigNumber.make(buf.readBigUInt64LE().toString());
-        transaction.amount = BigNumber.ZERO;
     }
 
     private static deserialiseVendorField(transaction: ITransaction, buf: ByteBuffer): void {

@@ -141,7 +141,8 @@ export abstract class TransactionHandler {
 
         sender.setNonce(data.nonce);
 
-        const newBalance: Utils.BigNumber = sender.getBalance().minus(data.amount).minus(data.fee);
+        const amount: Utils.BigNumber = Utils.BigNumber.make(data.amount || 0);
+        const newBalance: Utils.BigNumber = sender.getBalance().minus(amount).minus(data.fee);
 
         assert(Utils.isException(transaction.data) || !newBalance.isNegative());
 
@@ -173,7 +174,8 @@ export abstract class TransactionHandler {
 
         const data: Interfaces.ITransactionData = transaction.data;
 
-        sender.increaseBalance(data.amount.plus(data.fee));
+        const amount: Utils.BigNumber = Utils.BigNumber.make(data.amount || 0);
+        sender.increaseBalance(amount.plus(data.fee));
 
         this.verifyTransactionNonceRevert(sender, transaction);
 
@@ -220,8 +222,10 @@ export abstract class TransactionHandler {
 
         this.verifyTransactionNonceApply(sender, transaction);
 
-        if (sender.getBalance().minus(data.amount).minus(data.fee).isNegative()) {
-            throw new InsufficientBalanceError(data.amount.plus(data.fee), sender.getBalance());
+        const amount: Utils.BigNumber = Utils.BigNumber.make(data.amount || 0);
+
+        if (sender.getBalance().minus(amount).minus(data.fee).isNegative()) {
+            throw new InsufficientBalanceError(amount.plus(data.fee), sender.getBalance());
         }
 
         if (data.senderPublicKey !== sender.getPublicKey()) {

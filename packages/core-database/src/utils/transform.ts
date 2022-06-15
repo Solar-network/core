@@ -4,7 +4,7 @@ import { FindOperator } from "typeorm";
 export const transformBigInt = {
     from(value: string | undefined): BigNumber | undefined {
         if (value !== undefined) {
-            return BigNumber.make(value);
+            return BigNumber.make(value || 0);
         }
 
         return undefined;

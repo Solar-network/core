@@ -38,7 +38,7 @@ export class BlockFactory {
 
         if (data.transactions) {
             for (const transaction of data.transactions) {
-                transaction.amount = BigNumber.make(transaction.amount);
+                transaction.amount = BigNumber.make(transaction.amount || 0);
                 transaction.fee = BigNumber.make(transaction.fee);
             }
         }

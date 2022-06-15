@@ -17,14 +17,13 @@ const strictTransaction = {
 export const transactionBaseSchema: Record<string, any> = {
     $id: undefined,
     type: "object",
-    required: ["type", "senderPublicKey", "fee", "amount", "nonce"],
+    required: ["type", "senderPublicKey", "fee", "nonce"],
     properties: {
         id: { anyOf: [{ $ref: "transactionId" }, { type: "null" }] },
         version: { enum: [2, 3] },
         network: { $ref: "networkByte" },
         nonce: { bignumber: { minimum: 0 } },
         typeGroup: { type: "integer", minimum: 0 },
-        amount: { bignumber: { minimum: 1, bypassGenesis: true } },
         fee: { bignumber: { minimum: 0, bypassGenesis: true } },
         burnedFee: { bignumber: { minimum: 0 } },
         senderPublicKey: { $ref: "publicKey" },
@@ -62,9 +61,10 @@ export const strictSchema = (schema: TransactionSchema): TransactionSchema => {
 
 export const transfer = extend(transactionBaseSchema, {
     $id: "transfer",
-    required: ["recipientId"],
+    required: ["recipientId", "amount"],
     properties: {
         type: { transactionType: TransactionType.Core.Transfer },
+        amount: { bignumber: { minimum: 1, bypassGenesis: true } },
         fee: { bignumber: { minimum: 1, bypassGenesis: true } },
         recipientId: { $ref: "address" },
         expiration: { type: "integer", minimum: 0 },
@@ -76,7 +76,6 @@ export const secondSignature = extend(transactionBaseSchema, {
     required: ["asset"],
     properties: {
         type: { transactionType: TransactionType.Core.SecondSignature },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
         secondSignature: { type: "null" },
         asset: {
@@ -102,7 +101,6 @@ export const delegateRegistration = extend(transactionBaseSchema, {
     required: ["asset"],
     properties: {
         type: { transactionType: TransactionType.Core.DelegateRegistration },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1, bypassGenesis: true } },
         asset: {
             type: "object",
@@ -140,9 +138,7 @@ export const legacyVote = extend(transactionBaseSchema, {
     },
     properties: {
         type: { transactionType: TransactionType.Core.Vote },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
-        recipientId: { $ref: "address" },
         asset: {
             type: "object",
             required: ["votes"],
@@ -163,7 +159,6 @@ export const vote = extend(transactionBaseSchema, {
     required: ["typeGroup", "asset"],
     properties: {
         type: { transactionType: TransactionType.Solar.Vote },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
         asset: {
             type: "object",
@@ -192,7 +187,6 @@ export const multiSignature = extend(transactionBaseSchema, {
     required: ["asset"],
     properties: {
         type: { transactionType: TransactionType.Core.MultiSignature },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
         asset: {
             type: "object",
@@ -226,7 +220,6 @@ export const ipfs = extend(transactionBaseSchema, {
     $id: "ipfs",
     properties: {
         type: { transactionType: TransactionType.Core.Ipfs },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
         asset: {
             type: "object",
@@ -243,7 +236,7 @@ export const ipfs = extend(transactionBaseSchema, {
 
 export const htlcLock = extend(transactionBaseSchema, {
     $id: "htlcLock",
-    required: ["recipientId"],
+    required: ["recipientId", "amount"],
     properties: {
         type: { transactionType: TransactionType.Core.HtlcLock },
         amount: { bignumber: { minimum: 1 } },
@@ -283,7 +276,6 @@ export const htlcClaim = extend(transactionBaseSchema, {
     $id: "htlcClaim",
     properties: {
         type: { transactionType: TransactionType.Core.HtlcClaim },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 0 } },
         asset: {
             type: "object",
@@ -313,7 +305,6 @@ export const htlcRefund = extend(transactionBaseSchema, {
     $id: "htlcRefund",
     properties: {
         type: { transactionType: TransactionType.Core.HtlcRefund },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 0 } },
         asset: {
             type: "object",
@@ -335,7 +326,6 @@ export const multiPayment = extend(transactionBaseSchema, {
     $id: "multiPayment",
     properties: {
         type: { transactionType: TransactionType.Core.MultiPayment },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 1 } },
         asset: {
             type: "object",
@@ -364,7 +354,6 @@ export const delegateResignation = extend(transactionBaseSchema, {
     $id: "delegateResignation",
     properties: {
         type: { transactionType: TransactionType.Core.DelegateResignation },
-        amount: { bignumber: { minimum: 0, maximum: 0 } },
         fee: { bignumber: { minimum: 0 } },
     },
 });
