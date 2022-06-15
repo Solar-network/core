@@ -102,7 +102,9 @@ export class StateBuilder {
         for (const transaction of transactions) {
             const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
             wallet.setNonce(Utils.BigNumber.make(transaction.nonce));
-            wallet.decreaseBalance(Utils.BigNumber.make(transaction.amount || 0).plus(transaction.fee));
+            wallet.decreaseBalance(
+                Utils.BigNumber.make(transaction.amount || Utils.BigNumber.ZERO).plus(transaction.fee),
+            );
         }
     }
 
