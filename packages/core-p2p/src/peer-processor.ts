@@ -1,5 +1,6 @@
 import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Utils } from "@solar-network/crypto";
+import delay from "delay";
 
 import { PeerFactory } from "./contracts";
 import { DisconnectInvalidPeers } from "./listeners";
@@ -94,7 +95,21 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
             this.app,
             lastBlock.data.height,
         );
-        return this.communicator.ping(peer, verifyTimeout, blockTimeLookup);
+
+        return new Promise<void>((resolve, reject) => {
+            let isResolved = false;
+
+            const resolvesFirst = () => {
+                if (!isResolved) {
+                    isResolved = true;
+                    resolve();
+                }
+            };
+
+            this.communicator.ping(peer, verifyTimeout, blockTimeLookup).then(resolvesFirst).catch(reject);
+
+            delay(verifyTimeout).finally(isResolved ? resolvesFirst : reject);
+        });
     }
 
     private async acceptNewPeer(peer: Contracts.P2P.Peer, options: Contracts.P2P.AcceptNewPeerOptions): Promise<void> {

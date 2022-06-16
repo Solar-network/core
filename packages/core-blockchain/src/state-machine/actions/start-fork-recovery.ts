@@ -28,7 +28,9 @@ export class StartForkRecovery implements Action {
 
         this.stateStore.setNumberOfBlocksToRollback(0);
 
-        this.logger.info(`Removed ${AppUtils.pluralise("block", blocksToRemove, true)} :wastebasket:`);
+        this.logger.info(
+            `Removed ${blocksToRemove.toLocaleString()} ${AppUtils.pluralise("block", blocksToRemove)} :wastebasket:`,
+        );
 
         await this.networkMonitor.refreshPeersAfterFork();
 

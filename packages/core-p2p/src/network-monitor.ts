@@ -38,6 +38,9 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
+    @Container.inject(Container.Identifiers.StateStore)
+    private readonly stateStore!: Contracts.State.StateStore;
+
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
 
@@ -53,6 +56,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     private initialising = true;
     private lastPinged: number = 0;
+    private lastForkCheck: number = 0;
 
     private cachedTransactions: Map<string, number> = new Map();
 
@@ -169,9 +173,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
         const peerErrors = {};
 
-        const lastBlock: Interfaces.IBlock = this.app
-            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
-            .getLastBlock();
+        const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, lastBlock.data.height);
 
         const pingedPeers: Set<Contracts.P2P.Peer> = new Set();
@@ -337,9 +339,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         await this.discoverPeers(true);
         await this.cleansePeers({ forcePing: true });
 
-        const lastBlock: Interfaces.IBlock = this.app
-            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
-            .getLastBlock();
+        const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
         const includedPeers: Contracts.P2P.Peer[] = [];
         const relayPeers: Contracts.P2P.Peer[] = [];
@@ -411,18 +411,19 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 const blocksToRollback = lastBlock.data.height - forkHeight;
 
                 if (blocksToRollback > 5000) {
-                    this.logger.info(
-                        `Rolling back 5000/${blocksToRollback} blocks to fork at height ${forkHeight} (${ourPeerCount} vs ${forkPeerCount}) :repeat:`,
+                    this.logger.warning(
+                        `Fork detected! Rolling back ${(5000).toLocaleString()}/${
+                            blocksToRollback.toLocaleString
+                        } blocks to fork at height ${forkHeight.toLocaleString()} (${ourPeerCount} vs ${forkPeerCount}) :repeat:`,
                     );
 
                     return { forked: true, blocksToRollback: 5000 };
                 } else {
-                    this.logger.info(
-                        `Rolling back ${Utils.pluralise(
+                    this.logger.warning(
+                        `Fork detected! Rolling back ${blocksToRollback.toLocaleString()} ${Utils.pluralise(
                             "block",
                             blocksToRollback,
-                            true,
-                        )} to fork at height ${forkHeight} (${ourPeerCount} vs ${forkPeerCount}) :repeat:`,
+                        )} to fork at height ${forkHeight.toLocaleString()} (${ourPeerCount} vs ${forkPeerCount}) :repeat:`,
                     );
 
                     return { forked: true, blocksToRollback };
@@ -438,9 +439,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     }
 
     public async getAllDelegates(): Promise<string[]> {
-        const lastBlock: Interfaces.IBlock = this.app
-            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
-            .getLastBlock();
+        const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
@@ -456,6 +455,39 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         return this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate.username");
     }
 
+    public async checkForFork(): Promise<number> {
+        if (this.repository.getPeers().length === 0) {
+            return 0;
+        }
+
+        const milestone = Managers.configManager.getMilestone();
+        const timeNow: number = new Date().getTime() / 1000;
+
+        if (timeNow - this.lastForkCheck > milestone.blocktime) {
+            this.lastForkCheck = timeNow;
+            const networkStatus = await this.checkNetworkHealth();
+            if (networkStatus.forked && networkStatus.blocksToRollback && networkStatus.blocksToRollback > 0) {
+                return networkStatus.blocksToRollback;
+            }
+        }
+        return 0;
+    }
+
+    public async downloadBlockAtHeight(ip: string, height: number): Promise<Interfaces.IBlockData | undefined> {
+        if (!this.repository.hasPeer(ip)) {
+            return;
+        }
+
+        const peer: Contracts.P2P.Peer = this.repository.getPeer(ip);
+        const blocks: Interfaces.IBlockData[] = await this.communicator.getPeerBlocks(peer, {
+            fromBlockHeight: height - 1,
+            blockLimit: 1,
+            silent: true,
+            timeout: 2000,
+        });
+        return blocks[0];
+    }
+
     public async downloadBlocksFromHeight(
         fromBlockHeight: number,
         maxParallelDownloads = 10,
@@ -463,7 +495,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         timeout: number,
         checkThrottle: boolean = false,
     ): Promise<Interfaces.IBlockData[]> {
-        const peersAll: Contracts.P2P.Peer[] = this.repository.getPeers();
+        let peersAll: Contracts.P2P.Peer[] = this.repository.getPeers();
 
         if (peersAll.length === 0) {
             if (!silent) {
@@ -472,23 +504,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             return [];
         }
 
-        let peersNotForked: Contracts.P2P.Peer[] = Utils.shuffle(peersAll.filter((peer) => !peer.isForked()));
-
         if (checkThrottle) {
             const peersThatWouldThrottle: boolean[] = await Promise.all(
-                peersNotForked.map((peer) => this.communicator.wouldThrottleOnDownload(peer)),
+                peersAll.map((peer) => this.communicator.wouldThrottleOnDownload(peer)),
             );
-            peersNotForked = peersNotForked.filter((peer, index) => !peersThatWouldThrottle[index]);
-        }
-
-        if (peersNotForked.length === 0) {
-            if (!silent) {
-                this.logger.error(
-                    `Could not download blocks: We have ${peersAll.length} peer(s) but all ` +
-                        `of them are on a different chain than us :bangbang:`,
-                );
-            }
-            return [];
+            peersAll = peersAll.filter((peer, index) => !peersThatWouldThrottle[index]);
         }
 
         const networkHeight: number = this.getNetworkHeight();
@@ -499,7 +519,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         } else {
             chunksMissingToSync = Math.ceil((networkHeight - fromBlockHeight) / this.downloadChunkSize);
         }
-        const chunksToDownload: number = Math.min(chunksMissingToSync, peersNotForked.length, maxParallelDownloads);
+        const chunksToDownload: number = Math.min(chunksMissingToSync, peersAll.length, maxParallelDownloads);
 
         // We must return an uninterrupted sequence of blocks, starting from `fromBlockHeight`,
         // with sequential heights, without gaps.
@@ -535,11 +555,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 // As a first peer to try, pick such a peer that different jobs use different peers.
                 // If that peer fails then pick randomly from the remaining peers that have not
                 // been first-attempt for any job.
-                const peersToTry = [peersNotForked[i], ...Utils.shuffle(peersNotForked.slice(chunksToDownload))];
+                const peersToTry = [peersAll[i], ...Utils.shuffle(peersAll.slice(chunksToDownload))];
                 if (peersToTry.length === 1) {
                     // special case where we don't have "backup peers" (that have not been first-attempt for any job)
                     // so add peers that have been first-attempt as backup peers
-                    peersToTry.push(...peersNotForked.filter((p) => p.ip !== peersNotForked[i].ip));
+                    peersToTry.push(...peersAll.filter((p) => p.ip !== peersAll[i].ip));
                 }
 
                 for (peer of peersToTry) {
@@ -766,7 +786,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             // @ts-ignore
             Object.values(peers).map((peer: Contracts.P2P.Peer) => {
                 this.repository.forgetPeer(peer);
-
                 return this.app
                     .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
                     .call("validateAndAcceptPeer", { peer, options: { seed: true, lessVerbose: true } });
@@ -812,9 +831,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     }
 
     private async getDelegatesOnThisNode(): Promise<string[]> {
-        const lastBlock: Interfaces.IBlock = this.app
-            .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
-            .getLastBlock();
+        const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
