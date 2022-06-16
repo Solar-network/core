@@ -464,8 +464,8 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         if (timeNow - this.lastForkCheck > milestone.blocktime) {
             this.lastForkCheck = timeNow;
             const networkStatus = await this.checkNetworkHealth();
-            if (networkStatus.forked && networkStatus.blocksToRollback && networkStatus.blocksToRollback > 0) {
-                return networkStatus.blocksToRollback;
+            if (networkStatus.forked && networkStatus.blocksToRollback! > 0) {
+                return networkStatus.blocksToRollback!;
             }
         }
         return 0;
