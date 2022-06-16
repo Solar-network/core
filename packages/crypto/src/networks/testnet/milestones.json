@@ -147,5 +147,15 @@
         "p2p": {
             "minimumVersions": ["^3.4.0 || ^3.4.0-next.0"]
         }
+    },
+    {
+        "height": 972604,
+        "transfer": {
+            "minimum": 1
+        }
+    },
+    {
+        "height": 1000000,
+        "legacyTransfer": false
     }
 ]
