@@ -4,7 +4,6 @@ import { cache } from "./cache";
 import { closeConnection } from "./close-connection";
 import { commaArrayQuery } from "./comma-array-query";
 import { dotSeparatedQuery } from "./dot-separated-query";
-import { hapiAjv } from "./hapi-ajv";
 import { log } from "./log";
 import { pagination } from "./pagination";
 import { rateLimit } from "./rate-limit";
@@ -19,7 +18,6 @@ export const preparePlugins = (config) => [
             trustProxy: config.trustProxy,
         },
     },
-    { plugin: hapiAjv },
     {
         plugin: log,
         options: {

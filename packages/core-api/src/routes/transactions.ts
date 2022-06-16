@@ -37,27 +37,22 @@ export const register = (server: Hapi.Server): void => {
         path: "/transactions",
         handler: (request: StoreRequest, h: Hapi.ResponseToolkit) => controller.store(request, h),
         options: {
-            plugins: {
-                "hapi-ajv": {
-                    payloadSchema: {
-                        type: "object",
-                        required: ["transactions"],
-                        additionalProperties: false,
-                        properties: {
-                            transactions: {
-                                $ref: "transactions",
-                                minItems: 1,
-                                maxItems: server.app.app
-                                    .getTagged<Providers.PluginConfiguration>(
-                                        Container.Identifiers.PluginConfiguration,
-                                        "plugin",
-                                        "@solar-network/core-transaction-pool",
-                                    )
-                                    .get<number>("maxTransactionsPerRequest"),
-                            },
-                        },
-                    },
-                },
+            validate: {
+                payload: Joi.object({
+                    transactions: Joi.array()
+                        .min(1)
+                        .max(
+                            server.app.app
+                                .getTagged<Providers.PluginConfiguration>(
+                                    Container.Identifiers.PluginConfiguration,
+                                    "plugin",
+                                    "@solar-network/core-transaction-pool",
+                                )
+                                .get<number>("maxTransactionsPerRequest")!,
+                        )
+                        .items(Joi.object())
+                        .required(),
+                }).required(),
             },
         },
     });
