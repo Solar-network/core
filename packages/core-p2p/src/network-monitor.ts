@@ -412,7 +412,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
                 if (blocksToRollback > 5000) {
                     this.logger.warning(
-                        `Fork detected! Rolling back ${(5000).toLocaleString()}/${blocksToRollback.toLocaleString()} blocks to fork at height ${forkHeight.toLocaleString()} (${ourPeerCount} vs ${forkPeerCount}) :repeat:`,
+                        `Fork detected! Rolling back ${(5000).toLocaleString()}/${blocksToRollback.toLocaleString()} blocks to fork at height ${forkHeight.toLocaleString()} (${ourPeerCount.toLocaleString()} vs ${forkPeerCount.toLocaleString()}) :repeat:`,
                     );
 
                     return { forked: true, blocksToRollback: 5000 };
@@ -421,7 +421,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                         `Fork detected! Rolling back ${blocksToRollback.toLocaleString()} ${Utils.pluralise(
                             "block",
                             blocksToRollback,
-                        )} to fork at height ${forkHeight.toLocaleString()} (${ourPeerCount} vs ${forkPeerCount}) :repeat:`,
+                        )} to fork at height ${forkHeight.toLocaleString()} (${ourPeerCount.toLocaleString()} vs ${forkPeerCount.toLocaleString()}) :repeat:`,
                     );
 
                     return { forked: true, blocksToRollback };
