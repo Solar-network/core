@@ -524,6 +524,33 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         }
     }
 
+    public async checkForFork(blocks: Interfaces.IBlockData[]): Promise<boolean> {
+        const rollbackBlocks: number = await this.networkMonitor.checkForFork();
+        if (rollbackBlocks > 0) {
+            this.clearAndStopQueue();
+            await this.removeBlocks(rollbackBlocks);
+            this.stateStore.setNumberOfBlocksToRollback(0);
+            this.logger.info(
+                `Removed ${rollbackBlocks.toLocaleString()} ${Utils.pluralise("block", rollbackBlocks)} :wastebasket:`,
+            );
+            await this.getQueue().resume();
+            try {
+                if (blocks[0].ip) {
+                    const forkedBlock: Interfaces.IBlockData | undefined =
+                        await this.networkMonitor.downloadBlockAtHeight(blocks[0].ip, blocks[0].height - 1);
+                    if (forkedBlock) {
+                        this.enqueueBlocks([forkedBlock, ...blocks]);
+                    }
+                }
+            } catch {
+                //
+            }
+            return true;
+        }
+
+        return false;
+    }
+
     private resetMissedBlocks(): void {
         this.missedBlocks = 0;
     }

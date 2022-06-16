@@ -32,7 +32,8 @@ export interface NetworkMonitor {
     getNetworkHeight(): number;
     getNetworkState(log?: boolean): Promise<NetworkState>;
     refreshPeersAfterFork(): Promise<void>;
-    checkNetworkHealth(): Promise<NetworkStatus>;
+    checkNetworkHealth(fast?: boolean): Promise<NetworkStatus>;
+    downloadBlockAtHeight(ip: string, height: number): Promise<Interfaces.IBlockData | undefined>;
     downloadBlocksFromHeight(
         fromBlockHeight: number,
         maxParallelDownloads?: number,
@@ -46,4 +47,5 @@ export interface NetworkMonitor {
     completeColdStart(): void;
     hasMinimumPeers(silent?: boolean): boolean;
     populateSeedPeers(): Promise<void>;
+    checkForFork(): Promise<number>;
 }

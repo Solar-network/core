@@ -73,16 +73,19 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
             !Utils.isBlockChained(this.blockchain.getLastBlock().data, this.blocks[0], blockTimeLookup) &&
             !CryptoUtils.isException(this.blocks[0])
         ) {
-            this.logger.warning(
-                Utils.getBlockNotChainedErrorMessage(
-                    this.blockchain.getLastBlock().data,
-                    this.blocks[0],
-                    blockTimeLookup,
-                ),
-            );
-            // Discard remaining blocks as it won't go anywhere anyway.
             this.blockchain.clearQueue();
             this.blockchain.resetLastDownloadedBlock();
+
+            if (!(await this.blockchain.checkForFork(this.blocks))) {
+                this.logger.warning(
+                    Utils.getBlockNotChainedErrorMessage(
+                        this.blockchain.getLastBlock().data,
+                        this.blocks[0],
+                        blockTimeLookup,
+                    ),
+                );
+            }
+
             return;
         }
 

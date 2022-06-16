@@ -78,12 +78,14 @@ export class DownloadBlocks implements Action {
                     ).toLocaleString()} :warning:`,
                 );
             } else {
-                this.logger.warning("Downloaded block not accepted :warning: :warning: :warning:");
-                this.logger.warning(JSON.stringify(blocks[0]));
-
-                this.logger.warning(`Last downloaded block: ${JSON.stringify(lastDownloadedBlock)}`);
-
                 this.blockchain.clearQueue();
+
+                if (!(await this.blockchain.checkForFork(blocks))) {
+                    this.logger.warning("Downloaded block not accepted :warning: :warning: :warning:");
+                    this.logger.warning(JSON.stringify(blocks[0]));
+
+                    this.logger.warning(`Last downloaded block: ${JSON.stringify(lastDownloadedBlock)}`);
+                }
             }
 
             /* istanbul ignore else */
