@@ -533,7 +533,6 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             this.logger.info(
                 `Removed ${rollbackBlocks.toLocaleString()} ${Utils.pluralise("block", rollbackBlocks)} :wastebasket:`,
             );
-            await this.networkMonitor.refreshPeersAfterFork();
             await this.getQueue().resume();
             try {
                 if (blocks[0].ip) {

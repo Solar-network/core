@@ -335,9 +335,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         await this.cleansePeers({ forcePing: true });
     }
 
-    public async checkNetworkHealth(): Promise<Contracts.P2P.NetworkStatus> {
-        await this.discoverPeers(true);
-        await this.cleansePeers({ forcePing: true });
+    public async checkNetworkHealth(fast?: boolean): Promise<Contracts.P2P.NetworkStatus> {
+        if (!fast) {
+            await this.discoverPeers(true);
+        }
+        await this.cleansePeers({ fast, forcePing: true });
 
         const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
@@ -345,7 +347,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         const relayPeers: Contracts.P2P.Peer[] = [];
 
         const peers: Contracts.P2P.Peer[] = this.repository.getPeers();
-
         const milestone = Managers.configManager.getMilestone();
         if (milestone.onlyActiveDelegatesInCalculations) {
             const localPeer: Contracts.P2P.Peer = new Peer(
@@ -463,7 +464,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         if (timeNow - this.lastForkCheck > milestone.blocktime) {
             this.lastForkCheck = timeNow;
-            const networkStatus = await this.checkNetworkHealth();
+            await delay(1000); // give time for the block to be widely propagated
+            let networkStatus = await this.checkNetworkHealth(true); // fast check using our current peers
+            if (!networkStatus.forked) {
+                networkStatus = await this.checkNetworkHealth(); // slower check with the entire network
+            }
             if (networkStatus.forked && networkStatus.blocksToRollback! > 0) {
                 return networkStatus.blocksToRollback!;
             }
