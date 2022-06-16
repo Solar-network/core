@@ -203,7 +203,9 @@ export class Client {
                     connection.connect().catch((e) => {});
 
                     connection.onError = (e) => {
-                        this.logger.error(`${e.message} :bangbang:`);
+                        if (e.message !== "Connection terminated while waiting to connect") {
+                            this.logger.error(`${e.message} :bangbang:`);
+                        }
                     };
 
                     host.socket = connection;
