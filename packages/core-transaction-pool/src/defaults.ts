@@ -1,3 +1,7 @@
+import { cpus } from "os";
+
+const workerCount: number = Math.min(Math.max(1, Math.floor(cpus().length / 2)), 3);
+
 export const defaults = {
     enabled: !process.env.CORE_TRANSACTION_POOL_DISABLED,
     storage: `${process.env.CORE_PATH_DATA}/transaction-pool/transaction-pool.sqlite`,
@@ -33,7 +37,7 @@ export const defaults = {
         },
     },
     workerPool: {
-        workerCount: 3,
+        workerCount,
         cryptoPackages: [],
     },
 };
