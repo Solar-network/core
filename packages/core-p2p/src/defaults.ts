@@ -1,6 +1,6 @@
 export const defaults = {
     server: {
-        banSeconds: process.env.CORE_P2P_BAN_SECONDS || 60,
+        banSeconds: process.env.CORE_P2P_BAN_SECONDS || 10,
         hostname: process.env.CORE_P2P_HOST || "0.0.0.0",
         port: process.env.CORE_P2P_PORT || 4002,
         logLevel: process.env.CORE_NETWORK_NAME === "testnet" ? 1 : 0,
