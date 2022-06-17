@@ -14,7 +14,7 @@ export const transactionCriteriaSchemaObject = {
     ),
     senderPublicKey: walletCriteriaSchemaObject.publicKey,
     recipientId: walletCriteriaSchemaObject.address,
-    vendorField: Joi.string().max(255),
+    memo: Joi.string().max(255),
 };
 
 export const transactionParamSchema = transactionIdSchema;

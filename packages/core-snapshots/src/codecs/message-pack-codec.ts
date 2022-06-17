@@ -96,7 +96,7 @@ export class MessagePackCodec implements Codec {
                 // @ts-ignore
                 recipientId: transaction.data.recipientId,
                 type: transaction.data.type,
-                vendorField: transaction.data.vendorField,
+                memo: transaction.data.memo,
                 amount: transaction.data.amount,
                 fee: transaction.data.fee,
                 burnedFee: burnedFee,

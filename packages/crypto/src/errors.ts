@@ -106,9 +106,9 @@ export class MaximumTransferCountExceededError extends CryptoError {
     }
 }
 
-export class VendorFieldLengthExceededError extends CryptoError {
+export class MemoLengthExceededError extends CryptoError {
     public constructor(limit: number) {
-        super(`Length of vendor field exceeded the allowed maximum ${limit}`);
+        super(`Length of memo exceeded the allowed maximum ${limit}`);
     }
 }
 

@@ -286,5 +286,5 @@ export interface UnwrappedHtlcLock {
     expirationType: number;
     expirationValue: number;
     isExpired: boolean;
-    vendorField: string;
+    memo: string;
 }

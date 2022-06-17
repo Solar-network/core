@@ -39,10 +39,6 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
         return super.throwIfCannotBeApplied(transaction, sender);
     }
 
-    public hasVendorField(): boolean {
-        return true;
-    }
-
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
         Utils.assert.defined<string>(transaction.data.recipientId);
         const recipientId: string = transaction.data.recipientId;

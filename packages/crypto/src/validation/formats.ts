@@ -1,11 +1,11 @@
 import { Ajv } from "ajv";
 
-import { isValidPeer, maxVendorFieldLength } from "../utils";
+import { isValidPeer } from "../utils";
 
-const vendorField = (ajv: Ajv): void => {
-    ajv.addFormat("vendorField", (data) => {
+const memo = (ajv: Ajv): void => {
+    ajv.addFormat("memo", (data) => {
         try {
-            return Buffer.from(data, "utf8").length <= maxVendorFieldLength();
+            return Buffer.from(data, "utf8").length <= 255;
         } catch {
             return false;
         }
@@ -22,4 +22,4 @@ const validPeer = (ajv: Ajv): void => {
     });
 };
 
-export const formats = [vendorField, validPeer];
+export const formats = [memo, validPeer];

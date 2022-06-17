@@ -25,7 +25,7 @@ export type TransactionCriteria = {
     senderPublicKey?: OrEqualCriteria<string>;
     type?: OrEqualCriteria<number>;
     typeGroup?: OrEqualCriteria<number>;
-    vendorField?: OrLikeCriteria<string>;
+    memo?: OrLikeCriteria<string>;
     amount?: OrNumericCriteria<Utils.BigNumber>;
     fee?: OrNumericCriteria<Utils.BigNumber>;
     asset?: OrContainsCriteria<Record<string, any>>;

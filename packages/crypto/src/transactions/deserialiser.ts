@@ -15,7 +15,7 @@ export class Deserialiser {
         this.deserialiseCommon(data, buff);
 
         const instance: ITransaction = TransactionTypeFactory.create(data);
-        this.deserialiseVendorField(instance, buff);
+        this.deserialiseMemo(instance, buff);
 
         // Deserialise type specific parts
         instance.deserialise(buff);
@@ -52,11 +52,11 @@ export class Deserialiser {
         transaction.fee = BigNumber.make(buf.readBigUInt64LE().toString());
     }
 
-    private static deserialiseVendorField(transaction: ITransaction, buf: ByteBuffer): void {
-        const vendorFieldLength: number = buf.readUInt8();
-        if (vendorFieldLength > 0) {
-            const vendorFieldBuffer: Buffer = buf.readBuffer(vendorFieldLength);
-            transaction.data.vendorField = vendorFieldBuffer.toString("utf8");
+    private static deserialiseMemo(transaction: ITransaction, buf: ByteBuffer): void {
+        const memoLength: number = buf.readUInt8();
+        if (memoLength > 0) {
+            const memoBuffer: Buffer = buf.readBuffer(memoLength);
+            transaction.data.memo = memoBuffer.toString("utf8");
         }
     }
 

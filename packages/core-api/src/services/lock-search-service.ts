@@ -73,7 +73,7 @@ export class LockSearchService {
             timestamp: AppUtils.formatTimestamp(lockAttribute.timestamp),
             expirationType: lockAttribute.expiration.type,
             expirationValue: lockAttribute.expiration.value,
-            vendorField: lockAttribute.vendorField!,
+            memo: lockAttribute.memo!,
         };
     }
 

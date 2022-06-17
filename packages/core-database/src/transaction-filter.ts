@@ -75,9 +75,9 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
                     return handleOrCriteria(criteria.typeGroup!, async (c) => {
                         return { property: "typeGroup", op: "equal", value: c };
                     });
-                case "vendorField":
-                    return handleOrCriteria(criteria.vendorField!, async (c) => {
-                        return { property: "vendorField", op: "like", pattern: Buffer.from(c, "utf-8") };
+                case "memo":
+                    return handleOrCriteria(criteria.memo!, async (c) => {
+                        return { property: "memo", op: "like", pattern: Buffer.from(c, "utf-8") };
                     });
                 case "amount":
                     return handleOrCriteria(criteria.amount!, async (c) => {

@@ -95,8 +95,6 @@ export const numberToHex = (num: number, padding = 2): string => {
     return "0".repeat(padding - indexHex.length) + indexHex;
 };
 
-export const maxVendorFieldLength = (height?: number): number => configManager.getMilestone(height).vendorFieldLength;
-
 export const isSupportedTransactionVersion = (version: number): boolean => {
     const { acceptLegacySchnorrTransactions, bip340 } = configManager.getMilestone();
 

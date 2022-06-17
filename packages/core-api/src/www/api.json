@@ -1139,9 +1139,9 @@
                         }
                     },
                     {
-                        "name": "vendorField",
+                        "name": "memo",
                         "in": "query",
-                        "description": "Vendor field string of the lock transaction(s) to be returned",
+                        "description": "Memo string of the lock transaction(s) to be returned",
                         "schema": {
                             "type": "string",
                             "maxLength": 255
@@ -1288,6 +1288,8 @@
                                 "isExpired:desc",
                                 "lockId:asc",
                                 "lockId:desc",
+                                "memo:asc",
+                                "memo:desc",
                                 "recipientId:asc",
                                 "recipientId:desc",
                                 "secretHash:asc",
@@ -1299,9 +1301,7 @@
                                 "timestamp.human:asc",
                                 "timestamp.human:desc",
                                 "timestamp.unix:asc",
-                                "timestamp.unix:desc",
-                                "vendorField:asc",
-                                "vendorField:desc"
+                                "timestamp.unix:desc"
                             ]
                         }
                     }
@@ -1370,6 +1370,8 @@
                                 "fee.epoch:desc",
                                 "id:asc",
                                 "id:desc",
+                                "memo:asc",
+                                "memo:desc",
                                 "nonce:asc",
                                 "nonce:desc",
                                 "recipientId:asc",
@@ -1380,8 +1382,6 @@
                                 "senderPublicKey:desc",
                                 "timestamp:asc",
                                 "timestamp:desc",
-                                "vendorField:asc",
-                                "vendorField:desc",
                                 "version:asc",
                                 "version:desc"
                             ]
@@ -1527,9 +1527,9 @@
                         }
                     },
                     {
-                        "name": "vendorField",
+                        "name": "memo",
                         "in": "query",
-                        "description": "Vendor field string of the transaction(s) to be returned",
+                        "description": "Memo string of the transaction(s) to be returned",
                         "schema": {
                             "type": "string",
                             "maxLength": 255
@@ -1686,8 +1686,8 @@
                                 "type:desc",
                                 "typeGroup:asc",
                                 "typeGroup:desc",
-                                "vendorField:asc",
-                                "vendorField:desc",
+                                "memo:asc",
+                                "memo:desc",
                                 "version:asc",
                                 "version:desc"
                             ]
@@ -2507,7 +2507,7 @@
                     "nonce",
                     "amount",
                     "recipientId",
-                    "vendorField",
+                    "memo",
                     "expiration"
                 ],
                 "properties": {
@@ -2549,7 +2549,7 @@
                         "type": "string",
                         "example": "022bcee076006120b24f145d495686d2afc880079daf2eb20d8be9bf0e434ca3e1"
                     },
-                    "vendorField": {
+                    "memo": {
                         "type": "string",
                         "example": "Welcome to Solar!"
                     },

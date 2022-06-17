@@ -15,6 +15,7 @@ import { ApplyTransactionAction } from "./apply";
 import {
     ApiCommunicationError,
     InvalidSignatureError,
+    MemoIncorrectError,
     TransactionAlreadyCompletedError,
     TransactionAlreadySubmittedError,
     TransactionDoesNotExistError,
@@ -25,7 +26,6 @@ import {
     TransactionNotYetConfirmedError,
     TransactionTypeNotPermittedError,
     UnknownSwapNetworkError,
-    VendorFieldIncorrectError,
     WrongChainError,
     WrongContractError,
     WrongTokenError,
@@ -106,20 +106,20 @@ export class SXPSwap {
             const swapTransactions = block.transactions.filter(
                 (transaction) => transaction.data.senderPublicKey === swapWalletPublicKey,
             );
-            const duplicateSwapVendorFields = new Set(
+            const duplicateSwapMemos = new Set(
                 swapTransactions
-                    .map((transaction) => transaction.data.vendorField)
-                    .filter((vendorField, index, array) => array.indexOf(vendorField) !== index),
+                    .map((transaction) => transaction.data.memo)
+                    .filter((memo, index, array) => array.indexOf(memo) !== index),
             );
 
-            if (duplicateSwapVendorFields.size > 0) {
-                for (const duplicateSwapVendorField of duplicateSwapVendorFields) {
-                    const vendorFieldData: string[] =
-                        typeof duplicateSwapVendorField === "string" ? duplicateSwapVendorField.split(":") : [];
-                    if (vendorFieldData.length === 2) {
-                        const [network, transactionId] = vendorFieldData;
+            if (duplicateSwapMemos.size > 0) {
+                for (const duplicateSwapMemo of duplicateSwapMemos) {
+                    const memoData: string[] =
+                        typeof duplicateSwapMemo === "string" ? duplicateSwapMemo.split(":") : [];
+                    if (memoData.length === 2) {
+                        const [network, transactionId] = memoData;
                         swapTransactions
-                            .filter((transaction) => transaction.data.vendorField === duplicateSwapVendorField)
+                            .filter((transaction) => transaction.data.memo === duplicateSwapMemo)
                             .forEach((transaction) => {
                                 self.log.warning(
                                     `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transaction.data.id} (native coin) rejected :gun:`,
@@ -219,13 +219,13 @@ export class SXPSwap {
 
             const transactionData: Interfaces.ITransactionData = transaction.data;
             if (transactionData.senderPublicKey === swapWalletPublicKey) {
-                const vendorFieldData: string[] =
-                    typeof transactionData.vendorField === "string" ? transactionData.vendorField.split(":") : [];
-                if (vendorFieldData.length !== 2) {
-                    throw new VendorFieldIncorrectError();
+                const memoData: string[] =
+                    typeof transactionData.memo === "string" ? transactionData.memo.split(":") : [];
+                if (memoData.length !== 2) {
+                    throw new MemoIncorrectError();
                 }
 
-                const [network, transactionId] = vendorFieldData;
+                const [network, transactionId] = memoData;
 
                 try {
                     if (!supportedNetworks.includes(network)) {
@@ -331,7 +331,7 @@ export class SXPSwap {
 
                     const alreadyProcessedThisSwap = await self.transactionHistoryService.findOneByCriteria({
                         senderPublicKey: swapWalletPublicKey,
-                        vendorField: transactionData.vendorField,
+                        memo: transactionData.memo,
                     });
 
                     if (alreadyProcessedThisSwap !== undefined) {
@@ -397,17 +397,17 @@ export class SXPSwap {
 
             const transactionData: Interfaces.ITransactionData = transaction.data;
             if (transactionData.senderPublicKey === swapWalletPublicKey) {
-                const vendorFieldData: string[] =
-                    typeof transactionData.vendorField === "string" ? transactionData.vendorField.split(":") : [];
-                if (vendorFieldData.length !== 2) {
-                    throw new VendorFieldIncorrectError();
+                const memoData: string[] =
+                    typeof transactionData.memo === "string" ? transactionData.memo.split(":") : [];
+                if (memoData.length !== 2) {
+                    throw new MemoIncorrectError();
                 }
 
-                const [network, transactionId] = vendorFieldData;
+                const [network, transactionId] = memoData;
 
                 const alreadyInPool: boolean = self.poolQuery
                     .getAllBySender(swapWalletPublicKey)
-                    .wherePredicate((t) => t.data.vendorField === transactionData.vendorField)
+                    .wherePredicate((t) => t.data.memo === transactionData.memo)
                     .has();
 
                 if (alreadyInPool) {
