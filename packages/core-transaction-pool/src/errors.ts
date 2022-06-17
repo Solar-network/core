@@ -1,6 +1,15 @@
 import { Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Interfaces, Utils } from "@solar-network/crypto";
 
+export class AlreadyTriedTransactionError extends Contracts.TransactionPool.PoolError {
+    public constructor(transaction: Interfaces.ITransaction, seconds: number) {
+        super(
+            `${transaction} must wait another ${seconds} ${AppUtils.pluralise("second", seconds)} before trying again`,
+            "ERR_COOLDOWN",
+        );
+    }
+}
+
 export class AlreadyForgedTransactionError extends Contracts.TransactionPool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
         super(`${transaction} was already forged`, "ERR_FORGED");

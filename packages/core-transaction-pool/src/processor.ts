@@ -3,7 +3,7 @@ import { Container, Contracts } from "@solar-network/core-kernel";
 import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import delay from "delay";
 
-import { AlreadyForgedTransactionError, InvalidTransactionDataError } from "./errors";
+import { AlreadyForgedTransactionError, AlreadyTriedTransactionError, InvalidTransactionDataError } from "./errors";
 
 @Container.injectable()
 export class Processor implements Contracts.TransactionPool.Processor {
@@ -27,6 +27,8 @@ export class Processor implements Contracts.TransactionPool.Processor {
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
+    private cachedTransactions: Map<string, number> = new Map();
+
     public async process(
         data: Interfaces.ITransactionData[] | Buffer[],
     ): Promise<Contracts.TransactionPool.ProcessorResult> {
@@ -38,6 +40,8 @@ export class Processor implements Contracts.TransactionPool.Processor {
 
         const broadcastTransactions: Interfaces.ITransaction[] = [];
         const transactions: Interfaces.ITransaction[] = [];
+        const timeNow: number = Math.ceil(new Date().getTime() / 1000);
+        const expirySeconds: number = 30;
 
         const handleError = (entryId: string, error: Error) => {
             invalid.push(entryId);
@@ -57,6 +61,12 @@ export class Processor implements Contracts.TransactionPool.Processor {
             }
         };
 
+        for (const [id, expiryTime] of this.cachedTransactions.entries()) {
+            if (timeNow - expiryTime >= expirySeconds) {
+                this.cachedTransactions.delete(id);
+            }
+        }
+
         try {
             for (let i = 0; i < data.length; i++) {
                 const transactionData = data[i];
@@ -67,7 +77,15 @@ export class Processor implements Contracts.TransactionPool.Processor {
                         transactionData instanceof Buffer
                             ? await this.getTransactionFromBuffer(transactionData)
                             : await this.getTransactionFromData(transactionData);
-                    transactions.push(transaction);
+                    if (transaction.id && !this.cachedTransactions.has(transaction.id)) {
+                        this.cachedTransactions.set(transaction.id, timeNow);
+                        transactions.push(transaction);
+                    } else if (transaction.id) {
+                        throw new AlreadyTriedTransactionError(
+                            transaction,
+                            expirySeconds - (timeNow - this.cachedTransactions.get(transaction.id)!),
+                        );
+                    }
                 } catch (error) {
                     handleError(entryId, error);
                 }
