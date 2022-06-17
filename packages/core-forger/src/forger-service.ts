@@ -456,9 +456,6 @@ export class ForgerService {
         } else if (networkState.status === NetworkStateStatus.BelowMinimumDelegates) {
             this.logger.info("Not peered with enough delegates to get quorum. Will not forge :bomb:");
             return false;
-        } else if (networkState.status === NetworkStateStatus.BelowMinimumPeers) {
-            this.logger.info("Network reach is not sufficient to get quorum. Will not forge :bomb:");
-            return false;
         }
 
         const removeDuplicateBlockHeaders = (blockHeaders) => {

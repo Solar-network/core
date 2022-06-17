@@ -348,38 +348,34 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         const peers: Contracts.P2P.Peer[] = this.repository.getPeers();
         const milestone = Managers.configManager.getMilestone();
-        if (milestone.onlyActiveDelegatesInCalculations) {
-            const localPeer: Contracts.P2P.Peer = new Peer(
-                "127.0.0.1",
-                this.configuration.getRequired<number>("server.port"),
-            );
-            localPeer.publicKeys = await this.getDelegatesOnThisNode();
-            localPeer.verificationResult = new PeerVerificationResult(
-                lastBlock.data.height,
-                lastBlock.data.height,
-                lastBlock.data.height,
-            );
+        const localPeer: Contracts.P2P.Peer = new Peer(
+            "127.0.0.1",
+            this.configuration.getRequired<number>("server.port"),
+        );
+        localPeer.publicKeys = await this.getDelegatesOnThisNode();
+        localPeer.verificationResult = new PeerVerificationResult(
+            lastBlock.data.height,
+            lastBlock.data.height,
+            lastBlock.data.height,
+        );
 
-            for (const peer of peers) {
-                peer.publicKeys = peer.publicKeys.filter((publicKey) => !localPeer.publicKeys.includes(publicKey));
-            }
-            peers.push(localPeer);
+        for (const peer of peers) {
+            peer.publicKeys = peer.publicKeys.filter((publicKey) => !localPeer.publicKeys.includes(publicKey));
+        }
+        peers.push(localPeer);
 
-            for (const peer of peers) {
-                if (peer.isActiveDelegate()) {
-                    for (let i = 0; i < peer.publicKeys.length; i++) {
-                        includedPeers.push(peer);
-                    }
-                } else if (peer.state && peer.state.height! > lastBlock.data.height) {
-                    relayPeers.push(peer);
+        for (const peer of peers) {
+            if (peer.isActiveDelegate()) {
+                for (let i = 0; i < peer.publicKeys.length; i++) {
+                    includedPeers.push(peer);
                 }
+            } else if (peer.state && peer.state.height! > lastBlock.data.height) {
+                relayPeers.push(peer);
             }
+        }
 
-            if (includedPeers.length < Math.floor(milestone.activeDelegates / 2) + 1) {
-                includedPeers.push(...relayPeers);
-            }
-        } else {
-            includedPeers.push(...peers);
+        if (includedPeers.length < Math.floor(milestone.activeDelegates / 2) + 1) {
+            includedPeers.push(...relayPeers);
         }
 
         const verificationResults: Contracts.P2P.PeerVerificationResult[] = includedPeers
@@ -404,10 +400,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         for (const forkHeight of forkHeights) {
             const forkPeerCount = forkVerificationResults.filter((vr) => vr.highestCommonHeight === forkHeight).length;
-            let ourPeerCount = verificationResults.filter((vr) => vr.highestCommonHeight > forkHeight).length;
-            if (!milestone.onlyActiveDelegatesInCalculations) {
-                ourPeerCount++;
-            }
+            const ourPeerCount = verificationResults.filter((vr) => vr.highestCommonHeight > forkHeight).length;
             if (forkPeerCount > ourPeerCount) {
                 const blocksToRollback = lastBlock.data.height - forkHeight;
 

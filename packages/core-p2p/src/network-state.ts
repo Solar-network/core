@@ -65,10 +65,10 @@ class QuorumDetails {
 
     public canForge() {
         const milestone = Managers.configManager.getMilestone();
-        let threshold = 0.66;
-        if (milestone.onlyActiveDelegatesInCalculations) {
-            threshold = Math.min(1, (Math.floor(milestone.activeDelegates / 2) + 1) / (this.hasQuorum + this.noQuorum));
-        }
+        const threshold: number = Math.min(
+            1,
+            (Math.floor(milestone.activeDelegates / 2) + 1) / (this.hasQuorum + this.noQuorum),
+        );
         return this.getQuorum() >= threshold;
     }
 }
@@ -120,44 +120,36 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         );
 
         const milestone = Managers.configManager.getMilestone();
-        if (milestone.onlyActiveDelegatesInCalculations) {
-            if (delegatesOnThisNode.length > 0) {
-                const localPeer: Contracts.P2P.Peer = new Peer(
-                    "127.0.0.1",
-                    configuration.getRequired<number>("server.port"),
-                );
-                localPeer.publicKeys = delegatesOnThisNode;
-                localPeer.state = {
-                    height: lastBlock.data.height,
-                    forgingAllowed: slotInfo.forgingStatus,
-                    currentSlot: slotInfo.slotNumber,
-                    header: lastBlock.getHeader(),
-                };
-                peers.forEach((peer) => {
-                    peer.publicKeys = peer.publicKeys.filter((publicKey) => !delegatesOnThisNode.includes(publicKey));
-                });
-                peers.push(localPeer);
-            }
-            peers = peers.filter((peer) => peer.isActiveDelegate());
+        if (delegatesOnThisNode.length > 0) {
+            const localPeer: Contracts.P2P.Peer = new Peer(
+                "127.0.0.1",
+                configuration.getRequired<number>("server.port"),
+            );
+            localPeer.publicKeys = delegatesOnThisNode;
+            localPeer.state = {
+                height: lastBlock.data.height,
+                forgingAllowed: slotInfo.forgingStatus,
+                currentSlot: slotInfo.slotNumber,
+                header: lastBlock.getHeader(),
+            };
+            peers.forEach((peer) => {
+                peer.publicKeys = peer.publicKeys.filter((publicKey) => !delegatesOnThisNode.includes(publicKey));
+            });
+            peers.push(localPeer);
         }
+        peers = peers.filter((peer) => peer.isActiveDelegate());
 
         const minimumDelegateReach = configuration.getOptional<number>(
             "minimumDelegateReach",
             Math.floor(milestone.activeDelegates / 2) + 1,
         );
-        const minimumNetworkReach = configuration.getOptional<number>("minimumNetworkReach", 20);
 
         if (monitor.isColdStart()) {
             monitor.completeColdStart();
             return new NetworkState(NetworkStateStatus.ColdStart, lastBlock, monitor);
         } else if (process.env.CORE_ENV === "test") {
             return new NetworkState(NetworkStateStatus.Test, lastBlock, monitor);
-        } else if (!milestone.onlyActiveDelegatesInCalculations && repository.getPeers().length < minimumNetworkReach) {
-            return new NetworkState(NetworkStateStatus.BelowMinimumPeers, lastBlock, monitor);
-        } else if (
-            milestone.onlyActiveDelegatesInCalculations &&
-            peers.flatMap((peer) => peer.publicKeys).length < minimumDelegateReach
-        ) {
+        } else if (peers.flatMap((peer) => peer.publicKeys).length < minimumDelegateReach) {
             return new NetworkState(NetworkStateStatus.BelowMinimumDelegates, lastBlock, monitor);
         }
 
@@ -284,11 +276,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
     private update(peer: Contracts.P2P.Peer, currentSlot: number, monitor: Contracts.P2P.NetworkMonitor): void {
         Utils.assert.defined<number>(this.nodeHeight);
 
-        const milestone = Managers.configManager.getMilestone();
-        let increment = 1;
-        if (milestone.onlyActiveDelegatesInCalculations) {
-            increment = peer.publicKeys.length;
-        }
+        const increment: number = peer.publicKeys.length;
         if (typeof peer.state.header === "object" && typeof peer.state.header.height === "number") {
             if (peer.state.header.height !== this.nodeHeight) {
                 this.quorumDetails.noQuorum += increment;
