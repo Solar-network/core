@@ -120,7 +120,7 @@ export abstract class AbstractRepository<TEntity extends ObjectLiteral> extends 
                     propertyValue = undefined;
                 } else if (columnMetadata.type === "bigint") {
                     propertyValue = Utils.BigNumber.make(value);
-                } else if (columnMetadata.propertyName === "vendorField") {
+                } else if (columnMetadata.propertyName === "memo") {
                     propertyValue = value.toString("utf8");
                 } else {
                     propertyValue = value;

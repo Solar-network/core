@@ -18,7 +18,7 @@ export const transformBigInt = {
     },
 };
 
-export const transformVendorField = {
+export const transformMemo = {
     from: (value: Buffer | undefined | null): string | undefined => {
         if (value !== undefined && value !== null) {
             return value.toString("utf8");

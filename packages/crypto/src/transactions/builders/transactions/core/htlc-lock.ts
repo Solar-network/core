@@ -12,7 +12,7 @@ export class HtlcLockBuilder extends TransactionBuilder<HtlcLockBuilder> {
         this.data.recipientId = undefined;
         this.data.amount = BigNumber.ZERO;
         this.data.fee = Core.HtlcLockTransaction.staticFee();
-        this.data.vendorField = undefined;
+        this.data.memo = undefined;
         this.data.asset = {};
     }
 

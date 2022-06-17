@@ -55,8 +55,7 @@
             "maximum": 256,
             "minimum": 2
         },
-        "reward": 0,
-        "vendorFieldLength": 255
+        "reward": 0
     },
     {
         "height": 478,

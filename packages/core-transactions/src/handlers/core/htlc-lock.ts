@@ -31,9 +31,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
                 amount: Utils.BigNumber.make(transaction.amount),
                 recipientId: transaction.recipientId,
                 timestamp: transaction.timestamp,
-                vendorField: transaction.vendorField
-                    ? Buffer.from(transaction.vendorField, "hex").toString("utf8")
-                    : undefined,
+                memo: transaction.memo ? Buffer.from(transaction.memo, "hex").toString("utf8") : undefined,
                 ...transaction.asset.lock,
             };
 
@@ -129,7 +127,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
             amount: transaction.data.amount,
             recipientId: transaction.data.recipientId,
             timestamp: transaction.timestamp,
-            vendorField: transaction.data.vendorField,
+            memo: transaction.data.memo,
             ...transaction.data.asset.lock,
         };
         sender.setAttribute("htlc.locks", locks);

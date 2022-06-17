@@ -56,7 +56,7 @@ export class TransactionWithBlockResource implements Resource {
             signature: transactionData.signature,
             signSignature,
             signatures: transactionData.signatures,
-            vendorField: transactionData.vendorField,
+            memo: transactionData.memo,
             asset: transactionData.asset,
             confirmations,
             timestamp: AppUtils.formatTimestamp(blockData.timestamp),

@@ -30,7 +30,7 @@ export interface TransactionModel {
     recipientId: string;
     type: number;
     typeGroup: number;
-    vendorField: string | undefined;
+    memo: string | undefined;
     amount: Utils.BigNumber;
     fee: Utils.BigNumber;
     burnedFee: Utils.BigNumber;

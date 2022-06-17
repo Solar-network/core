@@ -22,7 +22,7 @@ export type LockResource = {
     };
     expirationType: Enums.HtlcLockExpirationType;
     expirationValue: number;
-    vendorField: string;
+    memo: string;
 };
 
 export const lockCriteriaSchemaObject = {
@@ -47,7 +47,7 @@ export const lockCriteriaSchemaObject = {
         Enums.HtlcLockExpirationType.EpochTimestamp,
     ),
     expirationValue: Joi.alternatives(blockCriteriaSchemaObject.height, blockCriteriaSchemaObject.timestamp),
-    vendorField: transactionCriteriaSchemaObject.vendorField,
+    memo: transactionCriteriaSchemaObject.memo,
 };
 
 export const lockParamSchema = transactionIdSchema;

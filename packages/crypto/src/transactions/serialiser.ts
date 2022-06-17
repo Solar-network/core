@@ -32,7 +32,7 @@ export class Serialiser {
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(size));
 
         this.serialiseCommon(transaction.data, buff);
-        this.serialiseVendorField(transaction, buff);
+        this.serialiseMemo(transaction, buff);
 
         const serialised: ByteBuffer | undefined = transaction.serialise(options);
 
@@ -73,13 +73,13 @@ export class Serialiser {
         buff.writeBigInt64LE(transaction.fee.toBigInt());
     }
 
-    private static serialiseVendorField(transaction: ITransaction, buff: ByteBuffer): void {
+    private static serialiseMemo(transaction: ITransaction, buff: ByteBuffer): void {
         const { data }: ITransaction = transaction;
 
-        if (data.vendorField) {
-            const vf: Buffer = Buffer.from(data.vendorField, "utf8");
-            buff.writeUInt8(vf.length);
-            buff.writeBuffer(vf);
+        if (data.memo) {
+            const memo: Buffer = Buffer.from(data.memo, "utf8");
+            buff.writeUInt8(memo.length);
+            buff.writeBuffer(memo);
         } else {
             buff.writeUInt8(0x00);
         }

@@ -7,6 +7,12 @@ export class ApiCommunicationError extends Error {
     }
 }
 
+export class MemoIncorrectError extends Error {
+    public constructor() {
+        super("The memo of the transaction from the swap source wallet must adhere to the correct format");
+    }
+}
+
 export class InvalidSignatureError extends Error {
     public constructor() {
         super("The swap transaction signature is invalid");
@@ -74,12 +80,6 @@ export class UnknownSwapNetworkError extends Error {
         super(
             `The network of this swap transaction (${network}) does not correspond to any recognised network (${supportedNetworks.join(", ")})`
         );
-    }
-}
-
-export class VendorFieldIncorrectError extends Error {
-    public constructor() {
-        super("The vendor field of the transaction from the swap source wallet must adhere to the correct format");
     }
 }
 

@@ -65,6 +65,7 @@ export interface ITransactionData {
     recipientId?: string;
 
     asset?: ITransactionAsset;
+    memo?: string;
     vendorField?: string;
 
     id?: string;
@@ -97,7 +98,7 @@ export interface ITransactionJson {
     recipientId?: string;
 
     asset?: ITransactionAsset;
-    vendorField?: string | undefined;
+    memo?: string | undefined;
 
     id?: string;
     signature?: string;
@@ -155,7 +156,7 @@ export interface IHtlcLock extends IHtlcLockAsset {
     amount: BigNumber;
     recipientId: string | undefined;
     timestamp: number;
-    vendorField: string | undefined;
+    memo: string | undefined;
 }
 
 export type IHtlcLocks = Record<string, IHtlcLock>;

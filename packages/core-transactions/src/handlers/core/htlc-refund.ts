@@ -185,9 +185,7 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
             amount: lockTransaction.amount,
             recipientId: lockTransaction.recipientId,
             timestamp: lockTransaction.timestamp,
-            vendorField: lockTransaction.vendorField
-                ? Buffer.from(lockTransaction.vendorField, "hex").toString("utf8")
-                : undefined,
+            memo: lockTransaction.memo ? Buffer.from(lockTransaction.memo, "hex").toString("utf8") : undefined,
             ...lockTransaction.asset.lock,
         };
         lockWallet.setAttribute("htlc.locks", locks);

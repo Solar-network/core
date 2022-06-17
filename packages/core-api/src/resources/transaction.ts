@@ -64,7 +64,7 @@ export class TransactionResource implements Resource {
             signature: resource.signature,
             signSignature: resource.signSignature || resource.secondSignature,
             signatures: resource.signatures,
-            vendorField: resource.vendorField,
+            memo: resource.memo,
             asset: resource.asset,
             confirmations: 0,
             timestamp:

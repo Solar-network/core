@@ -213,7 +213,7 @@ export const transactionCriteriaSchemas = {
     senderPublicKey: orEqualCriteria(Joi.string().hex().length(66)),
     type: orEqualCriteria(Joi.number().integer().min(0)),
     typeGroup: orEqualCriteria(Joi.number().integer().min(0)),
-    vendorField: orLikeCriteria(Joi.string().max(255, "utf8")),
+    memo: orLikeCriteria(Joi.string().max(255, "utf8")),
     amount: orNumericCriteria(Joi.number().integer().min(0)),
     fee: orNumericCriteria(Joi.number().integer().min(0)),
     burnedFee: orNumericCriteria(Joi.number().integer().min(0)),

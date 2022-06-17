@@ -2,7 +2,7 @@ import { Contracts } from "@solar-network/core-kernel";
 import { Utils } from "@solar-network/crypto";
 import { Column, Entity, Index } from "typeorm";
 
-import { transformBigInt, transformVendorField } from "../utils/transform";
+import { transformBigInt, transformMemo } from "../utils/transform";
 
 // TODO: Fix model to have undefined type on nullable fields
 @Entity({
@@ -87,9 +87,9 @@ export class Transaction implements Contracts.Database.TransactionModel {
     @Column({
         type: "bytea",
         default: undefined,
-        transformer: transformVendorField,
+        transformer: transformMemo,
     })
-    public vendorField: string | undefined;
+    public memo: string | undefined;
 
     @Column({
         type: "bigint",
