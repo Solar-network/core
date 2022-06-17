@@ -45,6 +45,6 @@ export const defaults = {
     },
     options: {
         basePath: "/api",
-        estimateTotalCount: !process.env.CORE_API_NO_ESTIMATED_TOTAL_COUNT,
+        estimateTotalCount: !!process.env.CORE_API_ESTIMATED_TOTAL_COUNT,
     },
 };
