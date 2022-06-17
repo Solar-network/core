@@ -689,7 +689,13 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
 
         const acceptedTransactions: Buffer[] = [];
-        const timeNow: number = new Date().getTime() / 1000;
+        const timeNow: number = Math.ceil(new Date().getTime() / 1000);
+
+        for (const [id, expiryTime] of this.cachedTransactions.entries()) {
+            if (timeNow - expiryTime > 30) {
+                this.cachedTransactions.delete(id);
+            }
+        }
 
         for (const transaction of transactions) {
             try {
@@ -705,12 +711,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             }
 
             await delay(1);
-        }
-
-        for (const [id, expiryTime] of this.cachedTransactions.entries()) {
-            if (timeNow - expiryTime > 30) {
-                this.cachedTransactions.delete(id);
-            }
         }
 
         return acceptedTransactions;
