@@ -530,9 +530,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             this.clearAndStopQueue();
             await this.removeBlocks(rollbackBlocks);
             this.stateStore.setNumberOfBlocksToRollback(0);
-            this.logger.info(
-                `Removed ${rollbackBlocks.toLocaleString()} ${Utils.pluralise("block", rollbackBlocks)} :wastebasket:`,
-            );
+            this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)} :wastebasket:`);
             await this.getQueue().resume();
             try {
                 if (blocks[0].ip) {

@@ -125,11 +125,13 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         const blockHeader: Interfaces.IBlockData = claimedState.header as Interfaces.IBlockData;
         const claimedHeight = Number(blockHeader.height);
         if (claimedHeight !== claimedState.height) {
-            this.log(
-                Severity.DEBUG_EXTRA,
-                `Peer claimed contradicting heights: state height=${claimedState.height} vs ` +
-                    `state header height: ${claimedHeight}`,
-            );
+            if (claimedState.height) {
+                this.log(
+                    Severity.DEBUG_EXTRA,
+                    `Peer claimed contradicting heights: state height=${claimedState.height.toLocaleString()} vs ` +
+                        `state header height: ${claimedHeight.toLocaleString()}`,
+                );
+            }
             return false;
         }
 
@@ -159,13 +161,16 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
             this.log(
                 Severity.DEBUG_EXTRA,
-                `Claimed block header ${blockHeader.height}:${blockHeader.id} failed signature verification`,
+                `Claimed block header ${blockHeader.height.toLocaleString()}:${
+                    blockHeader.id
+                } failed signature verification`,
             );
             return false;
         } catch (error) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `Claimed block header ${blockHeader.height}:${blockHeader.id} failed verification: ` + error.message,
+                `Claimed block header ${blockHeader.height.toLocaleString()}:${blockHeader.id} failed verification: ` +
+                    error.message,
             );
             return false;
         }
@@ -202,7 +207,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             this.log(
                 Severity.DEBUG_EXTRA,
                 `peer's claimed chain is ${Utils.pluralise("block", blocksAhead, true)} higher than ` +
-                    `ours (our height ${ourHeight}, his claimed height ${claimedHeight})`,
+                    `ours (our height ${ourHeight.toLocaleString()}, his claimed height ${claimedHeight.toLocaleString()})`,
                 null,
             );
 
@@ -214,9 +219,9 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         assert.strictEqual(
             blocks.length,
             1,
-            `databaseInterceptor.getBlocksByHeight([ ${claimedHeight} ]) returned ${blocks.length} results: ` +
+            `databaseInterceptor.getBlocksByHeight([ ${claimedHeight.toLocaleString()} ]) returned ${blocks.length.toLocaleString()} results: ` +
                 this.anyToString(blocks) +
-                ` (our chain is at height ${ourHeight})`,
+                ` (our chain is at height ${ourHeight.toLocaleString()})`,
         );
 
         const ourBlockAtHisHeight = blocks[0];
@@ -226,14 +231,18 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
                 this.log(
                     Severity.DEBUG_EXTRA,
                     `success: peer's latest block is the same as our latest ` +
-                        `block (height=${claimedHeight}, id=${claimedState.header.id}). Identical chains`,
+                        `block (height=${claimedHeight.toLocaleString()}, id=${
+                            claimedState.header.id
+                        }). Identical chains`,
                     true,
                 );
             } else {
                 this.log(
                     Severity.DEBUG_EXTRA,
                     `success: peer's latest block ` +
-                        `(height=${claimedHeight}, id=${claimedState.header.id}) is part of our chain. ` +
+                        `(height=${claimedHeight.toLocaleString()}, id=${
+                            claimedState.header.id
+                        }) is part of our chain. ` +
                         `Peer is ${Utils.pluralise("block", ourHeight - claimedHeight, true)} behind us`,
                     true,
                 );
@@ -243,7 +252,9 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
         this.log(
             Severity.DEBUG,
-            `peer's latest block (height=${claimedHeight}, id=${claimedState.header.id}), is different than the ` +
+            `peer's latest block (height=${claimedHeight.toLocaleString()}, id=${
+                claimedState.header.id
+            }), is different than the ` +
                 `block at the same height in our chain (id=${ourBlockAtHisHeight.id}). Peer has ` +
                 (claimedHeight < ourHeight ? `a shorter and` : `an equal-height but`) +
                 ` different chain`,
@@ -329,8 +340,8 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
                     Severity.DEBUG_EXTRA,
                     `failure: bogus reply from peer for common blocks ${ourBlocksPrint}: ` +
                         `peer pretends to have block with id ${highestCommon.id} at height ` +
-                        `${highestCommon.height}, however a block with the same id is at ` +
-                        `different height ${probesHeightById[highestCommon.id]} in our chain`,
+                        `${highestCommon.height.toLocaleString()}, however a block with the same id is at ` +
+                        `different height ${probesHeightById[highestCommon.id].toLocaleString()} in our chain`,
                 );
                 return undefined;
             }
@@ -345,7 +356,11 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         if (highestCommonBlockHeight === undefined) {
             this.log(Severity.INFO, `failure: could not determine a common block`);
         } else {
-            this.log(Severity.DEBUG_EXTRA, `highest common block height: ${highestCommonBlockHeight}`, null);
+            this.log(
+                Severity.DEBUG_EXTRA,
+                `highest common block height: ${highestCommonBlockHeight.toLocaleString()}`,
+                null,
+            );
         }
 
         return highestCommonBlockHeight;
@@ -461,7 +476,9 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         } catch (err) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `failure: could not get blocks starting from height ${height} from peer: exception: ${err.message}`,
+                `failure: could not get blocks starting from height ${height.toLocaleString()} from peer: exception: ${
+                    err.message
+                }`,
             );
             return false;
         }
@@ -469,7 +486,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         if (!response || response.length === 0) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `failure: could not get blocks starting from height ${height} ` +
+                `failure: could not get blocks starting from height ${height.toLocaleString()} ` +
                     `from peer: unexpected response: ${this.anyToString(response)}`,
             );
             return false;
@@ -502,7 +519,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         if (!block.verifySignature()) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `failure: peer's block at height ${expectedHeight} does not pass crypto-validation`,
+                `failure: peer's block at height ${expectedHeight.toLocaleString()} does not pass crypto-validation`,
             );
             return false;
         }
@@ -512,7 +529,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         if (height !== expectedHeight) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `failure: asked for block at height ${expectedHeight}, but got a block with height ${height} instead`,
+                `failure: asked for block at height ${expectedHeight.toLocaleString()}, but got a block with height ${height.toLocaleString()} instead`,
             );
             return false;
         }
@@ -520,7 +537,8 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         if (delegatesByPublicKey[block.data.generatorPublicKey]) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `successfully verified block at height ${height}, signed by ` + block.data.generatorPublicKey,
+                `successfully verified block at height ${height.toLocaleString()}, signed by ` +
+                    block.data.generatorPublicKey,
                 true,
             );
 

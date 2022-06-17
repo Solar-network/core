@@ -310,7 +310,7 @@ export class BlockRepository extends AbstractRepository<Block> {
             }
 
             app.get<Contracts.Kernel.Logger>(Container.Identifiers.LogService).info(
-                `Removing the latest ${blockIds.length.toLocaleString()} ${Utils.pluralise("block", blockIds.length)}`,
+                `Removing the latest ${Utils.pluralise("block", blockIds.length, true)}`,
             );
 
             await manager

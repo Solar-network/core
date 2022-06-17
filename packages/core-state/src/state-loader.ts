@@ -283,9 +283,10 @@ export class StateLoader {
 
             if (blocksFromOurHeight > 0) {
                 this.logger.info(
-                    `Restored state is ${blocksFromOurHeight.toLocaleString()} ${AppUtils.pluralise(
+                    `Restored state is ${AppUtils.pluralise(
                         "block",
                         blocksFromOurHeight,
+                        true,
                     )} behind so the blockchain will roll back to height ${height.toLocaleString()} :repeat:`,
                 );
                 await this.blockRepository.deleteTopBlocks(this.app, blocksFromOurHeight);

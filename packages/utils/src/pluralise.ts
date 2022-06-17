@@ -5,5 +5,5 @@ export const pluralise = (value: string, count: number = 1, inclusive: boolean =
         output += "s";
     }
 
-    return inclusive ? `${count} ${output}` : output;
+    return inclusive ? `${count.toLocaleString()} ${output}` : output;
 };

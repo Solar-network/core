@@ -413,15 +413,16 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
                 if (blocksToRollback > 5000) {
                     this.logger.warning(
-                        `Fork detected! Rolling back ${(5000).toLocaleString()}/${blocksToRollback.toLocaleString()} blocks to fork at height ${forkHeight.toLocaleString()} (${ourPeerCount.toLocaleString()} vs ${forkPeerCount.toLocaleString()}) :repeat:`,
+                        `Fork detected - rolling back ${(5000).toLocaleString()}/${blocksToRollback.toLocaleString()} blocks to fork at height ${forkHeight.toLocaleString()} (${ourPeerCount.toLocaleString()} vs ${forkPeerCount.toLocaleString()}) :repeat:`,
                     );
 
                     return { forked: true, blocksToRollback: 5000 };
                 } else {
                     this.logger.warning(
-                        `Fork detected! Rolling back ${blocksToRollback.toLocaleString()} ${Utils.pluralise(
+                        `Fork detected - rolling back ${Utils.pluralise(
                             "block",
                             blocksToRollback,
+                            true,
                         )} to fork at height ${forkHeight.toLocaleString()} (${ourPeerCount.toLocaleString()} vs ${forkPeerCount.toLocaleString()}) :repeat:`,
                     );
 
@@ -429,7 +430,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 }
             } else {
                 this.logger.debug(
-                    `Ignoring fork at height ${forkHeight} (${ourPeerCount} vs ${forkPeerCount}) :fork_and_knife:`,
+                    `Ignoring fork at height ${forkHeight.toLocaleString()} (${ourPeerCount.toLocaleString()} vs ${forkPeerCount.toLocaleString()}) :fork_and_knife:`,
                 );
             }
         }

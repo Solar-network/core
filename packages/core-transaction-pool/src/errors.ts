@@ -4,7 +4,7 @@ import { Interfaces, Utils } from "@solar-network/crypto";
 export class AlreadyTriedTransactionError extends Contracts.TransactionPool.PoolError {
     public constructor(transaction: Interfaces.ITransaction, seconds: number) {
         super(
-            `${transaction} must wait another ${seconds} ${AppUtils.pluralise("second", seconds)} before trying again`,
+            `${transaction} must wait another ${AppUtils.pluralise("second", seconds, true)} before trying again`,
             "ERR_COOLDOWN",
         );
     }
