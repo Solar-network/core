@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class RenameMemoToMemoInTransactionsTable20220618000000 implements MigrationInterface {
+export class RenameVendorFieldToMemoInTransactionsTable20220618000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(`
             ALTER TABLE transactions RENAME vendor_field TO memo;
