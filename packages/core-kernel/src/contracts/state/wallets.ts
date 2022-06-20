@@ -120,13 +120,25 @@ export interface Wallet {
      * @returns {object[]}
      * @memberof Wallet
      */
-    getVotes(): object[];
+    getStateHistory(key: string): object[];
 
     /**
-     * @param {object[]}
+     * @returns {Record<string, object[]>}
      * @memberof Wallet
      */
-    setVotes(votes: object[]): void;
+    getAllStateHistory(): Record<string, object[]>;
+
+    /**
+     * @param {Record<string, object[]>}
+     * @memberof Wallet
+     */
+    setAllStateHistory(stateHistory: Record<string, object[]>): void;
+
+    /**
+     * @param {string}
+     * @memberof Wallet
+     */
+    initialiseStateHistory(key: string): void;
 
     /**
      * @param {string} delegate
@@ -136,10 +148,10 @@ export interface Wallet {
     getVoteBalance(delegate: string): Utils.BigNumber;
 
     /**
-     * @returns {object}
+     * @returns {Record<string, Utils.BigNumber>}
      * @memberof Wallet
      */
-    getVoteBalances(): object;
+    getVoteBalances(): Record<string, Utils.BigNumber>;
 
     /**
      * @param {object} balances

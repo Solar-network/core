@@ -119,7 +119,7 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
-        const votes = sender.getVotes();
+        const votes = sender.getStateHistory("votes");
 
         votes.pop()!;
         const previousVotes = votes.at(-1)!;
