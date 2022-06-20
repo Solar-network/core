@@ -60,6 +60,10 @@ export class StateSaver {
             buffer.writeUInt32LE(length);
 
             for (const wallet of this.walletRepository.allByAddress()) {
+                const attributes: Record<string, any> = wallet.getAttributes();
+                const stateHistory: Record<string, object[]> = wallet.getAllStateHistory();
+                const voteBalances: Record<string, Utils.BigNumber> = wallet.getVoteBalances();
+
                 let bits: number = 0;
 
                 if (!wallet.getBalance().isZero()) {
@@ -74,15 +78,15 @@ export class StateSaver {
                     bits += 4;
                 }
 
-                if (Object.keys(wallet.getAttributes()).length > 0) {
+                if (Object.keys(attributes).length > 0) {
                     bits += 8;
                 }
 
-                if (Object.keys(wallet.getVoteBalances()).length > 0) {
+                if (Object.keys(stateHistory).length > 0) {
                     bits += 16;
                 }
 
-                if (wallet.getVotes().length > 1) {
+                if (Object.keys(voteBalances).length > 0) {
                     bits += 32;
                 }
 
@@ -119,52 +123,22 @@ export class StateSaver {
                     buffer.writeBuffer(publicKey);
                 }
 
-                if (Object.keys(wallet.getAttributes()).length > 0) {
-                    secondaryBuffer.reset();
-                    this.byteBufferArray.reset();
+                for (const item of [attributes, stateHistory, voteBalances]) {
+                    if (Object.keys(item).length > 0) {
+                        secondaryBuffer.reset();
+                        this.byteBufferArray.reset();
 
-                    const encoded: Buffer = this.encode(wallet.getAttributes(), secondaryBuffer);
-                    if (buffer.getRemainderLength() < 8) {
-                        flush();
+                        const encoded: Buffer = this.encode(item, secondaryBuffer);
+                        if (buffer.getRemainderLength() < 8) {
+                            flush();
+                        }
+                        buffer.writeUInt32LE(encoded.length);
+
+                        if (buffer.getRemainderLength() < encoded.length) {
+                            flush();
+                        }
+                        buffer.writeBuffer(encoded);
                     }
-                    buffer.writeUInt32LE(encoded.length);
-
-                    if (buffer.getRemainderLength() < encoded.length) {
-                        flush();
-                    }
-                    buffer.writeBuffer(encoded);
-                }
-
-                if (Object.keys(wallet.getVoteBalances()).length > 0) {
-                    secondaryBuffer.reset();
-                    this.byteBufferArray.reset();
-
-                    const encoded: Buffer = this.encode(wallet.getVoteBalances(), secondaryBuffer);
-                    if (buffer.getRemainderLength() < 8) {
-                        flush();
-                    }
-                    buffer.writeUInt32LE(encoded.length);
-
-                    if (buffer.getRemainderLength() < encoded.length) {
-                        flush();
-                    }
-                    buffer.writeBuffer(encoded);
-                }
-
-                if (wallet.getVotes().length > 1) {
-                    secondaryBuffer.reset();
-                    this.byteBufferArray.reset();
-
-                    const encoded: Buffer = this.encode(wallet.getVotes(), secondaryBuffer);
-                    if (buffer.getRemainderLength() < 8) {
-                        flush();
-                    }
-                    buffer.writeUInt32LE(encoded.length);
-
-                    if (buffer.getRemainderLength() < encoded.length) {
-                        flush();
-                    }
-                    buffer.writeBuffer(encoded);
                 }
             }
 

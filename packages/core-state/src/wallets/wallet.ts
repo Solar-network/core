@@ -1,4 +1,4 @@
-import { Contracts, Services } from "@solar-network/core-kernel";
+import { Contracts, Services, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Utils } from "@solar-network/crypto";
 
 import { WalletEvent } from "./wallet-event";
@@ -7,16 +7,19 @@ export class Wallet implements Contracts.State.Wallet {
     protected publicKey: string | undefined;
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
-    protected voteBalances: object = {};
-    protected votes: object[] = [{}];
+    protected stateHistory: Record<string, object[]> = {};
+    protected voteBalances: Record<string, Utils.BigNumber> = {};
 
     public constructor(
         protected readonly address: string,
         protected readonly attributes: Services.Attributes.AttributeMap,
         protected readonly events?: Contracts.Kernel.EventDispatcher,
     ) {
+        this.initialiseStateHistory("votes");
+
         if (!this.hasAttribute("votes")) {
-            this.setAttribute("votes", this.votes.at(-1));
+            const votes: object[] = this.getStateHistory("votes");
+            this.setAttribute("votes", votes.at(-1));
         }
     }
 
@@ -196,12 +199,24 @@ export class Wallet implements Contracts.State.Wallet {
      * @returns {object[]}
      * @memberof Wallet
      */
-    public getVotes(): object[] {
-        return this.votes;
+    public getStateHistory(key: string): object[] {
+        return this.stateHistory[key];
     }
 
-    public setVotes(votes: object[]): void {
-        this.votes = votes;
+    /**
+     * @returns {Record<string, object[]>}
+     * @memberof Wallet
+     */
+    public getAllStateHistory(): Record<string, object[]> {
+        return this.stateHistory;
+    }
+
+    public setAllStateHistory(stateHistory: Record<string, object[]>): void {
+        this.stateHistory = stateHistory;
+    }
+
+    public initialiseStateHistory(key: string): void {
+        this.stateHistory[key] = [{}];
     }
 
     /**
@@ -214,14 +229,14 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     /**
-     * @returns {object}
+     * @returns {Record<string, Utils.BigNumber>}
      * @memberof Wallet
      */
-    public getVoteBalances(): object {
+    public getVoteBalances(): Record<string, Utils.BigNumber> {
         return this.voteBalances;
     }
 
-    public setVoteBalances(balances: object) {
+    public setVoteBalances(balances: Record<string, Utils.BigNumber>) {
         this.voteBalances = balances;
     }
 
@@ -248,7 +263,7 @@ export class Wallet implements Contracts.State.Wallet {
      */
     public changeVotes(value: Record<string, number>): void {
         const sortedVotes: Record<string, number> = Utils.sortVotes(value);
-        this.votes.push(sortedVotes);
+        this.stateHistory.votes.push(sortedVotes);
         this.setAttribute("votes", sortedVotes);
     }
 
@@ -294,10 +309,8 @@ export class Wallet implements Contracts.State.Wallet {
         cloned.publicKey = this.publicKey;
         cloned.balance = this.balance;
         cloned.nonce = this.nonce;
-        cloned.voteBalances = { ...this.voteBalances };
-        cloned.votes = this.votes.map((vote) => {
-            return { ...vote };
-        });
+        cloned.stateHistory = AppUtils.cloneDeep(this.stateHistory);
+        cloned.voteBalances = AppUtils.cloneDeep(this.voteBalances);
         return cloned;
     }
 
