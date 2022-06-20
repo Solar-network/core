@@ -1,5 +1,5 @@
 import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/core-kernel";
-import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
+import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
 import { VotedForNonDelegateError, VotedForResignedDelegateError, VotedForTooManyDelegatesError } from "../../errors";
 import { DelegateRegistrationTransactionHandler } from "../core/delegate-registration";
@@ -91,7 +91,9 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         if (hasSender) {
             throw new Contracts.TransactionPool.PoolError(
-                `Sender ${transaction.data.senderPublicKey} already has a vote transaction in the pool`,
+                `${Identities.Address.fromPublicKey(
+                    transaction.data.senderPublicKey,
+                )} already has a vote transaction in the pool`,
                 "ERR_PENDING",
             );
         }

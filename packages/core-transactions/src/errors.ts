@@ -71,7 +71,7 @@ export class UnexpectedNonceError extends TransactionError {
 
 export class ColdWalletError extends TransactionError {
     public constructor() {
-        super(`Insufficient balance in database wallet. Wallet is not allowed to spend before funding is confirmed`);
+        super("Wallet is not allowed to spend before funding is confirmed");
     }
 }
 
@@ -89,90 +89,84 @@ export class InsufficientBalanceError extends TransactionError {
 
 export class SenderWalletMismatchError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the public key does not match the wallet`);
+        super("Failed to apply transaction, because the public key does not match the wallet");
     }
 }
 
 export class UnexpectedSecondSignatureError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because wallet does not allow second signatures`);
+        super("Failed to apply transaction, because the wallet does not have a second signature");
     }
 }
 
 export class MissingMultiSignatureOnSenderError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because sender does not have a multisignature`);
+        super("Failed to apply transaction, because the sender does not have a multisignature");
     }
 }
 
 export class InvalidMultiSignaturesError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the multisignatures are invalid`);
-    }
-}
-
-export class UnsupportedMultiSignatureTransactionError extends TransactionError {
-    public constructor() {
-        super(`Failed to apply transaction, because the transaction does not support multisignatures`);
+        super("Failed to apply transaction, because the multisignatures are invalid");
     }
 }
 
 export class InvalidSecondSignatureError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the second signature could not be verified`);
+        super("Failed to apply transaction, because the second signature could not be verified");
     }
 }
 
 export class WalletAlreadyResignedError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the wallet already resigned as delegate`);
+        super("Failed to apply transaction, because the wallet already resigned as a delegate");
     }
 }
 
 export class WalletNotADelegateError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the wallet is not a delegate`);
+        super("Failed to apply transaction, because the wallet is not a delegate");
     }
 }
 
 export class WalletIsAlreadyDelegateError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the wallet already has a registered username`);
+        super("Failed to apply transaction, because the wallet already registered as a delegate");
     }
 }
 
 export class WalletUsernameAlreadyRegisteredError extends TransactionError {
     public constructor(username: string) {
-        super(`Failed to apply transaction, because the username '${username}' is already registered`);
+        super(`Failed to apply transaction, because the delegate name '${username}' is already registered`);
     }
 }
 
 export class SecondSignatureAlreadyRegisteredError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because second signature is already enabled`);
+        super("Failed to apply transaction, because a second signature is already enabled on this wallet");
     }
 }
 export class NotSupportedForMultiSignatureWalletError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because multisignature is enabled`);
+        super("Failed to apply transaction, because multisignature is enabled");
     }
 }
 
 export class AlreadyVotedError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the sender wallet has already voted`);
+        super("Failed to apply transaction, because the sender wallet has already voted");
     }
 }
 
 export class NoVoteError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the wallet has not voted`);
+        super("Failed to apply transaction, because the wallet has not voted");
     }
 }
 
 export class UnvoteMismatchError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the wallet vote does not match`);
+        super("Failed to apply transaction, because the wallet vote does not match");
     }
 }
 
@@ -181,7 +175,7 @@ export class VotedForNonDelegateError extends TransactionError {
         if (vote) {
             super(`Failed to apply transaction, because '${vote}' is not a delegate`);
         } else {
-            super(`Failed to apply transaction, because only delegates can be voted`);
+            super("Failed to apply transaction, because only delegates can be voted");
         }
     }
 }
@@ -200,50 +194,50 @@ export class VotedForTooManyDelegatesError extends TransactionError {
 
 export class NotEnoughDelegatesError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because not enough delegates to allow resignation`);
+        super("Failed to apply transaction, because not enough delegates are registered to allow resignation");
     }
 }
 
 export class MultiSignatureAlreadyRegisteredError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because multisignature is already enabled`);
+        super("Failed to apply transaction, because a multisignature is already enabled on this wallet");
     }
 }
 
 export class MultiSignatureMinimumKeysError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because too few keys were provided`);
+        super("Failed to apply transaction, because too few keys were provided");
     }
 }
 
 export class IpfsHashAlreadyExists extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because this IPFS hash is already registered on the blockchain`);
+        super("Failed to apply transaction, because this IPFS hash is already registered on the blockchain");
     }
 }
 
 export class HtlcLockTransactionNotFoundError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the associated HTLC lock transaction could not be found`);
+        super("Failed to apply transaction, because the associated HTLC lock transaction could not be found");
     }
 }
 
 export class HtlcSecretHashMismatchError extends TransactionError {
     public constructor() {
         super(
-            `Failed to apply transaction, because the secret provided does not match the associated HTLC lock transaction secret`,
+            "Failed to apply transaction, because the secret provided does not match the associated HTLC lock transaction secret",
         );
     }
 }
 
 export class HtlcLockNotExpiredError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the associated HTLC lock transaction did not expire yet`);
+        super("Failed to apply transaction, because the associated HTLC lock transaction did not expire yet");
     }
 }
 
 export class HtlcLockExpiredError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the associated HTLC lock transaction expired`);
+        super("Failed to apply transaction, because the associated HTLC lock transaction expired");
     }
 }

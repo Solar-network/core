@@ -142,7 +142,7 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
 
         if (hasClaim) {
             throw new Contracts.TransactionPool.PoolError(
-                `HtlcClaim for "${lockId}" already in the pool`,
+                `HtlcClaim for '${lockId}' already in the pool`,
                 "ERR_PENDING",
             );
         }

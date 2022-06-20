@@ -1,5 +1,5 @@
 import { Container, Contracts, Utils } from "@solar-network/core-kernel";
-import { Interfaces, Transactions } from "@solar-network/crypto";
+import { Identities, Interfaces, Transactions } from "@solar-network/crypto";
 
 import { NotSupportedForMultiSignatureWalletError, SecondSignatureAlreadyRegisteredError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
@@ -75,7 +75,9 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
 
         if (hasSender) {
             throw new Contracts.TransactionPool.PoolError(
-                `Sender ${transaction.data.senderPublicKey} already has a second signature registration transaction in the pool`,
+                `${Identities.Address.fromPublicKey(
+                    transaction.data.senderPublicKey,
+                )} already has a second signature registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }

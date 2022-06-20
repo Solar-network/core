@@ -60,7 +60,7 @@ export class IpfsTransactionHandler extends TransactionHandler {
 
         if (hasIPFS) {
             throw new Contracts.TransactionPool.PoolError(
-                `IPFS transaction with IPFS address "${transaction.data.asset.ipfs}" already in the pool`,
+                `IPFS transaction with IPFS address '${transaction.data.asset.ipfs}' already in the pool`,
                 "ERR_PENDING",
             );
         }

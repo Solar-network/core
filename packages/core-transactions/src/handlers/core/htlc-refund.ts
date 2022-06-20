@@ -93,7 +93,7 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
 
         if (hasRefund) {
             throw new Contracts.TransactionPool.PoolError(
-                `HtlcRefund for "${lockId}" already in the pool`,
+                `HtlcRefund for '${lockId}' already in the pool`,
                 "ERR_PENDING",
             );
         }

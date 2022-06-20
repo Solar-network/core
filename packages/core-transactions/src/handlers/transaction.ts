@@ -13,7 +13,6 @@ import {
     TransactionFeeTooLowError,
     UnexpectedNonceError,
     UnexpectedSecondSignatureError,
-    UnsupportedMultiSignatureTransactionError,
 } from "../errors";
 
 // todo: revisit the implementation, container usage and arguments after core-database rework
@@ -249,7 +248,7 @@ export abstract class TransactionHandler {
                 throw new InvalidMultiSignaturesError();
             }
         } else if (transaction.data.signatures) {
-            throw new UnsupportedMultiSignatureTransactionError();
+            throw new MissingMultiSignatureOnSenderError();
         }
     }
 

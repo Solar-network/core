@@ -87,7 +87,9 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
 
         if (hasSender) {
             throw new Contracts.TransactionPool.PoolError(
-                `Sender ${transaction.data.senderPublicKey} already has a multisignature registration transaction in the pool`,
+                `${Identities.Address.fromPublicKey(
+                    transaction.data.senderPublicKey,
+                )} already has a multisignature registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }
@@ -106,7 +108,7 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
 
         if (hasAddress) {
             throw new Contracts.TransactionPool.PoolError(
-                `MultiSignatureRegistration for address ${address} already in the pool`,
+                `MultiSignatureRegistration for address '${address}' already in the pool`,
                 "ERR_PENDING",
             );
         }

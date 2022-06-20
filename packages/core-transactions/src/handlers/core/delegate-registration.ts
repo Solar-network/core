@@ -1,5 +1,5 @@
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Identities, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 
 import {
     NotSupportedForMultiSignatureWalletError,
@@ -148,7 +148,9 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
 
         if (hasSender) {
             throw new Contracts.TransactionPool.PoolError(
-                `Sender ${transaction.data.senderPublicKey} already has a delegate registration transaction in the pool`,
+                `${Identities.Address.fromPublicKey(
+                    transaction.data.senderPublicKey,
+                )} already has a delegate registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }
@@ -163,7 +165,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
 
         if (hasUsername) {
             throw new Contracts.TransactionPool.PoolError(
-                `Delegate registration for "${username}" already in the pool`,
+                `Delegate registration for '${username}' already in the pool`,
                 "ERR_PENDING",
             );
         }

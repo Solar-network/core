@@ -1,5 +1,5 @@
 import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/core-kernel";
-import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
+import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 
 import {
     AlreadyVotedError,
@@ -160,7 +160,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
         if (hasSender) {
             throw new Contracts.TransactionPool.PoolError(
-                `Sender ${transaction.data.senderPublicKey} already has a vote transaction in the pool`,
+                `${Identities.Address.fromPublicKey(
+                    transaction.data.senderPublicKey,
+                )} already has a vote transaction in the pool`,
                 "ERR_PENDING",
             );
         }
