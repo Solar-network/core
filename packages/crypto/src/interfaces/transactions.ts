@@ -38,7 +38,6 @@ export interface ITransactionAsset {
         username: string;
     };
     votes?: string[] | object;
-    multiSignatureLegacy?: IMultiSignatureLegacyAsset;
     multiSignature?: IMultiSignatureAsset;
     ipfs?: string;
     transfers?: ITransferItem[];
@@ -121,12 +120,6 @@ export interface ISchemaValidationResult<T = any> {
 export interface ITransferItem {
     amount: BigNumber;
     recipientId: string;
-}
-
-export interface IMultiSignatureLegacyAsset {
-    min: number;
-    lifetime: number;
-    keysgroup: string[];
 }
 
 export interface IMultiSignatureAsset {
