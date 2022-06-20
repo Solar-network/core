@@ -245,12 +245,12 @@ export class StateLoader {
 
                     if ((16 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        voteBalances = this.decode(new Utils.ByteBuffer(buffer.readBuffer(length)));
+                        stateHistory = this.decode(new Utils.ByteBuffer(buffer.readBuffer(length)));
                     }
 
                     if ((32 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        stateHistory = this.decode(new Utils.ByteBuffer(buffer.readBuffer(length)));
+                        voteBalances = this.decode(new Utils.ByteBuffer(buffer.readBuffer(length)));
                     }
 
                     const wallet: Contracts.State.Wallet = this.walletRepository.createWallet(address);

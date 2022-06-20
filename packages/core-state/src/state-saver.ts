@@ -82,11 +82,11 @@ export class StateSaver {
                     bits += 8;
                 }
 
-                if (Object.keys(voteBalances).length > 0) {
+                if (Object.keys(stateHistory).length > 0) {
                     bits += 16;
                 }
 
-                if (Object.keys(stateHistory).length > 0) {
+                if (Object.keys(voteBalances).length > 0) {
                     bits += 32;
                 }
 
@@ -123,7 +123,7 @@ export class StateSaver {
                     buffer.writeBuffer(publicKey);
                 }
 
-                for (const item of [attributes, voteBalances, stateHistory]) {
+                for (const item of [attributes, stateHistory, voteBalances]) {
                     if (Object.keys(item).length > 0) {
                         secondaryBuffer.reset();
                         this.byteBufferArray.reset();
