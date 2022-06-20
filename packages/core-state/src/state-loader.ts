@@ -266,8 +266,8 @@ export class StateLoader {
                         wallet.setAttribute(attribute, attributes[attribute]);
                     }
 
-                    wallet.setVoteBalances(voteBalances);
                     wallet.setAllStateHistory(stateHistory);
+                    wallet.setVoteBalances(voteBalances);
 
                     this.walletRepository.index(wallet);
                 }
