@@ -218,6 +218,7 @@ export const multiSignature = extend(transactionBaseSchema, {
 
 export const ipfs = extend(transactionBaseSchema, {
     $id: "ipfs",
+    required: ["asset"],
     properties: {
         type: { transactionType: TransactionType.Core.Ipfs },
         fee: { bignumber: { minimum: 1 } },
@@ -236,7 +237,7 @@ export const ipfs = extend(transactionBaseSchema, {
 
 export const htlcLock = extend(transactionBaseSchema, {
     $id: "htlcLock",
-    required: ["recipientId", "amount"],
+    required: ["recipientId", "amount", "asset"],
     properties: {
         type: { transactionType: TransactionType.Core.HtlcLock },
         amount: { bignumber: { minimum: 1 } },
@@ -274,6 +275,7 @@ export const htlcLock = extend(transactionBaseSchema, {
 
 export const htlcClaim = extend(transactionBaseSchema, {
     $id: "htlcClaim",
+    required: ["asset"],
     properties: {
         type: { transactionType: TransactionType.Core.HtlcClaim },
         fee: { bignumber: { minimum: 0 } },
@@ -303,6 +305,7 @@ export const htlcClaim = extend(transactionBaseSchema, {
 
 export const htlcRefund = extend(transactionBaseSchema, {
     $id: "htlcRefund",
+    required: ["asset"],
     properties: {
         type: { transactionType: TransactionType.Core.HtlcRefund },
         fee: { bignumber: { minimum: 0 } },
@@ -324,6 +327,7 @@ export const htlcRefund = extend(transactionBaseSchema, {
 
 export const transfer = extend(transactionBaseSchema, {
     $id: "transfer",
+    required: ["asset"],
     properties: {
         type: { transactionType: TransactionType.Core.Transfer },
         fee: { bignumber: { minimum: 1 } },
