@@ -32,6 +32,12 @@ export enum TransactionTypeGroup {
     Reserved = 1000,
 }
 
+export enum DelegateStatus {
+    TemporaryResign = 0,
+    PermanentResign = 1,
+    NotResigned = 2,
+}
+
 export enum HtlcLockExpirationType {
     EpochTimestamp = 1,
     BlockHeight = 2,

@@ -1,5 +1,5 @@
 import { Container, Contracts, Services, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Managers } from "@solar-network/crypto";
+import { Enums, Managers } from "@solar-network/crypto";
 import { Semver } from "@solar-network/utils";
 
 import { DelegateCriteria, DelegateResource } from "../resources-new";
@@ -57,6 +57,14 @@ export class DelegateSearchService {
             wallet.setAttribute("delegate.version", this.app.version());
         }
 
+        let resignationType: string | undefined = undefined;
+
+        if (delegateAttribute.resigned === Enums.DelegateStatus.PermanentResign) {
+            resignationType = "permanent";
+        } else if (delegateAttribute.resigned === Enums.DelegateStatus.TemporaryResign) {
+            resignationType = "temporary";
+        }
+
         return {
             username: delegateAttribute.username,
             address: wallet.getAddress(),
@@ -64,7 +72,8 @@ export class DelegateSearchService {
             votes: delegateAttribute.voteBalance,
             voters: delegateAttribute.voters,
             rank: delegateAttribute.rank,
-            isResigned: !!delegateAttribute.resigned,
+            isResigned: delegateAttribute.resigned !== undefined,
+            resignationType,
             blocks: {
                 produced: delegateAttribute.producedBlocks,
                 last: delegateAttribute.lastBlock,

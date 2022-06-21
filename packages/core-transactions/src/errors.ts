@@ -117,15 +117,33 @@ export class InvalidSecondSignatureError extends TransactionError {
     }
 }
 
-export class WalletAlreadyResignedError extends TransactionError {
+export class IrrevocableResignationError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet already resigned as a delegate");
+        super("Failed to apply transaction, because the wallet permanently resigned as a delegate");
+    }
+}
+
+export class WalletAlreadyPermanentlyResignedError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because the wallet already permanently resigned as a delegate");
+    }
+}
+
+export class WalletAlreadyTemporarilyResignedError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because the wallet already temporarily resigned as a delegate");
     }
 }
 
 export class WalletNotADelegateError extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because the wallet is not a delegate");
+    }
+}
+
+export class WalletNotResignedError extends TransactionError {
+    public constructor() {
+        super(`Failed to apply transaction, because the wallet has not resigned as a delegate`);
     }
 }
 
@@ -267,5 +285,23 @@ export class HtlcLockExpiredError extends TransactionError {
 export class HtlcLockExpiresTooSoonError extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because the associated HTLC lock transaction expires too soon");
+    }
+}
+
+export class NotEnoughTimeSinceResignationError extends TransactionError {
+    public constructor(blocks: number) {
+        super(
+            `Failed to apply transaction, because ${AppUtils.pluralise(
+                "more block",
+                blocks,
+                true,
+            )} must be produced before the resignation can be revoked`,
+        );
+    }
+}
+
+export class ResignationTypeAssetMilestoneNotActiveError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because different delegate resignation types are not enabled");
     }
 }
