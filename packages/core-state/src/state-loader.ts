@@ -63,11 +63,11 @@ export class StateLoader {
             }
         }
 
-        const purgeLock: string = `${process.env.CORE_PATH_TEMP}/purge-saved-states.lock`;
+        const clearLock: string = `${process.env.CORE_PATH_TEMP}/clear-saved-states.lock`;
 
-        if (existsSync(purgeLock)) {
+        if (existsSync(clearLock)) {
             try {
-                unlinkSync(purgeLock);
+                unlinkSync(clearLock);
             } catch {
                 //
             }

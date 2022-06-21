@@ -11,7 +11,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public signature: string = "state:purge";
+    public signature: string = "state:clear";
 
     /**
      * The console command description.
@@ -19,7 +19,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Purge all saved states";
+    public description: string = "Clear all saved states";
 
     /**
      * Configure the console command.
@@ -29,7 +29,7 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
-            .setFlag("force", "Force a purge", Joi.boolean())
+            .setFlag("force", "Force the saved states to be cleared", Joi.boolean())
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)));
     }
@@ -46,7 +46,7 @@ export class Command extends Commands.Command {
                 await this.components.prompt({
                     type: "confirm",
                     name: "value",
-                    message: "Purge all saved states so a fresh state will be generated on startup?",
+                    message: "Clear all saved states so a fresh state will be generated on startup?",
                 })
             ).value;
 
@@ -56,7 +56,7 @@ export class Command extends Commands.Command {
         }
 
         try {
-            closeSync(openSync(this.app.getCorePath("temp", "purge-saved-states.lock"), "w"));
+            closeSync(openSync(this.app.getCorePath("temp", "clear-saved-states.lock"), "w"));
         } catch {
             //
         }
