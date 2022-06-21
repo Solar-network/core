@@ -14,8 +14,8 @@ export const isNewBlockTime = (height: number): boolean => {
             continue;
         }
 
-        if (!milestone || temp.blocktime === milestone.blocktime) {
-            if (temp.blocktime) {
+        if (!milestone || temp.blockTime === milestone.blockTime) {
+            if (temp.blockTime) {
                 milestone = temp;
             }
         } else {
@@ -34,8 +34,8 @@ export const calculateBlockTime = (height: number): number => {
     for (let i = milestones.length - 1; i >= 0; i--) {
         const milestone = milestones[i];
         if (milestone.height <= height) {
-            if (milestone.blocktime) {
-                return milestone.blocktime;
+            if (milestone.blockTime) {
+                return milestone.blockTime;
             }
         }
     }

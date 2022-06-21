@@ -66,18 +66,18 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
         const lastBlock: Interfaces.IBlock = this.app.get<any>(Container.Identifiers.StateStore).getLastBlock();
 
         let { activeDelegates } = Managers.configManager.getMilestone();
-        let blocktime = Utils.calculateBlockTime(lastBlock.data.height);
+        let blockTime = Utils.calculateBlockTime(lastBlock.data.height);
         const expiration: Interfaces.IHtlcExpiration = lock.expiration;
 
         // TODO: find a better way to alter minimum lock expiration
         if (process.env.CORE_ENV === "test") {
-            blocktime = 0;
+            blockTime = 0;
             activeDelegates = 0;
         }
 
         if (
             (expiration.type === Enums.HtlcLockExpirationType.EpochTimestamp &&
-                expiration.value <= lastBlock.data.timestamp + blocktime * activeDelegates) ||
+                expiration.value <= lastBlock.data.timestamp + blockTime * activeDelegates) ||
             (expiration.type === Enums.HtlcLockExpirationType.BlockHeight &&
                 expiration.value <= lastBlock.data.height + activeDelegates)
         ) {

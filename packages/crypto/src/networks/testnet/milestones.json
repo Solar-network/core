@@ -7,7 +7,7 @@
             "maxTransactions": 150,
             "maxPayload": 2097152
         },
-        "blocktime": 8,
+        "blockTime": 8,
         "burn": {
             "feePercent": 90,
             "txAmount": 2000000

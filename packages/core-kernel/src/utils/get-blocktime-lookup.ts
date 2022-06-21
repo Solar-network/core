@@ -7,7 +7,7 @@ const mapHeightToMilestoneSpanTimestamp = async (
     height: number,
     findBlockTimestampByHeight: (height: number) => Promise<number>,
 ): Promise<(height: number) => number> => {
-    let nextMilestone = Managers.configManager.getNextMilestoneWithNewKey(1, "blocktime");
+    let nextMilestone = Managers.configManager.getNextMilestoneWithNewKey(1, "blockTime");
 
     // TODO: could cache this object here to reduce slow calls to DB.
     const heightMappedToBlockTimestamp: Map<number, number> = new Map();
@@ -19,7 +19,7 @@ const mapHeightToMilestoneSpanTimestamp = async (
 
         heightMappedToBlockTimestamp.set(endSpanBlockHeight, await findBlockTimestampByHeight(endSpanBlockHeight));
 
-        nextMilestone = Managers.configManager.getNextMilestoneWithNewKey(nextMilestone.height, "blocktime");
+        nextMilestone = Managers.configManager.getNextMilestoneWithNewKey(nextMilestone.height, "blockTime");
     }
 
     return (height) => {

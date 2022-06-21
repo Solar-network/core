@@ -170,7 +170,7 @@ export class Block implements IBlock {
                 result.errors.push("Invalid block version");
             }
 
-            if (block.timestamp > Slots.getTime() + Managers.configManager.getMilestone(block.height).blocktime) {
+            if (block.timestamp > Slots.getTime() + Managers.configManager.getMilestone(block.height).blockTime) {
                 result.errors.push("Invalid block timestamp");
             }
 
@@ -228,7 +228,7 @@ export class Block implements IBlock {
 
                 if (transaction.data.version === 1 && !constants.block.acceptExpiredTransactionTimestamps) {
                     const now: number = block.timestamp;
-                    if (transaction.data.timestamp > now + 3600 + constants.blocktime) {
+                    if (transaction.data.timestamp > now + 3600 + constants.blockTime) {
                         result.errors.push(`Encountered future transaction: ${transaction.data.id}`);
                     } else if (now - transaction.data.timestamp > 21600) {
                         result.errors.push(`Encountered expired transaction: ${transaction.data.id}`);

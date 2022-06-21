@@ -456,7 +456,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         const milestone = Managers.configManager.getMilestone();
         const timeNow: number = new Date().getTime() / 1000;
 
-        if (timeNow - this.lastForkCheck > milestone.blocktime) {
+        if (timeNow - this.lastForkCheck > milestone.blockTime) {
             this.lastForkCheck = timeNow;
             await delay(1000); // give time for the block to be widely propagated
             let networkStatus = await this.checkNetworkHealth(true); // fast check using our current peers

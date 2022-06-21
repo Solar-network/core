@@ -29,7 +29,7 @@ export class CheckLater implements Action {
     private readonly processor!: Contracts.TransactionPool.Processor;
 
     public async handle(): Promise<void> {
-        const { blocktime } = Managers.configManager.getMilestone();
+        const { blockTime } = Managers.configManager.getMilestone();
         const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, 1);
 
         const epoch = Math.floor(new Date(Managers.configManager.getMilestone().epoch).getTime() / 1000);
@@ -61,7 +61,7 @@ export class CheckLater implements Action {
                 this.logger.info(
                     `The network has launched and the next block is due in ${AppUtils.pluralise(
                         "second",
-                        blocktime,
+                        blockTime,
                         true,
                     )}! Welcome aboard :tada:`,
                 );

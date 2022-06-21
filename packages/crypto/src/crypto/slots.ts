@@ -84,7 +84,7 @@ export class Slots {
         let totalSlotsFromLastSpan = 0;
         let lastSpanEndTime = 0;
         let previousMilestoneHeight = 1;
-        let nextMilestone = configManager.getNextMilestoneWithNewKey(1, "blocktime");
+        let nextMilestone = configManager.getNextMilestoneWithNewKey(1, "blockTime");
 
         for (let i = 0; i < this.getMilestonesWhichAffectBlockTimes().length - 1; i++) {
             if (height < nextMilestone.height) {
@@ -97,7 +97,7 @@ export class Slots {
 
             blockTime = nextMilestone.data;
             previousMilestoneHeight = nextMilestone.height;
-            nextMilestone = configManager.getNextMilestoneWithNewKey(nextMilestone.height, "blocktime");
+            nextMilestone = configManager.getNextMilestoneWithNewKey(nextMilestone.height, "blockTime");
         }
 
         const slotNumberUpUntilThisTimestamp = Math.floor((timestamp - lastSpanEndTime) / blockTime);
@@ -120,15 +120,15 @@ export class Slots {
             {
                 found: true,
                 height: 1,
-                data: configManager.getMilestone(1).blocktime,
+                data: configManager.getMilestone(1).blockTime,
             },
         ];
 
-        let nextMilestone = configManager.getNextMilestoneWithNewKey(1, "blocktime");
+        let nextMilestone = configManager.getNextMilestoneWithNewKey(1, "blockTime");
 
         while (nextMilestone.found) {
             milestones.push(nextMilestone);
-            nextMilestone = configManager.getNextMilestoneWithNewKey(nextMilestone.height, "blocktime");
+            nextMilestone = configManager.getNextMilestoneWithNewKey(nextMilestone.height, "blockTime");
         }
 
         return milestones;
@@ -144,7 +144,7 @@ export class Slots {
         let milestoneHeight = 1;
         let lastSpanEndTime = 0;
 
-        let nextMilestone = configManager.getNextMilestoneWithNewKey(1, "blocktime");
+        let nextMilestone = configManager.getNextMilestoneWithNewKey(1, "blockTime");
 
         for (let i = 0; i < this.getMilestonesWhichAffectBlockTimes().length - 1; i++) {
             if (height < nextMilestone.height) {
@@ -157,7 +157,7 @@ export class Slots {
 
             blockTime = nextMilestone.data;
             milestoneHeight = nextMilestone.height;
-            nextMilestone = configManager.getNextMilestoneWithNewKey(nextMilestone.height, "blocktime");
+            nextMilestone = configManager.getNextMilestoneWithNewKey(nextMilestone.height, "blockTime");
         }
 
         return lastSpanEndTime + (slotNumber - totalSlotsFromLastSpan) * blockTime;

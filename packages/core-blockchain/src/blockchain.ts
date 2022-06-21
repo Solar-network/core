@@ -451,7 +451,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         block = block || this.getLastBlock().data;
 
         return (
-            Crypto.Slots.getTime() - block.timestamp < 3 * Managers.configManager.getMilestone(block.height).blocktime
+            Crypto.Slots.getTime() - block.timestamp < 3 * Managers.configManager.getMilestone(block.height).blockTime
         );
     }
 

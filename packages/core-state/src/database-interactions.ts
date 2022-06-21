@@ -150,8 +150,8 @@ export class DatabaseInteraction {
 
     private configureState(lastBlock: Interfaces.IBlock): void {
         this.stateStore.setLastBlock(lastBlock);
-        const { blocktime, block } = Managers.configManager.getMilestone();
-        const blocksPerDay: number = Math.ceil(86400 / blocktime);
+        const { blockTime, block } = Managers.configManager.getMilestone();
+        const blocksPerDay: number = Math.ceil(86400 / blockTime);
         this.stateBlockStore.resize(blocksPerDay);
         this.stateTransactionStore.resize(blocksPerDay * block.maxTransactions);
     }

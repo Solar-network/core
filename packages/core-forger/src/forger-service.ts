@@ -229,13 +229,13 @@ export class ForgerService {
                 AppUtils.assert.defined<string>(this.round.nextForger.publicKey);
 
                 if (this.isActiveDelegate(this.round.nextForger.publicKey)) {
-                    const blocktime = Managers.configManager.getMilestone(this.round.lastBlock.height).blocktime;
+                    const { blockTime } = Managers.configManager.getMilestone(this.round.lastBlock.height);
                     const username = this.usernames[this.round.nextForger.publicKey];
 
                     this.logger.info(
                         `Delegate ${username} is due to forge in ${AppUtils.pluralise(
                             "second",
-                            blocktime,
+                            blockTime,
                             true,
                         )} from now :sparkles:`,
                     );
@@ -402,8 +402,8 @@ export class ForgerService {
                 this.errorCount = 0;
             }
 
-            const blocktime = Managers.configManager.getMilestone(round.lastBlock.height).blocktime;
-            if (this.errorCount < blocktime - 1) {
+            const { blockTime } = Managers.configManager.getMilestone(round.lastBlock.height);
+            if (this.errorCount < blockTime - 1) {
                 return this.forgeNewBlock(delegate, false, this.round!);
             }
         });
@@ -677,9 +677,9 @@ export class ForgerService {
 
     private getRoundRemainingSlotTime(round: Contracts.P2P.CurrentRound): number {
         const epoch = new Date(Managers.configManager.getMilestone(1).epoch).getTime();
-        const blocktime = Managers.configManager.getMilestone(round.lastBlock.height).blocktime;
+        const { blockTime } = Managers.configManager.getMilestone(round.lastBlock.height);
 
-        return epoch + round.timestamp * 1000 + blocktime * 1000 - Date.now();
+        return epoch + round.timestamp * 1000 + blockTime * 1000 - Date.now();
     }
 
     private gracefulError(error: Error): void {
