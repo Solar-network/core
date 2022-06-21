@@ -359,6 +359,13 @@ export const delegateResignation = extend(transactionBaseSchema, {
     properties: {
         type: { transactionType: TransactionType.Core.DelegateResignation },
         fee: { bignumber: { minimum: 0 } },
+        asset: {
+            type: "object",
+            required: ["resignationType"],
+            properties: {
+                resignationType: { enum: [0, 1, 2] },
+            },
+        },
     },
 });
 

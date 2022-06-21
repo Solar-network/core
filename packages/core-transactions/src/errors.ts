@@ -1,4 +1,4 @@
-import { Contracts } from "@solar-network/core-kernel";
+import { Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Transactions, Utils } from "@solar-network/crypto";
 
 export class TransactionError extends Error {
@@ -117,15 +117,27 @@ export class InvalidSecondSignatureError extends TransactionError {
     }
 }
 
-export class WalletAlreadyResignedError extends TransactionError {
+export class WalletAlreadyPermanentlyResignedError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet already resigned as a delegate");
+        super("Failed to apply transaction, because the wallet already permanently resigned as delegate");
+    }
+}
+
+export class WalletAlreadyTemporarilyResignedError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because the wallet already temporarily resigned as delegate");
     }
 }
 
 export class WalletNotADelegateError extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because the wallet is not a delegate");
+    }
+}
+
+export class WalletNotResignedError extends TransactionError {
+    public constructor() {
+        super(`Failed to apply transaction, because the wallet has not resigned as delegate`);
     }
 }
 
@@ -239,5 +251,23 @@ export class HtlcLockNotExpiredError extends TransactionError {
 export class HtlcLockExpiredError extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because the associated HTLC lock transaction expired");
+    }
+}
+
+export class NotEnoughTimeSinceResignationError extends TransactionError {
+    public constructor(blocks: number) {
+        super(
+            `Failed to apply transaction, because ${AppUtils.pluralise(
+                "more block",
+                blocks,
+                true,
+            )} must be produced before the resignation can be revoked`,
+        );
+    }
+}
+
+export class ResignationTypeAssetMilestoneNotActiveError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because different delegate resignation types are not enabled");
     }
 }

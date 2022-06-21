@@ -1,7 +1,15 @@
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 
-import { NotEnoughDelegatesError, WalletAlreadyResignedError, WalletNotADelegateError } from "../../errors";
+import {
+    NotEnoughDelegatesError,
+    NotEnoughTimeSinceResignationError,
+    ResignationTypeAssetMilestoneNotActiveError,
+    WalletAlreadyPermanentlyResignedError,
+    WalletAlreadyTemporarilyResignedError,
+    WalletNotADelegateError,
+    WalletNotResignedError,
+} from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 import { DelegateRegistrationTransactionHandler } from "./delegate-registration";
 
@@ -35,7 +43,19 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
             AppUtils.assert.defined<string>(transaction.senderPublicKey);
 
             const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
-            wallet.setAttribute("delegate.resigned", true);
+
+            let type: Enums.DelegateStatus = Enums.DelegateStatus.TemporaryResign;
+            if (transaction.asset && transaction.asset.resignationType) {
+                type = transaction.asset.resignationType;
+            }
+
+            if (type !== Enums.DelegateStatus.NotResigned) {
+                wallet.setAttribute("delegate.resigned", type);
+            } else {
+                wallet.forgetAttribute("delegate.resigned");
+            }
+
+            wallet.addStateHistory("delegateStatus", { height: transaction.blockHeight, type });
             this.walletRepository.index(wallet);
         }
     }
@@ -55,8 +75,37 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
             throw new WalletNotADelegateError();
         }
 
+        let type: Enums.DelegateStatus = Enums.DelegateStatus.TemporaryResign;
+        if (transaction.data.asset && transaction.data.asset.resignationType) {
+            type = transaction.data.asset.resignationType;
+        }
+
+        const { delegateResignationTypeAsset } = Managers.configManager.getMilestone();
+
+        if (!delegateResignationTypeAsset && type !== Enums.DelegateStatus.TemporaryResign) {
+            throw new ResignationTypeAssetMilestoneNotActiveError();
+        }
+
         if (wallet.hasAttribute("delegate.resigned")) {
-            throw new WalletAlreadyResignedError();
+            if (wallet.getAttribute("delegate.resigned") === Enums.DelegateStatus.PermanentResign) {
+                throw new WalletAlreadyPermanentlyResignedError();
+            } else if (type === Enums.DelegateStatus.TemporaryResign) {
+                throw new WalletAlreadyTemporarilyResignedError();
+            } else if (type === Enums.DelegateStatus.NotResigned) {
+                const lastBlock: Interfaces.IBlock = this.app
+                    .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
+                    .getLastBlock();
+
+                const { height } = wallet.getLastStateHistory("delegateStatus");
+                const { blocksToRevokeDelegateResignation } = Managers.configManager.getMilestone();
+                if (lastBlock.data.height - height < blocksToRevokeDelegateResignation) {
+                    throw new NotEnoughTimeSinceResignationError(
+                        height - lastBlock.data.height + blocksToRevokeDelegateResignation,
+                    );
+                }
+            }
+        } else if (type === Enums.DelegateStatus.NotResigned) {
+            throw new WalletNotResignedError();
         }
 
         const requiredDelegatesCount: number = Managers.configManager.getMilestone().activeDelegates;
@@ -101,8 +150,18 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
 
         const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
-        senderWallet.setAttribute("delegate.resigned", true);
+        let type: Enums.DelegateStatus = Enums.DelegateStatus.TemporaryResign;
+        if (transaction.data.asset && transaction.data.asset.resignationType) {
+            type = transaction.data.asset.resignationType;
+        }
 
+        if (type === Enums.DelegateStatus.NotResigned) {
+            senderWallet.forgetAttribute("delegate.resigned");
+        } else {
+            senderWallet.setAttribute("delegate.resigned", type);
+        }
+
+        senderWallet.addStateHistory("delegateStatus", { height: transaction.data.blockHeight, type });
         this.walletRepository.index(senderWallet);
     }
 
@@ -113,7 +172,14 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
 
         const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
-        senderWallet.forgetAttribute("delegate.resigned");
+        senderWallet.removeLastStateHistory("delegateStatus");
+        const { type } = senderWallet.getLastStateHistory("delegateStatus");
+
+        if (type === Enums.DelegateStatus.NotResigned) {
+            senderWallet.forgetAttribute("delegate.resigned");
+        } else {
+            senderWallet.setAttribute("delegate.resigned", type);
+        }
 
         this.walletRepository.index(senderWallet);
     }

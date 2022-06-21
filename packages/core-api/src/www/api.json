@@ -644,6 +644,17 @@
                         }
                     },
                     {
+                        "name": "resignationType",
+                        "in": "query",
+                        "description": "Whether the delegate(s) to be returned have resigned permanently or temporarily",
+                        "schema": {
+                            "enum": [
+                                "permanent",
+                                "temporary"
+                            ]
+                        }
+                    },
+                    {
                         "name": "production.approval",
                         "in": "query",
                         "description": "Exact production approval rate of the delegate(s) to be returned",

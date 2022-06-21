@@ -1,5 +1,5 @@
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Identities, Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Identities, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 
 import {
     NotSupportedForMultiSignatureWalletError,
@@ -68,6 +68,11 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
                 voters: 0,
             });
 
+            wallet.initialiseStateHistory("delegateStatus");
+            wallet.addStateHistory("delegateStatus", {
+                height: transaction.blockHeight,
+                type: Enums.DelegateStatus.NotResigned,
+            });
             this.walletRepository.index(wallet);
         }
 
@@ -192,6 +197,12 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             voters: 0,
         });
 
+        sender.initialiseStateHistory("delegateStatus");
+        sender.addStateHistory("delegateStatus", {
+            height: transaction.data.blockHeight,
+            type: Enums.DelegateStatus.NotResigned,
+        });
+
         this.walletRepository.index(sender);
     }
 
@@ -203,6 +214,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
         sender.forgetAttribute("delegate");
+        sender.forgetStateHistory("delegateStatus");
 
         this.walletRepository.index(sender);
     }
