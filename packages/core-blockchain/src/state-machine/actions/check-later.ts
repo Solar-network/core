@@ -125,7 +125,6 @@ export class CheckLater implements Action {
                                 this.blockchain.handleIncomingBlock(blocks[0], false, blocks[0].ip!, false);
                             } else {
                                 this.blockchain.enqueueBlocks(blocks);
-                                this.blockchain.dispatch("DOWNLOADED");
                             }
                         }
                     } catch {
