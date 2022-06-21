@@ -16,7 +16,7 @@ export class HtlcLockBuilder extends TransactionBuilder<HtlcLockBuilder> {
         this.data.asset = {};
     }
 
-    public htlcLockAsset(lockAsset: IHtlcLockAsset): HtlcLockBuilder {
+    public lockAsset(lockAsset: IHtlcLockAsset): HtlcLockBuilder {
         this.data.asset = {
             lock: lockAsset,
         };

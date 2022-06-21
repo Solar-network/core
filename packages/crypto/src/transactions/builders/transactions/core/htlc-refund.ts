@@ -12,7 +12,7 @@ export class HtlcRefundBuilder extends TransactionBuilder<HtlcRefundBuilder> {
         this.data.asset = {};
     }
 
-    public htlcRefundAsset(refundAsset: IHtlcRefundAsset): HtlcRefundBuilder {
+    public refundAsset(refundAsset: IHtlcRefundAsset): HtlcRefundBuilder {
         this.data.asset = {
             refund: refundAsset,
         };

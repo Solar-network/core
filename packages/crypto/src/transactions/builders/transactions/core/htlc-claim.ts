@@ -12,7 +12,7 @@ export class HtlcClaimBuilder extends TransactionBuilder<HtlcClaimBuilder> {
         this.data.asset = {};
     }
 
-    public htlcClaimAsset(claimAsset: IHtlcClaimAsset): HtlcClaimBuilder {
+    public claimAsset(claimAsset: IHtlcClaimAsset): HtlcClaimBuilder {
         this.data.asset = {
             claim: claimAsset,
         };
