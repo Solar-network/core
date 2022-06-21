@@ -33,7 +33,7 @@ export abstract class DelegateResignationTransaction extends Transaction {
         const remainderLength: number = buf.getRemainderLength();
         if (
             (remainderLength <= 128 && remainderLength % 64 === 0) ||
-            (remainderLength >= 128 && remainderLength % 65 === 0)
+            (remainderLength >= 130 && remainderLength % 65 === 0)
         ) {
             return;
         }
