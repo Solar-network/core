@@ -2505,10 +2505,7 @@
                     "fee",
                     "senderPublicKey",
                     "nonce",
-                    "amount",
-                    "recipientId",
-                    "memo",
-                    "expiration"
+                    "memo"
                 ],
                 "properties": {
                     "id": {
@@ -2516,34 +2513,34 @@
                     },
                     "version": {
                         "type": "integer",
-                        "example": 2
+                        "example": 3
                     },
                     "type": {
                         "type": "integer",
-                        "example": 0
+                        "example": 6
                     },
                     "typeGroup": {
                         "type": "integer",
                         "example": 1
                     },
-                    "expiration": {
-                        "type": "integer",
-                        "example": 0
-                    },
                     "nonce": {
                         "type": "integer",
                         "example": 1
                     },
-                    "amount": {
-                        "type": "integer",
-                        "example": 100000000
+                    "asset": {
+                        "type": "object",
+                        "example": {
+                            "transfers": [
+                                {
+                                    "amount": "100000000",
+                                    "recipientId": ""
+                                }
+                            ]
+                        }
                     },
                     "fee": {
                         "type": "integer",
                         "example": 2500000
-                    },
-                    "recipientId": {
-                        "$ref": "#/components/schemas/recipientId"
                     },
                     "senderPublicKey": {
                         "type": "string",

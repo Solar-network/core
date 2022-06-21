@@ -128,7 +128,9 @@ export class Server {
                 swaggerJson.components.schemas.address.pattern.substring(0, 1) +
                 networkCharacter +
                 swaggerJson.components.schemas.address.pattern.substring(2);
-            swaggerJson.components.schemas.recipientId.example = dummyAddress;
+            swaggerJson.components.schemas.recipientId.example =
+                swaggerJson.components.schemas.transaction.properties.asset.example.transfers[0].recipientId =
+                    dummyAddress;
             swaggerJson.components.schemas.walletIdentifier.pattern =
                 swaggerJson.components.schemas.walletIdentifier.pattern.substring(0, 1) +
                 networkCharacter +
