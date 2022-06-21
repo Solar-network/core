@@ -2,6 +2,7 @@ import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@sol
 import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 
 import {
+    IrrevocableResignationError,
     NotEnoughDelegatesError,
     NotEnoughTimeSinceResignationError,
     ResignationTypeAssetMilestoneNotActiveError,
@@ -88,7 +89,11 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
 
         if (wallet.hasAttribute("delegate.resigned")) {
             if (wallet.getAttribute("delegate.resigned") === Enums.DelegateStatus.PermanentResign) {
-                throw new WalletAlreadyPermanentlyResignedError();
+                if (type === Enums.DelegateStatus.PermanentResign) {
+                    throw new WalletAlreadyPermanentlyResignedError();
+                }
+
+                throw new IrrevocableResignationError();
             } else if (type === Enums.DelegateStatus.TemporaryResign) {
                 throw new WalletAlreadyTemporarilyResignedError();
             } else if (type === Enums.DelegateStatus.NotResigned) {

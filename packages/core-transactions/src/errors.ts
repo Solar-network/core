@@ -117,15 +117,21 @@ export class InvalidSecondSignatureError extends TransactionError {
     }
 }
 
+export class IrrevocableResignationError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because the wallet permanently resigned as a delegate");
+    }
+}
+
 export class WalletAlreadyPermanentlyResignedError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet already permanently resigned as delegate");
+        super("Failed to apply transaction, because the wallet already permanently resigned as a delegate");
     }
 }
 
 export class WalletAlreadyTemporarilyResignedError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet already temporarily resigned as delegate");
+        super("Failed to apply transaction, because the wallet already temporarily resigned as a delegate");
     }
 }
 
@@ -137,7 +143,7 @@ export class WalletNotADelegateError extends TransactionError {
 
 export class WalletNotResignedError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the wallet has not resigned as delegate`);
+        super(`Failed to apply transaction, because the wallet has not resigned as a delegate`);
     }
 }
 
