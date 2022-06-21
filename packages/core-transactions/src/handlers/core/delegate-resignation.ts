@@ -113,7 +113,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
             .allByUsername()
             .filter((w) => !w.hasAttribute("delegate.resigned")).length;
 
-        if (type !== Enums.DelegateStatus.NotResigned && currentDelegatesCount - 1 < requiredDelegatesCount) {
+        if (!wallet.hasAttribute("delegate.resigned") && currentDelegatesCount - 1 < requiredDelegatesCount) {
             throw new NotEnoughDelegatesError();
         }
 
