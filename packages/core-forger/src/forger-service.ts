@@ -257,14 +257,7 @@ export class ForgerService {
             return this.checkLater(this.getRoundRemainingSlotTime(this.round));
         } catch (error) {
             if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
-                if (error.message.includes("blockchain isn't ready") || error.message.includes("App is not ready")) {
-                    if (this.logAppReady) {
-                        this.logger.info("Waiting for relay to become ready :hourglass_flowing_sand:");
-                        this.logAppReady = false;
-                    }
-                } else {
-                    this.logger.warning(error.message);
-                }
+                this.gracefulError(error);
             } else {
                 try {
                     this.client.emitEvent(Enums.ForgerEvent.Failed, { error: error.message });
@@ -389,7 +382,7 @@ export class ForgerService {
                 }
             } catch (error) {
                 if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
-                    this.logger.warning(error.message);
+                    this.gracefulError(error);
                 }
                 errored = true;
             }
@@ -399,7 +392,7 @@ export class ForgerService {
                 await this.loadRound();
             } catch (error) {
                 if (error instanceof HostNoResponseError || error instanceof RelayCommunicationError) {
-                    this.logger.warning(error.message);
+                    this.gracefulError(error);
                 }
                 errored = true;
             }
@@ -687,5 +680,16 @@ export class ForgerService {
         const blocktime = Managers.configManager.getMilestone(round.lastBlock.height).blocktime;
 
         return epoch + round.timestamp * 1000 + blocktime * 1000 - Date.now();
+    }
+
+    private gracefulError(error: Error): void {
+        if (error.message.includes("blockchain isn't ready") || error.message.includes("App is not ready")) {
+            if (this.logAppReady) {
+                this.logger.info("Waiting for relay to become ready :hourglass_flowing_sand:");
+                this.logAppReady = false;
+            }
+        } else {
+            this.logger.warning(error.message);
+        }
     }
 }
