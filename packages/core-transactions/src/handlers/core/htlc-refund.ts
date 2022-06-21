@@ -1,8 +1,12 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import assert from "assert";
 
-import { HtlcLockNotExpiredError, HtlcLockTransactionNotFoundError } from "../../errors";
+import {
+    HtlcLockNotExpiredByBlockHeightError,
+    HtlcLockNotExpiredByEpochTimestampError,
+    HtlcLockTransactionNotFoundError,
+} from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 import { HtlcLockTransactionHandler } from "./htlc-lock";
 
@@ -65,7 +69,14 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
             .getLastBlock();
 
         if (!AppUtils.expirationCalculator.calculateLockExpirationStatus(lastBlock, lock.expiration)) {
-            throw new HtlcLockNotExpiredError();
+            if (lock.expiration.type === Enums.HtlcLockExpirationType.EpochTimestamp) {
+                const { blockTime } = Managers.configManager.getMilestone();
+                throw new HtlcLockNotExpiredByEpochTimestampError(
+                    Math.ceil((lock.expiration.value - lastBlock.data.timestamp) / blockTime) * blockTime,
+                );
+            }
+
+            throw new HtlcLockNotExpiredByBlockHeightError(lock.expiration.value - lastBlock.data.height);
         }
     }
 

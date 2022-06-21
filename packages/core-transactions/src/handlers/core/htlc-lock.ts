@@ -1,7 +1,7 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 
-import { HtlcLockExpiredError } from "../../errors";
+import { HtlcLockExpiredError, HtlcLockExpiresTooSoonError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
 @Container.injectable()
@@ -75,13 +75,17 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
             activeDelegates = 0;
         }
 
+        if (AppUtils.expirationCalculator.calculateLockExpirationStatus(lastBlock, lock.expiration)) {
+            throw new HtlcLockExpiredError();
+        }
+
         if (
             (expiration.type === Enums.HtlcLockExpirationType.EpochTimestamp &&
                 expiration.value <= lastBlock.data.timestamp + blockTime * activeDelegates) ||
             (expiration.type === Enums.HtlcLockExpirationType.BlockHeight &&
                 expiration.value <= lastBlock.data.height + activeDelegates)
         ) {
-            throw new HtlcLockExpiredError();
+            throw new HtlcLockExpiresTooSoonError();
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);

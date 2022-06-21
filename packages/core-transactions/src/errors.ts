@@ -1,4 +1,4 @@
-import { Contracts } from "@solar-network/core-kernel";
+import { Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Transactions, Utils } from "@solar-network/crypto";
 
 export class TransactionError extends Error {
@@ -230,14 +230,42 @@ export class HtlcSecretHashMismatchError extends TransactionError {
     }
 }
 
-export class HtlcLockNotExpiredError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because the associated HTLC lock transaction did not expire yet");
+export class HtlcLockNotExpiredByEpochTimestampError extends TransactionError {
+    public constructor(seconds: number) {
+        const hasHave: string = seconds === 1 ? "has" : "have";
+
+        super(
+            `Failed to apply transaction, because the associated HTLC lock transaction does not expire until approximately ${AppUtils.pluralise(
+                "more second",
+                seconds,
+                true,
+            )} ${hasHave} elapsed`,
+        );
+    }
+}
+
+export class HtlcLockNotExpiredByBlockHeightError extends TransactionError {
+    public constructor(blocks: number) {
+        const hasHave: string = blocks === 1 ? "has" : "have";
+
+        super(
+            `Failed to apply transaction, because the associated HTLC lock transaction does not expire until ${AppUtils.pluralise(
+                "more block",
+                blocks,
+                true,
+            )} ${hasHave} been produced`,
+        );
     }
 }
 
 export class HtlcLockExpiredError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the associated HTLC lock transaction expired");
+        super("Failed to apply transaction, because the associated HTLC lock transaction has expired");
+    }
+}
+
+export class HtlcLockExpiresTooSoonError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because the associated HTLC lock transaction expires too soon");
     }
 }
