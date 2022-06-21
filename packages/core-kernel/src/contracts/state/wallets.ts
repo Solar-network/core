@@ -117,28 +117,48 @@ export interface Wallet {
     hasVoted(): boolean;
 
     /**
-     * @returns {object[]}
+     * @returns {Record<string, any[]>}
      * @memberof Wallet
      */
-    getStateHistory(key: string): object[];
+    getAllStateHistory(): Record<string, any[]>;
 
     /**
-     * @returns {Record<string, object[]>}
+     * @param {string} key
+     * @returns {any}
      * @memberof Wallet
      */
-    getAllStateHistory(): Record<string, object[]>;
+    getLastStateHistory(key: string): any;
 
     /**
-     * @param {Record<string, object[]>}
+     * @param {Record<string, any[]>} stateHistory
      * @memberof Wallet
      */
-    setAllStateHistory(stateHistory: Record<string, object[]>): void;
+    setAllStateHistory(stateHistory: Record<string, any[]>): void;
 
     /**
-     * @param {string}
+     * @param {string} key
      * @memberof Wallet
      */
     initialiseStateHistory(key: string): void;
+
+    /**
+     * @param {string} key
+     * @memberof Wallet
+     */
+    forgetStateHistory(key: string): void;
+
+    /**
+     * @param {string} key
+     * @param {any} value
+     * @memberof Wallet
+     */
+    addStateHistory(key: string, value: any): void;
+
+    /**
+     * @param {string} key
+     * @memberof Wallet
+     */
+    removeLastStateHistory(key: string): void;
 
     /**
      * @param {string} delegate

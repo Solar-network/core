@@ -7,7 +7,7 @@ export class Wallet implements Contracts.State.Wallet {
     protected publicKey: string | undefined;
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
-    protected stateHistory: Record<string, object[]> = {};
+    protected stateHistory: Record<string, any[]> = {};
     protected voteBalances: Record<string, Utils.BigNumber> = {};
 
     public constructor(
@@ -18,8 +18,7 @@ export class Wallet implements Contracts.State.Wallet {
         this.initialiseStateHistory("votes");
 
         if (!this.hasAttribute("votes")) {
-            const votes: object[] = this.getStateHistory("votes");
-            this.setAttribute("votes", votes.at(-1));
+            this.setAttribute("votes", this.getLastStateHistory("votes"));
         }
     }
 
@@ -196,27 +195,39 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     /**
-     * @returns {object[]}
+     * @returns {Record<string, any[]>}
      * @memberof Wallet
      */
-    public getStateHistory(key: string): object[] {
-        return this.stateHistory[key];
-    }
-
-    /**
-     * @returns {Record<string, object[]>}
-     * @memberof Wallet
-     */
-    public getAllStateHistory(): Record<string, object[]> {
+    public getAllStateHistory(): Record<string, any[]> {
         return this.stateHistory;
     }
 
-    public setAllStateHistory(stateHistory: Record<string, object[]>): void {
+    /**
+     * @returns {any}
+     * @memberof Wallet
+     */
+    public getLastStateHistory(key: string): any {
+        return this.stateHistory[key].at(-1);
+    }
+
+    public setAllStateHistory(stateHistory: Record<string, any[]>): void {
         this.stateHistory = stateHistory;
     }
 
     public initialiseStateHistory(key: string): void {
         this.stateHistory[key] = [{}];
+    }
+
+    public forgetStateHistory(key: string): void {
+        delete this.stateHistory[key];
+    }
+
+    public addStateHistory(key: string, value: any): void {
+        this.stateHistory[key].push(value);
+    }
+
+    public removeLastStateHistory(key: string): void {
+        this.stateHistory[key].pop();
     }
 
     /**
