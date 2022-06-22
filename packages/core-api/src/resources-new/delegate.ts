@@ -39,7 +39,7 @@ export const delegateCriteriaSchemaObject = {
     address: walletCriteriaSchemaObject.address,
     publicKey: walletCriteriaSchemaObject.publicKey,
     votesReceived: {
-        percent: Schemas.createRangeCriteriaSchema(Joi.number().min(0)),
+        percent: Schemas.createRangeCriteriaSchema(Joi.number().min(0).max(100)),
         votes: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         voters: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
     },
