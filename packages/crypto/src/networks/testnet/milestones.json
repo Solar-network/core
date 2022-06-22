@@ -155,5 +155,13 @@
     {
         "height": 1000000,
         "legacyTransfer": false
+    },
+    {
+        "height": 1044896,
+        "blocksToRevokeDelegateResignation": 106,
+        "delegateResignationTypeAsset": true,
+        "p2p": {
+            "minimumVersions": ["^3.4.0 || ^3.4.0-next.5"]
+        }
     }
 ]
