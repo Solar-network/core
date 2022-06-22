@@ -8,8 +8,7 @@ import { validator } from "../validation";
 import { Serialiser } from "./serialiser";
 
 export class Block implements IBlock {
-    // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
-    public serialised: string;
+    public serialised!: string;
     public data: IBlockData;
     public transactions: ITransaction[];
     public verification: IBlockVerification;

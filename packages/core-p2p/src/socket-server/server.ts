@@ -73,8 +73,7 @@ export class Server {
 
         this.server = new HapiServer({ address, listener, port });
 
-        // @ts-ignore
-        this.server.app = this.app; // TODO: Move app under app
+        this.server.app = this.app;
 
         await this.server.register({
             plugin: hapiNesPlugin,

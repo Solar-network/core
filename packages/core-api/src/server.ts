@@ -247,7 +247,6 @@ export class Server {
             },
             routes: {
                 payload: {
-                    /* istanbul ignore next */
                     async failAction(request, h, err) {
                         return badData(err.message);
                     },
@@ -257,7 +256,6 @@ export class Server {
                         context: validateContext,
                     },
 
-                    /* istanbul ignore next */
                     async failAction(request, h, err) {
                         return badData(err.message);
                     },

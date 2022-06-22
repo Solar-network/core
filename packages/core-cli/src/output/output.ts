@@ -35,8 +35,7 @@ export class Output {
      * @memberof Output
      */
     public mute(): void {
-        // @ts-ignore - We don't care about the type error, we just want to noop it.
-        process.stdout.write = () => {};
+        (process.stdout as any).write = () => {};
     }
 
     /**
@@ -45,8 +44,7 @@ export class Output {
      * @memberof Output
      */
     public unmute(): void {
-        // @ts-ignore - We don't care about the type error, we just want to restore it.
-        process.stdout.write = this.realStdout;
+        (process.stdout as any).write = this.realStdout;
     }
 
     /**

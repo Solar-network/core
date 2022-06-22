@@ -1,8 +1,6 @@
-import ByteBuffer from "bytebuffer";
-
 import { IBlockData, ITransaction } from "../interfaces";
 import { TransactionFactory } from "../transactions";
-import { BigNumber } from "../utils";
+import { BigNumber, ByteBuffer } from "../utils";
 import { Block } from "./block";
 
 export class Deserialiser {
@@ -14,13 +12,13 @@ export class Deserialiser {
         const block = {} as IBlockData;
         let transactions: ITransaction[] = [];
 
-        const buf: ByteBuffer = new ByteBuffer(serialised.length, true);
-        buf.append(serialised);
+        const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(serialised.length));
+        buf.writeBuffer(serialised);
         buf.reset();
 
         this.deserialiseHeader(block, buf);
 
-        headerOnly = headerOnly || buf.remaining() === 0;
+        headerOnly = headerOnly || buf.getRemainderLength() === 0;
         if (!headerOnly) {
             transactions = this.deserialiseTransactions(block, buf, options.deserialiseTransactionsUnchecked);
         }
@@ -31,18 +29,18 @@ export class Deserialiser {
     }
 
     private static deserialiseHeader(block: IBlockData, buf: ByteBuffer): void {
-        block.version = buf.readUint32();
-        block.timestamp = buf.readUint32();
-        block.height = buf.readUint32();
-        block.previousBlock = buf.readBytes(32).toString("hex");
-        block.numberOfTransactions = buf.readUint32();
-        block.totalAmount = BigNumber.make(buf.readUint64().toString());
-        block.totalFee = BigNumber.make(buf.readUint64().toString());
-        block.reward = BigNumber.make(buf.readUint64().toString());
-        block.payloadLength = buf.readUint32();
-        block.payloadHash = buf.readBytes(32).toString("hex");
-        block.generatorPublicKey = buf.readBytes(33).toString("hex");
-        block.blockSignature = buf.readBytes(64).toString("hex");
+        block.version = buf.readUInt32LE();
+        block.timestamp = buf.readUInt32LE();
+        block.height = buf.readUInt32LE();
+        block.previousBlock = buf.readBuffer(32).toString("hex");
+        block.numberOfTransactions = buf.readUInt32LE();
+        block.totalAmount = BigNumber.make(buf.readBigUInt64LE().toString());
+        block.totalFee = BigNumber.make(buf.readBigUInt64LE().toString());
+        block.reward = BigNumber.make(buf.readBigUInt64LE().toString());
+        block.payloadLength = buf.readUInt32LE();
+        block.payloadHash = buf.readBuffer(32).toString("hex");
+        block.generatorPublicKey = buf.readBuffer(33).toString("hex");
+        block.blockSignature = buf.readBuffer(64).toString("hex");
     }
 
     private static deserialiseTransactions(
@@ -53,13 +51,13 @@ export class Deserialiser {
         const transactionLengths: number[] = [];
 
         for (let i = 0; i < block.numberOfTransactions; i++) {
-            transactionLengths.push(buf.readUint32());
+            transactionLengths.push(buf.readUInt32LE());
         }
 
         const transactions: ITransaction[] = [];
         block.transactions = [];
         for (const length of transactionLengths) {
-            const transactionBytes = buf.readBytes(length).toBuffer();
+            const transactionBytes = buf.readBuffer(length);
             const transaction = deserialiseTransactionsUnchecked
                 ? TransactionFactory.fromBytesUnsafe(transactionBytes)
                 : TransactionFactory.fromBytes(transactionBytes);

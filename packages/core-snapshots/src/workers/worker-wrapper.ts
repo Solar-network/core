@@ -77,7 +77,6 @@ export class WorkerWrapper extends EventEmitter {
     private handleMessage(data) {
         // Actions: count, started, synced, exit, error
         this.emit(data.action, data.data);
-        /* istanbul ignore next */
         if (data.action !== "count" && data.action !== "log") {
             this.emit("*", { name: data.action, data: data.data });
         }

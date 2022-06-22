@@ -1,4 +1,3 @@
-import { camelCase, expandTilde, set } from "@solar-network/utils";
 import envPaths from "env-paths";
 import { ensureDirSync } from "fs-extra";
 import { resolve } from "path";
@@ -6,7 +5,7 @@ import { resolve } from "path";
 import { Application } from "../../contracts/kernel";
 import { Identifiers, inject, injectable } from "../../ioc";
 import { ConfigRepository } from "../../services/config";
-import { assert } from "../../utils";
+import { assert, camelCase, expandTilde, set } from "../../utils";
 import { Bootstrapper } from "../interfaces";
 
 /**

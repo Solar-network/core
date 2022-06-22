@@ -1,5 +1,4 @@
 import { Utils } from "@solar-network/core-kernel";
-import { prettyBytes, prettyTime } from "@solar-network/utils";
 import dayjs from "dayjs";
 import Tail from "nodejs-tail";
 import readLastLines from "read-last-lines";
@@ -101,9 +100,9 @@ export class Process {
                     app.name,
                     app.pm2_env.version,
                     app.pm2_env.status,
-                    prettyTime(dayjs().diff(app.pm2_env.pm_uptime)),
+                    Utils.prettyTime(dayjs().diff(app.pm2_env.pm_uptime)),
                     `${app.monit.cpu}%`,
-                    prettyBytes(app.monit.memory),
+                    Utils.prettyBytes(app.monit.memory),
                 ]);
             });
     }

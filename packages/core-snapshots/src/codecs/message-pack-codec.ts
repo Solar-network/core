@@ -84,7 +84,6 @@ export class MessagePackCodec implements Codec {
                 id,
             );
 
-            /* istanbul ignore next */
             return {
                 id: id,
                 version: transaction.data.version!,
@@ -93,8 +92,7 @@ export class MessagePackCodec implements Codec {
                 sequence: sequence,
                 timestamp: timestamp,
                 senderPublicKey: transaction.data.senderPublicKey!,
-                // @ts-ignore
-                recipientId: transaction.data.recipientId,
+                recipientId: transaction.data.recipientId!,
                 type: transaction.data.type,
                 memo: transaction.data.memo,
                 amount: transaction.data.amount,
@@ -103,8 +101,7 @@ export class MessagePackCodec implements Codec {
                 serialised: serialised,
                 typeGroup: transaction.data.typeGroup || 1,
                 nonce: Utils.BigNumber.make(transaction.data.nonce || 0),
-                // @ts-ignore
-                asset: transaction.data.asset,
+                asset: transaction.data.asset!,
             };
         } catch (err) {
             throw new CodecException.TransactionDecodeException(transactionId as unknown as string, err.message);

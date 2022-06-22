@@ -1,5 +1,6 @@
 import { Utils } from "@solar-network/crypto";
-import { Semver } from "@solar-network/utils";
+
+import { Semver } from "../../utils";
 export type EqualCriteria<T> = T;
 export type NumericCriteria<T> = T | { from: T } | { to: T } | { from: T; to: T };
 export type LikeCriteria<T> = T;

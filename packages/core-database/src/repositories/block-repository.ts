@@ -57,36 +57,30 @@ export class BlockRepository extends AbstractRepository<Block> {
     ): Promise<Contracts.Shared.DownloadBlock[]> {
         const blocks = await this.findByHeightRangeWithTransactionsRaw(start, end);
         return blocks.map((block) => {
-            return this.rawToEntity(
-                block,
-                // @ts-ignore
-                (entity: Block & { transactions: string[] }, _, value: Buffer[] | undefined) => {
-                    if (value && value.length) {
-                        entity.transactions = value.map((buffer) => buffer.toString("hex"));
-                    } else {
-                        entity.transactions = [];
-                    }
-                },
-            );
+            return this.rawToEntity(block, (entity: Partial<Block>, _, value: unknown) => {
+                const e = entity as Block & { transactions: string[] };
+                const v = value as Buffer[] | undefined;
+                if (v && v.length) {
+                    e.transactions = v.map((buffer) => buffer.toString("hex"));
+                } else {
+                    e.transactions = [];
+                }
+            });
         }) as Contracts.Shared.DownloadBlock[];
     }
 
     public async findByHeightRangeWithTransactions(start: number, end: number): Promise<Interfaces.IBlockData[]> {
         const blocks = await this.findByHeightRangeWithTransactionsRaw(start, end);
         return blocks.map((block) => {
-            return this.rawToEntity(
-                block,
-                // @ts-ignore
-                (entity: Block & { transactions: Interfaces.ITransactionData[] }, _, value: Buffer[] | undefined) => {
-                    if (value && value.length) {
-                        entity.transactions = value.map(
-                            (buffer) => Transactions.TransactionFactory.fromBytesUnsafe(buffer).data,
-                        );
-                    } else {
-                        entity.transactions = [];
-                    }
-                },
-            );
+            return this.rawToEntity(block, (entity: Partial<Block>, _, value: unknown) => {
+                const e = entity as Block & { transactions: Interfaces.ITransactionData[] };
+                const v = value as Buffer[] | undefined;
+                if (v && v.length) {
+                    e.transactions = v.map((buffer) => Transactions.TransactionFactory.fromBytesUnsafe(buffer).data);
+                } else {
+                    e.transactions = [];
+                }
+            });
         });
     }
 

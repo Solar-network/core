@@ -18,7 +18,6 @@ export class StreamWriter {
         private useCompression: boolean,
         private encode: Function,
     ) {
-        /* istanbul ignore next */
         process.on("exit", () => {
             this.destroyStreams();
         });
@@ -35,7 +34,6 @@ export class StreamWriter {
                 resolve();
             };
 
-            /* istanbul ignore next */
             const onError = (err) => {
                 removeListeners(this.writeStream!, eventListenerPairs);
 
@@ -67,16 +65,20 @@ export class StreamWriter {
                 transforms.push(zlib.createGzip());
             }
 
-            // @ts-ignore
-            pipeline(this.dbStream, ...transforms, this.writeStream, (err) => {
-                this.destroyStreams();
+            pipeline(
+                this.dbStream as unknown as (Writable | Readable)[],
+                ...(transforms as any),
+                this.writeStream,
+                (err) => {
+                    this.destroyStreams();
 
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                },
+            );
         });
     }
 

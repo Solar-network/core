@@ -45,11 +45,9 @@ export class ProgressRenderer {
     }
 
     private handleStart(data: { table: string; count: number }): void {
-        /* istanbul ignore else */
         if (data.table && data.count) {
             this.count[data.table] = data.count;
 
-            /* istanbul ignore else */
             if (!this.isAnyStarted) {
                 this.isAnyStarted = true;
                 this.spinner.start();
@@ -59,7 +57,6 @@ export class ProgressRenderer {
     }
 
     private handleUpdate(data: { table: string; value: number }): void {
-        /* istanbul ignore else */
         if (data.table && data.value) {
             this.progress[data.table] = this.calculatePercentage(this.count[data.table], data.value);
 
@@ -68,7 +65,6 @@ export class ProgressRenderer {
     }
 
     private handleComplete(data: { table: string }): void {
-        /* istanbul ignore else */
         if (data.table) {
             this.progress[data.table] = "100.00";
         }

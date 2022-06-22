@@ -17,7 +17,6 @@ let app: Application;
 let action: Worker.WorkerAction;
 const _workerData: Worker.WorkerData = workerData;
 
-/* istanbul ignore next */
 const connect = async (options: any): Promise<Connection> => {
     return createConnection({
         ...options.connection,
@@ -38,14 +37,12 @@ export const init = async (): Promise<void> => {
     }
     app = new Application(new Container.Container());
 
-    /* istanbul ignore next */
     if (_workerData.connection) {
         app.bind(Identifiers.SnapshotDatabaseConnection).toConstantValue(
             await connect({ connection: _workerData.connection }),
         );
     }
 
-    /* istanbul ignore next */
     app.bind(Identifiers.SnapshotRepositoryFactory).toFactory<Repository>(() => (table: string) => {
         if (table === "blocks") {
             return getCustomRepository(Repositories.BlockRepository);
@@ -56,13 +53,11 @@ export const init = async (): Promise<void> => {
         return getCustomRepository(Repositories.RoundRepository);
     });
 
-    /* istanbul ignore next */
     app.bind<StreamReader>(Identifiers.StreamReaderFactory).toFactory<StreamReader>(
         () => (path: string, useCompression: boolean, decode: Function) =>
             new StreamReader(path, useCompression, decode),
     );
 
-    /* istanbul ignore next */
     app.bind<StreamWriter>(Identifiers.StreamWriterFactory).toFactory<StreamWriter>(
         () => (dbStream: Readable, path: string, useCompression: boolean, encode: Function) =>
             new StreamWriter(dbStream, path, useCompression, encode),
@@ -105,7 +100,6 @@ export const init = async (): Promise<void> => {
 };
 
 export const dispose = async (): Promise<void> => {
-    /* istanbul ignore next */
     if (_workerData.connection) {
         const connection = app.get<Connection>(Identifiers.SnapshotDatabaseConnection);
 
@@ -113,7 +107,6 @@ export const dispose = async (): Promise<void> => {
     }
 };
 
-/* istanbul ignore next */
 parentPort?.on("message", async (data: { action: string; data: Worker.WorkerSyncData }) => {
     if (data.action === "start") {
         await init();
@@ -129,7 +122,6 @@ parentPort?.on("message", async (data: { action: string; data: Worker.WorkerSync
     }
 });
 
-/* istanbul ignore next */
 const handleException = (err: any) => {
     parentPort!.postMessage({
         action: "exception",
@@ -139,17 +131,14 @@ const handleException = (err: any) => {
     process.exit();
 };
 
-/* istanbul ignore next */
 process.on("unhandledRejection", (err) => {
     handleException(err);
 });
 
-/* istanbul ignore next */
 process.on("uncaughtException", (err) => {
     handleException(err);
 });
 
-/* istanbul ignore next */
 process.on("multipleResolves", (err) => {
     handleException(err);
 });

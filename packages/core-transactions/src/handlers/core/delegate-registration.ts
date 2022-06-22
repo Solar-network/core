@@ -165,7 +165,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         const hasUsername: boolean = this.poolQuery
             .getAll()
             .whereKind(transaction)
-            .wherePredicate(/* istanbul ignore next */ (t) => t.data.asset?.delegate?.username === username)
+            .wherePredicate((t) => t.data.asset?.delegate?.username === username)
             .has();
 
         if (hasUsername) {

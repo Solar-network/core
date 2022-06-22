@@ -14,7 +14,6 @@ export class TestWorkerAction implements Worker.WorkerAction {
     }
 
     public sync(data: { execute: string }): void {
-        /* istanbul ignore next */
         if (this.resume) {
             this.resume();
         }

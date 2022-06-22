@@ -1,5 +1,5 @@
-import { Container, Contracts, Utils } from "@solar-network/core-kernel";
-import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 
 import { isRecipientOnActiveNetwork } from "../../utils";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
@@ -40,7 +40,7 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        Utils.assert.defined<string>(transaction.data.recipientId);
+        AppUtils.assert.defined<string>(transaction.data.recipientId);
         const recipientId: string = transaction.data.recipientId;
 
         if (!isRecipientOnActiveNetwork(recipientId)) {
@@ -53,7 +53,7 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
-        Utils.assert.defined<string>(transaction.data.recipientId);
+        AppUtils.assert.defined<string>(transaction.data.recipientId);
 
         const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.recipientId);
 
@@ -61,7 +61,7 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
     }
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
-        Utils.assert.defined<string>(transaction.data.recipientId);
+        AppUtils.assert.defined<string>(transaction.data.recipientId);
 
         const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.recipientId);
 

@@ -1,7 +1,6 @@
-import { get, has, set, unset } from "@solar-network/utils";
-
 import { injectable } from "../../ioc";
 import { JsonObject, KeyValuePair } from "../../types";
+import { get, has, set, unset } from "../../utils";
 import { assert } from "../../utils";
 
 /**

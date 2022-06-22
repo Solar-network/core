@@ -1,6 +1,5 @@
 import { Container, Contracts, Services, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Enums, Managers } from "@solar-network/crypto";
-import { Semver } from "@solar-network/utils";
 
 import { DelegateCriteria, DelegateResource } from "../resources-new";
 
@@ -93,7 +92,7 @@ export class DelegateSearchService {
             },
             version:
                 delegateAttribute.version && delegateAttribute.rank && delegateAttribute.rank <= activeDelegates
-                    ? new Semver(delegateAttribute.version)
+                    ? new AppUtils.Semver(delegateAttribute.version)
                     : undefined,
         };
     }

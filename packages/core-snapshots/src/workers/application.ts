@@ -12,7 +12,6 @@ export class Application {
         return this.container.bind(serviceIdentifier);
     }
 
-    /* istanbul ignore next */
     public get<T>(serviceIdentifier: Contracts.Kernel.Container.ServiceIdentifier<T>): T {
         return this.container.get(serviceIdentifier);
     }

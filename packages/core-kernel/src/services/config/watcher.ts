@@ -35,7 +35,6 @@ export class Watcher {
 
         this.watcher = await nsfw(this.app.configPath(), (events) => {
             for (const event of events) {
-                /* istanbul ignore else */
                 if (event.action === ActionType.MODIFIED && configFiles.includes(event.file)) {
                     this.app.reboot();
                     break;

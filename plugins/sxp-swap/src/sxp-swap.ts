@@ -165,7 +165,7 @@ export class SXPSwap {
             if (data.version && data.version > 1) {
                 (this as any).verifyTransactionNonceApply(sender, transaction);
 
-                AppUtils.assert.defined<AppUtils.BigNumber>(data.nonce);
+                AppUtils.assert.defined<Utils.BigNumber>(data.nonce);
                 sender.setNonce(data.nonce);
             } else {
                 sender.increaseNonce();

@@ -1,7 +1,6 @@
-import { cloneDeep, get, has, set, unset } from "@solar-network/utils";
 import { strictEqual } from "assert";
 
-import { assert } from "../../utils";
+import { assert, cloneDeep, get, has, set, unset } from "../../utils";
 import { AttributeSet } from "./attribute-set";
 
 export class AttributeMap {

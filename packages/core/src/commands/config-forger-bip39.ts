@@ -65,7 +65,7 @@ export class Command extends Commands.Command {
                 type: "password",
                 name: "bip39",
                 message: "Please enter your delegate plain text passphrase. Referred to as BIP39",
-                validate: /* istanbul ignore next */ (value) =>
+                validate: (value) =>
                     !validateMnemonic(value) && !this.getFlag("skipValidation")
                         ? `Failed to verify the given passphrase as BIP39 compliant`
                         : true,

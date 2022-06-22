@@ -1,15 +1,15 @@
-import { BigNumber } from "@solar-network/utils";
+import { Utils } from "@solar-network/crypto";
 import { FindOperator } from "typeorm";
 
 export const transformBigInt = {
-    from(value: string | undefined): BigNumber | undefined {
+    from(value: string | undefined): Utils.BigNumber | undefined {
         if (value !== undefined) {
-            return value ? BigNumber.make(value) : BigNumber.ZERO;
+            return value ? Utils.BigNumber.make(value) : Utils.BigNumber.ZERO;
         }
 
         return undefined;
     },
-    to(value: BigNumber | FindOperator<any>): string | undefined {
+    to(value: Utils.BigNumber | FindOperator<any>): string | undefined {
         if (value !== undefined) {
             return value instanceof FindOperator ? value.value : value.toString();
         }

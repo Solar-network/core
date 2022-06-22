@@ -23,7 +23,6 @@
         "@solar-network/core-database": "workspace:*",
         "@solar-network/core-kernel": "workspace:*",
         "@solar-network/crypto": "workspace:*",
-        "bytebuffer": "5.0.1",
         "fs-extra": "8.1.0",
         "joi": "17.6.0",
         "msgpack-lite": "0.1.26",

@@ -21,12 +21,9 @@ export abstract class Transaction implements ITransaction {
     protected static defaultStaticFee: BigNumber = BigNumber.ZERO;
 
     public isVerified: boolean = false;
-    // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
-    public data: ITransactionData;
-    // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
-    public serialised: Buffer;
-    // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
-    public timestamp: number;
+    public data!: ITransactionData;
+    public serialised!: Buffer;
+    public timestamp!: number;
 
     public get id(): string | undefined {
         return this.data.id;

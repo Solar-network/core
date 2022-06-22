@@ -45,7 +45,6 @@ export class AcceptBlockHandler implements BlockHandler {
             // Reset wake-up timer after chaining a block, since there's no need to
             // wake up at all if blocks arrive periodically. Only wake up when there are
             // no new blocks.
-            /* istanbul ignore else */
             if (this.state.isStarted()) {
                 this.blockchain.resetWakeUp();
             }

@@ -132,7 +132,6 @@ export class NodeController extends Controller {
     }
 
     public async fees(request: Hapi.Request, h: Hapi.ResponseToolkit) {
-        // @ts-ignore
         const handlers = this.nullHandlerRegistry.getRegisteredHandlers();
         const handlersKey = {};
         const txsTypes: Array<{ type: number; typeGroup: number }> = [];

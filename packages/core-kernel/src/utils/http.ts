@@ -55,7 +55,6 @@ const sendRequest = (method: string, url: string, opts?: HttpOptions): Promise<H
         opts = { ...opts, ...parse(url) };
         opts.method = method.toLowerCase();
 
-        /* istanbul ignore next */
         if (opts.protocol === "http:") {
             opts.agent = globalAgent;
         }
@@ -82,7 +81,6 @@ const sendRequest = (method: string, url: string, opts?: HttpOptions): Promise<H
 
                 const type: string | undefined = r.headers["content-type"];
 
-                /* istanbul ignore next */
                 if (type && accumulator && type.includes("application/json")) {
                     try {
                         accumulator = JSON.parse(accumulator);

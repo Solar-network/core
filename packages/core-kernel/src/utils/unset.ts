@@ -25,6 +25,5 @@ export const unset = <T>(object: T, path: string | string[]): boolean => {
         }
     }
 
-    /* istanbul ignore next */
     return false;
 };

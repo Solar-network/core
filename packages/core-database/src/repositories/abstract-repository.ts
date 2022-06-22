@@ -1,4 +1,5 @@
-import { Contracts, Utils } from "@solar-network/core-kernel";
+import { Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 import { ObjectLiteral, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
@@ -128,7 +129,7 @@ export abstract class AbstractRepository<TEntity extends ObjectLiteral> extends 
 
                 entity[columnMetadata.propertyName as keyof TEntity] = propertyValue;
             } else {
-                Utils.assert.defined<CustomPropertyHandler<TEntity>>(customPropertyHandler);
+                AppUtils.assert.defined<CustomPropertyHandler<TEntity>>(customPropertyHandler);
                 customPropertyHandler(entity, key, value);
             }
         }

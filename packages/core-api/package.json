@@ -23,7 +23,6 @@
         "@solar-network/core-kernel": "workspace:*",
         "@solar-network/core-transactions": "workspace:*",
         "@solar-network/crypto": "workspace:*",
-        "@solar-network/utils": "workspace:*",
         "@hapi/boom": "9.1.4",
         "@hapi/hapi": "20.2.1",
         "@hapi/hoek": "9.2.1",

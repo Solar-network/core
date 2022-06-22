@@ -1,7 +1,6 @@
-import { get, has } from "@solar-network/utils";
-
 import { injectable } from "../ioc";
 import { PackageJson } from "../types";
+import { get, has } from "../utils";
 
 /**
  * @export

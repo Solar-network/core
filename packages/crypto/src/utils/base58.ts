@@ -25,7 +25,6 @@ const decodeCheck = (address: string): Buffer => {
 export const Base58 = {
     encodeCheck: moize(encodeCheck, {
         cache: {
-            // @ts-ignore
             create: () => {
                 return new Cache<string, string>(10000);
             },
@@ -33,7 +32,6 @@ export const Base58 = {
     }),
     decodeCheck: moize(decodeCheck, {
         cache: {
-            // @ts-ignore
             create: () => {
                 return new Cache<string, Buffer>(10000);
             },

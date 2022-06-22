@@ -30,7 +30,6 @@ export const isValidVersion = (app: Contracts.Kernel.Application, peer: Contract
 
     const includePrerelease: boolean = Managers.configManager.get("network.name") !== "mainnet";
     return minimumVersions.some((minimumVersion: string) =>
-        // @ts-ignore - check why the peer.version errors even though we exit early
-        semver.satisfies(peer.version, minimumVersion, { includePrerelease }),
+        semver.satisfies(peer.version!, minimumVersion, { includePrerelease }),
     );
 };
