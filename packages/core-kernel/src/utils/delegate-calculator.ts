@@ -12,7 +12,7 @@ const toDecimal = (voteBalance: Utils.BigNumber, totalSupply: Utils.BigNumber): 
     return +div.toFixed(2);
 };
 
-export const calculateApproval = (delegate: Wallet, supply: string): number => {
+export const calculateVotePercent = (delegate: Wallet, supply: string): number => {
     const totalSupply: Utils.BigNumber = Utils.BigNumber.make(supply);
     const voteBalance: Utils.BigNumber = delegate.getAttribute("delegate.voteBalance");
 

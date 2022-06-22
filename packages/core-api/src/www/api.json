@@ -655,36 +655,6 @@
                         }
                     },
                     {
-                        "name": "production.approval",
-                        "in": "query",
-                        "description": "Exact production approval rate of the delegate(s) to be returned",
-                        "schema": {
-                            "type": "number",
-                            "minimum": 0,
-                            "maximum": 1
-                        }
-                    },
-                    {
-                        "name": "production.approval.from",
-                        "in": "query",
-                        "description": "Lowest production approval rate of the delegate(s) to be returned",
-                        "schema": {
-                            "type": "number",
-                            "minimum": 0,
-                            "maximum": 1
-                        }
-                    },
-                    {
-                        "name": "production.approval.to",
-                        "in": "query",
-                        "description": "Highest production approval rate of the delegate(s) to be returned",
-                        "schema": {
-                            "type": "number",
-                            "minimum": 0,
-                            "maximum": 1
-                        }
-                    },
-                    {
                         "name": "forged.fees",
                         "in": "query",
                         "description": "Exact amount, in satoshis, of all fees forged by the delegate(s) to be returned",
@@ -804,7 +774,37 @@
                         }
                     },
                     {
-                        "name": "votes",
+                        "name": "votesReceived.percent",
+                        "in": "query",
+                        "description": "Exact total vote percentage of the delegate(s) to be returned",
+                        "schema": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                        }
+                    },
+                    {
+                        "name": "votesReceived.percent.from",
+                        "in": "query",
+                        "description": "Minimum total vote percentage of the delegate(s) to be returned",
+                        "schema": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                        }
+                    },
+                    {
+                        "name": "votesReceived.percent.to",
+                        "in": "query",
+                        "description": "Maximum total vote percentage rate of the delegate(s) to be returned",
+                        "schema": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                        }
+                    },
+                    {
+                        "name": "votesReceived.votes",
                         "in": "query",
                         "description": "Exact amount of vote weight for the delegate(s) to be returned",
                         "schema": {
@@ -812,7 +812,7 @@
                         }
                     },
                     {
-                        "name": "votes.from",
+                        "name": "votesReceived.votes.from",
                         "in": "query",
                         "description": "Minimum amount of vote weight for the delegate(s) to be returned",
                         "schema": {
@@ -820,7 +820,7 @@
                         }
                     },
                     {
-                        "name": "votes.to",
+                        "name": "votesReceived.votes.to",
                         "in": "query",
                         "description": "Maximum amount of vote weight for the delegate(s) to be returned",
                         "schema": {
@@ -828,7 +828,7 @@
                         }
                     },
                     {
-                        "name": "voters",
+                        "name": "votesReceived.voters",
                         "in": "query",
                         "description": "Exact number of voters for the delegate(s) to be returned",
                         "schema": {
@@ -836,7 +836,7 @@
                         }
                     },
                     {
-                        "name": "voters.from",
+                        "name": "votesReceived.voters.from",
                         "in": "query",
                         "description": "Minimum number of voters for the delegate(s) to be returned",
                         "schema": {
@@ -844,7 +844,7 @@
                         }
                     },
                     {
-                        "name": "voters.to",
+                        "name": "votesReceived.voters.to",
                         "in": "query",
                         "description": "Maximum number of voters for the delegate(s) to be returned",
                         "schema": {
@@ -946,18 +946,18 @@
                                 "forged.total:desc",
                                 "isResigned:asc",
                                 "isResigned:desc",
-                                "production.approval:asc",
-                                "production.approval:desc",
                                 "publicKey:asc",
                                 "publicKey:desc",
                                 "rank:asc",
                                 "rank:desc",
                                 "version:asc",
                                 "version:desc",
-                                "votes:asc",
-                                "votes:desc",
-                                "voters:asc",
-                                "voters:desc"
+                                "votesReceived.percent:asc",
+                                "votesReceived.percent:desc",
+                                "votesReceived.votes:asc",
+                                "votesReceived.votes:desc",
+                                "votesReceived.voters:asc",
+                                "votesReceived.voters:desc"
                             ]
                         }
                     }
