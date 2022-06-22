@@ -31,8 +31,7 @@
         "@solar-network/core-kernel": "workspace:*",
         "@solar-network/core-state": "workspace:*",
         "@solar-network/core-transactions": "workspace:*",
-        "@solar-network/crypto": "workspace:*",
-        "@solar-network/utils": "workspace:*"
+        "@solar-network/crypto": "workspace:*"
     },
     "engines": {
         "node": ">=16.0.0"

@@ -251,7 +251,6 @@ export class MemoryEventDispatcher implements EventDispatcherContract {
      * @memberof MemoryEventDispatcher
      */
     private getListenersByPattern(event: EventName): EventListener[] {
-        // @ts-ignore
         const matches: EventName[] = mm([...this.listeners.keys()], event);
 
         let eventListeners: EventListener[] = [];

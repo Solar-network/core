@@ -39,8 +39,7 @@ export class CronJob implements Job {
     public execute(callback: CronCommand): void {
         const onCallback: CronCommand = () => {
             const start = performance.now();
-            // @ts-ignore
-            callback();
+            (callback as Function)();
 
             this.events.dispatch(ScheduleEvent.CronJobFinished, {
                 executionTime: performance.now() - start,

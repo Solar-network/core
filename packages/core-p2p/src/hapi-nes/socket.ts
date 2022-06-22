@@ -110,12 +110,10 @@ export class Socket {
         } catch (err) {
             this.server.log(["nes", "serialization", "error"], message.type);
 
-            /* istanbul ignore else */
             if (message.id) {
                 return this._error(Boom.internal("Failed serialising message"), message);
             }
 
-            /* istanbul ignore next */
             return Promise.reject(err);
         }
 
@@ -185,7 +183,6 @@ export class Socket {
         setImmediate(() => this._flush());
     }
 
-    //@ts-ignore
     private _error(err, request?) {
         if (err.output?.statusCode === protocol.gracefulErrorStatusCode) {
             err = Boom.boomify(err);
@@ -286,7 +283,6 @@ export class Socket {
     }
 
     private async _processHello(request) {
-        /* istanbul ignore next */
         if (this._helloed) {
             throw Boom.badRequest("Connection already initialised");
         }

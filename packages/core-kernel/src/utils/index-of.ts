@@ -9,7 +9,6 @@ export const indexOf = <T>(iterable: T[], value: T, fromIndex?: number): number 
         if (i < 0) {
             i += length;
 
-            /* istanbul ignore else */
             if (i < 0) {
                 i = 0;
             }

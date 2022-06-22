@@ -1,4 +1,4 @@
-import ByteBuffer from "bytebuffer";
+import { Utils } from "@solar-network/crypto";
 import fs from "fs-extra";
 import { pipeline, Readable } from "stream";
 import zlib from "zlib";
@@ -14,12 +14,11 @@ export class StreamReader {
     private readStream?: Readable;
     private stream?: Readable;
 
-    private buffer: ByteBuffer = new ByteBuffer(0);
+    private buffer: Utils.ByteBuffer = new Utils.ByteBuffer(Buffer.alloc(0));
     private offset = 0;
     private length = 0;
 
     public constructor(private path: string, private useCompression: boolean, private decode: Function) {
-        /* istanbul ignore next */
         process.on("exit", () => {
             this.destroyStreams();
         });
@@ -63,7 +62,7 @@ export class StreamReader {
     }
 
     public async readNext(): Promise<any> {
-        let lengthChunk: ByteBuffer;
+        let lengthChunk: Utils.ByteBuffer;
         try {
             lengthChunk = await this.read(4);
         } catch (err) {
@@ -74,13 +73,11 @@ export class StreamReader {
 
             throw err;
         }
-
-        const length = lengthChunk.readUint32();
-
+        const length = lengthChunk.readUInt32LE();
         const dataChunk = await this.read(length);
 
         this.count++;
-        return this.decode(dataChunk.buffer);
+        return this.decode(dataChunk.getBuffer());
     }
 
     private async readNextChunk(): Promise<void> {
@@ -100,9 +97,9 @@ export class StreamReader {
             throw new StreamExceptions.EndOfFile(this.path);
         }
 
-        this.buffer = new ByteBuffer(chunk.length, true);
-        this.buffer.append(chunk);
-        this.length = this.buffer.capacity();
+        this.buffer = new Utils.ByteBuffer(Buffer.alloc(chunk.length));
+        this.buffer.writeBuffer(chunk);
+        this.length = chunk.length;
         this.offset = 0;
     }
 
@@ -115,7 +112,6 @@ export class StreamReader {
                 resolve();
             };
 
-            /* istanbul ignore next */
             const onError = () => {
                 removeListeners(this.stream!, eventListenerPairs);
 
@@ -142,9 +138,8 @@ export class StreamReader {
         });
     }
 
-    private async read(size: number): Promise<ByteBuffer> {
-        const bufferToReturn = new ByteBuffer(size, true);
-
+    private async read(size: number): Promise<Utils.ByteBuffer> {
+        const bufferToReturn = new Utils.ByteBuffer(Buffer.alloc(size));
         let remaining = size;
         while (remaining > 0) {
             if (this.offset === this.length) {
@@ -152,25 +147,24 @@ export class StreamReader {
             }
 
             let copyLength = 0;
-            /* istanbul ignore next */
             if (this.offset + remaining <= this.length) {
                 copyLength = remaining;
             } else {
-                /* istanbul ignore next */
                 copyLength = this.length - this.offset;
             }
 
-            bufferToReturn.append(this.buffer.copy(this.offset, this.offset + copyLength));
+            const offset: number = this.buffer.getOffset();
+            this.buffer.goTo(this.offset);
+            bufferToReturn.writeBuffer(this.buffer.readBuffer(copyLength));
+            this.buffer.goTo(offset);
             this.offset += copyLength;
             remaining -= copyLength;
         }
-
         bufferToReturn.reset();
         return bufferToReturn;
     }
 
     private destroyStreams(): void {
-        /* istanbul ignore next */
         this.readStream?.destroy();
     }
 }

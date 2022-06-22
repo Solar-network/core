@@ -120,9 +120,7 @@ export class DatabaseService {
         const block: Interfaces.IBlockData | undefined = await this.blockRepository.findLatest();
 
         if (!block) {
-            // @ts-ignore Technically, this cannot happen
-            // ! but this is public method so it can happen
-            return undefined;
+            return undefined as unknown as Interfaces.IBlock;
         }
 
         const transactions: Array<{

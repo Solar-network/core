@@ -1,9 +1,9 @@
-import { get, has, set, unset } from "@solar-network/utils";
 import deepmerge from "deepmerge";
 
 import { Identifiers, inject, injectable } from "../ioc";
 import { ConfigRepository } from "../services/config";
 import { JsonObject } from "../types";
+import { get, has, set, unset } from "../utils";
 
 // todo: review the implementation
 /**

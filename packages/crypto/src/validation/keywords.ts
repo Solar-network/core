@@ -28,10 +28,9 @@ const maxBytes = (ajv: Ajv): void => {
 
 const transactionType = (ajv: Ajv): void => {
     ajv.addKeyword("transactionType", {
-        // @ts-ignore
         compile(schema) {
-            return (data, dataPath, parentObject: ITransactionData) => {
-                // Impose dynamic limit based on milestone
+            return (data, _, po: object | any[] | undefined) => {
+                const parentObject: ITransactionData = po as unknown as ITransactionData;
                 if (
                     data === TransactionType.Core.Transfer &&
                     parentObject &&

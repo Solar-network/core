@@ -99,7 +99,7 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
         const hasRefund = this.poolQuery
             .getAll()
             .whereKind(transaction)
-            .wherePredicate(/* istanbul ignore next */ (t) => t.data.asset?.refund?.lockTransactionId === lockId)
+            .wherePredicate((t) => t.data.asset?.refund?.lockTransactionId === lockId)
             .has();
 
         if (hasRefund) {
@@ -125,7 +125,7 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
 
         this.verifyTransactionNonceApply(sender, transaction);
 
-        AppUtils.assert.defined<AppUtils.BigNumber>(data.nonce);
+        AppUtils.assert.defined<Utils.BigNumber>(data.nonce);
 
         sender.setNonce(data.nonce);
 

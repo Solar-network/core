@@ -30,8 +30,7 @@ export class BlockFactory {
     }
 
     public static fromJson(json: IBlockJson): IBlock | undefined {
-        // @ts-ignore
-        const data: IBlockData = { ...json };
+        const data: IBlockData = { ...json } as unknown as IBlockData;
         data.totalAmount = BigNumber.make(data.totalAmount);
         data.totalFee = BigNumber.make(data.totalFee);
         data.reward = BigNumber.make(data.reward);

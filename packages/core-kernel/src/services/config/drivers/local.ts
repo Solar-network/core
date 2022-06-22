@@ -1,4 +1,3 @@
-import { dotenv, get, set } from "@solar-network/utils";
 import { existsSync, readFileSync } from "fs";
 import importFresh from "import-fresh";
 import Joi from "joi";
@@ -15,6 +14,7 @@ import {
 import { FileException } from "../../../exceptions/filesystem";
 import { Identifiers, inject, injectable } from "../../../ioc";
 import { JsonObject, KeyValuePair, Primitive } from "../../../types";
+import { dotenv, get, set } from "../../../utils";
 import { assert } from "../../../utils";
 import { ConfigRepository } from "../repository";
 

@@ -131,7 +131,6 @@ export abstract class Command {
      * @returns {void}
      * @memberof Command
      */
-    /* istanbul ignore next */
     @postConstruct()
     // todo: for some reason this isn't recognised in tests for being called
     public configure(): void {

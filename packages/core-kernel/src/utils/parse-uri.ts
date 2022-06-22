@@ -13,7 +13,6 @@ export const parseURI = (value: string): URIScheme | undefined => {
         "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?",
     ).exec(value);
 
-    /* istanbul ignore next */
     if (isNull(matches)) {
         return undefined;
     }

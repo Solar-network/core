@@ -1,5 +1,5 @@
 import { configManager } from "../managers/config";
-import { BigNumber } from "./bignum";
+import { BigNumber } from "./big-number";
 
 const getReward = (height: number): BigNumber => {
     const milestones = configManager.get("milestones");

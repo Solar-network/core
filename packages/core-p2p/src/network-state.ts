@@ -59,7 +59,6 @@ class QuorumDetails {
     public getQuorum() {
         const quorum = this.hasQuorum / (this.hasQuorum + this.noQuorum);
 
-        /* istanbul ignore next */
         return isFinite(quorum) ? quorum : 0;
     }
 
@@ -98,13 +97,11 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         repository: Contracts.P2P.PeerRepository,
         delegatesOnThisNode: string[],
     ): Promise<Contracts.P2P.NetworkState> {
-        // @ts-ignore - app exists but isn't on the interface for now
         const lastBlock: Interfaces.IBlock = monitor.app
             .get<any>(Container.Identifiers.BlockchainService)
             .getLastBlock();
 
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(
-            // @ts-ignore - app exists but isn't on the interface for now
             monitor.app,
             lastBlock.data.height,
         );
@@ -112,7 +109,6 @@ export class NetworkState implements Contracts.P2P.NetworkState {
 
         let peers: Contracts.P2P.Peer[] = repository.getPeers();
 
-        // @ts-ignore - app exists but isn't on the interface for now
         const configuration = monitor.app.getTagged<Providers.PluginConfiguration>(
             Container.Identifiers.PluginConfiguration,
             "plugin",
@@ -259,7 +255,6 @@ export class NetworkState implements Contracts.P2P.NetworkState {
 
         if (monitor) {
             const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(
-                // @ts-ignore - app exists but isn't on the interface for now
                 monitor.app,
                 lastBlock.data.height,
             );

@@ -79,7 +79,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             const ourVersion = this.app.version();
 
             for (const [version, peers] of Object.entries(
-                // @ts-ignore
                 Utils.groupBy(this.repository.getPeers(), (peer) => peer.version),
             )) {
                 let discovery = `Discovered ${Utils.pluralise("peer", peers.length, true)} with v${version}`;
@@ -266,7 +265,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                     Utils.shuffle(peers)
                         .slice(0, maxPeersPerPeer)
                         .reduce(
-                            // @ts-ignore - rework this so TS stops throwing errors
                             (acc: object, curr: Contracts.P2P.PeerBroadcast) => ({
                                 ...acc,
                                 ...{ [curr.ip]: new Peer(curr.ip, curr.port) },
@@ -521,7 +519,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         // We must return an uninterrupted sequence of blocks, starting from `fromBlockHeight`,
         // with sequential heights, without gaps.
 
-        const downloadJobs = [];
+        const downloadJobs: Function[] = [];
         const downloadResults: any = [];
         let someJobFailed: boolean = false;
         let chunksHumanReadable: string = "";
@@ -534,7 +532,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 : height + this.downloadChunkSize
             ).toLocaleString()}]`;
 
-            //@ts-ignore
             downloadJobs.push(async () => {
                 if (this.chunkCache.has(blocksRange)) {
                     downloadResults[i] = this.chunkCache.get(blocksRange);
@@ -615,13 +612,10 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
         let firstFailureMessage!: string;
 
-        // Convert the array of AsyncFunction to an array of Promise by calling the functions.
-        // @ts-ignore
-        const result = await Promise.allSettled(downloadJobs.map((f) => f()));
+        const result = await Promise.allSettled(downloadJobs.map((f: Function) => f()));
         const failure = result.find((value) => value.status === "rejected");
         if (failure) {
-            // @ts-ignore
-            firstFailureMessage = failure.reason;
+            firstFailureMessage = (failure as any).reason;
         }
 
         let downloadedBlocks: Interfaces.IBlockData[] = [];
@@ -780,7 +774,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         });
 
         return Promise.all(
-            // @ts-ignore
             Object.values(peers).map((peer: Contracts.P2P.Peer) => {
                 this.repository.forgetPeer(peer);
                 return this.app

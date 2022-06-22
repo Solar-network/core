@@ -18,12 +18,10 @@ export const get = <T, V>(object: T, path: string | string[], defaultValue?: V):
         object = object[pathSegments[i]];
 
         if (object === undefined || object === null) {
-            /* istanbul ignore else */
             if (i !== pathSegments.length - 1) {
                 return defaultValue;
             }
 
-            /* istanbul ignore next */
             break;
         }
     }

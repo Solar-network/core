@@ -33,7 +33,6 @@ export class ReadProcessor {
             Managers.configManager.setHeight(data.height);
         }
 
-        /* istanbul ignore next */
         if (this.onResume) {
             this.onResume();
         }
@@ -41,8 +40,6 @@ export class ReadProcessor {
 
         this.emitCount();
 
-        // On first message is not defined
-        /* istanbul ignore next */
         if (this.callOnMessage) {
             this.callOnMessage();
         }
@@ -58,7 +55,6 @@ export class ReadProcessor {
         await this.waitForSynchronization(false);
 
         const interval = setInterval(() => {
-            /* istanbul ignore next */
             if (this.isRunning) {
                 this.emitCount();
             }
@@ -117,7 +113,6 @@ export class ReadProcessor {
     private waitOrContinueCount(): Promise<void> {
         return new Promise<void>(async (resolve) => {
             while (this.count === this.nextCount) {
-                /* istanbul ignore next */
                 await this.waitForSynchronization();
             }
             resolve();

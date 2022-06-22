@@ -1,6 +1,7 @@
 import Hapi from "@hapi/hapi";
 import { Repositories } from "@solar-network/core-database";
-import { Container, Contracts, Utils } from "@solar-network/core-kernel";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 
 import { Controller } from "./controller";
 
@@ -33,7 +34,7 @@ export class BlockchainController extends Controller {
                     transactions,
                     total,
                 },
-                supply: Utils.supplyCalculator.calculate(this.walletRepository.allByAddress()),
+                supply: AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress()),
             },
         };
     }

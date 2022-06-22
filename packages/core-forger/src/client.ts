@@ -41,8 +41,7 @@ export class Client {
      * @type {RelayHost}
      * @memberof Client
      */
-    // @ts-ignore
-    private host: RelayHost;
+    private host!: RelayHost;
 
     /**
      * @param {RelayHost[]} hosts

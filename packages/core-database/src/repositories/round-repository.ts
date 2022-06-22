@@ -1,4 +1,5 @@
-import { Contracts, Utils } from "@solar-network/core-kernel";
+import { Contracts } from "@solar-network/core-kernel";
+import { Utils } from "@solar-network/crypto";
 import { EntityRepository, Repository } from "typeorm";
 
 import { Round } from "../models";

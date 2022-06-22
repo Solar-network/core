@@ -1,4 +1,4 @@
-import ByteBuffer from "bytebuffer";
+import { Utils } from "@solar-network/crypto";
 import { Transform, TransformCallback } from "stream";
 
 export class TransformEncoder extends Transform {
@@ -9,12 +9,12 @@ export class TransformEncoder extends Transform {
     public _transform(chunk: object, encoding: string, callback: TransformCallback): void {
         const encoded: Buffer = this.encode(chunk);
 
-        const buffer: ByteBuffer = new ByteBuffer(4 + encoded.length, true);
+        const buffer: Utils.ByteBuffer = new Utils.ByteBuffer(Buffer.alloc(4 + encoded.length));
 
-        buffer.writeUint32(encoded.length);
-        buffer.append(encoded);
+        buffer.writeUInt32LE(encoded.length);
+        buffer.writeBuffer(encoded);
 
-        this.push(buffer.buffer);
+        this.push(buffer.getResult());
 
         callback();
     }

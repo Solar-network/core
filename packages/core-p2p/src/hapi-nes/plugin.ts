@@ -80,6 +80,5 @@ const plugin = {
 export { plugin };
 
 internals.socket = function (request) {
-    /* istanbul ignore next */
     return request.plugins.nes ? request.plugins.nes.socket : null;
 };

@@ -35,7 +35,6 @@ export class Verifier {
         let isVerified = false;
 
         try {
-            /* istanbul ignore next */
             const block = Blocks.BlockFactory.fromData(blockEntity as Interfaces.IBlockData)!;
 
             const bytes = Blocks.Serialiser.serialise(block.data, false);

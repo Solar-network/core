@@ -41,7 +41,6 @@
         "@solar-network/core-transactions": "workspace:*",
         "@solar-network/core-webhooks": "workspace:*",
         "@solar-network/crypto": "workspace:*",
-        "@solar-network/utils": "workspace:*",
         "argon2": "0.28.2",
         "bip39": "3.0.4",
         "boxen": "5.1.2",

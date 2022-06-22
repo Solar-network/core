@@ -23,8 +23,5 @@
         "@solar-network/core-database": "workspace:*",
         "@solar-network/core-kernel": "workspace:*",
         "@solar-network/crypto": "workspace:*"
-    },
-    "devDependencies": {
-        "bytebuffer": "5.0.1"
     }
 }

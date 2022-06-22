@@ -1,6 +1,5 @@
-import { Contracts } from "@solar-network/core-kernel";
+import { Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
 import { Utils } from "@solar-network/crypto";
-import { Semver } from "@solar-network/utils";
 import Joi from "joi";
 
 import * as Schemas from "../schemas";
@@ -32,7 +31,7 @@ export type DelegateResource = {
         devFunds: Utils.BigNumber;
         total: Utils.BigNumber;
     };
-    version?: Semver;
+    version?: AppUtils.Semver;
 };
 
 export const delegateCriteriaSchemaObject = {

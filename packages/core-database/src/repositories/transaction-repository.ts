@@ -1,5 +1,4 @@
-import { Utils } from "@solar-network/core-kernel";
-import { Crypto, Enums } from "@solar-network/crypto";
+import { Crypto, Enums, Utils } from "@solar-network/crypto";
 import dayjs from "dayjs";
 import { Brackets, EntityRepository, In } from "typeorm";
 
@@ -186,8 +185,6 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
             .getRawMany();
     }
 
-    // TODO: stuff like this is only needed once during bootstrap
-    // shouldnt be part of the repository
     public async findReceivedTransactions(): Promise<{ recipientId: string; amount: string }[]> {
         return this.createQueryBuilder()
             .select([])
@@ -221,17 +218,13 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
             .getRawMany();
 
         return transactions.map((transaction) => {
-            return this.rawToEntity(
-                transaction,
-                // @ts-ignore
-                (entity: any, key: string, value: number | string) => {
-                    if (key === "reward") {
-                        entity[key] = Utils.BigNumber.make(value);
-                    } else {
-                        entity[key] = value;
-                    }
-                },
-            );
+            return this.rawToEntity(transaction, (entity: any, key: string, value: unknown) => {
+                if (key === "reward") {
+                    entity[key] = Utils.BigNumber.make(value as bigint);
+                } else {
+                    entity[key] = value;
+                }
+            });
         }) as any;
     }
 

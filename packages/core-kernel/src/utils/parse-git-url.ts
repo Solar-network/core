@@ -21,10 +21,7 @@ export const parseGitUrl = (
         throw new Error("Failed to find a host.");
     }
 
-    // @ts-ignore - The previous host check will already exit if there are problems
-    // but for some reason the node typings say the path could be undefined.
-    // This doesn't seem to be the case and it always defaults to at least the host.
-    const segments: string[] = parsed.path.split("/").filter(Boolean);
+    const segments: string[] = parsed.path!.split("/").filter(Boolean);
 
     if (segments.length === 1) {
         throw new Error("Failed to find a name.");

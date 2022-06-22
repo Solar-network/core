@@ -4,7 +4,7 @@ import * as console from "console";
 import { emojify } from "node-emoji";
 import pino, { PrettyOptions } from "pino";
 import PinoPretty from "pino-pretty";
-import pump from "pump";
+import pump, { Callback, Stream } from "pump";
 import pumpify from "pumpify";
 import { Transform } from "readable-stream";
 import { createStream } from "rotating-file-stream";
@@ -88,7 +88,6 @@ export class PinoLogger implements Contracts.Kernel.Logger {
         this.logger = pino(
             {
                 base: null,
-                // @ts-ignore
                 customLevels: {
                     emergency: 0,
                     alert: 1,
@@ -115,10 +114,8 @@ export class PinoLogger implements Contracts.Kernel.Logger {
             pump(
                 this.stream,
                 split(),
-                // @ts-ignore - Object literal may only specify known properties, and 'colorize' does not exist in type 'PrettyOptions'.
-                this.createPrettyTransport(options.levels.console, { colorize: true }),
+                this.createPrettyTransport(options.levels.console, { colorize: true }) as unknown as Stream | Callback,
                 process.stdout,
-                /* istanbul ignore next */
                 (err) => {
                     console.error("Stdout stream closed due to an error:", err);
                 },
@@ -128,8 +125,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
         if (this.isValidLevel(options.levels.file)) {
             this.combinedFileStream = pumpify(
                 split(),
-                // @ts-ignore - Object literal may only specify known properties, and 'colorize' does not exist in type 'PrettyOptions'.
-                this.createPrettyTransport(options.levels.file, { colorize: false }),
+                this.createPrettyTransport(options.levels.file, { colorize: false }) as unknown as Stream | Callback,
                 this.getFileStream(options.fileRotator),
             );
 
@@ -290,7 +286,6 @@ export class PinoLogger implements Contracts.Kernel.Logger {
                     }
                 } catch {}
 
-                /* istanbul ignore next */
                 return cb();
             },
         });
@@ -310,7 +305,6 @@ export class PinoLogger implements Contracts.Kernel.Logger {
                 }
 
                 if (typeof time === "number") {
-                    /* istanbul ignore next */
                     time = new Date(time);
                 }
 

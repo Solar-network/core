@@ -41,12 +41,13 @@ export class StateMachine {
         this.stateStore.setBlockchain(nextState);
 
         for (const actionKey of nextState.actions.map((action) => action.type)) {
-            let action: Action;
+            let action: Action = undefined as unknown as Action;
             try {
                 action = this.app.resolve(actions[actionKey]);
-            } catch {}
+            } catch {
+                //
+            }
 
-            // @ts-ignore
             if (action) {
                 setImmediate(() => action.handle());
             } else {

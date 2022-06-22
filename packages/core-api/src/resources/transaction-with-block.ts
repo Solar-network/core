@@ -1,5 +1,5 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/core-kernel";
-import { Enums } from "@solar-network/crypto";
+import { Enums, Utils } from "@solar-network/crypto";
 
 import { Resource } from "../interfaces";
 
@@ -36,7 +36,7 @@ export class TransactionWithBlockResource implements Resource {
             transactionData.type === Enums.TransactionType.Core.Transfer
         ) {
             amount = transactionData
-                .asset!.transfers!.reduce((sum, transfer) => sum.plus(transfer!.amount), AppUtils.BigNumber.ZERO)
+                .asset!.transfers!.reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO)
                 .toFixed();
         }
 

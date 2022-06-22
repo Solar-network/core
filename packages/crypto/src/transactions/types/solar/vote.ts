@@ -1,5 +1,5 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { BigNumber } from "../../../utils/bignum";
+import { BigNumber } from "../../../utils/big-number";
 import { ByteBuffer } from "../../../utils/byte-buffer";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";

@@ -1,4 +1,3 @@
-import { isEmpty, prettyTime } from "@solar-network/utils";
 import chalk, { Chalk } from "chalk";
 import dayjs, { Dayjs } from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
@@ -7,6 +6,7 @@ import { inspect } from "util";
 
 import { Logger } from "../../../contracts/kernel/log";
 import { injectable } from "../../../ioc";
+import { isEmpty, prettyTime } from "../../../utils";
 
 dayjs.extend(advancedFormat);
 dayjs.extend(utc);

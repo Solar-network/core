@@ -1,11 +1,9 @@
 import { Contracts } from "../..";
 import { Application } from "../../contracts/kernel";
-// @ts-ignore
-import { BlockEvent, KernelEvent, StateEvent } from "../../enums";
+import { BlockEvent, KernelEvent } from "../../enums";
 import { ServiceProviderCannotBeBooted } from "../../exceptions/plugins";
 import { Identifiers, inject, injectable } from "../../ioc";
-// @ts-ignore
-import { ServiceProvider, ServiceProviderRepository } from "../../providers";
+import { ServiceProviderRepository } from "../../providers";
 import { assert } from "../../utils";
 import { Bootstrapper } from "../interfaces";
 import { ChangeServiceProviderState } from "./listeners";

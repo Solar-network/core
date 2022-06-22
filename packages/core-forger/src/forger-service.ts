@@ -576,7 +576,6 @@ export class ForgerService {
 
             this.printLoadedDelegates();
 
-            // @ts-ignore
             this.client.emitEvent(Enums.ForgerEvent.Started, {
                 activeDelegates: this.delegates.map((delegate) => delegate.publicKey),
             });

@@ -153,7 +153,6 @@ export class BlockProcessor {
                 }
             }
 
-            /* istanbul ignore else */
             if (forgedIds.length > 0) {
                 this.logger.warning(
                     `Block ${block.data.height.toLocaleString()} disregarded, because it contains already forged transactions :scroll:`,
@@ -187,7 +186,7 @@ export class BlockProcessor {
 
             AppUtils.assert.defined<string>(data.nonce);
 
-            const nonce: AppUtils.BigNumber = data.nonce;
+            const nonce: Utils.BigNumber = data.nonce;
 
             if (!nonceBySender[sender].plus(1).isEqualTo(nonce)) {
                 this.logger.warning(
@@ -239,7 +238,7 @@ export class BlockProcessor {
             this.logger.debug(
                 `Could not decide if delegate ${generatorUsername} is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
             );
-        } /* istanbul ignore next */ else if (forgingDelegate.getPublicKey() !== block.data.generatorPublicKey) {
+        } else if (forgingDelegate.getPublicKey() !== block.data.generatorPublicKey) {
             AppUtils.assert.defined<string>(forgingDelegate.getPublicKey());
 
             const forgingWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(

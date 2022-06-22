@@ -137,7 +137,7 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
         const hasClaim: boolean = this.poolQuery
             .getAll()
             .whereKind(transaction)
-            .wherePredicate(/* istanbul ignore next */ (t) => t.data.asset?.claim?.lockTransactionId === lockId)
+            .wherePredicate((t) => t.data.asset?.claim?.lockTransactionId === lockId)
             .has();
 
         if (hasClaim) {
@@ -163,7 +163,7 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
 
         this.verifyTransactionNonceApply(sender, transaction);
 
-        AppUtils.assert.defined<AppUtils.BigNumber>(data.nonce);
+        AppUtils.assert.defined<Utils.BigNumber>(data.nonce);
 
         sender.setNonce(data.nonce);
 
@@ -221,7 +221,7 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
         AppUtils.assert.defined<string>(data.asset?.claim?.lockTransactionId);
 
         const lockId: string = data.asset.claim.lockTransactionId;
-        // @ts-ignore - Type 'Transaction' is not assignable to type 'ITransactionData'.
+
         const lockTransaction: Interfaces.ITransactionData = (await this.transactionRepository.findByIds([lockId]))[0];
 
         AppUtils.assert.defined<Interfaces.ITransactionData>(lockTransaction.recipientId);

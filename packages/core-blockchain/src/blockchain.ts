@@ -432,7 +432,6 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         this.clearAndStopQueue();
 
-        /* istanbul ignore else */
         if (numberOfBlockToRollback) {
             this.stateStore.setNumberOfBlocksToRollback(numberOfBlockToRollback);
         }
