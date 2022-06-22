@@ -19,10 +19,10 @@
         "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
+        "@solar-network/crypto": "workspace:*",
         "@solar-network/database": "workspace:*",
         "@solar-network/kernel": "workspace:*",
         "@solar-network/transactions": "workspace:*",
-        "@solar-network/crypto": "workspace:*",
         "better-sqlite3": "7.4.3",
         "delay": "5.0.0",
         "fs-extra": "8.1.0",

@@ -23,10 +23,10 @@
         "pbts": "pbts src/socket-server/codecs/proto/protos.js -o src/socket-server/codecs/proto/protos.d.ts"
     },
     "dependencies": {
+        "@solar-network/crypto": "workspace:*",
         "@solar-network/database": "workspace:*",
         "@solar-network/kernel": "workspace:*",
         "@solar-network/state": "workspace:*",
-        "@solar-network/crypto": "workspace:*",
         "@hapi/boom": "9.1.4",
         "@hapi/bounce": "2.0.0",
         "@hapi/hapi": "20.2.1",

@@ -20,9 +20,9 @@
     },
     "dependencies": {
         "@alessiodf/ora": "^0.0.2",
+        "@solar-network/crypto": "workspace:*",
         "@solar-network/database": "workspace:*",
         "@solar-network/kernel": "workspace:*",
-        "@solar-network/crypto": "workspace:*",
         "fs-extra": "8.1.0",
         "joi": "17.6.0",
         "msgpack-lite": "0.1.26",

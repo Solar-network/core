@@ -21,8 +21,8 @@
     "dependencies": {
         "@alessiodf/listr": "^0.0.6",
         "@alessiodf/ora": "^0.0.2",
-        "@solar-network/kernel": "workspace:*",
         "@solar-network/crypto": "workspace:*",
+        "@solar-network/kernel": "workspace:*",
         "boxen": "5.1.2",
         "cli-table3": "0.6.0",
         "dayjs": "1.10.7",

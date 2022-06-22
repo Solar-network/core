@@ -20,10 +20,10 @@
         "compile": "node ../../node_modules/typescript/bin/tsc"
     },
     "dependencies": {
+        "@solar-network/crypto": "workspace:*",
         "@solar-network/database": "workspace:*",
         "@solar-network/kernel": "workspace:*",
         "@solar-network/transactions": "workspace:*",
-        "@solar-network/crypto": "workspace:*",
         "immutable": "4.0.0-rc.14",
         "joi": "17.6.0",
         "semver": "6.3.0",
