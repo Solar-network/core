@@ -1,4 +1,4 @@
-import { Commands, Container } from "@solar-network/core-cli";
+import { Commands, Container } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import { readJSONSync, writeJSONSync } from "fs-extra";
 import Joi from "joi";
@@ -56,7 +56,7 @@ export class Command extends Commands.Command {
 
             for (const app of Object.keys(appJson)) {
                 const loggerConfig = appJson[app].plugins.filter(
-                    (plugin) => plugin.package === "@solar-network/core-logger-pino",
+                    (plugin) => plugin.package === "@solar-network/logger",
                 )[0];
                 const emojify = this.getFlag("emojify");
 

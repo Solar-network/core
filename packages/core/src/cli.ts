@@ -1,5 +1,5 @@
-import { ApplicationFactory, Commands, Container, Contracts, InputParser, Plugins } from "@solar-network/core-cli";
-import { Utils } from "@solar-network/core-kernel";
+import { ApplicationFactory, Commands, Container, Contracts, InputParser, Plugins } from "@solar-network/cli";
+import { Utils } from "@solar-network/kernel";
 import envPaths from "env-paths";
 import { homedir } from "os";
 import { resolve } from "path";

@@ -1,4 +1,4 @@
-import { Commands, Container } from "@solar-network/core-cli";
+import { Commands, Container } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import envPaths from "env-paths";
 import execa, { ExecaReturnValue } from "execa";

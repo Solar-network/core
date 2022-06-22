@@ -1,8 +1,8 @@
-import { BlockProcessor, BlockProcessorResult } from "@solar-network/core-blockchain/dist/processor";
-import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@solar-network/core-kernel";
-import { TransactionValidator } from "@solar-network/core-state/dist/transaction-validator";
-import { Handlers } from "@solar-network/core-transactions";
-import { ColdWalletError } from "@solar-network/core-transactions/dist/errors";
+import { BlockProcessor, BlockProcessorResult } from "@solar-network/blockchain/dist/processor";
+import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@solar-network/kernel";
+import { TransactionValidator } from "@solar-network/state/dist/transaction-validator";
+import { Handlers } from "@solar-network/transactions";
+import { ColdWalletError } from "@solar-network/transactions/dist/errors";
 import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import * as EthereumTx from '@ethereumjs/tx';
 import assert from "assert";
@@ -45,8 +45,8 @@ export class SXPSwap {
     @Container.inject(Container.Identifiers.LogService)
     private readonly log!: Contracts.Kernel.Logger;
 
-    @Container.inject(Container.Identifiers.TransactionPoolQuery)
-    private readonly poolQuery!: Contracts.TransactionPool.Query;
+    @Container.inject(Container.Identifiers.PoolQuery)
+    private readonly poolQuery!: Contracts.Pool.Query;
 
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;

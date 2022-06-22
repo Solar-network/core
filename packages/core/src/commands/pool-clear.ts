@@ -1,4 +1,4 @@
-import { Commands, Container } from "@solar-network/core-cli";
+import { Commands, Container } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import { removeSync } from "fs-extra";
 import Joi from "joi";
@@ -24,7 +24,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Clear the transaction pool";
+    public description: string = "Clear the pool of transactions";
 
     /**
      * Configure the console command.
@@ -57,7 +57,7 @@ export class Command extends Commands.Command {
         try {
             if (
                 await this.components.confirm(
-                    "Clearing the transaction pool will remove all queued transactions from your node. Are you sure you want to clear?",
+                    "Clearing the pool will remove all queued transactions from your node. Are you sure you want to clear?",
                 )
             ) {
                 this.removeFiles();
@@ -72,6 +72,6 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     private removeFiles() {
-        removeSync(this.app.getCorePath("data", "transaction-pool"));
+        removeSync(this.app.getCorePath("data", "pool"));
     }
 }

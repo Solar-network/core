@@ -1,4 +1,4 @@
-import { Commands, Container, Contracts } from "@solar-network/core-cli";
+import { Commands, Container, Contracts } from "@solar-network/cli";
 import boxen from "boxen";
 import { blue, cyan } from "kleur";
 

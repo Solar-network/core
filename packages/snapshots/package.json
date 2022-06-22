@@ -1,0 +1,38 @@
+{
+    "name": "@solar-network/snapshots",
+    "version": "3.4.0-next.4",
+    "description": "Provides live local streamed snapshots functionality for Solar Core",
+    "license": "CC-BY-ND-4.0",
+    "contributors": [
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
+    ],
+    "files": [
+        "dist"
+    ],
+    "main": "dist/index",
+    "types": "dist/index",
+    "scripts": {
+        "build": "pnpm clean && pnpm compile",
+        "clean": "rimraf dist",
+        "compile": "node ../../node_modules/typescript/bin/tsc"
+    },
+    "dependencies": {
+        "@alessiodf/ora": "^0.0.2",
+        "@solar-network/crypto": "workspace:*",
+        "@solar-network/database": "workspace:*",
+        "@solar-network/kernel": "workspace:*",
+        "fs-extra": "8.1.0",
+        "joi": "17.6.0",
+        "msgpack-lite": "0.1.26",
+        "pg": "8.7.1",
+        "pg-query-stream": "3.4.2",
+        "pluralize": "8.0.0",
+        "typeorm": "0.2.25",
+        "xcase": "2.0.1"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "8.1.2"
+    }
+}

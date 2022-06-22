@@ -1,4 +1,4 @@
-import { Commands, Container, Contracts, Utils } from "@solar-network/core-cli";
+import { Commands, Container, Contracts, Utils } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 import { resolve } from "path";

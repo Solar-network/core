@@ -2,91 +2,91 @@
     "core": {
         "plugins": [
             {
-                "package": "@solar-network/core-logger-pino"
+                "package": "@solar-network/logger"
             },
             {
-                "package": "@solar-network/core-state"
+                "package": "@solar-network/state"
             },
             {
-                "package": "@solar-network/core-database"
+                "package": "@solar-network/database"
             },
             {
-                "package": "@solar-network/core-transactions"
+                "package": "@solar-network/transactions"
             },
             {
-                "package": "@solar-network/core-transaction-pool"
+                "package": "@solar-network/pool"
             },
             {
-                "package": "@solar-network/core-p2p"
+                "package": "@solar-network/p2p"
             },
             {
-                "package": "@solar-network/core-blockchain"
+                "package": "@solar-network/blockchain"
             },
             {
-                "package": "@solar-network/core-api"
+                "package": "@solar-network/api"
             },
             {
-                "package": "@solar-network/core-webhooks"
+                "package": "@solar-network/webhooks"
             },
             {
-                "package": "@solar-network/core-forger"
+                "package": "@solar-network/forger"
             }
         ]
     },
     "relay": {
         "plugins": [
             {
-                "package": "@solar-network/core-logger-pino"
+                "package": "@solar-network/logger"
             },
             {
-                "package": "@solar-network/core-state"
+                "package": "@solar-network/state"
             },
             {
-                "package": "@solar-network/core-database"
+                "package": "@solar-network/database"
             },
             {
-                "package": "@solar-network/core-transactions"
+                "package": "@solar-network/transactions"
             },
             {
-                "package": "@solar-network/core-transaction-pool"
+                "package": "@solar-network/pool"
             },
             {
-                "package": "@solar-network/core-p2p"
+                "package": "@solar-network/p2p"
             },
             {
-                "package": "@solar-network/core-blockchain"
+                "package": "@solar-network/blockchain"
             },
             {
-                "package": "@solar-network/core-api"
+                "package": "@solar-network/api"
             },
             {
-                "package": "@solar-network/core-webhooks"
+                "package": "@solar-network/webhooks"
             }
         ]
     },
     "forger": {
         "plugins": [
             {
-                "package": "@solar-network/core-logger-pino"
+                "package": "@solar-network/logger"
             },
             {
-                "package": "@solar-network/core-transactions"
+                "package": "@solar-network/transactions"
             },
             {
-                "package": "@solar-network/core-forger"
+                "package": "@solar-network/forger"
             }
         ]
     },
     "snapshot": {
         "plugins": [
             {
-                "package": "@solar-network/core-logger-pino"
+                "package": "@solar-network/logger"
             },
             {
-                "package": "@solar-network/core-database"
+                "package": "@solar-network/database"
             },
             {
-                "package": "@solar-network/core-snapshots"
+                "package": "@solar-network/snapshots"
             }
         ]
     }
