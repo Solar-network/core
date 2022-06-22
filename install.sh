@@ -41,7 +41,7 @@ if [[ -z $DEB ]]; then
     exit 1
 fi
 
-if [ $GLIBC -lt 227 ]; then
+if [ $GLIBC -lt 228 ]; then
     echo Sorry, your glibc version is too old. Try updating your operating system
     echo
     exit 1
@@ -92,7 +92,7 @@ echo "$(source <(echo "echo \"$RC\""))" > "$SOLAR_DATA_PATH"/.env &&
 
 if [ ! -f ""$SOLAR_DATA_PATH"/bin/node" ]; then
     wget -qO "$SOLAR_TEMP_PATH"/n https://raw.githubusercontent.com/tj/n/master/bin/n
-    N_PREFIX="$SOLAR_DATA_PATH" /bin/bash "$SOLAR_TEMP_PATH"/n 16 >/dev/null 2>/dev/null
+    N_PREFIX="$SOLAR_DATA_PATH" /bin/bash "$SOLAR_TEMP_PATH"/n 18 >/dev/null 2>/dev/null
 fi
 
 rm -rf "$SOLAR_DATA_PATH"/.pnpm
