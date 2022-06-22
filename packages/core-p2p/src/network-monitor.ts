@@ -372,8 +372,15 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             }
         }
 
-        if (includedPeers.length < Math.floor(milestone.activeDelegates / 2) + 1) {
+        const halfPlusOne: number = Math.floor(milestone.activeDelegates / 2) + 1;
+
+        if (includedPeers.length < halfPlusOne) {
             includedPeers.push(...relayPeers);
+            if (includedPeers.length < halfPlusOne) {
+                this.logger.info("Not enough peers available to check network health :no_entry_sign:");
+
+                return { forked: false };
+            }
         }
 
         const verificationResults: Contracts.P2P.PeerVerificationResult[] = includedPeers
@@ -381,7 +388,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             .map((peer) => peer.verificationResult!);
 
         if (verificationResults.length === 0) {
-            this.logger.info("No verified peers available :no_entry_sign:");
+            this.logger.info("No verified peers available to check network health :no_entry_sign:");
 
             return { forked: false };
         }
