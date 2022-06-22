@@ -1,4 +1,4 @@
-import { Commands, Container, Services } from "@solar-network/core-cli";
+import { Commands, Container, Services } from "@solar-network/cli";
 import envPaths from "env-paths";
 import { sync } from "execa";
 import { existsSync, readdirSync, readFileSync, remove, statSync, writeFileSync } from "fs-extra";

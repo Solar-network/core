@@ -27,10 +27,10 @@
     },
     "devDependencies": {
         "@solar-network/core": "workspace:*",
-        "@solar-network/core-blockchain": "workspace:*",
-        "@solar-network/core-kernel": "workspace:*",
-        "@solar-network/core-state": "workspace:*",
-        "@solar-network/core-transactions": "workspace:*",
+        "@solar-network/blockchain": "workspace:*",
+        "@solar-network/kernel": "workspace:*",
+        "@solar-network/state": "workspace:*",
+        "@solar-network/transactions": "workspace:*",
         "@solar-network/crypto": "workspace:*"
     },
     "engines": {

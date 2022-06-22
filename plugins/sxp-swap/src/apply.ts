@@ -1,5 +1,5 @@
-import { Services, Types } from "@solar-network/core-kernel";
-import { Handlers } from "@solar-network/core-transactions";
+import { Services, Types } from "@solar-network/kernel";
+import { Handlers } from "@solar-network/transactions";
 import { Interfaces } from "@solar-network/crypto";
 
 export class ApplyTransactionAction extends Services.Triggers.Action {

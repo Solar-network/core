@@ -1,0 +1,33 @@
+{
+    "name": "@solar-network/state",
+    "version": "3.4.0-next.4",
+    "description": "State Management for Solar Core",
+    "license": "CC-BY-ND-4.0",
+    "contributors": [
+        "alessiodf <gym@solar.org>",
+        "cactus1549 <cactus1549@solar.org>",
+        "ARK Ecosystem <info@ark.io>"
+    ],
+    "files": [
+        "dist"
+    ],
+    "main": "dist/index",
+    "types": "dist/index",
+    "scripts": {
+        "build": "pnpm clean && pnpm compile",
+        "build:watch": "pnpm clean && pnpm compile -w",
+        "clean": "rimraf dist",
+        "compile": "node ../../node_modules/typescript/bin/tsc"
+    },
+    "dependencies": {
+        "@solar-network/database": "workspace:*",
+        "@solar-network/kernel": "workspace:*",
+        "@solar-network/transactions": "workspace:*",
+        "@solar-network/crypto": "workspace:*",
+        "immutable": "4.0.0-rc.14",
+        "joi": "17.6.0",
+        "semver": "6.3.0",
+        "xstate": "4.23.4"
+    },
+    "minimumSavedStateVersion": "3.4.0-next.1"
+}

@@ -1,4 +1,4 @@
-import { Commands, Container, Utils } from "@solar-network/core-cli";
+import { Commands, Container, Utils } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
@@ -56,8 +56,8 @@ export class Command extends Commands.Command {
         await Utils.buildApplication({
             flags,
             plugins: {
-                "@solar-network/core-p2p": Utils.buildPeerFlags(flags),
-                "@solar-network/core-blockchain": {
+                "@solar-network/p2p": Utils.buildPeerFlags(flags),
+                "@solar-network/blockchain": {
                     networkStart: flags.networkStart,
                 },
             },

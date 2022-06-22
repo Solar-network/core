@@ -1,4 +1,4 @@
-import { Commands, Container, Contracts, Services } from "@solar-network/core-cli";
+import { Commands, Container, Contracts, Services } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import { copySync, ensureDirSync, existsSync, removeSync } from "fs-extra";
 import Joi from "joi";

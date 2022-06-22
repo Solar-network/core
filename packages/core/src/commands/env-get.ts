@@ -1,4 +1,4 @@
-import { Commands, Container } from "@solar-network/core-cli";
+import { Commands, Container } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import { parseFileSync } from "envfile";
 import { existsSync } from "fs-extra";

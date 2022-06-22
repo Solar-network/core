@@ -1,6 +1,6 @@
-import { Commands, Container, Contracts, Utils } from "@solar-network/core-cli";
-import { Container as KernelContainer, Contracts as KernelContracts } from "@solar-network/core-kernel";
+import { Commands, Container, Contracts, Utils } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
+import { Container as KernelContainer, Contracts as KernelContracts } from "@solar-network/kernel";
 import Joi from "joi";
 
 /**
