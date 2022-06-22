@@ -22,7 +22,6 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
 
     public walletAttributes(): ReadonlyArray<string> {
         return [
-            "delegate.approval", // Used by the API
             "delegate.forgedFees", // Used by the API
             "delegate.burnedFees", // Used by the API
             "delegate.forgedRewards", // Used by the API

@@ -1,5 +1,5 @@
 import { calculateForgingInfo } from "./calculate-forging-info";
-import { calculateApproval, calculateForgedTotal } from "./delegate-calculator";
+import { calculateForgedTotal, calculateVotePercent } from "./delegate-calculator";
 import { calculateLockExpirationStatus } from "./expiration-calculator";
 import { formatSeconds } from "./format-seconds";
 import { formatTimestamp } from "./format-timestamp";
@@ -209,7 +209,7 @@ export * from "./words";
 export * from "./zip-object";
 export { immutable };
 
-export const delegateCalculator = { calculateApproval, calculateForgedTotal };
+export const delegateCalculator = { calculateForgedTotal, calculateVotePercent };
 export const expirationCalculator = { calculateLockExpirationStatus };
 export const roundCalculator = { calculateRound, isNewRound };
 export const supplyCalculator = { calculate };

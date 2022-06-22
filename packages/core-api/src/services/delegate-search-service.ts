@@ -68,17 +68,17 @@ export class DelegateSearchService {
             username: delegateAttribute.username,
             address: wallet.getAddress(),
             publicKey: publicKey!,
-            votes: delegateAttribute.voteBalance,
-            voters: delegateAttribute.voters,
+            votesReceived: {
+                percent: AppUtils.delegateCalculator.calculateVotePercent(wallet, supply),
+                votes: delegateAttribute.voteBalance,
+                voters: delegateAttribute.voters,
+            },
             rank: delegateAttribute.rank,
             isResigned: delegateAttribute.resigned !== undefined,
             resignationType,
             blocks: {
                 produced: delegateAttribute.producedBlocks,
                 last: delegateAttribute.lastBlock,
-            },
-            production: {
-                approval: AppUtils.delegateCalculator.calculateApproval(wallet, supply),
             },
             forged: {
                 fees: delegateAttribute.forgedFees,

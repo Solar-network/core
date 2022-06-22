@@ -12,17 +12,17 @@ export type DelegateResource = {
     username: string;
     address: string;
     publicKey: string;
-    votes: Utils.BigNumber;
-    voters: number;
+    votesReceived: {
+        percent: number;
+        votes: Utils.BigNumber;
+        voters: number;
+    };
     rank: number;
     isResigned: boolean;
     resignationType: string | undefined;
     blocks: {
         produced: number;
         last: string | undefined;
-    };
-    production: {
-        approval: number;
     };
     forged: {
         fees: Utils.BigNumber;
@@ -38,8 +38,11 @@ export const delegateCriteriaSchemaObject = {
     username: Joi.string().pattern(/^[a-z0-9!@$&_.]{1,20}$/),
     address: walletCriteriaSchemaObject.address,
     publicKey: walletCriteriaSchemaObject.publicKey,
-    votes: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
-    voters: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
+    votesReceived: {
+        percent: Schemas.createRangeCriteriaSchema(Joi.number().min(0).max(100)),
+        votes: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
+        voters: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
+    },
     rank: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(1)),
     isResigned: Joi.boolean(),
     resignationType: Joi.string().valid("permanent", "temporary"),
@@ -54,9 +57,6 @@ export const delegateCriteriaSchemaObject = {
                 human: Joi.string(),
             },
         },
-    },
-    production: {
-        approval: Schemas.createRangeCriteriaSchema(Joi.number().min(0)),
     },
     forged: {
         burnedFees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
