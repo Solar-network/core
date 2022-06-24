@@ -51,7 +51,7 @@ export class Serialiser {
     }
 
     private static serialiseCommon(transaction: ITransactionData, buff: ByteBuffer): void {
-        transaction.version = transaction.version || 0x01;
+        transaction.version = transaction.version || 0x03;
         if (transaction.typeGroup === undefined) {
             transaction.typeGroup = TransactionTypeGroup.Core;
         }
