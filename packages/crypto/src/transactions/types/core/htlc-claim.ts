@@ -1,5 +1,4 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { configManager } from "../../../managers";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -13,10 +12,6 @@ export abstract class HtlcClaimTransaction extends Transaction {
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.htlcClaim;
-    }
-
-    public verify(): boolean {
-        return configManager.getMilestone().htlcEnabled && super.verify();
     }
 
     public serialise(): ByteBuffer | undefined {

@@ -1,7 +1,6 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
 import { Address } from "../../../identities";
 import { ISerialiseOptions } from "../../../interfaces";
-import { configManager } from "../../../managers";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -15,10 +14,6 @@ export abstract class HtlcLockTransaction extends Transaction {
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.htlcLock;
-    }
-
-    public verify(): boolean {
-        return configManager.getMilestone().htlcEnabled && super.verify();
     }
 
     public serialise(options?: ISerialiseOptions): ByteBuffer | undefined {
