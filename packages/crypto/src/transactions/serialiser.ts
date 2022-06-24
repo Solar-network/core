@@ -52,11 +52,13 @@ export class Serialiser {
 
     private static serialiseCommon(transaction: ITransactionData, buff: ByteBuffer): void {
         transaction.version = transaction.version || 0x03;
+        transaction.headerType = transaction.headerType || 0x00;
+
         if (transaction.typeGroup === undefined) {
             transaction.typeGroup = TransactionTypeGroup.Core;
         }
 
-        buff.writeUInt8(0xff);
+        buff.writeUInt8(0xff - transaction.headerType);
         buff.writeUInt8(transaction.version);
         buff.writeUInt8(transaction.network || configManager.get("network.pubKeyHash"));
 

@@ -39,8 +39,7 @@ export class Deserialiser {
     }
 
     public static deserialiseCommon(transaction: ITransactionData, buf: ByteBuffer): void {
-        // buf.skip(1); // Skip 0xFF marker
-        buf.jump(1); // Skip 0xFF marker
+        transaction.headerType = 0xff - buf.readUInt8();
         transaction.version = buf.readUInt8();
         transaction.network = buf.readUInt8();
 

@@ -55,6 +55,7 @@ export interface ITransactionData {
     timestamp: number;
     nonce: BigNumber;
     senderPublicKey: string;
+    headerType?: number;
 
     fee: BigNumber;
     burnedFee?: BigNumber;
