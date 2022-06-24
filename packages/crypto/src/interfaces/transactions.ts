@@ -53,8 +53,8 @@ export interface ITransactionData {
     typeGroup?: number;
     type: number;
     timestamp: number;
-    nonce?: BigNumber;
-    senderPublicKey: string | undefined;
+    nonce: BigNumber;
+    senderPublicKey: string;
 
     fee: BigNumber;
     burnedFee?: BigNumber;
@@ -86,7 +86,7 @@ export interface ITransactionJson {
     type: number;
 
     timestamp?: number;
-    nonce?: string;
+    nonce: string;
     senderPublicKey: string;
 
     fee: string;

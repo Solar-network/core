@@ -9,7 +9,6 @@ export class DelegateResignationBuilder extends TransactionBuilder<DelegateResig
         this.data.type = Core.DelegateResignationTransaction.type;
         this.data.typeGroup = Core.DelegateResignationTransaction.typeGroup;
         this.data.fee = Core.DelegateResignationTransaction.staticFee();
-        this.data.senderPublicKey = undefined;
         this.data.asset = {};
     }
 

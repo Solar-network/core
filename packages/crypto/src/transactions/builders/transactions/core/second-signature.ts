@@ -10,7 +10,6 @@ export class SecondSignatureBuilder extends TransactionBuilder<SecondSignatureBu
         this.data.type = Core.SecondSignatureRegistrationTransaction.type;
         this.data.typeGroup = Core.SecondSignatureRegistrationTransaction.typeGroup;
         this.data.fee = Core.SecondSignatureRegistrationTransaction.staticFee();
-        this.data.senderPublicKey = undefined;
         this.data.asset = { signature: {} } as ITransactionAsset;
     }
 

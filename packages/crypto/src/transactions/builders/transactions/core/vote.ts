@@ -9,7 +9,6 @@ export class VoteBuilder extends TransactionBuilder<VoteBuilder> {
         this.data.type = Core.LegacyVoteTransaction.type;
         this.data.typeGroup = Core.LegacyVoteTransaction.typeGroup;
         this.data.fee = Core.LegacyVoteTransaction.staticFee();
-        this.data.senderPublicKey = undefined;
         this.data.asset = { votes: [] };
     }
 

@@ -10,7 +10,6 @@ export class VoteBuilder extends TransactionBuilder<VoteBuilder> {
         this.data.type = Solar.VoteTransaction.type;
         this.data.typeGroup = Solar.VoteTransaction.typeGroup;
         this.data.fee = Solar.VoteTransaction.staticFee();
-        this.data.senderPublicKey = undefined;
         this.data.asset = { votes: {} };
     }
 

@@ -59,17 +59,12 @@ export class Serialiser {
         buff.writeUInt8(0xff);
         buff.writeUInt8(transaction.version);
         buff.writeUInt8(transaction.network || configManager.get("network.pubKeyHash"));
+
         buff.writeUInt32LE(transaction.typeGroup);
         buff.writeUInt16LE(transaction.type);
+        buff.writeBigInt64LE(transaction.nonce.toBigInt());
 
-        if (transaction.nonce) {
-            buff.writeBigInt64LE(transaction.nonce.toBigInt());
-        }
-
-        if (transaction.senderPublicKey) {
-            buff.writeBuffer(Buffer.from(transaction.senderPublicKey, "hex"));
-        }
-
+        buff.writeBuffer(Buffer.from(transaction.senderPublicKey, "hex"));
         buff.writeBigInt64LE(transaction.fee.toBigInt());
     }
 

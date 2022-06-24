@@ -9,7 +9,6 @@ export class MultiSignatureBuilder extends TransactionBuilder<MultiSignatureBuil
         this.data.type = Core.MultiSignatureRegistrationTransaction.type;
         this.data.typeGroup = Core.MultiSignatureRegistrationTransaction.typeGroup;
         this.data.fee = Core.MultiSignatureRegistrationTransaction.staticFee();
-        this.data.senderPublicKey = undefined;
         this.data.asset = { multiSignature: { min: 0, publicKeys: [] } };
     }
 

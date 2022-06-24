@@ -12,7 +12,6 @@ export class LegacyTransferBuilder extends TransactionBuilder<LegacyTransferBuil
         this.data.fee = Core.LegacyTransferTransaction.staticFee();
         this.data.amount = BigNumber.ZERO;
         this.data.recipientId = undefined;
-        this.data.senderPublicKey = undefined;
         this.data.expiration = 0;
     }
 
