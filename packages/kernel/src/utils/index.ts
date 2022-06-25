@@ -97,6 +97,7 @@ export * from "./is-function";
 export * from "./is-git";
 export * from "./is-greater-than-or-equal";
 export * from "./is-greater-than";
+export * from "./is-inside-core-directory";
 export * from "./is-less-than-or-equal";
 export * from "./is-less-than";
 export * from "./is-map";
