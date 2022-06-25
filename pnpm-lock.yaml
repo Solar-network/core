@@ -196,7 +196,7 @@ importers:
       fast-levenshtein: 2.0.6
       fs-extra: 8.1.0
       glob: 7.1.7
-      got: 11.8.2
+      got: 11.8.5
       inversify: 5.1.1
       joi: 17.6.0
       kleur: 4.1.4
@@ -225,7 +225,7 @@ importers:
       fast-levenshtein: 2.0.6
       fs-extra: 8.1.0
       glob: 7.1.7
-      got: 11.8.2
+      got: 11.8.5
       inversify: 5.1.1
       joi: 17.6.0
       kleur: 4.1.4
@@ -272,7 +272,7 @@ importers:
       envfile: 5.2.0
       execa: 3.4.0
       fs-extra: 8.1.0
-      got: 11.8.2
+      got: 11.8.5
       joi: 17.6.0
       kleur: 4.1.4
       module-alias: 2.2.2
@@ -304,7 +304,7 @@ importers:
       envfile: 5.2.0
       execa: 3.4.0
       fs-extra: 8.1.0
-      got: 11.8.2
+      got: 11.8.5
       joi: 17.6.0
       kleur: 4.1.4
       module-alias: 2.2.2
@@ -8017,8 +8017,8 @@ packages:
       slash: 3.0.0
     dev: true
 
-  /got/11.8.2:
-    resolution: {integrity: sha512-D0QywKgIe30ODs+fm8wMZiAcZjypcCodPNuMz5H9Mny7RJ+IjJ10BdmGW7OM7fHXP+O7r6ZwapQ/YQmMSvB0UQ==}
+  /got/11.8.5:
+    resolution: {integrity: sha512-o0Je4NvQObAuZPHLFoRSkdG2lTgtcynqymzg2Vupdx6PorhaT5MCbIyXG6d4D94kk8ZG57QeosgdiqfJWhEhlQ==}
     engines: {node: '>=10.19.0'}
     dependencies:
       '@sindresorhus/is': 4.6.0
