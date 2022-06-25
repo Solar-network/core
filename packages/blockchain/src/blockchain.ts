@@ -47,6 +47,9 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
+    @Container.inject(Container.Identifiers.RoundState)
+    private readonly roundState!: Contracts.State.RoundState;
+
     private queue!: Contracts.Kernel.Queue;
 
     private stopped!: boolean;
@@ -527,10 +530,15 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         const rollbackBlocks: number = await this.networkMonitor.checkForFork();
         if (rollbackBlocks > 0) {
             this.clearAndStopQueue();
+
             await this.removeBlocks(rollbackBlocks);
             this.stateStore.setNumberOfBlocksToRollback(0);
             this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)} :wastebasket:`);
+
+            await this.roundState.restore();
+
             await this.getQueue().resume();
+
             try {
                 if (blocks[0].ip) {
                     const forkedBlock: Interfaces.IBlockData | undefined =

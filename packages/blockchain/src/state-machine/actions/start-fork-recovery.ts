@@ -10,6 +10,9 @@ export class StartForkRecovery implements Action {
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
+    @Container.inject(Container.Identifiers.RoundState)
+    private readonly roundState!: Contracts.State.RoundState;
+
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
 
@@ -29,6 +32,8 @@ export class StartForkRecovery implements Action {
         this.stateStore.setNumberOfBlocksToRollback(0);
 
         this.logger.info(`Removed ${AppUtils.pluralise("block", blocksToRemove, true)} :wastebasket:`);
+
+        await this.roundState.restore();
 
         await this.networkMonitor.refreshPeersAfterFork();
 

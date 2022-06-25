@@ -13,4 +13,6 @@ export interface RoundState {
         height: number,
         wallet: Wallet,
     ): Promise<{ alreadyForged: boolean; reward: Utils.BigNumber }>;
+
+    restore(): Promise<void>;
 }
