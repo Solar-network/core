@@ -60,7 +60,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      *
      * Case1. Peer height > our height and our highest block is part of the peer's chain.
      *   This means the peer is ahead of us, on the same chain. No fork.
-     *   We verify: his blocks that have height > our height (up to the round end).
+     *   We verify: their blocks that have height > our height (up to the round end).
      *
      * Case2. Peer height > our height and our highest block is not part of the peer's chain.
      *   This means that the peer is on a different, higher chain. It has forked before our
@@ -207,7 +207,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             this.log(
                 Severity.DEBUG_EXTRA,
                 `peer's claimed chain is ${Utils.pluralise("block", blocksAhead, true)} higher than ` +
-                    `ours (our height ${ourHeight.toLocaleString()}, his claimed height ${claimedHeight.toLocaleString()})`,
+                    `ours (our height ${ourHeight.toLocaleString()}, their claimed height ${claimedHeight.toLocaleString()})`,
                 null,
             );
 
@@ -386,26 +386,26 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
         const delegates = await this.getDelegatesByRound(roundInfo);
 
-        const hisBlocksByHeight = {};
+        const theirBlocksByHeight = {};
 
         const endHeight = Math.min(claimedHeight, lastBlockHeightInRound);
 
         for (let height = startHeight; height <= endHeight; height++) {
-            if (hisBlocksByHeight[height] === undefined) {
+            if (theirBlocksByHeight[height] === undefined) {
                 if (
                     !(await this.fetchBlocksFromHeight({
                         height,
                         endHeight,
-                        blocksByHeight: hisBlocksByHeight,
+                        blocksByHeight: theirBlocksByHeight,
                         deadline,
                     }))
                 ) {
                     return false;
                 }
             }
-            assert(hisBlocksByHeight[height] !== undefined);
+            assert(theirBlocksByHeight[height] !== undefined);
 
-            if (!this.verifyPeerBlock(hisBlocksByHeight[height], height, delegates)) {
+            if (!this.verifyPeerBlock(theirBlocksByHeight[height], height, delegates)) {
                 return false;
             }
         }
