@@ -2,9 +2,18 @@
 
 const { existsSync, readdirSync, readJsonSync, statSync } = require("fs-extra");
 const { dirname, join } = require("path");
+const { coerce, satisfies } = require("semver");
 
 const main = async () => {
     try {
+        const coreVersion = readJsonSync(`${__dirname}/../package.json`).version;
+        const nodeNeeded = readJsonSync(`${__dirname}/../../../package.json`).engines.node;
+
+        if (!satisfies(process.versions.node, nodeNeeded)) {
+            console.error(`Core ${coreVersion} requires Node.js v${coerce(nodeNeeded).version}+, but you have ${process.version}`);
+            process.exit(1);
+        }
+
         const { addAlias } = require("module-alias");
         const files = readdirSync(`${__dirname}/../../`).map(
             (file) => `${__dirname}/../../${file}/package.json`)
