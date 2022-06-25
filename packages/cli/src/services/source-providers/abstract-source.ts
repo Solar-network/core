@@ -1,5 +1,5 @@
 import execa from "execa";
-import { ensureDirSync, moveSync, readJSONSync, removeSync } from "fs-extra";
+import { ensureDirSync, moveSync, readJsonSync, removeSync } from "fs-extra";
 import { join } from "path";
 
 import { Source } from "./contracts";
@@ -52,7 +52,7 @@ export abstract class AbstractSource implements Source {
 
     protected getPackageName(path: string): string {
         try {
-            return readJSONSync(join(path, "package.json")).name;
+            return readJsonSync(join(path, "package.json")).name;
         } catch {
             throw new InvalidPackageJson();
         }
@@ -60,7 +60,7 @@ export abstract class AbstractSource implements Source {
 
     protected getPackageVersion(path: string): string {
         try {
-            return readJSONSync(join(path, "package.json")).version;
+            return readJsonSync(join(path, "package.json")).version;
         } catch {
             throw new InvalidPackageJson();
         }

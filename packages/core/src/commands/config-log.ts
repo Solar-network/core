@@ -1,6 +1,6 @@
 import { Commands, Container } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
-import { readJSONSync, writeJSONSync } from "fs-extra";
+import { readJsonSync, writeJsonSync } from "fs-extra";
 import Joi from "joi";
 
 /**
@@ -52,7 +52,7 @@ export class Command extends Commands.Command {
 
         if (this.hasFlag("emojify")) {
             const appJsonFile = this.app.getCorePath("config", "app.json");
-            const appJson = readJSONSync(appJsonFile);
+            const appJson = readJsonSync(appJsonFile);
 
             for (const app of Object.keys(appJson)) {
                 const loggerConfig = appJson[app].plugins.filter(
@@ -80,7 +80,7 @@ export class Command extends Commands.Command {
                 }
             }
 
-            writeJSONSync(appJsonFile, appJson, { spaces: 4 });
+            writeJsonSync(appJsonFile, appJson, { spaces: 4 });
         }
     }
 }

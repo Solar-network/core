@@ -1,7 +1,7 @@
 import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Enums, Providers, Services, Utils } from "@solar-network/kernel";
 import delay from "delay";
-import { readJSONSync } from "fs-extra";
+import { readJsonSync } from "fs-extra";
 import prettyMs from "pretty-ms";
 import { gt, lt, satisfies } from "semver";
 
@@ -842,7 +842,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         const delegatesOnThisNode: string[] = [];
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {
-            const { secrets } = readJSONSync(`${this.app.configPath()}/delegates.json`);
+            const { secrets } = readJsonSync(`${this.app.configPath()}/delegates.json`);
             for (const secret of secrets) {
                 const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
                 if (delegates.includes(keys.publicKey) && publicKeys.includes(keys.publicKey)) {

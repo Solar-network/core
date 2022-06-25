@@ -3,7 +3,7 @@ import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar
 import { NetworkStateStatus } from "@solar-network/p2p";
 import { Handlers } from "@solar-network/transactions";
 import delay from "delay";
-import { writeJSONSync } from "fs-extra";
+import { writeJsonSync } from "fs-extra";
 
 import { Client } from "./client";
 import { HostNoResponseError, RelayCommunicationError } from "./errors";
@@ -566,7 +566,7 @@ export class ForgerService {
 
             const jsonFile: string = `${process.env.CORE_PATH_TEMP}/forger.json`;
             try {
-                writeJSONSync(jsonFile, {
+                writeJsonSync(jsonFile, {
                     pid: process.pid,
                     publicKeys: this.delegates.map((delegate) => delegate.publicKey),
                 });

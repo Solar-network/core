@@ -2,7 +2,7 @@ import Hapi from "@hapi/hapi";
 import { Crypto, Identities, Interfaces } from "@solar-network/crypto";
 import { Container, Contracts, Services, Utils } from "@solar-network/kernel";
 import { DatabaseInterceptor } from "@solar-network/state";
-import { readJSONSync } from "fs-extra";
+import { readJsonSync } from "fs-extra";
 
 import { constants } from "../../constants";
 import { Socket } from "../../hapi-nes/socket";
@@ -104,7 +104,7 @@ export class PeerController extends Controller {
 
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {
-            const { secrets } = readJSONSync(`${this.app.configPath()}/delegates.json`);
+            const { secrets } = readJsonSync(`${this.app.configPath()}/delegates.json`);
             for (const secret of secrets) {
                 const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
                 if (delegates.includes(keys.publicKey) && publicKeys.includes(keys.publicKey)) {

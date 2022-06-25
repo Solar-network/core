@@ -1,4 +1,4 @@
-import { existsSync, readJSONSync } from "fs-extra";
+import { existsSync, readJsonSync } from "fs-extra";
 import glob from "glob";
 import { join } from "path";
 
@@ -54,7 +54,7 @@ export class PluginDiscoverer {
             .map((packagePath) => join(path, packagePath).slice(0, -"/package.json".length));
 
         for (const packagePath of packagePaths) {
-            const packageJson = readJSONSync(join(packagePath, "package.json"));
+            const packageJson = readJsonSync(join(packagePath, "package.json"));
 
             plugins.push({
                 packageId: packagePath,

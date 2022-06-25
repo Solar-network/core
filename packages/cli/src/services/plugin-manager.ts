@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readJSONSync, removeSync, statSync } from "fs-extra";
+import { existsSync, readdirSync, readJsonSync, removeSync, statSync } from "fs-extra";
 import glob from "glob";
 import { white } from "kleur";
 import { join } from "path";
@@ -33,7 +33,7 @@ export class PluginManager implements Contracts.PluginManager {
 
         for (const packagePath of packagePaths) {
             try {
-                const packageJson = readJSONSync(join(packagePath, "package.json"));
+                const packageJson = readJsonSync(join(packagePath, "package.json"));
 
                 plugins.push({
                     path: packagePath,

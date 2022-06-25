@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { existsSync, readdirSync, readJSONSync, statSync } = require("fs-extra");
+const { existsSync, readdirSync, readJsonSync, statSync } = require("fs-extra");
 const { dirname, join } = require("path");
 
 const main = async () => {
@@ -12,7 +12,7 @@ const main = async () => {
 
          for (const file of files) {
              if (file.endsWith("/package.json")) {
-                 let { name } = readJSONSync(file);
+                 let { name } = readJsonSync(file);
                  if (name.startsWith("@solar-network/")) {
                     const dir = file.substring(0, file.length - 13);
                     addAlias(name, dir);
