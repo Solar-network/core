@@ -1,8 +1,11 @@
 import Listr from "@alessiodf/listr";
 import delay from "delay";
 import { sync } from "execa";
+import { readJsonSync } from "fs-extra";
 import { white } from "kleur";
 import { spawn } from "node-pty";
+import { resolve } from "path";
+import { coerce, major, satisfies } from "semver";
 
 import { Identifiers, inject, injectable } from "../ioc";
 import { Output } from "../output";
@@ -25,7 +28,7 @@ export class Installer {
      * @memberof Installer
      */
     public async install(pkg: string, tag: string = "latest"): Promise<void> {
-        const corePath = __dirname + "/../../../../";
+        const corePath = resolve(__dirname + "/../../../../");
 
         const getLastTag = (regex: string) => `git tag --sort=committerdate | grep -Px ${regex} | tail -1`;
         let gitTag: string = tag;
@@ -64,24 +67,45 @@ export class Installer {
             };
         };
 
+        const buildPhase = generatePromise();
+        const copyPhase = generatePromise();
         const downloadPhase = generatePromise();
         const gitPhase = generatePromise();
         const installPhase = { start: generatePromise(), end: generatePromise() };
 
         const pnpmFlags = "--reporter=" + (this.output.isNormal() ? "ndjson" : "default");
 
+        const nodeNeeded: string = readJsonSync(`${corePath}/package.json`).engines.node;
+        let newNodeNeeded: string = "";
+
+        if (!satisfies(process.versions.node, nodeNeeded)) {
+            newNodeNeeded = `wget -qO "$SOLAR_TEMP_PATH"/n https://raw.githubusercontent.com/tj/n/master/bin/n && N_PREFIX="$SOLAR_DATA_PATH" /bin/bash "$SOLAR_TEMP_PATH"/n ${major(
+                coerce(nodeNeeded)!,
+            )} &&`;
+        }
+
         const shell = spawn(
             "/bin/bash",
             [
                 "-c",
-                `(git tag -l | xargs git tag -d &&
+                `(pwd="$PWD" &&
+                rm -rf "$SOLAR_TEMP_PATH"/update &&
+                mkdir -p "$SOLAR_TEMP_PATH"/update &&
+                cp -r ./ "$SOLAR_TEMP_PATH"/update &&
+                cd "$SOLAR_TEMP_PATH"/update &&
+                git tag -l | xargs git tag -d &&
                 git fetch --all --tags -f &&
                 git reset --hard &&
                 git checkout tags/${gitTag} &&
-                CFLAGS="$CFLAGS" CPATH="$CPATH" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" pnpm install ${pnpmFlags} &&
+                ${newNodeNeeded}
+                CFLAGS="$CFLAGS" CPATH="$CPATH" LDFLAGS="$LDFLAGS" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" pnpm install ${
+                    newNodeNeeded ? "-f " : ""
+                }${pnpmFlags} &&
                 pnpm build ${pnpmFlags} &&
                 pnpm install ${pnpmFlags} &&
-                exit 0) || exit $?`,
+                rm -rf "$pwd" &&
+                mv "$SOLAR_TEMP_PATH"/update "$pwd" &&
+                exit 0) || ERR=$? && rm -rf "$SOLAR_TEMP_PATH"/update && exit $ERR`,
             ],
             { cols: process.stdout.columns, cwd: corePath, env: process.env as { [key: string]: string } },
         );
@@ -130,6 +154,7 @@ export class Installer {
             }
         });
 
+        let buildingCore: boolean = false;
         let workspacePrefix = "";
 
         function consume(data: string) {
@@ -140,6 +165,9 @@ export class Installer {
                 line = parsed.line;
             } catch {
                 line = data;
+                if (line.includes("Deleted tag")) {
+                    copyPhase.resolve();
+                }
             }
 
             if (line && !line.startsWith("{") && !line.endsWith("}")) {
@@ -153,12 +181,12 @@ export class Installer {
 
             if (parsed.initial && parsed.initial.name && parsed.prefix) {
                 const prefix = parsed.prefix.replace(workspacePrefix, "");
-                if (prefix) {
+                if (prefix && !buildingCore) {
                     packages[parsed.prefix] = parsed.initial.name;
                     packagesListr.add([
                         {
                             title: `Building ${parsed.initial.name}`,
-                            task: () => shellExit,
+                            task: () => buildPhase.promise,
                         },
                     ]);
                 }
@@ -168,6 +196,11 @@ export class Installer {
                 downloadPhase.resolve();
                 installPhase.start.resolve();
                 installPhase.end.resolve();
+                buildingCore = true;
+            }
+
+            if (parsed.name === "pnpm:package-manifest" && buildingCore) {
+                buildPhase.resolve();
             }
 
             if (parsed.script !== undefined) {
@@ -223,6 +256,10 @@ export class Installer {
 
         const tasks = new Listr([
             {
+                title: `Preparing directory`,
+                task: () => copyPhase.promise,
+            },
+            {
                 title: `Downloading Core ${version}`,
                 task: () => gitPhase.promise,
             },
@@ -239,7 +276,14 @@ export class Installer {
             },
             {
                 title: `Building Core ${version}`,
-                task: () => packagesListr,
+                task: async () => {
+                    await installPhase.end.promise;
+                    return packagesListr;
+                },
+            },
+            {
+                title: "Cleaning up",
+                task: () => shellExit,
             },
         ]);
 
