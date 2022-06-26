@@ -120,6 +120,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         timeoutMsec: number,
         blockTimeLookup: Crypto.GetBlockTimeStampLookup | undefined,
         force = false,
+        skipCommonBlocks = false,
     ): Promise<any> {
         const deadline = new Date().getTime() + timeoutMsec;
 
@@ -154,7 +155,19 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 throw new PeerPingTimeoutError(timeoutMsec);
             }
 
-            peer.verificationResult = await peerVerifier.checkState(pingResponse.state, deadline);
+            if (skipCommonBlocks) {
+                peer.fastVerificationResult = await peerVerifier.checkStateFast(pingResponse.state);
+
+                if (!peer.fastVerificationResult) {
+                    throw new PeerVerificationFailedError();
+                }
+            } else {
+                peer.verificationResult = await peerVerifier.checkState(pingResponse.state, deadline);
+
+                if (!peer.isVerified()) {
+                    throw new PeerVerificationFailedError();
+                }
+            }
 
             if (!peer.isVerified()) {
                 throw new PeerVerificationFailedError();

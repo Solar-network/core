@@ -281,7 +281,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
                     this.quorumDetails.overHeightBlockHeaders[peer.ip] = peer.state.header;
                 }
             } else {
-                if (peer.isForked()) {
+                if (peer.fastVerificationResult?.forked) {
                     this.quorumDetails.noQuorum += increment;
                     this.quorumDetails.forked += increment;
                     this.addToList(false, peer, monitor);

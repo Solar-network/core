@@ -22,11 +22,13 @@ export interface NetworkMonitor {
         forcePing,
         log,
         peerCount,
+        skipCommonBlocks,
     }?: {
         fast?: boolean;
         forcePing?: boolean;
         log?: boolean;
         peerCount?: number;
+        skipCommonBlocks?: boolean;
     }): Promise<void>;
     discoverPeers(pingAll?: boolean, addAll?: boolean, silent?: boolean): Promise<boolean>;
     getAllDelegates(): Promise<string[]>;

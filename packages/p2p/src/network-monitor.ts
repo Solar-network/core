@@ -155,7 +155,14 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         forcePing = false,
         log = true,
         peerCount,
-    }: { fast?: boolean; forcePing?: boolean; log?: boolean; peerCount?: number } = {}): Promise<void> {
+        skipCommonBlocks = false,
+    }: {
+        fast?: boolean;
+        forcePing?: boolean;
+        log?: boolean;
+        peerCount?: number;
+        skipCommonBlocks?: boolean;
+    } = {}): Promise<void> {
         let peers = this.repository.getPeers();
         let max = peers.length;
 
@@ -193,7 +200,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 peers.map(async (peer) => {
                     try {
                         pingedPeers.add(peer);
-                        await this.communicator.ping(peer, pingDelay, blockTimeLookup, forcePing);
+                        await this.communicator.ping(peer, pingDelay, blockTimeLookup, forcePing, skipCommonBlocks);
                     } catch (error) {
                         unresponsivePeers++;
 
@@ -317,7 +324,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     }
 
     public async getNetworkState(log: boolean = true): Promise<Contracts.P2P.NetworkState> {
-        await this.cleansePeers({ fast: true, forcePing: true, log });
+        await this.cleansePeers({ fast: true, forcePing: true, log, skipCommonBlocks: true });
         return await NetworkState.analyze(this, this.repository, await this.getDelegatesOnThisNode());
     }
 
@@ -870,7 +877,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     private pingAll(): void {
         const timeNow: number = new Date().getTime() / 1000;
         if (timeNow - this.lastPinged > 10) {
-            this.cleansePeers({ fast: true, forcePing: true, log: false });
+            this.cleansePeers({ fast: true, forcePing: true, log: false, skipCommonBlocks: true });
             this.lastPinged = timeNow;
         }
     }

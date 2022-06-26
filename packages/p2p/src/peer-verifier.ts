@@ -6,15 +6,31 @@ import { inspect } from "util";
 
 import { Severity } from "./enums";
 
+export class FastPeerVerificationResult {
+    public constructor(
+        public readonly myHeight: number,
+        public readonly theirHeight: number,
+        public readonly highestCommonHeight?: number,
+    ) {}
+
+    public get forked(): boolean {
+        if (this.highestCommonHeight) {
+            return this.highestCommonHeight !== this.myHeight && this.highestCommonHeight !== this.theirHeight;
+        }
+
+        return true;
+    }
+}
+
 export class PeerVerificationResult {
     public constructor(
         public readonly myHeight: number,
-        public readonly hisHeight: number,
+        public readonly theirHeight: number,
         public readonly highestCommonHeight: number,
     ) {}
 
     public get forked(): boolean {
-        return this.highestCommonHeight !== this.myHeight && this.highestCommonHeight !== this.hisHeight;
+        return this.highestCommonHeight !== this.myHeight && this.highestCommonHeight !== this.theirHeight;
     }
 }
 
@@ -121,6 +137,22 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         return new PeerVerificationResult(ourHeight, claimedHeight, highestCommonBlockHeight);
     }
 
+    public async checkStateFast(
+        claimedState: Contracts.P2P.PeerState,
+    ): Promise<FastPeerVerificationResult | undefined> {
+        if (!(await this.checkStateHeader(claimedState))) {
+            return undefined;
+        }
+
+        const claimedHeight = Number(claimedState.header.height);
+        const ourHeight: number = this.ourHeight();
+        if (await this.weHavePeersHighestBlock(claimedState, ourHeight)) {
+            return new FastPeerVerificationResult(ourHeight, claimedHeight, claimedHeight);
+        }
+
+        return new FastPeerVerificationResult(ourHeight, claimedHeight);
+    }
+
     private async checkStateHeader(claimedState: Contracts.P2P.PeerState): Promise<boolean> {
         const blockHeader: Interfaces.IBlockData = claimedState.header as Interfaces.IBlockData;
         const claimedHeight = Number(blockHeader.height);
@@ -224,9 +256,9 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
                 ` (our chain is at height ${ourHeight.toLocaleString()})`,
         );
 
-        const ourBlockAtHisHeight = blocks[0];
+        const ourBlockAtTheirHeight = blocks[0];
 
-        if (ourBlockAtHisHeight.id === claimedState.header.id) {
+        if (ourBlockAtTheirHeight.id === claimedState.header.id) {
             if (claimedHeight === ourHeight) {
                 this.log(
                     Severity.DEBUG_EXTRA,
@@ -255,7 +287,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             `peer's latest block (height=${claimedHeight.toLocaleString()}, id=${
                 claimedState.header.id
             }), is different than the ` +
-                `block at the same height in our chain (id=${ourBlockAtHisHeight.id}). Peer has ` +
+                `block at the same height in our chain (id=${ourBlockAtTheirHeight.id}). Peer has ` +
                 (claimedHeight < ourHeight ? `a shorter and` : `an equal-height but`) +
                 ` different chain`,
         );

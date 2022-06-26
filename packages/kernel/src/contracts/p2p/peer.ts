@@ -27,6 +27,7 @@ export interface Peer {
     stale: boolean;
     state: PeerState;
     verificationResult: PeerVerificationResult | undefined;
+    fastVerificationResult: FastPeerVerificationResult | undefined;
 
     addInfraction(): void;
     isActiveDelegate(): boolean;
@@ -79,7 +80,13 @@ export interface PeerPingResponse {
 
 export interface PeerVerificationResult {
     readonly myHeight: number;
-    readonly hisHeight: number;
+    readonly theirHeight: number;
     readonly highestCommonHeight: number;
+    readonly forked: boolean;
+}
+
+export interface FastPeerVerificationResult {
+    readonly myHeight: number;
+    readonly theirHeight: number;
     readonly forked: boolean;
 }

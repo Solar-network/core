@@ -1,7 +1,7 @@
 import { Contracts } from "@solar-network/kernel";
 import dayjs, { Dayjs } from "dayjs";
 
-import { PeerVerificationResult } from "./peer-verifier";
+import { FastPeerVerificationResult, PeerVerificationResult } from "./peer-verifier";
 
 /**
  * @export
@@ -62,6 +62,12 @@ export class Peer implements Contracts.P2P.Peer {
      * @memberof Peer
      */
     public verificationResult: PeerVerificationResult | undefined;
+
+    /**
+     * @type {(FastPeerVerificationResult | undefined)}
+     * @memberof Peer
+     */
+    public fastVerificationResult: FastPeerVerificationResult | undefined;
 
     /**
      * @type {(boolean)}

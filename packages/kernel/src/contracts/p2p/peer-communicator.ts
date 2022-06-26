@@ -14,6 +14,7 @@ export interface PeerCommunicator {
         timeoutMsec: number,
         blockTimeLookup?: Crypto.GetBlockTimeStampLookup,
         force?: boolean,
+        skipCommonBlocks?: boolean,
     ): Promise<any>;
 
     pingPorts(peer: Peer): Promise<void>;
