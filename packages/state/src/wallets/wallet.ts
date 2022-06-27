@@ -274,7 +274,7 @@ export class Wallet implements Contracts.State.Wallet {
      */
     public changeVotes(value: Record<string, number>): void {
         const sortedVotes: Record<string, number> = Utils.sortVotes(value);
-        this.stateHistory.votes.push(sortedVotes);
+        this.addStateHistory("votes", sortedVotes);
         this.setAttribute("votes", sortedVotes);
     }
 
