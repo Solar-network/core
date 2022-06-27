@@ -167,7 +167,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         let max = peers.length;
 
         let unresponsivePeers = 0;
-        const pingDelay = fast ? 1500 : this.config.verifyTimeout;
+        const pingDelay = fast ? 2500 : this.config.verifyTimeout;
 
         if (peerCount) {
             peers = Utils.shuffle(peers).slice(0, peerCount);
