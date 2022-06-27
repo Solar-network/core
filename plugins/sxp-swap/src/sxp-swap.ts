@@ -162,17 +162,16 @@ export class SXPSwap {
 
             await (this as any).throwIfCannotBeApplied(transaction, sender, status);
 
-            if (data.version && data.version > 1) {
-                (this as any).verifyTransactionNonceApply(sender, transaction);
+            (this as any).verifyTransactionNonceApply(sender, transaction);
 
-                AppUtils.assert.defined<Utils.BigNumber>(data.nonce);
-                sender.setNonce(data.nonce);
-            } else {
-                sender.increaseNonce();
-            }
+            AppUtils.assert.defined<Utils.BigNumber>(data.nonce);
 
-            const newBalance: Utils.BigNumber = sender.getBalance().minus(data.amount).minus(data.fee);
+            sender.setNonce(data.nonce);
+
+            const newBalance: Utils.BigNumber = sender.getBalance().minus(data.amount || Utils.BigNumber.ZERO).minus(data.fee);
+
             assert(Utils.isException(transaction.data) || !newBalance.isNegative());
+
             sender.setBalance(newBalance);
         };
 
