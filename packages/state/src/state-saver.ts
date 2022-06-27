@@ -2,8 +2,6 @@ import { Interfaces, Utils } from "@solar-network/crypto";
 import { Application, Container, Contracts, Providers } from "@solar-network/kernel";
 import { closeSync, existsSync, openSync, readdirSync, renameSync, statSync, unlinkSync, writeSync } from "fs";
 
-import { SavedStateValueType } from "./enums";
-
 @Container.injectable()
 export class StateSaver {
     @Container.inject(Container.Identifiers.Application)
@@ -128,7 +126,7 @@ export class StateSaver {
                         secondaryBuffer.reset();
                         this.byteBufferArray.reset();
 
-                        const encoded: Buffer = this.encode(item, secondaryBuffer);
+                        const encoded: Buffer = Buffer.from(JSON.stringify(item));
                         if (buffer.getRemainderLength() < 8) {
                             flush();
                         }
@@ -162,89 +160,5 @@ export class StateSaver {
             this.logger.error("An error occurred while trying to save the state :warning:");
             this.logger.error(error.stack);
         }
-    }
-
-    private encode(object: string | number | Record<string, any>, buffer: Utils.ByteBuffer) {
-        switch (typeof object) {
-            case "string": {
-                if (!(/^[0-9a-f]+$/.test(object) && object.length % 2 === 0)) {
-                    buffer.writeUInt32LE(object.length + 1);
-                    buffer.writeUInt8(SavedStateValueType.String);
-                    buffer.writeBuffer(Buffer.from(object));
-                } else {
-                    const hexBuffer = Buffer.from(object, "hex");
-                    buffer.writeUInt32LE(hexBuffer.length + 1);
-                    buffer.writeUInt8(SavedStateValueType.HexString);
-                    buffer.writeBuffer(hexBuffer);
-                }
-                break;
-            }
-            case "boolean": {
-                buffer.writeUInt32LE(2);
-                buffer.writeUInt8(SavedStateValueType.Boolean);
-                buffer.writeUInt8(object ? 1 : 0);
-                break;
-            }
-            case "number": {
-                if (object % 1 !== 0) {
-                    const stringifiedObject: string = object.toString();
-                    buffer.writeUInt32LE(stringifiedObject.length + 1);
-                    buffer.writeUInt8(SavedStateValueType.Decimal);
-                    buffer.writeBuffer(Buffer.from(stringifiedObject));
-                } else {
-                    buffer.writeUInt32LE(5);
-                    if (object >= 0) {
-                        buffer.writeUInt8(SavedStateValueType.Integer);
-                        buffer.writeUInt32LE(object);
-                    } else {
-                        buffer.writeUInt8(SavedStateValueType.Signed);
-                        buffer.writeInt32LE(object);
-                    }
-                }
-                break;
-            }
-            case "object": {
-                if (object instanceof Utils.BigNumber) {
-                    buffer.writeUInt32LE(9);
-                    if (!object.isNegative()) {
-                        buffer.writeUInt8(SavedStateValueType.BigNumber);
-                        buffer.writeBigUInt64LE(object.toBigInt());
-                    } else {
-                        buffer.writeUInt8(SavedStateValueType.SignedBigNumber);
-                        buffer.writeBigInt64LE(object.toBigInt());
-                    }
-                } else if (object instanceof Array || object instanceof Set) {
-                    const arrayBuffer: Utils.ByteBuffer = this.byteBufferArray.getByteBuffer();
-                    for (const value of object) {
-                        this.encode(value, arrayBuffer);
-                    }
-                    const bufferResult: Buffer = arrayBuffer.getResult();
-                    buffer.writeUInt32LE(bufferResult.length + 1);
-                    buffer.writeUInt8(object instanceof Array ? SavedStateValueType.Array : SavedStateValueType.Set);
-                    buffer.writeBuffer(bufferResult);
-                } else if (object instanceof Object) {
-                    const objectBuffer: Utils.ByteBuffer = this.byteBufferArray.getByteBuffer();
-                    for (const property in object) {
-                        if (object.hasOwnProperty(property)) {
-                            this.encode(property, objectBuffer);
-                            this.encode(object[property], objectBuffer);
-                        }
-                    }
-                    const bufferResult: Buffer = objectBuffer.getResult();
-                    buffer.writeUInt32LE(bufferResult.length + 1);
-                    buffer.writeUInt8(SavedStateValueType.Object);
-                    buffer.writeBuffer(bufferResult);
-                } else {
-                    buffer.writeUInt32LE(1);
-                    buffer.writeUInt8(SavedStateValueType.Null);
-                }
-                break;
-            }
-            case "undefined": {
-                buffer.writeUInt32LE(1);
-                buffer.writeUInt8(SavedStateValueType.Undefined);
-            }
-        }
-        return buffer.getResult();
     }
 }

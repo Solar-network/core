@@ -5,7 +5,6 @@ import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, statSync, 
 import { resolve } from "path";
 import semver from "semver";
 
-import { SavedStateValueType } from "./enums";
 import {
     BlockNotInDatabaseError,
     CorruptSavedStateError,
@@ -113,62 +112,6 @@ export class StateLoader {
         return result;
     }
 
-    private decode(buffer: Utils.ByteBuffer): any {
-        const length: number = buffer.readUInt32LE();
-        const objectBuffer: Utils.ByteBuffer = new Utils.ByteBuffer(buffer.readBuffer(length));
-
-        const type: number = objectBuffer.readUInt8();
-
-        switch (type) {
-            case SavedStateValueType.String: {
-                return objectBuffer.readBuffer(length - 1).toString();
-            }
-            case SavedStateValueType.HexString: {
-                return objectBuffer.readBuffer(length - 1).toString("hex");
-            }
-            case SavedStateValueType.Boolean: {
-                return objectBuffer.readUInt8() === 1;
-            }
-            case SavedStateValueType.Decimal: {
-                return parseFloat(objectBuffer.readBuffer(length - 1).toString());
-            }
-            case SavedStateValueType.Integer: {
-                return objectBuffer.readUInt32LE();
-            }
-            case SavedStateValueType.Signed: {
-                return objectBuffer.readInt32LE();
-            }
-            case SavedStateValueType.BigNumber: {
-                return Utils.BigNumber.make(objectBuffer.readBigUInt64LE());
-            }
-            case SavedStateValueType.SignedBigNumber: {
-                return Utils.BigNumber.make(objectBuffer.readBigInt64LE());
-            }
-            case SavedStateValueType.Array:
-            case SavedStateValueType.Set: {
-                const array: any[] = [];
-                while (objectBuffer.getRemainderLength() > 0) {
-                    array.push(this.decode(objectBuffer));
-                }
-                return type == SavedStateValueType.Array ? array : new Set(array);
-            }
-            case SavedStateValueType.Object: {
-                const object: object = {};
-                while (objectBuffer.getRemainderLength() > 0) {
-                    object[this.decode(objectBuffer)] = this.decode(objectBuffer);
-                }
-                return object;
-                break;
-            }
-            case SavedStateValueType.Null: {
-                return null;
-                break;
-            }
-        }
-
-        return undefined;
-    }
-
     private async load(savedStatesPath: string, stateFiles: Array<string>): Promise<boolean> {
         this.walletRepository.reset();
 
@@ -213,6 +156,14 @@ export class StateLoader {
 
             const total: number = buffer.readUInt32LE();
 
+            const reviver = (_, value) => {
+                if (typeof value === "string" && !isNaN(+value) && Number.isInteger(+value)) {
+                    return Utils.BigNumber.make(value);
+                }
+
+                return value;
+            };
+
             try {
                 for (let count = 0; count < total; count++) {
                     const bits: number = buffer.readUInt8();
@@ -240,17 +191,17 @@ export class StateLoader {
 
                     if ((8 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        attributes = this.decode(new Utils.ByteBuffer(buffer.readBuffer(length)));
+                        attributes = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                     }
 
                     if ((16 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        stateHistory = this.decode(new Utils.ByteBuffer(buffer.readBuffer(length)));
+                        stateHistory = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                     }
 
                     if ((32 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        voteBalances = this.decode(new Utils.ByteBuffer(buffer.readBuffer(length)));
+                        voteBalances = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                     }
 
                     const wallet: Contracts.State.Wallet = this.walletRepository.createWallet(address);
