@@ -77,13 +77,12 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
             this.blockchain.resetLastDownloadedBlock();
 
             if (!(await this.blockchain.checkForFork(this.blocks))) {
-                this.logger.warning(
-                    Utils.getBlockNotChainedErrorMessage(
-                        this.blockchain.getLastBlock().data,
-                        this.blocks[0],
-                        blockTimeLookup,
-                    ),
-                );
+                const lastBlockData: Interfaces.IBlockData = this.blockchain.getLastBlock().data;
+                if (lastBlockData.height !== this.blocks[0].height || lastBlockData.id !== this.blocks[0].id) {
+                    this.logger.warning(
+                        Utils.getBlockNotChainedErrorMessage(lastBlockData, this.blocks[0], blockTimeLookup),
+                    );
+                }
             }
 
             return;
