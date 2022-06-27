@@ -2,6 +2,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddBurnedFeeColumnToBlocksAndTransactionsTables20220304000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Adding burned_fee to blocks and transactions tables",
+        );
         await queryRunner.query(`
             ALTER TABLE blocks ADD COLUMN burned_fee BIGINT NOT NULL DEFAULT 0;
             ALTER TABLE transactions ADD COLUMN burned_fee BIGINT NOT NULL DEFAULT 0;

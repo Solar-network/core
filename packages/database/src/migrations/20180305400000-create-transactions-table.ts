@@ -2,6 +2,7 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateTransactionsTable20180305400000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug("Database migration: Creating transactions table");
         await queryRunner.query(`
             CREATE TABLE transactions (
                 "id" VARCHAR(64) PRIMARY KEY,

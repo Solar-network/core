@@ -2,6 +2,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class DisableFastupdateOnGinIndexes20220606000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Disabling fastupdate on indexes in transactions table",
+        );
         await queryRunner.query(`
         DROP INDEX IF EXISTS transactions_asset;
         DROP INDEX IF EXISTS transactions_asset_payments;

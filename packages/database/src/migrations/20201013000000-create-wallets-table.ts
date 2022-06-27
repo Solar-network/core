@@ -2,6 +2,7 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateWalletsTable20201013000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug("Database migration: Creating wallets table");
         await queryRunner.query(`
             CREATE TABLE wallets (
                 "address" VARCHAR(36) PRIMARY KEY NOT NULL,

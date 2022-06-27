@@ -3,6 +3,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class RenamePaymentsToTransfersInAsset20220613000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Renaming payments asset to transfers in transactions table",
+        );
         await queryRunner.query(`
             UPDATE transactions SET asset = JSONB_SET(asset #- '{payments}', '{transfers}', asset #> '{payments}') WHERE type_group = ${Enums.TransactionTypeGroup.Core} AND type = ${Enums.TransactionType.Core.Transfer};
             DROP INDEX transactions_asset_payments;

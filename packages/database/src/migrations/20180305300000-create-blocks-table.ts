@@ -2,6 +2,7 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateBlocksTable20180305300000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug("Database migration: Creating blocks table");
         await queryRunner.query(`
             CREATE TABLE blocks (
                 "id" VARCHAR(64) PRIMARY KEY,

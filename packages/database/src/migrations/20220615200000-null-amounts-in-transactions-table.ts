@@ -2,6 +2,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class NullAmountsInTransactionsTable20220615200000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Setting zero amount to null in transactions table",
+        );
         await queryRunner.query(`
             ALTER TABLE transactions ALTER COLUMN amount DROP NOT NULL;
             UPDATE transactions SET amount = NULL WHERE amount = 0;

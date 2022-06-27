@@ -2,6 +2,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class ChangeSetRowNonceToUseMaxNonce20190905000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Adding nonce trigger to transactions table",
+        );
         await queryRunner.query(`
             DROP TRIGGER transactions_set_nonce ON transactions;
 

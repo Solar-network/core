@@ -2,6 +2,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddNonceColumnToTransactionsTable20190806000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Adding nonce to transactions table",
+        );
         await queryRunner.query(`
             ALTER TABLE transactions ADD COLUMN nonce BIGINT;
             CREATE UNIQUE INDEX "transactions_sender_nonce" ON transactions ("sender_public_key", "nonce");

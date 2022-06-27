@@ -2,6 +2,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddBlocksAndTransactionsIndexes20200317000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Adding indexes to blocks and transactions tables",
+        );
         await queryRunner.query(`
             CREATE INDEX transactions_asset ON transactions USING GIN(asset);
             CREATE INDEX transactions_amount ON transactions(amount);

@@ -2,6 +2,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddBlockHeightColumnToTransactionsTable20200705000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Adding block_height to transactions table",
+        );
         await queryRunner.query(`
             ALTER TABLE blocks ADD CONSTRAINT blocks_id_height_unique UNIQUE (id, height);
             ALTER TABLE transactions ADD COLUMN block_height integer;

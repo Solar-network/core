@@ -2,6 +2,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class SetAutovacuumSettings20201103000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Configuring autovacuum on all tables",
+        );
         await queryRunner.query(`
             ALTER TABLE blocks SET (
                 autovacuum_vacuum_scale_factor = 0,

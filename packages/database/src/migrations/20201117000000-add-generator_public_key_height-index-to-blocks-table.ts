@@ -2,6 +2,9 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class AddGeneratorPublicKeyHeightIndexToBlocksTable20201117000000 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<any> {
+        queryRunner.connection.driver.options.extra.logger.debug(
+            "Database migration: Adding generator_public_key index to blocks table",
+        );
         await queryRunner.query(`
             CREATE INDEX IF NOT EXISTS blocks_generator_public_key_height ON blocks ("generator_public_key", "height");
         `);

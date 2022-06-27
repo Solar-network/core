@@ -90,6 +90,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         return createConnection({
             ...(connection as any),
+            extra: Object.assign(connection.extra, { logger: this.app.get(Container.Identifiers.LogService) }),
             namingStrategy: new SnakeNamingStrategy(),
             migrations: [__dirname + "/migrations/*.js"],
             migrationsRun: true,
