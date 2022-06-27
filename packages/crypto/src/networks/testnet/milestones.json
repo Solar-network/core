@@ -49,8 +49,11 @@
                 "vote": 9000000
             }
         },
-        "legacyVote": true,
         "legacyTransfer": true,
+        "legacyVote": true,
+        "p2p": {
+            "minimumVersions": ["^3.4.0-next.5"]
+        },
         "transfer": {
             "maximum": 256,
             "minimum": 2
@@ -127,10 +130,7 @@
         "height": 500000,
         "acceptLegacySchnorrTransactions": true,
         "bip340": true,
-        "htlcEnabled": true,
-        "p2p": {
-            "minimumVersions": ["^3.3.0 || ^3.3.0-next.0"]
-        }
+        "htlcEnabled": true
     },
     {
         "height": 671352,
@@ -141,10 +141,7 @@
     {
         "height": 918650,
         "acceptLegacySchnorrTransactions": false,
-        "legacyVote": false,
-        "p2p": {
-            "minimumVersions": ["^3.4.0 || ^3.4.0-next.0"]
-        }
+        "legacyVote": false
     },
     {
         "height": 972604,
@@ -159,9 +156,6 @@
     {
         "height": 1044896,
         "blocksToRevokeDelegateResignation": 106,
-        "delegateResignationTypeAsset": true,
-        "p2p": {
-            "minimumVersions": ["^3.4.0 || ^3.4.0-next.5"]
-        }
+        "delegateResignationTypeAsset": true
     }
 ]
