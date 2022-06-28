@@ -127,7 +127,7 @@
             "Sgymbo4rg9aBeJJ2YmV12xdRY2xo6b94U9": 5
         },
         "p2p": {
-            "minimumVersions": ["^3.3.0 || ^3.3.0-next.0"]
+            "minimumVersions": ["^3.3.0 || ^4.0.0"]
         }
     }
 ]
