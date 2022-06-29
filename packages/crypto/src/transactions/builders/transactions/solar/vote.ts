@@ -21,7 +21,7 @@ export class VoteBuilder extends TransactionBuilder<VoteBuilder> {
             const voteObject: Record<string, number> = {};
 
             if (voteArray.length > 0) {
-                const weight: number = Math.trunc((((100 / voteArray.length) * 100) / 100) * 100);
+                const weight: number = Math.trunc(10000 / voteArray.length);
                 let remainder: number = 10000;
 
                 for (const vote of voteArray) {
