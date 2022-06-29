@@ -1,7 +1,13 @@
 import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/kernel";
 
-import { VotedForNonDelegateError, VotedForResignedDelegateError, VotedForTooManyDelegatesError } from "../../errors";
+import {
+    AlreadyVotedForSameDelegatesError,
+    NoVoteError,
+    VotedForNonDelegateError,
+    VotedForResignedDelegateError,
+    VotedForTooManyDelegatesError,
+} from "../../errors";
 import { DelegateRegistrationTransactionHandler } from "../core/delegate-registration";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
@@ -56,6 +62,13 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         if (votes.length > activeDelegates) {
             throw new VotedForTooManyDelegatesError(activeDelegates);
+        }
+
+        if (Utils.isEqual(transaction.data.asset.votes, wallet.getLastStateHistory("votes"))) {
+            if (Object.keys(transaction.data.asset.votes).length === 0) {
+                throw new NoVoteError();
+            }
+            throw new AlreadyVotedForSameDelegatesError();
         }
 
         for (const delegate of votes) {
