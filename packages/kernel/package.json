@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/kernel",
-    "version": "3.4.0-next.8",
+    "version": "4.0.0",
     "description": "Kernel of Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [

@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/forger",
-    "version": "3.4.0-next.8",
+    "version": "4.0.0",
     "description": "Forger for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
