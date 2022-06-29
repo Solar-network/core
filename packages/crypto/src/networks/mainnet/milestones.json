@@ -22,10 +22,11 @@
                 "htlcLock": 82,
                 "htlcRefund": 0,
                 "ipfs": 98,
-                "multiPayment": 85,
+                "legacyTransfer": 99,
+                "legacyVote": 98,
                 "multiSignature": 16,
                 "secondSignature": 99,
-                "transfer": 99,
+                "transfer": 85,
                 "vote": 98
             },
             "minFee": 11299
@@ -40,18 +41,24 @@
                 "htlcLock": 5000000,
                 "htlcRefund": 0,
                 "ipfs": 5000000,
-                "multiPayment": 50000000,
+                "legacyTransfer": 5000000,
+                "legacyVote": 5000000,
                 "multiSignature": 5000000,
                 "secondSignature": 5000000,
-                "transfer": 5000000,
-                "vote": 5000000
+                "transfer": 50000000,
+                "vote": 9000000
             }
         },
+        "legacyTransfer": true,
         "legacyVote": true,
-        "multiPaymentLimit": 256,
-        "onlyActiveDelegatesInCalculations": true,
-        "reward": "0",
-        "vendorFieldLength": 255
+        "p2p": {
+            "minimumVersions": [">=3.3.0"]
+        },
+        "transfer": {
+            "maximum": 256,
+            "minimum": 2
+        },
+        "reward": 0
     },
     {
         "height": 75632,
@@ -125,9 +132,19 @@
         "bip340": true,
         "devFund": {
             "Sgymbo4rg9aBeJJ2YmV12xdRY2xo6b94U9": 5
-        },
+        }
+    },
+    {
+        "height": 1175000,
+        "acceptLegacySchnorrTransactions": false,
+        "blocksToRevokeDelegateResignation": 106,
+        "delegateResignationTypeAsset": true,
+        "legacyVote": false,
         "p2p": {
-            "minimumVersions": ["^3.3.0 || ^4.0.0"]
+            "minimumVersions": [">=4.0.0"]
+        },
+        "transfer": {
+            "minimum": 1
         }
     }
 ]
