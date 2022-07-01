@@ -22,7 +22,7 @@ export class TransactionsController extends Controller {
         request: Hapi.Request,
         h: Hapi.ResponseToolkit,
     ): Promise<Contracts.P2P.UnconfirmedTransactions> {
-        const fromForger: boolean = !Utils.isWhitelisted(
+        const fromForger: boolean = Utils.isWhitelisted(
             this.configuration.getOptional<string[]>("remoteAccess", []),
             request.info.remoteAddress,
         );

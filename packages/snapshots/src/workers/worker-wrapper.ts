@@ -9,6 +9,9 @@ export class WorkerWrapper extends EventEmitter {
 
     public constructor(data: WorkerData) {
         super();
+
+        delete data.connection.extra.logger;
+
         this.worker = new Worker(__dirname + "/worker.js", { workerData: data });
 
         this.worker.on("message", (data) => {

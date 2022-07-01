@@ -64,11 +64,11 @@ export class TransactionFactory {
                 data.asset.transfers = data.asset.payments;
                 delete data.asset.payments;
             }
+        }
 
-            if (data.vendorField) {
-                data.memo = data.vendorField;
-                delete data.vendorField;
-            }
+        if (data.vendorField) {
+            data.memo = data.vendorField;
+            delete data.vendorField;
         }
 
         const { value, error } = Verifier.verifySchema(data, strict);
