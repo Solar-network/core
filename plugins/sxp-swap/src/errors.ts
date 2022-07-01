@@ -1,9 +1,14 @@
 import { Utils } from "@solar-network/crypto";
-import { BigNumber } from "@solar-network/utils";
 
 export class ApiCommunicationError extends Error {
     public constructor(network: string) {
         super(`No ${network} api servers responded with valid data`);
+    }
+}
+
+export class MemoIncorrectError extends Error {
+    public constructor() {
+        super("The memo of the transaction from the swap source wallet must adhere to the correct format");
     }
 }
 
@@ -38,7 +43,7 @@ export class TransactionNotValidError extends Error {
 }
 
 export class TransactionHasWrongAmountError extends Error {
-    public constructor(amount: BigNumber, expectedAmount: BigNumber) {
+    public constructor(amount: Utils.BigNumber, expectedAmount: Utils.BigNumber) {
         super(
             `The swap transaction has the wrong amount (${Utils.formatSatoshi(amount)}, expected ${Utils.formatSatoshi(expectedAmount)})`
         );
@@ -74,12 +79,6 @@ export class UnknownSwapNetworkError extends Error {
         super(
             `The network of this swap transaction (${network}) does not correspond to any recognised network (${supportedNetworks.join(", ")})`
         );
-    }
-}
-
-export class VendorFieldIncorrectError extends Error {
-    public constructor() {
-        super("The vendor field of the transaction from the swap source wallet must adhere to the correct format");
     }
 }
 

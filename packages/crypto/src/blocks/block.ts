@@ -5,11 +5,10 @@ import { IBlock, IBlockData, IBlockJson, IBlockVerification, ITransaction, ITran
 import { configManager } from "../managers/config";
 import { BigNumber, calculateDevFund, isException } from "../utils";
 import { validator } from "../validation";
-import { Serializer } from "./serializer";
+import { Serialiser } from "./serialiser";
 
 export class Block implements IBlock {
-    // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
-    public serialized: string;
+    public serialised!: string;
     public data: IBlockData;
     public transactions: ITransaction[];
     public verification: IBlockVerification;
@@ -80,7 +79,7 @@ export class Block implements IBlock {
     }
 
     public static getId(data: IBlockData): string {
-        const payloadHash: Buffer = Serializer.serialize(data);
+        const payloadHash: Buffer = Serialiser.serialise(data);
 
         const hash: Buffer = HashAlgorithms.sha256(payloadHash);
 
@@ -122,7 +121,7 @@ export class Block implements IBlock {
 
     public verifySignature(): boolean {
         const { bip340 } = configManager.getMilestone(this.data.height);
-        const bytes: Buffer = Serializer.serialize(this.data, false);
+        const bytes: Buffer = Serialiser.serialise(this.data, false);
         const hash: Buffer = HashAlgorithms.sha256(bytes);
 
         if (!this.data.blockSignature) {
@@ -170,11 +169,11 @@ export class Block implements IBlock {
                 result.errors.push("Invalid block version");
             }
 
-            if (block.timestamp > Slots.getTime() + Managers.configManager.getMilestone(block.height).blocktime) {
+            if (block.timestamp > Slots.getTime() + Managers.configManager.getMilestone(block.height).blockTime) {
                 result.errors.push("Invalid block timestamp");
             }
 
-            const size: number = Serializer.size(this);
+            const size: number = Serialiser.size(this);
             if (size > constants.block.maxPayload) {
                 result.errors.push(`Payload is too large: ${size} > ${constants.block.maxPayload}`);
             }
@@ -184,7 +183,7 @@ export class Block implements IBlock {
                 result.errors.push("One or more transactions are not verified:");
 
                 for (const invalidTransaction of invalidTransactions) {
-                    result.errors.push(`=> ${invalidTransaction.serialized.toString("hex")}`);
+                    result.errors.push(`=> ${invalidTransaction.serialised.toString("hex")}`);
                 }
 
                 result.containsMultiSignatures = invalidTransactions.some((tx) => !!tx.data.signatures);
@@ -228,7 +227,7 @@ export class Block implements IBlock {
 
                 if (transaction.data.version === 1 && !constants.block.acceptExpiredTransactionTimestamps) {
                     const now: number = block.timestamp;
-                    if (transaction.data.timestamp > now + 3600 + constants.blocktime) {
+                    if (transaction.data.timestamp > now + 3600 + constants.blockTime) {
                         result.errors.push(`Encountered future transaction: ${transaction.data.id}`);
                     } else if (now - transaction.data.timestamp > 21600) {
                         result.errors.push(`Encountered expired transaction: ${transaction.data.id}`);
@@ -237,7 +236,7 @@ export class Block implements IBlock {
 
                 appliedTransactions[transaction.data.id] = transaction.data;
 
-                totalAmount = totalAmount.plus(transaction.data.amount);
+                totalAmount = totalAmount.plus(transaction.data.amount || BigNumber.ZERO);
                 totalFee = totalFee.plus(transaction.data.fee);
 
                 payloadBuffers.push(bytes);

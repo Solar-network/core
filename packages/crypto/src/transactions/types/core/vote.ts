@@ -3,23 +3,24 @@ import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
-export class VoteTransaction extends Transaction {
+export class LegacyVoteTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.Vote;
-    public static key = "vote";
+    public static key = "legacyVote";
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("100000000");
 
     public static getSchema(): schemas.TransactionSchema {
-        return schemas.vote;
+        return schemas.legacyVote;
     }
 
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         const { data } = this;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(69));
 
         if (data.asset && data.asset.votes) {
-            const voteBytes = data.asset.votes
+            const votes = data.asset.votes as string[];
+            const voteBytes = votes
                 .map((vote) => {
                     const prefix = vote.startsWith("+") ? "01" : "00";
                     const sliced = vote.slice(1);
@@ -37,14 +38,14 @@ export class VoteTransaction extends Transaction {
                     return hex;
                 })
                 .join("");
-            buff.writeUInt8(data.asset.votes.length);
+            buff.writeUInt8(votes.length);
             buff.writeBuffer(Buffer.from(voteBytes, "hex"));
         }
 
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
         const voteLength: number = buf.readUInt8();
         data.asset = { votes: [] };
@@ -63,7 +64,7 @@ export class VoteTransaction extends Transaction {
             }
 
             if (data.asset && data.asset.votes) {
-                data.asset.votes.push(vote);
+                (data.asset.votes as string[]).push(vote);
             }
         }
     }

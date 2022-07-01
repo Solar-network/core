@@ -1,11 +1,11 @@
 export enum CoreTransactionType {
-    Transfer = 0,
+    LegacyTransfer = 0,
     SecondSignature = 1,
     DelegateRegistration = 2,
     Vote = 3,
     MultiSignature = 4,
     Ipfs = 5,
-    MultiPayment = 6,
+    Transfer = 6,
     DelegateResignation = 7,
     HtlcLock = 8,
     HtlcClaim = 9,
@@ -14,6 +14,7 @@ export enum CoreTransactionType {
 
 export enum SolarTransactionType {
     Burn = 0,
+    Vote = 2,
 }
 
 export const TransactionType = {
@@ -29,6 +30,12 @@ export enum TransactionTypeGroup {
 
     // Everything above is available to anyone
     Reserved = 1000,
+}
+
+export enum DelegateStatus {
+    TemporaryResign = 0,
+    PermanentResign = 1,
+    NotResigned = 2,
 }
 
 export enum HtlcLockExpirationType {

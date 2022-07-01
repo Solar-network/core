@@ -54,7 +54,7 @@ export class TransactionTypeError extends CryptoError {
 
 export class InvalidTransactionBytesError extends CryptoError {
     public constructor(message: string) {
-        super(`Failed to deserialize transaction, encountered invalid bytes: ${message}`);
+        super(`Failed to deserialise transaction, encountered invalid bytes: ${message}`);
     }
 }
 
@@ -100,15 +100,15 @@ export class MissingMilestoneFeeError extends CryptoError {
     }
 }
 
-export class MaximumPaymentCountExceededError extends CryptoError {
+export class MaximumTransferCountExceededError extends CryptoError {
     public constructor(limit: number) {
-        super(`Number of payments exceeded the allowed maximum of ${limit}`);
+        super(`Number of transfers exceeded the allowed maximum of ${limit}`);
     }
 }
 
-export class VendorFieldLengthExceededError extends CryptoError {
+export class MemoLengthExceededError extends CryptoError {
     public constructor(limit: number) {
-        super(`Length of vendor field exceeded the allowed maximum ${limit}`);
+        super(`Length of memo exceeded the allowed maximum ${limit}`);
     }
 }
 

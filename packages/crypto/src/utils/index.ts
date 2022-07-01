@@ -2,11 +2,13 @@ import { SATOSHI } from "../constants";
 import { ITransactionData } from "../interfaces";
 import { configManager } from "../managers";
 import { Base58 } from "./base58";
-import { BigNumber } from "./bignum";
+import { BigNumber } from "./big-number";
 import { calculateBlockTime, isNewBlockTime } from "./block-time-calculator";
 import { ByteBuffer } from "./byte-buffer";
+import { ByteBufferArray } from "./byte-buffer-array";
 import { isLocalHost, isValidPeer } from "./is-valid-peer";
 import { calculateReward } from "./reward-calculator";
+import { sortVotes } from "./sort-votes";
 
 let genesisTransactions: { [key: string]: boolean };
 let whitelistedBlockAndTransactionIds: { [key: string]: boolean };
@@ -93,20 +95,10 @@ export const numberToHex = (num: number, padding = 2): string => {
     return "0".repeat(padding - indexHex.length) + indexHex;
 };
 
-export const maxVendorFieldLength = (height?: number): number => configManager.getMilestone(height).vendorFieldLength;
-
 export const isSupportedTransactionVersion = (version: number): boolean => {
     const { acceptLegacySchnorrTransactions, bip340 } = configManager.getMilestone();
 
-    if (bip340 && (version === 3 || (version === 2 && acceptLegacySchnorrTransactions))) {
-        return true;
-    }
-
-    if (!bip340 && version === 2) {
-        return true;
-    }
-
-    return false;
+    return version === 3 || (version === 2 && (acceptLegacySchnorrTransactions || !bip340));
 };
 
 export const calculateDevFund = (height: number, reward: BigNumber): Record<string, BigNumber> => {
@@ -117,11 +109,22 @@ export const calculateDevFund = (height: number, reward: BigNumber): Record<stri
         return {};
     }
 
-    for (const [wallet, percentage] of Object.entries(constants.devFund)) {
-        devFund[wallet] = reward.times(Math.round((percentage as number) * 100)).dividedBy(10000);
+    for (const [wallet, percent] of Object.entries(constants.devFund)) {
+        devFund[wallet] = reward.times(Math.round((percent as number) * 100)).dividedBy(10000);
     }
 
     return devFund;
 };
 
-export { Base58, BigNumber, ByteBuffer, isValidPeer, isLocalHost, calculateBlockTime, isNewBlockTime, calculateReward };
+export {
+    Base58,
+    BigNumber,
+    ByteBuffer,
+    ByteBufferArray,
+    isValidPeer,
+    isLocalHost,
+    calculateBlockTime,
+    isNewBlockTime,
+    calculateReward,
+    sortVotes,
+};

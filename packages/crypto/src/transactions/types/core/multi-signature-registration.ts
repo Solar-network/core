@@ -23,7 +23,7 @@ export class MultiSignatureRegistrationTransaction extends Transaction {
         return super.staticFee(feeContext);
     }
 
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         const { data } = this;
         const { min, publicKeys } = data.asset!.multiSignature!;
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(2 + publicKeys.length * 33));
@@ -38,7 +38,7 @@ export class MultiSignatureRegistrationTransaction extends Transaction {
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
 
         const multiSignature: IMultiSignatureAsset = { publicKeys: [], min: 0 };

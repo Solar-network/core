@@ -1,10 +1,10 @@
 import { Hash } from "../crypto";
-import { IKeyPair, ISerializeOptions, ITransactionData } from "../interfaces";
+import { IKeyPair, ISerialiseOptions, ITransactionData } from "../interfaces";
 import { numberToHex } from "../utils";
 import { Utils } from "./utils";
 
 export class Signer {
-    public static sign(transaction: ITransactionData, keys: IKeyPair, options?: ISerializeOptions): string {
+    public static sign(transaction: ITransactionData, keys: IKeyPair, options?: ISerialiseOptions): string {
         if (!options || (options.excludeSignature === undefined && options.excludeSecondSignature === undefined)) {
             options = { excludeSignature: true, excludeSecondSignature: true, ...options };
         }

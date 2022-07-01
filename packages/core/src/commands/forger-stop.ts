@@ -1,4 +1,4 @@
-import { Commands, Container } from "@solar-network/core-cli";
+import { Commands, Container } from "@solar-network/cli";
 import Joi from "joi";
 
 /**

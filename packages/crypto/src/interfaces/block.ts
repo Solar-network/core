@@ -9,7 +9,7 @@ export interface IBlockVerification {
 }
 
 export interface IBlock {
-    serialized: string;
+    serialised: string;
     data: IBlockData;
     transactions: ITransaction[];
     verification: IBlockVerification;
@@ -40,7 +40,7 @@ export interface IBlockData {
     generatorPublicKey: string;
 
     blockSignature?: string;
-    serialized?: string;
+    serialised?: string;
     transactions?: ITransactionData[];
     ip?: string;
     fromForger?: boolean;
@@ -63,6 +63,6 @@ export interface IBlockJson {
     generatorPublicKey: string;
 
     blockSignature?: string;
-    serialized?: string;
+    serialised?: string;
     transactions?: ITransactionJson[];
 }

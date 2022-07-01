@@ -1,5 +1,4 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { configManager } from "../../../managers";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -15,12 +14,7 @@ export abstract class HtlcClaimTransaction extends Transaction {
         return schemas.htlcClaim;
     }
 
-    public verify(): boolean {
-        const milestone = configManager.getMilestone();
-        return milestone.htlcEnabled === true && super.verify();
-    }
-
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         const { data } = this;
 
         if (!data.asset || !data.asset.claim) {
@@ -37,7 +31,7 @@ export abstract class HtlcClaimTransaction extends Transaction {
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
 
         const hashType: number = buf.readUInt8();

@@ -1,5 +1,5 @@
-import { ApplicationFactory, Commands, Container, Contracts, InputParser, Plugins } from "@solar-network/core-cli";
-import { dotenv, set } from "@solar-network/utils";
+import { ApplicationFactory, Commands, Container, Contracts, InputParser, Plugins } from "@solar-network/cli";
+import { Utils } from "@solar-network/kernel";
 import envPaths from "env-paths";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -62,10 +62,10 @@ export class CommandLineInterface {
 
         const home: string = homedir();
 
-        const config: Record<string, Primitive> = dotenv.parseFile(`${home}/.${flags.token}/.env`);
+        const config: Record<string, Primitive> = Utils.dotenv.parseFile(`${home}/.${flags.token}/.env`);
 
         for (const [key, value] of Object.entries(config)) {
-            set(process.env, key, value);
+            Utils.set(process.env, key, value);
         }
 
         // Discover commands and commands from plugins

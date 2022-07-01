@@ -1,10 +1,19 @@
 #!/usr/bin/env node
 
-const { existsSync, readdirSync, readJSONSync, statSync } = require("fs-extra");
+const { existsSync, readdirSync, readJsonSync, statSync } = require("fs-extra");
 const { dirname, join } = require("path");
+const { coerce, satisfies } = require("semver");
 
 const main = async () => {
     try {
+        const coreVersion = readJsonSync(`${__dirname}/../package.json`).version;
+        const nodeNeeded = readJsonSync(`${__dirname}/../../../package.json`).engines.node;
+
+        if (!satisfies(process.versions.node, nodeNeeded)) {
+            console.error(`Core ${coreVersion} requires Node.js v${coerce(nodeNeeded).version}+, but you have ${process.version}`);
+            process.exit(1);
+        }
+
         const { addAlias } = require("module-alias");
         const files = readdirSync(`${__dirname}/../../`).map(
             (file) => `${__dirname}/../../${file}/package.json`)
@@ -12,9 +21,18 @@ const main = async () => {
 
          for (const file of files) {
              if (file.endsWith("/package.json")) {
-                 const { name } = readJSONSync(file);
+                 let { name } = readJsonSync(file);
                  if (name.startsWith("@solar-network/")) {
                     const dir = file.substring(0, file.length - 13);
+                    addAlias(name, dir);
+                    if (name.endsWith("/logger")) {
+                        name = name.replace("/logger", "/logger-pino");
+                    } else if (name.endsWith("/pool")) {
+                        name = name.replace("/pool", "/transaction-pool");
+                    }
+                    if (!name.endsWith("/crypto") && !name.endsWith("/core")) {
+                        name = name.replace("/", "/core-");
+                    }
                     addAlias(name, dir);
                     addAlias(name.replace("@solar-network/", "@arkecosystem/"), dir);
                 }

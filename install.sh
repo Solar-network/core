@@ -33,9 +33,16 @@ echo '
 ╚══════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
 '
 DEB=$(which apt-get 2>/dev/null || :)
+GLIBC=$(ldd --version | grep ldd | sed 's/[[:blank:]]*$//;s/.*[[:blank:]]//; s/\.//g')
 
 if [[ -z $DEB ]]; then
     echo Sorry, Solar Core is only compatible with Debian-based Linux distributions
+    echo
+    exit 1
+fi
+
+if [ $GLIBC -lt 228 ]; then
+    echo Sorry, your glibc version is too old. Try updating your operating system
     echo
     exit 1
 fi
@@ -85,7 +92,7 @@ echo "$(source <(echo "echo \"$RC\""))" > "$SOLAR_DATA_PATH"/.env &&
 
 if [ ! -f ""$SOLAR_DATA_PATH"/bin/node" ]; then
     wget -qO "$SOLAR_TEMP_PATH"/n https://raw.githubusercontent.com/tj/n/master/bin/n
-    N_PREFIX="$SOLAR_DATA_PATH" /bin/bash "$SOLAR_TEMP_PATH"/n 16 >/dev/null 2>/dev/null
+    N_PREFIX="$SOLAR_DATA_PATH" /bin/bash "$SOLAR_TEMP_PATH"/n 18 >/dev/null 2>/dev/null
 fi
 
 rm -rf "$SOLAR_DATA_PATH"/.pnpm
@@ -288,11 +295,6 @@ async function addPlugin(plugin) {
 async function addPlugins() {
     const listr = new Listr();
     const plugins = [
-        {
-            package: "@alessiodf/rocket-boot",
-            command:
-                `"$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run plugin:install @alessiodf/rocket-boot --network=${network} --token="$SOLAR_CORE_TOKEN" && "$SOLAR_DATA_PATH"/bin/node "$SOLAR_CORE_PATH"/packages/core/bin/run rocket:enable --force --network=${network} --token="$SOLAR_CORE_TOKEN"`,
-        },
         {
             package: "@alessiodf/round-monitor",
             command:

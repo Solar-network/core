@@ -7,8 +7,8 @@ export class Cache<K, V> {
         return this.cache.has(key);
     }
 
-    public get(key: K): V | undefined {
-        return this.cache.get(key);
+    public get(key: K): V {
+        return this.cache.get(key)!;
     }
 
     public set(key: K, value: V): void {

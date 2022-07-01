@@ -1,7 +1,6 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
 import { Address } from "../../../identities";
-import { ISerializeOptions } from "../../../interfaces";
-import { configManager } from "../../../managers";
+import { ISerialiseOptions } from "../../../interfaces";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -17,12 +16,7 @@ export abstract class HtlcLockTransaction extends Transaction {
         return schemas.htlcLock;
     }
 
-    public verify(): boolean {
-        const milestone = configManager.getMilestone();
-        return milestone.htlcEnabled === true && super.verify();
-    }
-
-    public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
+    public serialise(options?: ISerialiseOptions): ByteBuffer | undefined {
         const { data } = this;
 
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(99));
@@ -50,7 +44,7 @@ export abstract class HtlcLockTransaction extends Transaction {
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
 
         const amount: BigNumber = BigNumber.make(buf.readBigUInt64LE().toString());

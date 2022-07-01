@@ -1,4 +1,4 @@
 export * from "./block";
-export * from "./deserializer";
+export * from "./deserialiser";
 export * from "./factory";
-export * from "./serializer";
+export * from "./serialiser";

@@ -14,13 +14,13 @@ export interface ITransaction {
     isVerified: boolean;
 
     data: ITransactionData;
-    serialized: Buffer;
+    serialised: Buffer;
     timestamp: number;
 
     setBurnedFee(height: number): void;
 
-    serialize(options?: ISerializeOptions): ByteBuffer | undefined;
-    deserialize(buf: ByteBuffer): void;
+    serialise(options?: ISerialiseOptions): ByteBuffer | undefined;
+    deserialise(buf: ByteBuffer): void;
 
     verify(options?: IVerifyOptions): boolean;
     verifySchema(strict?: boolean): ISchemaValidationResult;
@@ -37,11 +37,10 @@ export interface ITransactionAsset {
     delegate?: {
         username: string;
     };
-    votes?: string[];
-    multiSignatureLegacy?: IMultiSignatureLegacyAsset;
+    votes?: string[] | object;
     multiSignature?: IMultiSignatureAsset;
     ipfs?: string;
-    payments?: IMultiPaymentItem[];
+    transfers?: ITransferItem[];
     lock?: IHtlcLockAsset;
     claim?: IHtlcClaimAsset;
     refund?: IHtlcRefundAsset;
@@ -54,8 +53,9 @@ export interface ITransactionData {
     typeGroup?: number;
     type: number;
     timestamp: number;
-    nonce?: BigNumber;
-    senderPublicKey: string | undefined;
+    nonce: BigNumber;
+    senderPublicKey: string;
+    headerType?: number;
 
     fee: BigNumber;
     burnedFee?: BigNumber;
@@ -65,6 +65,7 @@ export interface ITransactionData {
     recipientId?: string;
 
     asset?: ITransactionAsset;
+    memo?: string;
     vendorField?: string;
 
     id?: string;
@@ -86,7 +87,7 @@ export interface ITransactionJson {
     type: number;
 
     timestamp?: number;
-    nonce?: string;
+    nonce: string;
     senderPublicKey: string;
 
     fee: string;
@@ -97,7 +98,7 @@ export interface ITransactionJson {
     recipientId?: string;
 
     asset?: ITransactionAsset;
-    vendorField?: string | undefined;
+    memo?: string | undefined;
 
     id?: string;
     signature?: string;
@@ -117,15 +118,9 @@ export interface ISchemaValidationResult<T = any> {
     errors?: ErrorObject[] | undefined;
 }
 
-export interface IMultiPaymentItem {
+export interface ITransferItem {
     amount: BigNumber;
     recipientId: string;
-}
-
-export interface IMultiSignatureLegacyAsset {
-    min: number;
-    lifetime: number;
-    keysgroup: string[];
 }
 
 export interface IMultiSignatureAsset {
@@ -155,7 +150,7 @@ export interface IHtlcLock extends IHtlcLockAsset {
     amount: BigNumber;
     recipientId: string | undefined;
     timestamp: number;
-    vendorField: string | undefined;
+    memo: string | undefined;
 }
 
 export type IHtlcLocks = Record<string, IHtlcLock>;
@@ -165,7 +160,7 @@ export interface IHtlcExpiration {
     value: number;
 }
 
-export interface IDeserializeOptions {
+export interface IDeserialiseOptions {
     acceptLegacyVersion?: boolean;
     disableVersionCheck?: boolean;
 }
@@ -174,7 +169,7 @@ export interface IVerifyOptions {
     disableVersionCheck?: boolean;
 }
 
-export interface ISerializeOptions {
+export interface ISerialiseOptions {
     acceptLegacyVersion?: boolean;
     disableVersionCheck?: boolean;
     excludeSignature?: boolean;

@@ -1,7 +1,7 @@
-import { Commands, Container, Contracts } from "@solar-network/core-cli";
+import { Commands, Container, Contracts } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import { validateMnemonic } from "bip39";
-import { writeJSONSync } from "fs-extra";
+import { writeJsonSync } from "fs-extra";
 import Joi from "joi";
 
 /**
@@ -65,7 +65,7 @@ export class Command extends Commands.Command {
                 type: "password",
                 name: "bip39",
                 message: "Please enter your delegate plain text passphrase. Referred to as BIP39",
-                validate: /* istanbul ignore next */ (value) =>
+                validate: (value) =>
                     !validateMnemonic(value) && !this.getFlag("skipValidation")
                         ? `Failed to verify the given passphrase as BIP39 compliant`
                         : true,
@@ -106,7 +106,7 @@ export class Command extends Commands.Command {
                     const delegates: Record<string, string | string[]> = require(delegatesConfig);
                     delegates.secrets = [flags.bip39];
 
-                    writeJSONSync(delegatesConfig, delegates);
+                    writeJsonSync(delegatesConfig, delegates);
                 },
             },
         ]);

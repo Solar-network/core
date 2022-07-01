@@ -6,6 +6,14 @@ export class ByteBuffer {
         this.buff = buff;
     }
 
+    public getBuffer(): Buffer {
+        return this.buff;
+    }
+
+    public getOffset(): number {
+        return this.offset;
+    }
+
     public getRemainder(): Buffer {
         return this.buff.slice(this.offset);
     }
@@ -24,6 +32,14 @@ export class ByteBuffer {
 
     public reset(): void {
         this.offset = 0;
+    }
+
+    public goTo(position: number) {
+        if (position < 0 || position > this.buff.length) {
+            throw new Error("Jump over buffer boundary: " + position + " vs " + this.buff.length);
+        }
+
+        this.offset = position;
     }
 
     public jump(length: number): void {

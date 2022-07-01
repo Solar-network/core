@@ -3,7 +3,7 @@ import { NotImplemented } from "../../errors";
 import { Address } from "../../identities";
 import {
     ISchemaValidationResult,
-    ISerializeOptions,
+    ISerialiseOptions,
     ITransaction,
     ITransactionData,
     ITransactionJson,
@@ -21,12 +21,9 @@ export abstract class Transaction implements ITransaction {
     protected static defaultStaticFee: BigNumber = BigNumber.ZERO;
 
     public isVerified: boolean = false;
-    // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
-    public data: ITransactionData;
-    // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
-    public serialized: Buffer;
-    // @ts-ignore - todo: this is public but not initialised on creation, either make it private or declare it as undefined
-    public timestamp: number;
+    public data!: ITransactionData;
+    public serialised!: Buffer;
+    public timestamp!: number;
 
     public get id(): string | undefined {
         return this.data.id;
@@ -73,15 +70,15 @@ export abstract class Transaction implements ITransaction {
         const milestone = configManager.getMilestone(height);
 
         this.data.burnedFee = BigNumber.ZERO;
-        if (milestone.burnPercentage !== undefined) {
-            const burnPercentage = parseInt(milestone.burnPercentage);
-            if (burnPercentage >= 0 && burnPercentage <= 100) {
-                this.data.burnedFee = this.data.fee.times(burnPercentage).dividedBy(100);
+        if (typeof milestone.burn === "object" && typeof milestone.burn.feePercent === "number") {
+            const feePercent = parseInt(milestone.burn.feePercent);
+            if (feePercent >= 0 && feePercent <= 100) {
+                this.data.burnedFee = this.data.fee.times(feePercent).dividedBy(100);
             }
         }
     }
 
-    public verify(options?: ISerializeOptions): boolean {
+    public verify(options?: ISerialiseOptions): boolean {
         return Verifier.verify(this.data, options);
     }
 
@@ -123,6 +120,6 @@ export abstract class Transaction implements ITransaction {
         return parts.join(" ");
     }
 
-    public abstract serialize(): ByteBuffer | undefined;
-    public abstract deserialize(buf: ByteBuffer): void;
+    public abstract serialise(): ByteBuffer | undefined;
+    public abstract deserialise(buf: ByteBuffer): void;
 }

@@ -5,8 +5,6 @@ import resolve from "@rollup/plugin-node-resolve";
 import ts from "@wessberg/rollup-plugin-ts";
 import builtinModules from "builtin-modules";
 import nodePolyfills from "rollup-plugin-node-polyfills";
-import { terser } from "rollup-plugin-terser";
-
 import pkg from "./package.json";
 
 const dependencies = Object.keys(pkg.dependencies);
@@ -55,16 +53,11 @@ const browserConfig = {
     input: "src/index.ts",
     output: [
         {
-            file: pkg.unpkg,
-            format: "esm",
-            plugins: [terser()],
-        },
-        {
             file: pkg.browser,
-            format: "esm",
+            format: "iife",
+            name: "SolarCrypto",
         },
     ],
-    external: [...Object.keys(pkg.dependencies || {})],
     plugins: [
         json(),
         resolve({ preferBuiltins: false, browser: true }),
@@ -83,35 +76,4 @@ const browserConfig = {
     ],
 };
 
-/** Universal code to be used as a standalone package */
-const umdConfig = {
-    input: "src/index.ts",
-    output: {
-        file: pkg["umd:main"],
-        format: "iife",
-        name: "ArkCrypto",
-    },
-    plugins: [
-        json(),
-        resolve({ preferBuiltins: false, browser: true }),
-        commonjs({ include: /node_modules/ }),
-        ts({
-            transpiler: "babel",
-            transpileOnly: true,
-            tsconfig: {
-                declaration: false,
-            },
-            babelConfig: {
-                presets: [
-                    [
-                        "@babel/preset-env",
-                        { loose: false, modules: false, targets: { browsers: [">0.25%", "not op_mini all"] } },
-                    ],
-                ],
-            },
-        }),
-        ...polyfillsPlugins,
-    ],
-};
-
-export default [moduleConfig, browserConfig, umdConfig];
+export default [moduleConfig, browserConfig];

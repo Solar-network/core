@@ -1,21 +1,21 @@
 import { HashAlgorithms } from "../crypto";
 import { AddressNetworkError } from "../errors";
-import { ISerializeOptions, ITransactionData } from "../interfaces";
+import { ISerialiseOptions, ITransactionData } from "../interfaces";
 import { configManager } from "../managers";
 import { isException } from "../utils";
-import { Serializer } from "./serializer";
+import { Serialiser } from "./serialiser";
 import { TransactionTypeFactory } from "./types/factory";
 
 export class Utils {
     public static toBytes(data: ITransactionData): Buffer {
-        return Serializer.serialize(TransactionTypeFactory.create(data));
+        return Serialiser.serialise(TransactionTypeFactory.create(data));
     }
 
-    public static toHash(transaction: ITransactionData, options?: ISerializeOptions): Buffer {
-        return HashAlgorithms.sha256(Serializer.getBytes(transaction, options));
+    public static toHash(transaction: ITransactionData, options?: ISerialiseOptions): Buffer {
+        return HashAlgorithms.sha256(Serialiser.getBytes(transaction, options));
     }
 
-    public static getId(transaction: ITransactionData, options: ISerializeOptions = {}): string {
+    public static getId(transaction: ITransactionData, options: ISerialiseOptions = {}): string {
         const id: string = Utils.toHash(transaction, options).toString("hex");
 
         // WORKAROUND:

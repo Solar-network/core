@@ -3,7 +3,7 @@
 P2P_GLOBAL=6001
 P2P_GLOBAL_CONN=10
 
-#Initialize p2p limiter
+#Initialise p2p limiter
 start_limit() {
 
 table=$(sudo iptables -nL P2P_LIMIT 2> /dev/null)

@@ -1,14 +1,10 @@
 import { TransactionTypeGroup } from "../../../enums";
-import {
-    MissingTransactionSignatureError,
-    TransactionSchemaError,
-    VendorFieldLengthExceededError,
-} from "../../../errors";
-import { Address, Keys } from "../../../identities";
+import { MemoLengthExceededError, MissingTransactionSignatureError, TransactionSchemaError } from "../../../errors";
+import { Keys } from "../../../identities";
 import { IKeyPair, ITransaction, ITransactionData } from "../../../interfaces";
 import { configManager } from "../../../managers/config";
 import { NetworkType } from "../../../types";
-import { BigNumber, maxVendorFieldLength } from "../../../utils";
+import { BigNumber } from "../../../utils";
 import { TransactionFactory, Utils } from "../..";
 import { Signer } from "../../signer";
 import { Verifier } from "../../verifier";
@@ -16,17 +12,15 @@ import { Verifier } from "../../verifier";
 export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBuilder>> {
     public data: ITransactionData;
 
-    protected signWithSenderAsRecipient = false;
-
-    private disableVersionCheck = false;
+    private disableVersionCheck = true;
 
     public constructor() {
         this.data = {
             id: undefined,
             typeGroup: TransactionTypeGroup.Test,
             nonce: BigNumber.ZERO,
-            vendorField: undefined,
-            version: configManager.getMilestone().bip340 ? 0x03 : 0x02,
+            memo: undefined,
+            version: 3,
         } as ITransactionData;
     }
 
@@ -70,36 +64,28 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         return this.instance();
     }
 
-    public amount(amount: string): TBuilder {
-        this.data.amount = BigNumber.make(amount);
-
-        return this.instance();
-    }
-
-    public recipientId(recipientId: string): TBuilder {
-        this.data.recipientId = recipientId;
-
-        return this.instance();
-    }
-
     public senderPublicKey(publicKey: string): TBuilder {
         this.data.senderPublicKey = publicKey;
 
         return this.instance();
     }
 
-    public vendorField(vendorField: string): TBuilder {
-        const limit: number = maxVendorFieldLength();
+    public memo(memo: string): TBuilder {
+        const limit: number = 255;
 
-        if (vendorField) {
-            if (Buffer.from(vendorField).length > limit) {
-                throw new VendorFieldLengthExceededError(limit);
+        if (memo) {
+            if (Buffer.from(memo).length > limit) {
+                throw new MemoLengthExceededError(limit);
             }
 
-            this.data.vendorField = vendorField;
+            this.data.memo = memo;
         }
 
         return this.instance();
+    }
+
+    public vendorField(memo: string): TBuilder {
+        return this.memo(memo);
     }
 
     public sign(passphrase: string): TBuilder {
@@ -150,7 +136,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         }
 
         const struct: ITransactionData = {
-            id: Utils.getId(this.data).toString(),
+            id: Utils.getId(this.data, { disableVersionCheck: this.disableVersionCheck }).toString(),
             signature: this.data.signature,
             secondSignature: this.data.secondSignature,
             version: this.data.version,
@@ -158,7 +144,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             fee: this.data.fee,
             senderPublicKey: this.data.senderPublicKey,
             network: this.data.network,
-            vendorField: this.data.vendorField,
+            memo: this.data.memo,
         } as ITransactionData;
 
         struct.typeGroup = this.data.typeGroup;
@@ -181,10 +167,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
 
     private signWithKeyPair(keys: IKeyPair): TBuilder {
         this.data.senderPublicKey = keys.publicKey;
-
-        if (this.signWithSenderAsRecipient) {
-            this.data.recipientId = Address.fromPublicKey(keys.publicKey, this.data.network);
-        }
 
         this.data.signature = Signer.sign(this.getSigningObject(), keys, {
             disableVersionCheck: this.disableVersionCheck,

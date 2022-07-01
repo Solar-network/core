@@ -1,8 +1,8 @@
-import { BlockProcessor, BlockProcessorResult } from "@solar-network/core-blockchain/dist/processor";
-import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@solar-network/core-kernel";
-import { TransactionValidator } from "@solar-network/core-state/dist/transaction-validator";
-import { Handlers } from "@solar-network/core-transactions";
-import { ColdWalletError } from "@solar-network/core-transactions/dist/errors";
+import { BlockProcessor, BlockProcessorResult } from "@solar-network/blockchain/dist/processor";
+import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@solar-network/kernel";
+import { TransactionValidator } from "@solar-network/state/dist/transaction-validator";
+import { Handlers } from "@solar-network/transactions";
+import { ColdWalletError } from "@solar-network/transactions/dist/errors";
 import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import * as EthereumTx from '@ethereumjs/tx';
 import assert from "assert";
@@ -15,6 +15,7 @@ import { ApplyTransactionAction } from "./apply";
 import {
     ApiCommunicationError,
     InvalidSignatureError,
+    MemoIncorrectError,
     TransactionAlreadyCompletedError,
     TransactionAlreadySubmittedError,
     TransactionDoesNotExistError,
@@ -25,7 +26,6 @@ import {
     TransactionNotYetConfirmedError,
     TransactionTypeNotPermittedError,
     UnknownSwapNetworkError,
-    VendorFieldIncorrectError,
     WrongChainError,
     WrongContractError,
     WrongTokenError,
@@ -45,8 +45,8 @@ export class SXPSwap {
     @Container.inject(Container.Identifiers.LogService)
     private readonly log!: Contracts.Kernel.Logger;
 
-    @Container.inject(Container.Identifiers.TransactionPoolQuery)
-    private readonly poolQuery!: Contracts.TransactionPool.Query;
+    @Container.inject(Container.Identifiers.PoolQuery)
+    private readonly poolQuery!: Contracts.Pool.Query;
 
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
@@ -106,20 +106,20 @@ export class SXPSwap {
             const swapTransactions = block.transactions.filter(
                 (transaction) => transaction.data.senderPublicKey === swapWalletPublicKey,
             );
-            const duplicateSwapVendorFields = new Set(
+            const duplicateSwapMemos = new Set(
                 swapTransactions
-                    .map((transaction) => transaction.data.vendorField)
-                    .filter((vendorField, index, array) => array.indexOf(vendorField) !== index),
+                    .map((transaction) => transaction.data.memo)
+                    .filter((memo, index, array) => array.indexOf(memo) !== index),
             );
 
-            if (duplicateSwapVendorFields.size > 0) {
-                for (const duplicateSwapVendorField of duplicateSwapVendorFields) {
-                    const vendorFieldData: string[] =
-                        typeof duplicateSwapVendorField === "string" ? duplicateSwapVendorField.split(":") : [];
-                    if (vendorFieldData.length === 2) {
-                        const [network, transactionId] = vendorFieldData;
+            if (duplicateSwapMemos.size > 0) {
+                for (const duplicateSwapMemo of duplicateSwapMemos) {
+                    const memoData: string[] =
+                        typeof duplicateSwapMemo === "string" ? duplicateSwapMemo.split(":") : [];
+                    if (memoData.length === 2) {
+                        const [network, transactionId] = memoData;
                         swapTransactions
-                            .filter((transaction) => transaction.data.vendorField === duplicateSwapVendorField)
+                            .filter((transaction) => transaction.data.memo === duplicateSwapMemo)
                             .forEach((transaction) => {
                                 self.log.warning(
                                     `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transaction.data.id} (native coin) rejected :gun:`,
@@ -162,17 +162,16 @@ export class SXPSwap {
 
             await (this as any).throwIfCannotBeApplied(transaction, sender, status);
 
-            if (data.version && data.version > 1) {
-                (this as any).verifyTransactionNonceApply(sender, transaction);
+            (this as any).verifyTransactionNonceApply(sender, transaction);
 
-                AppUtils.assert.defined<AppUtils.BigNumber>(data.nonce);
-                sender.setNonce(data.nonce);
-            } else {
-                sender.increaseNonce();
-            }
+            AppUtils.assert.defined<Utils.BigNumber>(data.nonce);
 
-            const newBalance: Utils.BigNumber = sender.getBalance().minus(data.amount).minus(data.fee);
+            sender.setNonce(data.nonce);
+
+            const newBalance: Utils.BigNumber = sender.getBalance().minus(data.amount || Utils.BigNumber.ZERO).minus(data.fee);
+
             assert(Utils.isException(transaction.data) || !newBalance.isNegative());
+
             sender.setBalance(newBalance);
         };
 
@@ -207,9 +206,9 @@ export class SXPSwap {
             return (this as any).performGenericWalletChecks(transaction, sender);
         };
 
-        (Handlers.Core.TransferTransactionHandler as any).prototype._throwIfCannotBeApplied =
-            Handlers.Core.TransferTransactionHandler.prototype.throwIfCannotBeApplied;
-        Handlers.Core.TransferTransactionHandler.prototype.throwIfCannotBeApplied = async function (
+        (Handlers.Core.LegacyTransferTransactionHandler as any).prototype._throwIfCannotBeApplied =
+            Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotBeApplied;
+        Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotBeApplied = async function (
             transaction: Interfaces.ITransaction,
             sender: Contracts.State.Wallet,
             status?: string,
@@ -219,13 +218,13 @@ export class SXPSwap {
 
             const transactionData: Interfaces.ITransactionData = transaction.data;
             if (transactionData.senderPublicKey === swapWalletPublicKey) {
-                const vendorFieldData: string[] =
-                    typeof transactionData.vendorField === "string" ? transactionData.vendorField.split(":") : [];
-                if (vendorFieldData.length !== 2) {
-                    throw new VendorFieldIncorrectError();
+                const memoData: string[] =
+                    typeof transactionData.memo === "string" ? transactionData.memo.split(":") : [];
+                if (memoData.length !== 2) {
+                    throw new MemoIncorrectError();
                 }
 
-                const [network, transactionId] = vendorFieldData;
+                const [network, transactionId] = memoData;
 
                 try {
                     if (!supportedNetworks.includes(network)) {
@@ -331,7 +330,7 @@ export class SXPSwap {
 
                     const alreadyProcessedThisSwap = await self.transactionHistoryService.findOneByCriteria({
                         senderPublicKey: swapWalletPublicKey,
-                        vendorField: transactionData.vendorField,
+                        memo: transactionData.memo,
                     });
 
                     if (alreadyProcessedThisSwap !== undefined) {
@@ -387,9 +386,9 @@ export class SXPSwap {
             }
         };
 
-        (Handlers.Core.TransferTransactionHandler as any).prototype._throwIfCannotEnterPool =
-            Handlers.Core.TransferTransactionHandler.prototype.throwIfCannotEnterPool;
-        Handlers.Core.TransferTransactionHandler.prototype.throwIfCannotEnterPool = async function (
+        (Handlers.Core.LegacyTransferTransactionHandler as any).prototype._throwIfCannotEnterPool =
+            Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotEnterPool;
+        Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotEnterPool = async function (
             transaction: Interfaces.ITransaction,
         ): Promise<void> {
             await (this as any)._throwIfCannotEnterPool(transaction);
@@ -397,17 +396,17 @@ export class SXPSwap {
 
             const transactionData: Interfaces.ITransactionData = transaction.data;
             if (transactionData.senderPublicKey === swapWalletPublicKey) {
-                const vendorFieldData: string[] =
-                    typeof transactionData.vendorField === "string" ? transactionData.vendorField.split(":") : [];
-                if (vendorFieldData.length !== 2) {
-                    throw new VendorFieldIncorrectError();
+                const memoData: string[] =
+                    typeof transactionData.memo === "string" ? transactionData.memo.split(":") : [];
+                if (memoData.length !== 2) {
+                    throw new MemoIncorrectError();
                 }
 
-                const [network, transactionId] = vendorFieldData;
+                const [network, transactionId] = memoData;
 
                 const alreadyInPool: boolean = self.poolQuery
                     .getAllBySender(swapWalletPublicKey)
-                    .wherePredicate((t) => t.data.vendorField === transactionData.vendorField)
+                    .wherePredicate((t) => t.data.memo === transactionData.memo)
                     .has();
 
                 if (alreadyInPool) {
@@ -420,10 +419,10 @@ export class SXPSwap {
         };
 
         TransactionValidator.prototype.validate = async function (transaction: Interfaces.ITransaction): Promise<void> {
-            const deserialized: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(
-                transaction.serialized,
+            const deserialised: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(
+                transaction.serialised,
             );
-            assert.strictEqual(transaction.id, deserialized.id);
+            assert.strictEqual(transaction.id, deserialised.id);
             const handler = await (this as any).handlerRegistry.getActivatedHandlerForData(transaction.data);
             await handler.apply(transaction, "validate");
         };

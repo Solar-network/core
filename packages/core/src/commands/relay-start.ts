@@ -1,4 +1,4 @@
-import { Commands, Container, Contracts, Utils } from "@solar-network/core-cli";
+import { Commands, Container, Contracts, Utils } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 import { resolve } from "path";
@@ -56,7 +56,7 @@ export class Command extends Commands.Command {
 
         this.actions.abortRunningProcess(`${flags.token}-core`);
 
-        await this.actions.daemonizeProcess(
+        await this.actions.daemoniseProcess(
             {
                 name: `${flags.token}-relay`,
                 script: resolve(__dirname, "../../bin/run"),

@@ -1,4 +1,5 @@
-import { Commands, Container, Services } from "@solar-network/core-cli";
+import { Commands, Container, Services } from "@solar-network/cli";
+import { Utils } from "@solar-network/kernel";
 import Joi from "joi";
 
 /**
@@ -62,6 +63,10 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
+        if (Utils.isInsideCoreDirectory()) {
+            this.components.fatal("You can't reinstall while inside the Core directory or one of its subdirectories");
+        }
+
         if (this.getFlag("force")) {
             return this.performInstall();
         }

@@ -1,5 +1,5 @@
-import { Commands, Container, Contracts } from "@solar-network/core-cli";
-import { Utils } from "@solar-network/core-kernel";
+import { Commands, Container, Contracts } from "@solar-network/cli";
+import { Utils } from "@solar-network/kernel";
 import Joi from "joi";
 
 /**
@@ -57,6 +57,10 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
+        if (Utils.isInsideCoreDirectory()) {
+            this.components.fatal("You can't update while inside the Core directory or one of its subdirectories");
+        }
+
         const hasNewVersion: boolean = await this.updater.check();
 
         if (hasNewVersion) {

@@ -1,5 +1,4 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { configManager } from "../../../managers";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -15,12 +14,7 @@ export abstract class HtlcRefundTransaction extends Transaction {
         return schemas.htlcRefund;
     }
 
-    public verify(): boolean {
-        const milestone = configManager.getMilestone();
-        return milestone.htlcEnabled === true && super.verify();
-    }
-
-    public serialize(): ByteBuffer | undefined {
+    public serialise(): ByteBuffer | undefined {
         const { data } = this;
 
         const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(32));
@@ -32,7 +26,7 @@ export abstract class HtlcRefundTransaction extends Transaction {
         return buff;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
 
         const lockTransactionId: string = buf.readBuffer(32).toString("hex");

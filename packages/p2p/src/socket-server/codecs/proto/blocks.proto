@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package blocks;
+
+message PostBlockRequest {
+    bytes block = 1;
+    shared.Headers headers = 2;
+}
+
+message PostBlockResponse {
+    bool status = 1;
+    uint32 height = 2;
+}
+
+message GetBlocksRequest {
+    uint32 lastBlockHeight = 1;
+    uint32 blockLimit = 2;
+    bool headersOnly = 3;
+    bool serialised = 4;
+    shared.Headers headers = 5;
+}
+
+message GetBlocksResponse {
+    message BlockHeader {
+        string id = 1;
+        uint32 version = 3;
+        uint32 timestamp = 4;
+        string previousBlock = 5;
+        uint32 height = 7;
+        uint32 numberOfTransactions = 8;
+        string totalAmount = 9; // bignumber in core
+        string totalFee = 10; // bignumber in core
+        string reward = 11; // bignumber in core
+        uint32 payloadLength = 12;
+        string payloadHash = 13;
+        string generatorPublicKey = 14;
+        string blockSignature = 15;
+        bytes transactions = 16; // custom ser/deser instead of repeated string
+    }
+
+    bytes blocks = 1; // custom ser/deser instead of repeated BlockHeader
+}

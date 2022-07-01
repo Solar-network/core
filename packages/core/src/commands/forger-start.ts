@@ -1,4 +1,4 @@
-import { Commands, Container, Contracts, Utils } from "@solar-network/core-cli";
+import { Commands, Container, Contracts, Utils } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 import { resolve } from "path";
@@ -61,7 +61,7 @@ export class Command extends Commands.Command {
 
         checkForPassphrase(this.app.getCorePath("config"));
 
-        await this.actions.daemonizeProcess(
+        await this.actions.daemoniseProcess(
             {
                 name: `${flags.token}-forger`,
                 script: resolve(__dirname, "../../bin/run"),

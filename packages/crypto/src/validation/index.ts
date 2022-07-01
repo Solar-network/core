@@ -13,6 +13,60 @@ export class Validator {
 
     private constructor(options: Record<string, any>) {
         this.ajv = this.instantiateAjv(options);
+
+        const getFraction = (number: number): number => {
+            let fraction = 0;
+            if (isNaN(number)) return fraction;
+
+            if (typeof number !== "number") {
+                number = Number(number);
+            }
+
+            const decimal = number.toString().split(".");
+            if (decimal.length === 2) {
+                fraction += decimal[1].length;
+            }
+
+            return fraction;
+        };
+
+        const sumOfVotesEquals100 = (schema: boolean, test: object): boolean => {
+            let total = 0;
+
+            for (const value of Object.values(test)) {
+                total += +value * 100;
+            }
+
+            return total === 10000 || Object.keys(test).length === 0;
+        };
+
+        const validateMultiples = (schema: number, test: number): boolean => {
+            if (schema == 0 || !(typeof test == "number" && isFinite(test))) {
+                return false;
+            }
+
+            const testDecimals = getFraction(test);
+            const schemaDecimals = getFraction(schema);
+
+            const max = Math.max(testDecimals, schemaDecimals);
+            const multiplier = Math.pow(10, max);
+
+            return Math.round(test * multiplier) % Math.round(schema * multiplier) === 0;
+        };
+
+        this.ajv.removeKeyword("multipleOf");
+        this.ajv.addKeyword("multipleOf", {
+            async: false,
+            errors: true,
+            type: "number",
+            validate: validateMultiples,
+        });
+        this.ajv.addKeyword("sumOfVotesEquals100", {
+            async: false,
+            errors: true,
+            type: "object",
+            validate: sumOfVotesEquals100,
+        });
     }
 
     public static make(options: Record<string, any> = {}): Validator {

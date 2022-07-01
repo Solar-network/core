@@ -1,6 +1,6 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
 import { Address } from "../../../identities";
-import { ISerializeOptions } from "../../../interfaces";
+import { ISerialiseOptions, ITransferItem } from "../../../interfaces";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -16,29 +16,40 @@ export abstract class TransferTransaction extends Transaction {
         return schemas.transfer;
     }
 
-    public serialize(options?: ISerializeOptions): ByteBuffer | undefined {
+    public serialise(options: ISerialiseOptions = {}): ByteBuffer | undefined {
         const { data } = this;
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(33));
-        buff.writeBigUInt64LE(data.amount.toBigInt());
-        buff.writeUInt32LE(data.expiration || 0);
 
-        if (data.recipientId) {
-            const { addressBuffer, addressError } = Address.toBuffer(data.recipientId);
+        if (data.asset && data.asset.transfers) {
+            const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(2 + data.asset.transfers.length * 29));
+            buff.writeUInt16LE(data.asset.transfers.length);
 
-            if (options) {
-                options.addressError = addressError;
+            for (const transfer of data.asset.transfers) {
+                buff.writeBigUInt64LE(transfer.amount.toBigInt());
+
+                const { addressBuffer, addressError } = Address.toBuffer(transfer.recipientId);
+                options.addressError = addressError || options.addressError;
+
+                buff.writeBuffer(addressBuffer);
             }
 
-            buff.writeBuffer(addressBuffer);
+            return buff;
         }
 
-        return buff;
+        return undefined;
     }
 
-    public deserialize(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer): void {
         const { data } = this;
-        data.amount = BigNumber.make(buf.readBigUInt64LE().toString());
-        data.expiration = buf.readUInt32LE();
-        data.recipientId = Address.fromBuffer(buf.readBuffer(21));
+        const transfers: ITransferItem[] = [];
+        const total: number = buf.readUInt16LE();
+
+        for (let j = 0; j < total; j++) {
+            transfers.push({
+                amount: BigNumber.make(buf.readBigUInt64LE().toString()),
+                recipientId: Address.fromBuffer(buf.readBuffer(21)),
+            });
+        }
+
+        data.asset = { transfers };
     }
 }
