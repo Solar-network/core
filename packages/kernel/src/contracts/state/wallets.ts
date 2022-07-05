@@ -127,7 +127,21 @@ export interface Wallet {
      * @returns {any}
      * @memberof Wallet
      */
-    getLastStateHistory(key: string): any;
+    getCurrentStateHistory(key: string): any;
+
+    /**
+     * @param {string} key
+     * @returns {any}
+     * @memberof Wallet
+     */
+    getPreviousStateHistory(key: string): any;
+
+    /**
+     * @param {string} key
+     * @returns {any}
+     * @memberof Wallet
+     */
+    getStateHistory(key: string): any;
 
     /**
      * @param {Record<string, any[]>} stateHistory
@@ -158,7 +172,7 @@ export interface Wallet {
      * @param {string} key
      * @memberof Wallet
      */
-    removeLastStateHistory(key: string): void;
+    removeCurrentStateHistory(key: string): void;
 
     /**
      * @param {string} delegate

@@ -101,7 +101,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
                     .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                     .getLastBlock();
 
-                const { height } = wallet.getLastStateHistory("delegateStatus");
+                const { height } = wallet.getCurrentStateHistory("delegateStatus");
                 const { blocksToRevokeDelegateResignation } = Managers.configManager.getMilestone();
                 if (lastBlock.data.height - height < blocksToRevokeDelegateResignation) {
                     throw new NotEnoughTimeSinceResignationError(
@@ -177,8 +177,8 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
 
         const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
-        senderWallet.removeLastStateHistory("delegateStatus");
-        const { type } = senderWallet.getLastStateHistory("delegateStatus");
+        senderWallet.removeCurrentStateHistory("delegateStatus");
+        const { type } = senderWallet.getCurrentStateHistory("delegateStatus");
 
         if (type === Enums.DelegateStatus.NotResigned) {
             senderWallet.forgetAttribute("delegate.resigned");

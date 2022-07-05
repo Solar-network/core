@@ -209,8 +209,8 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
         const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
-        sender.removeLastStateHistory("votes");
-        const previousVotes = sender.getLastStateHistory("votes");
+        sender.removeCurrentStateHistory("votes");
+        const previousVotes = sender.getCurrentStateHistory("votes");
 
         Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
         sender.setAttribute("votes", previousVotes);

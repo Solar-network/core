@@ -18,7 +18,7 @@ export class Wallet implements Contracts.State.Wallet {
         this.initialiseStateHistory("votes");
 
         if (!this.hasAttribute("votes")) {
-            this.setAttribute("votes", this.getLastStateHistory("votes"));
+            this.setAttribute("votes", this.getCurrentStateHistory("votes"));
         }
     }
 
@@ -206,8 +206,24 @@ export class Wallet implements Contracts.State.Wallet {
      * @returns {any}
      * @memberof Wallet
      */
-    public getLastStateHistory(key: string): any {
+    public getCurrentStateHistory(key: string): any {
         return this.stateHistory[key].at(-1);
+    }
+
+    /**
+     * @returns {any}
+     * @memberof Wallet
+     */
+    public getPreviousStateHistory(key: string): any {
+        return this.stateHistory[key].at(-2) || {};
+    }
+
+    /**
+     * @returns {any}
+     * @memberof Wallet
+     */
+    public getStateHistory(key: string): any {
+        return this.stateHistory[key];
     }
 
     public setAllStateHistory(stateHistory: Record<string, any[]>): void {
@@ -226,7 +242,7 @@ export class Wallet implements Contracts.State.Wallet {
         this.stateHistory[key].push(value);
     }
 
-    public removeLastStateHistory(key: string): void {
+    public removeCurrentStateHistory(key: string): void {
         this.stateHistory[key].pop();
     }
 
