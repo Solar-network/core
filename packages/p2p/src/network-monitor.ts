@@ -3,7 +3,7 @@ import { Container, Contracts, Enums, Providers, Services, Utils } from "@solar-
 import delay from "delay";
 import { readJsonSync } from "fs-extra";
 import prettyMs from "pretty-ms";
-import { gt, lt, satisfies } from "semver";
+import { gt, lt } from "semver";
 
 import { NetworkState } from "./network-state";
 import { Peer } from "./peer";
@@ -667,15 +667,13 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     public async downloadTransactions(): Promise<Buffer[]> {
         const transactions: Set<String> = new Set();
 
-        const peersCompatible: Contracts.P2P.Peer[] = this.repository
-            .getPeers()
-            .filter((peer) => !satisfies(peer.version!, "<=3.3", { includePrerelease: true }));
+        const peersAll: Contracts.P2P.Peer[] = this.repository.getPeers();
 
         const peersThatWouldThrottle: boolean[] = await Promise.all(
-            peersCompatible.map((peer) => this.communicator.wouldThrottleOnFetchingTransactions(peer)),
+            peersAll.map((peer) => this.communicator.wouldThrottleOnFetchingTransactions(peer)),
         );
 
-        const peersToTry = Utils.shuffle(peersCompatible)
+        const peersToTry = Utils.shuffle(peersAll)
             .filter((peer, index) => !peersThatWouldThrottle[index])
             .slice(0, 5);
 
