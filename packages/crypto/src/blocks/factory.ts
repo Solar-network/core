@@ -77,7 +77,7 @@ export class BlockFactory {
         }
 
         const block: IBlock = new Block(deserialised);
-        block.serialised = serialised.toString("hex");
+        block.serialised = Serialiser.serialiseWithTransactions(block.data).toString("hex");
 
         return block;
     }
