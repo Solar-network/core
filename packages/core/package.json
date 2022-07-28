@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/core",
-    "version": "4.0.2-next.1",
+    "version": "4.0.2",
     "description": "Core of the Solar Network Blockchain",
     "license": "CC-BY-ND-4.0",
     "contributors": [
