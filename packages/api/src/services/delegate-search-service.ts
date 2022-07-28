@@ -19,6 +19,10 @@ export class DelegateSearchService {
     private readonly paginationService!: Services.Search.PaginationService;
 
     public getDelegate(walletAddress: string): DelegateResource | undefined {
+        if (!this.walletRepository.hasByAddress(walletAddress)) {
+            return undefined;
+        }
+
         const wallet = this.walletRepository.findByAddress(walletAddress);
         const supply: string = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
         const ourKeys: string[] = AppUtils.getForgerDelegates();

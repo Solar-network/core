@@ -264,7 +264,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
 
     private addToList(hasQuorum: boolean, peer: Contracts.P2P.Peer, monitor: Contracts.P2P.NetworkMonitor): void {
         this.quorumDetails.delegates[hasQuorum ? "hasQuorum" : "noQuorum"].push(
-            ...peer.publicKeys.map((publicKey) => monitor.getDelegateName(publicKey)),
+            ...peer.publicKeys.map((publicKey) => monitor.getDelegateName(publicKey)!),
         );
     }
 

@@ -56,12 +56,14 @@ export class InternalController extends Controller {
         const timestamp: number = Crypto.Slots.getTime();
         const forgingInfo = Utils.forgingInfoCalculator.calculateForgingInfo(timestamp, height, blockTimeLookup);
 
-        const { reward } = delegates[forgingInfo.currentForger]
-            ? await this.roundState.getRewardForBlockInRound(
-                  height,
-                  this.walletRepository.findByPublicKey(delegates[forgingInfo.currentForger].publicKey!),
-              )
-            : Managers.configManager.getMilestone();
+        const { reward } =
+            delegates[forgingInfo.currentForger] &&
+            this.walletRepository.hasByPublicKey(delegates[forgingInfo.currentForger].publicKey!)
+                ? await this.roundState.getRewardForBlockInRound(
+                      height,
+                      this.walletRepository.findByPublicKey(delegates[forgingInfo.currentForger].publicKey!),
+                  )
+                : Managers.configManager.getMilestone();
 
         return {
             allDelegates,

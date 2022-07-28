@@ -97,7 +97,10 @@ export class CheckLater implements Action {
                             .getLastBlock();
                         blocks = blocks.filter((block) => block.height > lastBlock.data.height);
                         if (blocks.length) {
-                            if (blocks.length === 1) {
+                            if (
+                                blocks.length === 1 &&
+                                this.walletRepository.hasByPublicKey(blocks[0].generatorPublicKey)
+                            ) {
                                 const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
                                     blocks[0].generatorPublicKey,
                                 );

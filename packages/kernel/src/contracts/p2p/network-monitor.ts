@@ -32,7 +32,7 @@ export interface NetworkMonitor {
     }): Promise<void>;
     discoverPeers(pingAll?: boolean, addAll?: boolean, silent?: boolean): Promise<boolean>;
     getAllDelegates(): Promise<string[]>;
-    getDelegateName(publicKey: string): string;
+    getDelegateName(publicKey: string): string | undefined;
     getNetworkHeight(): number;
     getNetworkState(log?: boolean): Promise<NetworkState>;
     refreshPeersAfterFork(): Promise<void>;

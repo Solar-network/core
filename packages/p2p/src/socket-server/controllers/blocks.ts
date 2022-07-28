@@ -78,6 +78,10 @@ export class BlocksController extends Controller {
             transactions: deserialised.transactions.map((tx) => tx.data),
         };
 
+        if (!this.walletRepository.hasByPublicKey(block.generatorPublicKey)) {
+            return { status: false, height: this.blockchain.getLastHeight() };
+        }
+
         const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
 
         let generator: string;

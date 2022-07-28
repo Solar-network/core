@@ -456,8 +456,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         ).map((wallet) => wallet.getAttribute("delegate.username"));
     }
 
-    public getDelegateName(publicKey: string): string {
-        return this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate.username");
+    public getDelegateName(publicKey: string): string | undefined {
+        if (this.walletRepository.hasByPublicKey(publicKey)) {
+            return this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate.username");
+        }
+        return undefined;
     }
 
     public async checkForFork(): Promise<number> {

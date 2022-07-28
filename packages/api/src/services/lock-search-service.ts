@@ -87,6 +87,10 @@ export class LockSearchService {
     }
 
     private *getWalletLocks(walletAddress: string, ...criterias: LockCriteria[]): Iterable<LockResource> {
+        if (!this.walletRepository.hasByAddress(walletAddress)) {
+            return undefined;
+        }
+
         const wallet = this.walletRepository.findByAddress(walletAddress);
         const locksAttribute = wallet.getAttribute<Interfaces.IHtlcLocks>("htlc.locks", {});
 
