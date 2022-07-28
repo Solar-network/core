@@ -102,7 +102,7 @@ export class WalletSyncService implements Contracts.Kernel.EventListener {
             }
 
             try {
-                this.logger.debug(`Synchronizing wallets table at height ${blockHeight.toLocaleString()}`);
+                this.logger.debug(`Synchronising wallets table at height ${blockHeight.toLocaleString()}`);
 
                 const updatedWallets = Array.from(this.updatedAddresses.values()).map((address) =>
                     this.walletRepository.findByAddress(address),

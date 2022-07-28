@@ -52,14 +52,14 @@ export class CodecPlugin {
                         request.response.output.payload = Buffer.from(errorMessage, "utf-8");
                     }
                 } catch (e) {
-                    request.response.statusCode = 500; // Internal server error (serializing failed)
+                    request.response.statusCode = 500; // Internal server error (serialising failed)
                     request.response.output = {
                         statusCode: 500,
                         payload: Buffer.from("Internal server error"),
                         headers: {},
                     };
 
-                    this.logger.error(`Response serializing failed: ${e}`);
+                    this.logger.error(`Response serialising failed: ${e}`);
                 }
                 return h.continue;
             },
