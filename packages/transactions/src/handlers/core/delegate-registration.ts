@@ -68,10 +68,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             });
 
             wallet.initialiseStateHistory("delegateStatus");
-            wallet.addStateHistory("delegateStatus", {
-                height: transaction.blockHeight,
-                type: Enums.DelegateStatus.NotResigned,
-            });
+            wallet.addStateHistory("delegateStatus", Enums.DelegateStatus.NotResigned, transaction);
             this.walletRepository.index(wallet);
         }
 
@@ -197,10 +194,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         });
 
         sender.initialiseStateHistory("delegateStatus");
-        sender.addStateHistory("delegateStatus", {
-            height: transaction.data.blockHeight,
-            type: Enums.DelegateStatus.NotResigned,
-        });
+        sender.addStateHistory("delegateStatus", Enums.DelegateStatus.NotResigned, transaction.data);
 
         this.walletRepository.index(sender);
     }

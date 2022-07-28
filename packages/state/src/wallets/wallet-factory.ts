@@ -7,6 +7,6 @@ export const walletFactory = (
     events?: Contracts.Kernel.EventDispatcher,
 ) => {
     return (address: string): Wallet => {
-        return new Wallet(address, new Services.Attributes.AttributeMap(attributeSet), events);
+        return new Wallet(address, new Services.Attributes.AttributeMap(attributeSet), false, events);
     };
 };
