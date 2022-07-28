@@ -56,7 +56,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
                 wallet.forgetAttribute("delegate.resigned");
             }
 
-            wallet.addStateHistory("delegateStatus", { height: transaction.blockHeight, type });
+            wallet.addStateHistory("delegateStatus", type, transaction);
             this.walletRepository.index(wallet);
         }
     }
@@ -101,7 +101,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
                     .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                     .getLastBlock();
 
-                const { height } = wallet.getCurrentStateHistory("delegateStatus");
+                const { height } = wallet.getCurrentStateHistory("delegateStatus").transaction;
                 const { blocksToRevokeDelegateResignation } = Managers.configManager.getMilestone();
                 if (lastBlock.data.height - height < blocksToRevokeDelegateResignation) {
                     throw new NotEnoughTimeSinceResignationError(
@@ -166,7 +166,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
             senderWallet.setAttribute("delegate.resigned", type);
         }
 
-        senderWallet.addStateHistory("delegateStatus", { height: transaction.data.blockHeight, type });
+        senderWallet.addStateHistory("delegateStatus", type, transaction.data);
         this.walletRepository.index(senderWallet);
     }
 
@@ -178,7 +178,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
         const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
         senderWallet.removeCurrentStateHistory("delegateStatus");
-        const { type } = senderWallet.getCurrentStateHistory("delegateStatus");
+        const type = senderWallet.getCurrentStateHistory("delegateStatus").value;
 
         if (type === Enums.DelegateStatus.NotResigned) {
             senderWallet.forgetAttribute("delegate.resigned");

@@ -71,7 +71,7 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
                 }
             }
 
-            wallet.changeVotes(walletVote);
+            wallet.changeVotes(walletVote, transaction);
         }
     }
 
@@ -197,7 +197,7 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
         }
 
         Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
-        sender.changeVotes(walletVote);
+        sender.changeVotes(walletVote, transaction.data);
         sender.updateVoteBalances();
         Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
     }
@@ -210,7 +210,7 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
         const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
         sender.removeCurrentStateHistory("votes");
-        const previousVotes = sender.getCurrentStateHistory("votes");
+        const previousVotes = sender.getCurrentStateHistory("votes").value;
 
         Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
         sender.setAttribute("votes", previousVotes);

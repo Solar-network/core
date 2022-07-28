@@ -1,4 +1,4 @@
-import { Blocks, Crypto, Identities, Interfaces, Managers, Utils } from "@solar-network/crypto";
+import { Blocks, Crypto, Interfaces, Managers, Utils } from "@solar-network/crypto";
 import { DatabaseService } from "@solar-network/database";
 import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/kernel";
 import assert from "assert";
@@ -88,23 +88,12 @@ export class RoundState implements Contracts.State.RoundState {
 
         // When called during applyRound we already know the delegates, so we don't have to query the database.
         if (!delegates) {
-            delegates = (await this.databaseService.getRound(roundInfo.round)).map(({ publicKey, balance }) => {
-                // ! find wallet by public key and clone it
-                const wallet = this.walletRepository.createWallet(Identities.Address.fromPublicKey(publicKey));
-                wallet.setPublicKey(publicKey);
+            delegates = (await this.databaseService.getRound(roundInfo.round)).map(({ balance, publicKey }) => {
+                const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(publicKey).clone();
+                delegate.setAttribute("delegate.round", roundInfo!.round);
+                delegate.setAttribute("delegate.voteBalance", Utils.BigNumber.make(balance));
 
-                const existingWallet = this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate");
-                const delegate = {
-                    voteBalance: Utils.BigNumber.make(balance),
-                    username: existingWallet.username,
-                    round: roundInfo!.round,
-                    rank: existingWallet.rank,
-                };
-                AppUtils.assert.defined(delegate.username);
-
-                wallet.setAttribute("delegate", delegate);
-
-                return wallet;
+                return delegate;
             });
         }
 

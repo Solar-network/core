@@ -164,9 +164,10 @@ export interface Wallet {
     /**
      * @param {string} key
      * @param {any} value
+     * @param {Interfaces.ITransactionData | undefined} transaction
      * @memberof Wallet
      */
-    addStateHistory(key: string, value: any): void;
+    addStateHistory(key: string, value?: any, transaction?: Interfaces.ITransactionData | undefined): void;
 
     /**
      * @param {string} key
@@ -201,9 +202,10 @@ export interface Wallet {
 
     /**
      * @param {object} value
+     * @param {Interfaces.ITransactionData} transaction
      * @memberof Wallet
      */
-    changeVotes(value: object): void;
+    changeVotes(value: object, transaction: Interfaces.ITransactionData): void;
 
     updateVoteBalances(): void;
 

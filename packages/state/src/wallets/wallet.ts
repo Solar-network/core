@@ -1,4 +1,4 @@
-import { Utils } from "@solar-network/crypto";
+import { Interfaces, Utils } from "@solar-network/crypto";
 import { Contracts, Services, Utils as AppUtils } from "@solar-network/kernel";
 
 import { WalletEvent } from "./wallet-event";
@@ -13,12 +13,16 @@ export class Wallet implements Contracts.State.Wallet {
     public constructor(
         protected readonly address: string,
         protected readonly attributes: Services.Attributes.AttributeMap,
+        protected readonly isClone: boolean,
         protected readonly events?: Contracts.Kernel.EventDispatcher,
     ) {
-        this.initialiseStateHistory("votes");
+        if (!this.getStateHistory("votes") && !isClone) {
+            this.initialiseStateHistory("votes");
+            this.addStateHistory("votes", {});
+        }
 
-        if (!this.hasAttribute("votes")) {
-            this.setAttribute("votes", this.getCurrentStateHistory("votes"));
+        if (!this.hasAttribute("votes") && !isClone) {
+            this.setAttribute("votes", this.getCurrentStateHistory("votes").value);
         }
     }
 
@@ -215,7 +219,7 @@ export class Wallet implements Contracts.State.Wallet {
      * @memberof Wallet
      */
     public getPreviousStateHistory(key: string): any {
-        return this.stateHistory[key].at(-2) || {};
+        return this.stateHistory[key].at(-2) || { value: {} };
     }
 
     /**
@@ -231,19 +235,24 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     public initialiseStateHistory(key: string): void {
-        this.stateHistory[key] = [{}];
+        this.stateHistory[key] = [];
     }
 
     public forgetStateHistory(key: string): void {
         delete this.stateHistory[key];
     }
 
-    public addStateHistory(key: string, value: any): void {
-        this.stateHistory[key].push(value);
+    public addStateHistory(key: string, value?: any, transaction?: Interfaces.ITransactionData | undefined): void {
+        this.stateHistory[key].push({
+            value,
+            transaction: transaction ? { height: transaction.blockHeight, id: transaction.id } : undefined,
+        });
     }
 
     public removeCurrentStateHistory(key: string): void {
-        this.stateHistory[key].pop();
+        if (this.stateHistory[key].length > 1) {
+            this.stateHistory[key].pop();
+        }
     }
 
     /**
@@ -288,9 +297,9 @@ export class Wallet implements Contracts.State.Wallet {
      * @param {object} value
      * @memberof Wallet
      */
-    public changeVotes(value: Record<string, number>): void {
+    public changeVotes(value: Record<string, number>, transaction: Interfaces.ITransactionData): void {
         const sortedVotes: Record<string, number> = Utils.sortVotes(value);
-        this.addStateHistory("votes", sortedVotes);
+        this.addStateHistory("votes", sortedVotes, transaction);
         this.setAttribute("votes", sortedVotes);
     }
 
@@ -332,7 +341,7 @@ export class Wallet implements Contracts.State.Wallet {
      * @memberof Wallet
      */
     public clone(): Contracts.State.Wallet {
-        const cloned = new Wallet(this.address, this.attributes.clone());
+        const cloned = new Wallet(this.address, this.attributes.clone(), true);
         cloned.publicKey = this.publicKey;
         cloned.balance = this.balance;
         cloned.nonce = this.nonce;
