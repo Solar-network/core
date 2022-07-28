@@ -1,6 +1,6 @@
 import { transactions } from "./proto/protos";
 
-// actual max transactions is enforced by schema but we set a hard limit for deserializing (way higher than in schema)
+// actual max transactions is enforced by schema but we set a hard limit for deserialising (way higher than in schema)
 const hardLimitNumberOfTransactions = 1000;
 
 const serialiseTransactions = (
