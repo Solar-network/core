@@ -43,7 +43,7 @@ export class VoteTransactionHandler extends TransactionHandler {
 
             const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
 
-            wallet.changeVotes(transaction.asset.votes);
+            wallet.changeVotes(transaction.asset.votes, transaction);
         }
     }
 
@@ -64,7 +64,7 @@ export class VoteTransactionHandler extends TransactionHandler {
             throw new VotedForTooManyDelegatesError(activeDelegates);
         }
 
-        if (Utils.isEqual(transaction.data.asset.votes, wallet.getLastStateHistory("votes"))) {
+        if (Utils.isEqual(transaction.data.asset.votes, wallet.getCurrentStateHistory("votes").value)) {
             if (Object.keys(transaction.data.asset.votes).length === 0) {
                 throw new NoVoteError();
             }
@@ -122,7 +122,7 @@ export class VoteTransactionHandler extends TransactionHandler {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
         Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
-        sender.changeVotes(transaction.data.asset?.votes);
+        sender.changeVotes(transaction.data.asset?.votes, transaction.data);
         sender.updateVoteBalances();
         Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
     }
@@ -134,8 +134,8 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
-        sender.removeLastStateHistory("votes");
-        const previousVotes = sender.getLastStateHistory("votes");
+        sender.removeCurrentStateHistory("votes");
+        const previousVotes = sender.getCurrentStateHistory("votes").value;
 
         Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
         sender.setAttribute("votes", previousVotes);

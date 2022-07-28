@@ -52,11 +52,11 @@
         "legacyTransfer": true,
         "legacyVote": true,
         "p2p": {
-            "minimumVersions": [">=3.3.0"]
+            "minimumVersions": [">=4.0.0"]
         },
         "transfer": {
             "maximum": 256,
-            "minimum": 2
+            "minimum": 1
         },
         "reward": 0
     },
@@ -139,12 +139,6 @@
         "acceptLegacySchnorrTransactions": false,
         "blocksToRevokeDelegateResignation": 106,
         "delegateResignationTypeAsset": true,
-        "legacyVote": false,
-        "p2p": {
-            "minimumVersions": [">=4.0.0"]
-        },
-        "transfer": {
-            "minimum": 1
-        }
+        "legacyVote": false
     }
 ]

@@ -127,7 +127,21 @@ export interface Wallet {
      * @returns {any}
      * @memberof Wallet
      */
-    getLastStateHistory(key: string): any;
+    getCurrentStateHistory(key: string): any;
+
+    /**
+     * @param {string} key
+     * @returns {any}
+     * @memberof Wallet
+     */
+    getPreviousStateHistory(key: string): any;
+
+    /**
+     * @param {string} key
+     * @returns {any}
+     * @memberof Wallet
+     */
+    getStateHistory(key: string): any;
 
     /**
      * @param {Record<string, any[]>} stateHistory
@@ -150,15 +164,16 @@ export interface Wallet {
     /**
      * @param {string} key
      * @param {any} value
+     * @param {Interfaces.ITransactionData | undefined} transaction
      * @memberof Wallet
      */
-    addStateHistory(key: string, value: any): void;
+    addStateHistory(key: string, value?: any, transaction?: Interfaces.ITransactionData | undefined): void;
 
     /**
      * @param {string} key
      * @memberof Wallet
      */
-    removeLastStateHistory(key: string): void;
+    removeCurrentStateHistory(key: string): void;
 
     /**
      * @param {string} delegate
@@ -187,9 +202,10 @@ export interface Wallet {
 
     /**
      * @param {object} value
+     * @param {Interfaces.ITransactionData} transaction
      * @memberof Wallet
      */
-    changeVotes(value: object): void;
+    changeVotes(value: object, transaction: Interfaces.ITransactionData): void;
 
     updateVoteBalances(): void;
 
