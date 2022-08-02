@@ -88,9 +88,21 @@ export class VoteTransactionHandler extends TransactionHandler {
     public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
+        const wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const previousVotes = wallet
+            .getStateHistory("votes")
+            .filter(
+                (state) =>
+                    (!state.transaction ||
+                        (state.transaction && state.transaction.height <= transaction.data.blockHeight!)) &&
+                    Utils.isNotEqual(transaction.data.asset?.votes, state.value),
+            )
+            .reverse()[0].value;
         emitter.dispatch(AppEnums.VoteEvent.Vote, {
-            delegates: transaction.data.asset?.votes,
+            votes: transaction.data.asset?.votes,
+            previousVotes,
             transaction: transaction.data,
+            wallet
         });
     }
 
@@ -117,14 +129,16 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         Utils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
-        sender.changeVotes(transaction.data.asset?.votes, transaction.data);
-        sender.updateVoteBalances();
-        Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
+        Utils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
+        senderWallet.changeVotes(transaction.data.asset?.votes, transaction.data);
+        senderWallet.updateVoteBalances();
+        Utils.increaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {

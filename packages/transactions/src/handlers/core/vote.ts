@@ -135,19 +135,27 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
     public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
-
-        for (let vote of transaction.data.asset.votes) {
-            const delegateVote: string = vote.slice(1);
+        let previousVote!: string;
+        let vote!: string;
+        for (let voteAsset of transaction.data.asset.votes) {
+            const delegateVote: string = voteAsset.slice(1);
             if (delegateVote.length === 66) {
                 const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegateVote);
-                vote = vote[0] + Object.keys(delegateWallet.getAttribute("delegate.username"))[0];
+                voteAsset = voteAsset[0] + Object.keys(delegateWallet.getAttribute("delegate.username"))[0];
             }
 
-            emitter.dispatch(vote.startsWith("+") ? AppEnums.VoteEvent.Vote : AppEnums.VoteEvent.Unvote, {
-                delegate: vote,
-                transaction: transaction.data,
-            });
+            if (voteAsset.startsWith("-")) {
+                previousVote = voteAsset.slice(1);
+            } else {
+                vote = voteAsset.slice(1);
+            }
         }
+
+        emitter.dispatch(AppEnums.VoteEvent.Vote, {
+            vote,
+            previousVote,
+            transaction: transaction.data,
+        });
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
@@ -173,7 +181,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
         Utils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
@@ -196,10 +206,10 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
             }
         }
 
-        Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
-        sender.changeVotes(walletVote, transaction.data);
-        sender.updateVoteBalances();
-        Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
+        Utils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
+        senderWallet.changeVotes(walletVote, transaction.data);
+        senderWallet.updateVoteBalances();
+        Utils.increaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -207,15 +217,17 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
         Utils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
-        sender.removeCurrentStateHistory("votes");
-        const previousVotes = sender.getCurrentStateHistory("votes").value;
+        senderWallet.removeCurrentStateHistory("votes");
+        const previousVotes = senderWallet.getCurrentStateHistory("votes").value;
 
-        Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
-        sender.setAttribute("votes", previousVotes);
-        sender.updateVoteBalances();
-        Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
+        Utils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
+        senderWallet.setAttribute("votes", previousVotes);
+        senderWallet.updateVoteBalances();
+        Utils.increaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}

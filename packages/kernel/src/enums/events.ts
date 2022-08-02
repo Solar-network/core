@@ -74,7 +74,6 @@ export enum DelegateEvent {
 
 export enum VoteEvent {
     Vote = "wallet.vote",
-    Unvote = "wallet.unvote",
 }
 
 /**
