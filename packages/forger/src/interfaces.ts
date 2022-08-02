@@ -1,5 +1,5 @@
 import { Interfaces } from "@solar-network/crypto";
-import { Nes } from "@solar-network/p2p";
+import { Client } from "@solar-network/nes";
 
 /**
  * @export
@@ -19,10 +19,10 @@ export interface RelayHost {
     port: number;
 
     /**
-     * @type {Nes.Client}
+     * @type {Client}
      * @memberof RelayHost
      */
-    socket?: Nes.Client;
+    socket?: Client;
 }
 
 /**

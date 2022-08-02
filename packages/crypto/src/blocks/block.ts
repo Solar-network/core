@@ -92,6 +92,24 @@ export class Block implements IBlock {
         return "0".repeat(16 - temp.length) + temp;
     }
 
+    public static getBasicHeader(data: IBlockData): IBlockData {
+        return {
+            blockSignature: data.blockSignature,
+            generatorPublicKey: data.generatorPublicKey,
+            height: data.height,
+            id: data.id,
+            numberOfTransactions: data.numberOfTransactions,
+            payloadHash: data.payloadHash,
+            payloadLength: data.payloadLength,
+            previousBlock: data.previousBlock,
+            reward: data.reward,
+            timestamp: data.timestamp,
+            totalAmount: data.totalAmount,
+            totalFee: data.totalFee,
+            version: data.version,
+        };
+    }
+
     public getBurnedFees(): BigNumber {
         let fees: BigNumber = BigNumber.ZERO;
         for (const transaction of this.transactions) {
@@ -102,21 +120,7 @@ export class Block implements IBlock {
     }
 
     public getHeader(): IBlockData {
-        return {
-            blockSignature: this.data.blockSignature,
-            generatorPublicKey: this.data.generatorPublicKey,
-            height: this.data.height,
-            id: this.data.id,
-            numberOfTransactions: this.data.numberOfTransactions,
-            payloadHash: this.data.payloadHash,
-            payloadLength: this.data.payloadLength,
-            previousBlock: this.data.previousBlock,
-            reward: this.data.reward,
-            timestamp: this.data.timestamp,
-            totalAmount: this.data.totalAmount,
-            totalFee: this.data.totalFee,
-            version: this.data.version,
-        };
+        return Block.getBasicHeader(this.data);
     }
 
     public verifySignature(): boolean {

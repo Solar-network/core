@@ -23,29 +23,45 @@ const internals: any = {
 
 internals.schema = Joi.object({
     banHammerPlugin: Joi.object(),
-    onConnection: Joi.function(), // async function (socket) {}
-    onDisconnection: Joi.function(), // function (socket) {}
-    onMessage: Joi.function(), // async function (socket, message) { return data; }    // Or throw errors
+    banSeconds: Joi.number().integer().min(0).default(0),
+    basePath: Joi.string(),
+    disableGet: Joi.boolean(),
+    disablePost: Joi.boolean(),
+    enabled: Joi.boolean().default(true),
+    extendedTypes: Joi.boolean(),
     headers: Joi.array().items(Joi.string().lowercase()).min(1).allow("*", null),
-    payload: {
-        maxChunkChars: Joi.number().integer().min(1).allow(false),
-    },
     heartbeat: Joi.object({
         interval: Joi.number().integer().min(1).required(),
         timeout: Joi.number().integer().min(1).less(Joi.ref("interval")).required(),
     }).allow(false),
     maxConnections: Joi.number().integer().min(1).allow(false),
-    origin: Joi.array().items(Joi.string()).single().min(1),
     maxPayload: Joi.number().integer().min(1),
+    onConnection: Joi.function(), // async function (socket) {}
+    onDisconnection: Joi.function(), // function (socket) {}
+    onMessage: Joi.function(), // async function (socket, message) { return data; }    // Or throw errors
+    origin: Joi.array().items(Joi.string()).single().min(1),
+    path: Joi.string(),
+    payload: {
+        maxChunkChars: Joi.number().integer().min(1).allow(false),
+    },
+    rateLimiter: Joi.object(),
+    sendErrors: Joi.boolean(),
+    trustProxy: Joi.boolean(),
+    whitelist: Joi.array(),
 });
 
 const plugin = {
-    pkg: require("../../package.json"),
+    pkg: require("../package.json"),
     requirements: {
         hapi: ">=19.0.0",
     },
-    register: function (server: Server, options: object): void {
+    register: function (server: Server, options: any): void {
+        if (!options.enabled) {
+            return;
+        }
+
         const settings: any = Hoek.applyToDefaults(internals.defaults, options);
+        settings.rateLimiter = options.rateLimiter;
 
         if (Array.isArray(settings.headers)) {
             settings.headers = settings.headers.map((field) => field.toLowerCase());
@@ -74,6 +90,10 @@ const plugin = {
         // Decorate server and request
 
         server.decorate("request", "socket", internals.socket, { apply: true });
+        server.decorate("server", "broadcast", (payload) => listener.broadcast(payload));
+        server.decorate("server", "eachSocket", (each, options) => listener.eachSocket(each, options));
+        server.decorate("server", "publish", (path, update, options) => listener.publish(path, update, options));
+        server.decorate("server", "subscription", (path, options) => listener.subscription(path, options));
     },
 };
 

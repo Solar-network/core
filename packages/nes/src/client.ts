@@ -191,7 +191,7 @@ export class Client {
 
         const request = {
             type: "request",
-            method: "POST",
+            method: "post",
             path: options.path,
             headers: options.headers,
             payload: options.payload,
@@ -534,7 +534,7 @@ export class Client {
         // Response
 
         if (update.type === "request") {
-            return next(error, { payload: update.payload, statusCode: update.statusCode, headers: update.headers });
+            return next(error, { ...update });
         }
 
         // Authentication

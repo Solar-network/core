@@ -20,6 +20,7 @@
     "dependencies": {
         "@solar-network/crypto": "workspace:*",
         "@solar-network/kernel": "workspace:*",
+        "@solar-network/nes": "workspace:*",
         "@solar-network/p2p": "workspace:*",
         "@solar-network/transactions": "workspace:*",
         "delay": "5.0.0",

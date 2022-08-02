@@ -1,5 +1,5 @@
-import { Enums, Identities } from "@solar-network/crypto";
-import { Container, Contracts, Services, Utils } from "@solar-network/kernel";
+import { Identities } from "@solar-network/crypto";
+import { Container, Contracts, Services } from "@solar-network/kernel";
 
 import { WalletCriteria, WalletResource } from "../resources-new";
 
@@ -62,31 +62,7 @@ export class WalletSearchService {
     }
 
     private getWalletResourceFromWallet(wallet: Contracts.State.Wallet): WalletResource {
-        const attributes: Record<string, any> = Utils.cloneDeep(wallet.getAttributes());
-
-        let resigned: string | undefined = undefined;
-        if (wallet.hasAttribute("delegate.resigned")) {
-            switch (wallet.getAttribute("delegate.resigned")) {
-                case Enums.DelegateStatus.PermanentResign: {
-                    resigned = "permanent";
-                    break;
-                }
-                case Enums.DelegateStatus.TemporaryResign: {
-                    resigned = "temporary";
-                    break;
-                }
-            }
-            attributes.delegate.resigned = resigned;
-        }
-
-        return {
-            address: wallet.getAddress(),
-            publicKey: wallet.getPublicKey(),
-            balance: wallet.getBalance(),
-            nonce: wallet.getNonce(),
-            attributes: { ...attributes, votes: undefined },
-            votingFor: wallet.getVoteDistribution(),
-        };
+        return wallet.getBasicWallet();
     }
 
     private *getWallets(...criterias: WalletCriteria[]): Iterable<WalletResource> {

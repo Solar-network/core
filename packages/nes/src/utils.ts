@@ -1,18 +1,29 @@
+import { URL } from "url";
+
 import { NesMessage } from "./interfaces";
 
 const mapTypeIntToString = {
     0: "hello",
     1: "ping",
-    2: "update",
-    3: "request",
-    9: "undefined",
+    2: "get",
+    3: "post",
+    4: "sub",
+    5: "unsub",
+    6: "pub",
+    7: "revoke",
+    9: "error",
 };
+
 const mapTypeStringToInt = {
     hello: 0,
     ping: 1,
-    update: 2,
-    request: 3,
-    undefined: 9,
+    get: 2,
+    post: 3,
+    sub: 4,
+    unsub: 5,
+    pub: 6,
+    revoke: 7,
+    error: 9,
 };
 
 const HEADER_BYTE_LENGTH = 14;
@@ -28,23 +39,10 @@ const OFFSETS = {
     HEARTBEAT_TIMEOUT: 12,
 };
 
-const MAX_PATH_LENGTH = 100;
+const MAX_PATH_LENGTH = 255;
 const MAX_SOCKET_LENGTH = 100;
 
-// Nes message format :
-// <version><type><id><statusCode><pathLength><socketLength><heartbeat.interval><heartbeat.timeout><path><socket><payload>
-// version              uint8
-// type                 uint8
-// id                   uint32
-// statusCode           uint16
-// pathLength           uint8
-// path                 string
-// socketLength         uint8
-// socket               string
-// heartbeat.interval   uint16
-// heartbeat.timeout    uint16
-// payload              Buffer
-export const parseNesMessage = (buf: Buffer): NesMessage => {
+export const parseNesMessage = (buf: Buffer, extendedTypes?: boolean): NesMessage => {
     const messageLength = buf.byteLength;
     if (messageLength < HEADER_BYTE_LENGTH) {
         throw new Error("Nes message is below minimum length");
@@ -52,9 +50,18 @@ export const parseNesMessage = (buf: Buffer): NesMessage => {
 
     const version = buf.readUInt8(OFFSETS.VERSION).toString();
 
-    const type = mapTypeIntToString[buf.readUInt8(OFFSETS.TYPE)];
-    if (!type) {
+    const originalType = mapTypeIntToString[buf.readUInt8(OFFSETS.TYPE)];
+    let type = originalType;
+
+    if (!type || (!extendedTypes && !["hello", "error", "ping", "post"].includes(type))) {
         throw new Error("Type is invalid");
+    }
+
+    let method = "post";
+
+    if (type === "get" || type === "post") {
+        method = type;
+        type = "request";
     }
 
     const id = buf.readUInt32BE(OFFSETS.ID);
@@ -62,12 +69,20 @@ export const parseNesMessage = (buf: Buffer): NesMessage => {
     const statusCode = buf.readUInt16BE(OFFSETS.STATUS_CODE);
 
     const pathLength = buf.readUInt8(OFFSETS.PATH_LENGTH);
+
     if (pathLength > MAX_PATH_LENGTH || buf.byteLength < HEADER_BYTE_LENGTH + pathLength) {
         throw new Error("Invalid path length");
     }
-    const path = buf.slice(HEADER_BYTE_LENGTH, HEADER_BYTE_LENGTH + pathLength).toString();
+
+    let path = buf.slice(HEADER_BYTE_LENGTH, HEADER_BYTE_LENGTH + pathLength).toString();
+
+    if (path) {
+        const url = new URL(`http://127.0.0.1/${path}`);
+        path = url.pathname + url.search;
+    }
 
     const socketLength = buf.readUInt8(OFFSETS.SOCKET_LENGTH);
+
     if (socketLength > MAX_SOCKET_LENGTH || buf.byteLength < HEADER_BYTE_LENGTH + pathLength + socketLength) {
         throw new Error("Invalid socket length");
     }
@@ -80,12 +95,18 @@ export const parseNesMessage = (buf: Buffer): NesMessage => {
         timeout: buf.readUInt16BE(OFFSETS.HEARTBEAT_TIMEOUT),
     };
 
-    const payload = buf.slice(HEADER_BYTE_LENGTH + pathLength + socketLength);
+    let payload = buf.slice(HEADER_BYTE_LENGTH + pathLength + socketLength);
+
+    if (originalType !== "post" && pathLength === 255) {
+        path += payload.toString();
+        payload = Buffer.alloc(0);
+    }
 
     return {
         version,
         type,
         id,
+        method,
         statusCode,
         path,
         payload,
@@ -95,11 +116,28 @@ export const parseNesMessage = (buf: Buffer): NesMessage => {
 };
 
 export const stringifyNesMessage = (messageObj: NesMessage): Buffer => {
+    if (messageObj.path) {
+        if (!messageObj.method || (messageObj.method && messageObj.method.toLowerCase() !== "post")) {
+            if (messageObj.path.length > 255) {
+                messageObj.payload = messageObj.path.slice(255);
+                messageObj.path = messageObj.path.slice(0, 255);
+            }
+        }
+    }
+
     const pathBuf = Buffer.from(messageObj.path || "");
     const socketBuf = Buffer.from(messageObj.socket || "");
     const payloadBuf = Buffer.from(messageObj.payload || "");
 
     const bufHeader = Buffer.alloc(HEADER_BYTE_LENGTH);
+
+    if (messageObj.type === "request") {
+        if (messageObj.method) {
+            messageObj.type = messageObj.method.toLowerCase();
+        } else {
+            messageObj.type = "post";
+        }
+    }
 
     bufHeader.writeUInt8(Number.parseInt(messageObj.version || "0"), OFFSETS.VERSION);
     bufHeader.writeUInt8(
@@ -117,6 +155,5 @@ export const stringifyNesMessage = (messageObj: NesMessage): Buffer => {
 };
 
 export const protocol = {
-    gracefulErrorStatusCode: 499, // custom status code to be used when we want to send back an explicit error (otherwise
-    // no error is sent back and the socket is disconnected)
+    gracefulErrorStatusCode: 499,
 };

@@ -113,10 +113,12 @@ importers:
       '@solar-network/crypto': workspace:*
       '@solar-network/database': workspace:*
       '@solar-network/kernel': workspace:*
+      '@solar-network/nes': workspace:*
       '@solar-network/transactions': workspace:*
       '@types/hapi__boom': 7.4.1
       '@types/hapi__hapi': 20.0.9
       '@types/hapi__joi': 17.1.7
+      '@types/hapi__nes': 11.0.5
       '@types/ip': 1.1.0
       '@types/qs': 6.9.7
       '@types/semver': 6.2.3
@@ -135,6 +137,7 @@ importers:
       '@solar-network/crypto': link:../crypto
       '@solar-network/database': link:../database
       '@solar-network/kernel': link:../kernel
+      '@solar-network/nes': link:../nes
       '@solar-network/transactions': link:../transactions
       joi: 17.6.0
       nanomatch: 1.2.13
@@ -146,6 +149,7 @@ importers:
       '@types/hapi__boom': 7.4.1
       '@types/hapi__hapi': 20.0.9
       '@types/hapi__joi': 17.1.7
+      '@types/hapi__nes': 11.0.5
       '@types/ip': 1.1.0
       '@types/qs': 6.9.7
       '@types/semver': 6.2.3
@@ -417,6 +421,7 @@ importers:
     specifiers:
       '@solar-network/crypto': workspace:*
       '@solar-network/kernel': workspace:*
+      '@solar-network/nes': workspace:*
       '@solar-network/p2p': workspace:*
       '@solar-network/transactions': workspace:*
       '@types/node-forge': 0.10.4
@@ -428,6 +433,7 @@ importers:
     dependencies:
       '@solar-network/crypto': link:../crypto
       '@solar-network/kernel': link:../kernel
+      '@solar-network/nes': link:../nes
       '@solar-network/p2p': link:../p2p
       '@solar-network/transactions': link:../transactions
       delay: 5.0.0
@@ -538,17 +544,44 @@ importers:
       '@types/readable-stream': 2.3.11
       '@types/split2': 2.1.6
 
+  packages/nes:
+    specifiers:
+      '@alessiodf/bson': 0.1.4
+      '@hapi/boom': 9.1.4
+      '@hapi/bounce': 2.0.0
+      '@hapi/call': 9.0.0
+      '@hapi/hapi': 20.2.1
+      '@hapi/hoek': 9.2.1
+      '@hapi/teamwork': 5.1.0
+      '@hapi/validate': 2.0.0
+      '@solar-network/kernel': workspace:*
+      '@types/hapi__hapi': 20.0.9
+      joi: 17.6.0
+      ws: 7.5.5
+    dependencies:
+      '@alessiodf/bson': 0.1.4
+      '@hapi/boom': 9.1.4
+      '@hapi/bounce': 2.0.0
+      '@hapi/call': 9.0.0
+      '@hapi/hapi': 20.2.1
+      '@hapi/hoek': 9.2.1
+      '@hapi/teamwork': 5.1.0
+      '@hapi/validate': 2.0.0
+      '@solar-network/kernel': link:../kernel
+      joi: 17.6.0
+      ws: 7.5.5
+    devDependencies:
+      '@types/hapi__hapi': 20.0.9
+
   packages/p2p:
     specifiers:
       '@hapi/boom': 9.1.4
-      '@hapi/bounce': 2.0.0
       '@hapi/hapi': 20.2.1
-      '@hapi/hoek': 9.2.1
       '@hapi/sntp': 4.0.0
-      '@hapi/teamwork': 5.1.0
       '@solar-network/crypto': workspace:*
       '@solar-network/database': workspace:*
       '@solar-network/kernel': workspace:*
+      '@solar-network/nes': workspace:*
       '@solar-network/state': workspace:*
       '@types/better-sqlite3': 5.4.3
       '@types/fs-extra': 8.1.2
@@ -565,17 +598,14 @@ importers:
       protobufjs: 6.11.3
       rate-limiter-flexible: 1.3.2
       semver: 6.3.0
-      ws: 7.5.5
     dependencies:
       '@hapi/boom': 9.1.4
-      '@hapi/bounce': 2.0.0
       '@hapi/hapi': 20.2.1
-      '@hapi/hoek': 9.2.1
       '@hapi/sntp': 4.0.0
-      '@hapi/teamwork': 5.1.0
       '@solar-network/crypto': link:../crypto
       '@solar-network/database': link:../database
       '@solar-network/kernel': link:../kernel
+      '@solar-network/nes': link:../nes
       '@solar-network/state': link:../state
       dayjs: 1.10.7
       delay: 5.0.0
@@ -586,7 +616,6 @@ importers:
       protobufjs: 6.11.3
       rate-limiter-flexible: 1.3.2
       semver: 6.3.0
-      ws: 7.5.5
     devDependencies:
       '@types/better-sqlite3': 5.4.3
       '@types/fs-extra': 8.1.2
@@ -742,6 +771,11 @@ importers:
       '@solar-network/transactions': link:../../packages/transactions
 
 packages:
+
+  /@alessiodf/bson/0.1.4:
+    resolution: {integrity: sha512-lmZC9NHpLC9FIqopS3n1YD/H7aLf9ObyQb4aQyCxveNg9DcT7ybPykxpP3MwjmpFqlKyuYTqy+mmYDejjuWbXA==}
+    engines: {node: '>=15.0.0'}
+    dev: false
 
   /@alessiodf/listr/0.0.6:
     resolution: {integrity: sha512-OwiJG7RCKTTkt2IMk/q2XOJu+/NWmAq2fpMSWn2PBm8HE05W6PS4Ic4U7vN0JUbAWJoE6jXT8pFelcGQU4C7wg==}
@@ -3454,6 +3488,12 @@ packages:
     dependencies:
       '@hapi/hoek': 9.2.1
 
+  /@hapi/boom/10.0.0:
+    resolution: {integrity: sha512-1YVs9tLHhypBqqinKQRqh7FUERIolarQApO37OWkzD+z6y6USi871Sv746zBPKcIOBuI6g6y4FrwX87mmJ90Gg==}
+    dependencies:
+      '@hapi/hoek': 10.0.1
+    dev: false
+
   /@hapi/boom/9.1.4:
     resolution: {integrity: sha512-Ls1oH8jaN1vNsqcaHVYJrKmgMcKsC1wcp8bujvXrHaAqD2iDYq3HoOwsxwo09Cuda5R5nC0o0IxlrlTuvPuzSw==}
     dependencies:
@@ -3474,6 +3514,13 @@ packages:
     dependencies:
       '@hapi/boom': 9.1.4
       '@hapi/hoek': 9.2.1
+    dev: false
+
+  /@hapi/call/9.0.0:
+    resolution: {integrity: sha512-Z6byqbEtKF3RIH2kWG6cX64RwEqHBWYEVkNoEx6oKvkPaTrC6WTPRgr+ANo9Xa8G1GXyvs/NCMTnn3Mdj12TSA==}
+    dependencies:
+      '@hapi/boom': 10.0.0
+      '@hapi/hoek': 10.0.1
     dev: false
 
   /@hapi/catbox-memory/5.0.1:
@@ -3538,6 +3585,10 @@ packages:
       '@hapi/boom': 9.1.4
       '@hapi/hoek': 9.2.1
       '@hapi/validate': 1.1.3
+    dev: false
+
+  /@hapi/hoek/10.0.1:
+    resolution: {integrity: sha512-CvlW7jmOhWzuqOqiJQ3rQVLMcREh0eel4IBnxDx2FAcK8g7qoJRQK4L1CPBASoCY6y8e6zuCy3f2g+HWdkzcMw==}
     dev: false
 
   /@hapi/hoek/9.2.1:
@@ -3656,11 +3707,24 @@ packages:
     dependencies:
       '@hapi/hoek': 9.2.1
 
+  /@hapi/topo/6.0.0:
+    resolution: {integrity: sha512-aorJvN1Q1n5xrZuA50Z4X6adI6VAM2NalIVm46ALL9LUvdoqhof3JPY69jdJH8asM3PsWr2SUVYzp57EqUP41A==}
+    dependencies:
+      '@hapi/hoek': 10.0.1
+    dev: false
+
   /@hapi/validate/1.1.3:
     resolution: {integrity: sha512-/XMR0N0wjw0Twzq2pQOzPBZlDzkekGcoCtzO314BpIEsbXdYGthQUbxgkGDf4nhk1+IPDAsXqWjMohRQYO06UA==}
     dependencies:
       '@hapi/hoek': 9.2.1
       '@hapi/topo': 5.1.0
+
+  /@hapi/validate/2.0.0:
+    resolution: {integrity: sha512-w5m8MvBgqGndbMIB+AWmXTb8CLtF1DlIxbnbAHNAo7aFuNQuI1Ywc2e0zDLK5fbFXDoqRzNrHnC7JjNJ+hDigw==}
+    dependencies:
+      '@hapi/hoek': 10.0.1
+      '@hapi/topo': 6.0.0
+    dev: false
 
   /@hapi/vise/4.0.0:
     resolution: {integrity: sha512-eYyLkuUiFZTer59h+SGy7hUm+qE9p+UemePTHLlIWppEd+wExn3Df5jO04bFQTm7nleF5V8CtuYQYb+VFpZ6Sg==}
@@ -4475,6 +4539,12 @@ packages:
     resolution: {integrity: sha512-i9hvJpFYTT/qzB5xKWvDYaSXrIiNqi4ephi+5Lo6+DoQdwqPXQgmVVOZR+s3MBiHoFqsCZCX9TmVWG3HczmTEQ==}
     dependencies:
       '@types/mime-db': 1.43.1
+    dev: true
+
+  /@types/hapi__nes/11.0.5:
+    resolution: {integrity: sha512-0zbkXgFhXWYW0r1Jefw5Wpquf2xcfRU8KIeleHUWDPqNiH5yjcDJhn181s6I/7m9DRW8Tg9jrVMD8gMgNw2RIA==}
+    dependencies:
+      '@types/hapi__hapi': 20.0.9
     dev: true
 
   /@types/hapi__shot/4.1.2:

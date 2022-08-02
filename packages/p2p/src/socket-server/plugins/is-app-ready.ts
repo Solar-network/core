@@ -1,8 +1,9 @@
 import Boom from "@hapi/boom";
 import { Server } from "@hapi/hapi";
 import { Container, Contracts } from "@solar-network/kernel";
+import { Utils } from "@solar-network/nes";
 
-import { protocol } from "../../hapi-nes/utils";
+const { protocol } = Utils;
 
 @Container.injectable()
 export class IsAppReadyPlugin {

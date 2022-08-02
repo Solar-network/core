@@ -1,6 +1,7 @@
 import { Blocks, Interfaces } from "@solar-network/crypto";
 import { Container, Contracts, Utils } from "@solar-network/kernel";
-import { Codecs, Nes, NetworkState } from "@solar-network/p2p";
+import { Client as NesClient } from "@solar-network/nes";
+import { Codecs, NetworkState } from "@solar-network/p2p";
 
 import { HostNoResponseError, RelayCommunicationError } from "./errors";
 import { RelayHost } from "./interfaces";
@@ -60,7 +61,7 @@ export class Client {
      */
     public dispose(): void {
         for (const host of this.hosts) {
-            const socket: Nes.Client | undefined = host.socket;
+            const socket: NesClient | undefined = host.socket;
 
             if (socket) {
                 socket.disconnect();
@@ -198,7 +199,7 @@ export class Client {
 
                     const url = `ws://${Utils.IpAddress.normaliseAddress(host.hostname)}:${host.port}`;
                     const options = { ws: { maxPayload: MAX_PAYLOAD_CLIENT } };
-                    const connection = new Nes.Client(url, options);
+                    const connection = new NesClient(url, options);
                     connection.connect().catch((e) => {});
 
                     connection.onError = (e) => {
@@ -234,7 +235,7 @@ export class Client {
      */
     private async emit<T = object>(event: string, payload: Record<string, any> = {}, timeout = 4000): Promise<T> {
         try {
-            Utils.assert.defined<Nes.Client>(this.host.socket);
+            Utils.assert.defined<NesClient>(this.host.socket);
 
             const codec = this.getCodec(event);
 

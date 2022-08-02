@@ -1,6 +1,7 @@
 import { Providers } from "@solar-network/kernel";
 import Joi from "joi";
 
+import { EventListener } from "./event-listener";
 import Handlers from "./handlers";
 import { Identifiers } from "./identifiers";
 import { preparePlugins } from "./plugins";
@@ -12,6 +13,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Identifiers.WalletSearchService).to(WalletSearchService);
         this.app.bind(Identifiers.DelegateSearchService).to(DelegateSearchService);
         this.app.bind(Identifiers.LockSearchService).to(LockSearchService);
+        this.app.bind(Identifiers.EventListener).to(EventListener).inSingletonScope();
 
         if (this.config().get("server.http.enabled")) {
             await this.buildServer("http", Identifiers.HTTP);
@@ -23,11 +25,18 @@ export class ServiceProvider extends Providers.ServiceProvider {
     }
 
     public async boot(): Promise<void> {
-        if (this.config().get("server.http.enabled")) {
+        const http = this.config().get("server.http.enabled");
+        const https = this.config().get("server.https.enabled");
+
+        if (http || https) {
+            this.app.get<EventListener>(Identifiers.EventListener).initialise();
+        }
+
+        if (http) {
             await this.app.get<Server>(Identifiers.HTTP).boot();
         }
 
-        if (this.config().get("server.https.enabled")) {
+        if (https) {
             await this.app.get<Server>(Identifiers.HTTPS).boot();
         }
     }
@@ -76,9 +85,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
                     whitelist: Joi.array().items(Joi.string()).required(),
                     blacklist: Joi.array().items(Joi.string()).required(),
                 }).required(),
-                pagination: Joi.object({
-                    limit: Joi.number().integer().min(0).required(),
-                }).required(),
                 socketTimeout: Joi.number().integer().min(0).required(),
                 whitelist: Joi.array().items(Joi.string()).required(),
                 trustProxy: Joi.bool().required(),
@@ -103,22 +109,11 @@ export class ServiceProvider extends Providers.ServiceProvider {
                 },
             },
         });
-
-        await server.register(preparePlugins(this.config().get("plugins")));
+        await server.register(preparePlugins(this.config().all()));
 
         await server.register({
             plugin: Handlers,
             routes: { prefix: this.config().get("options.basePath") },
-        });
-
-        await server.route({
-            method: "GET",
-            path: "/{param*}",
-            handler: {
-                directory: {
-                    path: `${__dirname}/www`,
-                },
-            },
         });
     }
 }
