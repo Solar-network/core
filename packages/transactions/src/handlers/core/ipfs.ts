@@ -88,17 +88,19 @@ export class IpfsTransactionHandler extends TransactionHandler {
 
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
-        if (!sender.hasAttribute("ipfs")) {
-            sender.setAttribute("ipfs", { hashes: {} });
+        if (!senderWallet.hasAttribute("ipfs")) {
+            senderWallet.setAttribute("ipfs", { hashes: {} });
         }
 
         AppUtils.assert.defined<string>(transaction.data.asset?.ipfs);
 
-        sender.getAttribute("ipfs.hashes", {})[transaction.data.asset.ipfs] = true;
+        senderWallet.getAttribute("ipfs.hashes", {})[transaction.data.asset.ipfs] = true;
 
-        this.walletRepository.index(sender);
+        this.walletRepository.index(senderWallet);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -106,18 +108,20 @@ export class IpfsTransactionHandler extends TransactionHandler {
 
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
         AppUtils.assert.defined<Interfaces.ITransactionAsset>(transaction.data.asset?.ipfs);
 
-        const ipfsHashes = sender.getAttribute("ipfs.hashes");
+        const ipfsHashes = senderWallet.getAttribute("ipfs.hashes");
         delete ipfsHashes[transaction.data.asset.ipfs];
 
-        if (!Object.keys(ipfsHashes).length) {
-            sender.forgetAttribute("ipfs");
+        if (Object.keys(ipfsHashes).length === 0) {
+            senderWallet.forgetAttribute("ipfs");
         }
 
-        this.walletRepository.index(sender);
+        this.walletRepository.index(senderWallet);
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}

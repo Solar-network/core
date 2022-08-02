@@ -32,13 +32,6 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
         return Managers.configManager.getMilestone().legacyTransfer;
     }
 
-    public async throwIfCannotBeApplied(
-        transaction: Interfaces.ITransaction,
-        sender: Contracts.State.Wallet,
-    ): Promise<void> {
-        return super.throwIfCannotBeApplied(transaction, sender);
-    }
-
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.data.recipientId);
         const recipientId: string = transaction.data.recipientId;
@@ -55,16 +48,20 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.data.recipientId);
 
-        const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.recipientId);
+        const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(
+            transaction.data.recipientId,
+        );
 
-        recipient.increaseBalance(transaction.data.amount);
+        recipientWallet.increaseBalance(transaction.data.amount);
     }
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.data.recipientId);
 
-        const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.recipientId);
+        const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(
+            transaction.data.recipientId,
+        );
 
-        recipient.decreaseBalance(transaction.data.amount);
+        recipientWallet.decreaseBalance(transaction.data.amount);
     }
 }

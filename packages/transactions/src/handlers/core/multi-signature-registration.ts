@@ -114,16 +114,6 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
         }
     }
 
-    public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
-        await super.applyToSender(transaction);
-    }
-
-    public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
-        await super.revertForSender(transaction);
-        // Nothing else to do for the sender since the recipient wallet
-        // is made into a multi sig wallet.
-    }
-
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         const { data }: Interfaces.ITransaction = transaction;
 

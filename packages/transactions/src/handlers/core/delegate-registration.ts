@@ -177,11 +177,13 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
 
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
         AppUtils.assert.defined<string>(transaction.data.asset?.delegate?.username);
 
-        sender.setAttribute<Contracts.State.WalletDelegateAttributes>("delegate", {
+        senderWallet.setAttribute<Contracts.State.WalletDelegateAttributes>("delegate", {
             username: transaction.data.asset.delegate.username,
             voteBalance: Utils.BigNumber.ZERO,
             forgedFees: Utils.BigNumber.ZERO,
@@ -193,10 +195,10 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             voters: 0,
         });
 
-        sender.initialiseStateHistory("delegateStatus");
-        sender.addStateHistory("delegateStatus", Enums.DelegateStatus.NotResigned, transaction.data);
+        senderWallet.initialiseStateHistory("delegateStatus");
+        senderWallet.addStateHistory("delegateStatus", Enums.DelegateStatus.NotResigned, transaction.data);
 
-        this.walletRepository.index(sender);
+        this.walletRepository.index(senderWallet);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -204,12 +206,14 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
 
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
-        sender.forgetAttribute("delegate");
-        sender.forgetStateHistory("delegateStatus");
+        senderWallet.forgetAttribute("delegate");
+        senderWallet.forgetStateHistory("delegateStatus");
 
-        this.walletRepository.index(sender);
+        this.walletRepository.index(senderWallet);
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}

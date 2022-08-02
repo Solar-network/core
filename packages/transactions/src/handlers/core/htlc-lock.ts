@@ -96,11 +96,11 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
 
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
-        const lockedBalance = sender.getAttribute<Utils.BigNumber>("htlc.lockedBalance", Utils.BigNumber.ZERO);
-        sender.setAttribute("htlc.lockedBalance", lockedBalance.plus(transaction.data.amount));
+        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const lockedBalance = senderWallet.getAttribute<Utils.BigNumber>("htlc.lockedBalance", Utils.BigNumber.ZERO);
+        senderWallet.setAttribute("htlc.lockedBalance", lockedBalance.plus(transaction.data.amount));
 
-        this.walletRepository.index(sender);
+        this.walletRepository.index(senderWallet);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -108,11 +108,19 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
 
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
-        const lockedBalance = sender.getAttribute<Utils.BigNumber>("htlc.lockedBalance", Utils.BigNumber.ZERO);
-        sender.setAttribute("htlc.lockedBalance", lockedBalance.minus(transaction.data.amount));
+        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const lockedBalance = senderWallet.getAttribute<Utils.BigNumber>("htlc.lockedBalance", Utils.BigNumber.ZERO);
+        const newLockedBalance = lockedBalance.minus(transaction.data.amount);
 
-        this.walletRepository.index(sender);
+        if (newLockedBalance.isZero()) {
+            senderWallet.forgetAttribute("htlc.lockedBalance");
+            senderWallet.forgetAttribute("htlc.locks"); // zero lockedBalance means no pending locks
+            senderWallet.forgetAttribute("htlc");
+        } else {
+            senderWallet.setAttribute("htlc.lockedBalance", newLockedBalance);
+        }
+
+        this.walletRepository.index(senderWallet);
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
@@ -125,8 +133,8 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
         AppUtils.assert.defined<Interfaces.IHtlcLockAsset>(transaction.data.asset?.lock);
 
-        const sender = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
-        const locks = sender.getAttribute<Interfaces.IHtlcLocks>("htlc.locks", {});
+        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const locks = senderWallet.getAttribute<Interfaces.IHtlcLocks>("htlc.locks", {});
         locks[transaction.id] = {
             amount: transaction.data.amount,
             recipientId: transaction.data.recipientId,
@@ -134,20 +142,25 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
             memo: transaction.data.memo,
             ...transaction.data.asset.lock,
         };
-        sender.setAttribute("htlc.locks", locks);
+        senderWallet.setAttribute("htlc.locks", locks);
 
-        this.walletRepository.index(sender);
+        this.walletRepository.index(senderWallet);
     }
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.id);
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
-        const locks = sender.getAttribute<Interfaces.IHtlcLocks>("htlc.locks", {});
+        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const locks = senderWallet.getAttribute<Interfaces.IHtlcLocks>("htlc.locks", {});
         delete locks[transaction.id];
-        sender.setAttribute("htlc.locks", locks);
 
-        this.walletRepository.index(sender);
+        if (Object.keys(locks).length === 0) {
+            senderWallet.forgetAttribute("htlc.locks");
+        } else {
+            senderWallet.setAttribute("htlc.locks", locks);
+        }
+
+        this.walletRepository.index(senderWallet);
     }
 }

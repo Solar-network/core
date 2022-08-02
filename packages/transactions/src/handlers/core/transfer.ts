@@ -72,9 +72,11 @@ export class TransferTransactionHandler extends TransactionHandler {
 
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
-        sender.decreaseBalance(totalTransfersAmount);
+        senderWallet.decreaseBalance(totalTransfersAmount);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -89,18 +91,20 @@ export class TransferTransactionHandler extends TransactionHandler {
 
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
-        sender.increaseBalance(totalPaymentsAmount);
+        senderWallet.increaseBalance(totalPaymentsAmount);
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
 
         for (const transfer of transaction.data.asset.transfers) {
-            const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
+            const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
-            recipient.increaseBalance(transfer.amount);
+            recipientWallet.increaseBalance(transfer.amount);
         }
     }
 
@@ -108,9 +112,9 @@ export class TransferTransactionHandler extends TransactionHandler {
         AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
 
         for (const transfer of transaction.data.asset.transfers) {
-            const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
+            const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
-            recipient.decreaseBalance(transfer.amount);
+            recipientWallet.decreaseBalance(transfer.amount);
         }
     }
 }
