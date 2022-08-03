@@ -286,7 +286,7 @@ export class Wallet implements Contracts.State.Wallet {
      * @memberof Wallet
      */
     public getVoteBalance(delegate: string): Utils.BigNumber {
-        return this.voteBalances[delegate];
+        return this.voteBalances[delegate] ?? Utils.BigNumber.ZERO;
     }
 
     /**
@@ -333,7 +333,7 @@ export class Wallet implements Contracts.State.Wallet {
         this.voteBalances = {};
 
         const voteAmounts = this.calculateVoteAmount({
-            balance: this.getBalance() || Utils.BigNumber.ZERO,
+            balance: this.getBalance(),
             lockedBalance: this.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO),
         });
 
