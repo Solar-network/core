@@ -1,7 +1,6 @@
 import { Container, Contracts, Utils } from "@solar-network/kernel";
+import { Client } from "@solar-network/nes";
 import delay from "delay";
-
-import { Client } from "./hapi-nes";
 
 const TEN_SECONDS_IN_MILLISECONDS = 10000;
 

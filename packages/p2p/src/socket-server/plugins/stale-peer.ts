@@ -1,6 +1,5 @@
 import { Container, Contracts } from "@solar-network/kernel";
-
-import { Socket } from "../../hapi-nes/socket";
+import { Socket } from "@solar-network/nes";
 
 @Container.injectable()
 export class StalePeerPlugin {

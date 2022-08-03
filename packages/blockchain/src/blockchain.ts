@@ -235,12 +235,12 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             this.enqueueBlocks([block]);
 
             if (fireBlockReceivedEvent) {
-                this.events.dispatch(Enums.BlockEvent.Received, { ...block, ip });
+                this.events.dispatch(Enums.BlockEvent.Received, { ...Blocks.Block.getBasicHeader(block), ip });
             }
         } else {
             this.logger.info(`Block disregarded because blockchain is not ready :exclamation:`);
 
-            this.events.dispatch(Enums.BlockEvent.Disregarded, { ...block, ip });
+            this.events.dispatch(Enums.BlockEvent.Disregarded, { ...Blocks.Block.getBasicHeader(block), ip });
         }
     }
 

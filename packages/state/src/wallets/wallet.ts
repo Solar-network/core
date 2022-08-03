@@ -1,4 +1,4 @@
-import { Interfaces, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Utils } from "@solar-network/crypto";
 import { Contracts, Services, Utils as AppUtils } from "@solar-network/kernel";
 
 import { WalletEvent } from "./wallet-event";
@@ -390,6 +390,46 @@ export class Wallet implements Contracts.State.Wallet {
         }
 
         return votes;
+    }
+
+    public getBasicWallet(): Contracts.State.WalletBasic {
+        const attributes: Record<string, any> = AppUtils.cloneDeep(this.getAttributes());
+
+        let resigned: string | undefined = undefined;
+        if (this.hasAttribute("delegate.resigned")) {
+            switch (this.getAttribute("delegate.resigned")) {
+                case Enums.DelegateStatus.PermanentResign: {
+                    resigned = "permanent";
+                    break;
+                }
+                case Enums.DelegateStatus.TemporaryResign: {
+                    resigned = "temporary";
+                    break;
+                }
+            }
+            attributes.delegate.resigned = resigned;
+        }
+
+        if (attributes.delegate && !isNaN(attributes.delegate.round)) {
+            delete attributes.delegate.round;
+        }
+
+        return {
+            address: this.getAddress(),
+            publicKey: this.getPublicKey(),
+            balance: this.getBalance(),
+            nonce: this.getNonce(),
+            attributes: { ...attributes, votes: undefined },
+            votingFor: this.getVoteDistribution(),
+        };
+    }
+
+    public toBSON() {
+        return this.getBasicWallet();
+    }
+
+    public toJSON() {
+        return this.getBasicWallet();
     }
 
     private setVoteBalance(delegate: string, balance: Utils.BigNumber) {

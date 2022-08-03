@@ -1,11 +1,11 @@
 import Hapi from "@hapi/hapi";
 import { Crypto, Identities, Interfaces } from "@solar-network/crypto";
 import { Container, Contracts, Services, Utils } from "@solar-network/kernel";
+import { Socket } from "@solar-network/nes";
 import { DatabaseInterceptor } from "@solar-network/state";
 import { readJsonSync } from "fs-extra";
 
 import { constants } from "../../constants";
-import { Socket } from "../../hapi-nes/socket";
 import { getPeerIp } from "../../utils/get-peer-ip";
 import { getPeerConfig } from "../utils/get-peer-config";
 import { Controller } from "./controller";

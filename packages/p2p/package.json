@@ -23,16 +23,14 @@
         "pbts": "pbts src/socket-server/codecs/proto/protos.js -o src/socket-server/codecs/proto/protos.d.ts"
     },
     "dependencies": {
+        "@hapi/boom": "9.1.4",
+        "@hapi/hapi": "20.2.1",
+        "@hapi/sntp": "4.0.0",
         "@solar-network/crypto": "workspace:*",
         "@solar-network/database": "workspace:*",
         "@solar-network/kernel": "workspace:*",
+        "@solar-network/nes": "workspace:*",
         "@solar-network/state": "workspace:*",
-        "@hapi/boom": "9.1.4",
-        "@hapi/bounce": "2.0.0",
-        "@hapi/hapi": "20.2.1",
-        "@hapi/hoek": "9.2.1",
-        "@hapi/sntp": "4.0.0",
-        "@hapi/teamwork": "5.1.0",
         "dayjs": "1.10.7",
         "delay": "5.0.0",
         "ip": "1.1.5",
@@ -41,8 +39,7 @@
         "pretty-ms": "7.0.1",
         "protobufjs": "6.11.3",
         "rate-limiter-flexible": "1.3.2",
-        "semver": "6.3.0",
-        "ws": "7.5.5"
+        "semver": "6.3.0"
     },
     "devDependencies": {
         "@types/better-sqlite3": "5.4.3",

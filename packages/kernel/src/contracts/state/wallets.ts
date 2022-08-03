@@ -1,6 +1,13 @@
 import { Interfaces, Utils } from "@solar-network/crypto";
 
-// todo: review all interfaces in here and document them properly. Remove ones that are no longer needed.
+export interface WalletBasic {
+    address: string;
+    publicKey: string | undefined;
+    balance: Utils.BigNumber;
+    nonce: Utils.BigNumber;
+    attributes: Record<string, any>;
+    votingFor: Record<string, WalletVoteDistribution>;
+}
 
 export interface WalletIndex {
     readonly indexer: WalletIndexer;
@@ -231,6 +238,8 @@ export interface Wallet {
         balances: { [delegate: string]: Utils.BigNumber },
         delegates?: Record<string, number>,
     ): Record<string, any>;
+
+    getBasicWallet();
 }
 
 export type WalletFactory = (address: string) => Wallet;

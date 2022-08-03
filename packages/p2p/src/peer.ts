@@ -165,4 +165,24 @@ export class Peer implements Contracts.P2P.Peer {
         }
         return this.infractions.size >= 3;
     }
+
+    public toBSON() {
+        return this.getBasicPeer();
+    }
+
+    public toJSON() {
+        return this.getBasicPeer();
+    }
+
+    private getBasicPeer() {
+        return {
+            ip: this.ip,
+            port: this.port,
+            ports: this.ports,
+            version: this.version,
+            height: this.state ? this.state.height : undefined,
+            latency: this.latency,
+            plugins: this.plugins,
+        };
+    }
 }

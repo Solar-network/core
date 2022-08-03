@@ -364,7 +364,7 @@ export class ForgerService {
                             await this.client.broadcastBlock(block);
 
                             this.lastForgedBlock = block;
-                            this.client.emitEvent(Enums.BlockEvent.Forged, block.data);
+                            this.client.emitEvent(Enums.BlockEvent.Forged, block.getHeader());
 
                             for (const transaction of this.transactions) {
                                 this.client.emitEvent(Enums.TransactionEvent.Forged, transaction);

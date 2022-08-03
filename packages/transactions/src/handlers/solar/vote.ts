@@ -102,7 +102,7 @@ export class VoteTransactionHandler extends TransactionHandler {
             votes: transaction.data.asset?.votes,
             previousVotes,
             transaction: transaction.data,
-            wallet
+            wallet: wallet.getBasicWallet(),
         });
     }
 
