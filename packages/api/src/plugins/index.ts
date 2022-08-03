@@ -43,8 +43,7 @@ export const preparePlugins = (config) => {
         },
         runActionAnyway: false,
     });
-    // @ts-ignore
-    rateLimiter.rand = Math.random() * 16;
+
     return [
         {
             plugin: whitelist,
