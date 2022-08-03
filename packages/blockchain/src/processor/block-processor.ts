@@ -205,17 +205,13 @@ export class BlockProcessor {
     }
 
     private async validateGenerator(block: Interfaces.IBlock): Promise<boolean> {
-        const walletRepository = this.app.getTagged<Contracts.State.WalletRepository>(
-            Container.Identifiers.WalletRepository,
-            "state",
-            "blockchain",
-        );
-
-        if (!walletRepository.hasByPublicKey(block.data.generatorPublicKey)) {
+        if (!this.walletRepository.hasByPublicKey(block.data.generatorPublicKey)) {
             return false;
         }
 
-        const generatorWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(block.data.generatorPublicKey);
+        const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            block.data.generatorPublicKey,
+        );
 
         let generatorUsername: string;
         try {
@@ -246,7 +242,7 @@ export class BlockProcessor {
         } else if (forgingDelegate.getPublicKey() !== block.data.generatorPublicKey) {
             AppUtils.assert.defined<string>(forgingDelegate.getPublicKey());
 
-            const forgingWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(
+            const forgingWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
                 forgingDelegate.getPublicKey()!,
             );
             const forgingUsername: string = forgingWallet.getAttribute("delegate.username");
