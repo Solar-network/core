@@ -19,7 +19,7 @@ export class CheckLastDownloadedBlockSynced implements Action {
 
     public async handle(): Promise<void> {
         const epoch = Math.floor(new Date(Managers.configManager.getMilestone(1).epoch).getTime() / 1000);
-        if (Math.floor(new Date().getTime() / 1000) <= epoch) {
+        if (Math.floor(Date.now() / 1000) <= epoch) {
             this.blockchain.dispatch("SYNCED");
             return;
         }

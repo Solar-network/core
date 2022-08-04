@@ -594,7 +594,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      * @throws {Error} if deadline passed
      */
     private throwIfPastDeadline(deadline: number): number {
-        const now = new Date().getTime();
+        const now = Date.now();
 
         if (deadline <= now) {
             // Throw an exception so that it can cancel everything and break out of peer.ping().

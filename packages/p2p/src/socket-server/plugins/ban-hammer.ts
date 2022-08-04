@@ -44,7 +44,7 @@ export class BanHammerPlugin {
                     )}. Reason: ${reason} :oncoming_police_car:`,
                 );
             }
-            const timeNow: number = new Date().getTime() / 1000;
+            const timeNow: number = Date.now() / 1000;
             this.banList.set(ip, timeNow);
         }
     }
@@ -57,7 +57,7 @@ export class BanHammerPlugin {
             if (ip) {
                 if (this.banList.has(ip)) {
                     const bannedUntil: number = this.banList.get(ip)!;
-                    const timeNow: number = new Date().getTime() / 1000;
+                    const timeNow: number = Date.now() / 1000;
                     if (timeNow - bannedUntil >= this.banSeconds) {
                         this.banList.delete(ip);
                     } else {

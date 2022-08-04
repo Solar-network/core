@@ -38,7 +38,7 @@ export class Processor implements Contracts.Pool.Processor {
 
         const broadcastTransactions: Interfaces.ITransaction[] = [];
         const transactions: Interfaces.ITransaction[] = [];
-        const timeNow: number = Math.ceil(new Date().getTime() / 1000);
+        const timeNow: number = Math.ceil(Date.now() / 1000);
         const expirySeconds: number = 30;
 
         const handleError = (entryId: string, error: Error) => {

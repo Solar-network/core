@@ -469,7 +469,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
 
         const milestone = Managers.configManager.getMilestone();
-        const timeNow: number = new Date().getTime() / 1000;
+        const timeNow: number = Date.now() / 1000;
 
         if (timeNow - this.lastForkCheck > milestone.blockTime) {
             this.lastForkCheck = timeNow;
@@ -692,7 +692,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
 
         const acceptedTransactions: Buffer[] = [];
-        const timeNow: number = Math.ceil(new Date().getTime() / 1000);
+        const timeNow: number = Math.ceil(Date.now() / 1000);
 
         for (const [id, expiryTime] of this.cachedTransactions.entries()) {
             if (timeNow - expiryTime > 30) {
@@ -876,7 +876,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     }
 
     private pingAll(): void {
-        const timeNow: number = new Date().getTime() / 1000;
+        const timeNow: number = Date.now() / 1000;
         if (timeNow - this.lastPinged > 10) {
             this.cleansePeers({ fast: true, forcePing: true, log: false, skipCommonBlocks: true });
             this.lastPinged = timeNow;

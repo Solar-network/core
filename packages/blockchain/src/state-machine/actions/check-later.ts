@@ -34,10 +34,10 @@ export class CheckLater implements Action {
 
         const epoch = Math.floor(new Date(Managers.configManager.getMilestone().epoch).getTime() / 1000);
 
-        let timeNow = Math.floor(new Date().getTime() / 1000);
+        let timeNow = Math.floor(Date.now() / 1000);
         while (timeNow < epoch) {
             await delay(Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup));
-            timeNow = Math.floor(new Date().getTime() / 1000);
+            timeNow = Math.floor(Date.now() / 1000);
             if (timeNow < epoch) {
                 const seconds = epoch - timeNow;
 

@@ -122,7 +122,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         force = false,
         skipCommonBlocks = false,
     ): Promise<any> {
-        const deadline = new Date().getTime() + timeoutMsec;
+        const deadline = Date.now() + timeoutMsec;
 
         if (peer.version === undefined) {
             peer.version = this.app.version();
@@ -151,7 +151,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
             const peerVerifier = this.app.resolve(PeerVerifier).initialise(peer);
 
-            if (deadline <= new Date().getTime()) {
+            if (deadline <= Date.now()) {
                 throw new PeerPingTimeoutError(timeoutMsec);
             }
 
@@ -436,7 +436,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         try {
             this.connector.forgetError(peer);
 
-            const timeBeforeSocketCall: number = new Date().getTime();
+            const timeBeforeSocketCall: number = Date.now();
 
             maxPayload = maxPayload || constants.DEFAULT_MAX_PAYLOAD_CLIENT;
             await this.connector.connect(peer, maxPayload);
@@ -457,7 +457,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
             peer.sequentialErrorCounter = 0; // reset counter if response is successful, keep it after emit
 
-            peer.latency = new Date().getTime() - timeBeforeSocketCall;
+            peer.latency = Date.now() - timeBeforeSocketCall;
 
             if (!this.validateReply(peer, parsedResponsePayload, event)) {
                 const validationError = new Error(
