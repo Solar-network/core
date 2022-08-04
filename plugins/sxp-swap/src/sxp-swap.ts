@@ -1,10 +1,10 @@
+import * as EthereumTx from "@ethereumjs/tx";
 import { BlockProcessor, BlockProcessorResult } from "@solar-network/blockchain/dist/processor";
+import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@solar-network/kernel";
 import { TransactionValidator } from "@solar-network/state/dist/transaction-validator";
 import { Handlers } from "@solar-network/transactions";
 import { ColdWalletError } from "@solar-network/transactions/dist/errors";
-import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
-import * as EthereumTx from '@ethereumjs/tx';
 import assert from "assert";
 import delay from "delay";
 import InputDataDecoder from "ethereum-input-data-decoder";
@@ -141,9 +141,12 @@ export class SXPSwap {
             transaction: Interfaces.ITransaction,
             status?: string,
         ): Promise<void> {
-            await (this as any).applyToSender(transaction, status);
-            await this.applyToRecipient(transaction);
-            await (this as any).index(transaction);
+            try {
+                await (this as any).applyToSender(transaction, status);
+                await this.applyToRecipient(transaction);
+            } finally {
+                await (this as any).index(transaction);
+            }
         };
 
         Handlers.TransactionHandler.prototype.applyToSender = async function (
@@ -170,7 +173,10 @@ export class SXPSwap {
 
             sender.setNonce(data.nonce);
 
-            const newBalance: Utils.BigNumber = sender.getBalance().minus(data.amount || Utils.BigNumber.ZERO).minus(data.fee);
+            const newBalance: Utils.BigNumber = sender
+                .getBalance()
+                .minus(data.amount || Utils.BigNumber.ZERO)
+                .minus(data.fee);
 
             assert(Utils.isException(transaction.data) || !newBalance.isNegative());
 
@@ -237,26 +243,47 @@ export class SXPSwap {
                         throw new TransactionIdInvalidError();
                     }
 
-                    const requests = peers[network].map((peer: Web3) =>
-                        Promise.all([
-                            peer.eth.currentProvider ? (peer.eth.currentProvider as HttpProvider).host : undefined,
-                            self.getBlockNumber(peer),
-                            self.getTransaction(transactionId, peer),
-                            self.getReceipt(transactionId, peer)
-                        ]),
-                    );
+                    const results = await new Promise<Record<string, any>>((resolve) => {
+                        let isResolved = false;
+                        let rejections = 0;
 
-                    const results: any = await Promise.any([
-                        ...requests,
-                        new Promise<undefined[]>(async (resolve) => {
-                            await delay(2000);
-                            resolve([]);
-                        }),
-                    ]).catch(() => {
-                        return [];
+                        const resolvesFirst = (
+                            response?:
+                                | { api: string | undefined; height: unknown; txInfo: unknown; txReceipt: unknown }
+                                | undefined,
+                        ) => {
+                            if (!isResolved) {
+                                isResolved = true;
+                                return resolve(response ?? {});
+                            }
+                        };
+
+                        Promise.all(
+                            peers[network].map(async (peer: Web3) => {
+                                try {
+                                    const api = peer.eth.currentProvider
+                                        ? (peer.eth.currentProvider as HttpProvider).host
+                                        : undefined;
+                                    const height = await self.getBlockNumber(peer);
+                                    const txInfo = await self.getTransaction(transactionId, peer);
+                                    const txReceipt = await self.getReceipt(transactionId, peer);
+
+                                    if (!isResolved) {
+                                        resolvesFirst({ api, height, txInfo, txReceipt });
+                                    }
+                                } catch {
+                                    rejections++;
+                                    if (rejections === peers[network].length) {
+                                        resolvesFirst();
+                                    }
+                                }
+                            }),
+                        );
+
+                        delay(2000).finally(() => resolvesFirst());
                     });
 
-                    const [api, height, txInfo, txReceipt] = results;
+                    const { api, height, txInfo, txReceipt } = results;
 
                     if (!api || !height) {
                         throw new ApiCommunicationError(network);
@@ -440,11 +467,11 @@ export class SXPSwap {
             try {
                 const blockNumber = await peer.eth.getBlockNumber();
                 if (!blockNumber) {
-                    reject();
+                    return reject();
                 }
-                resolve(blockNumber);
+                return resolve(blockNumber);
             } catch (err) {
-                reject(err);
+                return reject(err);
             }
         });
     }
@@ -454,11 +481,11 @@ export class SXPSwap {
             try {
                 const transaction = await peer.eth.getTransaction(transactionId);
                 if (!transaction) {
-                    reject();
+                    return reject();
                 }
-                resolve(transaction);
+                return resolve(transaction);
             } catch (err) {
-                reject(err);
+                return reject(err);
             }
         });
     }
@@ -468,11 +495,11 @@ export class SXPSwap {
             try {
                 const receipt = await peer.eth.getTransactionReceipt(transactionId);
                 if (!receipt) {
-                    reject();
+                    return reject();
                 }
-                resolve(receipt);
+                return resolve(receipt);
             } catch (err) {
-                reject(err);
+                return reject(err);
             }
         });
     }

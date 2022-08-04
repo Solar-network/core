@@ -1,7 +1,7 @@
 import { BlockProcessorResult } from "@solar-network/blockchain/dist/processor";
 import { BlockHandler } from "@solar-network/blockchain/dist/processor/contracts";
-import { Container, Contracts } from "@solar-network/kernel";
 import { Interfaces } from "@solar-network/crypto";
+import { Container, Contracts } from "@solar-network/kernel";
 
 @Container.injectable()
 export class DuplicateSwapTransactionsHandler implements BlockHandler {
