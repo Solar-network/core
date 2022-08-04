@@ -78,7 +78,7 @@ export class ColdWalletError extends TransactionError {
 export class InsufficientBalanceError extends TransactionError {
     public constructor(amount: Utils.BigNumber, balance: Utils.BigNumber) {
         super(
-            `Insufficient balance in the wallet: tried to send ${Utils.formatSatoshi(
+            `Insufficient balance in the wallet: tried to spend ${Utils.formatSatoshi(
                 amount,
             )} but the wallet only has ${Utils.formatSatoshi(balance)} available (${Utils.formatSatoshi(
                 balance.minus(amount),
