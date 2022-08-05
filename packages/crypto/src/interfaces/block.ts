@@ -15,7 +15,7 @@ export interface IBlock {
     verification: IBlockVerification;
 
     getBurnedFees(): BigNumber;
-    getHeader(): IBlockData;
+    getHeader(withBurnedFee?: boolean): IBlockData;
     verifySignature(): boolean;
     verify(): IBlockVerification;
 

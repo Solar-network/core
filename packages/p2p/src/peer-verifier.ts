@@ -174,7 +174,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
                 .find((block) => block.data.height === blockHeader.height);
 
             // Use shortcut to prevent expensive crypto if the block header equals our own.
-            if (ownBlock && JSON.stringify(ownBlock.getHeader()) === JSON.stringify(blockHeader)) {
+            if (ownBlock && JSON.stringify(ownBlock.getHeader(false)) === JSON.stringify(blockHeader)) {
                 return true;
             }
 

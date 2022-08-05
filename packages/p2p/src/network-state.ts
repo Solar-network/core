@@ -126,7 +126,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
                 height: lastBlock.data.height,
                 forgingAllowed: slotInfo.forgingStatus,
                 currentSlot: slotInfo.slotNumber,
-                header: lastBlock.getHeader(),
+                header: lastBlock.getHeader(false),
             };
             peers.forEach((peer) => {
                 peer.publicKeys = peer.publicKeys.filter((publicKey) => !delegatesOnThisNode.includes(publicKey));

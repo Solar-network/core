@@ -83,7 +83,7 @@ export class PeerController extends Controller {
                 height: lastBlock.data.height,
                 forgingAllowed: slotInfo.forgingStatus,
                 currentSlot: slotInfo.slotNumber,
-                header: lastBlock.getHeader(),
+                header: lastBlock.getHeader(false),
             },
             config: getPeerConfig(this.app),
         };
