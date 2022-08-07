@@ -304,9 +304,11 @@ export abstract class TransactionHandler {
     private indexRepositories(repositories: Contracts.State.WalletRepository[], addresses: string[]) {
         for (const address of addresses) {
             for (const repository of repositories) {
-                if (repository.hasByAddress(address)) {
-                    repository.index(repository.findByAddress(address));
-                }
+                setImmediate(() => {
+                    if (repository.hasByAddress(address)) {
+                        repository.index(repository.findByAddress(address));
+                    }
+                });
             }
         }
     }
@@ -316,7 +318,8 @@ export abstract class TransactionHandler {
 
         const senderId = Identities.Address.fromPublicKey(transaction.data.senderPublicKey);
 
-        const repositories = [this.stateWalletRepository];
+        const repositories: Contracts.State.WalletRepository[] = [this.stateWalletRepository];
+
         const addresses = [senderId];
 
         if (this.stateWalletRepository !== this.walletRepository) {
@@ -343,10 +346,26 @@ export abstract class TransactionHandler {
                     AppUtils.assert.defined<Interfaces.IHtlcClaimAsset>(transaction.data.asset?.claim);
 
                     const lockId = transaction.data.asset.claim.lockTransactionId;
-                    const lockSenderWallet = this.walletRepository.findByIndex(
-                        Contracts.State.WalletIndexes.Locks,
-                        lockId,
-                    );
+                    let lockSenderWallet: Contracts.State.Wallet | undefined;
+
+                    try {
+                        lockSenderWallet = this.walletRepository.findByIndex(
+                            Contracts.State.WalletIndexes.Locks,
+                            lockId,
+                        );
+                    } catch {
+                        const lockTransaction: Interfaces.ITransactionData = (
+                            await this.transactionRepository.findByIds([lockId])
+                        )[0];
+
+                        if (this.walletRepository.hasByPublicKey(lockTransaction.senderPublicKey)) {
+                            lockSenderWallet = this.walletRepository.findByPublicKey(lockTransaction.senderPublicKey);
+                        }
+
+                        if (!lockSenderWallet) {
+                            throw new Error(`Lock id ${lockId} not found`);
+                        }
+                    }
                     const locks: Interfaces.IHtlcLocks = lockSenderWallet.getAttribute("htlc.locks", {});
 
                     let lockRecipientId: string | undefined;

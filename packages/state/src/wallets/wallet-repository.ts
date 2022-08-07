@@ -84,7 +84,7 @@ export class WalletRepository implements Contracts.State.WalletRepository {
 
     public findByIndex(index: string, key: string): Contracts.State.Wallet {
         if (!this.hasByIndex(index, key)) {
-            throw new Error(`Wallet ${key} doesn't exist in index ${index}`);
+            throw new Error(`Entry ${key} doesn't exist in index ${index}`);
         }
         return this.getIndex(index).get(key)!;
     }
@@ -95,7 +95,7 @@ export class WalletRepository implements Contracts.State.WalletRepository {
                 return this.findByIndex(index, key);
             }
         }
-        throw new Error(`Wallet ${key} doesn't exist in indexes ${indexes.join(", ")}`);
+        throw new Error(`Entry ${key} doesn't exist in indexes ${indexes.join(", ")}`);
     }
 
     public has(key: string): boolean {

@@ -16,7 +16,7 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
     }
 
     public walletAttributes(): ReadonlyArray<string> {
-        return ["htlc", "htlc.locks", "htlc.lockedBalance"];
+        return ["htlc", "htlc.locks", "htlc.lockedBalance", "htlc.pendingBalance"];
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
@@ -130,7 +130,7 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
         if (!lockWallet || !lockWallet.getAttribute("htlc.locks", {})[lockId]) {
             throw new Contracts.Pool.PoolError(
                 `The associated lock transaction id "${lockId}" was not found`,
-                "ERR_HTLCLOCKNOTFOUND",
+                "ERR_HTLC_LOCK_NOT_FOUND",
             );
         }
 
@@ -146,23 +146,15 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
     }
 
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        await super.applyToSender(transaction);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
         const data: Interfaces.ITransactionData = transaction.data;
 
-        if (Utils.isException(data)) {
-            this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}`);
-        }
-
-        await this.throwIfCannotBeApplied(transaction, sender);
-
-        this.verifyTransactionNonceApply(sender, transaction);
-
-        AppUtils.assert.defined<Utils.BigNumber>(data.nonce);
-
-        sender.setNonce(data.nonce);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
         AppUtils.assert.defined<string>(data.asset?.claim?.lockTransactionId);
 
@@ -182,37 +174,63 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
 
         const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(recipientId);
 
-        recipientWallet.increaseBalance(locks[lockId].amount.minus(data.fee));
+        recipientWallet.increaseBalance(locks[lockId].amount);
         const lockedBalance: Utils.BigNumber = lockWallet.getAttribute("htlc.lockedBalance");
         const newLockedBalance: Utils.BigNumber = lockedBalance.minus(locks[lockId].amount);
 
         strict(!newLockedBalance.isNegative());
 
+        const lockPendingBalance: Utils.BigNumber = lockWallet.getAttribute(
+            "htlc.pendingBalance",
+            Utils.BigNumber.ZERO,
+        );
+
         if (newLockedBalance.isZero()) {
             lockWallet.forgetAttribute("htlc.lockedBalance");
             lockWallet.forgetAttribute("htlc.locks"); // zero lockedBalance means no pending locks
-            lockWallet.forgetAttribute("htlc");
+            if (lockPendingBalance.isZero()) {
+                lockWallet.forgetAttribute("htlc");
+            }
         } else {
             lockWallet.setAttribute("htlc.lockedBalance", newLockedBalance);
         }
 
+        const pendingBalance: Utils.BigNumber = recipientWallet.getAttribute("htlc.pendingBalance");
+        const newPendingBalance: Utils.BigNumber = pendingBalance.minus(locks[lockId].amount);
+
+        strict(!newPendingBalance.isNegative());
+
+        const recipientLockedBalance: Utils.BigNumber = recipientWallet.getAttribute(
+            "htlc.lockedBalance",
+            Utils.BigNumber.ZERO,
+        );
+
+        if (newPendingBalance.isZero()) {
+            recipientWallet.forgetAttribute("htlc.pendingBalance");
+            if (recipientLockedBalance.isZero()) {
+                recipientWallet.forgetAttribute("htlc");
+            }
+        } else {
+            recipientWallet.setAttribute("htlc.pendingBalance", newPendingBalance);
+        }
+
         delete locks[lockId];
 
-        this.walletRepository.index(sender);
         this.walletRepository.index(lockWallet);
         this.walletRepository.index(recipientWallet);
+        this.walletRepository.index(senderWallet);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
+        await super.revertForSender(transaction);
+
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            transaction.data.senderPublicKey,
+        );
 
         const data: Interfaces.ITransactionData = transaction.data;
-
-        this.verifyTransactionNonceRevert(sender, transaction);
-
-        sender.decreaseNonce();
 
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
         AppUtils.assert.defined<string>(data.asset?.claim?.lockTransactionId);
@@ -226,7 +244,13 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
         const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(
             lockTransaction.recipientId,
         );
-        recipientWallet.decreaseBalance(lockTransaction.amount.minus(data.fee));
+        recipientWallet.decreaseBalance(lockTransaction.amount);
+
+        const pendingBalance: Utils.BigNumber = recipientWallet.getAttribute(
+            "htlc.pendingBalance",
+            Utils.BigNumber.ZERO,
+        );
+        recipientWallet.setAttribute("htlc.pendingBalance", pendingBalance.plus(lockTransaction.amount));
 
         AppUtils.assert.defined<string>(lockTransaction.senderPublicKey);
 
@@ -251,9 +275,9 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
         };
         lockWallet.setAttribute("htlc.locks", locks);
 
-        this.walletRepository.index(sender);
         this.walletRepository.index(lockWallet);
         this.walletRepository.index(recipientWallet);
+        this.walletRepository.index(senderWallet);
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}

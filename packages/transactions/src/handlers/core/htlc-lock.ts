@@ -11,7 +11,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
     }
 
     public walletAttributes(): ReadonlyArray<string> {
-        return ["htlc", "htlc.locks", "htlc.lockedBalance"];
+        return ["htlc", "htlc.locks", "htlc.lockedBalance", "htlc.pendingBalance"];
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
@@ -22,10 +22,12 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
         const transactions = await this.transactionRepository.getOpenHtlcLocks();
         const walletsToIndex: Record<string, Contracts.State.Wallet> = {};
         for (const transaction of transactions) {
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
-            const locks: Interfaces.IHtlcLocks = wallet.getAttribute("htlc.locks", {});
+            const lockWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                transaction.senderPublicKey,
+            );
+            const locks: Interfaces.IHtlcLocks = lockWallet.getAttribute("htlc.locks", {});
 
-            let lockedBalance: Utils.BigNumber = wallet.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO);
+            let lockedBalance: Utils.BigNumber = lockWallet.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO);
 
             locks[transaction.id] = {
                 amount: Utils.BigNumber.make(transaction.amount),
@@ -40,11 +42,19 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
             const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(
                 transaction.recipientId,
             );
-            walletsToIndex[wallet.getAddress()] = wallet;
+
+            let pendingBalance: Utils.BigNumber = recipientWallet.getAttribute(
+                "htlc.pendingBalance",
+                Utils.BigNumber.ZERO,
+            );
+            pendingBalance = pendingBalance.plus(transaction.amount);
+
+            walletsToIndex[lockWallet.getAddress()] = lockWallet;
             walletsToIndex[recipientWallet.getAddress()] = recipientWallet;
 
-            wallet.setAttribute("htlc.locks", locks);
-            wallet.setAttribute("htlc.lockedBalance", lockedBalance);
+            lockWallet.setAttribute("htlc.lockedBalance", lockedBalance);
+            lockWallet.setAttribute("htlc.locks", locks);
+            recipientWallet.setAttribute("htlc.pendingBalance", pendingBalance);
         }
 
         for (const wallet of Object.values(walletsToIndex)) {
@@ -111,11 +121,14 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
         const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
         const lockedBalance = senderWallet.getAttribute<Utils.BigNumber>("htlc.lockedBalance", Utils.BigNumber.ZERO);
         const newLockedBalance = lockedBalance.minus(transaction.data.amount);
+        const pendingBalance: Utils.BigNumber = senderWallet.getAttribute("htlc.pendingBalance", Utils.BigNumber.ZERO);
 
         if (newLockedBalance.isZero()) {
             senderWallet.forgetAttribute("htlc.lockedBalance");
             senderWallet.forgetAttribute("htlc.locks"); // zero lockedBalance means no pending locks
-            senderWallet.forgetAttribute("htlc");
+            if (pendingBalance.isZero()) {
+                senderWallet.forgetAttribute("htlc");
+            }
         } else {
             senderWallet.setAttribute("htlc.lockedBalance", newLockedBalance);
         }
@@ -124,12 +137,8 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
-        // It may seem that htlc-lock doesn't have recipient because it only updates sender's wallet.
-        // But actually applyToSender applies state changes that only affect sender.
-        // While applyToRecipient applies state changes that can affect others.
-        // It is simple technique to isolate different senders in pool.
-
         AppUtils.assert.defined<string>(transaction.id);
+        AppUtils.assert.defined<string>(transaction.data.recipientId);
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
         AppUtils.assert.defined<Interfaces.IHtlcLockAsset>(transaction.data.asset?.lock);
 
@@ -144,11 +153,23 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
         };
         senderWallet.setAttribute("htlc.locks", locks);
 
+        const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(
+            transaction.data.recipientId,
+        );
+
+        const pendingBalance = recipientWallet.getAttribute<Utils.BigNumber>(
+            "htlc.pendingBalance",
+            Utils.BigNumber.ZERO,
+        );
+        recipientWallet.setAttribute("htlc.pendingBalance", pendingBalance.plus(transaction.data.amount));
+
+        this.walletRepository.index(recipientWallet);
         this.walletRepository.index(senderWallet);
     }
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.id);
+        AppUtils.assert.defined<string>(transaction.data.recipientId);
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
         const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
@@ -161,6 +182,28 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
             senderWallet.setAttribute("htlc.locks", locks);
         }
 
+        const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(
+            transaction.data.recipientId,
+        );
+
+        const pendingBalance = recipientWallet.getAttribute<Utils.BigNumber>(
+            "htlc.pendingBalance",
+            Utils.BigNumber.ZERO,
+        );
+        const newPendingBalance = pendingBalance.minus(transaction.data.amount);
+
+        const lockedBalance: Utils.BigNumber = recipientWallet.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO);
+
+        if (newPendingBalance.isZero()) {
+            recipientWallet.forgetAttribute("htlc.pendingBalance");
+            if (lockedBalance.isZero()) {
+                recipientWallet.forgetAttribute("htlc");
+            }
+        } else {
+            recipientWallet.setAttribute("htlc.pendingBalance", newPendingBalance);
+        }
+
+        this.walletRepository.index(recipientWallet);
         this.walletRepository.index(senderWallet);
     }
 }
