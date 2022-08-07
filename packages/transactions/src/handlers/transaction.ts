@@ -177,6 +177,10 @@ export abstract class TransactionHandler {
         this.verifyTransactionNonceRevert(sender, transaction);
 
         sender.decreaseNonce();
+
+        if (sender.getNonce().isZero()) {
+            sender.forgetPublicKey();
+        }
     }
 
     /**

@@ -34,6 +34,23 @@ export class Wallet implements Contracts.State.Wallet {
         return this.publicKey;
     }
 
+    public hasPublicKey(): boolean {
+        return this.publicKey !== undefined;
+    }
+
+    public forgetPublicKey(): void {
+        const previousValue = this.publicKey;
+
+        this.publicKey = undefined;
+
+        this.events?.dispatchSync(WalletEvent.PropertySet, {
+            publicKey: this.publicKey,
+            key: "publicKey",
+            previousValue,
+            wallet: this,
+        });
+    }
+
     public setPublicKey(publicKey: string): void {
         const previousValue = this.publicKey;
 
@@ -112,6 +129,14 @@ export class Wallet implements Contracts.State.Wallet {
             nonce: this.nonce,
             attributes: this.attributes,
         };
+    }
+
+    /**
+     * @returns {number}
+     * @memberof Wallet
+     */
+    public countAttributes(): number {
+        return Object.keys(this.getAttributes()).length;
     }
 
     /**
