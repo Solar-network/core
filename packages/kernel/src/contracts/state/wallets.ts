@@ -42,7 +42,13 @@ export interface WalletData {
 }
 
 export interface Wallet {
+    countAttributes(): number;
+
     getAddress(): string;
+
+    hasPublicKey(): boolean;
+
+    forgetPublicKey(): void;
 
     getPublicKey(): string | undefined;
 

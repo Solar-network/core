@@ -2,10 +2,11 @@ import { Contracts } from "@solar-network/kernel";
 
 const isIndexable = (wallet: Contracts.State.Wallet): boolean => {
     return (
-        !wallet.getNonce().isZero() ||
-        !wallet.getBalance().isZero() ||
+        wallet.countAttributes() > 1 ||
         wallet.hasMultiSignature() ||
-        Object.keys(wallet.getAttributes()).length > 1
+        wallet.hasPublicKey() ||
+        !wallet.getBalance().isZero() ||
+        !wallet.getNonce().isZero()
     );
 };
 
