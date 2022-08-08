@@ -53,6 +53,10 @@ export class BlockFilter implements Contracts.Database.BlockFilter {
                     return handleOrCriteria(criteria.totalFee!, async (c) => {
                         return handleNumericCriteria("totalFee", c);
                     });
+                case "burnedFee":
+                    return handleOrCriteria(criteria.burnedFee!, async (c) => {
+                        return handleNumericCriteria("burnedFee", c);
+                    });
                 case "reward":
                     return handleOrCriteria(criteria.reward!, async (c) => {
                         return handleNumericCriteria("reward", c);

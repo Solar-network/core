@@ -18,6 +18,7 @@ export type TransactionCriteria = {
     recipientId?: OrEqualCriteria<string>;
     id?: OrEqualCriteria<string>;
     version?: OrEqualCriteria<number>;
+    blockHeight?: OrNumericCriteria<number>;
     blockId?: OrEqualCriteria<string>;
     sequence?: OrNumericCriteria<number>;
     timestamp?: OrNumericCriteria<number>;
@@ -27,6 +28,7 @@ export type TransactionCriteria = {
     typeGroup?: OrEqualCriteria<number>;
     memo?: OrLikeCriteria<string>;
     amount?: OrNumericCriteria<Utils.BigNumber>;
+    burnedFee?: OrNumericCriteria<Utils.BigNumber>;
     fee?: OrNumericCriteria<Utils.BigNumber>;
     asset?: OrContainsCriteria<Record<string, any>>;
 };

@@ -47,6 +47,10 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
                     return handleOrCriteria(criteria.version!, async (c) => {
                         return { property: "version", op: "equal", value: c };
                     });
+                case "blockHeight":
+                    return handleOrCriteria(criteria.blockHeight!, async (c) => {
+                        return handleNumericCriteria("blockHeight", c);
+                    });
                 case "blockId":
                     return handleOrCriteria(criteria.blockId!, async (c) => {
                         return { property: "blockId", op: "equal", value: c };
@@ -86,6 +90,10 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
                 case "fee":
                     return handleOrCriteria(criteria.fee!, async (c) => {
                         return handleNumericCriteria("fee", c);
+                    });
+                case "burnedFee":
+                    return handleOrCriteria(criteria.burnedFee!, async (c) => {
+                        return handleNumericCriteria("burnedFee", c);
                     });
                 case "asset":
                     return handleOrCriteria(criteria.asset!, async (c) => {

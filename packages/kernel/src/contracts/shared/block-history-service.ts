@@ -12,6 +12,7 @@ export type BlockCriteria = {
     numberOfTransactions?: OrNumericCriteria<number>;
     totalAmount?: OrNumericCriteria<Utils.BigNumber>;
     totalFee?: OrNumericCriteria<Utils.BigNumber>;
+    burnedFee?: OrNumericCriteria<Utils.BigNumber>;
     reward?: OrNumericCriteria<Utils.BigNumber>;
     payloadLength?: OrNumericCriteria<number>;
     payloadHash?: OrEqualCriteria<string>;

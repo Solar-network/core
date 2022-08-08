@@ -1373,6 +1373,8 @@
                             "enum": [
                                 "amount:asc",
                                 "amount:desc",
+                                "blockHeight:asc",
+                                "blockHeight:desc",
                                 "blockId:asc",
                                 "blockId:desc",
                                 "burnedFee:asc",
@@ -1503,6 +1505,30 @@
                         "description": "The version of the transaction(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/transactionVersions"
+                        }
+                    },
+                    {
+                        "name": "blockHeight",
+                        "in": "query",
+                        "description": "The exact block height containing the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "blockHeight.from",
+                        "in": "query",
+                        "description": "The earliest block height containing the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "blockHeight.to",
+                        "in": "query",
+                        "description": "The latest block height containing the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
                         }
                     },
                     {
@@ -1675,6 +1701,8 @@
                             "enum": [
                                 "amount:asc",
                                 "amount:desc",
+                                "blockHeight:asc",
+                                "blockHeight:desc",
                                 "blockId:asc",
                                 "blockId:desc",
                                 "burnedFee:asc",
@@ -1898,6 +1926,30 @@
                         }
                     },
                     {
+                        "name": "blockHeight",
+                        "in": "query",
+                        "description": "The exact block height containing the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "blockHeight.from",
+                        "in": "query",
+                        "description": "The earliest block height containing the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "blockHeight.to",
+                        "in": "query",
+                        "description": "The latest block height containing the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
                         "name": "blockId",
                         "in": "query",
                         "description": "The block ID containing the vote transaction(s) to be returned",
@@ -2024,6 +2076,8 @@
                         "schema": {
                             "type": "string",
                             "enum": [
+                                "blockHeight:asc",
+                                "blockHeight:desc",
                                 "blockId:asc",
                                 "blockId:desc",
                                 "burnedFee:asc",

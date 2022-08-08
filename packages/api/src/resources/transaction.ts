@@ -51,6 +51,7 @@ export class TransactionResource implements Resource {
 
         return {
             id: resource.id,
+            blockHeight: resource.blockHeight,
             blockId: resource.blockId,
             version: resource.version,
             type: resource.type,
