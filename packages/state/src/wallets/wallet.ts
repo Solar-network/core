@@ -1,4 +1,4 @@
-import { Enums, Interfaces, Utils } from "@solar-network/crypto";
+import { Enums, Utils } from "@solar-network/crypto";
 import { Contracts, Services, Utils as AppUtils } from "@solar-network/kernel";
 
 import { WalletEvent } from "./wallet-event";
@@ -7,7 +7,6 @@ export class Wallet implements Contracts.State.Wallet {
     protected publicKey: string | undefined;
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
-    protected stateHistory: Record<string, any[]> = {};
     protected voteBalances: Record<string, Utils.BigNumber> = {};
 
     public constructor(
@@ -16,13 +15,8 @@ export class Wallet implements Contracts.State.Wallet {
         protected readonly isClone: boolean,
         protected readonly events?: Contracts.Kernel.EventDispatcher,
     ) {
-        if (!this.getStateHistory("votes") && !isClone) {
-            this.initialiseStateHistory("votes");
-            this.addStateHistory("votes", {});
-        }
-
         if (!this.hasAttribute("votes") && !isClone) {
-            this.setAttribute("votes", this.getCurrentStateHistory("votes").value);
+            this.setAttribute("votes", {});
         }
     }
 
@@ -224,63 +218,6 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     /**
-     * @returns {Record<string, any[]>}
-     * @memberof Wallet
-     */
-    public getAllStateHistory(): Record<string, any[]> {
-        return this.stateHistory;
-    }
-
-    /**
-     * @returns {any}
-     * @memberof Wallet
-     */
-    public getCurrentStateHistory(key: string): any {
-        return this.stateHistory[key].at(-1);
-    }
-
-    /**
-     * @returns {any}
-     * @memberof Wallet
-     */
-    public getPreviousStateHistory(key: string): any {
-        return this.stateHistory[key].at(-2) || { value: {} };
-    }
-
-    /**
-     * @returns {any}
-     * @memberof Wallet
-     */
-    public getStateHistory(key: string): any {
-        return this.stateHistory[key];
-    }
-
-    public setAllStateHistory(stateHistory: Record<string, any[]>): void {
-        this.stateHistory = stateHistory;
-    }
-
-    public initialiseStateHistory(key: string): void {
-        this.stateHistory[key] = [];
-    }
-
-    public forgetStateHistory(key: string): void {
-        delete this.stateHistory[key];
-    }
-
-    public addStateHistory(key: string, value?: any, transaction?: Interfaces.ITransactionData | undefined): void {
-        this.stateHistory[key].push({
-            value,
-            transaction: transaction ? { height: transaction.blockHeight, id: transaction.id } : undefined,
-        });
-    }
-
-    public removeCurrentStateHistory(key: string): void {
-        if (this.stateHistory[key].length > 1) {
-            this.stateHistory[key].pop();
-        }
-    }
-
-    /**
      * @param {string} delegate
      * @returns {Utils.BigNumber}
      * @memberof Wallet
@@ -316,16 +253,6 @@ export class Wallet implements Contracts.State.Wallet {
         }
 
         return distribution;
-    }
-
-    /**
-     * @param {object} value
-     * @memberof Wallet
-     */
-    public changeVotes(value: Record<string, number>, transaction: Interfaces.ITransactionData): void {
-        const sortedVotes: Record<string, number> = Utils.sortVotes(value);
-        this.addStateHistory("votes", sortedVotes, transaction);
-        this.setAttribute("votes", sortedVotes);
     }
 
     public updateVoteBalances(): void {
@@ -370,7 +297,6 @@ export class Wallet implements Contracts.State.Wallet {
         cloned.publicKey = this.publicKey;
         cloned.balance = this.balance;
         cloned.nonce = this.nonce;
-        cloned.stateHistory = AppUtils.cloneDeep(this.stateHistory);
         cloned.voteBalances = AppUtils.cloneDeep(this.voteBalances);
         return cloned;
     }

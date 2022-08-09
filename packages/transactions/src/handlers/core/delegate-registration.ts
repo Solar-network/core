@@ -1,4 +1,4 @@
-import { Enums, Identities, Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Identities, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/kernel";
 
 import {
@@ -67,8 +67,6 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
                 voters: 0,
             });
 
-            wallet.initialiseStateHistory("delegateStatus");
-            wallet.addStateHistory("delegateStatus", Enums.DelegateStatus.NotResigned, transaction);
             this.walletRepository.index(wallet);
         }
 
@@ -195,9 +193,6 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             voters: 0,
         });
 
-        senderWallet.initialiseStateHistory("delegateStatus");
-        senderWallet.addStateHistory("delegateStatus", Enums.DelegateStatus.NotResigned, transaction.data);
-
         this.walletRepository.index(senderWallet);
     }
 
@@ -211,7 +206,6 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         );
 
         senderWallet.forgetAttribute("delegate");
-        senderWallet.forgetStateHistory("delegateStatus");
 
         this.walletRepository.index(senderWallet);
     }

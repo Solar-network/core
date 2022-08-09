@@ -71,7 +71,7 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
                 }
             }
 
-            wallet.changeVotes(walletVote, transaction);
+            wallet.setAttribute("votes", walletVote);
         }
     }
 
@@ -207,7 +207,7 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
         }
 
         Utils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
-        senderWallet.changeVotes(walletVote, transaction.data);
+        senderWallet.setAttribute("votes", walletVote);
         senderWallet.updateVoteBalances();
         Utils.increaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
     }
@@ -221,8 +221,26 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
             transaction.data.senderPublicKey,
         );
 
-        senderWallet.removeCurrentStateHistory("votes");
-        const previousVotes = senderWallet.getCurrentStateHistory("votes").value;
+        let previousVotes;
+
+        Utils.assert.defined<Interfaces.ITransactionAsset>(transaction.data.asset?.votes);
+
+        for (const vote of transaction.data.asset.votes.slice().reverse()) {
+            let delegateWallet: Contracts.State.Wallet;
+            let delegateVote: string = vote.slice(1);
+            if (delegateVote.length === 66) {
+                delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
+                delegateVote = delegateWallet.getAttribute("delegate.username");
+            } else {
+                delegateWallet = this.walletRepository.findByUsername(delegateVote);
+            }
+
+            if (vote.startsWith("+")) {
+                previousVotes = {};
+            } else {
+                previousVotes = { [delegateVote]: 100 };
+            }
+        }
 
         Utils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
         senderWallet.setAttribute("votes", previousVotes);

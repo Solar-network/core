@@ -174,7 +174,6 @@ export class StateLoader {
                     let balance: bigint | number = 0;
                     let nonce: bigint | number = 1;
                     let publicKey: string | undefined;
-                    let stateHistory: Record<string, object[]> = {};
                     let voteBalances: Record<string, Utils.BigNumber> = {};
 
                     if ((1 & bits) !== 0) {
@@ -196,11 +195,6 @@ export class StateLoader {
 
                     if ((16 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        stateHistory = JSON.parse(buffer.readBuffer(length).toString(), reviver);
-                    }
-
-                    if ((32 & bits) !== 0) {
-                        const length: number = buffer.readUInt32LE();
                         voteBalances = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                     }
 
@@ -217,7 +211,6 @@ export class StateLoader {
                         wallet.setAttribute(attribute, attributes[attribute]);
                     }
 
-                    wallet.setAllStateHistory(stateHistory);
                     wallet.setVoteBalances(voteBalances);
 
                     this.walletRepository.index(wallet);
