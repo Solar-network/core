@@ -78,7 +78,7 @@ export class CheckLater implements Action {
                     skipCommonBlocks: true,
                 });
                 setInterval(async () => {
-                    if (this.stateStore.getBlockchain().value !== "idle") {
+                    if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
                         return;
                     }
                     try {
@@ -141,7 +141,7 @@ export class CheckLater implements Action {
                 }, 500);
 
                 setInterval(async () => {
-                    if (this.stateStore.getBlockchain().value !== "idle") {
+                    if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
                         return;
                     }
                     const transactions: Buffer[] = await this.peerNetworkMonitor.downloadTransactions();
@@ -151,7 +151,7 @@ export class CheckLater implements Action {
                 }, 4000);
 
                 setInterval(async () => {
-                    if (this.stateStore.getBlockchain().value !== "idle") {
+                    if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
                         return;
                     }
 
@@ -161,7 +161,7 @@ export class CheckLater implements Action {
                 }, 1000);
 
                 setInterval(async () => {
-                    if (this.stateStore.getBlockchain().value !== "idle") {
+                    if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
                         return;
                     }
 
