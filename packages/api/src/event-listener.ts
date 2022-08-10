@@ -25,6 +25,10 @@ export class EventListener {
     private readonly walletRepository!: Contracts.State.WalletRepository;
 
     public async initialise(): Promise<void> {
+        if (!this.configuration.get("ws.enabled")) {
+            return;
+        }
+
         const servers: Server[] = [];
         if (this.configuration.get("server.http.enabled")) {
             servers.push(this.app.get<Server>(Identifiers.HTTP));
