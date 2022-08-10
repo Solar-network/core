@@ -7,6 +7,7 @@ export class LegacyVoteTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.Vote;
     public static key = "legacyVote";
+    public static unique: boolean = true;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("100000000");
 

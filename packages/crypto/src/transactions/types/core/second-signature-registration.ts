@@ -7,6 +7,7 @@ export abstract class SecondSignatureRegistrationTransaction extends Transaction
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.SecondSignature;
     public static key = "secondSignature";
+    public static unique: boolean = true;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("500000000");
 
