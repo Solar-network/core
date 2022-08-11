@@ -1,7 +1,5 @@
 import { Commands, Container, Contracts } from "@solar-network/cli";
-import { Identities } from "@solar-network/crypto";
 import { Networks } from "@solar-network/crypto";
-import { validateMnemonic } from "bip39";
 import { writeJsonSync } from "fs-extra";
 import Joi from "joi";
 
@@ -18,7 +16,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public signature: string = "config:forger:bip39";
+    public signature: string = "config:forger:private-key";
 
     /**
      * The console command description.
@@ -26,7 +24,7 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public description: string = "Configure the forging delegate (BIP39)";
+    public description: string = "Configure the forging delegate (privateKey)";
 
     /**
      * Indicates whether the command should be shown in the command list.
@@ -46,8 +44,7 @@ export class Command extends Commands.Command {
         this.definition
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("bip39", "A delegate plain text passphrase, referred to as BIP39", Joi.string())
-            .setFlag("skipValidation", "Skip BIP39 mnemonic validation", Joi.boolean().default(false));
+            .setFlag("privateKey", "A 64 character hexadecimal delegate private key", Joi.string().hex().length(64));
     }
 
     /**
@@ -57,19 +54,17 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        if (this.hasFlag("bip39")) {
+        if (this.hasFlag("privateKey")) {
             return this.performConfiguration(this.getFlags());
         }
 
         const response = await this.components.prompt([
             {
                 type: "password",
-                name: "bip39",
-                message: "Please enter your delegate plain text passphrase. Referred to as BIP39",
+                name: "privateKey",
+                message: "Please enter your 64 character hexadecimal delegate private key",
                 validate: (value: string) =>
-                    !validateMnemonic(value) && !this.getFlag("skipValidation")
-                        ? `Failed to verify the given passphrase as BIP39 compliant`
-                        : true,
+                    !/^[0-9a-fA-F]{64}$/.test(value) ? "The private key must be 64 hexadecimal characters" : true,
             },
             {
                 type: "confirm",
@@ -92,20 +87,12 @@ export class Command extends Commands.Command {
     private async performConfiguration(flags: Contracts.AnyObject): Promise<void> {
         await this.components.taskList([
             {
-                title: "Validating passphrase is BIP39 compliant",
-                task: () => {
-                    if (!flags.bip39 || (!validateMnemonic(flags.bip39) && !flags.skipValidation)) {
-                        throw new Error("Failed to verify the given passphrase as BIP39 compliant");
-                    }
-                },
-            },
-            {
-                title: "Writing BIP39 passphrase to configuration",
+                title: "Writing private key to configuration",
                 task: () => {
                     const delegatesConfig = this.app.getCorePath("config", "delegates.json");
 
                     const delegates: Record<string, string | string[]> = require(delegatesConfig);
-                    delegates.keys = [Identities.PrivateKey.fromPassphrase(flags.bip39)];
+                    delegates.keys = [flags.privateKey.toLowerCase()];
 
                     writeJsonSync(delegatesConfig, delegates, { spaces: 4 });
                 },

@@ -6,8 +6,8 @@ export class MissingConfigFile extends Exception {
     }
 }
 
-export class PassphraseNotDetected extends Exception {
+export class KeysNotDetected extends Exception {
     public constructor() {
-        super(`Unable to detect a BIP39 passphrase`);
+        super("Unable to detect any private keys");
     }
 }

@@ -2,9 +2,9 @@ import { Container, Contracts, Providers, Services } from "@solar-network/kernel
 import Joi from "joi";
 
 import { ForgeNewBlockAction, IsForgingAllowedAction } from "./actions";
-import { DelegateFactory } from "./delegate-factory";
+import { Delegate } from "./delegate";
 import { ForgerService } from "./forger-service";
-import { Delegate, RelayHost } from "./interfaces";
+import { RelayHost } from "./interfaces";
 import { CurrentDelegateProcessAction, LastForgedBlockRemoteAction, NextSlotProcessAction } from "./process-actions";
 
 /**
@@ -59,9 +59,12 @@ export class ServiceProvider extends Providers.ServiceProvider {
      * @memberof ServiceProvider
      */
     public async bootWhen(): Promise<boolean> {
-        const { secrets }: { secrets: string[] } = this.app.config("delegates")!;
+        const { keys, secrets }: Record<string, string> = this.app.config("delegates")!;
 
-        if (!secrets || !secrets.length || !Array.isArray(secrets)) {
+        if (
+            (!keys || !keys.length || !Array.isArray(keys)) &&
+            (!secrets || !secrets.length || !Array.isArray(secrets))
+        ) {
             return false;
         }
 
@@ -118,8 +121,8 @@ export class ServiceProvider extends Providers.ServiceProvider {
     private makeDelegates(): Delegate[] {
         const delegates: Set<Delegate> = new Set<Delegate>();
 
-        for (const secret of this.app.config("delegates.secrets")) {
-            delegates.add(DelegateFactory.fromBIP39(secret));
+        for (const key of this.app.config("delegates.keys")) {
+            delegates.add(new Delegate(key));
         }
 
         return [...delegates];

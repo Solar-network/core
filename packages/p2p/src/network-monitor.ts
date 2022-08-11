@@ -850,11 +850,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         const delegatesOnThisNode: string[] = [];
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {
-            const { secrets } = readJsonSync(`${this.app.configPath()}/delegates.json`);
-            for (const secret of secrets) {
-                const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
-                if (delegates.includes(keys.publicKey) && publicKeys.includes(keys.publicKey)) {
-                    delegatesOnThisNode.push(keys.publicKey);
+            const { keys } = readJsonSync(`${this.app.configPath()}/delegates.json`);
+            for (const key of keys) {
+                const keyPair: Interfaces.IKeyPair = Identities.Keys.fromPrivateKey(key);
+                if (delegates.includes(keyPair.publicKey) && publicKeys.includes(keyPair.publicKey)) {
+                    delegatesOnThisNode.push(keyPair.publicKey);
                 }
             }
         }
