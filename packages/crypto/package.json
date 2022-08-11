@@ -23,10 +23,10 @@
         "rollup": "rollup -c"
     },
     "dependencies": {
+        "@scure/bip32": "1.1.0",
         "ajv": "6.12.6",
         "ajv-keywords": "3.4.1",
         "bcrypto": "5.4.0",
-        "bip32": "2.0.6",
         "bip39": "3.0.4",
         "browserify-aes": "1.2.0",
         "bstring": "0.3.9",
