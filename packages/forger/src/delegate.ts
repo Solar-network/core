@@ -39,7 +39,7 @@ export class Delegate implements IDelegate {
     /**
      * @param {Interfaces.ITransactionData[]} transactions
      * @param {Record<string, any>} options
-     * @returns {(Interfaces.IBlock | undefined)}
+     * @returns {Interfaces.IBlock}
      * @memberof Delegate
      */
     public forge(transactions: Interfaces.ITransactionData[], options: Record<string, any>): Interfaces.IBlock {
