@@ -8,10 +8,11 @@ export class HDWallet {
     /**
      * Get root node from the given mnemonic with an optional passphrase.
      */
-    public static fromMnemonic(mnemonic: string, account: number, passphrase?: string): HDKey {
-        return HDKey.fromMasterSeed(mnemonicToSeedSync(mnemonic, passphrase)).derive(
-            `m/44'/${configManager.get("network.slip44")}'/${account}'/0`,
-        );
+    public static fromMnemonic(mnemonic: string, account: number, slip44?: number, passphrase?: string): HDKey {
+        if (slip44 === undefined) {
+            slip44 = configManager.get("network.slip44");
+        }
+        return HDKey.fromMasterSeed(mnemonicToSeedSync(mnemonic, passphrase)).derive(`m/44'/${slip44}'/${account}'/0`);
     }
 
     /**
