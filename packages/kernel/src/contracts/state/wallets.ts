@@ -130,65 +130,6 @@ export interface Wallet {
     hasVoted(): boolean;
 
     /**
-     * @returns {Record<string, any[]>}
-     * @memberof Wallet
-     */
-    getAllStateHistory(): Record<string, any[]>;
-
-    /**
-     * @param {string} key
-     * @returns {any}
-     * @memberof Wallet
-     */
-    getCurrentStateHistory(key: string): any;
-
-    /**
-     * @param {string} key
-     * @returns {any}
-     * @memberof Wallet
-     */
-    getPreviousStateHistory(key: string): any;
-
-    /**
-     * @param {string} key
-     * @returns {any}
-     * @memberof Wallet
-     */
-    getStateHistory(key: string): any;
-
-    /**
-     * @param {Record<string, any[]>} stateHistory
-     * @memberof Wallet
-     */
-    setAllStateHistory(stateHistory: Record<string, any[]>): void;
-
-    /**
-     * @param {string} key
-     * @memberof Wallet
-     */
-    initialiseStateHistory(key: string): void;
-
-    /**
-     * @param {string} key
-     * @memberof Wallet
-     */
-    forgetStateHistory(key: string): void;
-
-    /**
-     * @param {string} key
-     * @param {any} value
-     * @param {Interfaces.ITransactionData | undefined} transaction
-     * @memberof Wallet
-     */
-    addStateHistory(key: string, value?: any, transaction?: Interfaces.ITransactionData | undefined): void;
-
-    /**
-     * @param {string} key
-     * @memberof Wallet
-     */
-    removeCurrentStateHistory(key: string): void;
-
-    /**
      * @param {string} delegate
      * @returns {Utils.BigNumber}
      * @memberof Wallet
@@ -212,13 +153,6 @@ export interface Wallet {
      * @memberof Wallet
      */
     getVoteDistribution(): Record<string, WalletVoteDistribution>;
-
-    /**
-     * @param {object} value
-     * @param {Interfaces.ITransactionData} transaction
-     * @memberof Wallet
-     */
-    changeVotes(value: object, transaction: Interfaces.ITransactionData): void;
 
     updateVoteBalances(): void;
 

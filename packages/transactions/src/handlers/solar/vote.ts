@@ -1,5 +1,5 @@
-import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
-import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/kernel";
+import { Identities, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/kernel";
 
 import {
     AlreadyVotedForSameDelegatesError,
@@ -38,12 +38,12 @@ export class VoteTransactionHandler extends TransactionHandler {
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
-            Utils.assert.defined<string>(transaction.senderPublicKey);
-            Utils.assert.defined<string[]>(transaction.asset?.votes);
+            AppUtils.assert.defined<string>(transaction.senderPublicKey);
+            AppUtils.assert.defined<Record<string, number>>(transaction.asset?.votes);
 
             const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
 
-            wallet.changeVotes(transaction.asset.votes, transaction);
+            wallet.setAttribute("votes", Utils.sortVotes(transaction.asset.votes));
         }
     }
 
@@ -55,7 +55,7 @@ export class VoteTransactionHandler extends TransactionHandler {
         transaction: Interfaces.ITransaction,
         wallet: Contracts.State.Wallet,
     ): Promise<void> {
-        Utils.assert.defined<string[]>(transaction.data.asset?.votes);
+        AppUtils.assert.defined<string[]>(transaction.data.asset?.votes);
 
         const { activeDelegates } = Managers.configManager.getMilestone();
         const votes = Object.keys(transaction.data.asset.votes);
@@ -64,7 +64,7 @@ export class VoteTransactionHandler extends TransactionHandler {
             throw new VotedForTooManyDelegatesError(activeDelegates);
         }
 
-        if (Utils.isEqual(transaction.data.asset.votes, wallet.getCurrentStateHistory("votes").value)) {
+        if (AppUtils.isEqual(transaction.data.asset.votes, wallet.getAttribute("votes"))) {
             if (Object.keys(transaction.data.asset.votes).length === 0) {
                 throw new NoVoteError();
             }
@@ -85,19 +85,14 @@ export class VoteTransactionHandler extends TransactionHandler {
         return super.throwIfCannotBeApplied(transaction, wallet);
     }
 
-    public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
-        Utils.assert.defined<string[]>(transaction.data.asset?.votes);
+    public async emitEvents(
+        transaction: Interfaces.ITransaction,
+        emitter: Contracts.Kernel.EventDispatcher,
+    ): Promise<void> {
+        AppUtils.assert.defined<string[]>(transaction.data.asset?.votes);
 
         const wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
-        const previousVotes = wallet
-            .getStateHistory("votes")
-            .filter(
-                (state) =>
-                    (!state.transaction ||
-                        (state.transaction && state.transaction.height <= transaction.data.blockHeight!)) &&
-                    Utils.isNotEqual(transaction.data.asset?.votes, state.value),
-            )
-            .reverse()[0].value;
+        const previousVotes = await this.getPreviousVotes(transaction);
         emitter.dispatch(AppEnums.VoteEvent.Vote, {
             votes: transaction.data.asset?.votes,
             previousVotes,
@@ -107,7 +102,7 @@ export class VoteTransactionHandler extends TransactionHandler {
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
         const hasSender: boolean = this.poolQuery
             .getAllBySender(transaction.data.senderPublicKey)
@@ -127,37 +122,55 @@ export class VoteTransactionHandler extends TransactionHandler {
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
             transaction.data.senderPublicKey,
         );
 
-        Utils.assert.defined<string[]>(transaction.data.asset?.votes);
+        AppUtils.assert.defined<Record<string, number>>(transaction.data.asset?.votes);
 
-        Utils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
-        senderWallet.changeVotes(transaction.data.asset?.votes, transaction.data);
+        AppUtils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
+        senderWallet.setAttribute("votes", Utils.sortVotes(transaction.data.asset?.votes));
         senderWallet.updateVoteBalances();
-        Utils.increaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
+        AppUtils.increaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
         const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
-        sender.removeCurrentStateHistory("votes");
-        const previousVotes = sender.getCurrentStateHistory("votes").value;
+        const previousVotes = await this.getPreviousVotes(transaction);
 
-        Utils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
+        AppUtils.decreaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
         sender.setAttribute("votes", previousVotes);
         sender.updateVoteBalances();
-        Utils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
+        AppUtils.increaseVoteBalances(sender, { updateVoters: true, walletRepository: this.walletRepository });
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
+
+    private async getPreviousVotes(transaction: Interfaces.ITransaction): Promise<object> {
+        const { results } = await this.transactionHistoryService.listByCriteria(
+            {
+                blockHeight: { to: transaction.data.blockHeight! - 1 },
+                senderPublicKey: transaction.data.senderPublicKey,
+                typeGroup: this.getConstructor().typeGroup,
+                type: this.getConstructor().type,
+            },
+            [{ property: "blockHeight", direction: "desc" }],
+            { offset: 0, limit: 1 },
+        );
+
+        if (results[0] && results[0].asset) {
+            return results[0].asset.votes!;
+        }
+
+        return {};
+    }
 }

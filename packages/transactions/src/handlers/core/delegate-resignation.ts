@@ -56,7 +56,6 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
                 wallet.forgetAttribute("delegate.resigned");
             }
 
-            wallet.addStateHistory("delegateStatus", type, transaction);
             this.walletRepository.index(wallet);
         }
     }
@@ -101,11 +100,13 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
                     .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                     .getLastBlock();
 
-                const { height } = wallet.getCurrentStateHistory("delegateStatus").transaction;
+                const { blockHeight } = await this.getPreviousResignation(lastBlock.data.height, transaction);
+                AppUtils.assert.defined<string>(blockHeight);
+
                 const { blocksToRevokeDelegateResignation } = Managers.configManager.getMilestone();
-                if (lastBlock.data.height - height < blocksToRevokeDelegateResignation) {
+                if (lastBlock.data.height - blockHeight < blocksToRevokeDelegateResignation) {
                     throw new NotEnoughTimeSinceResignationError(
-                        height - lastBlock.data.height + blocksToRevokeDelegateResignation,
+                        blockHeight - lastBlock.data.height + blocksToRevokeDelegateResignation,
                     );
                 }
             }
@@ -166,7 +167,6 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
             senderWallet.setAttribute("delegate.resigned", type);
         }
 
-        senderWallet.addStateHistory("delegateStatus", type, transaction.data);
         this.walletRepository.index(senderWallet);
     }
 
@@ -177,8 +177,12 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
 
         const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
-        senderWallet.removeCurrentStateHistory("delegateStatus");
-        const type = senderWallet.getCurrentStateHistory("delegateStatus").value;
+        const previousResignation = await this.getPreviousResignation(transaction.data.blockHeight! - 1, transaction);
+        let type = Enums.DelegateStatus.NotResigned;
+
+        if (previousResignation) {
+            type = previousResignation.asset?.resignationType || Enums.DelegateStatus.TemporaryResign;
+        }
 
         if (type === Enums.DelegateStatus.NotResigned) {
             senderWallet.forgetAttribute("delegate.resigned");
@@ -189,13 +193,25 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
         this.walletRepository.index(senderWallet);
     }
 
-    public async applyToRecipient(
-        transaction: Interfaces.ITransaction,
-        // tslint:disable-next-line: no-empty
-    ): Promise<void> {}
+    public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
 
-    public async revertForRecipient(
+    public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
+
+    private async getPreviousResignation(
+        height: number,
         transaction: Interfaces.ITransaction,
-        // tslint:disable-next-line: no-empty
-    ): Promise<void> {}
+    ): Promise<Interfaces.ITransactionData> {
+        const { results } = await this.transactionHistoryService.listByCriteria(
+            {
+                blockHeight: { to: height },
+                senderPublicKey: transaction.data.senderPublicKey,
+                typeGroup: this.getConstructor().typeGroup,
+                type: this.getConstructor().type,
+            },
+            [{ property: "blockHeight", direction: "desc" }],
+            { offset: 0, limit: 1 },
+        );
+
+        return results[0];
+    }
 }
