@@ -8,6 +8,7 @@ export abstract class DelegateResignationTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.DelegateResignation;
     public static key = "delegateResignation";
+    public static unique: boolean = true;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("2500000000");
 

@@ -17,6 +17,7 @@ export abstract class Transaction implements ITransaction {
     public static type: number | undefined = undefined;
     public static typeGroup: number | undefined = undefined;
     public static key: string | undefined = undefined;
+    public static unique: boolean = false;
 
     protected static defaultStaticFee: BigNumber = BigNumber.ZERO;
 

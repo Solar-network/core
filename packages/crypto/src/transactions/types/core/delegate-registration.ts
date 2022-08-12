@@ -7,6 +7,7 @@ export abstract class DelegateRegistrationTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static type: number = TransactionType.Core.DelegateRegistration;
     public static key = "delegateRegistration";
+    public static unique: boolean = true;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("2500000000");
 

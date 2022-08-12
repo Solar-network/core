@@ -6,6 +6,7 @@ import { Handlers } from "@solar-network/transactions";
 import {
     AcceptBlockHandler,
     AlreadyForgedHandler,
+    ConflictingTransactionsHandler,
     ExceptionHandler,
     InvalidGeneratorHandler,
     InvalidRewardHandler,
@@ -46,6 +47,10 @@ export class BlockProcessor {
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
 
+    @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
+    @Container.tagged("state", "null")
+    private readonly transactionHandlerRegistry!: Handlers.Registry;
+
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")
     private readonly walletRepository!: Contracts.State.WalletRepository;
@@ -81,6 +86,11 @@ export class BlockProcessor {
 
         if (!(await this.validateReward(block))) {
             return this.app.resolve<InvalidRewardHandler>(InvalidRewardHandler).execute(block);
+        }
+
+        const containsConflictingTransactions: boolean = await this.checkBlockContainsConflictingTransactions(block);
+        if (containsConflictingTransactions) {
+            return this.app.resolve<ConflictingTransactionsHandler>(ConflictingTransactionsHandler).execute(block);
         }
 
         const containsForgedTransactions: boolean = await this.checkBlockContainsForgedTransactions(block);
@@ -125,6 +135,36 @@ export class BlockProcessor {
         }
 
         return true;
+    }
+
+    private async checkBlockContainsConflictingTransactions(block: Interfaces.IBlock): Promise<boolean> {
+        if (block.transactions.length > 0) {
+            const registeredHandlers = this.transactionHandlerRegistry.getRegisteredHandlers();
+
+            for (const registeredHandler of registeredHandlers) {
+                const handler = registeredHandler.getConstructor();
+                if (handler.unique) {
+                    const transactions: Interfaces.ITransaction[] = block.transactions.filter(
+                        (transaction) =>
+                            transaction.type === handler.type && transaction.typeGroup === handler.typeGroup,
+                    );
+                    const transactionsSet: Set<string> = new Set(
+                        transactions.map((transaction) => transaction.data.senderPublicKey),
+                    );
+                    if (transactionsSet.size !== transactions.length) {
+                        this.logger.warning(
+                            `Block ${block.data.height.toLocaleString()} disregarded, because it contains multiple ${
+                                handler.key
+                            } transactions from the same wallet :scroll:`,
+                        );
+
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private async checkBlockContainsForgedTransactions(block: Interfaces.IBlock): Promise<boolean> {
