@@ -38,7 +38,6 @@ export class Command extends Commands.Command {
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setFlag("env", "", Joi.string().default("production"))
-            .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39", Joi.string())
             .setFlag("skipPrompts", "Skip prompts", Joi.boolean().default(false));
     }
 

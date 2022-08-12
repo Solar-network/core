@@ -104,12 +104,12 @@ export class PeerController extends Controller {
 
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {
-            const { secrets } = readJsonSync(`${this.app.configPath()}/delegates.json`);
-            for (const secret of secrets) {
-                const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
-                if (delegates.includes(keys.publicKey) && publicKeys.includes(keys.publicKey)) {
-                    header.publicKeys.push(keys.publicKey);
-                    header.signatures.push(Crypto.Hash.signSchnorr(stateBuffer, keys));
+            const { keys } = readJsonSync(`${this.app.configPath()}/delegates.json`);
+            for (const key of keys) {
+                const keyPair: Interfaces.IKeyPair = Identities.Keys.fromPrivateKey(key);
+                if (delegates.includes(keyPair.publicKey) && publicKeys.includes(keyPair.publicKey)) {
+                    header.publicKeys.push(keyPair.publicKey);
+                    header.signatures.push(Crypto.Hash.signSchnorr(stateBuffer, keyPair));
                 }
             }
         }
