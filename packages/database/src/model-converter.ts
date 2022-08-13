@@ -11,7 +11,12 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
     }
 
     public getBlockData(models: Contracts.Database.BlockModel[]): Interfaces.IBlockData[] {
-        return models;
+        return models.map((model) => {
+            if (model.username === null) {
+                delete model.username;
+            }
+            return model;
+        });
     }
 
     public getBlockDataWithTransactionData(

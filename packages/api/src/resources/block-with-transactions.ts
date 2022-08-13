@@ -27,7 +27,9 @@ export class BlockWithTransactionsResource implements Resource {
             .reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO);
 
         const totalAmountTransferred: Utils.BigNumber = blockData.totalAmount.plus(totalTransferred);
-        const generator: Contracts.State.Wallet = this.walletRepository.findByPublicKey(blockData.generatorPublicKey);
+        const generator: Contracts.State.Wallet = blockData.username
+            ? this.walletRepository.findByUsername(blockData.username)
+            : this.walletRepository.findByPublicKey(blockData.generatorPublicKey);
         const lastBlock: Interfaces.IBlock = this.blockchainService.getLastBlock();
 
         return {
@@ -57,8 +59,7 @@ export class BlockWithTransactionsResource implements Resource {
                 username: generator.hasAttribute("delegate.username")
                     ? generator.getAttribute("delegate.username")
                     : undefined,
-                address: generator.getAddress(),
-                publicKey: generator.getPublicKey(),
+                publicKey: blockData.generatorPublicKey,
             },
             signature: blockData.blockSignature,
             confirmations: lastBlock ? lastBlock.data.height - blockData.height : 0,

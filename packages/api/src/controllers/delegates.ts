@@ -90,7 +90,7 @@ export class DelegatesController extends Controller {
         }
 
         if (request.query.transform) {
-            const blockCriteria = { generatorPublicKey: delegateResource.publicKey };
+            const blockCriteria = { username: delegateResource.username };
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
                 blockCriteria,
                 { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.Transfer },
@@ -101,7 +101,7 @@ export class DelegatesController extends Controller {
 
             return this.toPagination(blockWithSomeTransactionsListResult, BlockWithTransactionsResource, true);
         } else {
-            const blockCriteria = { generatorPublicKey: delegateResource.publicKey };
+            const blockCriteria = { username: delegateResource.username };
             const blockListResult = await this.blockHistoryService.listByCriteria(
                 blockCriteria,
                 this.getListingOrder(request),

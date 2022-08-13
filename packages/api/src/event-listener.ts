@@ -61,12 +61,7 @@ export class EventListener {
                             const endpoints = new Set([eventPath]);
 
                             if (eventGroupName === "BlockEvent") {
-                                if (this.walletRepository.hasByPublicKey(data.generatorPublicKey)) {
-                                    const wallet = this.walletRepository.findByPublicKey(data.generatorPublicKey);
-                                    if (wallet.hasAttribute("delegate.username")) {
-                                        endpoints.add(`${eventPath}/${wallet.getAttribute("delegate.username")}`);
-                                    }
-                                }
+                                endpoints.add(`${eventPath}/${data.username}`);
                             } else if (eventGroupName === "TransactionEvent") {
                                 if (this.walletRepository.hasByPublicKey(data.senderPublicKey)) {
                                     const wallet = this.walletRepository.findByPublicKey(data.senderPublicKey);

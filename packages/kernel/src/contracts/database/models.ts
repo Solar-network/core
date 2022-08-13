@@ -16,6 +16,7 @@ export interface BlockModel {
     payloadHash: string;
     generatorPublicKey: string;
     blockSignature: string;
+    username?: string;
 }
 
 export interface TransactionModel {

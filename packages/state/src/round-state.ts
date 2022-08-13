@@ -137,7 +137,7 @@ export class RoundState implements Contracts.State.RoundState {
         let reward: Utils.BigNumber | undefined = undefined;
         if (dynamicReward && dynamicReward.enabled) {
             alreadyForged = this.blocksInCurrentRound.some(
-                (blockGenerator) => blockGenerator.data.generatorPublicKey === wallet.getPublicKey(),
+                (blockGenerator) => blockGenerator.data.username === wallet.getAttribute("delegate.username"),
             );
             if (alreadyForged) {
                 reward = Utils.BigNumber.make(dynamicReward.secondaryReward);
@@ -191,18 +191,16 @@ export class RoundState implements Contracts.State.RoundState {
     private detectMissedRound(): void {
         for (const delegate of this.forgingDelegates) {
             const isBlockProduced = this.blocksInCurrentRound.some(
-                (blockGenerator) => blockGenerator.data.generatorPublicKey === delegate.getPublicKey(),
+                (blockGenerator) => blockGenerator.data.username === delegate.getAttribute("delegate.username"),
             );
 
             if (!isBlockProduced) {
-                const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegate.getPublicKey()!);
-
                 this.logger.debug(
-                    `Delegate ${wallet.getAttribute("delegate.username")} just missed a round :cold_sweat:`,
+                    `Delegate ${delegate.getAttribute("delegate.username")} just missed a round :cold_sweat:`,
                 );
 
                 this.events.dispatch(Enums.RoundEvent.Missed, {
-                    delegate: wallet,
+                    delegate,
                 });
             }
         }

@@ -105,6 +105,12 @@ export class Block implements Contracts.Database.BlockModel {
 
     @Column({
         type: "varchar",
+        length: 20,
+    })
+    public username!: string;
+
+    @Column({
+        type: "varchar",
         length: 256,
         nullable: false,
     })

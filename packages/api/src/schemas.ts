@@ -196,6 +196,12 @@ export const blockCriteriaSchemas = {
     payloadLength: orNumericCriteria(Joi.number().integer().min(0)),
     payloadHash: orEqualCriteria(Joi.string().hex()),
     generatorPublicKey: orEqualCriteria(Joi.string().hex().length(66)),
+    username: orEqualCriteria(
+        Joi.string()
+            .regex(/^(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$/)
+            .min(1)
+            .max(20),
+    ),
     blockSignature: orEqualCriteria(Joi.string().hex().length(128)),
 };
 

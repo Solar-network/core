@@ -41,10 +41,7 @@ export class StateBuilder {
         const steps = registeredHandlers.length + 3;
 
         try {
-            this.logger.info(`State Generation - Step 1 of ${steps}: Block Rewards`);
-            await this.buildBlockRewards();
-
-            this.logger.info(`State Generation - Step 2 of ${steps}: Fees & Nonces`);
+            this.logger.info(`State Generation - Step 1 of ${steps}: Fees & Nonces`);
             await this.buildSentTransactions();
 
             const capitalise = (key: string) => key[0].toUpperCase() + key.slice(1);
@@ -53,9 +50,12 @@ export class StateBuilder {
                 const ctorKey: string | undefined = handler.getConstructor().key;
                 AppUtils.assert.defined<string>(ctorKey);
 
-                this.logger.info(`State Generation - Step ${3 + i} of ${steps}: ${capitalise(ctorKey)}`);
+                this.logger.info(`State Generation - Step ${2 + i} of ${steps}: ${capitalise(ctorKey)}`);
                 await handler.bootstrap();
             }
+
+            this.logger.info(`State Generation - Step ${steps - 1} of ${steps}: Block Rewards`);
+            await this.buildBlockRewards();
 
             this.logger.info(`State Generation - Step ${steps} of ${steps}: Vote Balances & Delegate Ranking`);
             this.dposState.buildVoteBalances();
@@ -79,8 +79,10 @@ export class StateBuilder {
         const blocks = await this.blockRepository.getBlockRewards();
 
         for (const block of blocks) {
-            const wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
-            wallet.increaseBalance(Utils.BigNumber.make(block.rewards));
+            if (block.username) {
+                const wallet = this.walletRepository.findByUsername(block.username);
+                wallet.increaseBalance(Utils.BigNumber.make(block.rewards));
+            }
         }
 
         const devFunds = await this.blockRepository.getDevFunds();
@@ -91,7 +93,7 @@ export class StateBuilder {
             const devFundWallet = this.walletRepository.findByAddress(devFund.address);
             devFundWallet.increaseBalance(amount);
 
-            const delegateWallet = this.walletRepository.findByPublicKey(devFund.generatorPublicKey);
+            const delegateWallet = this.walletRepository.findByUsername(devFund.username);
             delegateWallet.decreaseBalance(amount);
         }
     }
