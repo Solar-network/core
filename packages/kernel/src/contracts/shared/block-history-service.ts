@@ -17,6 +17,7 @@ export type BlockCriteria = {
     payloadLength?: OrNumericCriteria<number>;
     payloadHash?: OrEqualCriteria<string>;
     generatorPublicKey?: OrEqualCriteria<string>;
+    username?: OrEqualCriteria<string>;
     blockSignature?: OrEqualCriteria<string>;
 };
 

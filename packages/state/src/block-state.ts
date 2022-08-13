@@ -30,12 +30,16 @@ export class BlockState implements Contracts.State.BlockState {
             index: number | undefined;
         },
     ): Promise<void> {
+        let forgerWallet: Contracts.State.Wallet;
+
         if (block.data.height === 1) {
             this.initGenesisForgerWallet(block.data.generatorPublicKey);
+            forgerWallet = this.walletRepository.findByPublicKey(block.data.generatorPublicKey);
+        } else {
+            forgerWallet = this.walletRepository.findByUsername(block.data.username!);
         }
 
         const previousBlock = this.state.getLastBlock();
-        const forgerWallet = this.walletRepository.findByPublicKey(block.data.generatorPublicKey);
 
         const appliedTransactions: Interfaces.ITransaction[] = [];
         try {
@@ -60,7 +64,7 @@ export class BlockState implements Contracts.State.BlockState {
     }
 
     public async revertBlock(block: Interfaces.IBlock): Promise<void> {
-        const forgerWallet = this.walletRepository.findByPublicKey(block.data.generatorPublicKey);
+        const forgerWallet = this.walletRepository.findByUsername(block.data.username!);
 
         const revertedTransactions: Interfaces.ITransaction[] = [];
         try {
@@ -220,7 +224,7 @@ export class BlockState implements Contracts.State.BlockState {
         delegateAttribute.devFunds = delegateAttribute.devFunds.minus(devFund);
 
         const { results } = await this.blockHistoryService.listByCriteria(
-            { generatorPublicKey: block.data.generatorPublicKey, height: { to: block.data.height - 1 } },
+            { username: block.data.username, height: { to: block.data.height - 1 } },
             [{ property: "height", direction: "desc" }],
             { offset: 0, limit: 1 },
         );

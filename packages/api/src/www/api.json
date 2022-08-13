@@ -267,6 +267,14 @@
                         }
                     },
                     {
+                        "name": "username",
+                        "in": "query",
+                        "description": "Username of the delegate that forged the block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/username"
+                        }
+                    },
+                    {
                         "name": "blockSignature",
                         "in": "query",
                         "description": "Signature of the block to be returned",
@@ -499,6 +507,8 @@
                                 "totalAmount:desc",
                                 "totalFee:asc",
                                 "totalFee:desc",
+                                "username:asc",
+                                "username:desc",
                                 "version:asc",
                                 "version:desc"
                             ]

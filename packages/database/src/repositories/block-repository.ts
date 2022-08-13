@@ -101,18 +101,19 @@ export class BlockRepository extends AbstractRepository<Block> {
             .getRawOne();
     }
 
-    public async getBlockRewards(): Promise<{ generatorPublicKey: string; rewards: string }[]> {
+    public async getBlockRewards(): Promise<{ username: string; rewards: string }[]> {
         return this.createQueryBuilder()
             .select([])
-            .addSelect("generator_public_key", "generatorPublicKey")
+            .addSelect("username")
             .addSelect("SUM(reward + total_fee - burned_fee)", "rewards")
-            .groupBy("generator_public_key")
+            .groupBy("username")
             .getRawMany();
     }
 
     public async getDelegatesForgedBlocks(): Promise<
         {
-            generatorPublicKey: string;
+            username: string;
+            height: number;
             totalRewards: string;
             devFunds: string;
             burnedFees: string;
@@ -122,72 +123,61 @@ export class BlockRepository extends AbstractRepository<Block> {
     > {
         const rewardsAndFees = await this.createQueryBuilder()
             .select([])
-            .addSelect("generator_public_key", "generatorPublicKey")
+            .addSelect("username")
             .addSelect("SUM(total_fee)", "totalFees")
             .addSelect("SUM(burned_fee)", "burnedFees")
             .addSelect("SUM(reward)", "totalRewards")
             .addSelect("COUNT(total_amount)", "totalProduced")
-            .groupBy("generator_public_key")
+            .groupBy("username")
             .getRawMany();
 
         const devFunds = await this.createQueryBuilder()
             .select([])
-            .addSelect("generator_public_key", "generatorPublicKey")
+            .addSelect("username")
             .addSelect("sum(amount::bigint)", "amount")
             .leftJoin(
                 "(SELECT 1)",
                 "_",
                 "TRUE CROSS JOIN LATERAL jsonb_each_text(dev_fund::jsonb) json(address, amount)",
             )
-            .groupBy("generator_public_key")
+            .groupBy("username")
             .getRawMany();
 
         for (const devFund of devFunds) {
-            rewardsAndFees.find((block) => block.generatorPublicKey === devFund.generatorPublicKey).devFunds =
-                devFund.amount;
+            rewardsAndFees.find((block) => block.username === devFund.username).devFunds = devFund.amount;
         }
 
         return rewardsAndFees;
     }
 
-    public async getDevFunds(): Promise<{ address: string; amount: string; generatorPublicKey: string }[]> {
+    public async getDevFunds(): Promise<{ address: string; amount: string; username: string }[]> {
         return this.createQueryBuilder()
             .select([])
-            .addSelect("generator_public_key", "generatorPublicKey")
-            .addSelect("address", "address")
+            .addSelect("username")
+            .addSelect("address")
             .addSelect("sum(amount::bigint)", "amount")
             .leftJoin(
                 "(SELECT 1)",
                 "_",
                 "TRUE CROSS JOIN LATERAL jsonb_each_text(dev_fund::jsonb) json(address, amount)",
             )
-            .groupBy("generator_public_key, address")
+            .groupBy("username, address")
             .getRawMany();
     }
 
-    public async getLastForgedBlocks(): Promise<
-        { id: string; height: string; generatorPublicKey: string; timestamp: number }[]
-    > {
+    public async getLastForgedBlocks(): Promise<{ id: string; height: number; username: string; timestamp: number }[]> {
         return this.query(`SELECT id,
                         height,
-                        generator_public_key AS "generatorPublicKey",
+                        username,
                         TIMESTAMP
                 FROM blocks
                 WHERE height IN (
                 SELECT MAX(height) AS last_block_height
                 FROM blocks
-                GROUP BY generator_public_key
+                GROUP BY username
                 )
                 ORDER BY TIMESTAMP DESC
         `);
-
-        // TODO: subquery
-        // return this.createQueryBuilder()
-        //     .select(["id", "height", "timestamp"])
-        //     .addSelect("generator_public_key", "generatorPublicKey")
-        //     .groupBy("generator_public_key")
-        //     .orderBy("timestamp", "DESC")
-        //     .getRawMany();
     }
 
     public async saveBlocks(blocks: Interfaces.IBlock[]): Promise<void> {

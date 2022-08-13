@@ -73,6 +73,10 @@ export class BlockFilter implements Contracts.Database.BlockFilter {
                     return handleOrCriteria(criteria.generatorPublicKey!, async (c) => {
                         return { property: "generatorPublicKey", op: "equal", value: c };
                     });
+                case "username":
+                    return handleOrCriteria(criteria.username!, async (c) => {
+                        return { property: "username", op: "equal", value: c };
+                    });
                 case "blockSignature":
                     return handleOrCriteria(criteria.blockSignature!, async (c) => {
                         return { property: "blockSignature", op: "equal", value: c };

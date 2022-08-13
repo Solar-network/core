@@ -35,6 +35,7 @@ export interface IBlockData {
     burnedFee?: BigNumber;
     reward: BigNumber;
     devFund?: Record<string, BigNumber>;
+    username?: string;
     payloadLength: number;
     payloadHash: string;
     generatorPublicKey: string;

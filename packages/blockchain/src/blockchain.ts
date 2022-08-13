@@ -50,6 +50,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     @Container.inject(Container.Identifiers.RoundState)
     private readonly roundState!: Contracts.State.RoundState;
 
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
+
     private queue!: Contracts.Kernel.Queue;
 
     private stopped!: boolean;
@@ -227,6 +231,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             return;
         }
 
+        this.setBlockUsername(block);
         this.pushPingBlock(block, fromForger);
 
         if (this.stateStore.isStarted()) {
@@ -273,7 +278,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         let currentTransactionsCount = 0;
         for (const block of blocks) {
             Utils.assert.defined<Interfaces.IBlockData>(block);
-
+            this.setBlockUsername(block);
             currentBlocksChunk.push(block);
             currentTransactionsCount += block.numberOfTransactions;
 
@@ -554,6 +559,20 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         }
 
         return false;
+    }
+
+    public setBlockUsername(block: Interfaces.IBlockData): void {
+        if (block.version === 0 && !block.username) {
+            if (this.walletRepository.hasByPublicKey(block.generatorPublicKey)) {
+                const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                    block.generatorPublicKey,
+                );
+
+                if (generatorWallet.hasAttribute("delegate.username")) {
+                    block.username = generatorWallet.getAttribute("delegate.username");
+                }
+            }
+        }
     }
 
     private resetMissedBlocks(): void {

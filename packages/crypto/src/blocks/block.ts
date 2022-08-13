@@ -92,10 +92,10 @@ export class Block implements IBlock {
         return "0".repeat(16 - temp.length) + temp;
     }
 
-    public static getBasicHeader(data: IBlockData, withBurnedFee: boolean = true): IBlockData {
+    public static getBasicHeader(data: IBlockData, withExtraData: boolean = true): IBlockData {
         return {
             blockSignature: data.blockSignature,
-            burnedFee: withBurnedFee ? data.burnedFee : undefined,
+            burnedFee: withExtraData ? data.burnedFee : undefined,
             generatorPublicKey: data.generatorPublicKey,
             height: data.height,
             id: data.id,
@@ -107,6 +107,7 @@ export class Block implements IBlock {
             timestamp: data.timestamp,
             totalAmount: data.totalAmount,
             totalFee: data.totalFee,
+            username: withExtraData ? data.username : undefined,
             version: data.version,
         };
     }
@@ -120,8 +121,8 @@ export class Block implements IBlock {
         return fees;
     }
 
-    public getHeader(withBurnedFee: boolean = true): IBlockData {
-        return Block.getBasicHeader(this.data, withBurnedFee);
+    public getHeader(withExtraData: boolean = true): IBlockData {
+        return Block.getBasicHeader(this.data, withExtraData);
     }
 
     public verifySignature(): boolean {

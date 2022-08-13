@@ -59,6 +59,14 @@ export class BlockFactory {
                 ...Deserialiser.deserialise(serialised, false, options),
                 id: data.id,
             });
+
+            if (block.data.version === 0) {
+                const username = data.username;
+                if (!block.data.username && username) {
+                    block.data.username = username;
+                }
+            }
+
             block.serialised = serialised.toString("hex");
 
             return block;

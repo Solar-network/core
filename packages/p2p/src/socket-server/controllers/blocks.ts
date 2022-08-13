@@ -78,53 +78,43 @@ export class BlocksController extends Controller {
             transactions: deserialised.transactions.map((tx) => tx.data),
         };
 
-        if (!this.walletRepository.hasByPublicKey(block.generatorPublicKey)) {
+        this.blockchain.setBlockUsername(block);
+        const { height, numberOfTransactions, id, reward, username } = block;
+
+        if (!username || !this.walletRepository.hasByUsername(username)) {
             return { status: false, height: this.blockchain.getLastHeight() };
         }
 
-        const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
+        const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(username);
 
-        let generator: string;
-        try {
-            generator = `delegate ${generatorWallet.getAttribute("delegate.username")} (#${generatorWallet.getAttribute(
-                "delegate.rank",
-            )})`;
-        } catch {
-            generator = "an unknown delegate";
+        if (!generatorWallet.hasAttribute("delegate.rank")) {
+            return { status: false, height: this.blockchain.getLastHeight() };
         }
 
+        const rank = generatorWallet.getAttribute("delegate.rank");
+        const generator: string = `delegate ${username} (#${rank})`;
+
         this.logger.info(
-            `Received new block forged by ${generator} at height ${block.height.toLocaleString()} with ${Utils.formatSatoshi(
-                block.reward,
+            `Received new block forged by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
+                reward,
             )} reward :package:`,
         );
 
         const { dynamicReward } = Managers.configManager.getMilestone();
 
-        if (dynamicReward && dynamicReward.enabled && block.reward.isEqualTo(dynamicReward.secondaryReward)) {
-            const { alreadyForged } = await this.roundState.getRewardForBlockInRound(block.height, generatorWallet);
-            if (
-                alreadyForged &&
-                !block.reward.isEqualTo(dynamicReward.ranks[generatorWallet.getAttribute("delegate.rank")])
-            ) {
-                this.logger.info(
-                    `The reward was reduced because ${generatorWallet.getAttribute(
-                        "delegate.username",
-                    )} already forged in this round :fire:`,
-                );
+        if (dynamicReward && dynamicReward.enabled && reward.isEqualTo(dynamicReward.secondaryReward)) {
+            const { alreadyForged } = await this.roundState.getRewardForBlockInRound(height, generatorWallet);
+            if (alreadyForged && !reward.isEqualTo(dynamicReward.ranks[rank])) {
+                this.logger.info(`The reward was reduced because ${username} already forged in this round :fire:`);
             }
         }
 
-        this.logger.debug(`The id of the new block is ${block.id}`);
+        this.logger.debug(`The id of the new block is ${id}`);
 
         const ip: string = mapAddr(request.info.remoteAddress);
 
         this.logger.debug(
-            `It contains ${AppUtils.pluralise(
-                "transaction",
-                block.numberOfTransactions,
-                true,
-            )} and was received from ${ip}`,
+            `It contains ${AppUtils.pluralise("transaction", numberOfTransactions, true)} and was received from ${ip}`,
         );
 
         this.blockchain.handleIncomingBlock(block, fromForger, ip);

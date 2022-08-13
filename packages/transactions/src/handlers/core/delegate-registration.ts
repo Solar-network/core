@@ -72,14 +72,13 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
 
         const forgedBlocks = await this.blockRepository.getDelegatesForgedBlocks();
         const lastForgedBlocks = await this.blockRepository.getLastForgedBlocks();
-        for (const block of forgedBlocks) {
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
 
-            // Genesis wallet is empty
-            if (!wallet.hasAttribute("delegate")) {
+        for (const block of forgedBlocks) {
+            if (!block.username) {
                 continue;
             }
 
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.username);
             const delegate: Contracts.State.WalletDelegateAttributes = wallet.getAttribute("delegate");
             delegate.burnedFees = delegate.forgedFees.plus(block.burnedFees);
             delegate.forgedFees = delegate.forgedFees.plus(block.totalFees);
@@ -89,13 +88,11 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         }
 
         for (const block of lastForgedBlocks) {
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
-
-            // Genesis wallet is empty
-            if (!wallet.hasAttribute("delegate")) {
+            if (!block.username) {
                 continue;
             }
 
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.username);
             wallet.setAttribute("delegate.lastBlock", block.id);
         }
     }

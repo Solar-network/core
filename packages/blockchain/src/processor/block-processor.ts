@@ -245,18 +245,19 @@ export class BlockProcessor {
     }
 
     private async validateGenerator(block: Interfaces.IBlock): Promise<boolean> {
-        if (!this.walletRepository.hasByPublicKey(block.data.generatorPublicKey)) {
+        if (!block.data.username || !this.walletRepository.hasByUsername(block.data.username)) {
             return false;
         }
 
-        const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            block.data.generatorPublicKey,
-        );
+        const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.data.username);
 
-        let generatorUsername: string;
-        try {
-            generatorUsername = generatorWallet.getAttribute("delegate.username");
-        } catch {
+        if (block.data.version === 0) {
+            if (delegateWallet.getPublicKey() !== block.data.generatorPublicKey) {
+                return false;
+            }
+        }
+
+        if (!delegateWallet.hasAttribute("delegate.rank")) {
             return false;
         }
 
@@ -277,25 +278,21 @@ export class BlockProcessor {
 
         if (!forgingDelegate) {
             this.logger.debug(
-                `Could not decide if delegate ${generatorUsername} is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
+                `Could not decide if delegate ${
+                    block.data.username
+                } is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
             );
-        } else if (forgingDelegate.getPublicKey() !== block.data.generatorPublicKey) {
-            AppUtils.assert.defined<string>(forgingDelegate.getPublicKey());
-
-            const forgingWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-                forgingDelegate.getPublicKey()!,
-            );
-            const forgingUsername: string = forgingWallet.getAttribute("delegate.username");
-
+        } else if (forgingDelegate.getAttribute("delegate.username") !== block.data.username) {
+            const forgingUsername: string = forgingDelegate.getAttribute("delegate.username");
             this.logger.warning(
-                `Delegate ${generatorUsername} is not allowed to forge in this slot, should be ${forgingUsername} :-1:`,
+                `Delegate ${block.data.username} is not allowed to forge in this slot, should be ${forgingUsername} :-1:`,
             );
 
             return false;
         }
 
         this.logger.debug(
-            `Delegate ${generatorUsername} is allowed to forge block ${block.data.height.toLocaleString()} :+1:`,
+            `Delegate ${block.data.username} is allowed to forge block ${block.data.height.toLocaleString()} :+1:`,
         );
 
         return true;
@@ -308,7 +305,9 @@ export class BlockProcessor {
             "blockchain",
         );
 
-        const generatorWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(block.data.generatorPublicKey);
+        AppUtils.assert.defined<string>(block.data.username);
+
+        const generatorWallet: Contracts.State.Wallet = walletRepository.findByUsername(block.data.username);
 
         const { reward } = await this.roundState.getRewardForBlockInRound(block.data.height, generatorWallet);
 

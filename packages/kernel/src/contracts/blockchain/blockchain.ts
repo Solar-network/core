@@ -124,4 +124,6 @@ export interface Blockchain {
     pushPingBlock(block: Interfaces.IBlockData, fromForger: boolean): void;
 
     checkForFork(blocks: Interfaces.IBlockData[]): Promise<boolean>;
+
+    setBlockUsername(block: Interfaces.IBlockData): void;
 }

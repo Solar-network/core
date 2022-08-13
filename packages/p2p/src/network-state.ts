@@ -251,7 +251,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
     private async setLastBlock(lastBlock: Interfaces.IBlock, monitor?: Contracts.P2P.NetworkMonitor): Promise<void> {
         this.nodeHeight = lastBlock.data.height;
         this.lastBlockId = lastBlock.data.id;
-        this.lastGenerator = lastBlock.data.generatorPublicKey;
+        this.lastGenerator = lastBlock.data.username;
 
         if (monitor) {
             const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(

@@ -201,11 +201,11 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
         typeGroup: number,
         limit?: number,
         offset?: number,
-    ): Promise<Array<Transaction & { blockHeight: number; blockGeneratorPublicKey: string; reward: Utils.BigNumber }>> {
+    ): Promise<Array<Transaction & { blockHeight: number; username: string; reward: Utils.BigNumber }>> {
         const transactions = await this.createQueryBuilder("transactions")
             .select()
             .addSelect('blocks.height as "blockHeight"')
-            .addSelect('blocks.generatorPublicKey as "blockGeneratorPublicKey"')
+            .addSelect("blocks.username as username")
             .addSelect('blocks.reward as "reward"')
             .addFrom(Block, "blocks")
             .where("block_id = blocks.id")
