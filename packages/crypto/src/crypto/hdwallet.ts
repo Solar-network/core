@@ -1,4 +1,6 @@
+import * as bls from "@noble/bls12-381";
 import { HDKey } from "@scure/bip32";
+import { secp256k1 } from "bcrypto";
 import { mnemonicToSeedSync } from "bip39";
 
 import { IKeyPair } from "../interfaces";
@@ -29,17 +31,14 @@ export class HDWallet {
             throw new Error();
         }
 
+        const privateKey: Buffer = Buffer.from(node.privateKey);
+
         return {
-            publicKey: Buffer.from(
-                node.publicKey.buffer,
-                node.publicKey.byteOffset,
-                node.publicKey.byteLength,
-            ).toString("hex"),
-            privateKey: Buffer.from(
-                node.privateKey.buffer,
-                node.privateKey.byteOffset,
-                node.privateKey.byteLength,
-            ).toString("hex"),
+            publicKey: {
+                secp256k1: secp256k1.publicKeyCreate(privateKey, true).toString("hex"),
+                bls12381: Buffer.from(bls.getPublicKey(privateKey)).toString("hex"),
+            },
+            privateKey: Buffer.from(node.privateKey).toString("hex"),
             compressed: true,
         };
     }

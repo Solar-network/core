@@ -328,6 +328,7 @@ importers:
       '@babel/plugin-transform-runtime': 7.18.5
       '@babel/preset-typescript': 7.17.12
       '@babel/runtime': 7.18.3
+      '@noble/bls12-381': 1.3.0
       '@rollup/plugin-babel': 5.3.0
       '@rollup/plugin-commonjs': 21.1.0
       '@rollup/plugin-inject': 4.0.2
@@ -361,6 +362,7 @@ importers:
       util: 0.12.4
       wif: 2.0.6
     dependencies:
+      '@noble/bls12-381': 1.3.0
       '@scure/bip32': 1.1.0
       ajv: 6.12.6
       ajv-keywords: 3.4.1_ajv@6.12.6
@@ -3832,6 +3834,10 @@ packages:
   /@mdn/browser-compat-data/3.3.14:
     resolution: {integrity: sha512-n2RC9d6XatVbWFdHLimzzUJxJ1KY8LdjqrW6YvGPiRmsHkhOUx74/Ct10x5Yo7bC/Jvqx7cDEW8IMPv/+vwEzA==}
     dev: true
+
+  /@noble/bls12-381/1.3.0:
+    resolution: {integrity: sha512-rYQXhQ+Q6fDYLSO/ZUY9RsDE0Adi2Iua9xXxNxLmO8jXiBZGVxecWQsC1116aRlv3XGLvoZTGqyy5vAcBu368g==}
+    dev: false
 
   /@noble/hashes/1.1.2:
     resolution: {integrity: sha512-KYRCASVTv6aeUi1tsF8/vpyR7zpfs3FUzy2Jqm+MU+LmUKhQ0y2FpfwqkCcxSg2ua4GALJd8k2R76WxwZGbQpA==}

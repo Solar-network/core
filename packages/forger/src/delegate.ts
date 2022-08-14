@@ -32,7 +32,7 @@ export class Delegate implements IDelegate {
      */
     public constructor(privateKey: string) {
         this.keys = Identities.Keys.fromPrivateKey(privateKey);
-        this.publicKey = this.keys.publicKey;
+        this.publicKey = this.keys.publicKey.secp256k1;
         this.address = Identities.Address.fromPublicKey(this.publicKey);
     }
 
@@ -73,7 +73,7 @@ export class Delegate implements IDelegate {
         return Blocks.BlockFactory.make(
             {
                 version: 0,
-                generatorPublicKey: keys.publicKey,
+                generatorPublicKey: keys.publicKey.secp256k1,
                 timestamp: options.timestamp,
                 previousBlock: options.previousBlock.id,
                 height: options.previousBlock.height + 1,

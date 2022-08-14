@@ -15,7 +15,7 @@ export class SecondSignatureBuilder extends TransactionBuilder<SecondSignatureBu
 
     public signatureAsset(secondPassphrase: string): SecondSignatureBuilder {
         if (this.data.asset && this.data.asset.signature) {
-            this.data.asset.signature.publicKey = Keys.fromPassphrase(secondPassphrase).publicKey;
+            this.data.asset.signature.publicKey = Keys.fromPassphrase(secondPassphrase).publicKey.secp256k1;
         }
 
         return this;

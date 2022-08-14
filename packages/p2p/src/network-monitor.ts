@@ -853,8 +853,11 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             const { keys } = readJsonSync(`${this.app.configPath()}/delegates.json`);
             for (const key of keys) {
                 const keyPair: Interfaces.IKeyPair = Identities.Keys.fromPrivateKey(key);
-                if (delegates.includes(keyPair.publicKey) && publicKeys.includes(keyPair.publicKey)) {
-                    delegatesOnThisNode.push(keyPair.publicKey);
+                if (
+                    delegates.includes(keyPair.publicKey.secp256k1) &&
+                    publicKeys.includes(keyPair.publicKey.secp256k1)
+                ) {
+                    delegatesOnThisNode.push(keyPair.publicKey.secp256k1);
                 }
             }
         }
