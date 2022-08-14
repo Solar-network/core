@@ -8,11 +8,11 @@ import { Keys } from "./keys";
 
 export class PublicKey {
     public static fromPassphrase(passphrase: string): string {
-        return Keys.fromPassphrase(passphrase).publicKey;
+        return Keys.fromPassphrase(passphrase).publicKey.secp256k1;
     }
 
     public static fromWIF(wif: string, network?: NetworkType): string {
-        return Keys.fromWIF(wif, network).publicKey;
+        return Keys.fromWIF(wif, network).publicKey.secp256k1;
     }
 
     public static fromMultiSignatureAsset(asset: IMultiSignatureAsset): string {

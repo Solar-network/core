@@ -10,7 +10,7 @@ export class Message {
         const keys: IKeyPair = Keys.fromPassphrase(passphrase);
 
         return {
-            publicKey: keys.publicKey,
+            publicKey: keys.publicKey.secp256k1,
             signature: Hash.signSchnorr(this.createHash(message), keys, true),
             message,
         };
@@ -24,7 +24,7 @@ export class Message {
         const keys: IKeyPair = Keys.fromWIF(wif, network);
 
         return {
-            publicKey: keys.publicKey,
+            publicKey: keys.publicKey.secp256k1,
             signature: Hash.signSchnorr(this.createHash(message), keys, true),
             message,
         };

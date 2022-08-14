@@ -166,7 +166,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
     }
 
     private signWithKeyPair(keys: IKeyPair): TBuilder {
-        this.data.senderPublicKey = keys.publicKey;
+        this.data.senderPublicKey = keys.publicKey.secp256k1;
 
         this.data.signature = Signer.sign(this.getSigningObject(), keys, {
             disableVersionCheck: this.disableVersionCheck,

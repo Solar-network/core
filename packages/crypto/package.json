@@ -23,6 +23,7 @@
         "rollup": "rollup -c"
     },
     "dependencies": {
+        "@noble/bls12-381": "1.3.0",
         "@scure/bip32": "1.1.0",
         "ajv": "6.12.6",
         "ajv-keywords": "3.4.1",
