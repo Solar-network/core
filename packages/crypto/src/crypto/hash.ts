@@ -25,11 +25,11 @@ export class Hash {
         }
     }
 
-    public static async aggregatePublicKeysBLS(publicKeys: Buffer[] | string[]): Promise<Buffer> {
+    public static aggregatePublicKeysBLS(publicKeys: Buffer[] | string[]): Buffer {
         return Buffer.from(bls.aggregatePublicKeys(publicKeys));
     }
 
-    public static async aggregateSignaturesBLS(signatures: Buffer[] | string[]): Promise<Buffer> {
+    public static aggregateSignaturesBLS(signatures: Buffer[] | string[]): Buffer {
         return Buffer.from(bls.aggregateSignatures(signatures));
     }
 
