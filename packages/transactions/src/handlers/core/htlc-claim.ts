@@ -237,7 +237,7 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
 
         const lockId: string = data.asset.claim.lockTransactionId;
 
-        const lockTransaction: Interfaces.ITransactionData = (await this.transactionRepository.findByIds([lockId]))[0];
+        const lockTransaction = (await this.transactionRepository.findByIds([lockId]))[0];
 
         AppUtils.assert.defined<Interfaces.ITransactionData>(lockTransaction.recipientId);
 

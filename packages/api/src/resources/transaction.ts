@@ -68,8 +68,6 @@ export class TransactionResource implements Resource {
             memo: resource.memo,
             asset: resource.asset,
             confirmations: 0,
-            timestamp:
-                typeof resource.timestamp !== "undefined" ? AppUtils.formatTimestamp(resource.timestamp) : undefined,
             nonce: resource.nonce?.toFixed(),
         };
     }

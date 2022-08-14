@@ -98,8 +98,6 @@ export abstract class Transaction implements ITransaction {
             delete data.typeGroup;
         }
 
-        delete data.timestamp;
-
         return data;
     }
 

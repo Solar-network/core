@@ -201,7 +201,7 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
         AppUtils.assert.defined<string>(transaction.data.asset?.refund?.lockTransactionId);
 
         const lockId: string = transaction.data.asset.refund.lockTransactionId;
-        const lockTransaction: Interfaces.ITransactionData = (await this.transactionRepository.findByIds([lockId]))[0];
+        const lockTransaction = (await this.transactionRepository.findByIds([lockId]))[0];
 
         AppUtils.assert.defined<string>(lockTransaction.id);
         AppUtils.assert.defined<string>(lockTransaction.senderPublicKey);
