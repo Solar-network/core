@@ -9,6 +9,10 @@ export class Verifier {
         Verifier.verifyBlockSignature(block);
     }
 
+    public static verifyMissedBlock(missedBlock: Models.MissedBlock): void {
+        // nothing to verify
+    }
+
     public static verifyTransaction(transaction: Models.Transaction): void {
         Verifier.verifyTransactionSignature(transaction);
     }

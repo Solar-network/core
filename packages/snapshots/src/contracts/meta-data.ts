@@ -1,5 +1,6 @@
 export interface MetaData {
     blocks: TableMetaData;
+    missedBlocks: TableMetaData;
     transactions: TableMetaData;
     rounds: TableMetaData;
 

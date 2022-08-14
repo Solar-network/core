@@ -7,8 +7,10 @@ import { Connection, createConnection, getCustomRepository } from "typeorm";
 import { BlockFilter } from "./block-filter";
 import { BlockHistoryService } from "./block-history-service";
 import { DatabaseService } from "./database-service";
+import { MissedBlockFilter } from "./missed-block-filter";
+import { MissedBlockHistoryService } from "./missed-block-history-service";
 import { ModelConverter } from "./model-converter";
-import { BlockRepository, RoundRepository, TransactionRepository } from "./repositories";
+import { BlockRepository, MissedBlockRepository, RoundRepository, TransactionRepository } from "./repositories";
 import { TransactionFilter } from "./transaction-filter";
 import { TransactionHistoryService } from "./transaction-history-service";
 import { SnakeNamingStrategy } from "./utils/snake-naming-strategy";
@@ -29,6 +31,12 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Container.Identifiers.DatabaseBlockRepository).toConstantValue(this.getBlockRepository());
         this.app.bind(Container.Identifiers.DatabaseBlockFilter).to(BlockFilter);
         this.app.bind(Container.Identifiers.BlockHistoryService).to(BlockHistoryService);
+
+        this.app
+            .bind(Container.Identifiers.DatabaseMissedBlockRepository)
+            .toConstantValue(this.getMissedBlockRepository());
+        this.app.bind(Container.Identifiers.DatabaseMissedBlockFilter).to(MissedBlockFilter);
+        this.app.bind(Container.Identifiers.MissedBlockHistoryService).to(MissedBlockHistoryService);
 
         this.app
             .bind(Container.Identifiers.DatabaseTransactionRepository)
@@ -105,6 +113,10 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
     public getBlockRepository(): BlockRepository {
         return getCustomRepository(BlockRepository);
+    }
+
+    public getMissedBlockRepository(): MissedBlockRepository {
+        return getCustomRepository(MissedBlockRepository);
     }
 
     public getTransactionRepository(): TransactionRepository {

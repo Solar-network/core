@@ -6,7 +6,7 @@ import { Database, Meta, Options, Worker } from "./contracts";
 import { Filesystem } from "./filesystem/filesystem";
 import { Identifiers } from "./ioc";
 import { ProgressDispatcher } from "./progress-dispatcher";
-import { BlockRepository, RoundRepository, TransactionRepository } from "./repositories";
+import { BlockRepository, MissedBlockRepository, RoundRepository, TransactionRepository } from "./repositories";
 import { WorkerWrapper } from "./workers/worker-wrapper";
 
 @Container.injectable()
@@ -34,6 +34,9 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
     @Container.inject(Identifiers.SnapshotBlockRepository)
     private readonly blockRepository!: BlockRepository;
 
+    @Container.inject(Identifiers.SnapshotMissedBlockRepository)
+    private readonly missedBlockRepository!: MissedBlockRepository;
+
     @Container.inject(Identifiers.SnapshotRoundRepository)
     private readonly roundRepository!: RoundRepository;
 
@@ -52,11 +55,11 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
 
     public async truncate(): Promise<void> {
         this.logger.info(
-            `Clearing:  ${Utils.pluralise("block", await this.blockRepository.fastCount(), true)},   ${Utils.pluralise(
+            `Clearing ${Utils.pluralise("block", await this.blockRepository.fastCount(), true)}, ${Utils.pluralise(
                 "transaction",
                 await this.transactionRepository.fastCount(),
                 true,
-            )},  ${Utils.pluralise("round", await this.roundRepository.fastCount(), true)}`,
+            )}, ${Utils.pluralise("round", await this.roundRepository.fastCount(), true)}`,
         );
 
         await this.blockRepository.truncate();
@@ -78,27 +81,33 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
         try {
             this.logger.info("Started counting blocks, rounds and transactions");
 
-            const dumpRage = await this.getDumpRange(options.start, options.end);
-            const meta = this.prepareMetaData(options, dumpRage);
+            const dumpRange = await this.getDumpRange(options.start, options.end);
+            const meta = this.prepareMetaData(options, dumpRange);
 
             this.logger.info(
-                `Started running dump for ${Utils.pluralise("block", dumpRage.blocksCount, true)}, ${Utils.pluralise(
+                `Started running dump for ${Utils.pluralise("block", dumpRange.blocksCount, true)}, ${Utils.pluralise(
                     "round",
-                    dumpRage.roundsCount,
+                    dumpRange.roundsCount,
                     true,
-                )} and ${Utils.pluralise("transaction", dumpRage.transactionsCount, true)}`,
+                )} and ${Utils.pluralise("transaction", dumpRange.transactionsCount, true)}`,
             );
 
             this.filesystem.setSnapshot(meta.folder);
             await this.filesystem.prepareDir();
 
             const blocksWorker = new WorkerWrapper(this.prepareWorkerData("dump", "blocks", meta));
+            const missedBlocksWorker = new WorkerWrapper(this.prepareWorkerData("dump", "missedBlocks", meta));
             const transactionsWorker = new WorkerWrapper(this.prepareWorkerData("dump", "transactions", meta));
             const roundsWorker = new WorkerWrapper(this.prepareWorkerData("dump", "rounds", meta));
 
             const stopBlocksDispatcher = await this.prepareProgressDispatcher(
                 blocksWorker,
                 "blocks",
+                meta.blocks.count,
+            );
+            const stopMissedBlocksDispatcher = await this.prepareProgressDispatcher(
+                missedBlocksWorker,
+                "missedBlocks",
                 meta.blocks.count,
             );
             const stopTransactionsDispatcher = await this.prepareProgressDispatcher(
@@ -109,15 +118,22 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
             const stopRoundDispatcher = await this.prepareProgressDispatcher(roundsWorker, "rounds", meta.rounds.count);
 
             try {
-                await Promise.all([blocksWorker.start(), transactionsWorker.start(), roundsWorker.start()]);
+                await Promise.all([
+                    blocksWorker.start(),
+                    missedBlocksWorker.start(),
+                    transactionsWorker.start(),
+                    roundsWorker.start(),
+                ]);
 
                 await this.filesystem.writeMetaData(meta);
             } catch (err) {
                 stopBlocksDispatcher();
+                stopMissedBlocksDispatcher();
                 stopTransactionsDispatcher();
                 stopRoundDispatcher();
 
                 await blocksWorker.terminate();
+                await missedBlocksWorker.terminate();
                 await transactionsWorker.terminate();
                 await roundsWorker.terminate();
 
@@ -153,12 +169,18 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
     private runSynchronisedAction(action: string, meta: Meta.MetaData): Promise<void> {
         return new Promise(async (resolve, reject) => {
             const blocksWorker = new WorkerWrapper(this.prepareWorkerData(action, "blocks", meta));
+            const missedBlocksWorker = new WorkerWrapper(this.prepareWorkerData(action, "missedBlocks", meta));
             const transactionsWorker = new WorkerWrapper(this.prepareWorkerData(action, "transactions", meta));
             const roundsWorker = new WorkerWrapper(this.prepareWorkerData(action, "rounds", meta));
 
             const stopBlocksProgressDispatcher = await this.prepareProgressDispatcher(
                 blocksWorker,
                 "blocks",
+                meta.blocks.count,
+            );
+            const stopMissedBlocksProgressDispatcher = await this.prepareProgressDispatcher(
+                missedBlocksWorker,
+                "missedBlocks",
                 meta.blocks.count,
             );
             const stopTransactionsProgressDispatcher = await this.prepareProgressDispatcher(
@@ -180,10 +202,12 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
                 roundsQueue.clear();
 
                 await blocksWorker.terminate();
+                await missedBlocksWorker.terminate();
                 await transactionsWorker.terminate();
                 await roundsWorker.terminate();
 
                 stopBlocksProgressDispatcher();
+                stopMissedBlocksProgressDispatcher();
                 stopTransactionsProgressDispatcher();
                 stopRoundsProgressDispatcher();
             };
@@ -207,6 +231,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
 
             try {
                 await blocksWorker.start();
+                await missedBlocksWorker.start();
                 await transactionsWorker.start();
                 await roundsWorker.start();
 
@@ -218,6 +243,8 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
                         nextValue: height,
                         nextField: "height",
                     });
+
+                    await missedBlocksWorker.sync({ nextValue: height, nextField: "height" });
 
                     if (!result) {
                         break;
@@ -291,6 +318,9 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
         const firstBlock = await this.blockRepository.findByHeight(startHeight);
         lastBlock = await this.blockRepository.findByHeight(endHeight);
 
+        const firstMissedBlock = await this.missedBlockRepository.findFirst();
+        const lastMissedBlock = await this.missedBlockRepository.findLast();
+
         Utils.assert.defined<Models.Block>(firstBlock);
         Utils.assert.defined<Models.Block>(lastBlock);
 
@@ -298,6 +328,13 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
             firstBlockHeight: firstBlock.height,
             lastBlockHeight: lastBlock.height,
             blocksCount: await this.blockRepository.countInRange(firstBlock.height, lastBlock.height),
+
+            firstMissedBlockHeight: firstMissedBlock?.height ?? 0,
+            lastMissedBlockHeight: lastMissedBlock?.height ?? 0,
+            missedBlocksCount: await this.missedBlockRepository.countInRange(
+                firstMissedBlock?.height ?? 0,
+                lastMissedBlock?.height ?? 0,
+            ),
 
             firstRoundRound: firstRound.round,
             lastRoundRound: lastRound.round,
@@ -315,6 +352,11 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
                 count: dumpRange.blocksCount,
                 start: dumpRange.firstBlockHeight,
                 end: dumpRange.lastBlockHeight,
+            },
+            missedBlocks: {
+                count: dumpRange.missedBlocksCount,
+                start: dumpRange.firstMissedBlockHeight,
+                end: dumpRange.lastMissedBlockHeight,
             },
             transactions: {
                 count: dumpRange.transactionsCount,

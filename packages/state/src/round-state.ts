@@ -1,5 +1,5 @@
 import { Blocks, Crypto, Interfaces, Managers, Utils } from "@solar-network/crypto";
-import { DatabaseService } from "@solar-network/database";
+import { DatabaseService, Repositories } from "@solar-network/database";
 import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/kernel";
 import assert from "assert";
 
@@ -17,6 +17,9 @@ export class RoundState implements Contracts.State.RoundState {
 
     @Container.inject(Container.Identifiers.DposPreviousRoundStateProvider)
     private readonly getDposPreviousRoundState!: Contracts.State.DposPreviousRoundStateProvider;
+
+    @Container.inject(Container.Identifiers.DatabaseMissedBlockRepository)
+    private readonly missedBlockRepository!: Repositories.MissedBlockRepository;
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
@@ -115,17 +118,33 @@ export class RoundState implements Contracts.State.RoundState {
         const lastSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup, lastBlock.data.timestamp);
         const currentSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup, block.data.timestamp);
 
-        const missedSlots: number = Math.min(currentSlot - lastSlot - 1, this.forgingDelegates.length);
+        const { blockTime } = Managers.configManager.getMilestone(lastBlock.data.height);
+        const { height } = block.data;
+        const slotTime = Crypto.Slots.getSlotTime(
+            blockTimeLookup,
+            Crypto.Slots.getSlotNumber(blockTimeLookup, lastBlock.data.timestamp),
+        );
+
+        const missedSlots: number = currentSlot - lastSlot - 1;
+        const missedBlocks: { timestamp: number; height: number; username: string }[] = [];
+
         for (let i = 0; i < missedSlots; i++) {
             const missedSlot: number = lastSlot + i + 1;
             const delegate: Contracts.State.Wallet = this.forgingDelegates[missedSlot % this.forgingDelegates.length];
 
-            this.logger.debug(`Delegate ${delegate.getAttribute("delegate.username")} just missed a block :pensive:`);
+            const timestamp: number = slotTime + blockTime * (i + 1);
+            const username: string = delegate.getAttribute("delegate.username");
 
-            this.events.dispatch(Enums.ForgerEvent.Missing, {
-                delegate,
-            });
+            if (i < this.forgingDelegates.length) {
+                this.logger.debug(`Delegate ${username} just missed a block :pensive:`);
+                this.events.dispatch(Enums.ForgerEvent.Missing, {
+                    delegate,
+                });
+            }
+
+            missedBlocks.push({ timestamp, height, username });
         }
+        this.missedBlockRepository.addMissedBlocks(missedBlocks);
     }
 
     public async getRewardForBlockInRound(

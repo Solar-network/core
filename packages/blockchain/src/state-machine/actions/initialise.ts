@@ -1,6 +1,6 @@
-import { Interfaces, Managers } from "@solar-network/crypto";
-import { DatabaseService } from "@solar-network/database";
-import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
+import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
+import { DatabaseService, Repositories } from "@solar-network/database";
+import { Container, Contracts, Services, Utils as AppUtils, Utils } from "@solar-network/kernel";
 import { DatabaseInteraction } from "@solar-network/state";
 import { existsSync, unlinkSync } from "fs";
 
@@ -16,6 +16,12 @@ export class Initialise implements Action {
 
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
+
+    @Container.inject(Container.Identifiers.DatabaseBlockRepository)
+    private readonly blockRepository!: Repositories.BlockRepository;
+
+    @Container.inject(Container.Identifiers.DatabaseMissedBlockRepository)
+    private readonly missedBlockRepository!: Repositories.MissedBlockRepository;
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
@@ -93,6 +99,9 @@ export class Initialise implements Action {
                 if (!loadedState) {
                     await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
                 }
+                if (!(await this.calculateMissedBlocks())) {
+                    return;
+                }
                 await this.databaseInteraction.restoreCurrentRound();
                 await this.pool.readdTransactions();
                 await this.networkMonitor.boot();
@@ -105,6 +114,9 @@ export class Initialise implements Action {
 
                 if (!loadedState) {
                     await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
+                }
+                if (!(await this.calculateMissedBlocks())) {
+                    return;
                 }
                 await this.databaseInteraction.restoreCurrentRound();
                 await this.networkMonitor.boot();
@@ -120,6 +132,10 @@ export class Initialise implements Action {
             if (!loadedState) {
                 await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
             }
+
+            if (!(await this.calculateMissedBlocks())) {
+                return;
+            }
             await this.databaseInteraction.restoreCurrentRound();
             await this.pool.readdTransactions();
 
@@ -131,5 +147,95 @@ export class Initialise implements Action {
 
             return this.blockchain.dispatch("FAILURE");
         }
+    }
+
+    private async calculateMissedBlocks(): Promise<boolean> {
+        if (await this.missedBlockRepository.hasMissedBlocks()) {
+            return true;
+        }
+
+        this.logger.info("Calculating productivity data, this might take a while :abacus:");
+
+        const chunkSize = 10000;
+
+        const chunks = this.stateStore.getLastBlock().data.height / chunkSize;
+
+        const missedBlocks: { timestamp: number; height: number; username: string }[] = [];
+        const calculatedRounds = {};
+
+        for (let i = 0; i < chunks; i++) {
+            const offset = i * chunkSize + 1;
+            const blocks = await this.blockRepository.findByHeightRange(offset, offset + chunkSize - 1);
+            for (let j = 0; j < blocks.length; j++) {
+                const block: Interfaces.IBlockData = blocks[j];
+
+                if (block.height === 1) {
+                    continue;
+                }
+
+                const round = Utils.roundCalculator.calculateRound(block.height);
+                const { blockTime } = Managers.configManager.getMilestone(round.roundHeight);
+                if (!calculatedRounds[round.round]) {
+                    const delegatesInThisRound: Contracts.State.Wallet[] = (await this.app
+                        .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
+                        .call("getActiveDelegates", { roundInfo: round }))!;
+                    calculatedRounds[round.round] = delegatesInThisRound.map((delegate) =>
+                        delegate.getAttribute("delegate.username"),
+                    );
+                    if (!calculatedRounds[round.round].length) {
+                        const rollbackHeight: number = round.roundHeight - round.maxDelegates;
+                        this.logger.error("The database is corrupted :fire:");
+                        this.logger.error(
+                            `Attempting recovery by rolling back to height ${rollbackHeight.toLocaleString()}`,
+                        );
+                        await this.blockRepository.deleteTopBlocks(
+                            this.app,
+                            this.stateStore.getLastBlock().data.height - rollbackHeight,
+                        );
+                        const lastBlock = await this.databaseService.getLastBlock();
+                        this.stateStore.setLastBlock(lastBlock);
+                        this.stateStore.setLastStoredBlockHeight(lastBlock.data.height);
+                        this.handle();
+                        return false;
+                    }
+                }
+
+                const delegates = calculatedRounds[round.round];
+                const lastBlock: Interfaces.IBlockData = (
+                    j > 0 ? blocks[j - 1] : await this.blockRepository.findByHeight(block.height - 1)
+                )!;
+                const thisSlot: number = Crypto.Slots.getSlotNumber(
+                    await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.height),
+                    block.timestamp,
+                );
+                const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(
+                    this.app,
+                    lastBlock.height,
+                );
+                const lastSlot: number = lastBlock
+                    ? Crypto.Slots.getSlotNumber(blockTimeLookup, lastBlock.timestamp) + 1
+                    : 0;
+                const missedSlots: number = thisSlot - lastSlot;
+                if (missedSlots > 0) {
+                    let missedSlotCounter: number = 0;
+                    for (let slotCounter = lastSlot; slotCounter < thisSlot; slotCounter++) {
+                        missedSlotCounter++;
+                        missedBlocks.push({
+                            height: block.height,
+                            username: delegates[slotCounter % delegates.length],
+                            timestamp:
+                                Crypto.Slots.getSlotTime(
+                                    blockTimeLookup,
+                                    Crypto.Slots.getSlotNumber(blockTimeLookup, lastBlock.timestamp),
+                                ) +
+                                blockTime * missedSlotCounter,
+                        });
+                    }
+                }
+            }
+        }
+
+        await this.missedBlockRepository.addMissedBlocks(missedBlocks);
+        return true;
     }
 }

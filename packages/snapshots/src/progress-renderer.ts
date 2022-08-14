@@ -10,12 +10,14 @@ export class ProgressRenderer {
 
     private count = {
         blocks: 0,
+        missedBlocks: 0,
         transactions: 0,
         rounds: 0,
     };
 
     private progress = {
         blocks: "---.--",
+        missedBlocks: "---.--",
         transactions: "---.--",
         rounds: "---.--",
     };

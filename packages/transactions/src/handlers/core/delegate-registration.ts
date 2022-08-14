@@ -29,6 +29,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             "delegate.forgedTotal", // Used by the API
             "delegate.lastBlock",
             "delegate.producedBlocks", // Used by the API
+            "delegate.productivity", // Used by the API
             "delegate.rank",
             "delegate.round",
             "delegate.username",

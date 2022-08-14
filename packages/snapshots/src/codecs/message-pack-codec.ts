@@ -54,6 +54,30 @@ export class MessagePackCodec implements Codec {
         }
     }
 
+    public encodeMissedBlock(missedBlock: {
+        MissedBlock_timestamp: number;
+        MissedBlock_height: number;
+        MissedBlock_username: string;
+    }): Buffer {
+        try {
+            return encode([
+                missedBlock.MissedBlock_timestamp,
+                missedBlock.MissedBlock_height,
+                missedBlock.MissedBlock_username,
+            ]);
+        } catch (err) {
+            throw new CodecException.MissedBlockEncodeException(missedBlock.MissedBlock_timestamp, err.message);
+        }
+    }
+
+    public decodeMissedBlock(buffer: Buffer): Models.MissedBlock {
+        try {
+            const [timestamp, height, username] = decode(buffer);
+            return { timestamp, height, username };
+        } catch (err) {
+            throw new CodecException.MissedBlockDecodeException(undefined, err.message);
+        }
+    }
     public encodeTransaction(transaction: {
         Transaction_id: string;
         Transaction_block_id: string;
