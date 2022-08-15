@@ -27,13 +27,13 @@ export class HtlcLockBuilder extends TransactionBuilder<HtlcLockBuilder> {
     public amount(amount: string): HtlcLockBuilder {
         this.data.amount = BigNumber.make(amount);
 
-        return this.instance();
+        return this;
     }
 
     public recipientId(recipientId: string): HtlcLockBuilder {
         this.data.recipientId = recipientId;
 
-        return this.instance();
+        return this;
     }
 
     public getStruct(): ITransactionData {

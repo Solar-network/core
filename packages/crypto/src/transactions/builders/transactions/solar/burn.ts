@@ -16,7 +16,7 @@ export class BurnBuilder extends TransactionBuilder<BurnBuilder> {
     public amount(amount: string): BurnBuilder {
         this.data.amount = BigNumber.make(amount);
 
-        return this.instance();
+        return this;
     }
 
     public getStruct(): ITransactionData {
