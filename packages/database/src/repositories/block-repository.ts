@@ -287,28 +287,26 @@ export class BlockRepository extends AbstractRepository<Block> {
                 .where("height > :targetHeight", { targetHeight })
                 .getRawMany();
 
-            const blockIds = blockIdRows.map((row) => row["id"]);
-
-            if (blockIds.length === 0) {
+            if (blockIdRows.length === 0) {
                 throw new Error("Corrupt database");
             }
 
             app.get<Contracts.Kernel.Logger>(Container.Identifiers.LogService).info(
-                `Removing the latest ${Utils.pluralise("block", blockIds.length, true)}`,
+                `Removing the latest ${Utils.pluralise("block", blockIdRows.length, true)} :wastebasket:`,
             );
 
             await manager
                 .createQueryBuilder()
                 .delete()
                 .from(Transaction)
-                .where("block_id IN (:...blockIds)", { blockIds })
+                .where("block_height > :targetHeight", { targetHeight })
                 .execute();
 
             await manager
                 .createQueryBuilder()
                 .delete()
                 .from(Block)
-                .where("id IN (:...blockIds)", { blockIds })
+                .where("height > :targetHeight", { targetHeight })
                 .execute();
 
             await manager
