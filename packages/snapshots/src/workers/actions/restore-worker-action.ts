@@ -18,10 +18,6 @@ export class RestoreWorkerAction extends AbstractWorkerAction {
             isBlock,
             streamReader,
             async (entity: any, previousEntity: any) => {
-                if (isBlock) {
-                    this.applyGenesisBlockFix(entity);
-                }
-
                 if (this.options!.verify) {
                     verify(entity, previousEntity);
                 }
