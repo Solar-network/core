@@ -76,7 +76,12 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         this.queue = await this.app.get<Types.QueueFactory>(Container.Identifiers.QueueFactory)();
 
-        this.queue.on("drain", () => {
+        const stateSaver: Contracts.State.StateSaver = this.app.get<Contracts.State.StateSaver>(
+            Container.Identifiers.StateSaver,
+        );
+
+        this.queue.on("drain", async () => {
+            await stateSaver.run();
             this.dispatch("PROCESSFINISHED");
         });
 

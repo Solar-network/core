@@ -17,9 +17,6 @@ export class StateLoader {
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Application;
 
-    @Container.inject(Container.Identifiers.BlockchainService)
-    private readonly blockchain!: Contracts.Blockchain.Blockchain;
-
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
     private readonly blockRepository!: Repositories.BlockRepository;
 
@@ -95,18 +92,6 @@ export class StateLoader {
             result = false;
         } else {
             result = await this.load(savedStatesPath, stateFiles);
-        }
-
-        const queue: Contracts.Kernel.Queue = this.blockchain.getQueue();
-        if (queue) {
-            const stateSaver: Contracts.State.StateSaver = this.app.get<Contracts.State.StateSaver>(
-                Container.Identifiers.StateSaver,
-            );
-            queue.removeAllListeners("drain");
-            queue.on("drain", async () => {
-                await stateSaver.run();
-                this.blockchain.dispatch("PROCESSFINISHED");
-            });
         }
 
         return result;
