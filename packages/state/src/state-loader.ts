@@ -142,7 +142,7 @@ export class StateLoader {
             const total: number = buffer.readUInt32LE();
 
             const reviver = (_, value) => {
-                if (typeof value === "string" && !isNaN(+value) && Number.isInteger(+value)) {
+                if (typeof value === "string" && !value.includes(".") && !isNaN(+value) && Number.isInteger(+value)) {
                     return Utils.BigNumber.make(value);
                 }
 
