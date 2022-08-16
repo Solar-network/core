@@ -96,6 +96,7 @@ export class Block implements IBlock {
         return {
             blockSignature: data.blockSignature,
             burnedFee: withExtraData ? data.burnedFee : undefined,
+            devFund: withExtraData ? data.devFund : undefined,
             generatorPublicKey: data.generatorPublicKey,
             height: data.height,
             id: data.id,
