@@ -180,7 +180,7 @@ export class LocalConfigLoader implements ConfigLoader {
             keys.add(Identities.PrivateKey.fromPassphrase(secret));
         }
 
-        if (secrets.size > 0) {
+        if (delegates.secrets || secrets.size > 0) {
             writeJsonSync(this.app.configPath("delegates.json"), { keys: [...keys] }, { spaces: 4 });
         }
 
