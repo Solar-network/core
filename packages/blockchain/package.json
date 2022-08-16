@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/blockchain",
-    "version": "4.1.0-next.0",
+    "version": "4.1.0-next.1",
     "description": "Blockchain Manager for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
