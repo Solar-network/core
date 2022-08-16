@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/state",
-    "version": "4.0.2",
+    "version": "4.1.0-next.0",
     "description": "State Management for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
@@ -29,5 +29,5 @@
         "semver": "6.3.0",
         "xstate": "4.23.4"
     },
-    "minimumSavedStateVersion": "4.0.2"
+    "minimumSavedStateVersion": "4.1.0-next.0"
 }
