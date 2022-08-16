@@ -46,7 +46,11 @@ export class EventListener {
                     const eventPath = `/events/${event}`;
                     for (const server of servers) {
                         server.subscription(eventPath);
-                        if (eventGroupName === "BlockEvent" || eventGroupName === "VoteEvent") {
+                        if (
+                            eventGroupName === "BlockEvent" ||
+                            eventGroupName === "DelegateEvent" ||
+                            eventGroupName === "VoteEvent"
+                        ) {
                             server.subscription(`${eventPath}/{id}`);
                         } else if (eventGroupName === "TransactionEvent") {
                             server.subscription(`${eventPath}/{id}`);
@@ -60,7 +64,7 @@ export class EventListener {
                         handle: async ({ data }) => {
                             const endpoints = new Set([eventPath]);
 
-                            if (eventGroupName === "BlockEvent") {
+                            if (eventGroupName === "BlockEvent" || eventGroupName === "DelegateEvent") {
                                 endpoints.add(`${eventPath}/${data.username}`);
                             } else if (eventGroupName === "TransactionEvent") {
                                 if (this.walletRepository.hasByPublicKey(data.senderPublicKey)) {

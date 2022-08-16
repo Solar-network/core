@@ -127,7 +127,13 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     }
 
     public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
-        emitter.dispatch(AppEnums.DelegateEvent.Resigned, transaction.data);
+        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const username = senderWallet.getAttribute("delegate.username");
+
+        emitter.dispatch(AppEnums.DelegateEvent.Resigned, {
+            ...transaction.data,
+            username,
+        });
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {

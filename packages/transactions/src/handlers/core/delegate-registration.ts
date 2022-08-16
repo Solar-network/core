@@ -132,7 +132,10 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
     }
 
     public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
-        emitter.dispatch(AppEnums.DelegateEvent.Registered, transaction.data);
+        emitter.dispatch(AppEnums.DelegateEvent.Registered, {
+            ...transaction.data,
+            username: transaction.data.asset?.delegate?.username,
+        });
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
