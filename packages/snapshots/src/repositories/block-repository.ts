@@ -47,6 +47,13 @@ export class BlockRepository extends AbstractRepository<Models.Block> {
             await manager
                 .createQueryBuilder()
                 .delete()
+                .from(Models.MissedBlock)
+                .where("height > :height", { height: block.height })
+                .execute();
+
+            await manager
+                .createQueryBuilder()
+                .delete()
                 .from(Models.Round)
                 .where("round > :round", { round: roundInfo.round - 1 })
                 .execute();

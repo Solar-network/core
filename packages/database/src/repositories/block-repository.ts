@@ -2,7 +2,7 @@ import { Interfaces, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Utils } from "@solar-network/kernel";
 import { EntityRepository, In } from "typeorm";
 
-import { Block, Round, Transaction } from "../models";
+import { Block, MissedBlock, Round, Transaction } from "../models";
 import { AbstractRepository } from "./abstract-repository";
 
 @EntityRepository(Block)
@@ -220,7 +220,7 @@ export class BlockRepository extends AbstractRepository<Block> {
         });
 
         if (!continuousChunk) {
-            throw new Error("Blocks chunk to delete isn't continuous");
+            throw new Error("Blocks chunk to delete isn't contiguous");
         }
 
         return this.manager.transaction(async (manager) => {
@@ -252,12 +252,19 @@ export class BlockRepository extends AbstractRepository<Block> {
                 .createQueryBuilder()
                 .delete()
                 .from(Block)
-                .where("id IN (:...blockIds)", { blockIds })
+                .where("height > :targetBlockHeight", { targetBlockHeight })
                 .execute();
 
             if (deleteBlocksResult.affected !== blockIds.length) {
                 throw new Error("Failed to delete all blocks from database");
             }
+
+            await manager
+                .createQueryBuilder()
+                .delete()
+                .from(MissedBlock)
+                .where("height > :targetBlockHeight", { targetBlockHeight })
+                .execute();
 
             await manager
                 .createQueryBuilder()
@@ -306,6 +313,13 @@ export class BlockRepository extends AbstractRepository<Block> {
                 .createQueryBuilder()
                 .delete()
                 .from(Block)
+                .where("height > :targetHeight", { targetHeight })
+                .execute();
+
+            await manager
+                .createQueryBuilder()
+                .delete()
+                .from(MissedBlock)
                 .where("height > :targetHeight", { targetHeight })
                 .execute();
 
