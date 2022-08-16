@@ -9,6 +9,10 @@ export interface DumpRange {
     lastBlockHeight: number;
     blocksCount: number;
 
+    firstMissedBlockHeight: number;
+    lastMissedBlockHeight: number;
+    missedBlocksCount: number;
+
     firstTransactionTimestamp: number;
     lastTransactionTimestamp: number;
     transactionsCount: number;

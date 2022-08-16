@@ -1,4 +1,5 @@
 export * from "./block-filter";
+export * from "./missed-block-filter";
 export * from "./model-converter";
 export * from "./models";
 export * from "./transaction-filter";

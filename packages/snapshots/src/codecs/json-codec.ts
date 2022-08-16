@@ -63,6 +63,26 @@ export class JSONCodec implements Codec {
         }
     }
 
+    public encodeMissedBlock(missedBlock: { MissedBlock_timestamp: number }): Buffer {
+        try {
+            const missedBlockStringified = JSONCodec.stringify(
+                cameliseKeys(JSONCodec.removePrefix(missedBlock, "MissedBlock_")),
+            );
+
+            return Buffer.from(missedBlockStringified);
+        } catch (err) {
+            throw new CodecException.MissedBlockEncodeException(missedBlock.MissedBlock_timestamp, err.message);
+        }
+    }
+
+    public decodeMissedBlock(buffer: Buffer): Models.MissedBlock {
+        try {
+            return JSON.parse(buffer.toString());
+        } catch (err) {
+            throw new CodecException.MissedBlockDecodeException(undefined, err.message);
+        }
+    }
+
     public encodeTransaction(transaction: { Transaction_id: string }): Buffer {
         try {
             let tmp = JSONCodec.removePrefix(transaction, "Transaction_");

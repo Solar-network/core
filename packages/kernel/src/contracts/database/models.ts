@@ -19,6 +19,12 @@ export interface BlockModel {
     username?: string;
 }
 
+export interface MissedBlockModel {
+    timestamp: number;
+    height: number;
+    username: string;
+}
+
 export interface TransactionModel {
     id: string;
     version: number;

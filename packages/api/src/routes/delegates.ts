@@ -3,9 +3,10 @@ import Joi from "joi";
 
 import { DelegatesController } from "../controllers/delegates";
 import {
-    blockSortingSchema,
+    blockSortingSchemaWithoutUsernameOrGeneratorPublicKey,
     delegateCriteriaSchema,
     delegateSortingSchema,
+    missedBlockSortingSchema,
     walletCriteriaSchema,
     walletParamSchema,
     walletSortingSchema,
@@ -73,11 +74,35 @@ export const register = (server: Hapi.Server): void => {
                     id: walletParamSchema,
                 }),
                 query: Joi.object({
-                    ...server.app.schemas.blockCriteriaSchemas,
+                    ...server.app.schemas.blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey,
                     orderBy: server.app.schemas.blocksOrderBy,
                     transform: Joi.bool().default(true),
                 })
-                    .concat(blockSortingSchema)
+                    .concat(blockSortingSchemaWithoutUsernameOrGeneratorPublicKey)
+                    .concat(Schemas.pagination),
+            },
+            plugins: {
+                pagination: {
+                    enabled: true,
+                },
+            },
+        },
+    });
+
+    server.route({
+        method: "GET",
+        path: "/delegates/{id}/blocks/missed",
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.missedBlocks(request, h),
+        options: {
+            validate: {
+                params: Joi.object({
+                    id: walletParamSchema,
+                }),
+                query: Joi.object({
+                    ...server.app.schemas.missedBlockCriteriaSchemasWithoutUsername,
+                    orderBy: server.app.schemas.missedBlocksOrderBy,
+                })
+                    .concat(missedBlockSortingSchema)
                     .concat(Schemas.pagination),
             },
             plugins: {

@@ -164,6 +164,7 @@ export const orderBy = Joi.alternatives().try(
 );
 
 export const blocksOrderBy = orderBy.default("height:desc");
+export const missedBlocksOrderBy = orderBy.default("timestamp:desc");
 export const transactionsOrderBy = orderBy.default(["timestamp:desc", "sequence:desc"]);
 
 const equalCriteria = (value: any) => value;
@@ -204,6 +205,26 @@ export const blockCriteriaSchemas = {
     ),
     blockSignature: orEqualCriteria(Joi.string().hex().length(128)),
 };
+
+export const blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey = { ...blockCriteriaSchemas } as any;
+delete blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey.generatorPublicKey;
+delete blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey.username;
+
+export const missedBlockCriteriaSchemas = {
+    timestamp: orNumericCriteria(Joi.number().integer().min(0)),
+    height: orNumericCriteria(Joi.number().integer().min(1)),
+    username: orEqualCriteria(
+        Joi.string()
+            .regex(/^(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$/)
+            .min(1)
+            .max(20),
+    ),
+};
+
+export const missedBlockCriteriaSchemasWithoutUsername = {
+    ...blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey,
+} as any;
+delete missedBlockCriteriaSchemasWithoutUsername.username;
 
 export const transactionCriteriaSchemas = {
     address: orEqualCriteria(address),

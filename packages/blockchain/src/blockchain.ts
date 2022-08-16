@@ -7,7 +7,6 @@ import { ProcessBlocksJob } from "./process-blocks-job";
 import { StateMachine } from "./state-machine";
 import { blockchainMachine } from "./state-machine/machine";
 
-// todo: reduce the overall complexity of this class and remove all helpers and getters that just serve as proxies
 @Container.injectable()
 export class Blockchain implements Contracts.Blockchain.Blockchain {
     @Container.inject(Container.Identifiers.Application)
@@ -28,6 +27,9 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
     private readonly blockRepository!: Repositories.BlockRepository;
+
+    @Container.inject(Container.Identifiers.DatabaseMissedBlockRepository)
+    private readonly missedBlockRepository!: Repositories.MissedBlockRepository;
 
     @Container.inject(Container.Identifiers.PoolService)
     private readonly pool!: Contracts.Pool.Service;
@@ -60,6 +62,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     private booted: boolean = false;
     private missedBlocks: number = 0;
     private lastCheckNetworkHealthTs: number = 0;
+    private updating: boolean = false;
 
     @Container.postConstruct()
     public async initialise(): Promise<void> {
@@ -149,6 +152,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         this.events.listen(Enums.ForgerEvent.Missing, { handle: this.checkMissingBlocks });
 
         this.events.listen(Enums.RoundEvent.Applied, { handle: this.resetMissedBlocks });
+
+        this.events.listen(Enums.QueueEvent.Finished, { handle: () => this.updateProductivity(false) });
+
+        this.updateProductivity(true);
 
         this.booted = true;
 
@@ -582,5 +589,54 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     private resetMissedBlocks(): void {
         this.missedBlocks = 0;
+    }
+
+    private async updateProductivity(initialStart: boolean): Promise<void> {
+        if (this.updating) {
+            return;
+        }
+
+        this.updating = true;
+
+        const timestamp =
+            (new Date(Utils.formatTimestamp(this.getLastBlock().data.timestamp).unix * 1000).setUTCHours(0, 0, 0, 0) -
+                new Date(Managers.configManager.getMilestone(1).epoch).getTime()) /
+            1000;
+
+        const productivityStatistics: Record<string, number> = await this.missedBlockRepository.getBlockProductivity(
+            timestamp - (this.configuration.get("missedBlocksLookback") as number),
+        );
+
+        for (const [username, productivity] of Object.entries(productivityStatistics)) {
+            const delegateWallet = this.walletRepository.findByUsername(username);
+
+            let oldProductivity: number | undefined = undefined;
+            if (delegateWallet.hasAttribute("delegate.productivity")) {
+                oldProductivity = delegateWallet.getAttribute("delegate.productivity");
+            }
+
+            let newProductivity: number | undefined = undefined;
+            if (productivity !== null) {
+                newProductivity = +productivity;
+            } else {
+                newProductivity = undefined;
+            }
+
+            if (!initialStart && newProductivity !== oldProductivity) {
+                this.events.dispatch(Enums.DelegateEvent.ProductivityChanged, {
+                    username,
+                    old: oldProductivity,
+                    new: newProductivity,
+                });
+            }
+
+            if (newProductivity !== undefined) {
+                delegateWallet.setAttribute("delegate.productivity", newProductivity);
+            } else {
+                delegateWallet.forgetAttribute("delegate.productivity");
+            }
+        }
+
+        this.updating = false;
     }
 }

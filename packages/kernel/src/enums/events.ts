@@ -68,6 +68,7 @@ export enum DatabaseEvent {
  * @enum {number}
  */
 export enum DelegateEvent {
+    ProductivityChanged = "delegate.productivityChanged",
     Registered = "delegate.registered",
     Resigned = "delegate.resigned",
 }

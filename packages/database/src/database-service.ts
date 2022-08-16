@@ -54,7 +54,7 @@ export class DatabaseService {
     }
 
     public async reset(): Promise<void> {
-        await this.connection.query("TRUNCATE TABLE blocks, rounds, transactions RESTART IDENTITY;");
+        await this.connection.query("TRUNCATE TABLE blocks, missed_blocks, rounds, transactions RESTART IDENTITY;");
     }
 
     public async getBlock(id: string): Promise<Interfaces.IBlock | undefined> {

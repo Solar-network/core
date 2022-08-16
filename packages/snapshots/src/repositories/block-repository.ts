@@ -15,7 +15,7 @@ export class BlockRepository extends AbstractRepository<Models.Block> {
     }
 
     public async truncate(): Promise<void> {
-        await this.manager.query("TRUNCATE TABLE transactions, rounds, blocks");
+        await this.manager.query("TRUNCATE TABLE transactions, rounds, missed_blocks, blocks");
     }
 
     public async countInRange(start: number, end: number): Promise<number> {

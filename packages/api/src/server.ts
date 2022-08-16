@@ -32,6 +32,15 @@ export class Server {
      * @memberof Server
      */
     @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/blockchain")
+    private readonly blockchainConfiguration!: Providers.PluginConfiguration;
+
+    /**
+     * @private
+     * @type {Providers.PluginConfiguration}
+     * @memberof Server
+     */
+    @Container.inject(Container.Identifiers.PluginConfiguration)
     @Container.tagged("plugin", "@solar-network/api")
     private readonly configuration!: Providers.PluginConfiguration;
 
@@ -154,6 +163,17 @@ export class Server {
             swaggerJson.components.schemas.transactionTypeGroups.enum = [...typeGroups];
             swaggerJson.components.schemas.transactionVersions.enum =
                 Transactions.schemas.transactionBaseSchema.properties.version.enum;
+
+            const seconds: number = this.blockchainConfiguration.get("missedBlocksLookback") as number;
+            const days: number = +(seconds / 86400).toFixed(2);
+
+            swaggerJson.paths["/blocks/missed"].get.summary = swaggerJson.paths["/blocks/missed"].get.summary.replace(
+                "X",
+                days,
+            );
+            swaggerJson.paths["/delegates/{identifier}/blocks/missed"].get.summary = swaggerJson.paths[
+                "/delegates/{identifier}/blocks/missed"
+            ].get.summary.replace("X", days);
 
             this.server.route({
                 method: "GET",

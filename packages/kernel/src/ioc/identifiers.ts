@@ -45,6 +45,7 @@ export const Identifiers = {
     ProcessActionsService: Symbol.for("Service<ProcessActions>"),
     ValidationService: Symbol.for("Service<Validation>"),
     BlockHistoryService: Symbol.for("Service<BlockHistory>"),
+    MissedBlockHistoryService: Symbol.for("Service<MissedBlockHistory>"),
     TransactionHistoryService: Symbol.for("Service<TransactionHistory>"),
 
     // Factories
@@ -59,6 +60,8 @@ export const Identifiers = {
     DatabaseRoundRepository: Symbol.for("Database<RoundRepository>"),
     DatabaseBlockRepository: Symbol.for("Database<BlockRepository>"),
     DatabaseBlockFilter: Symbol.for("Database<BlockFilter>"),
+    DatabaseMissedBlockFilter: Symbol.for("Database<MissedBlockFilter>"),
+    DatabaseMissedBlockRepository: Symbol.for("Database<MissedBlockRepository>"),
     DatabaseTransactionRepository: Symbol.for("Database<TransactionRepository>"),
     DatabaseTransactionFilter: Symbol.for("Database<TransactionFilter>"),
     DatabaseModelConverter: Symbol.for("Database<ModelConverter>"),
