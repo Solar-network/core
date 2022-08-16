@@ -38,6 +38,10 @@ export class Initialise implements Action {
     @Container.inject(Container.Identifiers.PeerNetworkMonitor)
     private readonly networkMonitor!: Contracts.P2P.NetworkMonitor;
 
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
+
     public async handle(): Promise<void> {
         try {
             const block: Interfaces.IBlock = this.stateStore.getLastBlock();
@@ -195,6 +199,7 @@ export class Initialise implements Action {
                         const lastBlock = await this.databaseService.getLastBlock();
                         this.stateStore.setLastBlock(lastBlock);
                         this.stateStore.setLastStoredBlockHeight(lastBlock.data.height);
+                        this.walletRepository.reset();
                         this.handle();
                         return false;
                     }
