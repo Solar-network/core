@@ -164,8 +164,6 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
     }
 
     public async rollbackByNumber(number: number): Promise<void> {
-        this.logger.info("Rolling back the blockchain");
-
         const lastBlock = await this.database.getLastBlock();
 
         return this.rollbackByHeight(lastBlock.data.height - number);
