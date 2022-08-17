@@ -17,6 +17,11 @@ export enum SolarTransactionType {
     Vote = 2,
 }
 
+export enum TransactionHeaderType {
+    Standard = 0,
+    Extended = 1,
+}
+
 export const TransactionType = {
     Core: CoreTransactionType,
     Solar: SolarTransactionType,

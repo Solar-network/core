@@ -172,16 +172,14 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
         return amount;
     }
 
-    public async getSentTransactions(): Promise<
-        { senderPublicKey: string; amount: string; fee: string; nonce: string }[]
-    > {
+    public async getSentTransactions(): Promise<{ senderId: string; amount: string; fee: string; nonce: string }[]> {
         return this.createQueryBuilder()
             .select([])
-            .addSelect("sender_public_key", "senderPublicKey")
+            .addSelect("sender_id", "senderId")
             .addSelect("SUM(amount)", "amount")
             .addSelect("SUM(fee)", "fee")
             .addSelect("COUNT(id)::int8", "nonce")
-            .groupBy("sender_public_key")
+            .groupBy("sender_id")
             .getRawMany();
     }
 
@@ -293,9 +291,9 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
             .getRawMany();
     }
 
-    public async getRefundedHtlcLockBalances(): Promise<{ senderPublicKey: string; refundedBalance: string }[]> {
+    public async getRefundedHtlcLockBalances(): Promise<{ senderId: string; refundedBalance: string }[]> {
         return this.createQueryBuilder()
-            .select(`sender_public_key AS "senderPublicKey"`)
+            .select(`sender_id AS "senderId"`)
             .addSelect("SUM(amount)", "refundedBalance")
             .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
             .andWhere(`type = ${Enums.TransactionType.Core.HtlcLock}`)
@@ -308,7 +306,7 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
                     .andWhere(`type = ${Enums.TransactionType.Core.HtlcRefund}`);
                 return `id IN ${refundedLockIdsSubQuery.getQuery()}`;
             })
-            .groupBy("sender_public_key")
+            .groupBy("sender_id")
             .getRawMany();
     }
 }

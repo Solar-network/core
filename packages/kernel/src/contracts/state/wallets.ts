@@ -275,6 +275,7 @@ export interface SearchContext<T = any> {
 
 export interface UnwrappedHtlcLock {
     lockId: string;
+    senderId: string;
     senderPublicKey: string;
     amount: Utils.BigNumber;
     recipientId: string;

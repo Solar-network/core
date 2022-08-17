@@ -1,6 +1,5 @@
 import { TransactionTypeGroup } from "../../enums";
 import { NotImplemented } from "../../errors";
-import { Address } from "../../identities";
 import {
     ISchemaValidationResult,
     ISerialiseOptions,
@@ -104,10 +103,10 @@ export abstract class Transaction implements ITransaction {
     public toString(): string {
         const parts: string[] = [];
 
-        if (this.data.senderPublicKey && this.data.nonce) {
-            parts.push(`${Address.fromPublicKey(this.data.senderPublicKey)}#${this.data.nonce}`);
-        } else if (this.data.senderPublicKey) {
-            parts.push(`${Address.fromPublicKey(this.data.senderPublicKey)}`);
+        if (this.data.senderId && this.data.nonce) {
+            parts.push(`${this.data.senderId}#${this.data.nonce}`);
+        } else if (this.data.senderId) {
+            parts.push(this.data.senderId);
         }
 
         if (this.data.id) {

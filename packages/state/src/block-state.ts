@@ -121,9 +121,9 @@ export class BlockState implements Contracts.State.BlockState {
 
         await transactionHandler.apply(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         let recipient: Contracts.State.Wallet | undefined;
         if (transaction.data.recipientId) {
@@ -142,9 +142,9 @@ export class BlockState implements Contracts.State.BlockState {
 
         const transactionHandler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
 
-        AppUtils.assert.defined<string>(data.senderPublicKey);
+        AppUtils.assert.defined<string>(data.senderId);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(data.senderPublicKey);
+        const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(data.senderId);
 
         let recipient: Contracts.State.Wallet | undefined;
         if (transaction.data.recipientId) {

@@ -27,6 +27,7 @@ export const transactionBaseSchema: Record<string, any> = {
         typeGroup: { type: "integer", minimum: 0 },
         fee: { bignumber: { minimum: 0, bypassGenesis: true } },
         burnedFee: { bignumber: { minimum: 0 } },
+        senderId: { $ref: "address" },
         senderPublicKey: { $ref: "publicKey" },
         memo: { anyOf: [{ type: "null" }, { type: "string", format: "memo" }] },
         signature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },

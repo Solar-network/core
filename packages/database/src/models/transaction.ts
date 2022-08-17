@@ -10,6 +10,7 @@ import { transformBigInt, transformMemo } from "../utils/transform";
 })
 @Index(["type"])
 @Index(["blockId"])
+@Index(["senderId"])
 @Index(["senderPublicKey"])
 @Index(["recipientId"])
 @Index(["timestamp"])
@@ -58,6 +59,13 @@ export class Transaction implements Contracts.Database.TransactionModel {
         default: undefined,
     })
     public nonce!: Utils.BigNumber;
+
+    @Column({
+        type: "varchar",
+        length: 34,
+        nullable: false,
+    })
+    public senderId!: string;
 
     @Column({
         type: "varchar",

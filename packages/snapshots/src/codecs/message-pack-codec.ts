@@ -120,6 +120,7 @@ export class MessagePackCodec implements Codec {
                 blockHeight: blockHeight,
                 sequence: sequence,
                 timestamp: timestamp,
+                senderId: transaction.data.senderId!,
                 senderPublicKey: transaction.data.senderPublicKey!,
                 recipientId: transaction.data.recipientId!,
                 type: transaction.data.type,

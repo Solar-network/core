@@ -20,10 +20,6 @@ export class EventListener {
     @Container.tagged("state", "null")
     private readonly handlerRegistry!: Handlers.Registry;
 
-    @Container.inject(Container.Identifiers.WalletRepository)
-    @Container.tagged("state", "blockchain")
-    private readonly walletRepository!: Contracts.State.WalletRepository;
-
     public async initialise(): Promise<void> {
         if (!this.configuration.get("ws.enabled")) {
             return;
@@ -67,24 +63,20 @@ export class EventListener {
                             if (eventGroupName === "BlockEvent" || eventGroupName === "DelegateEvent") {
                                 endpoints.add(`${eventPath}/${data.username}`);
                             } else if (eventGroupName === "TransactionEvent") {
-                                if (this.walletRepository.hasByPublicKey(data.senderPublicKey)) {
-                                    const wallet = this.walletRepository.findByPublicKey(data.senderPublicKey);
-                                    const handler = await this.handlerRegistry.getActivatedHandlerForData(data);
-                                    const address = wallet.getAddress();
-                                    const { key } = handler.getConstructor();
-                                    endpoints.add(`${eventPath}/${address}`);
-                                    endpoints.add(`${eventPath}/${address}/${key}`);
-                                    endpoints.add(`${eventPath}/${key}`);
-                                    if (data.recipientId) {
-                                        endpoints.add(`${eventPath}/${data.recipientId}`);
-                                        endpoints.add(`${eventPath}/${data.recipientId}/${key}`);
-                                    }
-                                    if (data.asset && data.asset.transfers) {
-                                        if (key === "transfer") {
-                                            for (const transfer of data.asset.transfers) {
-                                                endpoints.add(`${eventPath}/${transfer.recipientId}`);
-                                                endpoints.add(`${eventPath}/${transfer.recipientId}/${key}`);
-                                            }
+                                const handler = await this.handlerRegistry.getActivatedHandlerForData(data);
+                                const { key } = handler.getConstructor();
+                                endpoints.add(`${eventPath}/${data.senderId}`);
+                                endpoints.add(`${eventPath}/${data.senderId}/${key}`);
+                                endpoints.add(`${eventPath}/${key}`);
+                                if (data.recipientId) {
+                                    endpoints.add(`${eventPath}/${data.recipientId}`);
+                                    endpoints.add(`${eventPath}/${data.recipientId}/${key}`);
+                                }
+                                if (data.asset && data.asset.transfers) {
+                                    if (key === "transfer") {
+                                        for (const transfer of data.asset.transfers) {
+                                            endpoints.add(`${eventPath}/${transfer.recipientId}`);
+                                            endpoints.add(`${eventPath}/${transfer.recipientId}/${key}`);
                                         }
                                     }
                                 }

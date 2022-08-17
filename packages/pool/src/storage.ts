@@ -48,7 +48,7 @@ export class Storage implements Contracts.Pool.Storage {
                 n                  INTEGER      PRIMARY KEY AUTOINCREMENT,
                 height             INTEGER      NOT NULL,
                 id                 VARCHAR(64)  NOT NULL,
-                senderPublicKey    VARCHAR(66)  NOT NULL,
+                senderId           VARCHAR(34)  NOT NULL,
                 serialised         BLOB         NOT NULL
             );
 
@@ -57,17 +57,17 @@ export class Storage implements Contracts.Pool.Storage {
         `);
 
         this.addTransactionStmt = this.database.prepare(
-            "INSERT INTO pool (height, id, senderPublicKey, serialised) VALUES (:height, :id, :senderPublicKey, :serialised)",
+            "INSERT INTO pool (height, id, senderId, serialised) VALUES (:height, :id, :senderId, :serialised)",
         );
 
         this.hasTransactionStmt = this.database.prepare("SELECT COUNT(*) FROM pool WHERE id = :id").pluck(true);
 
         this.getAllTransactionsStmt = this.database.prepare(
-            "SELECT height, id, senderPublicKey, serialised FROM pool ORDER BY n",
+            "SELECT height, id, senderId, serialised FROM pool ORDER BY n",
         );
 
         this.getOldTransactionsStmt = this.database.prepare(
-            "SELECT height, id, senderPublicKey, serialised FROM pool WHERE height <= :height ORDER BY n DESC",
+            "SELECT height, id, senderId, serialised FROM pool WHERE height <= :height ORDER BY n DESC",
         );
 
         this.removeTransactionStmt = this.database.prepare("DELETE FROM pool WHERE id = :id");
