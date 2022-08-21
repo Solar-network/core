@@ -92,8 +92,9 @@ export class DelegatesController extends Controller {
             return notFound("Delegate not found");
         }
 
+        const blockCriteria = { ...request.query, username: delegateResource.username };
+
         if (request.query.transform) {
-            const blockCriteria = { ...request.query, username: delegateResource.username };
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
                 blockCriteria,
                 { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.Transfer },
@@ -104,7 +105,6 @@ export class DelegatesController extends Controller {
 
             return this.toPagination(blockWithSomeTransactionsListResult, BlockWithTransactionsResource, true);
         } else {
-            const blockCriteria = { ...request.query, username: delegateResource.username };
             const blockListResult = await this.blockHistoryService.listByCriteria(
                 blockCriteria,
                 this.getListingOrder(request),
@@ -133,6 +133,7 @@ export class DelegatesController extends Controller {
         }
 
         const missedBlockCriteria = { ...request.query, username: delegateResource.username };
+
         const missedBlockListResult = await this.missedBlockHistoryService.listByCriteria(
             missedBlockCriteria,
             this.getListingOrder(request),
