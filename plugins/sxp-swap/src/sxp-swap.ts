@@ -143,6 +143,7 @@ export class SXPSwap {
         ): Promise<void> {
             await (this as any).applyToSender(transaction, status);
             await this.applyToRecipient(transaction);
+            await (this as any).index(transaction);
         };
 
         Handlers.TransactionHandler.prototype.applyToSender = async function (
@@ -151,14 +152,15 @@ export class SXPSwap {
         ): Promise<void> {
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-            const sender: Contracts.State.Wallet = (this as any).walletRepository.findByPublicKey(
-                transaction.data.senderPublicKey,
-            );
             const data: Interfaces.ITransactionData = transaction.data;
 
             if (Utils.isException(data)) {
                 self.log.warning(`Transaction forcibly applied as an exception: ${transaction.id}`);
             }
+
+            const sender: Contracts.State.Wallet = (this as any).walletRepository.findByPublicKey(
+                transaction.data.senderPublicKey,
+            );
 
             await (this as any).throwIfCannotBeApplied(transaction, sender, status);
 

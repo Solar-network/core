@@ -15,6 +15,6 @@ export class AlreadyForgedHandler implements BlockHandler {
     public async execute(block?: Interfaces.IBlock): Promise<BlockProcessorResult> {
         this.blockchain.resetLastDownloadedBlock();
 
-        return BlockProcessorResult.DiscardedButCanBeBroadcasted;
+        return BlockProcessorResult.Rejected;
     }
 }

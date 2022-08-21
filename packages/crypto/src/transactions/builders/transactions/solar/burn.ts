@@ -13,6 +13,12 @@ export class BurnBuilder extends TransactionBuilder<BurnBuilder> {
         this.data.amount = BigNumber.ZERO;
     }
 
+    public amount(amount: string): BurnBuilder {
+        this.data.amount = BigNumber.make(amount);
+
+        return this.instance();
+    }
+
     public getStruct(): ITransactionData {
         const struct: ITransactionData = super.getStruct();
         struct.amount = this.data.amount;

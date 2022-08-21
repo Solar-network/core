@@ -1,4 +1,4 @@
-import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Identities, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { Repositories } from "@solar-network/database";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 import assert from "assert";
@@ -30,18 +30,24 @@ export abstract class TransactionHandler {
     @Container.inject(Container.Identifiers.WalletRepository)
     protected readonly walletRepository!: Contracts.State.WalletRepository;
 
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    protected readonly stateWalletRepository!: Contracts.State.WalletRepository;
+
     @Container.inject(Container.Identifiers.LogService)
     protected readonly logger!: Contracts.Kernel.Logger;
 
     public async verify(transaction: Interfaces.ITransaction): Promise<boolean> {
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        if (this.walletRepository.hasByPublicKey(transaction.data.senderPublicKey)) {
+            const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                transaction.data.senderPublicKey,
+            );
 
-        if (senderWallet.hasMultiSignature()) {
-            transaction.isVerified = this.verifySignatures(senderWallet, transaction.data);
+            if (senderWallet.hasMultiSignature()) {
+                transaction.isVerified = this.verifySignatures(senderWallet, transaction.data);
+            }
         }
 
         return transaction.isVerified;
@@ -112,25 +118,33 @@ export abstract class TransactionHandler {
     }
 
     public async apply(transaction: Interfaces.ITransaction): Promise<void> {
-        await this.applyToSender(transaction);
-        await this.applyToRecipient(transaction);
+        try {
+            await this.applyToSender(transaction);
+            await this.applyToRecipient(transaction);
+        } finally {
+            await this.index(transaction);
+        }
     }
 
     public async revert(transaction: Interfaces.ITransaction): Promise<void> {
-        await this.revertForSender(transaction);
-        await this.revertForRecipient(transaction);
+        try {
+            await this.revertForSender(transaction);
+            await this.revertForRecipient(transaction);
+        } finally {
+            await this.index(transaction);
+        }
     }
 
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
-
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
         const data: Interfaces.ITransactionData = transaction.data;
 
         if (Utils.isException(data)) {
             this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}`);
         }
+
+        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
 
         await this.throwIfCannotBeApplied(transaction, sender);
 
@@ -163,6 +177,10 @@ export abstract class TransactionHandler {
         this.verifyTransactionNonceRevert(sender, transaction);
 
         sender.decreaseNonce();
+
+        if (sender.getNonce().isZero()) {
+            sender.forgetPublicKey();
+        }
     }
 
     /**
@@ -281,6 +299,80 @@ export abstract class TransactionHandler {
         if (!wallet.getNonce().isEqualTo(nonce)) {
             throw new UnexpectedNonceError(nonce, wallet, true);
         }
+    }
+
+    private indexRepositories(repositories: Contracts.State.WalletRepository[], addresses: string[]) {
+        for (const address of addresses) {
+            for (const repository of repositories) {
+                if (repository.hasByAddress(address)) {
+                    repository.index(repository.findByAddress(address));
+                }
+            }
+        }
+    }
+
+    private async index(transaction: Interfaces.ITransaction): Promise<void> {
+        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+
+        const senderId = Identities.Address.fromPublicKey(transaction.data.senderPublicKey);
+
+        const repositories = [this.stateWalletRepository];
+        const addresses = [senderId];
+
+        if (this.stateWalletRepository !== this.walletRepository) {
+            repositories.push(this.walletRepository);
+        }
+
+        if (transaction.data.recipientId) {
+            AppUtils.assert.defined<string>(transaction.data.recipientId);
+
+            addresses.push(transaction.data.recipientId);
+        }
+
+        if (transaction.data.typeGroup === Enums.TransactionTypeGroup.Core) {
+            if (transaction.data.type === Enums.TransactionType.Core.Transfer) {
+                AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
+
+                for (const { recipientId } of transaction.data.asset.transfers) {
+                    addresses.push(recipientId);
+                }
+            }
+
+            if (transaction.data.type === Enums.TransactionType.Core.HtlcClaim) {
+                try {
+                    AppUtils.assert.defined<Interfaces.IHtlcClaimAsset>(transaction.data.asset?.claim);
+
+                    const lockId = transaction.data.asset.claim.lockTransactionId;
+                    const lockSenderWallet = this.walletRepository.findByIndex(
+                        Contracts.State.WalletIndexes.Locks,
+                        lockId,
+                    );
+                    const locks: Interfaces.IHtlcLocks = lockSenderWallet.getAttribute("htlc.locks", {});
+
+                    let lockRecipientId: string | undefined;
+
+                    if (locks[lockId] && locks[lockId].recipientId) {
+                        lockRecipientId = locks[lockId].recipientId;
+                    } else {
+                        const lockTransaction: Interfaces.ITransactionData = (
+                            await this.transactionRepository.findByIds([lockId])
+                        )[0];
+
+                        lockRecipientId = lockTransaction.recipientId;
+                    }
+
+                    AppUtils.assert.defined<Interfaces.ITransactionData>(lockRecipientId);
+
+                    const lockSenderId = lockSenderWallet.getAddress();
+
+                    addresses.push(...[lockSenderId, lockRecipientId]);
+                } catch {
+                    //
+                }
+            }
+        }
+
+        this.indexRepositories(repositories, addresses);
     }
 
     public abstract getConstructor(): Transactions.TransactionConstructor;

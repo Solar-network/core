@@ -38,7 +38,7 @@ export class DelegateSearchService {
         sorting: Contracts.Search.Sorting,
         ...criterias: DelegateCriteria[]
     ): Contracts.Search.ResultsPage<DelegateResource> {
-        sorting = [...sorting, { property: "rank", direction: "asc" }];
+        sorting = [...sorting, { property: "rank", direction: "asc" }, { property: "username", direction: "asc" }];
 
         return this.paginationService.getPage(pagination, sorting, this.getDelegates(...criterias));
     }
