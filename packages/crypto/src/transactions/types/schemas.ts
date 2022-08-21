@@ -20,7 +20,7 @@ export const transactionBaseSchema: Record<string, any> = {
     required: ["type", "senderPublicKey", "fee", "nonce"],
     properties: {
         id: { anyOf: [{ $ref: "transactionId" }, { type: "null" }] },
-        headerType: { enum: [0, 1] },
+        headerType: { enum: [0] },
         version: { enum: [2, 3] },
         network: { $ref: "networkByte" },
         nonce: { bignumber: { minimum: 0 } },
