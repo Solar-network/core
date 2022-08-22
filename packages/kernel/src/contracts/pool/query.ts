@@ -4,7 +4,7 @@ export type QueryPredicate = (transaction: Interfaces.ITransaction) => boolean;
 
 export interface Query {
     getAll(): QueryIterable;
-    getAllBySender(senderPublicKey: string): QueryIterable;
+    getAllBySender(senderId: string): QueryIterable;
     getFromLowestPriority(): QueryIterable;
     getFromHighestPriority(): QueryIterable;
 }

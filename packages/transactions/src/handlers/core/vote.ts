@@ -1,4 +1,4 @@
-import { Identities, Interfaces, Managers, Transactions } from "@solar-network/crypto";
+import { Enums, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/kernel";
 
 import {
@@ -38,10 +38,17 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
-            Utils.assert.defined<string>(transaction.senderPublicKey);
+            Utils.assert.defined<string>(transaction.senderId);
             Utils.assert.defined<string[]>(transaction.asset?.votes);
 
-            const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
 
             let walletVote: { [vote: string]: number } = wallet.getAttribute("votes");
 
@@ -159,18 +166,16 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        Utils.assert.defined<string>(transaction.data.senderId);
 
         const hasSender: boolean = this.poolQuery
-            .getAllBySender(transaction.data.senderPublicKey)
+            .getAllBySender(transaction.data.senderId)
             .whereKind(transaction)
             .has();
 
         if (hasSender) {
             throw new Contracts.Pool.PoolError(
-                `${Identities.Address.fromPublicKey(
-                    transaction.data.senderPublicKey,
-                )} already has a vote transaction in the pool`,
+                `${transaction.data.senderId} already has a vote transaction in the pool`,
                 "ERR_PENDING",
             );
         }
@@ -179,11 +184,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        Utils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
@@ -215,11 +218,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        Utils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         let previousVotes;
 

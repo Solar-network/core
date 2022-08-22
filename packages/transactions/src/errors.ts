@@ -311,3 +311,9 @@ export class ResignationTypeAssetMilestoneNotActiveError extends TransactionErro
         super("Failed to apply transaction, because different delegate resignation types are not enabled");
     }
 }
+
+export class UnexpectedHeaderTypeError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because the extended transaction header type is not enabled");
+    }
+}

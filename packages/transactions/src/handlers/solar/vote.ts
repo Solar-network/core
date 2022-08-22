@@ -1,4 +1,4 @@
-import { Identities, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/kernel";
 
 import {
@@ -38,10 +38,17 @@ export class VoteTransactionHandler extends TransactionHandler {
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
-            AppUtils.assert.defined<string>(transaction.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.senderId);
             AppUtils.assert.defined<Record<string, number>>(transaction.asset?.votes);
 
-            const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
 
             wallet.setAttribute("votes", Utils.sortVotes(transaction.asset.votes));
         }
@@ -91,7 +98,7 @@ export class VoteTransactionHandler extends TransactionHandler {
     ): Promise<void> {
         AppUtils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        const wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const wallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const previousVotes = await this.getPreviousVotes(transaction);
         emitter.dispatch(AppEnums.VoteEvent.Vote, {
             votes: transaction.data.asset?.votes,
@@ -102,18 +109,16 @@ export class VoteTransactionHandler extends TransactionHandler {
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
         const hasSender: boolean = this.poolQuery
-            .getAllBySender(transaction.data.senderPublicKey)
+            .getAllBySender(transaction.data.senderId)
             .whereKind(transaction)
             .has();
 
         if (hasSender) {
             throw new Contracts.Pool.PoolError(
-                `${Identities.Address.fromPublicKey(
-                    transaction.data.senderPublicKey,
-                )} already has a vote transaction in the pool`,
+                `${transaction.data.senderId} already has a vote transaction in the pool`,
                 "ERR_PENDING",
             );
         }
@@ -122,11 +127,9 @@ export class VoteTransactionHandler extends TransactionHandler {
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         AppUtils.assert.defined<Record<string, number>>(transaction.data.asset?.votes);
 
@@ -139,9 +142,9 @@ export class VoteTransactionHandler extends TransactionHandler {
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         const previousVotes = await this.getPreviousVotes(transaction);
 
@@ -159,7 +162,7 @@ export class VoteTransactionHandler extends TransactionHandler {
         const { results } = await this.transactionHistoryService.listByCriteria(
             {
                 blockHeight: { to: transaction.data.blockHeight! - 1 },
-                senderPublicKey: transaction.data.senderPublicKey,
+                senderId: transaction.data.senderId,
                 typeGroup: this.getConstructor().typeGroup,
                 type: this.getConstructor().type,
             },

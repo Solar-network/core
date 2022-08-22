@@ -1,4 +1,4 @@
-import { Identities, Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/kernel";
 
 import {
@@ -52,10 +52,16 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
-            AppUtils.assert.defined<string>(transaction.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.senderId);
             AppUtils.assert.defined<string>(transaction.asset?.delegate?.username);
 
-            const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+            }
 
             wallet.setAttribute<Contracts.State.WalletDelegateAttributes>("delegate", {
                 username: transaction.asset.delegate.username,
@@ -109,9 +115,9 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
     ): Promise<void> {
         const { data }: Interfaces.ITransaction = transaction;
 
-        AppUtils.assert.defined<string>(data.senderPublicKey);
+        AppUtils.assert.defined<string>(data.senderId);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(data.senderPublicKey);
+        const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(data.senderId);
 
         if (sender.hasMultiSignature()) {
             throw new NotSupportedForMultiSignatureWalletError();
@@ -140,18 +146,16 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
         const hasSender: boolean = this.poolQuery
-            .getAllBySender(transaction.data.senderPublicKey)
+            .getAllBySender(transaction.data.senderId)
             .whereKind(transaction)
             .has();
 
         if (hasSender) {
             throw new Contracts.Pool.PoolError(
-                `${Identities.Address.fromPublicKey(
-                    transaction.data.senderPublicKey,
-                )} already has a delegate registration transaction in the pool`,
+                `${transaction.data.senderId} already has a delegate registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }
@@ -175,11 +179,9 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         AppUtils.assert.defined<string>(transaction.data.asset?.delegate?.username);
 
@@ -201,11 +203,9 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         senderWallet.forgetAttribute("delegate");
 

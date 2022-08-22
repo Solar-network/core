@@ -1,11 +1,14 @@
-import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
-import { Container, Contracts } from "@solar-network/kernel";
+import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { InsufficientBurnAmountError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
 @Container.injectable()
 export class BurnTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.TransactionHistoryService)
+    private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
+
     public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
         return [];
     }
@@ -16,6 +19,26 @@ export class BurnTransactionHandler extends TransactionHandler {
 
     public getConstructor(): Transactions.TransactionConstructor {
         return Transactions.Solar.BurnTransaction;
+    }
+
+    public async bootstrap(): Promise<void> {
+        const criteria = {
+            typeGroup: this.getConstructor().typeGroup,
+            type: this.getConstructor().type,
+        };
+
+        for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
+            AppUtils.assert.defined<string>(transaction.senderId);
+
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
+        }
     }
 
     public async isActivated(): Promise<boolean> {
@@ -44,8 +67,6 @@ export class BurnTransactionHandler extends TransactionHandler {
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
-
-    public async bootstrap(): Promise<void> {}
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
 }

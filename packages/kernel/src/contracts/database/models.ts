@@ -33,6 +33,7 @@ export interface TransactionModel {
     sequence: number;
     timestamp: number;
     nonce: Utils.BigNumber;
+    senderId: string;
     senderPublicKey: string;
     recipientId: string;
     type: number;

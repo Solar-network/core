@@ -1,4 +1,4 @@
-import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { isRecipientOnActiveNetwork } from "../../utils";
@@ -8,6 +8,9 @@ import { TransactionHandler, TransactionHandlerConstructor } from "../transactio
 // todo: replace unnecessary function arguments with dependency injection to avoid passing around references
 @Container.injectable()
 export class LegacyTransferTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.TransactionHistoryService)
+    private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
+
     public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
         return [];
     }
@@ -21,6 +24,24 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
     }
 
     public async bootstrap(): Promise<void> {
+        const criteria = {
+            typeGroup: this.getConstructor().typeGroup,
+            type: this.getConstructor().type,
+        };
+
+        for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
+            AppUtils.assert.defined<string>(transaction.senderId);
+
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
+        }
+
         const transactions = await this.transactionRepository.findReceivedTransactions();
         for (const transaction of transactions) {
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.recipientId);

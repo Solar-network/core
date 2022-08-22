@@ -6,6 +6,9 @@ import { TransactionHandler, TransactionHandlerConstructor } from "../transactio
 
 @Container.injectable()
 export class HtlcLockTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.TransactionHistoryService)
+    private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
+
     public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
         return [];
     }
@@ -19,12 +22,28 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
     }
 
     public async bootstrap(): Promise<void> {
+        const criteria = {
+            typeGroup: this.getConstructor().typeGroup,
+            type: this.getConstructor().type,
+        };
+
+        for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
+            AppUtils.assert.defined<string>(transaction.senderId);
+
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
+        }
+
         const transactions = await this.transactionRepository.getOpenHtlcLocks();
         const walletsToIndex: Record<string, Contracts.State.Wallet> = {};
         for (const transaction of transactions) {
-            const lockWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-                transaction.senderPublicKey,
-            );
+            const lockWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
             const locks: Interfaces.IHtlcLocks = lockWallet.getAttribute("htlc.locks", {});
 
             let lockedBalance: Utils.BigNumber = lockWallet.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO);
@@ -32,6 +51,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
             locks[transaction.id] = {
                 amount: Utils.BigNumber.make(transaction.amount),
                 recipientId: transaction.recipientId,
+                senderId: transaction.senderId,
                 timestamp: transaction.timestamp,
                 memo: transaction.memo ? Buffer.from(transaction.memo, "hex").toString("utf8") : undefined,
                 ...transaction.asset.lock,
@@ -104,9 +124,9 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const lockedBalance = senderWallet.getAttribute<Utils.BigNumber>("htlc.lockedBalance", Utils.BigNumber.ZERO);
         senderWallet.setAttribute("htlc.lockedBalance", lockedBalance.plus(transaction.data.amount));
 
@@ -116,9 +136,9 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const lockedBalance = senderWallet.getAttribute<Utils.BigNumber>("htlc.lockedBalance", Utils.BigNumber.ZERO);
         const newLockedBalance = lockedBalance.minus(transaction.data.amount);
         const pendingBalance: Utils.BigNumber = senderWallet.getAttribute("htlc.pendingBalance", Utils.BigNumber.ZERO);
@@ -139,14 +159,15 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.id);
         AppUtils.assert.defined<string>(transaction.data.recipientId);
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
         AppUtils.assert.defined<Interfaces.IHtlcLockAsset>(transaction.data.asset?.lock);
 
-        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const locks = senderWallet.getAttribute<Interfaces.IHtlcLocks>("htlc.locks", {});
         locks[transaction.id] = {
             amount: transaction.data.amount,
             recipientId: transaction.data.recipientId,
+            senderId: transaction.data.senderId,
             timestamp: transaction.timestamp,
             memo: transaction.data.memo,
             ...transaction.data.asset.lock,
@@ -170,9 +191,9 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.id);
         AppUtils.assert.defined<string>(transaction.data.recipientId);
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const locks = senderWallet.getAttribute<Interfaces.IHtlcLocks>("htlc.locks", {});
         delete locks[transaction.id];
 

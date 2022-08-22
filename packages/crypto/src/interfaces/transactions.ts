@@ -53,6 +53,7 @@ export interface ITransactionData {
     typeGroup?: number;
     type: number;
     nonce: BigNumber;
+    senderId: string;
     senderPublicKey: string;
     headerType?: number;
 
@@ -86,6 +87,7 @@ export interface ITransactionJson {
     type: number;
 
     nonce: string;
+    senderId: string;
     senderPublicKey: string;
 
     fee: string;
@@ -147,6 +149,7 @@ export interface IHtlcRefundAsset {
 export interface IHtlcLock extends IHtlcLockAsset {
     amount: BigNumber;
     recipientId: string | undefined;
+    senderId: string;
     timestamp: number;
     memo: string | undefined;
 }
@@ -174,11 +177,5 @@ export interface ISerialiseOptions {
     excludeSecondSignature?: boolean;
     excludeMultiSignature?: boolean;
 
-    // WORKAROUND: A handful of mainnet transactions have an invalid
-    // recipient. Due to a refactor of the Address network byte
-    // validation it is no longer trivially possible to handle them.
-    // If an invalid address is encountered during transfer serialization,
-    // this error field is used to bubble up the error and defer the
-    // `AddressNetworkByteError` until the actual id is available to call `isException`.
     addressError?: string;
 }

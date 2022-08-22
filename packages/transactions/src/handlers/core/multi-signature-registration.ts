@@ -1,4 +1,4 @@
-import { Identities, Interfaces, Transactions } from "@solar-network/crypto";
+import { Enums, Identities, Interfaces, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { MultiSignatureAlreadyRegisteredError, MultiSignatureMinimumKeysError } from "../../errors";
@@ -31,19 +31,29 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
+            AppUtils.assert.defined<string>(transaction.senderId);
             AppUtils.assert.defined<Interfaces.IMultiSignatureAsset>(transaction.asset?.multiSignature);
 
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
+
             const multiSignature: Contracts.State.WalletMultiSignatureAttributes = transaction.asset.multiSignature;
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+            const multiSignatureWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
                 Identities.PublicKey.fromMultiSignatureAsset(multiSignature),
             );
 
-            if (wallet.hasMultiSignature()) {
+            if (multiSignatureWallet.hasMultiSignature()) {
                 throw new MultiSignatureAlreadyRegisteredError();
             }
 
-            wallet.setAttribute("multiSignature", multiSignature);
-            this.walletRepository.index(wallet);
+            multiSignatureWallet.setAttribute("multiSignature", multiSignature);
+            this.walletRepository.index(multiSignatureWallet);
         }
     }
 
@@ -77,19 +87,17 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
         AppUtils.assert.defined<Interfaces.IMultiSignatureAsset>(transaction.data.asset?.multiSignature);
 
         const hasSender: boolean = this.poolQuery
-            .getAllBySender(transaction.data.senderPublicKey)
+            .getAllBySender(transaction.data.senderId)
             .whereKind(transaction)
             .has();
 
         if (hasSender) {
             throw new Contracts.Pool.PoolError(
-                `${Identities.Address.fromPublicKey(
-                    transaction.data.senderPublicKey,
-                )} already has a multisignature registration transaction in the pool`,
+                `${transaction.data.senderId} already has a multisignature registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }

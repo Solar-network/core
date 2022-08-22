@@ -50,7 +50,7 @@ export class Collator implements Contracts.Pool.Collator {
                 break;
             }
 
-            if (failedTransactions.some((t) => t.data.senderPublicKey === transaction.data.senderPublicKey)) {
+            if (failedTransactions.some((t) => t.data.senderId === transaction.data.senderId)) {
                 continue;
             }
 

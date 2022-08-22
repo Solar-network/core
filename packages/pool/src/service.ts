@@ -85,7 +85,7 @@ export class Service implements Contracts.Pool.Service {
             }
 
             AppUtils.assert.defined<string>(transaction.id);
-            AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.data.senderId);
 
             if (this.storage.hasTransaction(transaction.id)) {
                 throw new TransactionAlreadyInPoolError(transaction);
@@ -94,7 +94,7 @@ export class Service implements Contracts.Pool.Service {
             this.storage.addTransaction({
                 height: this.stateStore.getLastHeight(),
                 id: transaction.id,
-                senderPublicKey: transaction.data.senderPublicKey,
+                senderId: transaction.data.senderId,
                 serialised: transaction.serialised,
             });
 
@@ -136,14 +136,14 @@ export class Service implements Contracts.Pool.Service {
                     const previouslyForgedTransaction = Transactions.TransactionFactory.fromBytes(serialised);
 
                     AppUtils.assert.defined<string>(previouslyForgedTransaction.id);
-                    AppUtils.assert.defined<string>(previouslyForgedTransaction.data.senderPublicKey);
+                    AppUtils.assert.defined<string>(previouslyForgedTransaction.data.senderId);
 
                     await this.addTransactionToMempool(previouslyForgedTransaction);
 
                     this.storage.addTransaction({
                         height: this.stateStore.getLastHeight(),
                         id: previouslyForgedTransaction.id,
-                        senderPublicKey: previouslyForgedTransaction.data.senderPublicKey,
+                        senderId: previouslyForgedTransaction.data.senderId,
                         serialised: previouslyForgedTransaction.serialised,
                     });
 
@@ -219,17 +219,14 @@ export class Service implements Contracts.Pool.Service {
             }
 
             AppUtils.assert.defined<string>(transaction.id);
-            AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.data.senderId);
 
             if (!this.storage.hasTransaction(transaction.id)) {
                 this.logger.error(`Failed to remove ${transaction} that isn't in pool :warning:`);
                 return;
             }
 
-            const removedTransactions = await this.mempool.removeTransaction(
-                transaction.data.senderPublicKey,
-                transaction.id,
-            );
+            const removedTransactions = await this.mempool.removeTransaction(transaction.data.senderId, transaction.id);
 
             for (const removedTransaction of removedTransactions) {
                 AppUtils.assert.defined<string>(removedTransaction.id);
@@ -253,14 +250,14 @@ export class Service implements Contracts.Pool.Service {
             }
 
             AppUtils.assert.defined<string>(transaction.id);
-            AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.data.senderId);
 
             if (!this.storage.hasTransaction(transaction.id)) {
                 return;
             }
 
             const removedTransactions = await this.mempool.removeForgedTransaction(
-                transaction.data.senderPublicKey,
+                transaction.data.senderId,
                 transaction.id,
             );
 
@@ -305,8 +302,8 @@ export class Service implements Contracts.Pool.Service {
         const lastHeight: number = this.stateStore.getLastHeight();
         const expiredHeight: number = lastHeight - maxTransactionAge;
 
-        for (const { senderPublicKey, id } of this.storage.getOldTransactions(expiredHeight)) {
-            const removedTransactions = await this.mempool.removeTransaction(senderPublicKey, id);
+        for (const { senderId, id } of this.storage.getOldTransactions(expiredHeight)) {
+            const removedTransactions = await this.mempool.removeTransaction(senderId, id);
 
             for (const removedTransaction of removedTransactions) {
                 AppUtils.assert.defined<string>(removedTransaction.id);
@@ -320,11 +317,11 @@ export class Service implements Contracts.Pool.Service {
     private async removeExpiredTransactions(): Promise<void> {
         for (const transaction of this.poolQuery.getAll()) {
             AppUtils.assert.defined<string>(transaction.id);
-            AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.data.senderId);
 
             if (this.expirationService.isExpired(transaction)) {
                 const removedTransactions = await this.mempool.removeTransaction(
-                    transaction.data.senderPublicKey,
+                    transaction.data.senderId,
                     transaction.id,
                 );
 
@@ -346,12 +343,9 @@ export class Service implements Contracts.Pool.Service {
         const transaction = this.poolQuery.getFromLowestPriority().first();
 
         AppUtils.assert.defined<string>(transaction.id);
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const removedTransactions = await this.mempool.removeTransaction(
-            transaction.data.senderPublicKey,
-            transaction.id,
-        );
+        const removedTransactions = await this.mempool.removeTransaction(transaction.data.senderId, transaction.id);
 
         for (const removedTransaction of removedTransactions) {
             AppUtils.assert.defined<string>(removedTransaction.id);
@@ -370,7 +364,7 @@ export class Service implements Contracts.Pool.Service {
     }
 
     private async addTransactionToMempool(transaction: Interfaces.ITransaction): Promise<void> {
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
         const maxTransactionsInPool: number = this.configuration.getRequired<number>("maxTransactionsInPool");
 

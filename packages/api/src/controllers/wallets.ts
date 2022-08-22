@@ -125,7 +125,7 @@ export class WalletsController extends Controller {
 
         const criteria: Contracts.Shared.TransactionCriteria = {
             ...request.query,
-            senderPublicKey: walletResource.publicKey,
+            senderId: walletResource.address,
         };
         const sorting: Contracts.Search.Sorting = this.getListingOrder(request);
         const pagination: Contracts.Search.Pagination = this.getListingPage(request);
@@ -210,14 +210,14 @@ export class WalletsController extends Controller {
             ...request.query,
             typeGroup: Enums.TransactionTypeGroup.Core,
             type: Enums.TransactionType.Core.Vote,
-            senderPublicKey: walletResource.publicKey,
+            senderId: walletResource.address,
         };
 
         const criteria: Contracts.Shared.TransactionCriteria = {
             ...request.query,
             typeGroup: Enums.TransactionTypeGroup.Solar,
             type: Enums.TransactionType.Solar.Vote,
-            senderPublicKey: walletResource.publicKey,
+            senderId: walletResource.address,
         };
 
         const sorting: Contracts.Search.Sorting = this.getListingOrder(request);

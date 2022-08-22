@@ -149,7 +149,7 @@ export class BlockProcessor {
                             transaction.type === handler.type && transaction.typeGroup === handler.typeGroup,
                     );
                     const transactionsSet: Set<string> = new Set(
-                        transactions.map((transaction) => transaction.data.senderPublicKey),
+                        transactions.map((transaction) => transaction.data.senderId),
                     );
                     if (transactionsSet.size !== transactions.length) {
                         this.logger.warning(
@@ -216,9 +216,9 @@ export class BlockProcessor {
         for (const transaction of block.transactions) {
             const data = transaction.data;
 
-            AppUtils.assert.defined<string>(data.senderPublicKey);
+            AppUtils.assert.defined<string>(data.senderId);
 
-            const sender: string = data.senderPublicKey;
+            const sender: string = data.senderId;
 
             if (nonceBySender[sender] === undefined) {
                 nonceBySender[sender] = this.walletRepository.getNonce(sender);

@@ -118,9 +118,9 @@ export class WalletRepository implements Contracts.State.WalletRepository {
         return this.getIndex(indexName).has(key);
     }
 
-    public getNonce(publicKey: string): Utils.BigNumber {
-        if (this.hasByPublicKey(publicKey)) {
-            return this.findByPublicKey(publicKey).getNonce();
+    public getNonce(address: string): Utils.BigNumber {
+        if (this.hasByAddress(address)) {
+            return this.findByAddress(address).getNonce();
         }
 
         return Utils.BigNumber.ZERO;

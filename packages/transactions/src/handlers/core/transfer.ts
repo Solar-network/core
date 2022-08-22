@@ -1,4 +1,4 @@
-import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { InsufficientBalanceError } from "../../errors";
@@ -28,14 +28,22 @@ export class TransferTransactionHandler extends TransactionHandler {
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
-            AppUtils.assert.defined<string>(transaction.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.senderId);
             AppUtils.assert.defined<object>(transaction.asset?.transfers);
 
-            const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
+
             for (const transfer of transaction.asset.transfers) {
                 const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
                 recipient.increaseBalance(transfer.amount);
-                sender.decreaseBalance(transfer.amount);
+                wallet.decreaseBalance(transfer.amount);
             }
         }
     }
@@ -70,11 +78,9 @@ export class TransferTransactionHandler extends TransactionHandler {
             Utils.BigNumber.ZERO,
         );
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         senderWallet.decreaseBalance(totalTransfersAmount);
     }
@@ -89,11 +95,9 @@ export class TransferTransactionHandler extends TransactionHandler {
             Utils.BigNumber.ZERO,
         );
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         senderWallet.increaseBalance(totalPaymentsAmount);
     }

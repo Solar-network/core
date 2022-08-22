@@ -15,6 +15,9 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
     @Container.inject(Container.Identifiers.PoolQuery)
     private readonly poolQuery!: Contracts.Pool.Query;
 
+    @Container.inject(Container.Identifiers.TransactionHistoryService)
+    private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
+
     public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
         return [HtlcLockTransactionHandler];
     }
@@ -28,11 +31,29 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
     }
 
     public async bootstrap(): Promise<void> {
+        const criteria = {
+            typeGroup: this.getConstructor().typeGroup,
+            type: this.getConstructor().type,
+        };
+
+        for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
+            AppUtils.assert.defined<string>(transaction.senderId);
+
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
+        }
+
         const balances = await this.transactionRepository.getRefundedHtlcLockBalances();
 
-        for (const { senderPublicKey, refundedBalance } of balances) {
+        for (const { senderId, refundedBalance } of balances) {
             // sender is from the original lock
-            const refundWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(senderPublicKey);
+            const refundWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(senderId);
             refundWallet.increaseBalance(Utils.BigNumber.make(refundedBalance));
         }
     }
@@ -110,13 +131,11 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
         const data: Interfaces.ITransactionData = transaction.data;
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         AppUtils.assert.defined<string>(data.asset?.refund?.lockTransactionId);
 
@@ -192,11 +211,9 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         AppUtils.assert.defined<string>(transaction.data.asset?.refund?.lockTransactionId);
 
@@ -204,12 +221,10 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
         const lockTransaction = (await this.transactionRepository.findByIds([lockId]))[0];
 
         AppUtils.assert.defined<string>(lockTransaction.id);
-        AppUtils.assert.defined<string>(lockTransaction.senderPublicKey);
+        AppUtils.assert.defined<string>(lockTransaction.senderId);
         AppUtils.assert.defined<Interfaces.IHtlcLockAsset>(lockTransaction.asset?.lock);
 
-        const lockWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            lockTransaction.senderPublicKey,
-        );
+        const lockWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(lockTransaction.senderId);
 
         lockWallet.decreaseBalance(lockTransaction.amount);
 
@@ -233,6 +248,7 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
         locks[lockTransaction.id] = {
             amount: lockTransaction.amount,
             recipientId: lockTransaction.recipientId,
+            senderId: lockTransaction.senderId,
             timestamp: lockTransaction.timestamp,
             memo: lockTransaction.memo ? Buffer.from(lockTransaction.memo, "hex").toString("utf8") : undefined,
             ...lockTransaction.asset.lock,

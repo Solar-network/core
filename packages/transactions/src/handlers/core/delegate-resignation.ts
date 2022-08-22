@@ -41,9 +41,15 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
-            AppUtils.assert.defined<string>(transaction.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.senderId);
 
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+            }
 
             let type: Enums.DelegateStatus = Enums.DelegateStatus.TemporaryResign;
             if (transaction.asset && transaction.asset.resignationType) {
@@ -127,7 +133,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     }
 
     public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
-        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const username = senderWallet.getAttribute("delegate.username");
 
         emitter.dispatch(AppEnums.DelegateEvent.Resigned, {
@@ -137,17 +143,15 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
         const hasSender: boolean = this.poolQuery
-            .getAllBySender(transaction.data.senderPublicKey)
+            .getAllBySender(transaction.data.senderId)
             .whereKind(transaction)
             .has();
 
         if (hasSender) {
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-                transaction.data.senderPublicKey,
-            );
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
             throw new Contracts.Pool.PoolError(
                 `Delegate resignation for '${wallet.getAttribute("delegate.username")}' already in the pool`,
                 "ERR_PENDING",
@@ -158,9 +162,9 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         let type: Enums.DelegateStatus = Enums.DelegateStatus.TemporaryResign;
         if (transaction.data.asset && transaction.data.asset.resignationType) {
@@ -179,9 +183,9 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         const previousResignation = await this.getPreviousResignation(transaction.data.blockHeight! - 1, transaction);
         let type = Enums.DelegateStatus.NotResigned;
@@ -210,7 +214,7 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
         const { results } = await this.transactionHistoryService.listByCriteria(
             {
                 blockHeight: { to: height },
-                senderPublicKey: transaction.data.senderPublicKey,
+                senderId: transaction.data.senderId,
                 typeGroup: this.getConstructor().typeGroup,
                 type: this.getConstructor().type,
             },

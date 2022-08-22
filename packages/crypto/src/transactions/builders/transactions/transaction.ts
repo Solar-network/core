@@ -1,6 +1,6 @@
-import { TransactionTypeGroup } from "../../../enums";
+import { TransactionHeaderType, TransactionTypeGroup } from "../../../enums";
 import { MemoLengthExceededError, MissingTransactionSignatureError, TransactionSchemaError } from "../../../errors";
-import { Keys } from "../../../identities";
+import { Address, Keys } from "../../../identities";
 import { IKeyPair, ITransaction, ITransactionData } from "../../../interfaces";
 import { configManager } from "../../../managers/config";
 import { NetworkType } from "../../../types";
@@ -16,10 +16,11 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
 
     public constructor() {
         this.data = {
+            headerType: TransactionHeaderType.Standard,
             id: undefined,
-            typeGroup: TransactionTypeGroup.Test,
-            nonce: BigNumber.ZERO,
             memo: undefined,
+            nonce: BigNumber.ZERO,
+            typeGroup: TransactionTypeGroup.Test,
             version: 3,
         } as ITransactionData;
     }
@@ -60,6 +61,12 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         if (fee) {
             this.data.fee = BigNumber.make(fee);
         }
+
+        return this.instance();
+    }
+
+    public senderId(senderId: string): TBuilder {
+        this.data.senderId = senderId;
 
         return this.instance();
     }
@@ -136,15 +143,17 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         }
 
         const struct: ITransactionData = {
-            id: Utils.getId(this.data, { disableVersionCheck: this.disableVersionCheck }).toString(),
-            signature: this.data.signature,
-            secondSignature: this.data.secondSignature,
-            version: this.data.version,
-            type: this.data.type,
             fee: this.data.fee,
-            senderPublicKey: this.data.senderPublicKey,
-            network: this.data.network,
+            headerType: this.data.headerType,
+            id: Utils.getId(this.data, { disableVersionCheck: this.disableVersionCheck }).toString(),
             memo: this.data.memo,
+            network: this.data.network,
+            secondSignature: this.data.secondSignature,
+            senderId: this.data.senderId,
+            senderPublicKey: this.data.senderPublicKey,
+            signature: this.data.signature,
+            type: this.data.type,
+            version: this.data.version,
         } as ITransactionData;
 
         struct.typeGroup = this.data.typeGroup;
@@ -153,6 +162,8 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         if (Array.isArray(this.data.signatures)) {
             struct.signatures = this.data.signatures;
         }
+
+        Object.keys(struct).forEach((key) => struct[key] === undefined && delete struct[key]);
 
         return struct;
     }
@@ -167,6 +178,16 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
 
     private signWithKeyPair(keys: IKeyPair): TBuilder {
         this.data.senderPublicKey = keys.publicKey.secp256k1;
+
+        if (!this.data.senderId) {
+            this.data.senderId = Address.fromPublicKey(this.data.senderPublicKey);
+        }
+
+        if (this.data.senderId === Address.fromPublicKey(this.data.senderPublicKey)) {
+            this.data.headerType = TransactionHeaderType.Standard;
+        } else {
+            this.data.headerType = TransactionHeaderType.Extended;
+        }
 
         this.data.signature = Signer.sign(this.getSigningObject(), keys, {
             disableVersionCheck: this.disableVersionCheck,
