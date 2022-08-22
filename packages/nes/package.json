@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/nes",
-    "version": "4.1.0-next.1",
+    "version": "4.1.0-next.2",
     "description": "Websocket client and server for Solar Core",
     "license": "BSD-3-Clause",
     "contributors": [
