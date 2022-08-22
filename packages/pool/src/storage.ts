@@ -1,6 +1,6 @@
 import { Container, Contracts, Providers } from "@solar-network/kernel";
 import BetterSqlite3 from "better-sqlite3";
-import { ensureFileSync } from "fs-extra";
+import { ensureFileSync, existsSync, unlinkSync } from "fs-extra";
 
 @Container.injectable()
 export class Storage implements Contracts.Pool.Storage {
@@ -17,18 +17,34 @@ export class Storage implements Contracts.Pool.Storage {
     private flushStmt!: BetterSqlite3.Statement<never[]>;
 
     public boot(): void {
+        const clearLock: string = `${process.env.CORE_PATH_TEMP}/clear-pool.lock`;
         const filename = this.configuration.getRequired<string>("storage");
-        ensureFileSync(filename);
 
-        const table = "pool_20201204";
+        if (existsSync(clearLock)) {
+            try {
+                unlinkSync(clearLock);
+            } catch {
+                //
+            }
+
+            const poolFiles = [filename, `${filename}-shm`, `${filename}-wal`];
+
+            try {
+                for (const file of poolFiles) {
+                    unlinkSync(file);
+                }
+            } catch {
+                //
+            }
+        }
+
+        ensureFileSync(filename);
 
         this.database = new BetterSqlite3(filename);
         this.database.exec(`
             PRAGMA journal_mode = WAL;
 
-            DROP TABLE IF EXISTS pool;
-
-            CREATE TABLE IF NOT EXISTS ${table}(
+            CREATE TABLE IF NOT EXISTS pool (
                 n                  INTEGER      PRIMARY KEY AUTOINCREMENT,
                 height             INTEGER      NOT NULL,
                 id                 VARCHAR(64)  NOT NULL,
@@ -36,27 +52,27 @@ export class Storage implements Contracts.Pool.Storage {
                 serialised         BLOB         NOT NULL
             );
 
-            CREATE UNIQUE INDEX IF NOT EXISTS ${table}_id ON ${table} (id);
-            CREATE INDEX IF NOT EXISTS ${table}_height ON ${table} (height);
+            CREATE UNIQUE INDEX IF NOT EXISTS pool_id ON pool (id);
+            CREATE INDEX IF NOT EXISTS pool_height ON pool (height);
         `);
 
         this.addTransactionStmt = this.database.prepare(
-            `INSERT INTO ${table} (height, id, senderPublicKey, serialised) VALUES (:height, :id, :senderPublicKey, :serialised)`,
+            "INSERT INTO pool (height, id, senderPublicKey, serialised) VALUES (:height, :id, :senderPublicKey, :serialised)",
         );
 
-        this.hasTransactionStmt = this.database.prepare(`SELECT COUNT(*) FROM ${table} WHERE id = :id`).pluck(true);
+        this.hasTransactionStmt = this.database.prepare("SELECT COUNT(*) FROM pool WHERE id = :id").pluck(true);
 
         this.getAllTransactionsStmt = this.database.prepare(
-            `SELECT height, id, senderPublicKey, serialised FROM ${table} ORDER BY n`,
+            "SELECT height, id, senderPublicKey, serialised FROM pool ORDER BY n",
         );
 
         this.getOldTransactionsStmt = this.database.prepare(
-            `SELECT height, id, senderPublicKey, serialised FROM ${table} WHERE height <= :height ORDER BY n DESC`,
+            "SELECT height, id, senderPublicKey, serialised FROM pool WHERE height <= :height ORDER BY n DESC",
         );
 
-        this.removeTransactionStmt = this.database.prepare(`DELETE FROM ${table} WHERE id = :id`);
+        this.removeTransactionStmt = this.database.prepare("DELETE FROM pool WHERE id = :id");
 
-        this.flushStmt = this.database.prepare(`DELETE FROM ${table}`);
+        this.flushStmt = this.database.prepare("DELETE FROM pool");
     }
 
     public dispose(): void {
