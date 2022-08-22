@@ -82,6 +82,7 @@ export class DelegateSearchService {
             resignationType,
             blocks: {
                 produced: delegateAttribute.producedBlocks,
+                missed: delegateAttribute.missedBlocks,
                 productivity: delegateAttribute.productivity,
                 last: delegateAttribute.lastBlock,
             },

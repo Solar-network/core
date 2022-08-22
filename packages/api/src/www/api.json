@@ -968,6 +968,30 @@
                         }
                     },
                     {
+                        "name": "blocks.missed",
+                        "in": "query",
+                        "description": "Exact number of blocks missed by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "blocks.missed.from",
+                        "in": "query",
+                        "description": "Minimum number of blocks missed by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "blocks.missed.to",
+                        "in": "query",
+                        "description": "Maximum number of blocks missed by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
                         "name": "blocks.produced",
                         "in": "query",
                         "description": "Exact number of blocks produced by the delegate(s) to be returned",
@@ -1072,6 +1096,8 @@
                             "enum": [
                                 "address:asc",
                                 "address:desc",
+                                "blocks.missed:asc",
+                                "blocks.missed:desc",
                                 "blocks.produced:asc",
                                 "blocks.produced:desc",
                                 "blocks.productivity:asc",

@@ -603,11 +603,14 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                 new Date(Managers.configManager.getMilestone(1).epoch).getTime()) /
             1000;
 
-        const productivityStatistics: Record<string, number> = await this.missedBlockRepository.getBlockProductivity(
+        const productivityStatistics: Record<
+            string,
+            Record<string, number>
+        > = await this.missedBlockRepository.getBlockProductivity(
             timestamp - (this.configuration.get("missedBlocksLookback") as number),
         );
 
-        for (const [username, productivity] of Object.entries(productivityStatistics)) {
+        for (const [username, { missed, productivity }] of Object.entries(productivityStatistics)) {
             const delegateWallet = this.walletRepository.findByUsername(username);
 
             let oldProductivity: number | undefined = undefined;
@@ -631,8 +634,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             }
 
             if (newProductivity !== undefined) {
+                delegateWallet.setAttribute("delegate.missedBlocks", +missed || 0);
                 delegateWallet.setAttribute("delegate.productivity", newProductivity);
             } else {
+                delegateWallet.forgetAttribute("delegate.missedBlocks");
                 delegateWallet.forgetAttribute("delegate.productivity");
             }
         }

@@ -19,10 +19,11 @@ export class MissedBlockRepository extends AbstractRepository<MissedBlock> {
         });
     }
 
-    public async getBlockProductivity(timestamp: number): Promise<Record<string, number>> {
+    public async getBlockProductivity(timestamp: number): Promise<Record<string, Record<string, number>>> {
         const productivityStatistics = await this.query(`
             SELECT
             usernames.username,
+            missed.count missed,
             CASE WHEN produced IS NULL THEN
                 CASE WHEN missed IS NULL THEN
                     NULL
@@ -50,8 +51,8 @@ export class MissedBlockRepository extends AbstractRepository<MissedBlock> {
         `);
 
         const delegateProductivity = {};
-        for (const { username, productivity } of productivityStatistics) {
-            delegateProductivity[username] = productivity;
+        for (const { username, missed, productivity } of productivityStatistics) {
+            delegateProductivity[username] = { missed, productivity };
         }
 
         return delegateProductivity;

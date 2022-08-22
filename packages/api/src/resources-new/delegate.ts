@@ -22,6 +22,7 @@ export type DelegateResource = {
     resignationType: string | undefined;
     blocks: {
         produced: number;
+        missed: number | undefined;
         productivity: number | undefined;
         last: string | undefined;
     };
@@ -49,6 +50,7 @@ export const delegateCriteriaSchemaObject = {
     resignationType: Joi.string().valid("permanent", "temporary"),
     blocks: {
         produced: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
+        missed: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
         productivity: Schemas.createRangeCriteriaSchema(Joi.number().min(0)),
         last: {
             id: blockCriteriaSchemaObject.id,
