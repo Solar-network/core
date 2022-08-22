@@ -1950,7 +1950,7 @@
                                 "nonce:asc",
                                 "nonce:desc",
                                 "recipientId:asc",
-                                "recpientId:desc",
+                                "recipientId:desc",
                                 "senderId:asc",
                                 "senderId:desc",
                                 "senderPublicKey:asc",
