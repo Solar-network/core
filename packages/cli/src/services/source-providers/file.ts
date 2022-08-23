@@ -7,7 +7,7 @@ import { MissingPackageFolder } from "./errors";
 /**
  * @export
  * @class File
- * @implements {Source}
+ * @implements {AbstractSource}
  */
 export class File extends AbstractSource {
     public constructor(paths: { data: string; temp: string }) {
@@ -31,6 +31,8 @@ export class File extends AbstractSource {
     public async update(value: string): Promise<void> {
         await this.install(value);
     }
+
+    protected async build(packageName: string): Promise<void> {}
 
     protected async preparePackage(value: string): Promise<void> {
         await extract(

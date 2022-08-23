@@ -28,18 +28,19 @@ export abstract class AbstractSource implements Source {
 
         moveSync(origin, this.getDestPath(packageName));
 
-        await this.installDependencies(packageName);
+        await this.installAndBuild(packageName);
 
         removeSync(origin);
     }
 
-    protected async installDependencies(packageName: string): Promise<void> {
-        const subprocess = execa(`pnpm`, ["install", "--production"], { cwd: this.getDestPath(packageName) });
+    protected async installAndBuild(packageName: string): Promise<void> {
+        const subprocess = execa("pnpm", ["install"], { cwd: this.getDestPath(packageName) });
         if (process.argv.includes("-v") || process.argv.includes("-vv")) {
             subprocess.stdout!.pipe(process.stdout);
             subprocess.stderr!.pipe(process.stderr);
         }
         await subprocess;
+        await this.build(packageName);
     }
 
     protected getOriginPath(): string {
@@ -67,12 +68,19 @@ export abstract class AbstractSource implements Source {
     }
 
     protected removeInstalledPackage(packageName: string): void {
-        removeSync(this.getDestPath(packageName));
+        const destPath: string = join(this.dataPath, packageName);
+        const finalPath: string = this.getDestPath(packageName);
+        removeSync(finalPath);
+        if (destPath !== finalPath) {
+            removeSync(destPath);
+        }
     }
 
     public abstract exists(value: string, version?: string): Promise<boolean>;
 
     public abstract update(value: string): Promise<void>;
+
+    protected abstract build(packageName: string): Promise<void>;
 
     protected abstract preparePackage(value: string, version?: string): Promise<void>;
 }
