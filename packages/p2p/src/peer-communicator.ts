@@ -353,13 +353,15 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         return peerBlocks;
     }
 
-    public async getUnconfirmedTransactions(peer: Contracts.P2P.Peer): Promise<Buffer[]> {
+    public async getUnconfirmedTransactions(peer: Contracts.P2P.Peer, exclude: string[]): Promise<Buffer[]> {
         const getUnconfirmedTransactionsTimeout = 10000;
         const { maxPayload, maxTransactions } = Managers.configManager.getMilestone().block;
         const { transactions } = await this.emit(
             peer,
             "p2p.transactions.getUnconfirmedTransactions",
-            {},
+            {
+                exclude,
+            },
             getUnconfirmedTransactionsTimeout,
             maxPayload,
             false,

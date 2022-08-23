@@ -2,6 +2,7 @@ import { transactions } from "./proto/protos";
 
 // actual max transactions is enforced by schema but we set a hard limit for deserialising (way higher than in schema)
 const hardLimitNumberOfTransactions = 1000;
+const hardLimitNumberOfUnconfirmedExclusions = 15000;
 
 const serialiseTransactions = (
     encode: Function,
@@ -42,9 +43,35 @@ const deserialiseTransactions = (decode: Function, payload: Buffer): object => {
 
 export const getUnconfirmedTransactions = {
     request: {
-        serialise: (obj: transactions.GetUnconfirmedTransactionsRequest): Buffer =>
-            Buffer.from(transactions.GetUnconfirmedTransactionsRequest.encode(obj).finish()),
-        deserialise: (payload: Buffer): {} => transactions.GetUnconfirmedTransactionsRequest.decode(payload),
+        serialise: (obj: transactions.IGetUnconfirmedTransactionsRequest): Buffer => {
+            obj = {
+                ...obj,
+                exclude: Buffer.concat(
+                    ((obj.exclude as unknown as string[]) ?? []).map((id) => Buffer.from(id, "hex")),
+                ),
+            };
+            return Buffer.from(transactions.GetUnconfirmedTransactionsRequest.encode(obj).finish());
+        },
+        deserialise: (payload: Buffer): object => {
+            const decoded = transactions.GetUnconfirmedTransactionsRequest.decode(payload);
+            const excludeBuffer = Buffer.from(decoded.exclude);
+            const exclude: string[] = [];
+
+            if (excludeBuffer.byteLength % 32 === 0) {
+                for (let offset = 0; offset < excludeBuffer.byteLength; ) {
+                    exclude.push(excludeBuffer.slice(offset, offset + 32).toString("hex"));
+                    offset += 32;
+                    if (exclude.length > hardLimitNumberOfUnconfirmedExclusions) {
+                        break;
+                    }
+                }
+            }
+
+            return {
+                ...decoded,
+                exclude,
+            };
+        },
     },
     response: {
         serialise: (obj: transactions.IGetUnconfirmedTransactionsResponse): Buffer =>

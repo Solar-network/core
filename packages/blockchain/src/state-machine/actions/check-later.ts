@@ -18,6 +18,9 @@ export class CheckLater implements Action {
     @Container.inject(Container.Identifiers.PeerNetworkMonitor)
     private readonly peerNetworkMonitor!: Contracts.P2P.NetworkMonitor;
 
+    @Container.inject(Container.Identifiers.PoolQuery)
+    private readonly poolQuery!: Contracts.Pool.Query;
+
     @Container.inject(Container.Identifiers.RoundState)
     private readonly roundState!: Contracts.State.RoundState;
 
@@ -166,7 +169,9 @@ export class CheckLater implements Action {
                     if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
                         return;
                     }
-                    const transactions: Buffer[] = await this.peerNetworkMonitor.downloadTransactions();
+
+                    const exclude: string[] = Array.from(this.poolQuery.getFromHighestPriority()).map((t) => t.id!);
+                    const transactions: Buffer[] = await this.peerNetworkMonitor.downloadTransactions(exclude);
                     if (transactions.length > 0) {
                         await this.processor.process(transactions);
                     }

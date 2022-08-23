@@ -31,7 +31,7 @@ export class AcceptPeerPlugin {
                 if (routesConfigByPath[request.path]) {
                     const peerIp = request.info.remoteAddress;
                     const peerPort: number =
-                        request.payload.headers.port || Number(this.configuration.get<number>("server.port"));
+                        request.payload.headers?.port || Number(this.configuration.get<number>("server.port"));
 
                     peerProcessor.validateAndAcceptPeer({
                         ip: peerIp,

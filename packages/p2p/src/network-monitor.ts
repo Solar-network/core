@@ -3,7 +3,7 @@ import { Container, Contracts, Enums, Providers, Services, Utils } from "@solar-
 import delay from "delay";
 import { readJsonSync } from "fs-extra";
 import prettyMs from "pretty-ms";
-import { gt, lt } from "semver";
+import { gt, lt, satisfies } from "semver";
 
 import { NetworkState } from "./network-state";
 import { Peer } from "./peer";
@@ -667,22 +667,27 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         return downloadedBlocks;
     }
 
-    public async downloadTransactions(): Promise<Buffer[]> {
+    public async downloadTransactions(exclude: string[]): Promise<Buffer[]> {
         const transactions: Set<String> = new Set();
 
-        const peersAll: Contracts.P2P.Peer[] = this.repository.getPeers();
+        const peers: Contracts.P2P.Peer[] = this.repository
+            .getPeers()
+            .filter((peer) => satisfies(peer.version!, ">=4.1.0-next.3", { includePrerelease: true }));
 
         const peersThatWouldThrottle: boolean[] = await Promise.all(
-            peersAll.map((peer) => this.communicator.wouldThrottleOnFetchingTransactions(peer)),
+            peers.map((peer) => this.communicator.wouldThrottleOnFetchingTransactions(peer)),
         );
 
-        const peersToTry = Utils.shuffle(peersAll)
-            .filter((peer, index) => !peersThatWouldThrottle[index])
+        const peersToTry = Utils.shuffle(peers)
+            .filter((_, index) => !peersThatWouldThrottle[index])
             .slice(0, 5);
 
         for (const peer of peersToTry) {
             try {
-                const downloadedTransactions: Buffer[] = await this.communicator.getUnconfirmedTransactions(peer);
+                const downloadedTransactions: Buffer[] = await this.communicator.getUnconfirmedTransactions(
+                    peer,
+                    exclude,
+                );
                 for (const transaction of downloadedTransactions) {
                     transactions.add(transaction.toString("hex"));
                 }

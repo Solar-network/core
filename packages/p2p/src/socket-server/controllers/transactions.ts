@@ -26,9 +26,13 @@ export class TransactionsController extends Controller {
             this.configuration.getOptional<string[]>("remoteAccess", []),
             request.info.remoteAddress,
         );
-        const transactions: Interfaces.ITransaction[] = (request.payload as any).countOnly
+        const payload: any = request.payload;
+        const transactions: Interfaces.ITransaction[] = payload.countOnly
             ? []
-            : await this.collator.getBlockCandidateTransactions(fromForger);
+            : await this.collator.getBlockCandidateTransactions(
+                  fromForger,
+                  Array.isArray(payload.exclude) ? payload.exclude : [],
+              );
 
         return {
             poolSize: this.pool.getPoolSize(),

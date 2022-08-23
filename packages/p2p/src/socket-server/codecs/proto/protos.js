@@ -5112,6 +5112,7 @@ $root.transactions = (function() {
          * @memberof transactions
          * @interface IGetUnconfirmedTransactionsRequest
          * @property {boolean|null} [countOnly] GetUnconfirmedTransactionsRequest countOnly
+         * @property {Uint8Array|null} [exclude] GetUnconfirmedTransactionsRequest exclude
          * @property {shared.IHeaders|null} [headers] GetUnconfirmedTransactionsRequest headers
          */
 
@@ -5137,6 +5138,14 @@ $root.transactions = (function() {
          * @instance
          */
         GetUnconfirmedTransactionsRequest.prototype.countOnly = false;
+
+        /**
+         * GetUnconfirmedTransactionsRequest exclude.
+         * @member {Uint8Array} exclude
+         * @memberof transactions.GetUnconfirmedTransactionsRequest
+         * @instance
+         */
+        GetUnconfirmedTransactionsRequest.prototype.exclude = $util.newBuffer([]);
 
         /**
          * GetUnconfirmedTransactionsRequest headers.
@@ -5172,8 +5181,10 @@ $root.transactions = (function() {
                 writer = $Writer.create();
             if (message.countOnly != null && Object.hasOwnProperty.call(message, "countOnly"))
                 writer.uint32(/* id 1, wireType 0 =*/8).bool(message.countOnly);
+            if (message.exclude != null && Object.hasOwnProperty.call(message, "exclude"))
+                writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.exclude);
             if (message.headers != null && Object.hasOwnProperty.call(message, "headers"))
-                $root.shared.Headers.encode(message.headers, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                $root.shared.Headers.encode(message.headers, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
             return writer;
         };
 
@@ -5212,6 +5223,9 @@ $root.transactions = (function() {
                     message.countOnly = reader.bool();
                     break;
                 case 2:
+                    message.exclude = reader.bytes();
+                    break;
+                case 3:
                     message.headers = $root.shared.Headers.decode(reader, reader.uint32());
                     break;
                 default:
@@ -5252,6 +5266,9 @@ $root.transactions = (function() {
             if (message.countOnly != null && message.hasOwnProperty("countOnly"))
                 if (typeof message.countOnly !== "boolean")
                     return "countOnly: boolean expected";
+            if (message.exclude != null && message.hasOwnProperty("exclude"))
+                if (!(message.exclude && typeof message.exclude.length === "number" || $util.isString(message.exclude)))
+                    return "exclude: buffer expected";
             if (message.headers != null && message.hasOwnProperty("headers")) {
                 var error = $root.shared.Headers.verify(message.headers);
                 if (error)
@@ -5274,6 +5291,11 @@ $root.transactions = (function() {
             var message = new $root.transactions.GetUnconfirmedTransactionsRequest();
             if (object.countOnly != null)
                 message.countOnly = Boolean(object.countOnly);
+            if (object.exclude != null)
+                if (typeof object.exclude === "string")
+                    $util.base64.decode(object.exclude, message.exclude = $util.newBuffer($util.base64.length(object.exclude)), 0);
+                else if (object.exclude.length)
+                    message.exclude = object.exclude;
             if (object.headers != null) {
                 if (typeof object.headers !== "object")
                     throw TypeError(".transactions.GetUnconfirmedTransactionsRequest.headers: object expected");
@@ -5297,10 +5319,19 @@ $root.transactions = (function() {
             var object = {};
             if (options.defaults) {
                 object.countOnly = false;
+                if (options.bytes === String)
+                    object.exclude = "";
+                else {
+                    object.exclude = [];
+                    if (options.bytes !== Array)
+                        object.exclude = $util.newBuffer(object.exclude);
+                }
                 object.headers = null;
             }
             if (message.countOnly != null && message.hasOwnProperty("countOnly"))
                 object.countOnly = message.countOnly;
+            if (message.exclude != null && message.hasOwnProperty("exclude"))
+                object.exclude = options.bytes === String ? $util.base64.encode(message.exclude, 0, message.exclude.length) : options.bytes === Array ? Array.prototype.slice.call(message.exclude) : message.exclude;
             if (message.headers != null && message.hasOwnProperty("headers"))
                 object.headers = $root.shared.Headers.toObject(message.headers, options);
             return object;
