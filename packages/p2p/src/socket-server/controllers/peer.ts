@@ -6,7 +6,6 @@ import { DatabaseInterceptor } from "@solar-network/state";
 import { readJsonSync } from "fs-extra";
 
 import { constants } from "../../constants";
-import { getPeerIp } from "../../utils/get-peer-ip";
 import { getPeerConfig } from "../utils/get-peer-config";
 import { Controller } from "./controller";
 
@@ -30,11 +29,9 @@ export class PeerController extends Controller {
     private cachedHeader: Contracts.P2P.PeerPingResponse | undefined;
 
     public getPeers(request: GetPeersRequest, h: Hapi.ResponseToolkit): Contracts.P2P.PeerBroadcast[] {
-        const peerIp = getPeerIp(request.socket);
-
         return this.peerRepository
             .getPeers()
-            .filter((peer) => peer.ip !== peerIp)
+            .filter((peer) => peer.ip !== request.info.remoteAddress)
             .filter((peer) => peer.port !== -1)
             .sort((a, b) => {
                 Utils.assert.defined<number>(a.latency);

@@ -6,7 +6,6 @@ import { BigNumber } from "./big-number";
 import { calculateBlockTime, isNewBlockTime } from "./block-time-calculator";
 import { ByteBuffer } from "./byte-buffer";
 import { ByteBufferArray } from "./byte-buffer-array";
-import { isLocalHost, isValidPeer } from "./is-valid-peer";
 import { calculateReward } from "./reward-calculator";
 import { sortVotes } from "./sort-votes";
 
@@ -121,8 +120,6 @@ export {
     BigNumber,
     ByteBuffer,
     ByteBufferArray,
-    isValidPeer,
-    isLocalHost,
     calculateBlockTime,
     isNewBlockTime,
     calculateReward,

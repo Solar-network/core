@@ -1,7 +1,5 @@
 import { Ajv } from "ajv";
 
-import { isValidPeer } from "../utils";
-
 const memo = (ajv: Ajv): void => {
     ajv.addFormat("memo", (data) => {
         try {
@@ -12,14 +10,4 @@ const memo = (ajv: Ajv): void => {
     });
 };
 
-const validPeer = (ajv: Ajv): void => {
-    ajv.addFormat("peer", (ip: string) => {
-        try {
-            return isValidPeer({ ip }, false);
-        } catch {
-            return false;
-        }
-    });
-};
-
-export const formats = [memo, validPeer];
+export const formats = [memo];

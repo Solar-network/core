@@ -1,9 +1,9 @@
-import { Utils } from "@solar-network/crypto";
 import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/kernel";
 import delay from "delay";
 
 import { PeerFactory } from "./contracts";
 import { DisconnectInvalidPeers } from "./listeners";
+import { isValidPeer } from "./utils";
 
 // todo: review the implementation
 @Container.injectable()
@@ -58,7 +58,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
             return false;
         }
 
-        if (!Utils.isValidPeer(peer) || this.repository.hasPendingPeer(peer.ip)) {
+        if (!isValidPeer(peer) || this.repository.hasPendingPeer(peer.ip)) {
             return false;
         }
 

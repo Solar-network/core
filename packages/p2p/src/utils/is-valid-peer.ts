@@ -1,24 +1,22 @@
 import * as ipAddr from "ipaddr.js";
 import os from "os";
 
-// todo: review the implementation of all methods
-export const isLocalHost = (ip: string, includeNetworkInterfaces: boolean = true): boolean => {
+const isUnicast = (ip: string): boolean => {
     try {
         const parsed = ipAddr.parse(ip);
-        if (parsed.range() === "loopback" || ip.startsWith("0") || ["127.0.0.1", "::ffff:127.0.0.1"].includes(ip)) {
+        if (parsed.range() === "unicast" && !ip.startsWith("0")) {
             return true;
         }
-
-        if (includeNetworkInterfaces) {
-            const interfaces = os.networkInterfaces();
-
-            return Object.keys(interfaces).some((ifname) => interfaces[ifname]!.some((iface) => iface.address === ip));
-        }
-
         return false;
     } catch (error) {
         return false;
     }
+};
+
+const networkInterfaces = (ip: string): boolean => {
+    const interfaces = os.networkInterfaces();
+
+    return Object.keys(interfaces).some((ifname) => interfaces[ifname]!.some((iface) => iface.address === ip));
 };
 
 const sanitiseRemoteAddress = (ip: string): string | undefined => {
@@ -41,7 +39,11 @@ export const isValidPeer = (
 
     peer.ip = sanitisedAddress;
 
-    if (isLocalHost(peer.ip, includeNetworkInterfaces)) {
+    if (!isUnicast(peer.ip)) {
+        return false;
+    }
+
+    if (includeNetworkInterfaces && networkInterfaces(peer.ip)) {
         return false;
     }
 
