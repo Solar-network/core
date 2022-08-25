@@ -29,7 +29,7 @@
         "pg": "8.7.1",
         "pg-query-stream": "3.4.2",
         "pluralize": "8.0.0",
-        "typeorm": "0.2.25",
+        "typeorm": "0.2.34",
         "xcase": "2.0.1"
     },
     "devDependencies": {
