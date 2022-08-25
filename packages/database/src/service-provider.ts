@@ -1,6 +1,6 @@
 import { Container, Contracts, Enums, Providers } from "@solar-network/kernel";
 import { sync } from "execa";
-import { chmodSync, existsSync, readFileSync, unlinkSync } from "fs";
+import { chmodSync, existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 import Joi from "joi";
 import { Connection, createConnection, getCustomRepository } from "typeorm";
 
@@ -17,14 +17,16 @@ import { SnakeNamingStrategy } from "./utils/snake-naming-strategy";
 import { WalletsTableService } from "./wallets-table-service";
 
 export class ServiceProvider extends Providers.ServiceProvider {
-    public async register(): Promise<void> {
-        const logger: Contracts.Kernel.Logger = this.app.get(Container.Identifiers.LogService);
+    private logger!: Contracts.Kernel.Logger;
 
-        logger.info("Connecting to database: " + (this.config().all().connection as any).database);
+    public async register(): Promise<void> {
+        this.logger = this.app.get(Container.Identifiers.LogService);
+
+        this.logger.info(`Connecting to database: ${(this.config().all().connection as any).database}`);
 
         this.app.bind(Container.Identifiers.DatabaseConnection).toConstantValue(await this.connect());
 
-        logger.debug("Connection established");
+        this.logger.debug("Connection established");
 
         this.app.bind(Container.Identifiers.DatabaseRoundRepository).toConstantValue(this.getRoundRepository());
 
@@ -96,15 +98,39 @@ export class ServiceProvider extends Providers.ServiceProvider {
             this.app.terminate(error.stderr || error.shortMessage);
         }
 
-        return createConnection({
+        const dbConnection: Connection = await createConnection({
             ...(connection as any),
-            extra: Object.assign(connection.extra, { logger: this.app.get(Container.Identifiers.LogService) }),
+            extra: Object.assign(connection.extra, { logger: this.logger }),
             namingStrategy: new SnakeNamingStrategy(),
             migrations: [__dirname + "/migrations/*.js"],
             migrationsRun: true,
-            // TODO: expose entities to allow extending the models by plugins
             entities: [__dirname + "/models/*.js"],
         });
+
+        const configFile: string = `${connection.extra.host}/postgresql.conf`;
+        const config: string[] = readFileSync(configFile).toString().split("\n");
+        const configLines: string[] = [
+            "checkpoint_timeout = 60min",
+            "checkpoint_completion_target = 0.9",
+            "max_wal_size = 1GB",
+            "min_wal_size = 80MB",
+        ];
+        let updatedConfig: boolean = false;
+
+        for (const configLine of configLines) {
+            if (!config.includes(configLine)) {
+                config.push(configLine);
+                updatedConfig = true;
+            }
+        }
+
+        if (updatedConfig) {
+            this.logger.debug("Updating database configuration :books:");
+            writeFileSync(configFile, config.join("\n"));
+            await dbConnection.query("SELECT pg_reload_conf();");
+        }
+
+        return dbConnection;
     }
 
     public getRoundRepository(): RoundRepository {
