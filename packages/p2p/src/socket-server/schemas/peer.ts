@@ -8,7 +8,7 @@ export const peerSchemas = {
     }),
 
     getCommonBlocks: Joi.object({
-        ids: Joi.array().min(1).max(10).items(Joi.string()), // TODO strings are block ids
+        ids: Joi.array().min(1).max(10).items(Joi.string().hex().length(64)),
         headers,
     }),
 
