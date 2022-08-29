@@ -603,43 +603,47 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                 new Date(Managers.configManager.getMilestone(1).epoch).getTime()) /
             1000;
 
-        const productivityStatistics: Record<
-            string,
-            Record<string, number>
-        > = await this.missedBlockRepository.getBlockProductivity(
-            timestamp - (this.configuration.get("missedBlocksLookback") as number),
-        );
+        try {
+            const productivityStatistics: Record<
+                string,
+                Record<string, number>
+            > = await this.missedBlockRepository.getBlockProductivity(
+                timestamp - (this.configuration.get("missedBlocksLookback") as number),
+            );
 
-        for (const [username, { missed, productivity }] of Object.entries(productivityStatistics)) {
-            const delegateWallet = this.walletRepository.findByUsername(username);
+            for (const [username, { missed, productivity }] of Object.entries(productivityStatistics)) {
+                const delegateWallet = this.walletRepository.findByUsername(username);
 
-            let oldProductivity: number | undefined = undefined;
-            if (delegateWallet.hasAttribute("delegate.productivity")) {
-                oldProductivity = delegateWallet.getAttribute("delegate.productivity");
+                let oldProductivity: number | undefined = undefined;
+                if (delegateWallet.hasAttribute("delegate.productivity")) {
+                    oldProductivity = delegateWallet.getAttribute("delegate.productivity");
+                }
+
+                let newProductivity: number | undefined = undefined;
+                if (productivity !== null) {
+                    newProductivity = +productivity;
+                } else {
+                    newProductivity = undefined;
+                }
+
+                if (!initialStart && newProductivity !== oldProductivity) {
+                    this.events.dispatch(Enums.DelegateEvent.ProductivityChanged, {
+                        username,
+                        old: oldProductivity,
+                        new: newProductivity,
+                    });
+                }
+
+                if (newProductivity !== undefined) {
+                    delegateWallet.setAttribute("delegate.missedBlocks", +missed || 0);
+                    delegateWallet.setAttribute("delegate.productivity", newProductivity);
+                } else {
+                    delegateWallet.forgetAttribute("delegate.missedBlocks");
+                    delegateWallet.forgetAttribute("delegate.productivity");
+                }
             }
-
-            let newProductivity: number | undefined = undefined;
-            if (productivity !== null) {
-                newProductivity = +productivity;
-            } else {
-                newProductivity = undefined;
-            }
-
-            if (!initialStart && newProductivity !== oldProductivity) {
-                this.events.dispatch(Enums.DelegateEvent.ProductivityChanged, {
-                    username,
-                    old: oldProductivity,
-                    new: newProductivity,
-                });
-            }
-
-            if (newProductivity !== undefined) {
-                delegateWallet.setAttribute("delegate.missedBlocks", +missed || 0);
-                delegateWallet.setAttribute("delegate.productivity", newProductivity);
-            } else {
-                delegateWallet.forgetAttribute("delegate.missedBlocks");
-                delegateWallet.forgetAttribute("delegate.productivity");
-            }
+        } catch {
+            //
         }
 
         this.updating = false;
