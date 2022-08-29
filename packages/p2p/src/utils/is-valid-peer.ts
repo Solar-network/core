@@ -1,16 +1,20 @@
 import * as ipAddr from "ipaddr.js";
 import os from "os";
 
-const isUnicast = (ip: string): boolean => {
+const validRanges = ["unicast"];
+
+if (process.env.CORE_P2P_ALLOW_PRIVATE_IP_RANGES) {
+    validRanges.push(...["linkLocal", "private", "uniqueLocal"]);
+}
+
+const isValidRange = (ip: string): boolean => {
     try {
         const parsed = ipAddr.parse(ip);
-        if (parsed.range() === "unicast" && !ip.startsWith("0")) {
-            return true;
-        }
-        return false;
-    } catch (error) {
-        return false;
+        return !ip.startsWith("0") && validRanges.includes(parsed.range());
+    } catch {
+        //
     }
+    return false;
 };
 
 const networkInterfaces = (ip: string): boolean => {
@@ -39,7 +43,7 @@ export const isValidPeer = (
 
     peer.ip = sanitisedAddress;
 
-    if (!isUnicast(peer.ip)) {
+    if (!isValidRange(peer.ip)) {
         return false;
     }
 
