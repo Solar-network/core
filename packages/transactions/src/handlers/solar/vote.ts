@@ -64,7 +64,7 @@ export class VoteTransactionHandler extends TransactionHandler {
     ): Promise<void> {
         AppUtils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        const { activeDelegates } = Managers.configManager.getMilestone();
+        const { activeDelegates, canVoteForResignedDelegates } = Managers.configManager.getMilestone();
         const votes = Object.keys(transaction.data.asset.votes);
 
         if (votes.length > activeDelegates) {
@@ -83,9 +83,11 @@ export class VoteTransactionHandler extends TransactionHandler {
                 throw new VotedForNonDelegateError(delegate);
             }
 
-            const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegate);
-            if (delegateWallet.hasAttribute("delegate.resigned")) {
-                throw new VotedForResignedDelegateError(delegate);
+            if (!canVoteForResignedDelegates) {
+                const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegate);
+                if (delegateWallet.hasAttribute("delegate.resigned")) {
+                    throw new VotedForResignedDelegateError(delegate);
+                }
             }
         }
 

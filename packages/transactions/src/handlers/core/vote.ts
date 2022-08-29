@@ -1,13 +1,7 @@
 import { Enums, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils } from "@solar-network/kernel";
 
-import {
-    AlreadyVotedError,
-    NoVoteError,
-    UnvoteMismatchError,
-    VotedForNonDelegateError,
-    VotedForResignedDelegateError,
-} from "../../errors";
+import { AlreadyVotedError, NoVoteError, UnvoteMismatchError, VotedForNonDelegateError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 import { DelegateRegistrationTransactionHandler } from "./delegate-registration";
 
@@ -119,10 +113,6 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
             if (vote.startsWith("+")) {
                 if (walletVote) {
                     throw new AlreadyVotedError();
-                }
-
-                if (delegateWallet.hasAttribute("delegate.resigned")) {
-                    throw new VotedForResignedDelegateError(delegateVote);
                 }
 
                 walletVote = delegateVote;
