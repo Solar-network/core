@@ -547,7 +547,7 @@ importers:
 
   packages/nes:
     specifiers:
-      '@alessiodf/bson': 0.1.4
+      '@alessiodf/bson': 0.1.8
       '@hapi/boom': 9.1.4
       '@hapi/bounce': 2.0.0
       '@hapi/call': 9.0.0
@@ -560,7 +560,7 @@ importers:
       joi: 17.6.0
       ws: 7.5.5
     dependencies:
-      '@alessiodf/bson': 0.1.4
+      '@alessiodf/bson': 0.1.8
       '@hapi/boom': 9.1.4
       '@hapi/bounce': 2.0.0
       '@hapi/call': 9.0.0
@@ -773,8 +773,8 @@ importers:
 
 packages:
 
-  /@alessiodf/bson/0.1.4:
-    resolution: {integrity: sha512-lmZC9NHpLC9FIqopS3n1YD/H7aLf9ObyQb4aQyCxveNg9DcT7ybPykxpP3MwjmpFqlKyuYTqy+mmYDejjuWbXA==}
+  /@alessiodf/bson/0.1.8:
+    resolution: {integrity: sha512-OrHZ0uZtjoCQ2x0090qZjgkOCRZR1HFGZP4gcVR3sJxOPUGl581A7FXDhxrc1jJjtitH02qk7lNvWJZCbhzrSw==}
     engines: {node: '>=15.0.0'}
     dev: false
 

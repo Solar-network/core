@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "@solar-network/kernel": "workspace:*",
-        "@alessiodf/bson": "0.1.4",
+        "@alessiodf/bson": "0.1.8",
         "@hapi/boom": "9.1.4",
         "@hapi/bounce": "2.0.0",
         "@hapi/call": "9.0.0",
