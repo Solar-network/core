@@ -50,17 +50,10 @@ export class WalletSearchService {
                 const delegateAttributes: Record<string, any> = wallet.hasAttribute("delegate")
                     ? wallet.getAttribute("delegate")
                     : {};
-                if (criteria.length < 34) {
-                    if (criteria.length <= 20) {
-                        return delegateAttributes.username && delegateAttributes.username.startsWith(criteria);
-                    } else {
-                        return wallet.getAddress().toLowerCase().startsWith(criteria) || publicKey.startsWith(criteria);
-                    }
+                if (criteria.length <= 20) {
+                    return delegateAttributes.username && delegateAttributes.username.startsWith(criteria);
                 } else {
-                    return (
-                        criteria === wallet.getAddress().toLowerCase() ||
-                        (criteria.length > 20 && criteria === publicKey)
-                    );
+                    return wallet.getAddress().toLowerCase().startsWith(criteria) || publicKey.startsWith(criteria);
                 }
             })
             .slice(0, 100)
