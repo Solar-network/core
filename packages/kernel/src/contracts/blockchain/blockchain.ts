@@ -126,4 +126,6 @@ export interface Blockchain {
     checkForFork(blocks: Interfaces.IBlockData[]): Promise<boolean>;
 
     setBlockUsername(block: Interfaces.IBlockData): void;
+
+    isCheckingForFork(): boolean;
 }

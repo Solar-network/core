@@ -60,8 +60,11 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     private stopped!: boolean;
     private booted: boolean = false;
+    private forkCheck: boolean = false;
+    private forking: boolean = false;
     private missedBlocks: number = 0;
     private lastCheckNetworkHealthTs: number = 0;
+    private lastCheckForkTs: number = 0;
     private updating: boolean = false;
 
     @Container.postConstruct()
@@ -274,7 +277,9 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             processBlocksJob.setBlocks(blocks);
 
             this.queue.push(processBlocksJob);
-            this.queue.resume();
+            if (!this.forking) {
+                this.queue.resume();
+            }
         };
 
         const lastDownloadedHeight: number = this.getLastDownloadedBlock().height;
@@ -474,6 +479,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         );
     }
 
+    public isCheckingForFork(): boolean {
+        return this.forkCheck;
+    }
+
     /**
      * Get the last block of the blockchain.
      */
@@ -544,30 +553,55 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     }
 
     public async checkForFork(blocks: Interfaces.IBlockData[]): Promise<boolean> {
-        const rollbackBlocks: number = await this.networkMonitor.checkForFork();
-        if (rollbackBlocks > 0) {
-            this.clearAndStopQueue();
+        const milestone = Managers.configManager.getMilestone();
+        const timeNow: number = Date.now() / 1000;
 
-            await this.removeBlocks(rollbackBlocks);
-            this.stateStore.setNumberOfBlocksToRollback(0);
-            this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)} :wastebasket:`);
+        if (timeNow - this.lastCheckForkTs > milestone.blockTime) {
+            this.lastCheckForkTs = timeNow;
+            this.forkCheck = true;
+            const rollbackBlocks: number = await this.networkMonitor.checkForFork();
+            if (rollbackBlocks > 0) {
+                this.forking = true;
+                this.clearAndStopQueue();
 
-            await this.roundState.restore();
-
-            await this.getQueue().resume();
-
-            try {
-                if (blocks[0].ip) {
-                    const forkedBlock: Interfaces.IBlockData | undefined =
-                        await this.networkMonitor.downloadBlockAtHeight(blocks[0].ip, blocks[0].height - 1);
-                    if (forkedBlock) {
-                        this.enqueueBlocks([forkedBlock, ...blocks]);
+                await new Promise<void>((resolve) => {
+                    if (this.getQueue().isRunning()) {
+                        this.getQueue().once("drain", () => {
+                            resolve();
+                        });
+                    } else {
+                        resolve();
                     }
+                });
+
+                await this.removeBlocks(rollbackBlocks);
+                this.stateStore.setNumberOfBlocksToRollback(0);
+                this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)} :wastebasket:`);
+
+                await this.roundState.restore();
+
+                this.forking = false;
+
+                await this.getQueue().resume();
+                try {
+                    if (blocks[0].ip) {
+                        const forkedBlock: Interfaces.IBlockData | undefined =
+                            await this.networkMonitor.downloadBlockAtHeight(blocks[0].ip, blocks[0].height - 1);
+                        if (forkedBlock) {
+                            const blocksToEnqueue: Interfaces.IBlockData[] = [forkedBlock, ...blocks];
+                            this.stateStore.setLastDownloadedBlock(blocksToEnqueue[blocksToEnqueue.length - 1]);
+                            this.dispatch("NEWBLOCK");
+                            this.enqueueBlocks(blocksToEnqueue);
+                        }
+                    }
+                } catch {
+                    //
                 }
-            } catch {
-                //
+                this.forkCheck = false;
+                return true;
             }
-            return true;
+
+            this.forkCheck = false;
         }
 
         return false;

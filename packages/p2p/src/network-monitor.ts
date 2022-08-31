@@ -56,7 +56,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     private initialising = true;
     private lastPinged: number = 0;
-    private lastForkCheck: number = 0;
 
     private cachedTransactions: Map<string, number> = new Map();
 
@@ -468,20 +467,15 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             return 0;
         }
 
-        const milestone = Managers.configManager.getMilestone();
-        const timeNow: number = Date.now() / 1000;
-
-        if (timeNow - this.lastForkCheck > milestone.blockTime) {
-            this.lastForkCheck = timeNow;
-            await delay(1000); // give time for the block to be widely propagated
-            let networkStatus = await this.checkNetworkHealth(true); // fast check using our current peers
-            if (!networkStatus.forked) {
-                networkStatus = await this.checkNetworkHealth(); // slower check with the entire network
-            }
-            if (networkStatus.forked && networkStatus.blocksToRollback! > 0) {
-                return networkStatus.blocksToRollback!;
-            }
+        await delay(1000); // give time for the block to be widely propagated
+        let networkStatus = await this.checkNetworkHealth(true); // fast check using our current peers
+        if (!networkStatus.forked) {
+            networkStatus = await this.checkNetworkHealth(); // slower check with the entire network
         }
+        if (networkStatus.forked && networkStatus.blocksToRollback! > 0) {
+            return networkStatus.blocksToRollback!;
+        }
+
         return 0;
     }
 

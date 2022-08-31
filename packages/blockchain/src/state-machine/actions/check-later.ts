@@ -83,8 +83,10 @@ export class CheckLater implements Action {
                     log: false,
                     skipCommonBlocks: true,
                 });
+                let lastBlockId: string | undefined;
+
                 setInterval(async () => {
-                    if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
+                    if (this.stateStore.getBlockchain().value !== "idle") {
                         return;
                     }
                     try {
@@ -98,7 +100,7 @@ export class CheckLater implements Action {
                             2000,
                             true,
                         );
-                        if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
+                        if (this.stateStore.getBlockchain().value !== "idle") {
                             return;
                         }
                         lastBlock = this.app
@@ -121,44 +123,47 @@ export class CheckLater implements Action {
                                     return;
                                 }
 
-                                const rank = generatorWallet.getAttribute("delegate.rank");
-                                const generator: string = `delegate ${username} (#${rank})`;
+                                if (lastBlockId !== `${id},${lastBlock.data.id}`) {
+                                    const rank = generatorWallet.getAttribute("delegate.rank");
+                                    const generator: string = `delegate ${username} (#${rank})`;
 
-                                this.logger.info(
-                                    `Downloaded new block forged by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
-                                        reward,
-                                    )} reward :package:`,
-                                );
-
-                                const { dynamicReward } = Managers.configManager.getMilestone();
-
-                                if (
-                                    dynamicReward &&
-                                    dynamicReward.enabled &&
-                                    reward.isEqualTo(dynamicReward.secondaryReward)
-                                ) {
-                                    const { alreadyForged } = await this.roundState.getRewardForBlockInRound(
-                                        height,
-                                        generatorWallet,
+                                    this.logger.info(
+                                        `Downloaded new block forged by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
+                                            reward,
+                                        )} reward :package:`,
                                     );
-                                    if (alreadyForged && !reward.isEqualTo(dynamicReward.ranks[rank])) {
-                                        this.logger.info(
-                                            `The reward was reduced because ${username} already forged in this round :fire:`,
+
+                                    const { dynamicReward } = Managers.configManager.getMilestone();
+
+                                    if (
+                                        dynamicReward &&
+                                        dynamicReward.enabled &&
+                                        reward.isEqualTo(dynamicReward.secondaryReward)
+                                    ) {
+                                        const { alreadyForged } = await this.roundState.getRewardForBlockInRound(
+                                            height,
+                                            generatorWallet,
                                         );
+                                        if (alreadyForged && !reward.isEqualTo(dynamicReward.ranks[rank])) {
+                                            this.logger.info(
+                                                `The reward was reduced because ${username} already forged in this round :fire:`,
+                                            );
+                                        }
                                     }
+
+                                    this.logger.debug(`The id of the new block is ${id}`);
+
+                                    this.logger.debug(
+                                        `It contains ${AppUtils.pluralise(
+                                            "transaction",
+                                            numberOfTransactions,
+                                            true,
+                                        )} and was downloaded from ${ip}`,
+                                    );
+
+                                    this.blockchain.handleIncomingBlock(blocks[0], false, ip!, false);
+                                    lastBlockId = `${id},${lastBlock.data.id}`;
                                 }
-
-                                this.logger.debug(`The id of the new block is ${id}`);
-
-                                this.logger.debug(
-                                    `It contains ${AppUtils.pluralise(
-                                        "transaction",
-                                        numberOfTransactions,
-                                        true,
-                                    )} and was downloaded from ${ip}`,
-                                );
-
-                                this.blockchain.handleIncomingBlock(blocks[0], false, ip!, false);
                             } else {
                                 this.blockchain.enqueueBlocks(blocks);
                             }
@@ -169,7 +174,7 @@ export class CheckLater implements Action {
                 }, 500);
 
                 setInterval(async () => {
-                    if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
+                    if (this.stateStore.getBlockchain().value !== "idle") {
                         return;
                     }
 
@@ -181,7 +186,7 @@ export class CheckLater implements Action {
                 }, 4000);
 
                 setInterval(async () => {
-                    if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
+                    if (this.stateStore.getBlockchain().value !== "idle") {
                         return;
                     }
 
@@ -191,7 +196,7 @@ export class CheckLater implements Action {
                 }, 1000);
 
                 setInterval(async () => {
-                    if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
+                    if (this.stateStore.getBlockchain().value !== "idle") {
                         return;
                     }
 
