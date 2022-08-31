@@ -1,6 +1,7 @@
 {
     "name": "mainnet",
     "messagePrefix": "Solar message:\n",
+    "addressCharacter": "S",
     "bip32": {
         "public": 70617039,
         "private": 70615956

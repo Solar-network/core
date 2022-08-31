@@ -1,10 +1,19 @@
 import { Interfaces, Utils } from "@solar-network/crypto";
 
-import { Options, OrCriteria, OrEqualCriteria, OrNumericCriteria, Pagination, ResultsPage, Sorting } from "../search";
+import {
+    Options,
+    OrCriteria,
+    OrEqualCriteria,
+    OrLikeCriteria,
+    OrNumericCriteria,
+    Pagination,
+    ResultsPage,
+    Sorting,
+} from "../search";
 import { OrTransactionCriteria } from "./transaction-history-service";
 
 export type BlockCriteria = {
-    id?: OrEqualCriteria<string>;
+    id?: OrLikeCriteria<string>;
     version?: OrEqualCriteria<number>;
     timestamp?: OrNumericCriteria<number>;
     previousBlock?: OrEqualCriteria<string>;
@@ -21,6 +30,14 @@ export type BlockCriteria = {
     blockSignature?: OrEqualCriteria<string>;
 };
 
+export type BlockSearchResource = {
+    height: number;
+    id?: string;
+    timestamp: number;
+    transactions: number;
+    username?: string;
+};
+
 export type OrBlockCriteria = OrCriteria<BlockCriteria>;
 
 export type BlockDataWithTransactionData = {
@@ -29,6 +46,8 @@ export type BlockDataWithTransactionData = {
 };
 
 export interface BlockHistoryService {
+    getBlocksLike(criteria: string): Promise<BlockSearchResource[]>;
+
     findOneByCriteria(criteria: OrBlockCriteria): Promise<Interfaces.IBlockData | undefined>;
 
     findManyByCriteria(criteria: OrBlockCriteria): Promise<Interfaces.IBlockData[]>;
