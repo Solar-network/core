@@ -98,6 +98,9 @@ export class CheckLater implements Action {
                             2000,
                             true,
                         );
+                        if (this.stateStore.getBlockchain().value !== "idle" || !this.blockchain.isSynced()) {
+                            return;
+                        }
                         lastBlock = this.app
                             .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                             .getLastBlock();
