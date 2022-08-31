@@ -1,6 +1,7 @@
 {
     "name": "testnet",
     "messagePrefix": "Solar testnet message:\n",
+    "addressCharacter": "D",
     "bip32": {
         "public": 70617039,
         "private": 70615956

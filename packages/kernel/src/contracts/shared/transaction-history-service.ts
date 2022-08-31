@@ -16,7 +16,7 @@ export type TransactionCriteria = {
     address?: OrEqualCriteria<string>;
     senderId?: OrEqualCriteria<string>;
     recipientId?: OrEqualCriteria<string>;
-    id?: OrEqualCriteria<string>;
+    id?: OrLikeCriteria<string>;
     version?: OrEqualCriteria<number>;
     blockHeight?: OrNumericCriteria<number>;
     blockId?: OrEqualCriteria<string>;
@@ -33,6 +33,16 @@ export type TransactionCriteria = {
     asset?: OrContainsCriteria<Record<string, any>>;
 };
 
+export type TransactionSearchResource = {
+    amount?: Utils.BigNumber;
+    asset?: Interfaces.ITransactionAsset;
+    id?: string;
+    recipient?: string;
+    sender: string;
+    type: number;
+    typeGroup?: number;
+};
+
 export type OrTransactionCriteria = OrCriteria<TransactionCriteria>;
 
 export type TransactionDataWithBlockData = {
@@ -41,6 +51,8 @@ export type TransactionDataWithBlockData = {
 };
 
 export interface TransactionHistoryService {
+    getTransactionsLike(criteria: string): Promise<TransactionSearchResource[]>;
+
     findOneByCriteria(criteria: OrTransactionCriteria): Promise<Interfaces.ITransactionData | undefined>;
 
     findManyByCriteria(criteria: OrTransactionCriteria): Promise<Interfaces.ITransactionData[]>;

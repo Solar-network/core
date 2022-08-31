@@ -7,20 +7,20 @@ import { TransactionRepository } from "./repositories/transaction-repository";
 
 @Container.injectable()
 export class TransactionHistoryService implements Contracts.Shared.TransactionHistoryService {
+    @Container.inject(Container.Identifiers.DatabaseBlockFilter)
+    private readonly blockFilter!: Contracts.Database.BlockFilter;
+
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
     private readonly blockRepository!: BlockRepository;
+
+    @Container.inject(Container.Identifiers.DatabaseModelConverter)
+    private readonly modelConverter!: Contracts.Database.ModelConverter;
 
     @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
     private readonly transactionRepository!: TransactionRepository;
 
     @Container.inject(Container.Identifiers.DatabaseTransactionFilter)
     private readonly transactionFilter!: Contracts.Database.TransactionFilter;
-
-    @Container.inject(Container.Identifiers.DatabaseBlockFilter)
-    private readonly blockFilter!: Contracts.Database.BlockFilter;
-
-    @Container.inject(Container.Identifiers.DatabaseModelConverter)
-    private readonly modelConverter!: Contracts.Database.ModelConverter;
 
     public async findOneByCriteria(
         criteria: Contracts.Shared.OrTransactionCriteria,
@@ -53,6 +53,25 @@ export class TransactionHistoryService implements Contracts.Shared.TransactionHi
         for await (const model of this.transactionRepository.streamByExpression(expression, sorting)) {
             yield this.modelConverter.getTransactionData([model])[0];
         }
+    }
+
+    public async getTransactionsLike(criteria: string): Promise<Contracts.Shared.TransactionSearchResource[]> {
+        return (
+            await this.listByCriteria({ id: criteria.toLowerCase() }, [{ property: "id", direction: "asc" }], {
+                offset: 0,
+                limit: 100,
+            })
+        ).results.map((transaction: Interfaces.ITransactionData) => {
+            return {
+                amount: transaction.amount && transaction.amount.isGreaterThan(0) ? transaction.amount : undefined,
+                asset: transaction.asset,
+                id: transaction.id,
+                recipient: transaction.recipientId,
+                sender: transaction.senderId,
+                type: transaction.type,
+                typeGroup: transaction.typeGroup,
+            };
+        });
     }
 
     public async listByCriteria(

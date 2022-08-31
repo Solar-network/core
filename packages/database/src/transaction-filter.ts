@@ -41,7 +41,7 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
                     });
                 case "id":
                     return handleOrCriteria(criteria.id!, async (c) => {
-                        return { property: "id", op: "equal", value: c };
+                        return { property: "id", op: "like", pattern: c + "%" };
                     });
                 case "version":
                     return handleOrCriteria(criteria.version!, async (c) => {
