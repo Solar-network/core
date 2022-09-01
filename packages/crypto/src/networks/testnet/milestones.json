@@ -145,5 +145,9 @@
         "delegateResignationTypeAsset": true,
         "legacyTransfer": false,
         "legacyVote": false
+    },
+    {
+        "height": 1250000,
+        "canVoteForResignedDelegates": true
     }
 ]
