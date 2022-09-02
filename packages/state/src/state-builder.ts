@@ -85,15 +85,15 @@ export class StateBuilder {
             }
         }
 
-        const devFunds = await this.blockRepository.getDevFunds();
+        const donations = await this.blockRepository.getDonations();
 
-        for (const devFund of devFunds) {
-            const amount: Utils.BigNumber = Utils.BigNumber.make(devFund.amount);
+        for (const donation of donations) {
+            const amount: Utils.BigNumber = Utils.BigNumber.make(donation.amount);
 
-            const devFundWallet = this.walletRepository.findByAddress(devFund.address);
-            devFundWallet.increaseBalance(amount);
+            const donationWallet = this.walletRepository.findByAddress(donation.address);
+            donationWallet.increaseBalance(amount);
 
-            const delegateWallet = this.walletRepository.findByUsername(devFund.username);
+            const delegateWallet = this.walletRepository.findByUsername(donation.username);
             delegateWallet.decreaseBalance(amount);
         }
     }

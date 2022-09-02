@@ -3,7 +3,7 @@ import { Hash, HashAlgorithms, Slots } from "../crypto";
 import { BlockSchemaError } from "../errors";
 import { IBlock, IBlockData, IBlockJson, IBlockVerification, ITransaction, ITransactionData } from "../interfaces";
 import { configManager } from "../managers/config";
-import { BigNumber, calculateDevFund, isException } from "../utils";
+import { BigNumber, calculateDonations, isException } from "../utils";
 import { validator } from "../validation";
 import { Serialiser } from "./serialiser";
 
@@ -28,7 +28,7 @@ export class Block implements IBlock {
 
         this.data.burnedFee = this.getBurnedFees();
 
-        this.data.devFund = calculateDevFund(this.data.height, this.data.reward);
+        this.data.donations = calculateDonations(this.data.height, this.data.reward);
 
         this.verification = this.verify();
     }
@@ -96,7 +96,7 @@ export class Block implements IBlock {
         return {
             blockSignature: data.blockSignature,
             burnedFee: withExtraData ? data.burnedFee : undefined,
-            devFund: withExtraData ? data.devFund : undefined,
+            donations: withExtraData ? data.donations : undefined,
             generatorPublicKey: data.generatorPublicKey,
             height: data.height,
             id: data.id,

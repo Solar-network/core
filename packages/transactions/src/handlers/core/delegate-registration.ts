@@ -25,7 +25,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             "delegate.forgedFees", // Used by the API
             "delegate.burnedFees", // Used by the API
             "delegate.forgedRewards", // Used by the API
-            "delegate.devFunds", // Used by the API
+            "delegate.donations", // Used by the API
             "delegate.forgedTotal", // Used by the API
             "delegate.lastBlock",
             "delegate.missedBlocks", // Used by the API
@@ -69,7 +69,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
                 forgedFees: Utils.BigNumber.ZERO,
                 burnedFees: Utils.BigNumber.ZERO,
                 forgedRewards: Utils.BigNumber.ZERO,
-                devFunds: Utils.BigNumber.ZERO,
+                donations: Utils.BigNumber.ZERO,
                 producedBlocks: 0,
                 rank: undefined,
                 voters: 0,
@@ -91,7 +91,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             delegate.burnedFees = delegate.forgedFees.plus(block.burnedFees);
             delegate.forgedFees = delegate.forgedFees.plus(block.totalFees);
             delegate.forgedRewards = delegate.forgedRewards.plus(block.totalRewards);
-            delegate.devFunds = delegate.devFunds.plus(block.devFunds || Utils.BigNumber.ZERO);
+            delegate.donations = delegate.donations.plus(block.donations || Utils.BigNumber.ZERO);
             delegate.producedBlocks += +block.totalProduced;
         }
 
@@ -191,7 +191,7 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             forgedFees: Utils.BigNumber.ZERO,
             burnedFees: Utils.BigNumber.ZERO,
             forgedRewards: Utils.BigNumber.ZERO,
-            devFunds: Utils.BigNumber.ZERO,
+            donations: Utils.BigNumber.ZERO,
             producedBlocks: 0,
             round: 0,
             voters: 0,

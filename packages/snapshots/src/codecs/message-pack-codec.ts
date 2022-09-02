@@ -21,7 +21,7 @@ export class MessagePackCodec implements Codec {
 
     public encodeBlock(block: {
         Block_burned_fee: Utils.BigNumber;
-        Block_dev_fund: Utils.BigNumber;
+        Block_donations: Utils.BigNumber;
         Block_id: string;
         Block_username: string;
         Block_version: number;
@@ -30,7 +30,7 @@ export class MessagePackCodec implements Codec {
             const blockCamelised = cameliseKeys(MessagePackCodec.removePrefix(block, "Block_"));
             return encode([
                 block.Block_burned_fee,
-                block.Block_dev_fund,
+                block.Block_donations,
                 block.Block_version === 0 ? block.Block_username : undefined,
                 Blocks.Serialiser.serialise(blockCamelised, true),
             ]);
@@ -41,10 +41,10 @@ export class MessagePackCodec implements Codec {
 
     public decodeBlock(buffer: Buffer): Models.Block {
         try {
-            const [burnedFee, devFund, username, serialised] = decode(buffer);
+            const [burnedFee, donations, username, serialised] = decode(buffer);
             const data = Blocks.Deserialiser.deserialise(serialised, false).data as Models.Block;
             data.burnedFee = burnedFee;
-            data.devFund = devFund;
+            data.donations = donations;
             if (username) {
                 data.username = username;
             }
