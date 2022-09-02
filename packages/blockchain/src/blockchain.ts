@@ -562,9 +562,14 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             const rollbackBlocks: number = await this.networkMonitor.checkForFork();
             if (rollbackBlocks > 0) {
                 this.forking = true;
-                await this.getQueue().stop();
+                await this.queue.stop();
 
                 await this.removeBlocks(rollbackBlocks);
+
+                await this.queue.clear();
+                const lastStoredBlock = await this.database.getLastBlock();
+                this.stateStore.setLastDownloadedBlock(lastStoredBlock.data);
+
                 this.stateStore.setNumberOfBlocksToRollback(0);
                 this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)} :wastebasket:`);
 
@@ -572,7 +577,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
                 this.forking = false;
 
-                await this.getQueue().resume();
+                await this.queue.resume();
                 try {
                     if (blocks[0].ip) {
                         const forkedBlock: Interfaces.IBlockData | undefined =
