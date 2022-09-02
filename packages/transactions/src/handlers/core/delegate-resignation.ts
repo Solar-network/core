@@ -5,7 +5,6 @@ import {
     IrrevocableResignationError,
     NotEnoughDelegatesError,
     NotEnoughTimeSinceResignationError,
-    ResignationTypeAssetMilestoneNotActiveError,
     WalletAlreadyPermanentlyResignedError,
     WalletAlreadyTemporarilyResignedError,
     WalletNotADelegateError,
@@ -84,12 +83,6 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
         let type: Enums.DelegateStatus = Enums.DelegateStatus.TemporaryResign;
         if (transaction.data.asset && transaction.data.asset.resignationType) {
             type = transaction.data.asset.resignationType;
-        }
-
-        const { delegateResignationTypeAsset } = Managers.configManager.getMilestone();
-
-        if (!delegateResignationTypeAsset && type !== Enums.DelegateStatus.TemporaryResign) {
-            throw new ResignationTypeAssetMilestoneNotActiveError();
         }
 
         if (wallet.hasAttribute("delegate.resigned")) {

@@ -145,7 +145,6 @@
         "height": 918650,
         "acceptLegacySchnorrTransactions": false,
         "blocksToRevokeDelegateResignation": 106,
-        "delegateResignationTypeAsset": true,
         "legacyTransfer": false,
         "legacyVote": false
     },
