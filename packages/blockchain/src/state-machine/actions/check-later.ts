@@ -165,6 +165,7 @@ export class CheckLater implements Action {
                                     lastBlockId = `${id},${lastBlock.data.id}`;
                                 }
                             } else {
+                                this.blockchain.dispatch("NEWBLOCK");
                                 this.blockchain.enqueueBlocks(blocks);
                             }
                         }
