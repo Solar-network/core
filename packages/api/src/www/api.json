@@ -47,6 +47,33 @@
                 }
             }
         },
+        "/blockchain/search/{id}": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Search the blockchain",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Full or partial wallet address, block ID, delegate name, public key or transaction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
         "/node/configuration": {
             "get": {
                 "tags": [
