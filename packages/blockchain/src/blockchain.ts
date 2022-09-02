@@ -562,17 +562,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             const rollbackBlocks: number = await this.networkMonitor.checkForFork();
             if (rollbackBlocks > 0) {
                 this.forking = true;
-                this.clearAndStopQueue();
-
-                await new Promise<void>((resolve) => {
-                    if (this.getQueue().isRunning()) {
-                        this.getQueue().once("drain", () => {
-                            resolve();
-                        });
-                    } else {
-                        resolve();
-                    }
-                });
+                await this.getQueue().stop();
 
                 await this.removeBlocks(rollbackBlocks);
                 this.stateStore.setNumberOfBlocksToRollback(0);
