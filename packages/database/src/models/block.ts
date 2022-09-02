@@ -81,7 +81,7 @@ export class Block implements Contracts.Database.BlockModel {
         type: "jsonb",
         nullable: false,
     })
-    public devFund!: Record<string, Utils.BigNumber>;
+    public donations!: Record<string, Utils.BigNumber>;
 
     @Column({
         type: "integer",

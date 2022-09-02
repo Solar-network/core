@@ -134,8 +134,11 @@
     },
     {
         "height": 671352,
-        "devFund": {
-            "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": 5
+        "donations": {
+            "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": {
+                "percent": 5,
+                "purpose": "development"
+            }
         }
     },
     {

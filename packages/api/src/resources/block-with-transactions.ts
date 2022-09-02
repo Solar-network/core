@@ -39,13 +39,16 @@ export class BlockWithTransactionsResource implements Resource {
             previous: blockData.previousBlock,
             forged: {
                 reward: blockData.reward.toFixed(),
-                devFund: blockData.devFund,
+                donations: blockData.donations,
                 fee: blockData.totalFee.toFixed(),
                 burnedFee: blockData.burnedFee!.toFixed(),
                 amount: totalAmountTransferred.toFixed(),
                 total: blockData.reward
                     .minus(
-                        Object.values(blockData.devFund!).reduce((prev, curr) => prev.plus(curr), Utils.BigNumber.ZERO),
+                        Object.values(blockData.donations!).reduce(
+                            (prev, curr) => prev.plus(curr),
+                            Utils.BigNumber.ZERO,
+                        ),
                     )
                     .plus(blockData.totalFee)
                     .minus(blockData.burnedFee!)

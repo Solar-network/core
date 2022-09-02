@@ -130,8 +130,11 @@
         "height": 671988,
         "acceptLegacySchnorrTransactions": true,
         "bip340": true,
-        "devFund": {
-            "Sgymbo4rg9aBeJJ2YmV12xdRY2xo6b94U9": 5
+        "donations": {
+            "Sgymbo4rg9aBeJJ2YmV12xdRY2xo6b94U9": {
+                "percent": 5,
+                "purpose": "development"
+            }
         }
     },
     {

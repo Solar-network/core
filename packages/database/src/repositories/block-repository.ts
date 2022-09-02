@@ -115,7 +115,7 @@ export class BlockRepository extends AbstractRepository<Block> {
             username: string;
             height: number;
             totalRewards: string;
-            devFunds: string;
+            donations: string;
             burnedFees: string;
             totalFees: string;
             totalProduced: number;
@@ -131,26 +131,26 @@ export class BlockRepository extends AbstractRepository<Block> {
             .groupBy("username")
             .getRawMany();
 
-        const devFunds = await this.createQueryBuilder()
+        const donations = await this.createQueryBuilder()
             .select([])
             .addSelect("username")
             .addSelect("sum(amount::bigint)", "amount")
             .leftJoin(
                 "(SELECT 1)",
                 "_",
-                "TRUE CROSS JOIN LATERAL jsonb_each_text(dev_fund::jsonb) json(address, amount)",
+                "TRUE CROSS JOIN LATERAL jsonb_each_text(donations::jsonb) json(address, amount)",
             )
             .groupBy("username")
             .getRawMany();
 
-        for (const devFund of devFunds) {
-            rewardsAndFees.find((block) => block.username === devFund.username).devFunds = devFund.amount;
+        for (const donation of donations) {
+            rewardsAndFees.find((block) => block.username === donation.username).donations = donation.amount;
         }
 
         return rewardsAndFees;
     }
 
-    public async getDevFunds(): Promise<{ address: string; amount: string; username: string }[]> {
+    public async getDonations(): Promise<{ address: string; amount: string; username: string }[]> {
         return this.createQueryBuilder()
             .select([])
             .addSelect("username")
@@ -159,7 +159,7 @@ export class BlockRepository extends AbstractRepository<Block> {
             .leftJoin(
                 "(SELECT 1)",
                 "_",
-                "TRUE CROSS JOIN LATERAL jsonb_each_text(dev_fund::jsonb) json(address, amount)",
+                "TRUE CROSS JOIN LATERAL jsonb_each_text(donations::jsonb) json(address, amount)",
             )
             .groupBy("username, address")
             .getRawMany();

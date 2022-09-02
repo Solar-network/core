@@ -870,25 +870,25 @@
                         }
                     },
                     {
-                        "name": "forged.devFunds",
+                        "name": "forged.donations",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all development funds raised by the delegate(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all donations by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.devFunds.from",
+                        "name": "forged.donations.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all development funds raised by the delegate(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all donations by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.devFunds.to",
+                        "name": "forged.donations.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all all development funds raised by the delegate(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all donations by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -1131,8 +1131,8 @@
                                 "blocks.productivity:desc",
                                 "forged.burnedFees:asc",
                                 "forged.burnedFees:desc",
-                                "forged.devFunds:asc",
-                                "forged.devFunds:desc",
+                                "forged.donations:asc",
+                                "forged.donations:desc",
                                 "forged.fees:asc",
                                 "forged.fees:desc",
                                 "forged.rewards:asc",

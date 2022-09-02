@@ -11,7 +11,7 @@ export interface BlockModel {
     totalFee: Utils.BigNumber;
     burnedFee: Utils.BigNumber;
     reward: Utils.BigNumber;
-    devFund: Record<string, Utils.BigNumber>;
+    donations: Record<string, Utils.BigNumber>;
     payloadLength: number;
     payloadHash: string;
     generatorPublicKey: string;
