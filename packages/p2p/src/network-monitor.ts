@@ -668,7 +668,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         const peers: Contracts.P2P.Peer[] = this.repository
             .getPeers()
-            .filter((peer) => satisfies(peer.version!, ">=4.1.0-next.3", { includePrerelease: true }));
+            .filter((peer) => satisfies(peer.version!, ">=4.1.0"));
 
         const peersThatWouldThrottle: boolean[] = await Promise.all(
             peers.map((peer) => this.communicator.wouldThrottleOnFetchingTransactions(peer)),
