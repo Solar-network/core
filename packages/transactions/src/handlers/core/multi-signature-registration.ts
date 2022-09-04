@@ -58,7 +58,7 @@ export class MultiSignatureRegistrationTransactionHandler extends TransactionHan
     }
 
     public async isActivated(): Promise<boolean> {
-        return true;
+        return false;
     }
 
     public async throwIfCannotBeApplied(
