@@ -115,7 +115,9 @@ export class Command extends Commands.Command {
                     }
 
                     if (existsSync(configDest)) {
-                        this.components.fatal("Please use the --force flag if you wish to overwrite the existing configuration");
+                        this.components.fatal(
+                            "Please use the --force flag if you wish to overwrite the existing configuration",
+                        );
                     }
 
                     if (!existsSync(configSrc)) {
