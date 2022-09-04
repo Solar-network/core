@@ -65,6 +65,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     private missedBlocks: number = 0;
     private lastCheckNetworkHealthTs: number = 0;
     private lastCheckForkTs: number = 0;
+    private lastUpdatedBlockId: string | undefined;
     private updating: boolean = false;
 
     @Container.postConstruct()
@@ -621,7 +622,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     }
 
     private async updateProductivity(initialStart: boolean): Promise<void> {
-        if (this.updating) {
+        if (this.updating || this.getLastBlock().data.id === this.lastUpdatedBlockId) {
             return;
         }
 
@@ -671,6 +672,8 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                     delegateWallet.forgetAttribute("delegate.productivity");
                 }
             }
+
+            this.lastUpdatedBlockId = this.getLastBlock().data.id;
         } catch {
             //
         }
