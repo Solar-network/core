@@ -421,7 +421,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                     );
 
                     return { forked: true, blocksToRollback: 5000 };
-                } else {
+                } else if (blocksToRollback > 0) {
                     this.logger.warning(
                         `Fork detected - rolling back ${Utils.pluralise(
                             "block",
@@ -431,6 +431,8 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                     );
 
                     return { forked: true, blocksToRollback };
+                } else {
+                    return { forked: false };
                 }
             } else {
                 this.logger.debug(

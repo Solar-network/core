@@ -116,6 +116,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         return this.booted;
     }
 
+    public isForking(): boolean {
+        return this.forking;
+    }
+
     public getQueue(): Contracts.Kernel.Queue {
         return this.queue;
     }
@@ -177,6 +181,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
             await this.queue.stop();
         }
+    }
+
+    public setForkingState(forking: boolean): void {
+        this.forking = forking;
     }
 
     /**
@@ -278,7 +286,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             processBlocksJob.setBlocks(blocks);
 
             this.queue.push(processBlocksJob);
-            if (!this.forking) {
+            if (!this.isForking()) {
                 this.queue.resume();
             }
         };
@@ -325,8 +333,6 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
      */
     public async removeBlocks(nblocks: number): Promise<void> {
         try {
-            this.clearAndStopQueue();
-
             const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
             // If the current chain height is H and we will be removing blocks [N, H],
@@ -387,6 +393,12 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             if (nblocks >= lastBlock.data.height) {
                 nblocks = lastBlock.data.height - 1;
             }
+
+            if (nblocks < 1) {
+                return;
+            }
+
+            this.clearAndStopQueue();
 
             const resetHeight: number = lastBlock.data.height - nblocks;
             this.logger.info(
@@ -453,13 +465,17 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     /**
      * Fork the chain at the given block.
      */
-    public forkBlock(block: Interfaces.IBlock, numberOfBlockToRollback?: number): void {
+    public forkBlock(block: Interfaces.IBlock, numberOfBlocksToRollback?: number): void {
+        if (numberOfBlocksToRollback && numberOfBlocksToRollback < 0) {
+            return;
+        }
+
         this.stateStore.setForkedBlock(block);
 
         this.clearAndStopQueue();
 
-        if (numberOfBlockToRollback) {
-            this.stateStore.setNumberOfBlocksToRollback(numberOfBlockToRollback);
+        if (numberOfBlocksToRollback) {
+            this.stateStore.setNumberOfBlocksToRollback(numberOfBlocksToRollback);
         }
 
         this.dispatch("FORK");
@@ -547,7 +563,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             const networkStatus = await this.networkMonitor.checkNetworkHealth();
 
             if (networkStatus.forked) {
-                this.stateStore.setNumberOfBlocksToRollback(networkStatus.blocksToRollback || 0);
+                this.stateStore.setNumberOfBlocksToRollback(networkStatus.blocksToRollback!);
                 this.dispatch("FORK");
             }
         }
@@ -557,12 +573,12 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         const milestone = Managers.configManager.getMilestone();
         const timeNow: number = Date.now() / 1000;
 
-        if (timeNow - this.lastCheckForkTs > milestone.blockTime) {
+        if (!this.isForking() && timeNow - this.lastCheckForkTs > milestone.blockTime) {
             this.lastCheckForkTs = timeNow;
             this.forkCheck = true;
             const rollbackBlocks: number = await this.networkMonitor.checkForFork();
             if (rollbackBlocks > 0) {
-                this.forking = true;
+                this.setForkingState(true);
                 await this.queue.stop();
 
                 await this.removeBlocks(rollbackBlocks);
@@ -576,7 +592,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
                 await this.roundState.restore();
 
-                this.forking = false;
+                this.setForkingState(false);
 
                 await this.queue.resume();
                 try {

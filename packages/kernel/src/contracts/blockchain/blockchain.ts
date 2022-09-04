@@ -25,6 +25,10 @@ export interface Blockchain {
 
     dispose(): Promise<void>;
 
+    isForking(): boolean;
+
+    setForkingState(forking: boolean): void;
+
     /**
      * Set wakeup timeout to check the network for new blocks.
      */
