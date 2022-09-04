@@ -1,4 +1,4 @@
-import { Container, Contracts, Utils } from "@solar-network/kernel";
+import { Container, Contracts, Providers, Utils } from "@solar-network/kernel";
 import { performance } from "perf_hooks";
 
 import * as conditions from "./conditions";
@@ -23,6 +23,15 @@ export class Listener {
 
     /**
      * @private
+     * @type {Providers.PluginConfiguration}
+     * @memberof Listener
+     */
+    @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/webhooks")
+    private readonly configuration!: Providers.PluginConfiguration;
+
+    /**
+     * @private
      * @type {Contracts.Kernel.EventDispatcher}
      * @memberof Listener
      */
@@ -41,6 +50,7 @@ export class Listener {
      * @param {string} event
      * @memberof Listener
      */
+
     public async handle({ name, data }: { name: string; data: Webhook }): Promise<void> {
         // Skip own events to prevent cycling
         if (name.toString().includes("webhooks")) {
@@ -64,9 +74,9 @@ export class Listener {
      * @returns {Promise<void>}
      * @memberof Broadcaster
      */
-    public async broadcast(webhook: Webhook, payload: object, timeout: number = 1500): Promise<void> {
+    public async broadcast(webhook: Webhook, payload: object): Promise<void> {
         const start = performance.now();
-
+        const timeout: number = this.configuration.getRequired("timeout");
         try {
             const { statusCode } = await Utils.http.post(webhook.target, {
                 body: {

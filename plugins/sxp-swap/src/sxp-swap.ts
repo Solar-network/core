@@ -434,7 +434,7 @@ export class SXPSwap {
                 const [network, transactionId] = memoData;
 
                 const alreadyInPool: boolean = self.poolQuery
-                    .getAllBySender(swapWalletPublicKey)
+                    .getAllBySender(transactionData.senderId)
                     .wherePredicate((t) => t.data.memo === transactionData.memo)
                     .has();
 
