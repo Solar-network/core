@@ -14,10 +14,6 @@ export class VerifyWorkerAction extends AbstractWorkerAction {
         const verify = this.getVerifyFunction();
 
         this.readProcessor = new ReadProcessor(isBlock, streamReader, async (entity: any, previousEntity: any) => {
-            if (isBlock) {
-                this.applyGenesisBlockFix(entity);
-            }
-
             verify(entity, previousEntity);
         });
 

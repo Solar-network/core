@@ -1,8 +1,7 @@
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
 import { Container, Contracts } from "@solar-network/kernel";
+import { plugin as hapiNesPlugin, Socket } from "@solar-network/nes";
 
-import { plugin as hapiNesPlugin } from "../hapi-nes";
-import { Socket } from "../hapi-nes/socket";
 import { AcceptPeerPlugin } from "./plugins/accept-peer";
 import { AwaitBlockPlugin } from "./plugins/await-block";
 import { BanHammerPlugin } from "./plugins/ban-hammer";
@@ -80,7 +79,9 @@ export class Server {
             options: {
                 banHammerPlugin,
                 onDisconnection: (socket: Socket) => this.app.resolve(StalePeerPlugin).register(socket),
+                enabled: true,
                 maxPayload: 20971520,
+                path: "/",
             },
         });
 
@@ -140,7 +141,6 @@ export class Server {
      * @returns {Promise<void>}
      * @memberof Server
      */
-    // @todo: add proper types
     public async register(plugins: any | any[]): Promise<void> {
         await this.server.register(plugins);
     }
@@ -151,7 +151,7 @@ export class Server {
      * @memberof Server
      */
     public async route(routes: ServerRoute | ServerRoute[]): Promise<void> {
-        await this.server.route(routes);
+        this.server.route(routes);
     }
 
     /**

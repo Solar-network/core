@@ -1,8 +1,10 @@
+import { TransactionHeaderType } from "../enums";
 import {
     DuplicateParticipantInMultiSignatureError,
     InvalidTransactionBytesError,
     TransactionVersionError,
 } from "../errors";
+import { Address } from "../identities";
 import { IDeserialiseOptions, ITransaction, ITransactionData } from "../interfaces";
 import { BigNumber, ByteBuffer, isSupportedTransactionVersion } from "../utils";
 import { TransactionTypeFactory } from "./types";
@@ -48,6 +50,13 @@ export class Deserialiser {
         transaction.nonce = BigNumber.make(buf.readBigUInt64LE());
 
         transaction.senderPublicKey = buf.readBuffer(33).toString("hex");
+
+        if (transaction.headerType === TransactionHeaderType.Standard) {
+            transaction.senderId = Address.fromPublicKey(transaction.senderPublicKey);
+        } else {
+            transaction.senderId = Address.fromBuffer(buf.readBuffer(21));
+        }
+
         transaction.fee = BigNumber.make(buf.readBigUInt64LE().toString());
     }
 

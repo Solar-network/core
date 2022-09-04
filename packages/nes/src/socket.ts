@@ -1,5 +1,6 @@
 "use strict";
 
+import { serialise } from "@alessiodf/bson";
 import Boom from "@hapi/boom";
 import Bounce from "@hapi/bounce";
 import Hoek from "@hapi/hoek";
@@ -17,8 +18,16 @@ export class Socket {
     public app;
     public info;
 
+    public auth = {
+        isAuthenticated: false,
+        credentials: null,
+        artifacts: null,
+    };
+
     public _removed;
     public _pinged;
+
+    public _subscriptions;
 
     private _ws;
     private _listener;
@@ -27,11 +36,13 @@ export class Socket {
     private _packets;
     private _sending;
     private _lastPinged;
+    private _requests;
 
     public constructor(
         ws: object,
         req: { headers: string[]; socket: { remoteAddress: string; remotePort: number } },
         listener: object,
+        ip: string,
     ) {
         this._ws = ws;
         this._listener = listener;
@@ -40,26 +51,28 @@ export class Socket {
         this._processingCount = 0;
         this._packets = [];
         this._sending = false;
+        this._subscriptions = {};
         this._removed = new Teamwork.Team();
 
         this.server = this._listener._server;
         this.id = this._listener._generateId();
         this.app = {};
 
+        this._requests = [];
+
         this.info = {
-            remoteAddress: req.socket.remoteAddress,
+            remoteAddress: ip,
             remotePort: req.socket.remotePort,
-            "x-forwarded-for": req.headers["x-forwarded-for"],
         };
 
         this._ws.on("error", (error) => {
             if (error instanceof RangeError) {
-                this.terminate(true, error.message.replaceAll("WebSocket", "websocket").replaceAll(":", " -"));
+                this.terminate(error.message.replaceAll("WebSocket", "websocket").replaceAll(":", " -"));
             }
         });
         this._ws.on("message", (message) => this._onMessage(message));
-        this._ws.on("ping", () => this.terminate(true, "Malicious ping frame received"));
-        this._ws.on("pong", () => this.terminate(true, "Malicious pong frame received"));
+        this._ws.on("ping", () => this.terminate("Malicious ping frame received"));
+        this._ws.on("pong", () => this.terminate("Malicious pong frame received"));
     }
 
     public getWebSocket() {
@@ -68,17 +81,40 @@ export class Socket {
         }
     }
 
-    public disconnect(): void {
+    public disconnect() {
         this._ws.close();
         return this._removed;
     }
 
-    public terminate(ban: boolean, reason?: string): void {
-        if (ban && this._ws && this._ws._socket) {
-            this._ws._socket.ban = reason;
-        }
-        this._ws.terminate();
-        return this._removed;
+    public async publish(path, update) {
+        const payload = {
+            type: "pub",
+            path,
+            payload: update,
+        };
+
+        return await this._send(payload);
+    }
+
+    public async send(payload) {
+        const response = {
+            type: "update",
+            payload,
+        };
+
+        return await this._send(response);
+    }
+
+    public async revoke(path, update, options = {}) {
+        await this._unsubscribe(path);
+
+        const message = {
+            type: "revoke",
+            path,
+            payload: update !== null ? update : undefined,
+        };
+
+        return await this._send(message);
     }
 
     public isOpen(): boolean {
@@ -91,15 +127,26 @@ export class Socket {
     }
 
     // public because used in listener ; from original code
-    public _send(message: { id?: number; type: string }, options?: { replace?: string }): Promise<unknown> {
+    public async _send(
+        message: { id?: number; payload?: any; type: string },
+        options?: { replace?: string },
+    ): Promise<unknown> {
         options = options || {};
 
         if (!this.isOpen()) {
             // Open
             return Promise.reject(Boom.internal("Socket not open"));
         }
+        if (
+            this._listener._settings.extendedTypes &&
+            typeof message.payload === "object" &&
+            !(message.payload instanceof Buffer)
+        ) {
+            message.payload = await serialise(message.payload);
+        }
 
         let string;
+
         try {
             string = stringifyNesMessage(message);
             if (options.replace) {
@@ -108,10 +155,10 @@ export class Socket {
                 });
             }
         } catch (err) {
-            this.server.log(["nes", "serialization", "error"], message.type);
+            this.server.log(["nes", "serialisation", "error"], message.type);
 
             if (message.id) {
-                return this._error(Boom.internal("Failed serialising message"), message);
+                return await this._error(Boom.internal("Failed serialising message"), message);
             }
 
             return Promise.reject(err);
@@ -183,36 +230,107 @@ export class Socket {
         setImmediate(() => this._flush());
     }
 
-    private _error(err, request?) {
-        if (err.output?.statusCode === protocol.gracefulErrorStatusCode) {
-            err = Boom.boomify(err);
+    private _terminate(reason?: string): void {
+        if (reason && this._ws && this._ws._socket) {
+            this._ws._socket.ban = reason;
+        }
+        this._ws.terminate();
+        return this._removed;
+    }
 
-            const message = Hoek.clone(err.output);
-            delete message.payload.statusCode;
-            message.headers = this._filterHeaders(message.headers);
+    private async terminate(message) {
+        const { banSeconds } = this._listener._settings;
+
+        if (banSeconds > 0) {
+            this._listener._bans.set(this.info.remoteAddress, Date.now() + banSeconds * 1000);
+        }
+
+        if (this._listener._settings.sendErrors) {
+            if (typeof message === "string") {
+                message = Hoek.clone(Boom.boomify(new Error(message)).output);
+            }
+            if (message.payload && message.payload.message) {
+                message.payload.message = `${message.statusCode} ${message.payload.message}`;
+                if (banSeconds > 0) {
+                    message.payload.message += `\nConnection will be blocked for ${banSeconds} second${
+                        banSeconds !== 1 ? "s" : ""
+                    }`;
+                }
+            }
 
             message.payload = Buffer.from(JSON.stringify(message.payload));
+
+            await this._send(message);
+            this.disconnect();
+            setTimeout(() => {
+                this._terminate();
+            }, 100);
+        } else {
+            this._terminate(message);
+        }
+
+        return this._removed;
+    }
+
+    private async _error(err, request?) {
+        if (
+            err.output?.statusCode === protocol.gracefulErrorStatusCode ||
+            (err.output?.statusCode && this._listener._settings.sendErrors)
+        ) {
+            err = Boom.boomify(err);
+            const message = Hoek.clone(err.output);
+            delete message.payload.statusCode;
+            if (err.output?.statusCode !== protocol.gracefulErrorStatusCode) {
+                if (
+                    message.payload.message &&
+                    message.payload.message.startsWith("{") &&
+                    message.payload.message.endsWith("}")
+                ) {
+                    const parsed = JSON.parse(message.payload.message);
+                    if (parsed.message) {
+                        if (parsed.error !== parsed.message) {
+                            message.payload.message = `${parsed.error} (${parsed.message})`;
+                        } else {
+                            message.payload.message = parsed.error;
+                        }
+                    }
+                }
+            }
+
+            message.headers = this._filterHeaders(message.headers);
+
             if (request) {
                 message.type = request.type;
                 message.id = request.id;
             }
 
-            return this._send(message);
+            if (err.output?.statusCode === protocol.gracefulErrorStatusCode) {
+                message.payload = Buffer.from(JSON.stringify(message.payload));
+                return await this._send(message);
+            } else {
+                return this.terminate(message);
+            }
         } else {
-            this.terminate(true, err.output.payload.message);
-            return Promise.resolve();
+            return this.terminate(err.output.payload.message);
         }
     }
 
     private async _onMessage(message) {
+        if (
+            this._listener._bans.has(this.info.remoteAddress) &&
+            this._listener._bans.get(this.info.remoteAddress) > Date.now()
+        ) {
+            return this._terminate();
+        }
+
         let request;
         try {
             if (!(message instanceof Buffer)) {
-                return this.terminate(true, "Invalid message received");
+                return this.terminate("Invalid message received");
             }
-            request = parseNesMessage(message);
+            request = parseNesMessage(message, this._listener._settings.extendedTypes);
         } catch (err) {
-            return this.terminate(true, "Invaild payload received");
+            return this.terminate("Invalid payload received");
         }
 
         this._pinged = true;
@@ -236,7 +354,7 @@ export class Socket {
             }
         } catch (err) {
             Bounce.rethrow(err, "system");
-            this.terminate(false);
+            this._terminate();
         }
 
         --this._processingCount;
@@ -255,7 +373,6 @@ export class Socket {
 
         if (request.type === "ping") {
             if (this._lastPinged && Date.now() < this._lastPinged + 1000) {
-                this._lastPinged = Date.now();
                 throw Boom.badRequest("Exceeded ping limit");
             }
             this._lastPinged = Date.now();
@@ -270,11 +387,35 @@ export class Socket {
             throw Boom.badRequest("Connection is not initialised");
         }
 
+        this._requests.push(Date.now());
+        this._requests = this._requests.filter((request) => Date.now() < request + 1000);
+
         // Endpoint request
 
         if (request.type === "request") {
-            request.method = "POST";
+            if (!request.method) {
+                request.method = "post";
+            } else if (
+                (request.method === "get" && this._listener._settings.disableGet) ||
+                (request.method === "post" && this._listener._settings.disablePost)
+            ) {
+                throw Boom.methodNotAllowed();
+            }
             return this._processRequest(request);
+        }
+
+        if (this._requests.length > 10) {
+            throw Boom.badRequest("Exceeded socket rate limit");
+        }
+
+        // Subscriptions
+
+        if (request.type === "sub") {
+            return this._processSubscription(request);
+        }
+
+        if (request.type === "unsub") {
+            return this._processUnsub(request);
         }
 
         // Unknown
@@ -303,6 +444,29 @@ export class Socket {
             await this._listener._settings.onConnection(this);
         }
 
+        if (request.payload && request.payload.length > 0) {
+            try {
+                if (request.payload.length > 102400) {
+                    throw new Error();
+                }
+
+                const subs = JSON.parse(request.payload);
+
+                if (!Array.isArray(subs) || subs.length > 1000) {
+                    throw new Error();
+                }
+
+                for (const sub of subs) {
+                    if (typeof sub !== "string") {
+                        throw new Error();
+                    }
+                    await this._listener._subscribe(sub, this);
+                }
+            } catch {
+                throw Boom.badRequest("Invalid subscription payload");
+            }
+        }
+
         const response = {
             type: "hello",
             id: request.id,
@@ -328,6 +492,8 @@ export class Socket {
             throw Boom.badRequest("Cannot include an Authorization header");
         }
 
+        path = this._listener._settings.basePath ? this._listener._settings.basePath + path : path.slice(1);
+
         if (path[0] !== "/") {
             // Route id
             const route = this.server.lookup(path);
@@ -343,11 +509,29 @@ export class Socket {
             }
         }
 
+        const headers = { "content-type": "application/octet-stream" };
+        let payload = request.payload;
+
+        if (this._listener._settings.extendedTypes) {
+            headers["content-type"] = "application/json";
+            if (method === "post") {
+                if (payload) {
+                    try {
+                        payload = JSON.parse(payload);
+                    } catch {
+                        throw Boom.badRequest("Invalid or missing payload");
+                    }
+                }
+            } else {
+                payload = undefined;
+            }
+        }
+
         const shot = {
             method,
             url: path,
-            payload: request.payload,
-            headers: { ...request.headers, "content-type": "application/octet-stream" },
+            payload,
+            headers,
             auth: null,
             validate: false,
             plugins: {
@@ -361,11 +545,14 @@ export class Socket {
 
         const res = await this.server.inject(shot);
         if (res.statusCode >= 400) {
-            throw Boom.boomify(new Error(res.result), { statusCode: res.statusCode });
+            throw Boom.boomify(new Error(typeof res.result === "object" ? JSON.stringify(res.result) : res.result), {
+                statusCode: res.statusCode,
+            });
         }
 
         const response = {
             type: "request",
+            method,
             id: request.id,
             statusCode: res.statusCode,
             payload: res.result,
@@ -373,6 +560,58 @@ export class Socket {
         };
 
         return { response, options: {} };
+    }
+
+    private _pathToPaths(path) {
+        return path
+            .split("/")
+            .slice(1)
+            .map((element) => (element.includes(",") ? element.split(",") : element))
+            .reduce(
+                (prev, curr) =>
+                    Array.isArray(curr)
+                        ? prev.flatMap((a) => curr.map((b) => a + "/" + b))
+                        : prev.map((a) => a + "/" + curr),
+                [""],
+            );
+    }
+    private async _processSubscription(request) {
+        const paths = this._pathToPaths(request.path);
+
+        for (const path of paths) {
+            await this._listener._subscribe(path, this);
+        }
+
+        const response = {
+            type: "sub",
+            id: request.id,
+            path: request.path,
+        };
+
+        return { response };
+    }
+
+    private async _processUnsub(request) {
+        const paths = this._pathToPaths(request.path);
+
+        for (const path of paths) {
+            await this._unsubscribe(path);
+        }
+
+        const response = {
+            type: "unsub",
+            id: request.id,
+        };
+
+        return { response };
+    }
+
+    private _unsubscribe(path) {
+        const sub = this._subscriptions[path];
+        if (sub) {
+            delete this._subscriptions[path];
+            return sub.remove(this, path);
+        }
     }
 
     private _filterHeaders(headers) {

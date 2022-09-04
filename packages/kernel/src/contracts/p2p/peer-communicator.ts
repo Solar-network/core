@@ -32,7 +32,7 @@ export interface PeerCommunicator {
         }: { fromBlockHeight: number; blockLimit?: number; headersOnly?: boolean },
     ): Promise<Interfaces.IBlockData[]>;
 
-    getUnconfirmedTransactions(peer: Peer): Promise<Buffer[]>;
+    getUnconfirmedTransactions(peer: Peer, exclude: string[]): Promise<Buffer[]>;
 
     wouldThrottleOnDownload(peer: Peer): Promise<boolean>;
 

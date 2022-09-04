@@ -47,6 +47,33 @@
                 }
             }
         },
+        "/blockchain/search/{id}": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Search the blockchain",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Full or partial wallet address, block ID, delegate name, public key or transaction ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
         "/node/configuration": {
             "get": {
                 "tags": [
@@ -264,6 +291,14 @@
                         "description": "Public key of the delegate that forged the block(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/publicKey"
+                        }
+                    },
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "Username of the delegate that forged the block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/username"
                         }
                     },
                     {
@@ -499,6 +534,8 @@
                                 "totalAmount:desc",
                                 "totalFee:asc",
                                 "totalFee:desc",
+                                "username:asc",
+                                "username:desc",
                                 "version:asc",
                                 "version:desc"
                             ]
@@ -541,6 +578,112 @@
                     },
                     "422": {
                         "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/blocks/missed": {
+            "get": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Find missed blocks in the last X days",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/page"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "schema": {
+                            "$ref": "#/components/schemas/limit"
+                        }
+                    },
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "Username of the delegate that missed the block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/username"
+                        }
+                    },
+                    {
+                        "name": "height",
+                        "in": "query",
+                        "description": "Exact height of the missed block to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "height.from",
+                        "in": "query",
+                        "description": "Earliest height of the missed block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "height.to",
+                        "in": "query",
+                        "description": "Latest height of the missed block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "Exact time, in seconds since the epoch, of the missed block to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "timestamp.from",
+                        "in": "query",
+                        "description": "Earliest time, in seconds since the epoch, of the missed block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "timestamp.to",
+                        "in": "query",
+                        "description": "Latest time, in seconds since the epoch, of the missed block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Delegate not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/blocks/first": {
+            "get": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Get the first block in the blockchain",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
                     }
                 }
             }
@@ -727,25 +870,25 @@
                         }
                     },
                     {
-                        "name": "forged.devFunds",
+                        "name": "forged.donations",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all development funds raised by the delegate(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all donations by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.devFunds.from",
+                        "name": "forged.donations.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all development funds raised by the delegate(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all donations by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.devFunds.to",
+                        "name": "forged.donations.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all all development funds raised by the delegate(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all donations by the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -852,6 +995,30 @@
                         }
                     },
                     {
+                        "name": "blocks.missed",
+                        "in": "query",
+                        "description": "Exact number of blocks missed by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "blocks.missed.from",
+                        "in": "query",
+                        "description": "Minimum number of blocks missed by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "blocks.missed.to",
+                        "in": "query",
+                        "description": "Maximum number of blocks missed by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
                         "name": "blocks.produced",
                         "in": "query",
                         "description": "Exact number of blocks produced by the delegate(s) to be returned",
@@ -871,6 +1038,30 @@
                         "name": "blocks.produced.to",
                         "in": "query",
                         "description": "Maximum number of blocks produced by the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "blocks.productivity",
+                        "in": "query",
+                        "description": "Exact productivity rate of the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "blocks.productivity.from",
+                        "in": "query",
+                        "description": "Lowest productivity rate of the delegate(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "blocks.productivity.to",
+                        "in": "query",
+                        "description": "Highest productivity rate of the delegate(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -932,12 +1123,16 @@
                             "enum": [
                                 "address:asc",
                                 "address:desc",
+                                "blocks.missed:asc",
+                                "blocks.missed:desc",
                                 "blocks.produced:asc",
                                 "blocks.produced:desc",
+                                "blocks.productivity:asc",
+                                "blocks.productivity:desc",
                                 "forged.burnedFees:asc",
                                 "forged.burnedFees:desc",
-                                "forged.devFunds:asc",
-                                "forged.devFunds:desc",
+                                "forged.donations:asc",
+                                "forged.donations:desc",
                                 "forged.fees:asc",
                                 "forged.fees:desc",
                                 "forged.rewards:asc",
@@ -1032,6 +1227,100 @@
                         "description": "The number of results per page",
                         "schema": {
                             "$ref": "#/components/schemas/limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Delegate not found"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/delegates/{identifier}/blocks/missed": {
+            "get": {
+                "tags": [
+                    "Delegates"
+                ],
+                "summary": "Find missed blocks in the last X days by a specific delegate",
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Identifier for delegate (address, public key, username)",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/walletIdentifier"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/page"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "schema": {
+                            "$ref": "#/components/schemas/limit"
+                        }
+                    },
+                    {
+                        "name": "height",
+                        "in": "query",
+                        "description": "Exact height of the missed block to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "height.from",
+                        "in": "query",
+                        "description": "Earliest height of the missed block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "height.to",
+                        "in": "query",
+                        "description": "Latest height of the missed block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "timestamp",
+                        "in": "query",
+                        "description": "Exact time, in seconds since the epoch, of the missed block to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "timestamp.from",
+                        "in": "query",
+                        "description": "Earliest time, in seconds since the epoch, of the missed block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "timestamp.to",
+                        "in": "query",
+                        "description": "Latest time, in seconds since the epoch, of the missed block(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
                         }
                     }
                 ],
@@ -1373,6 +1662,8 @@
                             "enum": [
                                 "amount:asc",
                                 "amount:desc",
+                                "blockHeight:asc",
+                                "blockHeight:desc",
                                 "blockId:asc",
                                 "blockId:desc",
                                 "burnedFee:asc",
@@ -1503,6 +1794,30 @@
                         "description": "The version of the transaction(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/transactionVersions"
+                        }
+                    },
+                    {
+                        "name": "blockHeight",
+                        "in": "query",
+                        "description": "The exact block height containing the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "blockHeight.from",
+                        "in": "query",
+                        "description": "The earliest block height containing the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "blockHeight.to",
+                        "in": "query",
+                        "description": "The latest block height containing the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
                         }
                     },
                     {
@@ -1675,6 +1990,8 @@
                             "enum": [
                                 "amount:asc",
                                 "amount:desc",
+                                "blockHeight:asc",
+                                "blockHeight:desc",
                                 "blockId:asc",
                                 "blockId:desc",
                                 "burnedFee:asc",
@@ -1686,7 +2003,7 @@
                                 "nonce:asc",
                                 "nonce:desc",
                                 "recipientId:asc",
-                                "recpientId:desc",
+                                "recipientId:desc",
                                 "senderId:asc",
                                 "senderId:desc",
                                 "senderPublicKey:asc",
@@ -1898,6 +2215,30 @@
                         }
                     },
                     {
+                        "name": "blockHeight",
+                        "in": "query",
+                        "description": "The exact block height containing the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "blockHeight.from",
+                        "in": "query",
+                        "description": "The earliest block height containing the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "blockHeight.to",
+                        "in": "query",
+                        "description": "The latest block height containing the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
                         "name": "blockId",
                         "in": "query",
                         "description": "The block ID containing the vote transaction(s) to be returned",
@@ -2024,6 +2365,8 @@
                         "schema": {
                             "type": "string",
                             "enum": [
+                                "blockHeight:asc",
+                                "blockHeight:desc",
                                 "blockId:asc",
                                 "blockId:desc",
                                 "burnedFee:asc",

@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readJsonSync, removeSync, statSync } from "fs-extra";
 import glob from "glob";
 import { white } from "kleur";
-import { join } from "path";
+import { join, resolve } from "path";
 
 import { Spinner } from "../components";
 import * as Contracts from "../contracts";
@@ -161,19 +161,45 @@ export class PluginManager implements Contracts.PluginManager {
     }
 
     public async remove(token: string, network: string, pkg: string): Promise<void> {
-        const directory: string = join(this.getPluginsPath(token, network), pkg);
-
+        const pluginsDirectory: string = resolve(this.getPluginsPath(token, network));
+        let directory: string = resolve(join(this.getPluginsPath(token, network), pkg));
         if (!existsSync(directory)) {
             throw new Error(`The package [${pkg}] does not exist`);
         }
 
         const spinner = new Spinner().render(`Removing ${pkg}...`);
         spinner.start();
-        try {
-            removeSync(directory);
-        } catch (error) {
-            spinner.fail();
-            throw error;
+
+        if (existsSync(`${directory}/.git`)) {
+            const pluginDirectory = resolve(`${__dirname}/../../../../plugins/`);
+            try {
+                removeSync(join(pluginDirectory, pkg.replaceAll("/", "-")));
+            } catch (error) {
+                spinner.fail();
+                throw error;
+            }
+        }
+
+        let onlyIfEmpty: boolean = false;
+
+        while (pluginsDirectory !== directory) {
+            const isEmpty: boolean = !existsSync(directory) || readdirSync(directory).length === 0;
+
+            if (!onlyIfEmpty || isEmpty) {
+                try {
+                    removeSync(directory);
+                } catch (error) {
+                    spinner.fail();
+                    throw error;
+                }
+            }
+
+            if (onlyIfEmpty && !isEmpty) {
+                break;
+            } else {
+                onlyIfEmpty = true;
+                directory = resolve(`${directory}/../`);
+            }
         }
         spinner.succeed();
     }

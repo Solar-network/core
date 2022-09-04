@@ -1,6 +1,13 @@
 import { Interfaces, Utils } from "@solar-network/crypto";
 
-// todo: review all interfaces in here and document them properly. Remove ones that are no longer needed.
+export interface WalletBasic {
+    address: string;
+    publicKey: string | undefined;
+    balance: Utils.BigNumber;
+    nonce: Utils.BigNumber;
+    attributes: Record<string, any>;
+    votingFor: Record<string, WalletVoteDistribution>;
+}
 
 export interface WalletIndex {
     readonly indexer: WalletIndexer;
@@ -42,7 +49,13 @@ export interface WalletData {
 }
 
 export interface Wallet {
+    countAttributes(): number;
+
     getAddress(): string;
+
+    hasPublicKey(): boolean;
+
+    forgetPublicKey(): void;
 
     getPublicKey(): string | undefined;
 
@@ -117,65 +130,6 @@ export interface Wallet {
     hasVoted(): boolean;
 
     /**
-     * @returns {Record<string, any[]>}
-     * @memberof Wallet
-     */
-    getAllStateHistory(): Record<string, any[]>;
-
-    /**
-     * @param {string} key
-     * @returns {any}
-     * @memberof Wallet
-     */
-    getCurrentStateHistory(key: string): any;
-
-    /**
-     * @param {string} key
-     * @returns {any}
-     * @memberof Wallet
-     */
-    getPreviousStateHistory(key: string): any;
-
-    /**
-     * @param {string} key
-     * @returns {any}
-     * @memberof Wallet
-     */
-    getStateHistory(key: string): any;
-
-    /**
-     * @param {Record<string, any[]>} stateHistory
-     * @memberof Wallet
-     */
-    setAllStateHistory(stateHistory: Record<string, any[]>): void;
-
-    /**
-     * @param {string} key
-     * @memberof Wallet
-     */
-    initialiseStateHistory(key: string): void;
-
-    /**
-     * @param {string} key
-     * @memberof Wallet
-     */
-    forgetStateHistory(key: string): void;
-
-    /**
-     * @param {string} key
-     * @param {any} value
-     * @param {Interfaces.ITransactionData | undefined} transaction
-     * @memberof Wallet
-     */
-    addStateHistory(key: string, value?: any, transaction?: Interfaces.ITransactionData | undefined): void;
-
-    /**
-     * @param {string} key
-     * @memberof Wallet
-     */
-    removeCurrentStateHistory(key: string): void;
-
-    /**
      * @param {string} delegate
      * @returns {Utils.BigNumber}
      * @memberof Wallet
@@ -199,13 +153,6 @@ export interface Wallet {
      * @memberof Wallet
      */
     getVoteDistribution(): Record<string, WalletVoteDistribution>;
-
-    /**
-     * @param {object} value
-     * @param {Interfaces.ITransactionData} transaction
-     * @memberof Wallet
-     */
-    changeVotes(value: object, transaction: Interfaces.ITransactionData): void;
 
     updateVoteBalances(): void;
 
@@ -231,6 +178,8 @@ export interface Wallet {
         balances: { [delegate: string]: Utils.BigNumber },
         delegates?: Record<string, number>,
     ): Record<string, any>;
+
+    getBasicWallet();
 }
 
 export type WalletFactory = (address: string) => Wallet;
@@ -242,7 +191,7 @@ export interface WalletDelegateAttributes {
     forgedFees: Utils.BigNumber;
     burnedFees: Utils.BigNumber;
     forgedRewards: Utils.BigNumber;
-    devFunds: Utils.BigNumber;
+    donations: Utils.BigNumber;
     producedBlocks: number;
     rank?: number;
     lastBlock?: string;
@@ -326,6 +275,7 @@ export interface SearchContext<T = any> {
 
 export interface UnwrappedHtlcLock {
     lockId: string;
+    senderId: string;
     senderPublicKey: string;
     amount: Utils.BigNumber;
     recipientId: string;

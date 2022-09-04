@@ -21,15 +21,17 @@ export class MessagePackCodec implements Codec {
 
     public encodeBlock(block: {
         Block_burned_fee: Utils.BigNumber;
-        Block_dev_fund: Utils.BigNumber;
+        Block_donations: Utils.BigNumber;
         Block_id: string;
+        Block_username: string;
+        Block_version: number;
     }): Buffer {
         try {
             const blockCamelised = cameliseKeys(MessagePackCodec.removePrefix(block, "Block_"));
-
             return encode([
                 block.Block_burned_fee,
-                block.Block_dev_fund,
+                block.Block_donations,
+                block.Block_version === 0 ? block.Block_username : undefined,
                 Blocks.Serialiser.serialise(blockCamelised, true),
             ]);
         } catch (err) {
@@ -39,16 +41,43 @@ export class MessagePackCodec implements Codec {
 
     public decodeBlock(buffer: Buffer): Models.Block {
         try {
-            const [burnedFee, devFund, serialised] = decode(buffer);
+            const [burnedFee, donations, username, serialised] = decode(buffer);
             const data = Blocks.Deserialiser.deserialise(serialised, false).data as Models.Block;
             data.burnedFee = burnedFee;
-            data.devFund = devFund;
+            data.donations = donations;
+            if (username) {
+                data.username = username;
+            }
             return data;
         } catch (err) {
             throw new CodecException.BlockDecodeException(undefined, err.message);
         }
     }
 
+    public encodeMissedBlock(missedBlock: {
+        MissedBlock_timestamp: number;
+        MissedBlock_height: number;
+        MissedBlock_username: string;
+    }): Buffer {
+        try {
+            return encode([
+                missedBlock.MissedBlock_timestamp,
+                missedBlock.MissedBlock_height,
+                missedBlock.MissedBlock_username,
+            ]);
+        } catch (err) {
+            throw new CodecException.MissedBlockEncodeException(missedBlock.MissedBlock_timestamp, err.message);
+        }
+    }
+
+    public decodeMissedBlock(buffer: Buffer): Models.MissedBlock {
+        try {
+            const [timestamp, height, username] = decode(buffer);
+            return { timestamp, height, username };
+        } catch (err) {
+            throw new CodecException.MissedBlockDecodeException(undefined, err.message);
+        }
+    }
     public encodeTransaction(transaction: {
         Transaction_id: string;
         Transaction_block_id: string;
@@ -91,6 +120,7 @@ export class MessagePackCodec implements Codec {
                 blockHeight: blockHeight,
                 sequence: sequence,
                 timestamp: timestamp,
+                senderId: transaction.data.senderId!,
                 senderPublicKey: transaction.data.senderPublicKey!,
                 recipientId: transaction.data.recipientId!,
                 type: transaction.data.type,

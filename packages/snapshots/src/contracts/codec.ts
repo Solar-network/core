@@ -4,6 +4,9 @@ export interface Codec {
     encodeBlock(block: any): Buffer;
     decodeBlock(buffer: Buffer): Models.Block;
 
+    encodeMissedBlock(missedBlock: any): Buffer;
+    decodeMissedBlock(buffer: Buffer): Models.MissedBlock;
+
     encodeTransaction(transaction: any): Buffer;
     decodeTransaction(buffer: Buffer): Models.Transaction;
 

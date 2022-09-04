@@ -40,6 +40,9 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Contracts.Kernel.Application;
 
+    @Container.inject(Container.Identifiers.BlockchainService)
+    private readonly blockchain!: Contracts.Blockchain.Blockchain;
+
     @Container.inject(Container.Identifiers.DposState)
     @Container.tagged("state", "blockchain")
     private readonly dposState!: Contracts.State.DposState;
@@ -174,7 +177,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
                 .find((block) => block.data.height === blockHeader.height);
 
             // Use shortcut to prevent expensive crypto if the block header equals our own.
-            if (ownBlock && JSON.stringify(ownBlock.getHeader()) === JSON.stringify(blockHeader)) {
+            if (ownBlock && JSON.stringify(ownBlock.getHeader(false)) === JSON.stringify(blockHeader)) {
                 return true;
             }
 
@@ -466,12 +469,11 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             delegates = this.dposState.getRoundDelegates().slice();
         }
 
-        const delegatesByPublicKey: Record<string, Contracts.State.Wallet> = {};
+        const delegatesByUsername: Record<string, Contracts.State.Wallet> = {};
         for (const delegate of delegates) {
-            Utils.assert.defined<string>(delegate.getPublicKey());
-            delegatesByPublicKey[delegate.getPublicKey()!] = delegate;
+            delegatesByUsername[delegate.getAttribute("delegate.username")] = delegate;
         }
-        return delegatesByPublicKey;
+        return delegatesByUsername;
     }
 
     /**
@@ -535,23 +537,26 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      * Verify a given block from the peer's chain - must be signed by one of the provided delegates.
      * @param {Interfaces.IBlockData} blockData the block to verify
      * @param {Number} expectedHeight the given block must be at this height
-     * @param {Object} delegatesByPublicKey a map of { publicKey: delegate, ... }, one of these
+     * @param {Object} delegatesByUsername a map of { username: delegate, ... }, one of these
      * delegates must have signed the block
      * @return {Boolean} true if the block is legit (signed by the appropriate delegate)
      */
     private verifyPeerBlock(
         blockData: Interfaces.IBlockData,
         expectedHeight: number,
-        delegatesByPublicKey: Record<string, Contracts.State.Wallet>,
+        delegatesByUsername: Record<string, Contracts.State.Wallet>,
     ): boolean {
         const block: Interfaces.IBlock | undefined = Blocks.BlockFactory.fromData(blockData);
 
         Utils.assert.defined<Interfaces.IBlock>(block);
 
+        this.blockchain.setBlockUsername(block.data);
+        Utils.assert.defined<Interfaces.IBlock>(block.data.username);
+
         if (!block.verifySignature()) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `failure: peer's block at height ${expectedHeight.toLocaleString()} does not pass crypto-validation`,
+                `failure: peer's block at height ${expectedHeight.toLocaleString()} does not pass crypto validation`,
             );
             return false;
         }
@@ -566,11 +571,10 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             return false;
         }
 
-        if (delegatesByPublicKey[block.data.generatorPublicKey]) {
+        if (delegatesByUsername[block.data.username]) {
             this.log(
                 Severity.DEBUG_EXTRA,
-                `successfully verified block at height ${height.toLocaleString()}, signed by ` +
-                    block.data.generatorPublicKey,
+                `successfully verified block at height ${height.toLocaleString()}, signed by ` + block.data.username,
                 true,
             );
 
@@ -581,7 +585,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             Severity.DEBUG_EXTRA,
             `failure: block ${this.anyToString(blockData)} is not signed by any of the delegates ` +
                 `for the corresponding round: ` +
-                this.anyToString(Object.values(delegatesByPublicKey)),
+                this.anyToString(Object.values(delegatesByUsername)),
         );
 
         return false;
@@ -594,7 +598,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      * @throws {Error} if deadline passed
      */
     private throwIfPastDeadline(deadline: number): number {
-        const now = new Date().getTime();
+        const now = Date.now();
 
         if (deadline <= now) {
             // Throw an exception so that it can cancel everything and break out of peer.ping().

@@ -1,3 +1,4 @@
+import { DatabaseService } from "@solar-network/database";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { Action } from "../contracts";
@@ -10,6 +11,9 @@ export class StartForkRecovery implements Action {
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
+    @Container.inject(Container.Identifiers.DatabaseService)
+    private readonly database!: DatabaseService;
+
     @Container.inject(Container.Identifiers.RoundState)
     private readonly roundState!: Contracts.State.RoundState;
 
@@ -20,24 +24,39 @@ export class StartForkRecovery implements Action {
     private readonly networkMonitor!: Contracts.P2P.NetworkMonitor;
 
     public async handle(): Promise<void> {
-        this.logger.info("Starting fork recovery :fork_and_knife:");
-
-        this.blockchain.clearAndStopQueue();
+        if (this.blockchain.isForking()) {
+            return;
+        }
 
         const random: number = 4 + Math.floor(Math.random() * 99); // random int inside [4, 102] range
         const blocksToRemove: number = this.stateStore.getNumberOfBlocksToRollback() || random;
 
-        await this.blockchain.removeBlocks(blocksToRemove);
+        if (blocksToRemove > 0) {
+            const queue: Contracts.Kernel.Queue = this.blockchain.getQueue();
 
-        this.stateStore.setNumberOfBlocksToRollback(0);
+            this.blockchain.setForkingState(true);
+            this.logger.info("Starting fork recovery :fork_and_knife:");
 
-        this.logger.info(`Removed ${AppUtils.pluralise("block", blocksToRemove, true)} :wastebasket:`);
+            await queue.stop();
 
-        await this.roundState.restore();
+            await this.blockchain.removeBlocks(blocksToRemove);
 
-        await this.networkMonitor.refreshPeersAfterFork();
+            await queue.clear();
+            const lastStoredBlock = await this.database.getLastBlock();
+            this.stateStore.setLastDownloadedBlock(lastStoredBlock.data);
+
+            this.stateStore.setNumberOfBlocksToRollback(0);
+            this.logger.info(`Removed ${AppUtils.pluralise("block", blocksToRemove, true)} :wastebasket:`);
+
+            await this.roundState.restore();
+
+            this.blockchain.setForkingState(false);
+
+            await queue.resume();
+
+            await this.networkMonitor.refreshPeersAfterFork();
+        }
 
         this.blockchain.dispatch("SUCCESS");
-        await this.blockchain.getQueue().resume();
     }
 }

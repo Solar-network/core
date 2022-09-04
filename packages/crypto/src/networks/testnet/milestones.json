@@ -7,6 +7,7 @@
             "maxTransactions": 150,
             "maxPayload": 2097152
         },
+        "blocksToRevokeDelegateResignation": 106,
         "blockTime": 8,
         "burn": {
             "feePercent": 90,
@@ -52,7 +53,7 @@
         "legacyTransfer": true,
         "legacyVote": true,
         "p2p": {
-            "minimumVersions": [">=4.0.2-next.0"]
+            "minimumVersions": [">=4.1.0-next.0"]
         },
         "transfer": {
             "maximum": 256,
@@ -134,16 +135,31 @@
     },
     {
         "height": 671352,
-        "devFund": {
-            "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": 5
+        "donations": {
+            "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": {
+                "percent": 5,
+                "purpose": "development"
+            }
         }
     },
     {
         "height": 918650,
         "acceptLegacySchnorrTransactions": false,
-        "blocksToRevokeDelegateResignation": 106,
-        "delegateResignationTypeAsset": true,
         "legacyTransfer": false,
         "legacyVote": false
+    },
+    {
+        "height": 1260712,
+        "canVoteForResignedDelegates": true,
+        "donations": {
+            "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": {
+                "percent": 5,
+                "purpose": "development"
+            },
+            "D646b6dx3sW5NAgMDTKAZ2hdC57K1BeRaK": {
+                "percent": 5,
+                "purpose": "voting"
+            }
+        }
     }
 ]

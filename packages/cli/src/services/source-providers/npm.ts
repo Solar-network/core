@@ -11,7 +11,7 @@ import { InvalidChannel } from "./errors";
 /**
  * @export
  * @class NPM
- * @implements {Source}
+ * @implements {AbstractSource}
  */
 export class NPM extends AbstractSource {
     public constructor(paths: { data: string; temp: string }) {
@@ -48,6 +48,8 @@ export class NPM extends AbstractSource {
             await this.install(value, latestVersion);
         }
     }
+
+    protected async build(packageName: string): Promise<void> {}
 
     protected async preparePackage(value: string, version?: string): Promise<void> {
         const { name, tarball }: { name: string; tarball: string } = await this.getPackage(value, version);

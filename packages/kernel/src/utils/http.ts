@@ -1,12 +1,15 @@
-import { ClientRequest, globalAgent, IncomingMessage } from "http";
-import { request, RequestOptions } from "https";
+import { ClientRequest, IncomingMessage, request as httpRequest } from "http";
+import { request as httpsRequest, RequestOptions } from "https";
 import { Primitive } from "type-fest";
 import { parse } from "url";
 
 import { isObject } from "./is-object";
 import { isUndefined } from "./is-undefined";
 
-export type HttpOptions = RequestOptions & { body?: Record<string, Primitive> };
+export type HttpOptions = RequestOptions & {
+    body?: Record<string, Primitive>;
+    rejectOnError?: boolean;
+};
 
 export type HttpResponse = {
     method: string | undefined;
@@ -55,12 +58,18 @@ const sendRequest = (method: string, url: string, opts?: HttpOptions): Promise<H
         opts = { ...opts, ...parse(url) };
         opts.method = method.toLowerCase();
 
-        if (opts.protocol === "http:") {
-            opts.agent = globalAgent;
+        let request = httpRequest;
+
+        if (opts.protocol === "https:") {
+            request = httpsRequest;
         }
 
         if (isUndefined(opts.timeout)) {
             opts.timeout = 1500;
+        }
+
+        if (isUndefined(opts.rejectOnError)) {
+            opts.rejectOnError = true;
         }
 
         const req: ClientRequest = request(opts, (r: IncomingMessage): void => {
@@ -93,7 +102,7 @@ const sendRequest = (method: string, url: string, opts?: HttpOptions): Promise<H
                 response.statusMessage = r.statusMessage;
                 response.data = accumulator;
 
-                if (r.statusCode && r.statusCode >= 400) {
+                if (opts!.rejectOnError && r.statusCode && r.statusCode >= 400) {
                     return rej(new HttpError(response));
                 }
 

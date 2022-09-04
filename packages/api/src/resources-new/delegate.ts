@@ -22,13 +22,15 @@ export type DelegateResource = {
     resignationType: string | undefined;
     blocks: {
         produced: number;
+        missed: number | undefined;
+        productivity: number | undefined;
         last: string | undefined;
     };
     forged: {
         fees: Utils.BigNumber;
         burnedFees: Utils.BigNumber;
         rewards: Utils.BigNumber;
-        devFunds: Utils.BigNumber;
+        donations: Utils.BigNumber;
         total: Utils.BigNumber;
     };
     version?: AppUtils.Semver;
@@ -48,6 +50,8 @@ export const delegateCriteriaSchemaObject = {
     resignationType: Joi.string().valid("permanent", "temporary"),
     blocks: {
         produced: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
+        missed: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
+        productivity: Schemas.createRangeCriteriaSchema(Joi.number().min(0)),
         last: {
             id: blockCriteriaSchemaObject.id,
             height: blockCriteriaSchemaObject.height,
@@ -62,7 +66,7 @@ export const delegateCriteriaSchemaObject = {
         burnedFees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         fees: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         rewards: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
-        devFunds: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
+        donations: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
         total: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
     },
     version: Schemas.createRangeCriteriaSchema(Schemas.semver),

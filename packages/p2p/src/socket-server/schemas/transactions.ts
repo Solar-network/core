@@ -19,4 +19,8 @@ export const transactionsSchemas = {
                 ),
             headers,
         }),
+    getUnconfirmedTransactions: Joi.object({
+        exclude: Joi.array().items(Joi.string().hex().length(64)),
+        headers,
+    }),
 };

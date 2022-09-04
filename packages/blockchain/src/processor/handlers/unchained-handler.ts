@@ -48,7 +48,7 @@ export class UnchainedHandler implements BlockHandler {
                     roundInfo,
                 })) as Contracts.State.Wallet[];
 
-                if (delegates.some((delegate) => delegate.getPublicKey() === block.data.generatorPublicKey)) {
+                if (delegates.some((delegate) => delegate.getAttribute("delegate.username") === block.data.username)) {
                     return BlockProcessorResult.Rollback;
                 }
 
@@ -94,12 +94,12 @@ export class UnchainedHandler implements BlockHandler {
             return UnchainedBlockStatus.InvalidTimestamp;
         } else {
             if (this.isValidGenerator) {
-                this.logger.warning(`Detect double forging by ${block.data.generatorPublicKey} :chains:`);
+                this.logger.warning(`Detected double forging by ${block.data.username} :chains:`);
                 return UnchainedBlockStatus.DoubleForging;
             }
 
             this.logger.info(
-                `Forked block disregarded because it is not allowed to be forged. Caused by delegate: ${block.data.generatorPublicKey} :bangbang:`,
+                `Forked block disregarded because it is not allowed to be forged. Caused by delegate ${block.data.username} :bangbang:`,
             );
 
             return UnchainedBlockStatus.GeneratorMismatch;

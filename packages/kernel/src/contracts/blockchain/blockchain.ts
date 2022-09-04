@@ -25,6 +25,10 @@ export interface Blockchain {
 
     dispose(): Promise<void>;
 
+    isForking(): boolean;
+
+    setForkingState(forking: boolean): void;
+
     /**
      * Set wakeup timeout to check the network for new blocks.
      */
@@ -124,4 +128,8 @@ export interface Blockchain {
     pushPingBlock(block: Interfaces.IBlockData, fromForger: boolean): void;
 
     checkForFork(blocks: Interfaces.IBlockData[]): Promise<boolean>;
+
+    setBlockUsername(block: Interfaces.IBlockData): void;
+
+    isCheckingForFork(): boolean;
 }

@@ -1,6 +1,5 @@
 import { Container, Contracts, Providers } from "@solar-network/kernel";
 
-import { getPeerIp } from "../../utils/get-peer-ip";
 import { BlocksRoute } from "../routes/blocks";
 import { PeerRoute } from "../routes/peer";
 import { TransactionsRoute } from "../routes/transactions";
@@ -30,9 +29,9 @@ export class AcceptPeerPlugin {
             type: "onPreHandler",
             method: async (request, h) => {
                 if (routesConfigByPath[request.path]) {
-                    const peerIp = request.socket ? getPeerIp(request.socket) : request.info.remoteAddress;
+                    const peerIp = request.info.remoteAddress;
                     const peerPort: number =
-                        request.payload.headers.port || Number(this.configuration.get<number>("server.port"));
+                        request.payload.headers?.port || Number(this.configuration.get<number>("server.port"));
 
                     peerProcessor.validateAndAcceptPeer({
                         ip: peerIp,

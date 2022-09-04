@@ -3,7 +3,7 @@ import { Hash, HashAlgorithms, Slots } from "../crypto";
 import { BlockSchemaError } from "../errors";
 import { IBlock, IBlockData, IBlockJson, IBlockVerification, ITransaction, ITransactionData } from "../interfaces";
 import { configManager } from "../managers/config";
-import { BigNumber, calculateDevFund, isException } from "../utils";
+import { BigNumber, calculateDonations, isException } from "../utils";
 import { validator } from "../validation";
 import { Serialiser } from "./serialiser";
 
@@ -28,7 +28,7 @@ export class Block implements IBlock {
 
         this.data.burnedFee = this.getBurnedFees();
 
-        this.data.devFund = calculateDevFund(this.data.height, this.data.reward);
+        this.data.donations = calculateDonations(this.data.height, this.data.reward);
 
         this.verification = this.verify();
     }
@@ -92,6 +92,27 @@ export class Block implements IBlock {
         return "0".repeat(16 - temp.length) + temp;
     }
 
+    public static getBasicHeader(data: IBlockData, withExtraData: boolean = true): IBlockData {
+        return {
+            blockSignature: data.blockSignature,
+            burnedFee: withExtraData ? data.burnedFee : undefined,
+            donations: withExtraData ? data.donations : undefined,
+            generatorPublicKey: data.generatorPublicKey,
+            height: data.height,
+            id: data.id,
+            numberOfTransactions: data.numberOfTransactions,
+            payloadHash: data.payloadHash,
+            payloadLength: data.payloadLength,
+            previousBlock: data.previousBlock,
+            reward: data.reward,
+            timestamp: data.timestamp,
+            totalAmount: data.totalAmount,
+            totalFee: data.totalFee,
+            username: withExtraData ? data.username : undefined,
+            version: data.version,
+        };
+    }
+
     public getBurnedFees(): BigNumber {
         let fees: BigNumber = BigNumber.ZERO;
         for (const transaction of this.transactions) {
@@ -101,22 +122,8 @@ export class Block implements IBlock {
         return fees;
     }
 
-    public getHeader(): IBlockData {
-        return {
-            blockSignature: this.data.blockSignature,
-            generatorPublicKey: this.data.generatorPublicKey,
-            height: this.data.height,
-            id: this.data.id,
-            numberOfTransactions: this.data.numberOfTransactions,
-            payloadHash: this.data.payloadHash,
-            payloadLength: this.data.payloadLength,
-            previousBlock: this.data.previousBlock,
-            reward: this.data.reward,
-            timestamp: this.data.timestamp,
-            totalAmount: this.data.totalAmount,
-            totalFee: this.data.totalFee,
-            version: this.data.version,
-        };
+    public getHeader(withExtraData: boolean = true): IBlockData {
+        return Block.getBasicHeader(this.data, withExtraData);
     }
 
     public verifySignature(): boolean {
@@ -223,15 +230,6 @@ export class Block implements IBlock {
                     transaction.data.expiration <= this.data.height
                 ) {
                     result.errors.push(`Encountered expired transaction: ${transaction.data.id}`);
-                }
-
-                if (transaction.data.version === 1 && !constants.block.acceptExpiredTransactionTimestamps) {
-                    const now: number = block.timestamp;
-                    if (transaction.data.timestamp > now + 3600 + constants.blockTime) {
-                        result.errors.push(`Encountered future transaction: ${transaction.data.id}`);
-                    } else if (now - transaction.data.timestamp > 21600) {
-                        result.errors.push(`Encountered expired transaction: ${transaction.data.id}`);
-                    }
                 }
 
                 appliedTransactions[transaction.data.id] = transaction.data;

@@ -10,7 +10,7 @@ export class BlockFactory {
     public static make(data: IBlockData, keys: IKeyPair, aux?: Buffer): IBlock {
         const { bip340 } = configManager.getMilestone(data.height);
 
-        data.generatorPublicKey = keys.publicKey;
+        data.generatorPublicKey = keys.publicKey.secp256k1;
 
         const payloadHash: Buffer = Serialiser.serialise(data, false);
         const hash: Buffer = HashAlgorithms.sha256(payloadHash);
@@ -59,6 +59,14 @@ export class BlockFactory {
                 ...Deserialiser.deserialise(serialised, false, options),
                 id: data.id,
             });
+
+            if (block.data.version === 0) {
+                const username = data.username;
+                if (!block.data.username && username) {
+                    block.data.username = username;
+                }
+            }
+
             block.serialised = serialised.toString("hex");
 
             return block;

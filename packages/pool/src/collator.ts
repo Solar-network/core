@@ -23,7 +23,10 @@ export class Collator implements Contracts.Pool.Collator {
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
-    public async getBlockCandidateTransactions(validate: boolean): Promise<Interfaces.ITransaction[]> {
+    public async getBlockCandidateTransactions(
+        validate: boolean,
+        exclude: string[],
+    ): Promise<Interfaces.ITransaction[]> {
         const height: number = this.blockchain.getLastBlock().data.height;
         const milestone = Managers.configManager.getMilestone(height);
         const blockHeaderSize =
@@ -45,12 +48,16 @@ export class Collator implements Contracts.Pool.Collator {
         const validator: Contracts.State.TransactionValidator = this.createTransactionValidator();
         const failedTransactions: Interfaces.ITransaction[] = [];
 
-        for (const transaction of this.poolQuery.getFromHighestPriority()) {
+        const transactions: Interfaces.ITransaction[] = Array.from(this.poolQuery.getFromHighestPriority()).filter(
+            (t) => !exclude.includes(t.id!),
+        );
+
+        for (const transaction of transactions) {
             if (candidateTransactions.length === milestone.block.maxTransactions) {
                 break;
             }
 
-            if (failedTransactions.some((t) => t.data.senderPublicKey === transaction.data.senderPublicKey)) {
+            if (failedTransactions.some((t) => t.data.senderId === transaction.data.senderId)) {
                 continue;
             }
 

@@ -1,4 +1,4 @@
-import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { isRecipientOnActiveNetwork } from "../../utils";
@@ -8,6 +8,9 @@ import { TransactionHandler, TransactionHandlerConstructor } from "../transactio
 // todo: replace unnecessary function arguments with dependency injection to avoid passing around references
 @Container.injectable()
 export class LegacyTransferTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.TransactionHistoryService)
+    private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
+
     public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
         return [];
     }
@@ -21,6 +24,24 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
     }
 
     public async bootstrap(): Promise<void> {
+        const criteria = {
+            typeGroup: this.getConstructor().typeGroup,
+            type: this.getConstructor().type,
+        };
+
+        for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
+            AppUtils.assert.defined<string>(transaction.senderId);
+
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
+        }
+
         const transactions = await this.transactionRepository.findReceivedTransactions();
         for (const transaction of transactions) {
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.recipientId);
@@ -30,13 +51,6 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
 
     public async isActivated(): Promise<boolean> {
         return Managers.configManager.getMilestone().legacyTransfer;
-    }
-
-    public async throwIfCannotBeApplied(
-        transaction: Interfaces.ITransaction,
-        sender: Contracts.State.Wallet,
-    ): Promise<void> {
-        return super.throwIfCannotBeApplied(transaction, sender);
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
@@ -55,16 +69,20 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.data.recipientId);
 
-        const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.recipientId);
+        const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(
+            transaction.data.recipientId,
+        );
 
-        recipient.increaseBalance(transaction.data.amount);
+        recipientWallet.increaseBalance(transaction.data.amount);
     }
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.data.recipientId);
 
-        const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.recipientId);
+        const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(
+            transaction.data.recipientId,
+        );
 
-        recipient.decreaseBalance(transaction.data.amount);
+        recipientWallet.decreaseBalance(transaction.data.amount);
     }
 }

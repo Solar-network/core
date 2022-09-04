@@ -1,4 +1,4 @@
-import { Managers, Utils } from "@solar-network/crypto";
+import { Identities, Managers, Utils } from "@solar-network/crypto";
 import { Repositories } from "@solar-network/database";
 import { Application, Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
@@ -41,21 +41,21 @@ export class StateBuilder {
         const steps = registeredHandlers.length + 3;
 
         try {
-            this.logger.info(`State Generation - Step 1 of ${steps}: Block Rewards`);
-            await this.buildBlockRewards();
-
-            this.logger.info(`State Generation - Step 2 of ${steps}: Fees & Nonces`);
-            await this.buildSentTransactions();
-
             const capitalise = (key: string) => key[0].toUpperCase() + key.slice(1);
             for (let i = 0; i < registeredHandlers.length; i++) {
                 const handler = registeredHandlers[i];
                 const ctorKey: string | undefined = handler.getConstructor().key;
                 AppUtils.assert.defined<string>(ctorKey);
 
-                this.logger.info(`State Generation - Step ${3 + i} of ${steps}: ${capitalise(ctorKey)}`);
+                this.logger.info(`State Generation - Step ${1 + i} of ${steps}: ${capitalise(ctorKey)}`);
                 await handler.bootstrap();
             }
+
+            this.logger.info(`State Generation - Step ${steps - 2} of ${steps}: Fees & Nonces`);
+            await this.buildSentTransactions();
+
+            this.logger.info(`State Generation - Step ${steps - 1} of ${steps}: Block Rewards`);
+            await this.buildBlockRewards();
 
             this.logger.info(`State Generation - Step ${steps} of ${steps}: Vote Balances & Delegate Ranking`);
             this.dposState.buildVoteBalances();
@@ -79,19 +79,21 @@ export class StateBuilder {
         const blocks = await this.blockRepository.getBlockRewards();
 
         for (const block of blocks) {
-            const wallet = this.walletRepository.findByPublicKey(block.generatorPublicKey);
-            wallet.increaseBalance(Utils.BigNumber.make(block.rewards));
+            if (block.username) {
+                const wallet = this.walletRepository.findByUsername(block.username);
+                wallet.increaseBalance(Utils.BigNumber.make(block.rewards));
+            }
         }
 
-        const devFunds = await this.blockRepository.getDevFunds();
+        const donations = await this.blockRepository.getDonations();
 
-        for (const devFund of devFunds) {
-            const amount: Utils.BigNumber = Utils.BigNumber.make(devFund.amount);
+        for (const donation of donations) {
+            const amount: Utils.BigNumber = Utils.BigNumber.make(donation.amount);
 
-            const devFundWallet = this.walletRepository.findByAddress(devFund.address);
-            devFundWallet.increaseBalance(amount);
+            const donationWallet = this.walletRepository.findByAddress(donation.address);
+            donationWallet.increaseBalance(amount);
 
-            const delegateWallet = this.walletRepository.findByPublicKey(devFund.generatorPublicKey);
+            const delegateWallet = this.walletRepository.findByUsername(donation.username);
             delegateWallet.decreaseBalance(amount);
         }
     }
@@ -100,7 +102,7 @@ export class StateBuilder {
         const transactions = await this.transactionRepository.getSentTransactions();
 
         for (const transaction of transactions) {
-            const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            const wallet = this.walletRepository.findByAddress(transaction.senderId);
             wallet.setNonce(Utils.BigNumber.make(transaction.nonce));
             wallet.decreaseBalance(
                 Utils.BigNumber.make(transaction.amount || Utils.BigNumber.ZERO).plus(transaction.fee),
@@ -110,40 +112,36 @@ export class StateBuilder {
 
     private verifyWalletsConsistency(): void {
         const logNegativeBalance = (wallet, type, balance) =>
-            this.logger.warning(`Wallet ${wallet.address} has a negative ${type} of '${balance}'`);
+            this.logger.warning(`Wallet ${wallet.address} has a negative ${type} of ${balance}`);
 
-        const genesisPublicKeys: Record<string, true> = Managers.configManager
-            .get("genesisBlock.transactions")
-            .reduce((acc, curr) => Object.assign(acc, { [curr.senderPublicKey]: true }), {});
-
+        const genesisAddress: string = Identities.Address.fromPublicKey(
+            Managers.configManager.get("genesisBlock.transactions")[0].senderPublicKey,
+        );
         for (const wallet of this.walletRepository.allByAddress()) {
-            if (
-                wallet.getBalance().isLessThan(0) &&
-                (wallet.getPublicKey() === undefined || !genesisPublicKeys[wallet.getPublicKey()!])
-            ) {
-                // Senders of whitelisted transactions that result in a negative balance,
-                // also need to be special treated during bootstrap. Therefore, specific
-                // senderPublicKey/nonce pairs are allowed to be negative.
+            const address: string = wallet.getAddress();
+            const balance: Utils.BigNumber = wallet.getBalance();
+
+            if (balance.isLessThan(0) && (address === undefined || address !== genesisAddress)) {
                 const negativeBalanceExceptions: Record<string, Record<string, string>> = this.configRepository.get(
                     "crypto.exceptions.negativeBalances",
                     {},
                 );
 
-                const whitelistedNegativeBalances: Record<string, string> | undefined = wallet.getPublicKey()
-                    ? negativeBalanceExceptions[wallet.getPublicKey()!]
+                const whitelistedNegativeBalances: Record<string, string> | undefined = address
+                    ? negativeBalanceExceptions[address]
                     : undefined;
 
                 if (!whitelistedNegativeBalances) {
-                    logNegativeBalance(wallet, "balance", wallet.getBalance());
+                    logNegativeBalance(wallet, "balance", balance);
                     throw new Error("Non-genesis wallet with negative balance");
                 }
 
-                const allowedNegativeBalance = wallet
-                    .getBalance()
-                    .isEqualTo(whitelistedNegativeBalances[wallet.getNonce().toString()]);
+                const allowedNegativeBalance = balance.isEqualTo(
+                    whitelistedNegativeBalances[wallet.getNonce().toString()],
+                );
 
                 if (!allowedNegativeBalance) {
-                    logNegativeBalance(wallet, "balance", wallet.getBalance());
+                    logNegativeBalance(wallet, "balance", balance);
                     throw new Error("Non-genesis wallet with negative balance");
                 }
             }

@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/snapshots",
-    "version": "4.0.2",
+    "version": "4.1.0",
     "description": "Provides live local streamed snapshots functionality for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
@@ -29,7 +29,7 @@
         "pg": "8.7.1",
         "pg-query-stream": "3.4.2",
         "pluralize": "8.0.0",
-        "typeorm": "0.2.25",
+        "typeorm": "0.2.34",
         "xcase": "2.0.1"
     },
     "devDependencies": {

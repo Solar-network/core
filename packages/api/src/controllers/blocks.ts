@@ -3,7 +3,7 @@ import Hapi from "@hapi/hapi";
 import { Enums } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 
-import { BlockResource, BlockWithTransactionsResource, TransactionResource } from "../resources";
+import { BlockResource, BlockWithTransactionsResource, MissedBlockResource, TransactionResource } from "../resources";
 import { Controller } from "./controller";
 
 @Container.injectable()
@@ -13,6 +13,9 @@ export class BlocksController extends Controller {
 
     @Container.inject(Container.Identifiers.BlockHistoryService)
     private readonly blockHistoryService!: Contracts.Shared.BlockHistoryService;
+
+    @Container.inject(Container.Identifiers.MissedBlockHistoryService)
+    private readonly missedBlockHistoryService!: Contracts.Shared.MissedBlockHistoryService;
 
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
@@ -37,6 +40,17 @@ export class BlocksController extends Controller {
 
             return this.toPagination(blockListResult, BlockResource, false);
         }
+    }
+
+    public async missed(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
+        const missedBlockListResult = await this.missedBlockHistoryService.listByCriteria(
+            request.query,
+            this.getListingOrder(request),
+            this.getListingPage(request),
+            this.getListingOptions(),
+        );
+
+        return this.toPagination(missedBlockListResult, MissedBlockResource, true);
     }
 
     public async first(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {

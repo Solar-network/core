@@ -1,5 +1,6 @@
-import { TransactionTypeGroup } from "../enums";
-import { TransactionVersionError } from "../errors";
+import { TransactionHeaderType, TransactionTypeGroup } from "../enums";
+import { AddressNetworkError, TransactionVersionError } from "../errors";
+import { Address } from "../identities";
 import { ISerialiseOptions } from "../interfaces";
 import { ITransaction, ITransactionData } from "../interfaces";
 import { configManager } from "../managers/config";
@@ -67,6 +68,15 @@ export class Serialiser {
         buff.writeBigInt64LE(transaction.nonce.toBigInt());
 
         buff.writeBuffer(Buffer.from(transaction.senderPublicKey, "hex"));
+        if (transaction.headerType === TransactionHeaderType.Extended) {
+            const { addressBuffer, addressError } = Address.toBuffer(transaction.senderId);
+            if (addressError) {
+                throw new AddressNetworkError(addressError);
+            }
+
+            buff.writeBuffer(addressBuffer);
+        }
+
         buff.writeBigInt64LE(transaction.fee.toBigInt());
     }
 

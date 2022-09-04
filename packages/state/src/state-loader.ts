@@ -17,9 +17,6 @@ export class StateLoader {
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Application;
 
-    @Container.inject(Container.Identifiers.BlockchainService)
-    private readonly blockchain!: Contracts.Blockchain.Blockchain;
-
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
     private readonly blockRepository!: Repositories.BlockRepository;
 
@@ -97,18 +94,6 @@ export class StateLoader {
             result = await this.load(savedStatesPath, stateFiles);
         }
 
-        const queue: Contracts.Kernel.Queue = this.blockchain.getQueue();
-        if (queue) {
-            const stateSaver: Contracts.State.StateSaver = this.app.get<Contracts.State.StateSaver>(
-                Container.Identifiers.StateSaver,
-            );
-            queue.removeAllListeners("drain");
-            queue.on("drain", async () => {
-                await stateSaver.run();
-                this.blockchain.dispatch("PROCESSFINISHED");
-            });
-        }
-
         return result;
     }
 
@@ -157,7 +142,7 @@ export class StateLoader {
             const total: number = buffer.readUInt32LE();
 
             const reviver = (_, value) => {
-                if (typeof value === "string" && !isNaN(+value) && Number.isInteger(+value)) {
+                if (typeof value === "string" && !value.includes(".") && !isNaN(+value) && Number.isInteger(+value)) {
                     return Utils.BigNumber.make(value);
                 }
 
@@ -174,7 +159,6 @@ export class StateLoader {
                     let balance: bigint | number = 0;
                     let nonce: bigint | number = 1;
                     let publicKey: string | undefined;
-                    let stateHistory: Record<string, object[]> = {};
                     let voteBalances: Record<string, Utils.BigNumber> = {};
 
                     if ((1 & bits) !== 0) {
@@ -196,11 +180,6 @@ export class StateLoader {
 
                     if ((16 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        stateHistory = JSON.parse(buffer.readBuffer(length).toString(), reviver);
-                    }
-
-                    if ((32 & bits) !== 0) {
-                        const length: number = buffer.readUInt32LE();
                         voteBalances = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                     }
 
@@ -217,7 +196,6 @@ export class StateLoader {
                         wallet.setAttribute(attribute, attributes[attribute]);
                     }
 
-                    wallet.setAllStateHistory(stateHistory);
                     wallet.setVoteBalances(voteBalances);
 
                     this.walletRepository.index(wallet);

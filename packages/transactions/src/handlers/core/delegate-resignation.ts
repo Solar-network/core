@@ -5,7 +5,6 @@ import {
     IrrevocableResignationError,
     NotEnoughDelegatesError,
     NotEnoughTimeSinceResignationError,
-    ResignationTypeAssetMilestoneNotActiveError,
     WalletAlreadyPermanentlyResignedError,
     WalletAlreadyTemporarilyResignedError,
     WalletNotADelegateError,
@@ -41,9 +40,15 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
-            AppUtils.assert.defined<string>(transaction.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.senderId);
 
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+            }
 
             let type: Enums.DelegateStatus = Enums.DelegateStatus.TemporaryResign;
             if (transaction.asset && transaction.asset.resignationType) {
@@ -56,7 +61,6 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
                 wallet.forgetAttribute("delegate.resigned");
             }
 
-            wallet.addStateHistory("delegateStatus", type, transaction);
             this.walletRepository.index(wallet);
         }
     }
@@ -81,12 +85,6 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
             type = transaction.data.asset.resignationType;
         }
 
-        const { delegateResignationTypeAsset } = Managers.configManager.getMilestone();
-
-        if (!delegateResignationTypeAsset && type !== Enums.DelegateStatus.TemporaryResign) {
-            throw new ResignationTypeAssetMilestoneNotActiveError();
-        }
-
         if (wallet.hasAttribute("delegate.resigned")) {
             if (wallet.getAttribute("delegate.resigned") === Enums.DelegateStatus.PermanentResign) {
                 if (type === Enums.DelegateStatus.PermanentResign) {
@@ -101,11 +99,13 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
                     .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                     .getLastBlock();
 
-                const { height } = wallet.getCurrentStateHistory("delegateStatus").transaction;
+                const { blockHeight } = await this.getPreviousResignation(lastBlock.data.height, transaction);
+                AppUtils.assert.defined<string>(blockHeight);
+
                 const { blocksToRevokeDelegateResignation } = Managers.configManager.getMilestone();
-                if (lastBlock.data.height - height < blocksToRevokeDelegateResignation) {
+                if (lastBlock.data.height - blockHeight < blocksToRevokeDelegateResignation) {
                     throw new NotEnoughTimeSinceResignationError(
-                        height - lastBlock.data.height + blocksToRevokeDelegateResignation,
+                        blockHeight - lastBlock.data.height + blocksToRevokeDelegateResignation,
                     );
                 }
             }
@@ -126,21 +126,25 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     }
 
     public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
-        emitter.dispatch(AppEnums.DelegateEvent.Resigned, transaction.data);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
+        const username = senderWallet.getAttribute("delegate.username");
+
+        emitter.dispatch(AppEnums.DelegateEvent.Resigned, {
+            ...transaction.data,
+            username,
+        });
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
         const hasSender: boolean = this.poolQuery
-            .getAllBySender(transaction.data.senderPublicKey)
+            .getAllBySender(transaction.data.senderId)
             .whereKind(transaction)
             .has();
 
         if (hasSender) {
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-                transaction.data.senderPublicKey,
-            );
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
             throw new Contracts.Pool.PoolError(
                 `Delegate resignation for '${wallet.getAttribute("delegate.username")}' already in the pool`,
                 "ERR_PENDING",
@@ -151,9 +155,9 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         let type: Enums.DelegateStatus = Enums.DelegateStatus.TemporaryResign;
         if (transaction.data.asset && transaction.data.asset.resignationType) {
@@ -166,19 +170,22 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
             senderWallet.setAttribute("delegate.resigned", type);
         }
 
-        senderWallet.addStateHistory("delegateStatus", type, transaction.data);
         this.walletRepository.index(senderWallet);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
-        senderWallet.removeCurrentStateHistory("delegateStatus");
-        const type = senderWallet.getCurrentStateHistory("delegateStatus").value;
+        const previousResignation = await this.getPreviousResignation(transaction.data.blockHeight! - 1, transaction);
+        let type = Enums.DelegateStatus.NotResigned;
+
+        if (previousResignation) {
+            type = previousResignation.asset?.resignationType || Enums.DelegateStatus.TemporaryResign;
+        }
 
         if (type === Enums.DelegateStatus.NotResigned) {
             senderWallet.forgetAttribute("delegate.resigned");
@@ -189,13 +196,25 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
         this.walletRepository.index(senderWallet);
     }
 
-    public async applyToRecipient(
-        transaction: Interfaces.ITransaction,
-        // tslint:disable-next-line: no-empty
-    ): Promise<void> {}
+    public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
 
-    public async revertForRecipient(
+    public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
+
+    private async getPreviousResignation(
+        height: number,
         transaction: Interfaces.ITransaction,
-        // tslint:disable-next-line: no-empty
-    ): Promise<void> {}
+    ): Promise<Interfaces.ITransactionData> {
+        const { results } = await this.transactionHistoryService.listByCriteria(
+            {
+                blockHeight: { to: height },
+                senderId: transaction.data.senderId,
+                typeGroup: this.getConstructor().typeGroup,
+                type: this.getConstructor().type,
+            },
+            [{ property: "blockHeight", direction: "desc" }],
+            { offset: 0, limit: 1 },
+        );
+
+        return results[0];
+    }
 }

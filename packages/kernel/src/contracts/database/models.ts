@@ -11,11 +11,18 @@ export interface BlockModel {
     totalFee: Utils.BigNumber;
     burnedFee: Utils.BigNumber;
     reward: Utils.BigNumber;
-    devFund: Record<string, Utils.BigNumber>;
+    donations: Record<string, Utils.BigNumber>;
     payloadLength: number;
     payloadHash: string;
     generatorPublicKey: string;
     blockSignature: string;
+    username?: string;
+}
+
+export interface MissedBlockModel {
+    timestamp: number;
+    height: number;
+    username: string;
 }
 
 export interface TransactionModel {
@@ -26,6 +33,7 @@ export interface TransactionModel {
     sequence: number;
     timestamp: number;
     nonce: Utils.BigNumber;
+    senderId: string;
     senderPublicKey: string;
     recipientId: string;
     type: number;

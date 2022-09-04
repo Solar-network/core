@@ -21,7 +21,7 @@ const connect = async (options: any): Promise<Connection> => {
     return createConnection({
         ...options.connection,
         namingStrategy: new Utils.SnakeNamingStrategy(),
-        entities: [Models.Block, Models.Transaction, Models.Round],
+        entities: [Models.Block, Models.MissedBlock, Models.Transaction, Models.Round],
     });
 };
 
@@ -44,13 +44,20 @@ export const init = async (): Promise<void> => {
     }
 
     app.bind(Identifiers.SnapshotRepositoryFactory).toFactory<Repository>(() => (table: string) => {
-        if (table === "blocks") {
-            return getCustomRepository(Repositories.BlockRepository);
+        switch (table) {
+            case "blocks": {
+                return getCustomRepository(Repositories.BlockRepository);
+            }
+            case "missedBlocks": {
+                return getCustomRepository(Repositories.MissedBlockRepository);
+            }
+            case "transactions": {
+                return getCustomRepository(Repositories.TransactionRepository);
+            }
+            default: {
+                return getCustomRepository(Repositories.RoundRepository);
+            }
         }
-        if (table === "transactions") {
-            return getCustomRepository(Repositories.TransactionRepository);
-        }
-        return getCustomRepository(Repositories.RoundRepository);
     });
 
     app.bind<StreamReader>(Identifiers.StreamReaderFactory).toFactory<StreamReader>(

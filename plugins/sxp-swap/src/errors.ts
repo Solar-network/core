@@ -45,7 +45,9 @@ export class TransactionNotValidError extends Error {
 export class TransactionHasWrongAmountError extends Error {
     public constructor(amount: Utils.BigNumber, expectedAmount: Utils.BigNumber) {
         super(
-            `The swap transaction has the wrong amount (${Utils.formatSatoshi(amount)}, expected ${Utils.formatSatoshi(expectedAmount)})`
+            `The swap transaction has the wrong amount (${Utils.formatSatoshi(amount)}, expected ${Utils.formatSatoshi(
+                expectedAmount,
+            )})`,
         );
     }
 }
@@ -77,7 +79,9 @@ export class TransactionTypeNotPermittedError extends Error {
 export class UnknownSwapNetworkError extends Error {
     public constructor(network: string, supportedNetworks: string[]) {
         super(
-            `The network of this swap transaction (${network}) does not correspond to any recognised network (${supportedNetworks.join(", ")})`
+            `The network of this swap transaction (${network}) does not correspond to any recognised network (${supportedNetworks.join(
+                ", ",
+            )})`,
         );
     }
 }

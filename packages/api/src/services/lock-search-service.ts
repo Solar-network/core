@@ -65,6 +65,7 @@ export class LockSearchService {
 
         return {
             lockId,
+            senderId: lockAttribute.senderId,
             senderPublicKey,
             isExpired,
             amount: lockAttribute.amount,

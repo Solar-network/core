@@ -1,4 +1,4 @@
-import { badData, isBoom } from "@hapi/boom";
+import { badData, isBoom, notFound } from "@hapi/boom";
 import { RequestRoute, Server as HapiServer, ServerInjectOptions, ServerInjectResponse, ServerRoute } from "@hapi/hapi";
 import { Identities, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Providers, Types, Utils } from "@solar-network/kernel";
@@ -25,6 +25,15 @@ export class Server {
      */
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Contracts.Kernel.Application;
+
+    /**
+     * @private
+     * @type {Providers.PluginConfiguration}
+     * @memberof Server
+     */
+    @Container.inject(Container.Identifiers.PluginConfiguration)
+    @Container.tagged("plugin", "@solar-network/blockchain")
+    private readonly blockchainConfiguration!: Providers.PluginConfiguration;
 
     /**
      * @private
@@ -155,10 +164,37 @@ export class Server {
             swaggerJson.components.schemas.transactionVersions.enum =
                 Transactions.schemas.transactionBaseSchema.properties.version.enum;
 
-            await this.server.route({
+            const seconds: number = this.blockchainConfiguration.get("missedBlocksLookback") as number;
+            const days: number = +(seconds / 86400).toFixed(2);
+
+            swaggerJson.paths["/blocks/missed"].get.summary = swaggerJson.paths["/blocks/missed"].get.summary.replace(
+                "X",
+                days,
+            );
+            swaggerJson.paths["/delegates/{identifier}/blocks/missed"].get.summary = swaggerJson.paths[
+                "/delegates/{identifier}/blocks/missed"
+            ].get.summary.replace("X", days);
+
+            this.server.route({
                 method: "GET",
                 path: "/api.json",
                 handler: () => swaggerJson,
+            });
+
+            this.server.route({
+                method: "GET",
+                path: "/{param*}",
+                handler: {
+                    directory: {
+                        path: (request) => {
+                            if (request.path.length < 20) {
+                                return `${__dirname}/www`;
+                            } else {
+                                return notFound();
+                            }
+                        },
+                    },
+                },
             });
 
             await this.server.start();
@@ -206,6 +242,14 @@ export class Server {
         return this.server.table().find((route) => route.method === method.toLowerCase() && route.path === path);
     }
 
+    public subscription(path: string): void {
+        return this.server.subscription(path);
+    }
+
+    public publish(path: string, payload) {
+        return this.server.publish(path, payload);
+    }
+
     /**
      * @param {(string | ServerInjectOptions)} options
      * @returns {Promise<void>}
@@ -231,16 +275,6 @@ export class Server {
             options.tls.cert = readFileSync(options.tls.cert).toString();
         }
 
-        const validateContext = {
-            configuration: {
-                plugins: {
-                    pagination: {
-                        limit: this.configuration.getRequired<number>("plugins.pagination.limit"),
-                    },
-                },
-            },
-        };
-
         const defaultOptions = {
             router: {
                 stripTrailingSlash: true,
@@ -252,10 +286,6 @@ export class Server {
                     },
                 },
                 validate: {
-                    options: {
-                        context: validateContext,
-                    },
-
                     async failAction(request, h, err) {
                         return badData(err.message);
                     },

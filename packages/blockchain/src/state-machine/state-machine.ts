@@ -24,6 +24,10 @@ export class StateMachine {
     public transition(event: string): void {
         const nextState = blockchainMachine.transition(this.stateStore.getBlockchain(), event);
 
+        if (!nextState.changed) {
+            return;
+        }
+
         if (nextState.actions.length > 0) {
             this.logger.debug(
                 `event '${event}': ${JSON.stringify(this.stateStore.getBlockchain().value)} -> ${JSON.stringify(

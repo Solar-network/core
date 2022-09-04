@@ -48,6 +48,9 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
+        this.actions.abortRunningProcess(`${this.getFlag("token")}-core`);
+        this.actions.abortRunningProcess(`${this.getFlag("token")}-relay`);
+
         const flags: Contracts.AnyObject = { ...this.getFlags() };
         flags.processType = "snapshot";
 

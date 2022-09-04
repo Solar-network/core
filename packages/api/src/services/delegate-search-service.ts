@@ -38,7 +38,7 @@ export class DelegateSearchService {
         sorting: Contracts.Search.Sorting,
         ...criterias: DelegateCriteria[]
     ): Contracts.Search.ResultsPage<DelegateResource> {
-        sorting = [...sorting, { property: "rank", direction: "asc" }];
+        sorting = [...sorting, { property: "rank", direction: "asc" }, { property: "username", direction: "asc" }];
 
         return this.paginationService.getPage(pagination, sorting, this.getDelegates(...criterias));
     }
@@ -82,17 +82,19 @@ export class DelegateSearchService {
             resignationType,
             blocks: {
                 produced: delegateAttribute.producedBlocks,
+                missed: delegateAttribute.missedBlocks,
+                productivity: delegateAttribute.productivity,
                 last: delegateAttribute.lastBlock,
             },
             forged: {
                 fees: delegateAttribute.forgedFees,
                 burnedFees: delegateAttribute.burnedFees,
                 rewards: delegateAttribute.forgedRewards,
-                devFunds: delegateAttribute.devFunds,
+                donations: delegateAttribute.donations,
                 total: delegateAttribute.forgedFees
                     .minus(delegateAttribute.burnedFees)
                     .plus(delegateAttribute.forgedRewards)
-                    .minus(delegateAttribute.devFunds),
+                    .minus(delegateAttribute.donations),
             },
             version:
                 delegateAttribute.version && delegateAttribute.rank && delegateAttribute.rank <= activeDelegates

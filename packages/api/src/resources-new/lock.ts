@@ -10,6 +10,7 @@ export type LockCriteria = Contracts.Search.StandardCriteriaOf<LockResource>;
 
 export type LockResource = {
     lockId: string;
+    senderId: string;
     senderPublicKey: string;
     isExpired: boolean;
     amount: Utils.BigNumber;
@@ -27,7 +28,7 @@ export type LockResource = {
 
 export const lockCriteriaSchemaObject = {
     lockId: transactionCriteriaSchemaObject.id,
-    senderPublicKey: transactionCriteriaSchemaObject.senderPublicKey,
+    senderId: transactionCriteriaSchemaObject.senderId,
     isExpired: Joi.boolean(),
     amount: Schemas.createRangeCriteriaSchema(Schemas.bigNumber),
     secretHash: Joi.alternatives(

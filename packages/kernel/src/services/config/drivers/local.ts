@@ -1,4 +1,6 @@
+import { Identities } from "@solar-network/crypto";
 import { existsSync, readFileSync } from "fs";
+import { writeJsonSync } from "fs-extra";
 import importFresh from "import-fresh";
 import Joi from "joi";
 import { homedir } from "os";
@@ -169,10 +171,23 @@ export class LocalConfigLoader implements ConfigLoader {
      * @memberof LocalConfigLoader
      */
     private loadDelegates(): void {
+        const delegates: KeyValuePair<any> = this.loadFromLocation(["delegates.json"]);
+
+        const keys: Set<string> = new Set(delegates.keys || []);
+        const secrets: Set<string> = new Set(delegates.secrets || []);
+
+        for (const secret of secrets) {
+            keys.add(Identities.PrivateKey.fromPassphrase(secret));
+        }
+
+        if (delegates.secrets || secrets.size > 0) {
+            writeJsonSync(this.app.configPath("delegates.json"), { keys: [...keys] }, { spaces: 4 });
+        }
+
         this.validationService.validate(
             this.loadFromLocation(["delegates.json"]),
             Joi.object({
-                secrets: Joi.array().items(Joi.string()).optional(),
+                keys: Joi.array().items(Joi.string().hex().length(64)).optional(),
             }),
         );
 

@@ -4,7 +4,7 @@ import { Enums } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 
 import { Identifiers } from "../identifiers";
-import { BlockResource, BlockWithTransactionsResource } from "../resources";
+import { BlockResource, BlockWithTransactionsResource, MissedBlockResource } from "../resources";
 import {
     DelegateCriteria,
     delegateCriteriaSchemaObject,
@@ -26,6 +26,9 @@ export class DelegatesController extends Controller {
 
     @Container.inject(Container.Identifiers.BlockHistoryService)
     private readonly blockHistoryService!: Contracts.Shared.BlockHistoryService;
+
+    @Container.inject(Container.Identifiers.MissedBlockHistoryService)
+    private readonly missedBlockHistoryService!: Contracts.Shared.MissedBlockHistoryService;
 
     public index(request: Hapi.Request, h: Hapi.ResponseToolkit): Contracts.Search.ResultsPage<DelegateResource> {
         const pagination = this.getQueryPagination(request.query);
@@ -89,8 +92,9 @@ export class DelegatesController extends Controller {
             return notFound("Delegate not found");
         }
 
+        const blockCriteria = { ...request.query, username: delegateResource.username };
+
         if (request.query.transform) {
-            const blockCriteria = { generatorPublicKey: delegateResource.publicKey };
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
                 blockCriteria,
                 { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.Transfer },
@@ -101,7 +105,6 @@ export class DelegatesController extends Controller {
 
             return this.toPagination(blockWithSomeTransactionsListResult, BlockWithTransactionsResource, true);
         } else {
-            const blockCriteria = { generatorPublicKey: delegateResource.publicKey };
             const blockListResult = await this.blockHistoryService.listByCriteria(
                 blockCriteria,
                 this.getListingOrder(request),
@@ -111,5 +114,33 @@ export class DelegatesController extends Controller {
 
             return this.toPagination(blockListResult, BlockResource, false);
         }
+    }
+
+    public async missedBlocks(
+        request: Hapi.Request,
+        h: Hapi.ResponseToolkit,
+    ): Promise<Contracts.Search.ResultsPage<object> | Boom> {
+        const walletId = request.params.id as string;
+
+        const walletResource = this.walletSearchService.getWallet(walletId);
+        if (!walletResource) {
+            return notFound("Delegate not found");
+        }
+
+        const delegateResource = this.delegateSearchService.getDelegate(walletResource.address);
+        if (!delegateResource) {
+            return notFound("Delegate not found");
+        }
+
+        const missedBlockCriteria = { ...request.query, username: delegateResource.username };
+
+        const missedBlockListResult = await this.missedBlockHistoryService.listByCriteria(
+            missedBlockCriteria,
+            this.getListingOrder(request),
+            this.getListingPage(request),
+            this.getListingOptions(),
+        );
+
+        return this.toPagination(missedBlockListResult, MissedBlockResource, true);
     }
 }

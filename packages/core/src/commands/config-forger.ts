@@ -3,6 +3,7 @@ import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
 import { Command as BIP39Command } from "./config-forger-bip39";
+import { Command as PrivateKeyCommand } from "./config-forger-private-key";
 
 /**
  * @export
@@ -37,8 +38,14 @@ export class Command extends Commands.Command {
         this.definition
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39", Joi.string())
-            .setFlag("skipValidation", "Skip BIP39 mnemonic validation", Joi.boolean().default(false));
+            .setFlag("bip39", "A delegate plain text passphrase, referred to as BIP39", Joi.string())
+            .setFlag("privateKey", "A 64 character hexadecimal delegate private key", Joi.string().hex().length(64))
+            .setFlag("skipValidation", "Skip BIP39 mnemonic validation", Joi.boolean().default(false))
+            .setFlag(
+                "method",
+                'The configuration method to use ("bip39" or "privateKey")',
+                Joi.string().valid(...["bip39", "privateKey"]),
+            );
     }
 
     /**
@@ -48,7 +55,39 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        return await this.initialiseAndExecute(BIP39Command);
+        if (this.getFlag("method") === "bip39") {
+            return await this.initialiseAndExecute(BIP39Command);
+        }
+
+        if (this.getFlag("method") === "privateKey") {
+            return await this.initialiseAndExecute(PrivateKeyCommand);
+        }
+
+        let response = await this.components.prompt([
+            {
+                type: "select",
+                name: "method",
+                message: "Please select how you wish to enter your delegate private key?",
+                choices: [
+                    { title: "Hexadecimal private key", value: "privateKey" },
+                    { title: "BIP39 passphrase (Deprecated)", value: "bip39" },
+                ],
+            },
+        ]);
+
+        if (!response.method) {
+            this.components.fatal("Please enter valid data and try again");
+        }
+
+        response = { ...this.getFlags(), ...response };
+
+        if (response.method === "bip39") {
+            return await this.initialiseAndExecute(BIP39Command);
+        }
+
+        if (response.method === "privateKey") {
+            return await this.initialiseAndExecute(PrivateKeyCommand);
+        }
     }
 
     private async initialiseAndExecute(commandSignature): Promise<void> {

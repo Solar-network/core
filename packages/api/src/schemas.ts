@@ -116,7 +116,7 @@ export const createSortingSchema = (
 export const pagination = Joi.object({
     page: Joi.number().integer().positive().default(1),
     offset: Joi.number().integer().min(0),
-    limit: Joi.number().integer().min(1).default(100).max(Joi.ref("$configuration.plugins.pagination.limit")),
+    limit: Joi.number().integer().min(1).default(100).max(100),
 }); // .without("offset", "page"); // conflict with pagination plugin
 
 export const address = Joi.string().alphanum().length(34);
@@ -164,6 +164,7 @@ export const orderBy = Joi.alternatives().try(
 );
 
 export const blocksOrderBy = orderBy.default("height:desc");
+export const missedBlocksOrderBy = orderBy.default("timestamp:desc");
 export const transactionsOrderBy = orderBy.default(["timestamp:desc", "sequence:desc"]);
 
 const equalCriteria = (value: any) => value;
@@ -187,7 +188,7 @@ export const blockCriteriaSchemas = {
     version: orEqualCriteria(Joi.number().integer().min(0)),
     timestamp: orNumericCriteria(Joi.number().integer().min(0)),
     previousBlock: orEqualCriteria(Joi.string().length(64).hex()),
-    height: orNumericCriteria(Joi.number().integer().min(0)),
+    height: orNumericCriteria(Joi.number().integer().min(1)),
     numberOfTransactions: orNumericCriteria(Joi.number().integer().min(0)),
     totalAmount: orNumericCriteria(Joi.number().integer().min(0)),
     totalFee: orNumericCriteria(Joi.number().integer().min(0)),
@@ -196,8 +197,34 @@ export const blockCriteriaSchemas = {
     payloadLength: orNumericCriteria(Joi.number().integer().min(0)),
     payloadHash: orEqualCriteria(Joi.string().hex()),
     generatorPublicKey: orEqualCriteria(Joi.string().hex().length(66)),
+    username: orEqualCriteria(
+        Joi.string()
+            .regex(/^(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$/)
+            .min(1)
+            .max(20),
+    ),
     blockSignature: orEqualCriteria(Joi.string().hex().length(128)),
 };
+
+export const blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey = { ...blockCriteriaSchemas } as any;
+delete blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey.generatorPublicKey;
+delete blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey.username;
+
+export const missedBlockCriteriaSchemas = {
+    timestamp: orNumericCriteria(Joi.number().integer().min(0)),
+    height: orNumericCriteria(Joi.number().integer().min(1)),
+    username: orEqualCriteria(
+        Joi.string()
+            .regex(/^(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$/)
+            .min(1)
+            .max(20),
+    ),
+};
+
+export const missedBlockCriteriaSchemasWithoutUsername = {
+    ...blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey,
+} as any;
+delete missedBlockCriteriaSchemasWithoutUsername.username;
 
 export const transactionCriteriaSchemas = {
     address: orEqualCriteria(address),
@@ -205,6 +232,7 @@ export const transactionCriteriaSchemas = {
     recipientId: orEqualCriteria(address),
     id: orEqualCriteria(Joi.string().hex().length(64)),
     version: orEqualCriteria(Joi.number().integer().positive()),
+    blockHeight: orNumericCriteria(Joi.number().integer().min(1)),
     blockId: orEqualCriteria(Joi.string().length(64).hex()),
     sequence: orNumericCriteria(Joi.number().integer().positive()),
     timestamp: orNumericCriteria(Joi.number().integer().min(0)),

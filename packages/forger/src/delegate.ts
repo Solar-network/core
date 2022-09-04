@@ -1,20 +1,51 @@
-import { Blocks, Crypto, Interfaces, Utils } from "@solar-network/crypto";
+import { Blocks, Crypto, Identities, Interfaces, Utils } from "@solar-network/crypto";
 import { Utils as AppUtils } from "@solar-network/kernel";
+
+import { Delegate as IDelegate } from "./interfaces";
 
 /**
  * @export
- * @abstract
- * @class Method
+ * @class Delegate
  */
-export abstract class Method {
+export class Delegate implements IDelegate {
     /**
-     * @protected
-     * @param {Interfaces.IKeyPair} keys
+     * @type {Interfaces.IKeyPair}
+     * @memberof Delegate
+     */
+    public keys: Interfaces.IKeyPair | undefined;
+
+    /**
+     * @type {string}
+     * @memberof Delegate
+     */
+    public publicKey: string;
+
+    /**
+     * @type {string}
+     * @memberof Delegate
+     */
+    public address: string;
+
+    /**
+     * @param {string} privateKey
+     * @memberof Delegate
+     */
+    public constructor(privateKey: string) {
+        this.keys = Identities.Keys.fromPrivateKey(privateKey);
+        this.publicKey = this.keys.publicKey.secp256k1;
+        this.address = Identities.Address.fromPublicKey(this.publicKey);
+    }
+
+    /**
      * @param {Interfaces.ITransactionData[]} transactions
      * @param {Record<string, any>} options
      * @returns {Interfaces.IBlock}
-     * @memberof Method
+     * @memberof Delegate
      */
+    public forge(transactions: Interfaces.ITransactionData[], options: Record<string, any>): Interfaces.IBlock {
+        return this.createBlock(this.keys!, transactions, options);
+    }
+
     protected createBlock(
         keys: Interfaces.IKeyPair,
         transactions: Interfaces.ITransactionData[],
@@ -42,7 +73,7 @@ export abstract class Method {
         return Blocks.BlockFactory.make(
             {
                 version: 0,
-                generatorPublicKey: keys.publicKey,
+                generatorPublicKey: keys.publicKey.secp256k1,
                 timestamp: options.timestamp,
                 previousBlock: options.previousBlock.id,
                 height: options.previousBlock.height + 1,

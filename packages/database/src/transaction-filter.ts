@@ -41,11 +41,15 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
                     });
                 case "id":
                     return handleOrCriteria(criteria.id!, async (c) => {
-                        return { property: "id", op: "equal", value: c };
+                        return { property: "id", op: "like", pattern: c + "%" };
                     });
                 case "version":
                     return handleOrCriteria(criteria.version!, async (c) => {
                         return { property: "version", op: "equal", value: c };
+                    });
+                case "blockHeight":
+                    return handleOrCriteria(criteria.blockHeight!, async (c) => {
+                        return handleNumericCriteria("blockHeight", c);
                     });
                 case "blockId":
                     return handleOrCriteria(criteria.blockId!, async (c) => {
@@ -87,6 +91,10 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
                     return handleOrCriteria(criteria.fee!, async (c) => {
                         return handleNumericCriteria("fee", c);
                     });
+                case "burnedFee":
+                    return handleOrCriteria(criteria.burnedFee!, async (c) => {
+                        return handleNumericCriteria("burnedFee", c);
+                    });
                 case "asset":
                     return handleOrCriteria(criteria.asset!, async (c) => {
                         return this.handleAssetCriteria(c);
@@ -115,10 +123,7 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
     ): Promise<Contracts.Search.Expression<Transaction>> {
         if (this.walletRepository.hasByAddress(criteria)) {
             const senderWallet = this.walletRepository.findByAddress(criteria);
-
-            if (senderWallet && senderWallet.getPublicKey()) {
-                return { op: "equal", property: "senderPublicKey", value: senderWallet.getPublicKey() };
-            }
+            return { op: "equal", property: "senderId", value: senderWallet.getAddress() };
         }
 
         return { op: "false" };
@@ -144,21 +149,19 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
 
         if (this.walletRepository.hasByAddress(criteria)) {
             const recipientWallet = this.walletRepository.findByAddress(criteria);
-            if (recipientWallet && recipientWallet.getPublicKey()) {
-                const delegateRegistrationExpression: Contracts.Search.AndExpression<Transaction> = {
-                    op: "and",
-                    expressions: [
-                        { op: "equal", property: "typeGroup", value: Enums.TransactionTypeGroup.Core },
-                        { op: "equal", property: "type", value: Enums.TransactionType.Core.DelegateRegistration },
-                        { op: "equal", property: "senderPublicKey", value: recipientWallet.getPublicKey() },
-                    ],
-                };
+            const delegateRegistrationExpression: Contracts.Search.AndExpression<Transaction> = {
+                op: "and",
+                expressions: [
+                    { op: "equal", property: "typeGroup", value: Enums.TransactionTypeGroup.Core },
+                    { op: "equal", property: "type", value: Enums.TransactionType.Core.DelegateRegistration },
+                    { op: "equal", property: "senderId", value: recipientWallet.getAddress() },
+                ],
+            };
 
-                return {
-                    op: "or",
-                    expressions: [recipientIdExpression, transferRecipientIdExpression, delegateRegistrationExpression],
-                };
-            }
+            return {
+                op: "or",
+                expressions: [recipientIdExpression, transferRecipientIdExpression, delegateRegistrationExpression],
+            };
         }
         return {
             op: "or",

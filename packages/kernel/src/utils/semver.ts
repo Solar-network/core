@@ -53,6 +53,10 @@ export class Semver {
         return this.value;
     }
 
+    public toBSON() {
+        return this.value;
+    }
+
     public toJSON() {
         return this.value;
     }

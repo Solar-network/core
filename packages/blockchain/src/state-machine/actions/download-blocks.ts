@@ -80,12 +80,14 @@ export class DownloadBlocks implements Action {
             } else {
                 this.blockchain.clearQueue();
 
-                if (!(await this.blockchain.checkForFork(blocks))) {
-                    this.logger.warning("Downloaded block not accepted :warning: :warning: :warning:");
-                    this.logger.warning(JSON.stringify(blocks[0]));
+                setImmediate(async () => {
+                    if (!this.blockchain.isCheckingForFork() && !(await this.blockchain.checkForFork(blocks))) {
+                        this.logger.warning("Downloaded block not accepted :warning: :warning: :warning:");
+                        this.logger.warning(JSON.stringify(blocks[0]));
 
-                    this.logger.warning(`Last downloaded block: ${JSON.stringify(lastDownloadedBlock)}`);
-                }
+                        this.logger.warning(`Last downloaded block: ${JSON.stringify(lastDownloadedBlock)}`);
+                    }
+                });
             }
 
             if (this.blockchain.getQueue().size() === 0) {

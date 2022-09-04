@@ -58,10 +58,10 @@ export class InternalController extends Controller {
 
         const { reward } =
             delegates[forgingInfo.currentForger] &&
-            this.walletRepository.hasByPublicKey(delegates[forgingInfo.currentForger].publicKey!)
+            this.walletRepository.hasByUsername(delegates[forgingInfo.currentForger].delegate.username)
                 ? await this.roundState.getRewardForBlockInRound(
                       height,
-                      this.walletRepository.findByPublicKey(delegates[forgingInfo.currentForger].publicKey!),
+                      this.walletRepository.findByUsername(delegates[forgingInfo.currentForger].delegate.username),
                   )
                 : Managers.configManager.getMilestone();
 

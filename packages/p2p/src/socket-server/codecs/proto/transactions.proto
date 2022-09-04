@@ -4,7 +4,8 @@ package transactions;
 
 message GetUnconfirmedTransactionsRequest {
     bool countOnly = 1;
-    shared.Headers headers = 2;
+    bytes exclude = 2;
+    shared.Headers headers = 3;
 }
 
 message GetUnconfirmedTransactionsResponse {

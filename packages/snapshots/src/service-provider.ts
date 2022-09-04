@@ -6,7 +6,7 @@ import { SnapshotDatabaseService } from "./database-service";
 import { Filesystem } from "./filesystem/filesystem";
 import { Identifiers } from "./ioc";
 import { ProgressDispatcher } from "./progress-dispatcher";
-import { BlockRepository, RoundRepository, TransactionRepository } from "./repositories";
+import { BlockRepository, MissedBlockRepository, RoundRepository, TransactionRepository } from "./repositories";
 import { SnapshotService } from "./snapshot-service";
 
 export class ServiceProvider extends Providers.ServiceProvider {
@@ -46,6 +46,9 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Identifiers.ProgressDispatcher).to(ProgressDispatcher).inTransientScope();
 
         this.app.bind(Identifiers.SnapshotBlockRepository).toConstantValue(getCustomRepository(BlockRepository));
+        this.app
+            .bind(Identifiers.SnapshotMissedBlockRepository)
+            .toConstantValue(getCustomRepository(MissedBlockRepository));
         this.app
             .bind(Identifiers.SnapshotTransactionRepository)
             .toConstantValue(getCustomRepository(TransactionRepository));

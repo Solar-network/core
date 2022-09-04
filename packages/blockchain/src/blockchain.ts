@@ -7,7 +7,6 @@ import { ProcessBlocksJob } from "./process-blocks-job";
 import { StateMachine } from "./state-machine";
 import { blockchainMachine } from "./state-machine/machine";
 
-// todo: reduce the overall complexity of this class and remove all helpers and getters that just serve as proxies
 @Container.injectable()
 export class Blockchain implements Contracts.Blockchain.Blockchain {
     @Container.inject(Container.Identifiers.Application)
@@ -28,6 +27,9 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
     private readonly blockRepository!: Repositories.BlockRepository;
+
+    @Container.inject(Container.Identifiers.DatabaseMissedBlockRepository)
+    private readonly missedBlockRepository!: Repositories.MissedBlockRepository;
 
     @Container.inject(Container.Identifiers.PoolService)
     private readonly pool!: Contracts.Pool.Service;
@@ -50,12 +52,21 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     @Container.inject(Container.Identifiers.RoundState)
     private readonly roundState!: Contracts.State.RoundState;
 
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
+
     private queue!: Contracts.Kernel.Queue;
 
     private stopped!: boolean;
     private booted: boolean = false;
+    private forkCheck: boolean = false;
+    private forking: boolean = false;
     private missedBlocks: number = 0;
     private lastCheckNetworkHealthTs: number = 0;
+    private lastCheckForkTs: number = 0;
+    private lastUpdatedBlockId: string | undefined;
+    private updating: boolean = false;
 
     @Container.postConstruct()
     public async initialise(): Promise<void> {
@@ -72,7 +83,12 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         this.queue = await this.app.get<Types.QueueFactory>(Container.Identifiers.QueueFactory)();
 
-        this.queue.on("drain", () => {
+        const stateSaver: Contracts.State.StateSaver = this.app.get<Contracts.State.StateSaver>(
+            Container.Identifiers.StateSaver,
+        );
+
+        this.queue.on("drain", async () => {
+            await stateSaver.run();
             this.dispatch("PROCESSFINISHED");
         });
 
@@ -98,6 +114,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     public isBooted(): boolean {
         return this.booted;
+    }
+
+    public isForking(): boolean {
+        return this.forking;
     }
 
     public getQueue(): Contracts.Kernel.Queue {
@@ -141,6 +161,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         this.events.listen(Enums.RoundEvent.Applied, { handle: this.resetMissedBlocks });
 
+        this.events.listen(Enums.QueueEvent.Finished, { handle: () => this.updateProductivity(false) });
+
+        this.updateProductivity(true);
+
         this.booted = true;
 
         return true;
@@ -157,6 +181,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
             await this.queue.stop();
         }
+    }
+
+    public setForkingState(forking: boolean): void {
+        this.forking = forking;
     }
 
     /**
@@ -227,6 +255,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             return;
         }
 
+        this.setBlockUsername(block);
         this.pushPingBlock(block, fromForger);
 
         if (this.stateStore.isStarted()) {
@@ -235,12 +264,12 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             this.enqueueBlocks([block]);
 
             if (fireBlockReceivedEvent) {
-                this.events.dispatch(Enums.BlockEvent.Received, { ...block, ip });
+                this.events.dispatch(Enums.BlockEvent.Received, { ...Blocks.Block.getBasicHeader(block), ip });
             }
         } else {
             this.logger.info(`Block disregarded because blockchain is not ready :exclamation:`);
 
-            this.events.dispatch(Enums.BlockEvent.Disregarded, { ...block, ip });
+            this.events.dispatch(Enums.BlockEvent.Disregarded, { ...Blocks.Block.getBasicHeader(block), ip });
         }
     }
 
@@ -257,7 +286,9 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             processBlocksJob.setBlocks(blocks);
 
             this.queue.push(processBlocksJob);
-            this.queue.resume();
+            if (!this.isForking()) {
+                this.queue.resume();
+            }
         };
 
         const lastDownloadedHeight: number = this.getLastDownloadedBlock().height;
@@ -273,7 +304,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         let currentTransactionsCount = 0;
         for (const block of blocks) {
             Utils.assert.defined<Interfaces.IBlockData>(block);
-
+            this.setBlockUsername(block);
             currentBlocksChunk.push(block);
             currentTransactionsCount += block.numberOfTransactions;
 
@@ -302,8 +333,6 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
      */
     public async removeBlocks(nblocks: number): Promise<void> {
         try {
-            this.clearAndStopQueue();
-
             const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
             // If the current chain height is H and we will be removing blocks [N, H],
@@ -364,6 +393,12 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             if (nblocks >= lastBlock.data.height) {
                 nblocks = lastBlock.data.height - 1;
             }
+
+            if (nblocks < 1) {
+                return;
+            }
+
+            this.clearAndStopQueue();
 
             const resetHeight: number = lastBlock.data.height - nblocks;
             this.logger.info(
@@ -430,13 +465,17 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     /**
      * Fork the chain at the given block.
      */
-    public forkBlock(block: Interfaces.IBlock, numberOfBlockToRollback?: number): void {
+    public forkBlock(block: Interfaces.IBlock, numberOfBlocksToRollback?: number): void {
+        if (numberOfBlocksToRollback && numberOfBlocksToRollback < 0) {
+            return;
+        }
+
         this.stateStore.setForkedBlock(block);
 
         this.clearAndStopQueue();
 
-        if (numberOfBlockToRollback) {
-            this.stateStore.setNumberOfBlocksToRollback(numberOfBlockToRollback);
+        if (numberOfBlocksToRollback) {
+            this.stateStore.setNumberOfBlocksToRollback(numberOfBlocksToRollback);
         }
 
         this.dispatch("FORK");
@@ -455,6 +494,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         return (
             Crypto.Slots.getTime() - block.timestamp < 3 * Managers.configManager.getMilestone(block.height).blockTime
         );
+    }
+
+    public isCheckingForFork(): boolean {
+        return this.forkCheck;
     }
 
     /**
@@ -520,43 +563,137 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             const networkStatus = await this.networkMonitor.checkNetworkHealth();
 
             if (networkStatus.forked) {
-                this.stateStore.setNumberOfBlocksToRollback(networkStatus.blocksToRollback || 0);
+                this.stateStore.setNumberOfBlocksToRollback(networkStatus.blocksToRollback!);
                 this.dispatch("FORK");
             }
         }
     }
 
     public async checkForFork(blocks: Interfaces.IBlockData[]): Promise<boolean> {
-        const rollbackBlocks: number = await this.networkMonitor.checkForFork();
-        if (rollbackBlocks > 0) {
-            this.clearAndStopQueue();
+        const milestone = Managers.configManager.getMilestone();
+        const timeNow: number = Date.now() / 1000;
 
-            await this.removeBlocks(rollbackBlocks);
-            this.stateStore.setNumberOfBlocksToRollback(0);
-            this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)} :wastebasket:`);
+        if (!this.isForking() && timeNow - this.lastCheckForkTs > milestone.blockTime) {
+            this.lastCheckForkTs = timeNow;
+            this.forkCheck = true;
+            const rollbackBlocks: number = await this.networkMonitor.checkForFork();
+            if (rollbackBlocks > 0) {
+                this.setForkingState(true);
+                await this.queue.stop();
 
-            await this.roundState.restore();
+                await this.removeBlocks(rollbackBlocks);
 
-            await this.getQueue().resume();
+                await this.queue.clear();
+                const lastStoredBlock = await this.database.getLastBlock();
+                this.stateStore.setLastDownloadedBlock(lastStoredBlock.data);
 
-            try {
-                if (blocks[0].ip) {
-                    const forkedBlock: Interfaces.IBlockData | undefined =
-                        await this.networkMonitor.downloadBlockAtHeight(blocks[0].ip, blocks[0].height - 1);
-                    if (forkedBlock) {
-                        this.enqueueBlocks([forkedBlock, ...blocks]);
+                this.stateStore.setNumberOfBlocksToRollback(0);
+                this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)} :wastebasket:`);
+
+                await this.roundState.restore();
+
+                this.setForkingState(false);
+
+                await this.queue.resume();
+                try {
+                    if (blocks[0].ip) {
+                        const forkedBlock: Interfaces.IBlockData | undefined =
+                            await this.networkMonitor.downloadBlockAtHeight(blocks[0].ip, blocks[0].height - 1);
+                        if (forkedBlock) {
+                            const blocksToEnqueue: Interfaces.IBlockData[] = [forkedBlock, ...blocks];
+                            this.stateStore.setLastDownloadedBlock(blocksToEnqueue[blocksToEnqueue.length - 1]);
+                            this.dispatch("NEWBLOCK");
+                            this.enqueueBlocks(blocksToEnqueue);
+                        }
                     }
+                } catch {
+                    //
                 }
-            } catch {
-                //
+                this.forkCheck = false;
+                return true;
             }
-            return true;
+
+            this.forkCheck = false;
         }
 
         return false;
     }
 
+    public setBlockUsername(block: Interfaces.IBlockData): void {
+        if (block.version === 0 && !block.username) {
+            if (this.walletRepository.hasByPublicKey(block.generatorPublicKey)) {
+                const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
+                    block.generatorPublicKey,
+                );
+
+                if (generatorWallet.hasAttribute("delegate.username")) {
+                    block.username = generatorWallet.getAttribute("delegate.username");
+                }
+            }
+        }
+    }
+
     private resetMissedBlocks(): void {
         this.missedBlocks = 0;
+    }
+
+    private async updateProductivity(initialStart: boolean): Promise<void> {
+        if (this.updating || this.getLastBlock().data.id === this.lastUpdatedBlockId) {
+            return;
+        }
+
+        this.updating = true;
+
+        const timestamp =
+            (new Date(Utils.formatTimestamp(this.getLastBlock().data.timestamp).unix * 1000).setUTCHours(0, 0, 0, 0) -
+                new Date(Managers.configManager.getMilestone(1).epoch).getTime()) /
+            1000;
+
+        try {
+            const productivityStatistics: Record<
+                string,
+                Record<string, number>
+            > = await this.missedBlockRepository.getBlockProductivity(
+                timestamp - (this.configuration.get("missedBlocksLookback") as number),
+            );
+
+            for (const [username, { missed, productivity }] of Object.entries(productivityStatistics)) {
+                const delegateWallet = this.walletRepository.findByUsername(username);
+
+                let oldProductivity: number | undefined = undefined;
+                if (delegateWallet.hasAttribute("delegate.productivity")) {
+                    oldProductivity = delegateWallet.getAttribute("delegate.productivity");
+                }
+
+                let newProductivity: number | undefined = undefined;
+                if (productivity !== null) {
+                    newProductivity = +productivity;
+                } else {
+                    newProductivity = undefined;
+                }
+
+                if (!initialStart && newProductivity !== oldProductivity) {
+                    this.events.dispatch(Enums.DelegateEvent.ProductivityChanged, {
+                        username,
+                        old: oldProductivity,
+                        new: newProductivity,
+                    });
+                }
+
+                if (newProductivity !== undefined) {
+                    delegateWallet.setAttribute("delegate.missedBlocks", +missed || 0);
+                    delegateWallet.setAttribute("delegate.productivity", newProductivity);
+                } else {
+                    delegateWallet.forgetAttribute("delegate.missedBlocks");
+                    delegateWallet.forgetAttribute("delegate.productivity");
+                }
+            }
+
+            this.lastUpdatedBlockId = this.getLastBlock().data.id;
+        } catch {
+            //
+        }
+
+        this.updating = false;
     }
 }

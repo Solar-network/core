@@ -1,12 +1,11 @@
 import Hapi from "@hapi/hapi";
 import { Crypto, Identities, Interfaces } from "@solar-network/crypto";
 import { Container, Contracts, Services, Utils } from "@solar-network/kernel";
+import { Socket } from "@solar-network/nes";
 import { DatabaseInterceptor } from "@solar-network/state";
 import { readJsonSync } from "fs-extra";
 
 import { constants } from "../../constants";
-import { Socket } from "../../hapi-nes/socket";
-import { getPeerIp } from "../../utils/get-peer-ip";
 import { getPeerConfig } from "../utils/get-peer-config";
 import { Controller } from "./controller";
 
@@ -30,11 +29,9 @@ export class PeerController extends Controller {
     private cachedHeader: Contracts.P2P.PeerPingResponse | undefined;
 
     public getPeers(request: GetPeersRequest, h: Hapi.ResponseToolkit): Contracts.P2P.PeerBroadcast[] {
-        const peerIp = getPeerIp(request.socket);
-
         return this.peerRepository
             .getPeers()
-            .filter((peer) => peer.ip !== peerIp)
+            .filter((peer) => peer.ip !== request.info.remoteAddress)
             .filter((peer) => peer.port !== -1)
             .sort((a, b) => {
                 Utils.assert.defined<number>(a.latency);
@@ -83,7 +80,7 @@ export class PeerController extends Controller {
                 height: lastBlock.data.height,
                 forgingAllowed: slotInfo.forgingStatus,
                 currentSlot: slotInfo.slotNumber,
-                header: lastBlock.getHeader(),
+                header: lastBlock.getHeader(false),
             },
             config: getPeerConfig(this.app),
         };
@@ -104,12 +101,15 @@ export class PeerController extends Controller {
 
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {
-            const { secrets } = readJsonSync(`${this.app.configPath()}/delegates.json`);
-            for (const secret of secrets) {
-                const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
-                if (delegates.includes(keys.publicKey) && publicKeys.includes(keys.publicKey)) {
-                    header.publicKeys.push(keys.publicKey);
-                    header.signatures.push(Crypto.Hash.signSchnorr(stateBuffer, keys));
+            const { keys } = readJsonSync(`${this.app.configPath()}/delegates.json`);
+            for (const key of keys) {
+                const keyPair: Interfaces.IKeyPair = Identities.Keys.fromPrivateKey(key);
+                if (
+                    delegates.includes(keyPair.publicKey.secp256k1) &&
+                    publicKeys.includes(keyPair.publicKey.secp256k1)
+                ) {
+                    header.publicKeys.push(keyPair.publicKey.secp256k1);
+                    header.signatures.push(Crypto.Hash.signSchnorr(stateBuffer, keyPair));
                 }
             }
         }

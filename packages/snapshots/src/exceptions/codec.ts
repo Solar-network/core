@@ -12,6 +12,18 @@ export class BlockEncodeException extends Exceptions.Base.Exception {
     }
 }
 
+export class MissedBlockDecodeException extends Exceptions.Base.Exception {
+    public constructor(timestamp: number | undefined, message: string) {
+        super(`Missed block with timestamp ${timestamp} could not be decoded. ${message}`);
+    }
+}
+
+export class MissedBlockEncodeException extends Exceptions.Base.Exception {
+    public constructor(timestamp: number, message: string) {
+        super(`Missed block with timestamp ${timestamp} could not be encoded. ${message}`);
+    }
+}
+
 export class TransactionDecodeException extends Exceptions.Base.Exception {
     public constructor(id: string | undefined, message: string) {
         super(`Transaction with id ${id} could not be decoded. ${message}`);

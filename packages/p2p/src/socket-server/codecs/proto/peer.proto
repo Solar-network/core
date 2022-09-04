@@ -42,9 +42,9 @@ message GetStatusResponse {
             string previousBlock = 5;
             uint32 height = 7;
             uint32 numberOfTransactions = 8;
-            string totalAmount = 9; // bignumber in core
-            string totalFee = 10; // bignumber in core
-            string reward = 11; // bignumber in core
+            string totalAmount = 9;
+            string totalFee = 10;
+            string reward = 11;
             uint32 payloadLength = 12;
             string payloadHash = 13;
             string generatorPublicKey = 14;

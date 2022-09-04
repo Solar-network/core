@@ -6,6 +6,7 @@ import { Handlers } from "@solar-network/transactions";
 import {
     AcceptBlockHandler,
     AlreadyForgedHandler,
+    ConflictingTransactionsHandler,
     ExceptionHandler,
     InvalidGeneratorHandler,
     InvalidRewardHandler,
@@ -46,6 +47,10 @@ export class BlockProcessor {
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
 
+    @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
+    @Container.tagged("state", "null")
+    private readonly transactionHandlerRegistry!: Handlers.Registry;
+
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")
     private readonly walletRepository!: Contracts.State.WalletRepository;
@@ -81,6 +86,11 @@ export class BlockProcessor {
 
         if (!(await this.validateReward(block))) {
             return this.app.resolve<InvalidRewardHandler>(InvalidRewardHandler).execute(block);
+        }
+
+        const containsConflictingTransactions: boolean = await this.checkBlockContainsConflictingTransactions(block);
+        if (containsConflictingTransactions) {
+            return this.app.resolve<ConflictingTransactionsHandler>(ConflictingTransactionsHandler).execute(block);
         }
 
         const containsForgedTransactions: boolean = await this.checkBlockContainsForgedTransactions(block);
@@ -125,6 +135,36 @@ export class BlockProcessor {
         }
 
         return true;
+    }
+
+    private async checkBlockContainsConflictingTransactions(block: Interfaces.IBlock): Promise<boolean> {
+        if (block.transactions.length > 0) {
+            const registeredHandlers = this.transactionHandlerRegistry.getRegisteredHandlers();
+
+            for (const registeredHandler of registeredHandlers) {
+                const handler = registeredHandler.getConstructor();
+                if (handler.unique) {
+                    const transactions: Interfaces.ITransaction[] = block.transactions.filter(
+                        (transaction) =>
+                            transaction.type === handler.type && transaction.typeGroup === handler.typeGroup,
+                    );
+                    const transactionsSet: Set<string> = new Set(
+                        transactions.map((transaction) => transaction.data.senderId),
+                    );
+                    if (transactionsSet.size !== transactions.length) {
+                        this.logger.warning(
+                            `Block ${block.data.height.toLocaleString()} disregarded, because it contains multiple ${
+                                handler.key
+                            } transactions from the same wallet :scroll:`,
+                        );
+
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private async checkBlockContainsForgedTransactions(block: Interfaces.IBlock): Promise<boolean> {
@@ -176,9 +216,9 @@ export class BlockProcessor {
         for (const transaction of block.transactions) {
             const data = transaction.data;
 
-            AppUtils.assert.defined<string>(data.senderPublicKey);
+            AppUtils.assert.defined<string>(data.senderId);
 
-            const sender: string = data.senderPublicKey;
+            const sender: string = data.senderId;
 
             if (nonceBySender[sender] === undefined) {
                 nonceBySender[sender] = this.walletRepository.getNonce(sender);
@@ -205,22 +245,19 @@ export class BlockProcessor {
     }
 
     private async validateGenerator(block: Interfaces.IBlock): Promise<boolean> {
-        const walletRepository = this.app.getTagged<Contracts.State.WalletRepository>(
-            Container.Identifiers.WalletRepository,
-            "state",
-            "blockchain",
-        );
-
-        if (!walletRepository.hasByPublicKey(block.data.generatorPublicKey)) {
+        if (!block.data.username || !this.walletRepository.hasByUsername(block.data.username)) {
             return false;
         }
 
-        const generatorWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(block.data.generatorPublicKey);
+        const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.data.username);
 
-        let generatorUsername: string;
-        try {
-            generatorUsername = generatorWallet.getAttribute("delegate.username");
-        } catch {
+        if (block.data.version === 0) {
+            if (delegateWallet.getPublicKey() !== block.data.generatorPublicKey) {
+                return false;
+            }
+        }
+
+        if (!delegateWallet.hasAttribute("delegate.rank")) {
             return false;
         }
 
@@ -241,25 +278,21 @@ export class BlockProcessor {
 
         if (!forgingDelegate) {
             this.logger.debug(
-                `Could not decide if delegate ${generatorUsername} is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
+                `Could not decide if delegate ${
+                    block.data.username
+                } is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
             );
-        } else if (forgingDelegate.getPublicKey() !== block.data.generatorPublicKey) {
-            AppUtils.assert.defined<string>(forgingDelegate.getPublicKey());
-
-            const forgingWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(
-                forgingDelegate.getPublicKey()!,
-            );
-            const forgingUsername: string = forgingWallet.getAttribute("delegate.username");
-
+        } else if (forgingDelegate.getAttribute("delegate.username") !== block.data.username) {
+            const forgingUsername: string = forgingDelegate.getAttribute("delegate.username");
             this.logger.warning(
-                `Delegate ${generatorUsername} is not allowed to forge in this slot, should be ${forgingUsername} :-1:`,
+                `Delegate ${block.data.username} is not allowed to forge in this slot, should be ${forgingUsername} :-1:`,
             );
 
             return false;
         }
 
         this.logger.debug(
-            `Delegate ${generatorUsername} is allowed to forge block ${block.data.height.toLocaleString()} :+1:`,
+            `Delegate ${block.data.username} is allowed to forge block ${block.data.height.toLocaleString()} :+1:`,
         );
 
         return true;
@@ -272,7 +305,9 @@ export class BlockProcessor {
             "blockchain",
         );
 
-        const generatorWallet: Contracts.State.Wallet = walletRepository.findByPublicKey(block.data.generatorPublicKey);
+        AppUtils.assert.defined<string>(block.data.username);
+
+        const generatorWallet: Contracts.State.Wallet = walletRepository.findByUsername(block.data.username);
 
         const { reward } = await this.roundState.getRewardForBlockInRound(block.data.height, generatorWallet);
 

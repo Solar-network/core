@@ -1,3 +1,4 @@
+import * as bls from "@noble/bls12-381";
 import { secp256k1 } from "bcrypto";
 import wif from "wif";
 
@@ -16,7 +17,10 @@ export class Keys {
         privateKey = privateKey instanceof Buffer ? privateKey : Buffer.from(privateKey, "hex");
 
         return {
-            publicKey: secp256k1.publicKeyCreate(privateKey, compressed).toString("hex"),
+            publicKey: {
+                secp256k1: secp256k1.publicKeyCreate(privateKey, compressed).toString("hex"),
+                bls12381: Buffer.from(bls.getPublicKey(privateKey)).toString("hex"),
+            },
             privateKey: privateKey.toString("hex"),
             compressed,
         };
@@ -38,7 +42,10 @@ export class Keys {
         }
 
         return {
-            publicKey: secp256k1.publicKeyCreate(privateKey, compressed).toString("hex"),
+            publicKey: {
+                secp256k1: secp256k1.publicKeyCreate(privateKey, compressed).toString("hex"),
+                bls12381: Buffer.from(bls.getPublicKey(privateKey)).toString("hex"),
+            },
             privateKey: privateKey.toString("hex"),
             compressed,
         };

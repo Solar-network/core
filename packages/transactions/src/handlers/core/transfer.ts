@@ -1,4 +1,4 @@
-import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { InsufficientBalanceError } from "../../errors";
@@ -28,14 +28,22 @@ export class TransferTransactionHandler extends TransactionHandler {
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
-            AppUtils.assert.defined<string>(transaction.senderPublicKey);
+            AppUtils.assert.defined<string>(transaction.senderId);
             AppUtils.assert.defined<object>(transaction.asset?.transfers);
 
-            const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
+
             for (const transfer of transaction.asset.transfers) {
                 const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
                 recipient.increaseBalance(transfer.amount);
-                sender.decreaseBalance(transfer.amount);
+                wallet.decreaseBalance(transfer.amount);
             }
         }
     }
@@ -70,11 +78,11 @@ export class TransferTransactionHandler extends TransactionHandler {
             Utils.BigNumber.ZERO,
         );
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
-        sender.decreaseBalance(totalTransfersAmount);
+        senderWallet.decreaseBalance(totalTransfersAmount);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -87,20 +95,20 @@ export class TransferTransactionHandler extends TransactionHandler {
             Utils.BigNumber.ZERO,
         );
 
-        AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
+        AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByPublicKey(transaction.data.senderPublicKey);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
-        sender.increaseBalance(totalPaymentsAmount);
+        senderWallet.increaseBalance(totalPaymentsAmount);
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
 
         for (const transfer of transaction.data.asset.transfers) {
-            const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
+            const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
-            recipient.increaseBalance(transfer.amount);
+            recipientWallet.increaseBalance(transfer.amount);
         }
     }
 
@@ -108,9 +116,9 @@ export class TransferTransactionHandler extends TransactionHandler {
         AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
 
         for (const transfer of transaction.data.asset.transfers) {
-            const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
+            const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
-            recipient.decreaseBalance(transfer.amount);
+            recipientWallet.decreaseBalance(transfer.amount);
         }
     }
 }

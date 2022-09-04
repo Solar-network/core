@@ -2141,6 +2141,9 @@ export namespace transactions {
         /** GetUnconfirmedTransactionsRequest countOnly */
         countOnly?: (boolean|null);
 
+        /** GetUnconfirmedTransactionsRequest exclude */
+        exclude?: (Uint8Array|null);
+
         /** GetUnconfirmedTransactionsRequest headers */
         headers?: (shared.IHeaders|null);
     }
@@ -2156,6 +2159,9 @@ export namespace transactions {
 
         /** GetUnconfirmedTransactionsRequest countOnly. */
         public countOnly: boolean;
+
+        /** GetUnconfirmedTransactionsRequest exclude. */
+        public exclude: Uint8Array;
 
         /** GetUnconfirmedTransactionsRequest headers. */
         public headers?: (shared.IHeaders|null);

@@ -43,7 +43,6 @@ export class Command extends Commands.Command {
             .setFlag("skipDiscovery", "Skip the initial peer discovery", Joi.boolean())
             .setFlag("ignoreMinimumNetworkReach", "Ignore the minimum network reach on start", Joi.boolean())
             .setFlag("launchMode", "The mode the relay will be launched in (seed only at the moment)", Joi.string())
-            .setFlag("bip39", "A delegate plain text passphrase. Referred to as BIP39", Joi.string())
             .setFlag("skipPrompts", "Skip prompts", Joi.boolean().default(false));
     }
 

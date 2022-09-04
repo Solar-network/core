@@ -2,7 +2,7 @@ import { badData } from "@hapi/boom";
 import Boom from "@hapi/boom";
 import { Server as HapiServer, ServerInjectOptions, ServerInjectResponse } from "@hapi/hapi";
 import inert from "@hapi/inert";
-import { Container, Contracts, Providers, Types, Utils } from "@solar-network/kernel";
+import { Container, Contracts, Enums, Providers, Types, Utils } from "@solar-network/kernel";
 import { randomBytes } from "crypto";
 import { readJsonSync } from "fs-extra";
 
@@ -195,6 +195,13 @@ export class Server {
      */
     private registerRoutes(): void {
         const swaggerJson = readJsonSync(`${__dirname}/../www/api.json`);
+
+        Object.keys(Enums)
+            .filter((event) => event.endsWith("Event"))
+            .forEach((event) =>
+                swaggerJson.components.schemas.webhook.properties.event.enum.push(...Object.values(Enums[event])),
+            );
+
         swaggerJson.servers.push({ url: this.configuration.getRequired<string>("basePath") });
         swaggerJson.info.version = this.app.version();
 

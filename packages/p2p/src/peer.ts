@@ -152,17 +152,37 @@ export class Peer implements Contracts.P2P.Peer {
     }
 
     public addInfraction(): void {
-        const timeNow: number = new Date().getTime() / 1000;
+        const timeNow: number = Date.now() / 1000;
         this.infractions.add(timeNow);
     }
 
     public isIgnored(): boolean {
-        const timeNow: number = new Date().getTime() / 1000;
+        const timeNow: number = Date.now() / 1000;
         for (const infraction of this.infractions) {
             if (timeNow - infraction > 600) {
                 this.infractions.delete(infraction);
             }
         }
         return this.infractions.size >= 3;
+    }
+
+    public toBSON() {
+        return this.getBasicPeer();
+    }
+
+    public toJSON() {
+        return this.getBasicPeer();
+    }
+
+    private getBasicPeer() {
+        return {
+            ip: this.ip,
+            port: this.port,
+            ports: this.ports,
+            version: this.version,
+            height: this.state ? this.state.height : undefined,
+            latency: this.latency,
+            plugins: this.plugins,
+        };
     }
 }

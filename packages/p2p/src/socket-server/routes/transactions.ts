@@ -11,8 +11,9 @@ export class TransactionsRoute extends Route {
             "/p2p/transactions/getUnconfirmedTransactions": {
                 id: "p2p.transactions.getUnconfirmedTransactions",
                 handler: controller.getUnconfirmedTransactions,
+                validation: transactionsSchemas.getUnconfirmedTransactions,
                 codec: getUnconfirmedTransactions,
-                maxBytes: 1024,
+                maxBytes: 524288,
             },
             "/p2p/transactions/postTransactions": {
                 id: "p2p.transactions.postTransactions",

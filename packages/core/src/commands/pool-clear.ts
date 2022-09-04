@@ -1,6 +1,6 @@
 import { Commands, Container } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
-import { removeSync } from "fs-extra";
+import { closeSync, openSync } from "fs";
 import Joi from "joi";
 
 /**
@@ -46,32 +46,24 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        this.actions.abortRunningProcess(`${this.getFlag("token")}-core`);
-        this.actions.abortRunningProcess(`${this.getFlag("token")}-forger`);
-        this.actions.abortRunningProcess(`${this.getFlag("token")}-relay`);
+        if (!this.getFlag("force")) {
+            const confirmation: any = (
+                await this.components.prompt({
+                    type: "confirm",
+                    name: "value",
+                    message: "Clear all unconfirmed transactions from your pool on next startup?",
+                })
+            ).value;
 
-        if (this.getFlag("force")) {
-            return this.removeFiles();
+            if (!confirmation) {
+                throw new Error("You'll need to confirm the input to continue");
+            }
         }
 
         try {
-            if (
-                await this.components.confirm(
-                    "Clearing the pool will remove all queued transactions from your node. Are you sure you want to clear?",
-                )
-            ) {
-                this.removeFiles();
-            }
-        } catch (err) {
-            this.components.fatal(err.message);
+            closeSync(openSync(this.app.getCorePath("temp", "clear-pool.lock"), "w"));
+        } catch {
+            //
         }
-    }
-
-    /**
-     * @private
-     * @memberof Command
-     */
-    private removeFiles() {
-        removeSync(this.app.getCorePath("data", "pool"));
     }
 }

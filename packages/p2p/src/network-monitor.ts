@@ -3,7 +3,7 @@ import { Container, Contracts, Enums, Providers, Services, Utils } from "@solar-
 import delay from "delay";
 import { readJsonSync } from "fs-extra";
 import prettyMs from "pretty-ms";
-import { gt, lt } from "semver";
+import { gt, lt, satisfies } from "semver";
 
 import { NetworkState } from "./network-state";
 import { Peer } from "./peer";
@@ -56,7 +56,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     private initialising = true;
     private lastPinged: number = 0;
-    private lastForkCheck: number = 0;
 
     private cachedTransactions: Map<string, number> = new Map();
 
@@ -422,7 +421,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                     );
 
                     return { forked: true, blocksToRollback: 5000 };
-                } else {
+                } else if (blocksToRollback > 0) {
                     this.logger.warning(
                         `Fork detected - rolling back ${Utils.pluralise(
                             "block",
@@ -432,6 +431,8 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                     );
 
                     return { forked: true, blocksToRollback };
+                } else {
+                    return { forked: false };
                 }
             } else {
                 this.logger.debug(
@@ -468,20 +469,15 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             return 0;
         }
 
-        const milestone = Managers.configManager.getMilestone();
-        const timeNow: number = new Date().getTime() / 1000;
-
-        if (timeNow - this.lastForkCheck > milestone.blockTime) {
-            this.lastForkCheck = timeNow;
-            await delay(1000); // give time for the block to be widely propagated
-            let networkStatus = await this.checkNetworkHealth(true); // fast check using our current peers
-            if (!networkStatus.forked) {
-                networkStatus = await this.checkNetworkHealth(); // slower check with the entire network
-            }
-            if (networkStatus.forked && networkStatus.blocksToRollback! > 0) {
-                return networkStatus.blocksToRollback!;
-            }
+        await delay(1000); // give time for the block to be widely propagated
+        let networkStatus = await this.checkNetworkHealth(true); // fast check using our current peers
+        if (!networkStatus.forked) {
+            networkStatus = await this.checkNetworkHealth(); // slower check with the entire network
         }
+        if (networkStatus.forked && networkStatus.blocksToRollback! > 0) {
+            return networkStatus.blocksToRollback!;
+        }
+
         return 0;
     }
 
@@ -667,22 +663,27 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         return downloadedBlocks;
     }
 
-    public async downloadTransactions(): Promise<Buffer[]> {
+    public async downloadTransactions(exclude: string[]): Promise<Buffer[]> {
         const transactions: Set<String> = new Set();
 
-        const peersAll: Contracts.P2P.Peer[] = this.repository.getPeers();
+        const peers: Contracts.P2P.Peer[] = this.repository
+            .getPeers()
+            .filter((peer) => satisfies(peer.version!, ">=4.1.0"));
 
         const peersThatWouldThrottle: boolean[] = await Promise.all(
-            peersAll.map((peer) => this.communicator.wouldThrottleOnFetchingTransactions(peer)),
+            peers.map((peer) => this.communicator.wouldThrottleOnFetchingTransactions(peer)),
         );
 
-        const peersToTry = Utils.shuffle(peersAll)
-            .filter((peer, index) => !peersThatWouldThrottle[index])
+        const peersToTry = Utils.shuffle(peers)
+            .filter((_, index) => !peersThatWouldThrottle[index])
             .slice(0, 5);
 
         for (const peer of peersToTry) {
             try {
-                const downloadedTransactions: Buffer[] = await this.communicator.getUnconfirmedTransactions(peer);
+                const downloadedTransactions: Buffer[] = await this.communicator.getUnconfirmedTransactions(
+                    peer,
+                    exclude,
+                );
                 for (const transaction of downloadedTransactions) {
                     transactions.add(transaction.toString("hex"));
                 }
@@ -692,7 +693,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
 
         const acceptedTransactions: Buffer[] = [];
-        const timeNow: number = Math.ceil(new Date().getTime() / 1000);
+        const timeNow: number = Math.ceil(Date.now() / 1000);
 
         for (const [id, expiryTime] of this.cachedTransactions.entries()) {
             if (timeNow - expiryTime > 30) {
@@ -850,11 +851,14 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         const delegatesOnThisNode: string[] = [];
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {
-            const { secrets } = readJsonSync(`${this.app.configPath()}/delegates.json`);
-            for (const secret of secrets) {
-                const keys: Interfaces.IKeyPair = Identities.Keys.fromPassphrase(secret);
-                if (delegates.includes(keys.publicKey) && publicKeys.includes(keys.publicKey)) {
-                    delegatesOnThisNode.push(keys.publicKey);
+            const { keys } = readJsonSync(`${this.app.configPath()}/delegates.json`);
+            for (const key of keys) {
+                const keyPair: Interfaces.IKeyPair = Identities.Keys.fromPrivateKey(key);
+                if (
+                    delegates.includes(keyPair.publicKey.secp256k1) &&
+                    publicKeys.includes(keyPair.publicKey.secp256k1)
+                ) {
+                    delegatesOnThisNode.push(keyPair.publicKey.secp256k1);
                 }
             }
         }
@@ -876,7 +880,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     }
 
     private pingAll(): void {
-        const timeNow: number = new Date().getTime() / 1000;
+        const timeNow: number = Date.now() / 1000;
         if (timeNow - this.lastPinged > 10) {
             this.cleansePeers({ fast: true, forcePing: true, log: false, skipCommonBlocks: true });
             this.lastPinged = timeNow;

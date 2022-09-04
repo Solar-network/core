@@ -1,3 +1,5 @@
+import { Enums } from "@solar-network/kernel";
+
 export const defaults = {
     server: {
         http: {
@@ -36,9 +38,6 @@ export const defaults = {
                 ? process.env.CORE_API_RATE_LIMIT_BLACKLIST.split(",")
                 : [],
         },
-        pagination: {
-            limit: 100,
-        },
         socketTimeout: 5000,
         whitelist: ["*"],
         trustProxy: !!process.env.CORE_API_TRUST_PROXY,
@@ -46,5 +45,23 @@ export const defaults = {
     options: {
         basePath: "/api",
         estimateTotalCount: !!process.env.CORE_API_ESTIMATED_TOTAL_COUNT,
+    },
+    ws: {
+        banSeconds: 10,
+        disableGet: !!process.env.CORE_API_WS_GET_DISABLED,
+        disablePost: !!process.env.CORE_API_WS_POST_DISABLED,
+        enabled: !process.env.CORE_API_WS_DISABLED,
+        events: [
+            Enums.BlockEvent.Applied,
+            Enums.BlockEvent.Reverted,
+            Enums.DelegateEvent.ProductivityChanged,
+            Enums.ForgerEvent.Missing,
+            Enums.RoundEvent.Created,
+            Enums.RoundEvent.Missed,
+            Enums.TransactionEvent.Applied,
+            Enums.TransactionEvent.Reverted,
+            Enums.VoteEvent.Vote,
+        ],
+        path: "/ws",
     },
 };

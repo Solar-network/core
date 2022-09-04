@@ -53,7 +53,7 @@ export class Command extends Commands.Command {
         this.definition
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("reset", "Using the --reset flag will overwrite existing configuration", Joi.boolean());
+            .setFlag("force", "Overwrites any existing configuration", Joi.boolean());
     }
 
     /**
@@ -110,12 +110,12 @@ export class Command extends Commands.Command {
             {
                 title: "Prepare directories",
                 task: () => {
-                    if (flags.reset) {
+                    if (flags.force) {
                         removeSync(configDest);
                     }
 
                     if (existsSync(configDest)) {
-                        this.components.fatal("Please use the --reset flag if you wish to reset your configuration");
+                        this.components.fatal("Please use the --force flag if you wish to overwrite the existing configuration");
                     }
 
                     if (!existsSync(configSrc)) {

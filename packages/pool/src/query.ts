@@ -76,10 +76,10 @@ export class Query implements Contracts.Pool.Query {
         return new QueryIterable(iterable);
     }
 
-    public getAllBySender(senderPublicKey: string): QueryIterable {
+    public getAllBySender(senderId: string): QueryIterable {
         const iterable: Iterable<Interfaces.ITransaction> = function* (this: Query) {
-            if (this.mempool.hasSenderMempool(senderPublicKey)) {
-                const transactions = this.mempool.getSenderMempool(senderPublicKey).getFromEarliest();
+            if (this.mempool.hasSenderMempool(senderId)) {
+                const transactions = this.mempool.getSenderMempool(senderId).getFromEarliest();
                 for (const transaction of transactions) {
                     yield transaction;
                 }

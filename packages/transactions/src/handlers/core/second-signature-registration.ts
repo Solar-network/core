@@ -1,4 +1,4 @@
-import { Identities, Interfaces, Transactions } from "@solar-network/crypto";
+import { Enums, Interfaces, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Utils } from "@solar-network/kernel";
 
 import { NotSupportedForMultiSignatureWalletError, SecondSignatureAlreadyRegisteredError } from "../../errors";
@@ -31,10 +31,18 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
         };
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
-            Utils.assert.defined<string>(transaction.senderPublicKey);
+            Utils.assert.defined<string>(transaction.senderId);
             Utils.assert.defined<string>(transaction.asset?.signature?.publicKey);
 
-            const wallet = this.walletRepository.findByPublicKey(transaction.senderPublicKey);
+            const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
+            if (
+                transaction.headerType === Enums.TransactionHeaderType.Standard &&
+                wallet.getPublicKey() === undefined
+            ) {
+                wallet.setPublicKey(transaction.senderPublicKey);
+                this.walletRepository.index(wallet);
+            }
+
             wallet.setAttribute("secondPublicKey", transaction.asset.signature.publicKey);
         }
     }
@@ -51,12 +59,10 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
             throw new SecondSignatureAlreadyRegisteredError();
         }
 
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        Utils.assert.defined<string>(transaction.data.senderId);
         Utils.assert.defined<string>(transaction.data.asset?.signature?.publicKey);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         if (senderWallet.hasMultiSignature()) {
             throw new NotSupportedForMultiSignatureWalletError();
@@ -66,18 +72,16 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        Utils.assert.defined<string>(transaction.data.senderId);
 
         const hasSender: boolean = this.poolQuery
-            .getAllBySender(transaction.data.senderPublicKey)
+            .getAllBySender(transaction.data.senderId)
             .whereKind(transaction)
             .has();
 
         if (hasSender) {
             throw new Contracts.Pool.PoolError(
-                `${Identities.Address.fromPublicKey(
-                    transaction.data.senderPublicKey,
-                )} already has a second signature registration transaction in the pool`,
+                `${transaction.data.senderId} already has a second signature registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }
@@ -86,11 +90,9 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        Utils.assert.defined<string>(transaction.data.senderId);
 
-        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-            transaction.data.senderPublicKey,
-        );
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         Utils.assert.defined<string>(transaction.data.asset?.signature?.publicKey);
 
@@ -100,9 +102,9 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        Utils.assert.defined<string>(transaction.data.senderPublicKey);
+        Utils.assert.defined<string>(transaction.data.senderId);
 
-        this.walletRepository.findByPublicKey(transaction.data.senderPublicKey).forgetAttribute("secondPublicKey");
+        this.walletRepository.findByAddress(transaction.data.senderId).forgetAttribute("secondPublicKey");
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}

@@ -37,6 +37,21 @@ export class BlockHistoryService implements Contracts.Shared.BlockHistoryService
         return this.modelConverter.getBlockData(models);
     }
 
+    public async getBlocksLike(criteria: string): Promise<Contracts.Shared.BlockSearchResource[]> {
+        return (
+            await this.listByCriteria({ id: criteria.toLowerCase() }, [{ property: "id", direction: "asc" }], {
+                offset: 0,
+                limit: 100,
+            })
+        ).results.map((block: Interfaces.IBlockData) => ({
+            height: block.height,
+            id: block.id,
+            timestamp: block.timestamp,
+            transactions: block.numberOfTransactions,
+            username: block.username,
+        }));
+    }
+
     public async listByCriteria(
         criteria: Contracts.Shared.OrBlockCriteria,
         sorting: Contracts.Search.Sorting,

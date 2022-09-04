@@ -18,6 +18,12 @@ export class CheckLater implements Action {
     @Container.inject(Container.Identifiers.PeerNetworkMonitor)
     private readonly peerNetworkMonitor!: Contracts.P2P.NetworkMonitor;
 
+    @Container.inject(Container.Identifiers.PoolQuery)
+    private readonly poolQuery!: Contracts.Pool.Query;
+
+    @Container.inject(Container.Identifiers.RoundState)
+    private readonly roundState!: Contracts.State.RoundState;
+
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
 
@@ -34,10 +40,10 @@ export class CheckLater implements Action {
 
         const epoch = Math.floor(new Date(Managers.configManager.getMilestone().epoch).getTime() / 1000);
 
-        let timeNow = Math.floor(new Date().getTime() / 1000);
+        let timeNow = Math.floor(Date.now() / 1000);
         while (timeNow < epoch) {
             await delay(Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup));
-            timeNow = Math.floor(new Date().getTime() / 1000);
+            timeNow = Math.floor(Date.now() / 1000);
             if (timeNow < epoch) {
                 const seconds = epoch - timeNow;
 
@@ -77,6 +83,8 @@ export class CheckLater implements Action {
                     log: false,
                     skipCommonBlocks: true,
                 });
+                let lastBlockId: string | undefined;
+
                 setInterval(async () => {
                     if (this.stateStore.getBlockchain().value !== "idle") {
                         return;
@@ -92,46 +100,72 @@ export class CheckLater implements Action {
                             2000,
                             true,
                         );
+                        if (this.stateStore.getBlockchain().value !== "idle") {
+                            return;
+                        }
                         lastBlock = this.app
                             .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                             .getLastBlock();
                         blocks = blocks.filter((block) => block.height > lastBlock.data.height);
                         if (blocks.length) {
-                            if (
-                                blocks.length === 1 &&
-                                this.walletRepository.hasByPublicKey(blocks[0].generatorPublicKey)
-                            ) {
-                                const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(
-                                    blocks[0].generatorPublicKey,
-                                );
+                            if (blocks.length === 1) {
+                                this.blockchain.setBlockUsername(blocks[0]);
+                                const { height, numberOfTransactions, id, ip, reward, username } = blocks[0];
 
-                                let generator: string;
-                                try {
-                                    generator = `delegate ${generatorWallet.getAttribute(
-                                        "delegate.username",
-                                    )} (#${generatorWallet.getAttribute("delegate.rank")})`;
-                                } catch {
-                                    generator = "an unknown delegate";
+                                if (!username || !this.walletRepository.hasByUsername(username)) {
+                                    return;
                                 }
 
-                                this.logger.info(
-                                    `Downloaded new block forged by ${generator} at height ${blocks[0].height.toLocaleString()} with ${Utils.formatSatoshi(
-                                        blocks[0].reward,
-                                    )} reward :package:`,
-                                );
+                                const generatorWallet: Contracts.State.Wallet =
+                                    this.walletRepository.findByUsername(username);
 
-                                this.logger.debug(`The id of the new block is ${blocks[0].id}`);
+                                if (!generatorWallet.hasAttribute("delegate.rank")) {
+                                    return;
+                                }
 
-                                this.logger.debug(
-                                    `It contains ${AppUtils.pluralise(
-                                        "transaction",
-                                        blocks[0].numberOfTransactions,
-                                        true,
-                                    )} and was downloaded from ${blocks[0].ip}`,
-                                );
+                                if (lastBlockId !== `${id},${lastBlock.data.id}`) {
+                                    const rank = generatorWallet.getAttribute("delegate.rank");
+                                    const generator: string = `delegate ${username} (#${rank})`;
 
-                                this.blockchain.handleIncomingBlock(blocks[0], false, blocks[0].ip!, false);
+                                    this.logger.info(
+                                        `Downloaded new block forged by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
+                                            reward,
+                                        )} reward :package:`,
+                                    );
+
+                                    const { dynamicReward } = Managers.configManager.getMilestone();
+
+                                    if (
+                                        dynamicReward &&
+                                        dynamicReward.enabled &&
+                                        reward.isEqualTo(dynamicReward.secondaryReward)
+                                    ) {
+                                        const { alreadyForged } = await this.roundState.getRewardForBlockInRound(
+                                            height,
+                                            generatorWallet,
+                                        );
+                                        if (alreadyForged && !reward.isEqualTo(dynamicReward.ranks[rank])) {
+                                            this.logger.info(
+                                                `The reward was reduced because ${username} already forged in this round :fire:`,
+                                            );
+                                        }
+                                    }
+
+                                    this.logger.debug(`The id of the new block is ${id}`);
+
+                                    this.logger.debug(
+                                        `It contains ${AppUtils.pluralise(
+                                            "transaction",
+                                            numberOfTransactions,
+                                            true,
+                                        )} and was downloaded from ${ip}`,
+                                    );
+
+                                    this.blockchain.handleIncomingBlock(blocks[0], false, ip!, false);
+                                    lastBlockId = `${id},${lastBlock.data.id}`;
+                                }
                             } else {
+                                this.blockchain.dispatch("NEWBLOCK");
                                 this.blockchain.enqueueBlocks(blocks);
                             }
                         }
@@ -144,7 +178,9 @@ export class CheckLater implements Action {
                     if (this.stateStore.getBlockchain().value !== "idle") {
                         return;
                     }
-                    const transactions: Buffer[] = await this.peerNetworkMonitor.downloadTransactions();
+
+                    const exclude: string[] = Array.from(this.poolQuery.getFromHighestPriority()).map((t) => t.id!);
+                    const transactions: Buffer[] = await this.peerNetworkMonitor.downloadTransactions(exclude);
                     if (transactions.length > 0) {
                         await this.processor.process(transactions);
                     }

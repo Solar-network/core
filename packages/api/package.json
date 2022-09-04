@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/api",
-    "version": "4.0.2",
+    "version": "4.1.0",
     "description": "Public API for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
@@ -22,6 +22,7 @@
         "@solar-network/crypto": "workspace:*",
         "@solar-network/database": "workspace:*",
         "@solar-network/kernel": "workspace:*",
+        "@solar-network/nes": "workspace:*",
         "@solar-network/transactions": "workspace:*",
         "@hapi/boom": "9.1.4",
         "@hapi/hapi": "20.2.1",
@@ -38,6 +39,7 @@
         "@types/hapi__boom": "7.4.1",
         "@types/hapi__hapi": "20.0.9",
         "@types/hapi__joi": "17.1.7",
+        "@types/hapi__nes": "11.0.5",
         "@types/ip": "1.1.0",
         "@types/qs": "6.9.7",
         "@types/semver": "6.2.3",

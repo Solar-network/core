@@ -1,5 +1,3 @@
-import { totalmem } from "os";
-
 import { Application } from "../application";
 import { Spinner } from "../components";
 import { AnyObject, ProcessOptions } from "../contracts";
@@ -58,8 +56,6 @@ export class DaemoniseProcess {
 
             flagsProcess.name = processName;
 
-            const potato: boolean = totalmem() < 2 * 1024 ** 3;
-
             spinner.start();
 
             await this.processManager.start(
@@ -70,7 +66,6 @@ export class DaemoniseProcess {
                             NODE_ENV: "production",
                             CORE_ENV: flags.env,
                         },
-                        node_args: potato ? { max_old_space_size: 500 } : undefined,
                     },
                 },
                 flagsProcess,

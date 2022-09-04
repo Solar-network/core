@@ -6,6 +6,13 @@ import * as Schemas from "../schemas";
 
 export type WalletCriteria = Contracts.Search.StandardCriteriaOf<WalletResource>;
 
+export type WalletSearchResource = {
+    address: string;
+    publicKey?: string;
+    balance: Utils.BigNumber;
+    votes: object;
+};
+
 export type WalletResource = {
     address: string;
     publicKey?: string;

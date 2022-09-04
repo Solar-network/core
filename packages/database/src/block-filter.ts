@@ -23,7 +23,7 @@ export class BlockFilter implements Contracts.Database.BlockFilter {
             switch (key) {
                 case "id":
                     return handleOrCriteria(criteria.id!, async (c) => {
-                        return { property: "id", op: "equal", value: c };
+                        return { property: "id", op: "like", pattern: c + "%" };
                     });
                 case "version":
                     return handleOrCriteria(criteria.version!, async (c) => {
@@ -53,6 +53,10 @@ export class BlockFilter implements Contracts.Database.BlockFilter {
                     return handleOrCriteria(criteria.totalFee!, async (c) => {
                         return handleNumericCriteria("totalFee", c);
                     });
+                case "burnedFee":
+                    return handleOrCriteria(criteria.burnedFee!, async (c) => {
+                        return handleNumericCriteria("burnedFee", c);
+                    });
                 case "reward":
                     return handleOrCriteria(criteria.reward!, async (c) => {
                         return handleNumericCriteria("reward", c);
@@ -68,6 +72,10 @@ export class BlockFilter implements Contracts.Database.BlockFilter {
                 case "generatorPublicKey":
                     return handleOrCriteria(criteria.generatorPublicKey!, async (c) => {
                         return { property: "generatorPublicKey", op: "equal", value: c };
+                    });
+                case "username":
+                    return handleOrCriteria(criteria.username!, async (c) => {
+                        return { property: "username", op: "equal", value: c };
                     });
                 case "blockSignature":
                     return handleOrCriteria(criteria.blockSignature!, async (c) => {

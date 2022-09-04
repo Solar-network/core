@@ -1,12 +1,11 @@
 import { SATOSHI } from "../constants";
-import { ITransactionData } from "../interfaces";
+import { IDonation, ITransactionData } from "../interfaces";
 import { configManager } from "../managers";
 import { Base58 } from "./base58";
 import { BigNumber } from "./big-number";
 import { calculateBlockTime, isNewBlockTime } from "./block-time-calculator";
 import { ByteBuffer } from "./byte-buffer";
 import { ByteBufferArray } from "./byte-buffer-array";
-import { isLocalHost, isValidPeer } from "./is-valid-peer";
 import { calculateReward } from "./reward-calculator";
 import { sortVotes } from "./sort-votes";
 
@@ -101,19 +100,19 @@ export const isSupportedTransactionVersion = (version: number): boolean => {
     return version === 3 || (version === 2 && (acceptLegacySchnorrTransactions || !bip340));
 };
 
-export const calculateDevFund = (height: number, reward: BigNumber): Record<string, BigNumber> => {
+export const calculateDonations = (height: number, reward: BigNumber): Record<string, BigNumber> => {
     const constants = configManager.getMilestone(height);
-    const devFund = {};
+    const donations = {};
 
-    if (!constants.devFund) {
+    if (!constants.donations) {
         return {};
     }
 
-    for (const [wallet, percent] of Object.entries(constants.devFund)) {
-        devFund[wallet] = reward.times(Math.round((percent as number) * 100)).dividedBy(10000);
+    for (const [wallet, { percent }] of Object.entries(constants.donations as Record<string, IDonation>)) {
+        donations[wallet] = reward.times(Math.round(percent * 100)).dividedBy(10000);
     }
 
-    return devFund;
+    return donations;
 };
 
 export {
@@ -121,8 +120,6 @@ export {
     BigNumber,
     ByteBuffer,
     ByteBufferArray,
-    isValidPeer,
-    isLocalHost,
     calculateBlockTime,
     isNewBlockTime,
     calculateReward,

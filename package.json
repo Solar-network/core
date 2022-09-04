@@ -44,7 +44,7 @@
         "husky": "7.0.4",
         "js-yaml": "4.1.0",
         "lint-staged": "11.2.6",
-        "moment-timezone": "0.5.33",
+        "moment-timezone": "0.5.35",
         "npm-check-updates": "11.8.5",
         "prettier": "2.4.1",
         "prompts": "2.4.2",
@@ -66,10 +66,8 @@
     },
     "pnpm": {
         "overrides": {
-            "minimist@<1.2.6": ">=1.2.6",
-            "browserslist@>=4.0.0 <4.16.5": ">=4.16.5",
             "got@<11.8.5": ">=11.8.5",
-            "moment@>=2.18.0 <2.29.4": ">=2.29.4"
+            "browserslist@>=4.0.0 <4.16.5": ">=4.16.5"
         }
     }
 }

@@ -1,6 +1,5 @@
 import { Container, Contracts } from "@solar-network/kernel";
 
-import { getPeerIp } from "../../utils/get-peer-ip";
 import { BlocksRoute } from "../routes/blocks";
 import { PeerRoute } from "../routes/peer";
 import { TransactionsRoute } from "../routes/transactions";
@@ -24,7 +23,7 @@ export class VersionPlugin {
             type: "onPostAuth",
             method: async (request, h) => {
                 if (routesConfigByPath[request.path]) {
-                    const peerIp = request.socket ? getPeerIp(request.socket) : request.info.remoteAddress;
+                    const peerIp = request.info.remoteAddress;
                     const version = request.payload?.headers?.version;
                     if (version && this.peerRepository.hasPeer(peerIp)) {
                         const peer = this.peerRepository.getPeer(peerIp);

@@ -74,7 +74,7 @@ export class DatabaseInteraction {
             await this.emitTransactionEvents(transaction);
         }
 
-        this.events.dispatch(Enums.BlockEvent.Applied, block.data);
+        this.events.dispatch(Enums.BlockEvent.Applied, block.getHeader());
     }
 
     public async revertBlock(block: Interfaces.IBlock): Promise<void> {
@@ -85,7 +85,7 @@ export class DatabaseInteraction {
             this.events.dispatch(Enums.TransactionEvent.Reverted, block.transactions[i].data);
         }
 
-        this.events.dispatch(Enums.BlockEvent.Reverted, block.data);
+        this.events.dispatch(Enums.BlockEvent.Reverted, block.getHeader());
     }
 
     public async restoreCurrentRound(): Promise<void> {

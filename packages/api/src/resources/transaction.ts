@@ -33,9 +33,7 @@ export class TransactionResource implements Resource {
      * @memberof Resource
      */
     public transform(resource: Interfaces.ITransactionData): object {
-        AppUtils.assert.defined<string>(resource.senderPublicKey);
-
-        const sender: string = this.walletRepository.findByPublicKey(resource.senderPublicKey).getAddress();
+        AppUtils.assert.defined<string>(resource.senderId);
 
         let amount: string | undefined =
             typeof resource.amount !== "undefined" && !resource.amount.isZero() ? resource.amount.toFixed() : undefined;
@@ -51,6 +49,7 @@ export class TransactionResource implements Resource {
 
         return {
             id: resource.id,
+            blockHeight: resource.blockHeight,
             blockId: resource.blockId,
             version: resource.version,
             type: resource.type,
@@ -58,7 +57,7 @@ export class TransactionResource implements Resource {
             amount,
             fee: resource.fee.toFixed(),
             burnedFee: typeof resource.burnedFee !== "undefined" ? resource.burnedFee.toFixed() : undefined,
-            sender,
+            sender: resource.senderId,
             senderPublicKey: resource.senderPublicKey,
             recipient: resource.recipientId,
             signature: resource.signature,
@@ -67,8 +66,6 @@ export class TransactionResource implements Resource {
             memo: resource.memo,
             asset: resource.asset,
             confirmations: 0,
-            timestamp:
-                typeof resource.timestamp !== "undefined" ? AppUtils.formatTimestamp(resource.timestamp) : undefined,
             nonce: resource.nonce?.toFixed(),
         };
     }

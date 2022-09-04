@@ -63,6 +63,11 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
         const lastHeight = this.blockchain.getLastBlock().data.height;
         const fromHeight = this.blocks[0].height;
         const toHeight = this.blocks[this.blocks.length - 1].height;
+
+        if (fromHeight <= lastHeight) {
+            return;
+        }
+
         this.logger.debug(
             `Processing chunk of blocks [${fromHeight.toLocaleString()}, ${toHeight.toLocaleString()}] on top of ${lastHeight.toLocaleString()}`,
         );
@@ -76,14 +81,17 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
             this.blockchain.clearQueue();
             this.blockchain.resetLastDownloadedBlock();
 
-            if (!(await this.blockchain.checkForFork(this.blocks))) {
-                const lastBlockData: Interfaces.IBlockData = this.blockchain.getLastBlock().data;
-                if (lastBlockData.height !== this.blocks[0].height || lastBlockData.id !== this.blocks[0].id) {
-                    this.logger.warning(
-                        Utils.getBlockNotChainedErrorMessage(lastBlockData, this.blocks[0], blockTimeLookup),
-                    );
+            const blocks: Interfaces.IBlockData[] = this.blocks;
+            const lastBlockData: Interfaces.IBlockData = this.blockchain.getLastBlock().data;
+            setImmediate(async () => {
+                if (!this.blockchain.isCheckingForFork() && !(await this.blockchain.checkForFork(blocks))) {
+                    if (lastBlockData.height !== blocks[0].height || lastBlockData.id !== blocks[0].id) {
+                        this.logger.warning(
+                            Utils.getBlockNotChainedErrorMessage(lastBlockData, blocks[0], blockTimeLookup),
+                        );
+                    }
                 }
-            }
+            });
 
             return;
         }

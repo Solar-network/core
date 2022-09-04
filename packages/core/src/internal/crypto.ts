@@ -1,14 +1,13 @@
 import { existsSync } from "fs-extra";
 import { join } from "path";
 
-import { MissingConfigFile, PassphraseNotDetected } from "../exceptions/crypto";
+import { KeysNotDetected, MissingConfigFile } from "../exceptions/crypto";
 
 export const checkForPassphrase = (config?: string): void => {
     if (!config && process.env.CORE_PATH_CONFIG) {
         config = process.env.CORE_PATH_CONFIG;
     }
 
-    // @todo: update to follow new config convention
     const configDelegates = join(config!, "delegates.json");
 
     if (!existsSync(configDelegates)) {
@@ -17,7 +16,7 @@ export const checkForPassphrase = (config?: string): void => {
 
     const delegates = require(configDelegates);
 
-    if (!delegates.secrets?.length) {
-        throw new PassphraseNotDetected();
+    if (!delegates.keys?.length && !delegates.secrets?.length) {
+        throw new KeysNotDetected();
     }
 };

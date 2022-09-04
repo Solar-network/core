@@ -352,7 +352,7 @@ export class StateStore implements Contracts.State.StateStore {
 
         if (this.blockPing.block.height === incomingBlock.height && this.blockPing.block.id === incomingBlock.id) {
             this.blockPing.count++;
-            this.blockPing.last = new Date().getTime();
+            this.blockPing.last = Date.now();
 
             return true;
         }
@@ -374,8 +374,8 @@ export class StateStore implements Contracts.State.StateStore {
 
         this.blockPing = {
             count: fromForger ? 0 : 1,
-            first: new Date().getTime(),
-            last: new Date().getTime(),
+            first: Date.now(),
+            last: Date.now(),
             fromForger: fromForger,
             block,
         };

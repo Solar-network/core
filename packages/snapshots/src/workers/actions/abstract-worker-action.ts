@@ -1,5 +1,3 @@
-import { Managers } from "@solar-network/crypto";
-import { Models } from "@solar-network/database";
 import { Container, Contracts } from "@solar-network/kernel";
 import { singular } from "pluralize";
 import { Readable } from "stream";
@@ -73,12 +71,6 @@ export abstract class AbstractWorkerAction implements Worker.WorkerAction {
     protected getVerifyFunction(): Function {
         // passing a codec method as last parameter. Example: Verifier.verifyBlock
         return Verifier[`verify${this.getSingularCapitalisedTableName()}`];
-    }
-
-    protected applyGenesisBlockFix(block: Models.Block): void {
-        if (block.height === 1) {
-            block.id = Managers.configManager.get<string>("genesisBlock.id")!;
-        }
     }
 
     public abstract start(): Promise<void>;

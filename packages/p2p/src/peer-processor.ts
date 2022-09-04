@@ -1,9 +1,9 @@
-import { Utils } from "@solar-network/crypto";
 import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/kernel";
 import delay from "delay";
 
 import { PeerFactory } from "./contracts";
 import { DisconnectInvalidPeers } from "./listeners";
+import { isValidPeer } from "./utils";
 
 // todo: review the implementation
 @Container.injectable()
@@ -58,7 +58,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
             return false;
         }
 
-        if (!Utils.isValidPeer(peer) || this.repository.hasPendingPeer(peer.ip)) {
+        if (!isValidPeer(peer) || this.repository.hasPendingPeer(peer.ip)) {
             return false;
         }
 
@@ -96,17 +96,25 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
 
         return new Promise<void>((resolve, reject) => {
             let isResolved = false;
+            let isRejected = false;
 
             const resolvesFirst = () => {
-                if (!isResolved) {
+                if (!isResolved && !isRejected) {
                     isResolved = true;
                     resolve();
                 }
             };
 
-            this.communicator.ping(peer, verifyTimeout, blockTimeLookup).then(resolvesFirst).catch(reject);
+            const rejectsFirst = () => {
+                if (!isResolved && !isRejected) {
+                    isRejected = true;
+                    reject();
+                }
+            };
 
-            delay(verifyTimeout).finally(isResolved ? resolvesFirst : reject);
+            this.communicator.ping(peer, verifyTimeout, blockTimeLookup).then(resolvesFirst).catch(rejectsFirst);
+
+            delay(verifyTimeout).finally(isResolved ? resolvesFirst : rejectsFirst);
         });
     }
 

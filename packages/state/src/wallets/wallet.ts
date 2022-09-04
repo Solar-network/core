@@ -1,4 +1,4 @@
-import { Interfaces, Utils } from "@solar-network/crypto";
+import { Enums, Utils } from "@solar-network/crypto";
 import { Contracts, Services, Utils as AppUtils } from "@solar-network/kernel";
 
 import { WalletEvent } from "./wallet-event";
@@ -7,7 +7,6 @@ export class Wallet implements Contracts.State.Wallet {
     protected publicKey: string | undefined;
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
-    protected stateHistory: Record<string, any[]> = {};
     protected voteBalances: Record<string, Utils.BigNumber> = {};
 
     public constructor(
@@ -16,13 +15,8 @@ export class Wallet implements Contracts.State.Wallet {
         protected readonly isClone: boolean,
         protected readonly events?: Contracts.Kernel.EventDispatcher,
     ) {
-        if (!this.getStateHistory("votes") && !isClone) {
-            this.initialiseStateHistory("votes");
-            this.addStateHistory("votes", {});
-        }
-
         if (!this.hasAttribute("votes") && !isClone) {
-            this.setAttribute("votes", this.getCurrentStateHistory("votes").value);
+            this.setAttribute("votes", {});
         }
     }
 
@@ -32,6 +26,23 @@ export class Wallet implements Contracts.State.Wallet {
 
     public getPublicKey(): string | undefined {
         return this.publicKey;
+    }
+
+    public hasPublicKey(): boolean {
+        return this.publicKey !== undefined;
+    }
+
+    public forgetPublicKey(): void {
+        const previousValue = this.publicKey;
+
+        this.publicKey = undefined;
+
+        this.events?.dispatchSync(WalletEvent.PropertySet, {
+            publicKey: this.publicKey,
+            key: "publicKey",
+            previousValue,
+            wallet: this,
+        });
     }
 
     public setPublicKey(publicKey: string): void {
@@ -112,6 +123,14 @@ export class Wallet implements Contracts.State.Wallet {
             nonce: this.nonce,
             attributes: this.attributes,
         };
+    }
+
+    /**
+     * @returns {number}
+     * @memberof Wallet
+     */
+    public countAttributes(): number {
+        return Object.keys(this.getAttributes()).length;
     }
 
     /**
@@ -199,69 +218,12 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     /**
-     * @returns {Record<string, any[]>}
-     * @memberof Wallet
-     */
-    public getAllStateHistory(): Record<string, any[]> {
-        return this.stateHistory;
-    }
-
-    /**
-     * @returns {any}
-     * @memberof Wallet
-     */
-    public getCurrentStateHistory(key: string): any {
-        return this.stateHistory[key].at(-1);
-    }
-
-    /**
-     * @returns {any}
-     * @memberof Wallet
-     */
-    public getPreviousStateHistory(key: string): any {
-        return this.stateHistory[key].at(-2) || { value: {} };
-    }
-
-    /**
-     * @returns {any}
-     * @memberof Wallet
-     */
-    public getStateHistory(key: string): any {
-        return this.stateHistory[key];
-    }
-
-    public setAllStateHistory(stateHistory: Record<string, any[]>): void {
-        this.stateHistory = stateHistory;
-    }
-
-    public initialiseStateHistory(key: string): void {
-        this.stateHistory[key] = [];
-    }
-
-    public forgetStateHistory(key: string): void {
-        delete this.stateHistory[key];
-    }
-
-    public addStateHistory(key: string, value?: any, transaction?: Interfaces.ITransactionData | undefined): void {
-        this.stateHistory[key].push({
-            value,
-            transaction: transaction ? { height: transaction.blockHeight, id: transaction.id } : undefined,
-        });
-    }
-
-    public removeCurrentStateHistory(key: string): void {
-        if (this.stateHistory[key].length > 1) {
-            this.stateHistory[key].pop();
-        }
-    }
-
-    /**
      * @param {string} delegate
      * @returns {Utils.BigNumber}
      * @memberof Wallet
      */
     public getVoteBalance(delegate: string): Utils.BigNumber {
-        return this.voteBalances[delegate];
+        return this.voteBalances[delegate] ?? Utils.BigNumber.ZERO;
     }
 
     /**
@@ -293,22 +255,12 @@ export class Wallet implements Contracts.State.Wallet {
         return distribution;
     }
 
-    /**
-     * @param {object} value
-     * @memberof Wallet
-     */
-    public changeVotes(value: Record<string, number>, transaction: Interfaces.ITransactionData): void {
-        const sortedVotes: Record<string, number> = Utils.sortVotes(value);
-        this.addStateHistory("votes", sortedVotes, transaction);
-        this.setAttribute("votes", sortedVotes);
-    }
-
     public updateVoteBalances(): void {
         const votes: Record<string, number> = this.getAttribute("votes");
         this.voteBalances = {};
 
         const voteAmounts = this.calculateVoteAmount({
-            balance: this.getBalance() || Utils.BigNumber.ZERO,
+            balance: this.getBalance(),
             lockedBalance: this.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO),
         });
 
@@ -345,7 +297,6 @@ export class Wallet implements Contracts.State.Wallet {
         cloned.publicKey = this.publicKey;
         cloned.balance = this.balance;
         cloned.nonce = this.nonce;
-        cloned.stateHistory = AppUtils.cloneDeep(this.stateHistory);
         cloned.voteBalances = AppUtils.cloneDeep(this.voteBalances);
         return cloned;
     }
@@ -390,6 +341,46 @@ export class Wallet implements Contracts.State.Wallet {
         }
 
         return votes;
+    }
+
+    public getBasicWallet(): Contracts.State.WalletBasic {
+        const attributes: Record<string, any> = AppUtils.cloneDeep(this.getAttributes());
+
+        let resigned: string | undefined = undefined;
+        if (this.hasAttribute("delegate.resigned")) {
+            switch (this.getAttribute("delegate.resigned")) {
+                case Enums.DelegateStatus.PermanentResign: {
+                    resigned = "permanent";
+                    break;
+                }
+                case Enums.DelegateStatus.TemporaryResign: {
+                    resigned = "temporary";
+                    break;
+                }
+            }
+            attributes.delegate.resigned = resigned;
+        }
+
+        if (attributes.delegate && !isNaN(attributes.delegate.round)) {
+            delete attributes.delegate.round;
+        }
+
+        return {
+            address: this.getAddress(),
+            publicKey: this.getPublicKey(),
+            balance: this.getBalance(),
+            nonce: this.getNonce(),
+            attributes: { ...attributes, votes: undefined },
+            votingFor: this.getVoteDistribution(),
+        };
+    }
+
+    public toBSON() {
+        return this.getBasicWallet();
+    }
+
+    public toJSON() {
+        return this.getBasicWallet();
     }
 
     private setVoteBalance(delegate: string, balance: Utils.BigNumber) {
