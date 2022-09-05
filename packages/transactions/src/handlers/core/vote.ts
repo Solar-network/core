@@ -51,8 +51,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
                 const votingFor: string = Object.keys(walletVote)[0];
 
                 if (delegateVote.length === 66) {
-                    const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegateVote);
-                    delegateVote = delegateWallet.getAttribute("delegate.username");
+                    delegateVote = this.walletRepository
+                        .findByPublicKey(delegateVote)
+                        .getAttribute("delegate.username");
                 }
 
                 if (vote.startsWith("+")) {
@@ -93,10 +94,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
         for (const vote of transaction.data.asset.votes) {
             let delegateVote: string = vote.slice(1);
-            let delegateWallet: Contracts.State.Wallet;
 
             if (delegateVote.length === 66) {
-                delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
+                const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegateVote);
 
                 if (!delegateWallet.isDelegate()) {
                     throw new VotedForNonDelegateError();
@@ -107,7 +107,6 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
                 if (!this.walletRepository.hasByUsername(delegateVote)) {
                     throw new VotedForNonDelegateError(delegateVote);
                 }
-                delegateWallet = this.walletRepository.findByUsername(delegateVote);
             }
 
             if (vote.startsWith("+")) {
@@ -137,8 +136,11 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
         for (let voteAsset of transaction.data.asset.votes) {
             const delegateVote: string = voteAsset.slice(1);
             if (delegateVote.length === 66) {
-                const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByPublicKey(delegateVote);
-                voteAsset = voteAsset[0] + Object.keys(delegateWallet.getAttribute("delegate.username"))[0];
+                voteAsset =
+                    voteAsset[0] +
+                    Object.keys(
+                        this.walletRepository.findByPublicKey(delegateVote).getAttribute("delegate.username"),
+                    )[0];
             }
 
             if (voteAsset.startsWith("-")) {
@@ -183,13 +185,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
         let walletVote!: { [vote: string]: number };
 
         for (const vote of transaction.data.asset.votes) {
-            let delegateWallet: Contracts.State.Wallet;
             let delegateVote: string = vote.slice(1);
             if (delegateVote.length === 66) {
-                delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
-                delegateVote = delegateWallet.getAttribute("delegate.username");
-            } else {
-                delegateWallet = this.walletRepository.findByUsername(delegateVote);
+                delegateVote = this.walletRepository.findByPublicKey(delegateVote).getAttribute("delegate.username");
             }
 
             if (vote.startsWith("+")) {
@@ -217,13 +215,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
         Utils.assert.defined<Interfaces.ITransactionAsset>(transaction.data.asset?.votes);
 
         for (const vote of transaction.data.asset.votes.slice().reverse()) {
-            let delegateWallet: Contracts.State.Wallet;
             let delegateVote: string = vote.slice(1);
             if (delegateVote.length === 66) {
-                delegateWallet = this.walletRepository.findByPublicKey(delegateVote);
-                delegateVote = delegateWallet.getAttribute("delegate.username");
-            } else {
-                delegateWallet = this.walletRepository.findByUsername(delegateVote);
+                delegateVote = this.walletRepository.findByPublicKey(delegateVote).getAttribute("delegate.username");
             }
 
             if (vote.startsWith("+")) {
