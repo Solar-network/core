@@ -158,7 +158,7 @@ export class Initialise implements Action {
             return true;
         }
 
-        this.logger.info("Calculating productivity data, this might take a while :abacus:");
+        this.logger.info("Calculating productivity data :abacus:");
 
         const chunkSize = 10000;
 
