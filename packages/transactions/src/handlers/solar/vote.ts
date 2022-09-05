@@ -5,7 +5,6 @@ import {
     AlreadyVotedForSameDelegatesError,
     NoVoteError,
     VotedForNonDelegateError,
-    VotedForResignedDelegateError,
     VotedForTooManyDelegatesError,
 } from "../../errors";
 import { DelegateRegistrationTransactionHandler } from "../core/delegate-registration";
@@ -64,7 +63,7 @@ export class VoteTransactionHandler extends TransactionHandler {
     ): Promise<void> {
         AppUtils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        const { activeDelegates, canVoteForResignedDelegates } = Managers.configManager.getMilestone();
+        const { activeDelegates } = Managers.configManager.getMilestone();
         const votes = Object.keys(transaction.data.asset.votes);
 
         if (votes.length > activeDelegates) {
@@ -81,12 +80,6 @@ export class VoteTransactionHandler extends TransactionHandler {
         for (const delegate of votes) {
             if (!this.walletRepository.hasByUsername(delegate)) {
                 throw new VotedForNonDelegateError(delegate);
-            }
-
-            if (!canVoteForResignedDelegates) {
-                if (this.walletRepository.findByUsername(delegate).hasAttribute("delegate.resigned")) {
-                    throw new VotedForResignedDelegateError(delegate);
-                }
             }
         }
 

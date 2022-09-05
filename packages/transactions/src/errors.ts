@@ -204,12 +204,6 @@ export class VotedForNonDelegateError extends TransactionError {
     }
 }
 
-export class VotedForResignedDelegateError extends TransactionError {
-    public constructor(vote: string) {
-        super(`Failed to apply transaction, because '${vote}' is a resigned delegate`);
-    }
-}
-
 export class VotedForTooManyDelegatesError extends TransactionError {
     public constructor(maximumVotes: number) {
         super(`Failed to apply transaction, because there are more than ${maximumVotes.toLocaleString()} votes`);

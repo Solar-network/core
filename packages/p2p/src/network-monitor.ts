@@ -3,7 +3,7 @@ import { Container, Contracts, Enums, Providers, Services, Utils } from "@solar-
 import delay from "delay";
 import { readJsonSync } from "fs-extra";
 import prettyMs from "pretty-ms";
-import { gt, lt, satisfies } from "semver";
+import { gt, lt } from "semver";
 
 import { NetworkState } from "./network-state";
 import { Peer } from "./peer";
@@ -666,9 +666,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     public async downloadTransactions(exclude: string[]): Promise<Buffer[]> {
         const transactions: Set<String> = new Set();
 
-        const peers: Contracts.P2P.Peer[] = this.repository
-            .getPeers()
-            .filter((peer) => satisfies(peer.version!, ">=4.1.0"));
+        const peers: Contracts.P2P.Peer[] = this.repository.getPeers();
 
         const peersThatWouldThrottle: boolean[] = await Promise.all(
             peers.map((peer) => this.communicator.wouldThrottleOnFetchingTransactions(peer)),
