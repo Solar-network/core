@@ -84,8 +84,7 @@ export class VoteTransactionHandler extends TransactionHandler {
             }
 
             if (!canVoteForResignedDelegates) {
-                const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(delegate);
-                if (delegateWallet.hasAttribute("delegate.resigned")) {
+                if (this.walletRepository.findByUsername(delegate).hasAttribute("delegate.resigned")) {
                     throw new VotedForResignedDelegateError(delegate);
                 }
             }
@@ -161,19 +160,44 @@ export class VoteTransactionHandler extends TransactionHandler {
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
 
     private async getPreviousVotes(transaction: Interfaces.ITransaction): Promise<object> {
+        const heightAndSender = {
+            blockHeight: { to: transaction.data.blockHeight! - 1 },
+            senderId: transaction.data.senderId,
+        };
+
+        const criteria = {
+            ...heightAndSender,
+            typeGroup: this.getConstructor().typeGroup,
+            type: this.getConstructor().type,
+        };
+
+        const legacyCriteria = {
+            ...heightAndSender,
+            typeGroup: Enums.TransactionTypeGroup.Core,
+            type: Enums.TransactionType.Core.Vote,
+        };
+
         const { results } = await this.transactionHistoryService.listByCriteria(
-            {
-                blockHeight: { to: transaction.data.blockHeight! - 1 },
-                senderId: transaction.data.senderId,
-                typeGroup: this.getConstructor().typeGroup,
-                type: this.getConstructor().type,
-            },
+            [criteria, legacyCriteria],
             [{ property: "blockHeight", direction: "desc" }],
             { offset: 0, limit: 1 },
         );
 
         if (results[0] && results[0].asset) {
-            return results[0].asset.votes!;
+            if (!Array.isArray(results[0].asset.votes)) {
+                return results[0].asset.votes!;
+            }
+
+            const previousVote = (results[0].asset.votes as string[]).pop();
+            if (previousVote && previousVote.startsWith("+")) {
+                let delegateVote: string = previousVote.slice(1);
+                if (delegateVote.length === 66) {
+                    delegateVote = this.walletRepository
+                        .findByPublicKey(delegateVote)
+                        .getAttribute("delegate.username");
+                }
+                return { [delegateVote]: 100 };
+            }
         }
 
         return {};
