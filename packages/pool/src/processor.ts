@@ -1,9 +1,8 @@
-import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
-import { Repositories } from "@solar-network/database";
+import { Interfaces } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 import delay from "delay";
 
-import { AlreadyForgedTransactionError, AlreadyTriedTransactionError, InvalidTransactionDataError } from "./errors";
+import { AlreadyTriedTransactionError, InvalidTransactionDataError } from "./errors";
 
 @Container.injectable()
 export class Processor implements Contracts.Pool.Processor {
@@ -20,9 +19,6 @@ export class Processor implements Contracts.Pool.Processor {
     @Container.inject(Container.Identifiers.PeerTransactionBroadcaster)
     @Container.optional()
     private readonly transactionBroadcaster!: Contracts.P2P.TransactionBroadcaster | undefined;
-
-    @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
-    private readonly transactionRepository!: Repositories.TransactionRepository;
 
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
@@ -71,10 +67,7 @@ export class Processor implements Contracts.Pool.Processor {
                 const entryId = transactionData instanceof Buffer ? String(i) : transactionData.id ?? String(i);
 
                 try {
-                    const transaction =
-                        transactionData instanceof Buffer
-                            ? await this.getTransactionFromBuffer(transactionData)
-                            : await this.getTransactionFromData(transactionData);
+                    const transaction = await this.getTransaction(transactionData);
                     if (transaction.id && !this.cachedTransactions.has(transaction.id)) {
                         this.cachedTransactions.set(transaction.id, timeNow);
                         transactions.push(transaction);
@@ -90,20 +83,10 @@ export class Processor implements Contracts.Pool.Processor {
                 await delay(1);
             }
 
-            const forgedTransactionIds: string[] =
-                transactions.length > 0
-                    ? await this.transactionRepository.getForgedTransactionsIds(
-                          transactions.map((transaction) => transaction.data.id!),
-                      )
-                    : [];
-
             for (let i = 0; i < transactions.length; i++) {
                 const transaction = transactions[i];
                 const entryId = transaction.data && transaction.data.id ? transaction.data.id : String(i);
                 try {
-                    if (forgedTransactionIds.includes(entryId)) {
-                        throw new AlreadyForgedTransactionError(transaction);
-                    }
                     await this.pool.addTransaction(transaction);
                     accept.push(entryId);
 
@@ -136,31 +119,11 @@ export class Processor implements Contracts.Pool.Processor {
         };
     }
 
-    private async getTransactionFromBuffer(transactionData: Buffer): Promise<Interfaces.ITransaction> {
-        try {
-            const transactionCommon = {} as Interfaces.ITransactionData;
-            const txByteBuffer = new Utils.ByteBuffer(transactionData);
-            Transactions.Deserialiser.deserialiseCommon(transactionCommon, txByteBuffer);
-
-            if (this.workerPool.isTypeGroupSupported(transactionCommon.typeGroup || Enums.TransactionTypeGroup.Core)) {
-                return await this.workerPool.getTransactionFromData(transactionData);
-            } else {
-                return Transactions.TransactionFactory.fromBytes(transactionData);
-            }
-        } catch (error) {
-            throw new InvalidTransactionDataError(error.message);
-        }
-    }
-
-    private async getTransactionFromData(
-        transactionData: Interfaces.ITransactionData,
+    private async getTransaction(
+        transactionData: Interfaces.ITransactionData | Buffer,
     ): Promise<Interfaces.ITransaction> {
         try {
-            if (this.workerPool.isTypeGroupSupported(transactionData.typeGroup || Enums.TransactionTypeGroup.Core)) {
-                return await this.workerPool.getTransactionFromData(transactionData);
-            } else {
-                return Transactions.TransactionFactory.fromData(transactionData);
-            }
+            return await this.workerPool.getTransaction(transactionData);
         } catch (error) {
             throw new InvalidTransactionDataError(error.message);
         }

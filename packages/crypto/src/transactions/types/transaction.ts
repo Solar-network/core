@@ -1,6 +1,7 @@
 import { TransactionTypeGroup } from "../../enums";
 import { NotImplemented } from "../../errors";
 import {
+    IDeserialiseAddresses,
     ISchemaValidationResult,
     ISerialiseOptions,
     ITransaction,
@@ -24,6 +25,12 @@ export abstract class Transaction implements ITransaction {
     public data!: ITransactionData;
     public serialised!: Buffer;
     public timestamp!: number;
+
+    public get addresses(): IDeserialiseAddresses {
+        return {
+            senderId: this.data.senderId,
+        };
+    }
 
     public get id(): string | undefined {
         return this.data.id;

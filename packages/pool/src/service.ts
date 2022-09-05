@@ -38,9 +38,10 @@ export class Service implements Contracts.Pool.Service {
     private disposed = false;
 
     public async boot(): Promise<void> {
-        this.events.listen(Enums.StateEvent.BuilderFinished, this);
-        this.events.listen(Enums.CryptoEvent.MilestoneChanged, this);
         this.events.listen(Enums.BlockEvent.Applied, this);
+        this.events.listen(Enums.CryptoEvent.MilestoneChanged, this);
+        this.events.listen(Enums.QueueEvent.Finished, this);
+        this.events.listen(Enums.RoundEvent.Applied, this);
 
         if (process.env.CORE_RESET_DATABASE || process.env.CORE_RESET_POOL) {
             await this.flush();
@@ -48,9 +49,10 @@ export class Service implements Contracts.Pool.Service {
     }
 
     public dispose(): void {
-        this.events.forget(Enums.CryptoEvent.MilestoneChanged, this);
-        this.events.forget(Enums.StateEvent.BuilderFinished, this);
         this.events.forget(Enums.BlockEvent.Applied, this);
+        this.events.forget(Enums.CryptoEvent.MilestoneChanged, this);
+        this.events.forget(Enums.QueueEvent.Finished, this);
+        this.events.forget(Enums.RoundEvent.Applied, this);
 
         this.disposed = true;
     }
@@ -58,14 +60,21 @@ export class Service implements Contracts.Pool.Service {
     public async handle({ name }: { name: string; data: object }): Promise<void> {
         try {
             switch (name) {
-                case Enums.StateEvent.BuilderFinished:
-                    await this.readdTransactions();
-                    break;
-                case Enums.CryptoEvent.MilestoneChanged:
-                    await this.readdTransactions();
-                    break;
                 case Enums.BlockEvent.Applied:
                     await this.cleanUp();
+                    break;
+                case Enums.CryptoEvent.MilestoneChanged:
+                    await this.readdTransactions([], true);
+                    break;
+                case Enums.QueueEvent.Finished:
+                    if (this.getPoolSize() <= 7500) {
+                        await this.readdTransactions([], true);
+                    }
+                    break;
+                case Enums.RoundEvent.Applied:
+                    if (this.getPoolSize() > 7500) {
+                        await this.readdTransactions([], true);
+                    }
                     break;
             }
         } catch (error) {
@@ -94,6 +103,7 @@ export class Service implements Contracts.Pool.Service {
             this.storage.addTransaction({
                 height: this.stateStore.getLastHeight(),
                 id: transaction.id,
+                recipientId: (transaction.addresses.recipientId || []).join(","),
                 senderId: transaction.data.senderId,
                 serialised: transaction.serialised,
             });
@@ -101,11 +111,11 @@ export class Service implements Contracts.Pool.Service {
             try {
                 await this.dynamicFeeMatcher.throwIfCannotEnterPool(transaction);
                 await this.addTransactionToMempool(transaction);
-                this.logger.debug(`${transaction} added to pool`);
+                this.logger.debug(`${transaction} added to the pool`);
                 this.events.dispatch(Enums.TransactionEvent.AddedToPool, transaction.data);
             } catch (error) {
                 this.storage.removeTransaction(transaction.id);
-                this.logger.warning(`${transaction} failed to enter pool: ${error.message} :warning:`);
+                this.logger.warning(`${transaction} failed to enter the pool: ${error.message} :warning:`);
                 this.events.dispatch(Enums.TransactionEvent.RejectedByPool, transaction.data);
 
                 throw error instanceof Contracts.Pool.PoolError
@@ -115,7 +125,10 @@ export class Service implements Contracts.Pool.Service {
         });
     }
 
-    public async readdTransactions(previouslyForgedTransactions: Interfaces.ITransaction[] = []): Promise<void> {
+    public async readdTransactions(
+        previouslyForgedTransactions: Interfaces.ITransaction[] = [],
+        recheckValidity: boolean = false,
+    ): Promise<void> {
         await this.lock.runExclusive(async () => {
             if (this.disposed) {
                 return;
@@ -131,9 +144,13 @@ export class Service implements Contracts.Pool.Service {
 
             const previouslyForgedStoredIds: string[] = [];
 
-            for (const { id, serialised } of previouslyForgedTransactions) {
+            for (const { addresses, id, serialised } of previouslyForgedTransactions) {
                 try {
-                    const previouslyForgedTransaction = Transactions.TransactionFactory.fromBytes(serialised);
+                    const previouslyForgedTransaction = Transactions.TransactionFactory.fromBytesUnsafe(
+                        serialised,
+                        id,
+                        addresses,
+                    );
 
                     AppUtils.assert.defined<string>(previouslyForgedTransaction.id);
                     AppUtils.assert.defined<string>(previouslyForgedTransaction.data.senderId);
@@ -143,6 +160,7 @@ export class Service implements Contracts.Pool.Service {
                     this.storage.addTransaction({
                         height: this.stateStore.getLastHeight(),
                         id: previouslyForgedTransaction.id,
+                        recipientId: (previouslyForgedTransaction.addresses.recipientId || []).join(","),
                         senderId: previouslyForgedTransaction.data.senderId,
                         serialised: previouslyForgedTransaction.serialised,
                     });
@@ -152,7 +170,7 @@ export class Service implements Contracts.Pool.Service {
                     previouslyForgedSuccesses++;
                 } catch (error) {
                     this.logger.debug(
-                        `Failed to re-add previously forged transaction ${id}: ${error.message} :warning:`,
+                        `Failed to re-add previously forged transaction ${id} to the pool: ${error.message} :warning:`,
                     );
                     previouslyForgedFailures++;
                 }
@@ -162,52 +180,94 @@ export class Service implements Contracts.Pool.Service {
             const lastHeight: number = this.stateStore.getLastHeight();
             const expiredHeight: number = lastHeight - maxTransactionAge;
 
-            for (const { height, id, serialised } of this.storage.getAllTransactions()) {
+            for (const { height, id, recipientId, senderId, serialised } of this.storage.getAllTransactions()) {
                 if (previouslyForgedStoredIds.includes(id)) {
                     continue;
                 }
 
                 if (height > expiredHeight) {
                     try {
-                        const previouslyStoredTransaction = Transactions.TransactionFactory.fromBytes(serialised);
+                        const addresses: Interfaces.IDeserialiseAddresses = {
+                            senderId,
+                            recipientId: (recipientId || "").split(","),
+                        };
+                        if (addresses.recipientId![0].length === 0) {
+                            delete addresses.recipientId;
+                        }
+
+                        const previouslyStoredTransaction = Transactions.TransactionFactory.fromBytesUnsafe(
+                            serialised,
+                            id,
+                            addresses,
+                        );
                         await this.addTransactionToMempool(previouslyStoredTransaction);
                         previouslyStoredSuccesses++;
                     } catch (error) {
                         this.storage.removeTransaction(id);
-                        this.logger.debug(
-                            `Failed to re-add previously stored transaction ${id}: ${error.message} :warning:`,
-                        );
+                        if (!recheckValidity) {
+                            this.logger.debug(
+                                `Failed to re-add previously stored transaction ${id} to the pool: ${error.message} :warning:`,
+                            );
+                        }
                         previouslyStoredFailures++;
                     }
                 } else {
                     this.storage.removeTransaction(id);
-                    this.logger.debug(`Not re-adding previously stored expired transaction ${id}`);
+                    this.logger.debug(`Not re-adding previously stored expired transaction to the pool: ${id}`);
                     previouslyStoredExpirations++;
                 }
             }
 
-            if (previouslyForgedSuccesses >= 1) {
+            if (!recheckValidity && previouslyForgedSuccesses >= 1) {
                 this.logger.info(
-                    `${previouslyForgedSuccesses} previously forged transactions re-added :money_with_wings:`,
+                    `${AppUtils.pluralise(
+                        "previously forged transaction",
+                        previouslyForgedSuccesses,
+                        true,
+                    )} re-added to the pool :money_with_wings:`,
                 );
             }
             if (previouslyForgedFailures >= 1) {
                 this.logger.warning(
-                    `${previouslyForgedFailures} previously forged transactions failed re-adding :warning:`,
+                    `${AppUtils.pluralise(
+                        "previously forged transaction",
+                        previouslyForgedFailures,
+                        true,
+                    )} could not be re-added to the pool :warning:`,
                 );
             }
-            if (previouslyStoredSuccesses >= 1) {
+            if (!recheckValidity && previouslyStoredSuccesses >= 1) {
                 this.logger.info(
-                    `${previouslyStoredSuccesses} previously stored transactions re-added :money_with_wings:`,
+                    `${AppUtils.pluralise(
+                        "previously stored transaction",
+                        previouslyStoredSuccesses,
+                        true,
+                    )} re-added to the pool :money_with_wings:`,
                 );
             }
             if (previouslyStoredExpirations >= 1) {
-                this.logger.info(`${previouslyStoredExpirations} previously stored transactions expired :zap:`);
+                this.logger.info(
+                    `${AppUtils.pluralise("transaction", previouslyStoredExpirations, true)} in the pool expired :zap:`,
+                );
             }
             if (previouslyStoredFailures >= 1) {
-                this.logger.warning(
-                    `${previouslyStoredFailures} previously stored transactions failed re-adding :warning:`,
-                );
+                if (recheckValidity) {
+                    this.logger.warning(
+                        `${AppUtils.pluralise(
+                            "transaction",
+                            previouslyStoredFailures,
+                            true,
+                        )} removed from the pool as they are no longer valid :zap:`,
+                    );
+                } else {
+                    this.logger.warning(
+                        `${AppUtils.pluralise(
+                            "previously stored transaction",
+                            previouslyStoredFailures,
+                            true,
+                        )} could not be re-added to the pool :warning:`,
+                    );
+                }
             }
         });
     }
@@ -222,7 +282,6 @@ export class Service implements Contracts.Pool.Service {
             AppUtils.assert.defined<string>(transaction.data.senderId);
 
             if (!this.storage.hasTransaction(transaction.id)) {
-                this.logger.error(`Failed to remove ${transaction} that isn't in pool :warning:`);
                 return;
             }
 
@@ -231,13 +290,12 @@ export class Service implements Contracts.Pool.Service {
             for (const removedTransaction of removedTransactions) {
                 AppUtils.assert.defined<string>(removedTransaction.id);
                 this.storage.removeTransaction(removedTransaction.id);
-                this.logger.debug(`Removed ${removedTransaction}`);
+                this.logger.debug(`Removed ${removedTransaction} from the pool`);
                 this.events.dispatch(Enums.TransactionEvent.RemovedFromPool, removedTransaction.data);
             }
 
             if (!removedTransactions.find((t) => t.id === transaction.id)) {
                 this.storage.removeTransaction(transaction.id);
-                this.logger.error(`Removed ${transaction} from storage`);
                 this.events.dispatch(Enums.TransactionEvent.RemovedFromPool, transaction.data);
             }
         });
@@ -264,12 +322,12 @@ export class Service implements Contracts.Pool.Service {
             for (const removedTransaction of removedTransactions) {
                 AppUtils.assert.defined<string>(removedTransaction.id);
                 this.storage.removeTransaction(removedTransaction.id);
-                this.logger.debug(`Removed forged ${removedTransaction}`);
+                this.logger.debug(`Removed forged ${removedTransaction} from the pool`);
             }
 
             if (!removedTransactions.find((t) => t.id === transaction.id)) {
                 this.storage.removeTransaction(transaction.id);
-                this.logger.error(`Removed forged ${transaction} from storage`);
+                this.logger.error(`Removed forged ${transaction} from the pool storage`);
             }
         });
     }
@@ -316,7 +374,7 @@ export class Service implements Contracts.Pool.Service {
             for (const removedTransaction of removedTransactions) {
                 AppUtils.assert.defined<string>(removedTransaction.id);
                 this.storage.removeTransaction(removedTransaction.id);
-                this.logger.info(`Removed old ${removedTransaction}`);
+                this.logger.info(`Removed old ${removedTransaction} from the pool`);
                 this.events.dispatch(Enums.TransactionEvent.Expired, removedTransaction.data);
             }
         }
@@ -336,7 +394,7 @@ export class Service implements Contracts.Pool.Service {
                 for (const removedTransaction of removedTransactions) {
                     AppUtils.assert.defined<string>(removedTransaction.id);
                     this.storage.removeTransaction(removedTransaction.id);
-                    this.logger.info(`Removed expired ${removedTransaction}`);
+                    this.logger.info(`Removed expired ${removedTransaction} from the pool`);
                     this.events.dispatch(Enums.TransactionEvent.Expired, removedTransaction.data);
                 }
             }
@@ -358,7 +416,7 @@ export class Service implements Contracts.Pool.Service {
         for (const removedTransaction of removedTransactions) {
             AppUtils.assert.defined<string>(removedTransaction.id);
             this.storage.removeTransaction(removedTransaction.id);
-            this.logger.info(`Removed lowest priority ${removedTransaction}`);
+            this.logger.info(`Removed lowest priority ${removedTransaction} from the pool`);
             this.events.dispatch(Enums.TransactionEvent.RemovedFromPool, removedTransaction.data);
         }
     }

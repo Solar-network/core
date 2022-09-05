@@ -6,6 +6,7 @@ import {
     TransactionVersionError,
 } from "../errors";
 import {
+    IDeserialiseAddresses,
     IDeserialiseOptions,
     ISerialiseOptions,
     ITransaction,
@@ -35,9 +36,16 @@ export class TransactionFactory {
      * NOTE: Only use this internally when it is safe to assume the buffer has already been
      * verified.
      */
-    public static fromBytesUnsafe(buff: Buffer, id?: string): ITransaction {
+    public static fromBytesUnsafe(
+        buff: Buffer,
+        id?: string,
+        transactionAddresses?: IDeserialiseAddresses,
+    ): ITransaction {
         try {
-            const options: IDeserialiseOptions | ISerialiseOptions = { acceptLegacyVersion: true };
+            const options: IDeserialiseOptions | ISerialiseOptions = {
+                acceptLegacyVersion: true,
+                transactionAddresses,
+            };
             const transaction = Deserialiser.deserialise(buff, options);
             transaction.data.id = id || Utils.getId(transaction.data, options);
             transaction.isVerified = true;

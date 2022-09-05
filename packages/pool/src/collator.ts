@@ -71,14 +71,16 @@ export class Collator implements Contracts.Pool.Collator {
                     break;
                 }
 
+                let candidateTransaction: Interfaces.ITransaction;
                 if (validate) {
-                    await validator.validate(transaction);
+                    candidateTransaction = await validator.validate(transaction);
+                } else {
+                    candidateTransaction = transaction;
                 }
-
-                candidateTransactions.push(transaction);
+                candidateTransactions.push(candidateTransaction);
 
                 bytesLeft -= 4;
-                bytesLeft -= transaction.serialised.length;
+                bytesLeft -= candidateTransaction.serialised.length;
             } catch (error) {
                 this.logger.warning(`${transaction} failed to collate: ${error.message} :warning:`);
                 failedTransactions.push(transaction);

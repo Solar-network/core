@@ -10,12 +10,6 @@ export class AlreadyTriedTransactionError extends Contracts.Pool.PoolError {
     }
 }
 
-export class AlreadyForgedTransactionError extends Contracts.Pool.PoolError {
-    public constructor(transaction: Interfaces.ITransaction) {
-        super(`${transaction} was already forged`, "ERR_FORGED");
-    }
-}
-
 export class RetryTransactionError extends Contracts.Pool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
         super(`${transaction} cannot be added to the pool, please retry`, "ERR_RETRY");
@@ -94,15 +88,6 @@ export class TransactionFailedToApplyError extends Contracts.Pool.PoolError {
 export class TransactionFailedToVerifyError extends Contracts.Pool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
         super(`${transaction} failed signature verification check`, "ERR_BAD_DATA");
-    }
-}
-
-export class TransactionFromFutureError extends Contracts.Pool.PoolError {
-    public secondsInFuture: number;
-
-    public constructor(transaction: Interfaces.ITransaction, secondsInFuture: number) {
-        super(`${transaction} is ${Pool.pluralise("second", secondsInFuture, true)} in future`, "ERR_FROM_FUTURE");
-        this.secondsInFuture = secondsInFuture;
     }
 }
 

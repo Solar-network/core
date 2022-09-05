@@ -41,38 +41,41 @@ export class Storage implements Contracts.Pool.Storage {
         ensureFileSync(filename);
 
         this.database = new BetterSqlite3(filename);
+        const dbName = "pool_20220908";
+
         this.database.exec(`
             PRAGMA journal_mode = WAL;
 
-            CREATE TABLE IF NOT EXISTS pool (
+            CREATE TABLE IF NOT EXISTS ${dbName} (
                 n                  INTEGER      PRIMARY KEY AUTOINCREMENT,
                 height             INTEGER      NOT NULL,
                 id                 VARCHAR(64)  NOT NULL,
+                recipientId        TEXT         NOT NULL,
                 senderId           VARCHAR(34)  NOT NULL,
                 serialised         BLOB         NOT NULL
             );
 
-            CREATE UNIQUE INDEX IF NOT EXISTS pool_id ON pool (id);
-            CREATE INDEX IF NOT EXISTS pool_height ON pool (height);
+            CREATE UNIQUE INDEX IF NOT EXISTS pool_id ON ${dbName} (id);
+            CREATE INDEX IF NOT EXISTS pool_height ON ${dbName} (height);
         `);
 
         this.addTransactionStmt = this.database.prepare(
-            "INSERT INTO pool (height, id, senderId, serialised) VALUES (:height, :id, :senderId, :serialised)",
+            `INSERT INTO ${dbName} (height, id, recipientId, senderId, serialised) VALUES (:height, :id, :recipientId, :senderId, :serialised)`,
         );
 
-        this.hasTransactionStmt = this.database.prepare("SELECT COUNT(*) FROM pool WHERE id = :id").pluck(true);
+        this.hasTransactionStmt = this.database.prepare(`SELECT COUNT(*) FROM ${dbName} WHERE id = :id`).pluck(true);
 
         this.getAllTransactionsStmt = this.database.prepare(
-            "SELECT height, id, senderId, serialised FROM pool ORDER BY n",
+            `SELECT height, id, recipientId, senderId, serialised FROM ${dbName} ORDER BY n`,
         );
 
         this.getOldTransactionsStmt = this.database.prepare(
-            "SELECT height, id, senderId, serialised FROM pool WHERE height <= :height ORDER BY n DESC",
+            `SELECT id, senderId FROM ${dbName} WHERE height <= :height ORDER BY n DESC`,
         );
 
-        this.removeTransactionStmt = this.database.prepare("DELETE FROM pool WHERE id = :id");
+        this.removeTransactionStmt = this.database.prepare(`DELETE FROM ${dbName} WHERE id = :id`);
 
-        this.flushStmt = this.database.prepare("DELETE FROM pool");
+        this.flushStmt = this.database.prepare(`DELETE FROM ${dbName}`);
     }
 
     public dispose(): void {
