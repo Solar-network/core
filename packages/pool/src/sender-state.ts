@@ -88,4 +88,8 @@ export class SenderState implements Contracts.Pool.SenderState {
             throw error;
         }
     }
+
+    public getWallet(address: string): Contracts.State.Wallet | undefined {
+        return this.handlerRegistry.getRegisteredHandlers()[0].getWallet(address);
+    }
 }

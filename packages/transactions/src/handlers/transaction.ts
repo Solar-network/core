@@ -217,6 +217,14 @@ export abstract class TransactionHandler {
         );
     }
 
+    public getWallet(address: string): Contracts.State.Wallet | undefined {
+        if (this.walletRepository.hasByAddress(address)) {
+            return this.walletRepository.findByAddress(address);
+        }
+
+        return undefined;
+    }
+
     protected async performGenericWalletChecks(
         transaction: Interfaces.ITransaction,
         sender: Contracts.State.Wallet,
