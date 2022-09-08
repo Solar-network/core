@@ -57,7 +57,6 @@ export class BlockFactory {
             const serialised: Buffer = Serialiser.serialiseWithTransactions(data);
             const block: IBlock = new Block({
                 ...Deserialiser.deserialise(serialised, false, options),
-                id: data.id,
             });
 
             if (block.data.version === 0) {

@@ -13,7 +13,7 @@ export class Block implements IBlock {
     public transactions: ITransaction[];
     public verification: IBlockVerification;
 
-    public constructor({ data, transactions }: { data: IBlockData; transactions: ITransaction[]; id?: string }) {
+    public constructor({ data, transactions }: { data: IBlockData; transactions: ITransaction[] }) {
         this.data = data;
 
         this.transactions = transactions.map((transaction, index) => {
