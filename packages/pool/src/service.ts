@@ -297,6 +297,14 @@ export class Service implements Contracts.Pool.Service {
         });
     }
 
+    public getPoolWallet(address: string): Contracts.State.Wallet | undefined {
+        if (!this.mempool.hasSenderMempool(address)) {
+            return undefined;
+        }
+
+        return this.mempool.getSenderMempool(address).getWallet();
+    }
+
     private async removeOldTransactions(): Promise<void> {
         const maxTransactionAge: number = this.configuration.getRequired<number>("maxTransactionAge");
         const lastHeight: number = this.stateStore.getLastHeight();
