@@ -1,6 +1,6 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
 import { Address } from "../../../identities";
-import { ISerialiseOptions } from "../../../interfaces";
+import { IDeserialiseAddresses, ISerialiseOptions } from "../../../interfaces";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -11,6 +11,12 @@ export abstract class HtlcLockTransaction extends Transaction {
     public static key = "htlcLock";
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("10000000");
+
+    public get addresses(): IDeserialiseAddresses {
+        const addresses = super.addresses;
+        addresses.recipientId = [this.data.recipientId!];
+        return addresses;
+    }
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.htlcLock;
@@ -44,7 +50,7 @@ export abstract class HtlcLockTransaction extends Transaction {
         return buff;
     }
 
-    public deserialise(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer, transactionAddresses?: IDeserialiseAddresses): void {
         const { data } = this;
 
         const amount: BigNumber = BigNumber.make(buf.readBigUInt64LE().toString());
@@ -52,10 +58,13 @@ export abstract class HtlcLockTransaction extends Transaction {
         const secretHash: string = buf.readBuffer(secretHashLength).toString("hex");
         const expirationType: number = buf.readUInt8();
         const expirationValue: number = buf.readUInt32LE();
-        const recipientId: string = Address.fromBuffer(buf.readBuffer(21));
-
         data.amount = amount;
-        data.recipientId = recipientId;
+        if (transactionAddresses?.recipientId) {
+            data.recipientId = transactionAddresses.recipientId[0];
+            buf.jump(21);
+        } else {
+            data.recipientId = Address.fromBuffer(buf.readBuffer(21));
+        }
         data.asset = {
             lock: {
                 secretHash,

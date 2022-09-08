@@ -1,6 +1,7 @@
 export type StoredTransaction = {
     height: number;
     id: string;
+    recipientId: string;
     senderId: string;
     serialised: Buffer;
 };

@@ -1,6 +1,6 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
 import { Address } from "../../../identities";
-import { ISerialiseOptions, ITransferItem } from "../../../interfaces";
+import { IDeserialiseAddresses, ISerialiseOptions, ITransferItem } from "../../../interfaces";
 import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -11,6 +11,12 @@ export abstract class TransferTransaction extends Transaction {
     public static key = "transfer";
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("10000000");
+
+    public get addresses(): IDeserialiseAddresses {
+        const addresses = super.addresses;
+        addresses.recipientId = this.data.asset?.transfers?.map((transfer) => transfer.recipientId);
+        return addresses;
+    }
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.transfer;
@@ -38,18 +44,26 @@ export abstract class TransferTransaction extends Transaction {
         return undefined;
     }
 
-    public deserialise(buf: ByteBuffer): void {
+    public deserialise(buf: ByteBuffer, transactionAddresses?: IDeserialiseAddresses): void {
         const { data } = this;
         const transfers: ITransferItem[] = [];
         const total: number = buf.readUInt16LE();
 
         for (let j = 0; j < total; j++) {
+            const amount: BigNumber = BigNumber.make(buf.readBigUInt64LE().toString());
+            let recipientId: string;
+            if (transactionAddresses?.recipientId) {
+                recipientId = transactionAddresses.recipientId[j];
+                buf.jump(21);
+            } else {
+                recipientId = Address.fromBuffer(buf.readBuffer(21));
+            }
+
             transfers.push({
-                amount: BigNumber.make(buf.readBigUInt64LE().toString()),
-                recipientId: Address.fromBuffer(buf.readBuffer(21)),
+                amount,
+                recipientId,
             });
         }
-
         data.asset = { transfers };
     }
 }

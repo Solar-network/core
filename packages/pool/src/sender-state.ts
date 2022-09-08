@@ -1,4 +1,4 @@
-import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
+import { Interfaces, Managers } from "@solar-network/crypto";
 import { Container, Contracts, Enums, Providers, Services } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
@@ -7,7 +7,6 @@ import {
     TransactionExceedsMaximumByteSizeError,
     TransactionFailedToApplyError,
     TransactionFailedToVerifyError,
-    TransactionFromFutureError,
     TransactionFromWrongNetworkError,
     TransactionHasExpiredError,
 } from "./errors";
@@ -42,12 +41,6 @@ export class SenderState implements Contracts.Pool.SenderState {
         const currentNetwork: number = Managers.configManager.get<number>("network.pubKeyHash");
         if (transaction.data.network && transaction.data.network !== currentNetwork) {
             throw new TransactionFromWrongNetworkError(transaction, currentNetwork);
-        }
-
-        const now: number = Crypto.Slots.getTime();
-        if (transaction.timestamp > now + 3600) {
-            const secondsInFuture: number = transaction.timestamp - now;
-            throw new TransactionFromFutureError(transaction, secondsInFuture);
         }
 
         if (this.expirationService.isExpired(transaction)) {

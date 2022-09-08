@@ -9,10 +9,11 @@ export class TransactionValidator implements Contracts.State.TransactionValidato
     @Container.tagged("state", "clone")
     private readonly handlerRegistry!: Handlers.Registry;
 
-    public async validate(transaction: Interfaces.ITransaction): Promise<void> {
+    public async validate(transaction: Interfaces.ITransaction): Promise<Interfaces.ITransaction> {
         const deserialised: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(transaction.serialised);
         strictEqual(transaction.id, deserialised.id);
-        const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
-        await handler.apply(transaction);
+        const handler = await this.handlerRegistry.getActivatedHandlerForData(deserialised.data);
+        await handler.apply(deserialised);
+        return deserialised;
     }
 }

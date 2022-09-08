@@ -447,13 +447,14 @@ export class SXPSwap {
             }
         };
 
-        TransactionValidator.prototype.validate = async function (transaction: Interfaces.ITransaction): Promise<void> {
+        TransactionValidator.prototype.validate = async function (transaction: Interfaces.ITransaction): Promise<Interfaces.ITransaction> {
             const deserialised: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(
                 transaction.serialised,
             );
             assert.strictEqual(transaction.id, deserialised.id);
-            const handler = await (this as any).handlerRegistry.getActivatedHandlerForData(transaction.data);
-            await handler.apply(transaction, "validate");
+            const handler = await (this as any).handlerRegistry.getActivatedHandlerForData(deserialised.data);
+            await handler.apply(deserialised, "validate");
+            return deserialised;
         };
 
         this.app.get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService).unbind("applyTransaction");

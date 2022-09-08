@@ -13,6 +13,7 @@ export interface ITransaction {
 
     isVerified: boolean;
 
+    addresses: IDeserialiseAddresses;
     data: ITransactionData;
     serialised: Buffer;
     timestamp: number;
@@ -20,7 +21,7 @@ export interface ITransaction {
     setBurnedFee(height: number): void;
 
     serialise(options?: ISerialiseOptions): ByteBuffer | undefined;
-    deserialise(buf: ByteBuffer): void;
+    deserialise(buf: ByteBuffer, transactionAddresses?: IDeserialiseAddresses): void;
 
     verify(options?: IVerifyOptions): boolean;
     verifySchema(strict?: boolean): ISchemaValidationResult;
@@ -164,6 +165,12 @@ export interface IHtlcExpiration {
 export interface IDeserialiseOptions {
     acceptLegacyVersion?: boolean;
     disableVersionCheck?: boolean;
+    transactionAddresses?: IDeserialiseAddresses;
+}
+
+export interface IDeserialiseAddresses {
+    senderId: string;
+    recipientId?: string[];
 }
 
 export interface IVerifyOptions {

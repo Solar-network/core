@@ -3,9 +3,6 @@ import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 @Container.injectable()
 export class Mempool implements Contracts.Pool.Mempool {
-    @Container.inject(Container.Identifiers.LogService)
-    private readonly logger!: Contracts.Kernel.Logger;
-
     @Container.inject(Container.Identifiers.PoolSenderMempoolFactory)
     private readonly createSenderMempool!: Contracts.Pool.SenderMempoolFactory;
 
@@ -39,7 +36,6 @@ export class Mempool implements Contracts.Pool.Mempool {
             senderMempool = this.createSenderMempool();
             senderMempool.setAddress(transaction.data.senderId);
             this.senderMempools.set(transaction.data.senderId, senderMempool);
-            this.logger.debug(`${transaction.data.senderId} state created`);
         }
 
         try {
@@ -47,7 +43,6 @@ export class Mempool implements Contracts.Pool.Mempool {
         } finally {
             if (senderMempool.isDisposable()) {
                 this.senderMempools.delete(transaction.data.senderId);
-                this.logger.debug(`${transaction.data.senderId} state disposed`);
             }
         }
     }
@@ -63,7 +58,6 @@ export class Mempool implements Contracts.Pool.Mempool {
         } finally {
             if (senderMempool.isDisposable()) {
                 this.senderMempools.delete(senderId);
-                this.logger.debug(`${senderId} state disposed`);
             }
         }
     }
@@ -79,7 +73,6 @@ export class Mempool implements Contracts.Pool.Mempool {
         } finally {
             if (senderMempool.isDisposable()) {
                 this.senderMempools.delete(senderId);
-                this.logger.debug(`${senderId} state disposed`);
             }
         }
     }
