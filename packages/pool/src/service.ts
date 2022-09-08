@@ -257,7 +257,9 @@ export class Service implements Contracts.Pool.Service {
                             "transaction",
                             previouslyStoredFailures,
                             true,
-                        )} removed from the pool as they are no longer valid :zap:`,
+                        )} removed from the pool as ${
+                            previouslyStoredFailures !== 1 ? "they are" : "it is"
+                        } no longer valid :zap:`,
                     );
                 } else {
                     this.logger.warning(
