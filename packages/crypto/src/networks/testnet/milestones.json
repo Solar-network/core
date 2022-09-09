@@ -32,7 +32,7 @@
             },
             "minFee": 11299
         },
-        "epoch": "2022-03-16T18:00:00.000Z",
+        "epoch": "2022-07-20T18:00:00.000Z",
         "fees": {
             "staticFees": {
                 "burn": 0,
@@ -134,26 +134,17 @@
         "htlcEnabled": true
     },
     {
-        "height": 671352,
-        "donations": {
-            "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": {
-                "percent": 5,
-                "purpose": "development"
-            }
-        }
-    },
-    {
-        "height": 918650,
+        "height": 535780,
         "acceptLegacySchnorrTransactions": false,
         "legacyTransfer": false,
         "legacyVote": false
     },
     {
-        "height": 1260712,
+        "height": 535884,
         "donations": {
             "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": {
                 "percent": 5,
-                "purpose": "development"
+                "purpose": "testing"
             },
             "D646b6dx3sW5NAgMDTKAZ2hdC57K1BeRaK": {
                 "percent": 5,
