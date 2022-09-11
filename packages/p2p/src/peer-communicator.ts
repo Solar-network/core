@@ -226,22 +226,24 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                         }
                         if (this.walletRepository.hasByPublicKey(publicKey)) {
                             const delegateWallet = this.walletRepository.findByPublicKey(publicKey);
-                            if (!delegatePeer) {
-                                peer.publicKeys.push(publicKey);
-                                delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
-                            } else if (!peer.isForked()) {
-                                if (
-                                    delegatePeer.isForked() ||
-                                    (peer.state.header.height === lastBlock.data.height &&
-                                        peer.state.header.id === lastBlock.data.id) ||
-                                    (peer.state.header.height >= delegatePeer.state.header.height &&
-                                        delegatePeer.state.header.id !== lastBlock.data.id)
-                                ) {
+                            if (delegateWallet.isDelegate()) {
+                                if (!delegatePeer) {
                                     peer.publicKeys.push(publicKey);
                                     delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
-                                    delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
-                                        (peerPublicKey) => peerPublicKey !== publicKey,
-                                    );
+                                } else if (!peer.isForked()) {
+                                    if (
+                                        delegatePeer.isForked() ||
+                                        (peer.state.header.height === lastBlock.data.height &&
+                                            peer.state.header.id === lastBlock.data.id) ||
+                                        (peer.state.header.height >= delegatePeer.state.header.height &&
+                                            delegatePeer.state.header.id !== lastBlock.data.id)
+                                    ) {
+                                        peer.publicKeys.push(publicKey);
+                                        delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
+                                        delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
+                                            (peerPublicKey) => peerPublicKey !== publicKey,
+                                        );
+                                    }
                                 }
                             }
                         }
