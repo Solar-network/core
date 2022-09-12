@@ -129,7 +129,7 @@ export class Server {
     public async boot(): Promise<void> {
         try {
             const swaggerJson = readJsonSync(`${__dirname}/www/api.json`);
-            const dummyAddress = Identities.Address.fromPassphrase("");
+            const dummyAddress = Identities.Address.fromMnemonic("");
             const networkCharacter = dummyAddress.slice(0, 1);
             swaggerJson.servers.push({ url: this.configuration.getRequired<string>("options.basePath") });
             swaggerJson.info.version = this.app.version();

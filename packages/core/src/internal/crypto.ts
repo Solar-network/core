@@ -3,7 +3,7 @@ import { join } from "path";
 
 import { KeysNotDetected, MissingConfigFile } from "../exceptions/crypto";
 
-export const checkForPassphrase = (config?: string): void => {
+export const checkForPrivateKeys = (config?: string): void => {
     if (!config && process.env.CORE_PATH_CONFIG) {
         config = process.env.CORE_PATH_CONFIG;
     }

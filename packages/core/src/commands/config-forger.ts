@@ -38,7 +38,7 @@ export class Command extends Commands.Command {
         this.definition
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
-            .setFlag("bip39", "A delegate plain text passphrase, referred to as BIP39", Joi.string())
+            .setFlag("bip39", "A delegate plain text mnemonic, referred to as BIP39", Joi.string())
             .setFlag("privateKey", "A 64 character hexadecimal delegate private key", Joi.string().hex().length(64))
             .setFlag("skipValidation", "Skip BIP39 mnemonic validation", Joi.boolean().default(false))
             .setFlag(
@@ -70,7 +70,7 @@ export class Command extends Commands.Command {
                 message: "Please select how you wish to enter your delegate private key?",
                 choices: [
                     { title: "Hexadecimal private key", value: "privateKey" },
-                    { title: "BIP39 passphrase (Deprecated)", value: "bip39" },
+                    { title: "BIP39 mnemonic (Deprecated)", value: "bip39" },
                 ],
             },
         ]);

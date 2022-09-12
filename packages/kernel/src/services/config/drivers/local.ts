@@ -177,7 +177,7 @@ export class LocalConfigLoader implements ConfigLoader {
         const secrets: Set<string> = new Set(delegates.secrets || []);
 
         for (const secret of secrets) {
-            keys.add(Identities.PrivateKey.fromPassphrase(secret));
+            keys.add(Identities.PrivateKey.fromMnemonic(secret));
         }
 
         if (delegates.secrets || secrets.size > 0) {

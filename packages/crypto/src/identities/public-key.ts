@@ -4,8 +4,8 @@ import { NetworkType } from "../types";
 import { Keys } from "./keys";
 
 export class PublicKey {
-    public static fromPassphrase(passphrase: string): string {
-        return Keys.fromPassphrase(passphrase).publicKey.secp256k1;
+    public static fromMnemonic(mnemonic: string): string {
+        return Keys.fromMnemonic(mnemonic).publicKey.secp256k1;
     }
 
     public static fromWIF(wif: string, network?: NetworkType): string {

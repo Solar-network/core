@@ -3,7 +3,7 @@ import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 import { resolve } from "path";
 
-import { checkForPassphrase } from "../internal/crypto";
+import { checkForPrivateKeys } from "../internal/crypto";
 
 /**
  * @export
@@ -60,7 +60,7 @@ export class Command extends Commands.Command {
         this.actions.abortRunningProcess(`${flags.token}-forger`);
         this.actions.abortRunningProcess(`${flags.token}-relay`);
 
-        checkForPassphrase(this.app.getCorePath("config"));
+        checkForPrivateKeys(this.app.getCorePath("config"));
 
         await this.actions.daemoniseProcess(
             {

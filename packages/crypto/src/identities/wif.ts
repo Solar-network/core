@@ -6,8 +6,8 @@ import { configManager } from "../managers";
 import { Keys } from "./keys";
 
 export class WIF {
-    public static fromPassphrase(passphrase: string, network?: Network): string {
-        const keys: IKeyPair = Keys.fromPassphrase(passphrase);
+    public static fromMnemonic(mnemonic: string, network?: Network): string {
+        const keys: IKeyPair = Keys.fromMnemonic(mnemonic);
 
         if (!network) {
             network = configManager.get("network");

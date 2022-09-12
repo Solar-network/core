@@ -2,7 +2,7 @@ import { Commands, Container, Contracts, Utils } from "@solar-network/cli";
 import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
-import { checkForPassphrase } from "../internal/crypto";
+import { checkForPrivateKeys } from "../internal/crypto";
 
 /**
  * @export
@@ -51,7 +51,7 @@ export class Command extends Commands.Command {
         const flags: Contracts.AnyObject = { ...this.getFlags() };
         flags.processType = "forger";
 
-        checkForPassphrase(this.app.getCorePath("config"));
+        checkForPrivateKeys(this.app.getCorePath("config"));
 
         await Utils.buildApplication({
             flags,

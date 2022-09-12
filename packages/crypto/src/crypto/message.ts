@@ -6,8 +6,8 @@ import { Hash } from "./hash";
 import { HashAlgorithms } from "./hash-algorithms";
 
 export class Message {
-    public static sign(message: string, passphrase: string): IMessage {
-        const keys: IKeyPair = Keys.fromPassphrase(passphrase);
+    public static sign(message: string, mnemonic: string): IMessage {
+        const keys: IKeyPair = Keys.fromMnemonic(mnemonic);
 
         return {
             publicKey: keys.publicKey.secp256k1,

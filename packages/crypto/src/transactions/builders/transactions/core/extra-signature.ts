@@ -13,9 +13,9 @@ export class ExtraSignatureBuilder extends TransactionBuilder<ExtraSignatureBuil
         this.data.asset = { signature: {} } as ITransactionAsset;
     }
 
-    public signatureAsset(extraPassphrase: string): ExtraSignatureBuilder {
+    public signatureAsset(extraMnemonic: string): ExtraSignatureBuilder {
         if (this.data.asset && this.data.asset.signature) {
-            this.data.asset.signature.publicKey = Keys.fromPassphrase(extraPassphrase).publicKey.secp256k1;
+            this.data.asset.signature.publicKey = Keys.fromMnemonic(extraMnemonic).publicKey.secp256k1;
         }
 
         return this;
