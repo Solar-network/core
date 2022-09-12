@@ -126,12 +126,15 @@ export class WalletRepository implements Contracts.State.WalletRepository {
         return Utils.BigNumber.ZERO;
     }
 
-    public index(wallets: Contracts.State.Wallet | Contracts.State.Wallet[]): void {
-        if (!Array.isArray(wallets)) {
-            this.indexWallet(wallets);
-        } else {
-            for (const wallet of wallets) {
-                this.indexWallet(wallet);
+    public index(
+        wallets: Contracts.State.Wallet | Contracts.State.Wallet[],
+        blockchainWallets?: Contracts.State.Wallet | Contracts.State.Wallet[],
+    ): void {
+        if (!Array.isArray(wallets) && !Array.isArray(blockchainWallets)) {
+            this.indexWallet(wallets, blockchainWallets);
+        } else if (Array.isArray(wallets) && Array.isArray(blockchainWallets)) {
+            for (let i = 0; i < wallets.length; i++) {
+                this.indexWallet(wallets[i], blockchainWallets[i]);
             }
         }
     }
@@ -168,10 +171,10 @@ export class WalletRepository implements Contracts.State.WalletRepository {
         return walletClone;
     }
 
-    protected indexWallet(wallet: Contracts.State.Wallet): void {
+    protected indexWallet(wallet: Contracts.State.Wallet, blockchainWallet?: Contracts.State.Wallet): void {
         for (const index of Object.values(this.indexes).filter((index) => index.autoIndex)) {
             index.forgetWallet(wallet);
-            index.index(wallet);
+            index.index(wallet, blockchainWallet);
         }
     }
 }

@@ -12,7 +12,7 @@ export interface WalletBasic {
 export interface WalletIndex {
     readonly indexer: WalletIndexer;
     readonly autoIndex: boolean;
-    index(wallet: Wallet): void;
+    index(wallet: Wallet, blockchainWallet?: Wallet): void;
     has(key: string): boolean;
     get(key: string): Wallet | undefined;
     set(key: string, wallet: Wallet): void;
@@ -25,7 +25,7 @@ export interface WalletIndex {
     clear(): void;
 }
 
-export type WalletIndexer = (index: WalletIndex, wallet: Wallet) => void;
+export type WalletIndexer = (index: WalletIndex, wallet: Wallet, blockchainWallet?: Wallet) => void;
 
 export type WalletIndexerIndex = { name: string; indexer: WalletIndexer; autoIndex: boolean };
 
@@ -245,7 +245,7 @@ export interface WalletRepository {
 
     getNonce(publicKey: string): Utils.BigNumber;
 
-    index(wallet: Wallet): void;
+    index(wallet: Wallet, blockchainWallet?: Wallet): void;
 
     setOnIndex(index: string, key: string, wallet: Wallet): void;
 
