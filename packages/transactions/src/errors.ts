@@ -164,6 +164,13 @@ export class SecondSignatureAlreadyRegisteredError extends TransactionError {
         super("Failed to apply transaction, because a second signature is already enabled on this wallet");
     }
 }
+
+export class PublicKeyAlreadyAssociatedWithWalletError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because that public key is already associated with this wallet");
+    }
+}
+
 export class NotSupportedForMultiSignatureWalletError extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because multisignature is enabled");

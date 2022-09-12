@@ -1,7 +1,11 @@
 import { Enums, Interfaces, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Utils } from "@solar-network/kernel";
 
-import { NotSupportedForMultiSignatureWalletError, SecondSignatureAlreadyRegisteredError } from "../../errors";
+import {
+    NotSupportedForMultiSignatureWalletError,
+    PublicKeyAlreadyAssociatedWithWalletError,
+    SecondSignatureAlreadyRegisteredError,
+} from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
 @Container.injectable()
@@ -66,6 +70,10 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
 
         if (senderWallet.hasMultiSignature()) {
             throw new NotSupportedForMultiSignatureWalletError();
+        }
+
+        if (senderWallet.getPublicKey() === transaction.data.asset.signature.publicKey) {
+            throw new PublicKeyAlreadyAssociatedWithWalletError();
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);
