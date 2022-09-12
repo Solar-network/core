@@ -83,14 +83,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
             }).required(),
             workerPool: Joi.object({
                 workerCount: Joi.number().integer().min(1).required(),
-                cryptoPackages: Joi.array()
-                    .items(
-                        Joi.object({
-                            typeGroup: Joi.number().integer().min(3),
-                            packageName: Joi.string(),
-                        }),
-                    )
-                    .required(),
             }).required(),
         }).unknown(true);
     }

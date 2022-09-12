@@ -1,4 +1,4 @@
-import { Managers, Transactions } from "@solar-network/crypto";
+import { Managers } from "@solar-network/crypto";
 import { Models, Utils } from "@solar-network/database";
 import { Container } from "@solar-network/kernel";
 import { Readable } from "stream";
@@ -28,13 +28,6 @@ const connect = async (options: any): Promise<Connection> => {
 export const init = async (): Promise<void> => {
     Managers.configManager.setConfig(_workerData.networkConfig);
 
-    for (const cryptoPackage of _workerData.cryptoPackages) {
-        const transactions = require(cryptoPackage).Transactions;
-
-        for (const transaction of Object.values(transactions)) {
-            Transactions.TransactionRegistry.registerTransactionType(transaction as typeof Transactions.Transaction);
-        }
-    }
     app = new Application(new Container.Container());
 
     if (_workerData.connection) {

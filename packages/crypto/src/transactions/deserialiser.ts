@@ -5,7 +5,7 @@ import {
     TransactionVersionError,
 } from "../errors";
 import { Address } from "../identities";
-import { IDeserialiseOptions, ITransaction, ITransactionData } from "../interfaces";
+import { IDeserialiseAddresses, IDeserialiseOptions, ITransaction, ITransactionData } from "../interfaces";
 import { BigNumber, ByteBuffer, isSupportedTransactionVersion } from "../utils";
 import { TransactionTypeFactory } from "./types";
 
@@ -14,13 +14,13 @@ export class Deserialiser {
         const data = {} as ITransactionData;
 
         const buff: ByteBuffer = this.getByteBuffer(serialised);
-        this.deserialiseCommon(data, buff);
+        this.deserialiseCommon(data, buff, options.transactionAddresses);
 
         const instance: ITransaction = TransactionTypeFactory.create(data);
         this.deserialiseMemo(instance, buff);
 
         // Deserialise type specific parts
-        instance.deserialise(buff);
+        instance.deserialise(buff, options.transactionAddresses);
 
         this.deserialiseSchnorr(data, buff);
 
@@ -40,7 +40,11 @@ export class Deserialiser {
         return instance;
     }
 
-    public static deserialiseCommon(transaction: ITransactionData, buf: ByteBuffer): void {
+    public static deserialiseCommon(
+        transaction: ITransactionData,
+        buf: ByteBuffer,
+        transactionAddresses?: IDeserialiseAddresses,
+    ): void {
         transaction.headerType = 0xff - buf.readUInt8();
         transaction.version = buf.readUInt8();
         transaction.network = buf.readUInt8();
@@ -54,7 +58,12 @@ export class Deserialiser {
         if (transaction.headerType === TransactionHeaderType.Standard) {
             transaction.senderId = Address.fromPublicKey(transaction.senderPublicKey);
         } else {
-            transaction.senderId = Address.fromBuffer(buf.readBuffer(21));
+            if (transactionAddresses?.senderId) {
+                transaction.senderId = transactionAddresses.senderId;
+                buf.jump(21);
+            } else {
+                transaction.senderId = Address.fromBuffer(buf.readBuffer(21));
+            }
         }
 
         transaction.fee = BigNumber.make(buf.readBigUInt64LE().toString());

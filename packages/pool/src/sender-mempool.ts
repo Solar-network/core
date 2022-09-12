@@ -12,6 +12,7 @@ export class SenderMempool implements Contracts.Pool.SenderMempool {
     @Container.inject(Container.Identifiers.PoolSenderState)
     private readonly senderState!: Contracts.Pool.SenderState;
 
+    private address!: string;
     private concurrency: number = 0;
 
     private readonly lock: AppUtils.Lock = new AppUtils.Lock();
@@ -101,5 +102,13 @@ export class SenderMempool implements Contracts.Pool.SenderMempool {
         } finally {
             this.concurrency--;
         }
+    }
+
+    public setAddress(address: string): void {
+        this.address = address;
+    }
+
+    public getWallet(): Contracts.State.Wallet | undefined {
+        return this.senderState.getWallet(this.address);
     }
 }

@@ -53,7 +53,7 @@
         "legacyTransfer": true,
         "legacyVote": true,
         "p2p": {
-            "minimumVersions": [">=4.0.0"]
+            "minimumVersions": [">=4.1.0"]
         },
         "transfer": {
             "maximum": 256,
@@ -145,7 +145,6 @@
     },
     {
         "height": 1812866,
-        "canVoteForResignedDelegates": true,
         "donations": {
             "Sgymbo4rg9aBeJJ2YmV12xdRY2xo6b94U9": {
                 "percent": 5,

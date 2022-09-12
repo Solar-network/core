@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/pool",
-    "version": "4.1.1",
+    "version": "4.1.2",
     "description": "Pool Manager for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [

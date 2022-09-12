@@ -206,7 +206,7 @@ export class Wallet implements Contracts.State.Wallet {
      * @memberof Wallet
      */
     public isDelegate(): boolean {
-        return this.hasAttribute("delegate");
+        return this.hasAttribute("delegate.username");
     }
 
     /**

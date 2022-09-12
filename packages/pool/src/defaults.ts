@@ -38,6 +38,5 @@ export const defaults = {
     },
     workerPool: {
         workerCount,
-        cryptoPackages: [],
     },
 };

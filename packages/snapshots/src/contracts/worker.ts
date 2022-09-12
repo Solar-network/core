@@ -9,7 +9,6 @@ export interface WorkerAction {
 export interface WorkerData {
     actionOptions: ActionOptions;
     networkConfig: Interfaces.NetworkConfig;
-    cryptoPackages: string[];
     connection?: any;
 }
 

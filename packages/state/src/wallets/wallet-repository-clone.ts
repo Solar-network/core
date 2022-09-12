@@ -49,14 +49,17 @@ export class WalletRepositoryClone extends WalletRepository {
         }
 
         let wallet;
+        let blockchainWallet;
+
         if (this.blockchainWalletRepository.hasByAddress(address)) {
             const walletToClone = this.blockchainWalletRepository.findByAddress(address);
+            blockchainWallet = walletToClone;
             wallet = this.cloneWallet(this.blockchainWalletRepository, walletToClone);
         } else {
             wallet = this.createWallet(address);
         }
 
-        super.index(wallet);
+        super.index(wallet, blockchainWallet);
 
         return wallet;
     }
@@ -65,7 +68,11 @@ export class WalletRepositoryClone extends WalletRepository {
         if (!super.hasByIndex(Contracts.State.WalletIndexes.PublicKeys, publicKey)) {
             const wallet = this.findByAddress(Identities.Address.fromPublicKey(publicKey));
             wallet.setPublicKey(publicKey);
-            super.index(wallet);
+            let blockchainWallet;
+            if (this.blockchainWalletRepository.hasByPublicKey(publicKey)) {
+                blockchainWallet = this.blockchainWalletRepository.findByPublicKey(publicKey);
+            }
+            super.index(wallet, blockchainWallet);
         }
 
         return super.findByIndex(Contracts.State.WalletIndexes.PublicKeys, publicKey);
@@ -144,7 +151,12 @@ export class WalletRepositoryClone extends WalletRepository {
             indexKeys[indexName] = this.getIndex(indexName).walletKeys(wallet);
         }
 
-        super.indexWallet(wallet);
+        let blockchainWallet;
+        const address = wallet.getAddress();
+        if (this.blockchainWalletRepository.hasByAddress(address)) {
+            blockchainWallet = this.blockchainWalletRepository.findByAddress(address);
+        }
+        super.indexWallet(wallet, blockchainWallet);
 
         for (const indexName of this.getIndexNames()) {
             const walletKeys = this.getIndex(indexName).walletKeys(wallet);
