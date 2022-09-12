@@ -22,9 +22,6 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
     @Container.tagged("plugin", "@solar-network/database")
     private readonly coreDatabaseConfiguration!: Providers.PluginConfiguration;
 
-    @Container.inject(Container.Identifiers.PluginDiscoverer)
-    private readonly pluginDiscoverer!: Providers.PluginDiscoverer;
-
     @Container.inject(Container.Identifiers.LogService)
     private readonly logger!: Contracts.Kernel.Logger;
 
@@ -379,11 +376,6 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
     }
 
     private prepareWorkerData(action: string, table: string, meta: Meta.MetaData): any {
-        const cryptoPackages: string[] = [];
-        for (const packageName of this.configuration.getOptional<string[]>("cryptoPackages", [])) {
-            cryptoPackages.push(this.pluginDiscoverer.get(packageName).packageId);
-        }
-
         return {
             actionOptions: {
                 action: action,
@@ -397,7 +389,6 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
                 updateStep: this.configuration.getOptional("updateStep", 1000),
             },
             networkConfig: Managers.configManager.all()!,
-            cryptoPackages,
             connection: this.coreDatabaseConfiguration.getRequired("connection"),
         };
     }

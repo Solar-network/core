@@ -143,7 +143,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
 
             if (height >= currentHeight) {
                 this.logger.error(
-                    `Rollback height ${height.toLocaleString()} is greater than the current height ${currentHeight.toLocaleString()}`,
+                    `Rollback height ${height.toLocaleString()} is not less than the current height ${currentHeight.toLocaleString()}`,
                 );
                 return;
             }
