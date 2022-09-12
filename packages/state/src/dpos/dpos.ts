@@ -70,10 +70,10 @@ export class DposState implements Contracts.State.DposState {
             const diff = voteBalanceB.comparedTo(voteBalanceA);
 
             if (diff === 0) {
-                AppUtils.assert.defined<string>(a.getPublicKey());
-                AppUtils.assert.defined<string>(b.getPublicKey());
+                AppUtils.assert.defined<string>(a.getPublicKey("primary"));
+                AppUtils.assert.defined<string>(b.getPublicKey("primary"));
 
-                if (a.getPublicKey() === b.getPublicKey()) {
+                if (a.getPublicKey("primary") === b.getPublicKey("primary")) {
                     const username = a.getAttribute("delegate.username");
                     throw new Error(
                         `The balance and public key of both delegates are identical! ` +
@@ -81,7 +81,7 @@ export class DposState implements Contracts.State.DposState {
                     );
                 }
 
-                return a.getPublicKey()!.localeCompare(b.getPublicKey()!, "en");
+                return a.getPublicKey("primary").localeCompare(b.getPublicKey("primary"), "en");
             }
 
             return diff;

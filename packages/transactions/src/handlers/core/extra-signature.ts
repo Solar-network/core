@@ -1,15 +1,11 @@
 import { Enums, Interfaces, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Utils } from "@solar-network/kernel";
 
-import {
-    NotSupportedForMultiSignatureWalletError,
-    PublicKeyAlreadyAssociatedWithWalletError,
-    SecondSignatureAlreadyRegisteredError,
-} from "../../errors";
+import { ExtraSignatureAlreadyRegisteredError, PublicKeyAlreadyAssociatedWithWalletError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
 @Container.injectable()
-export class SecondSignatureRegistrationTransactionHandler extends TransactionHandler {
+export class ExtraSignatureRegistrationTransactionHandler extends TransactionHandler {
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
@@ -21,11 +17,11 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
     }
 
     public walletAttributes(): ReadonlyArray<string> {
-        return ["secondPublicKey"];
+        return [];
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
-        return Transactions.Core.SecondSignatureRegistrationTransaction;
+        return Transactions.Core.ExtraSignatureRegistrationTransaction;
     }
 
     public async bootstrap(): Promise<void> {
@@ -41,13 +37,13 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
             if (
                 transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey() === undefined
+                wallet.getPublicKey("primary") === undefined
             ) {
-                wallet.setPublicKey(transaction.senderPublicKey);
+                wallet.setPublicKey(transaction.senderPublicKey, "primary");
                 this.walletRepository.index(wallet);
             }
 
-            wallet.setAttribute("secondPublicKey", transaction.asset.signature.publicKey);
+            wallet.setPublicKey(transaction.asset.signature.publicKey, "extra");
         }
     }
 
@@ -59,8 +55,8 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
         transaction: Interfaces.ITransaction,
         wallet: Contracts.State.Wallet,
     ): Promise<void> {
-        if (wallet.hasSecondSignature()) {
-            throw new SecondSignatureAlreadyRegisteredError();
+        if (wallet.hasPublicKeyByType("extra")) {
+            throw new ExtraSignatureAlreadyRegisteredError();
         }
 
         Utils.assert.defined<string>(transaction.data.senderId);
@@ -68,11 +64,7 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
 
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
-        if (senderWallet.hasMultiSignature()) {
-            throw new NotSupportedForMultiSignatureWalletError();
-        }
-
-        if (senderWallet.getPublicKey() === transaction.data.asset.signature.publicKey) {
+        if (senderWallet.hasPublicKey(transaction.data.asset.signature.publicKey)) {
             throw new PublicKeyAlreadyAssociatedWithWalletError();
         }
 
@@ -89,7 +81,7 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
 
         if (hasSender) {
             throw new Contracts.Pool.PoolError(
-                `${transaction.data.senderId} already has a second signature registration transaction in the pool`,
+                `${transaction.data.senderId} already has an extra signature registration transaction in the pool`,
                 "ERR_PENDING",
             );
         }
@@ -104,7 +96,7 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
 
         Utils.assert.defined<string>(transaction.data.asset?.signature?.publicKey);
 
-        senderWallet.setAttribute("secondPublicKey", transaction.data.asset.signature.publicKey);
+        senderWallet.setPublicKey(transaction.data.asset.signature.publicKey, "extra");
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -112,7 +104,7 @@ export class SecondSignatureRegistrationTransactionHandler extends TransactionHa
 
         Utils.assert.defined<string>(transaction.data.senderId);
 
-        this.walletRepository.findByAddress(transaction.data.senderId).forgetAttribute("secondPublicKey");
+        this.walletRepository.findByAddress(transaction.data.senderId).forgetPublicKey("extra");
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}

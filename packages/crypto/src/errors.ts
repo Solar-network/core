@@ -114,7 +114,7 @@ export class MemoLengthExceededError extends CryptoError {
 
 export class MissingTransactionSignatureError extends CryptoError {
     public constructor() {
-        super(`Expected the transaction to be signed`);
+        super("Expected the transaction to be signed with a primary signature");
     }
 }
 
@@ -127,17 +127,5 @@ export class BlockSchemaError extends CryptoError {
 export class InvalidMilestoneConfigurationError extends CryptoError {
     public constructor(message: string) {
         super(message);
-    }
-}
-
-export class InvalidMultiSignatureAssetError extends CryptoError {
-    public constructor() {
-        super(`The multisignature asset is invalid`);
-    }
-}
-
-export class DuplicateParticipantInMultiSignatureError extends CryptoError {
-    public constructor() {
-        super(`Invalid multisignature, because duplicate participant found`);
     }
 }

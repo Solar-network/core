@@ -46,14 +46,25 @@ export class WalletSearchService {
         return this.walletRepository
             .allByAddress()
             .filter((wallet) => {
-                const publicKey: string = wallet.hasPublicKey() ? wallet.getPublicKey()!.toLowerCase() : "";
+                const publicKeys: string[] = [];
+                const walletKeys = Object.values(wallet.getPublicKeys());
+                for (const key of walletKeys) {
+                    if (typeof key === "string") {
+                        publicKeys.push(key.toLowerCase());
+                    } else {
+                        publicKeys.push(...Object.keys(key).map((key) => key.toLowerCase()));
+                    }
+                }
                 const delegateAttributes: Record<string, any> = wallet.hasAttribute("delegate")
                     ? wallet.getAttribute("delegate")
                     : {};
                 if (criteria.length <= 20) {
                     return delegateAttributes.username && delegateAttributes.username.startsWith(criteria);
                 } else {
-                    return wallet.getAddress().toLowerCase().startsWith(criteria) || publicKey.startsWith(criteria);
+                    return (
+                        wallet.getAddress().toLowerCase().startsWith(criteria) ||
+                        publicKeys.filter((publicKey) => publicKey.startsWith(criteria)).length > 0
+                    );
                 }
             })
             .slice(0, 100)
@@ -79,7 +90,7 @@ export class WalletSearchService {
                 return {
                     address: wallet.getAddress(),
                     delegate,
-                    publicKey: wallet.getPublicKey(),
+                    publicKeys: wallet.getPublicKeys(),
                     balance: wallet.getBalance(),
                     votes: wallet.getVoteDistribution(),
                 };
@@ -134,7 +145,6 @@ export class WalletSearchService {
     private *getActiveWallets(...criterias: WalletCriteria[]): Iterable<WalletResource> {
         for (const wallet of this.walletRepository.allByPublicKey()) {
             const walletResource = this.getWalletResourceFromWallet(wallet);
-
             if (this.standardCriteriaService.testStandardCriterias(walletResource, ...criterias)) {
                 yield walletResource;
             }

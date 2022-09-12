@@ -1,11 +1,7 @@
 import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/kernel";
 
-import {
-    NotSupportedForMultiSignatureWalletError,
-    WalletIsAlreadyDelegateError,
-    WalletUsernameAlreadyRegisteredError,
-} from "../../errors";
+import { WalletIsAlreadyDelegateError, WalletUsernameAlreadyRegisteredError } from "../../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
 @Container.injectable()
@@ -58,9 +54,9 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
             if (
                 transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey() === undefined
+                wallet.getPublicKey("primary") === undefined
             ) {
-                wallet.setPublicKey(transaction.senderPublicKey);
+                wallet.setPublicKey(transaction.senderPublicKey, "primary");
             }
 
             wallet.setAttribute<Contracts.State.WalletDelegateAttributes>("delegate", {
@@ -114,14 +110,6 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         wallet: Contracts.State.Wallet,
     ): Promise<void> {
         const { data }: Interfaces.ITransaction = transaction;
-
-        AppUtils.assert.defined<string>(data.senderId);
-
-        const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(data.senderId);
-
-        if (sender.hasMultiSignature()) {
-            throw new NotSupportedForMultiSignatureWalletError();
-        }
 
         AppUtils.assert.defined<string>(data.asset?.delegate?.username);
 

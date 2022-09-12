@@ -17,10 +17,9 @@ class TransactionRegistry {
 
         // Core transactions
         this.registerTransactionType(Core.LegacyTransferTransaction);
-        this.registerTransactionType(Core.SecondSignatureRegistrationTransaction);
+        this.registerTransactionType(Core.ExtraSignatureRegistrationTransaction);
         this.registerTransactionType(Core.DelegateRegistrationTransaction);
         this.registerTransactionType(Core.LegacyVoteTransaction);
-        this.registerTransactionType(Core.MultiSignatureRegistrationTransaction);
         this.registerTransactionType(Core.IpfsTransaction);
         this.registerTransactionType(Core.TransferTransaction);
         this.registerTransactionType(Core.DelegateResignationTransaction);

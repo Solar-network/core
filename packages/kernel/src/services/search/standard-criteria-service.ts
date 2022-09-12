@@ -244,6 +244,29 @@ export class StandardCriteriaService {
             return criteriaKeys.every((key) => {
                 try {
                     if (
+                        key === "publicKey" &&
+                        typeof value[key + "s"] === "object" &&
+                        value[key + "s"] !== null &&
+                        typeof criteriaItem[key] === "object" &&
+                        criteriaItem[key] !== null
+                    ) {
+                        const publicKeys: string[] = [];
+                        const keys = Object.values(value[key + "s"]);
+                        for (const key of keys) {
+                            if (typeof key === "string") {
+                                publicKeys.push(key.toLowerCase());
+                            } else {
+                                publicKeys.push(...Object.keys(key as string).map((key) => key.toLowerCase()));
+                            }
+                        }
+                        for (const publicKey of criteriaItem[key]) {
+                            if (publicKeys.includes(publicKey)) {
+                                return true;
+                            }
+                        }
+                    }
+
+                    if (
                         key === "votingFor" &&
                         typeof value[key] === "object" &&
                         value[key] !== null &&

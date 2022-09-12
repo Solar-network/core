@@ -8,14 +8,14 @@ export type WalletCriteria = Contracts.Search.StandardCriteriaOf<WalletResource>
 
 export type WalletSearchResource = {
     address: string;
-    publicKey?: string;
+    publicKeys?: Record<string, string | Contracts.State.WalletPermissions>;
     balance: Utils.BigNumber;
     votes: object;
 };
 
 export type WalletResource = {
     address: string;
-    publicKey?: string;
+    publicKeys?: Record<string, string | Contracts.State.WalletPermissions>;
     balance: Utils.BigNumber;
     nonce: Utils.BigNumber;
     attributes: object;

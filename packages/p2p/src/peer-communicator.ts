@@ -201,7 +201,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 (await this.triggers.call("getActiveDelegates", {
                     roundInfo,
                 })) as Contracts.State.Wallet[]
-            ).map((wallet) => wallet.getPublicKey());
+            ).map((wallet) => wallet.getPublicKey("primary"));
             for (const signatureIndex in pingResponse.signatures) {
                 const publicKey = pingResponse.publicKeys![signatureIndex];
                 const signature = pingResponse.signatures[signatureIndex];

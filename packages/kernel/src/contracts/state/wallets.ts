@@ -1,8 +1,8 @@
-import { Interfaces, Utils } from "@solar-network/crypto";
+import { Utils } from "@solar-network/crypto";
 
 export interface WalletBasic {
     address: string;
-    publicKey: string | undefined;
+    publicKeys: Record<string, string | WalletPermissions>;
     balance: Utils.BigNumber;
     nonce: Utils.BigNumber;
     attributes: Record<string, any>;
@@ -25,6 +25,10 @@ export interface WalletIndex {
     clear(): void;
 }
 
+export interface WalletPermissions {
+    types?: string[];
+}
+
 export type WalletIndexer = (index: WalletIndex, wallet: Wallet, blockchainWallet?: Wallet) => void;
 
 export type WalletIndexerIndex = { name: string; indexer: WalletIndexer; autoIndex: boolean };
@@ -42,7 +46,7 @@ export enum WalletIndexes {
 
 export interface WalletData {
     address: string;
-    publicKey?: string;
+    publicKey: string;
     balance: Utils.BigNumber;
     nonce: Utils.BigNumber;
     attributes: Record<string, any>;
@@ -53,13 +57,19 @@ export interface Wallet {
 
     getAddress(): string;
 
-    hasPublicKey(): boolean;
+    hasPublicKey(publicKey: string): boolean;
 
-    forgetPublicKey(): void;
+    hasPublicKeyByType(type: string): boolean;
 
-    getPublicKey(): string | undefined;
+    forgetPublicKey(type: string): void;
 
-    setPublicKey(publicKey: string): void;
+    getPublicKey(type: string): string;
+
+    getPublicKeys(): Record<string, string | WalletPermissions>;
+
+    setPublicKey(publicKey: string, type: string, permissions?: object): void;
+
+    setPublicKeys(publicKeys: Record<string, string | WalletPermissions>): void;
 
     getBalance(): Utils.BigNumber;
 
@@ -157,18 +167,6 @@ export interface Wallet {
     updateVoteBalances(): void;
 
     /**
-     * @returns {boolean}
-     * @memberof Wallet
-     */
-    hasSecondSignature(): boolean;
-
-    /**
-     * @returns {boolean}
-     * @memberof Wallet
-     */
-    hasMultiSignature(): boolean;
-
-    /**
      * @returns {Wallet}
      * @memberof Wallet
      */
@@ -199,8 +197,6 @@ export interface WalletDelegateAttributes {
     resigned?: boolean;
     version?: string;
 }
-
-export type WalletMultiSignatureAttributes = Interfaces.IMultiSignatureAsset & { legacy?: boolean };
 
 export interface WalletVoteDistribution {
     percent: number;

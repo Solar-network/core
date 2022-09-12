@@ -1,6 +1,5 @@
 import { HashAlgorithms } from "../crypto";
 import { PublicKeyError } from "../errors";
-import { IMultiSignatureAsset } from "../interfaces";
 import { configManager } from "../managers";
 import { NetworkType } from "../types";
 import { Base58 } from "../utils";
@@ -35,10 +34,6 @@ export class Address {
 
     public static fromWIF(wif: string, network?: NetworkType): string {
         return Address.fromPublicKey(PublicKey.fromWIF(wif, network));
-    }
-
-    public static fromMultiSignatureAsset(asset: IMultiSignatureAsset, networkVersion?: number): string {
-        return this.fromPublicKey(PublicKey.fromMultiSignatureAsset(asset), networkVersion);
     }
 
     public static fromPrivateKey(privateKey: { publicKey: string }, networkVersion?: number): string {

@@ -844,7 +844,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             (await this.triggers.call("getActiveDelegates", {
                 roundInfo,
             })) as Contracts.State.Wallet[]
-        ).map((wallet) => wallet.getPublicKey());
+        ).map((wallet) => wallet.getPublicKey("primary"));
 
         const delegatesOnThisNode: string[] = [];
         const publicKeys = Utils.getForgerDelegates();

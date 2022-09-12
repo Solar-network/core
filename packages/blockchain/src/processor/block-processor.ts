@@ -102,25 +102,6 @@ export class BlockProcessor {
     }
 
     private async verifyBlock(block: Interfaces.IBlock): Promise<boolean> {
-        if (block.verification.containsMultiSignatures) {
-            try {
-                for (const transaction of block.transactions) {
-                    const registry = this.app.getTagged<Handlers.Registry>(
-                        Container.Identifiers.TransactionHandlerRegistry,
-                        "state",
-                        "blockchain",
-                    );
-                    const handler = await registry.getActivatedHandlerForData(transaction.data);
-                    await handler.verify(transaction);
-                }
-
-                block.verification = block.verify();
-            } catch (error) {
-                this.logger.warning(`Failed to verify block, because: ${error.message} :bangbang:`);
-                block.verification.verified = false;
-            }
-        }
-
         const { verified } = block.verification;
         if (!verified) {
             this.logger.warning(
@@ -252,7 +233,7 @@ export class BlockProcessor {
         const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.data.username);
 
         if (block.data.version === 0) {
-            if (delegateWallet.getPublicKey() !== block.data.generatorPublicKey) {
+            if (delegateWallet.getPublicKey("primary") !== block.data.generatorPublicKey) {
                 return false;
             }
         }

@@ -70,7 +70,7 @@ export class WalletRepository implements Contracts.State.WalletRepository {
         const index = this.getIndex(Contracts.State.WalletIndexes.PublicKeys);
         if (publicKey && !index.has(publicKey)) {
             const wallet = this.findByAddress(Identities.Address.fromPublicKey(publicKey));
-            wallet.setPublicKey(publicKey);
+            wallet.setPublicKey(publicKey, "primary");
             index.set(publicKey, wallet);
         }
         const wallet: Contracts.State.Wallet | undefined = index.get(publicKey);

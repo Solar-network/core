@@ -191,7 +191,7 @@ export class SXPSwap {
                 sender.getAddress(),
             );
 
-            AppUtils.assert.defined<string>(sender.getPublicKey());
+            AppUtils.assert.defined<string>(sender.getPublicKey("primary"));
 
             const transactionData: Interfaces.ITransactionData = transaction.data;
             if (
@@ -202,7 +202,7 @@ export class SXPSwap {
             }
 
             if (
-                !(this as any).walletRepository.hasByPublicKey(sender.getPublicKey()!) &&
+                !(this as any).walletRepository.hasByPublicKey(sender.getPublicKey("primary")) &&
                 senderWallet.getBalance().isZero()
             ) {
                 throw new ColdWalletError();

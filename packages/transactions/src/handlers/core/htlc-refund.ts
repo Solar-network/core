@@ -42,9 +42,9 @@ export class HtlcRefundTransactionHandler extends TransactionHandler {
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
             if (
                 transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey() === undefined
+                wallet.getPublicKey("primary") === undefined
             ) {
-                wallet.setPublicKey(transaction.senderPublicKey);
+                wallet.setPublicKey(transaction.senderPublicKey, "primary");
                 this.walletRepository.index(wallet);
             }
         }

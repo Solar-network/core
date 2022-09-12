@@ -22,7 +22,6 @@ export class TransactionWithBlockResource implements Resource {
 
         AppUtils.assert.defined<string>(transactionData.senderId);
 
-        const signSignature: string | undefined = transactionData.signSignature ?? transactionData.secondSignature;
         const confirmations: number = this.stateStore.getLastHeight() - blockData.height + 1;
 
         let amount: string | undefined =
@@ -53,8 +52,6 @@ export class TransactionWithBlockResource implements Resource {
             sender: transactionData.senderId,
             senderPublicKey: transactionData.senderPublicKey,
             recipient: transactionData.recipientId,
-            signature: transactionData.signature,
-            signSignature,
             signatures: transactionData.signatures,
             memo: transactionData.memo,
             asset: transactionData.asset,

@@ -158,7 +158,7 @@ export class StateLoader {
                     let attributes: object = {};
                     let balance: bigint | number = 0;
                     let nonce: bigint | number = 1;
-                    let publicKey: string | undefined;
+                    let publicKeys: Record<string, string | Contracts.State.WalletPermissions> = {};
                     let voteBalances: Record<string, Utils.BigNumber> = {};
 
                     if ((1 & bits) !== 0) {
@@ -170,12 +170,13 @@ export class StateLoader {
                     }
 
                     if ((4 & bits) !== 0) {
-                        publicKey = buffer.readBuffer(33).toString("hex");
+                        const length: number = buffer.readUInt32LE();
+                        attributes = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                     }
 
                     if ((8 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        attributes = JSON.parse(buffer.readBuffer(length).toString(), reviver);
+                        publicKeys = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                     }
 
                     if ((16 & bits) !== 0) {
@@ -188,13 +189,11 @@ export class StateLoader {
                     wallet.setBalance(Utils.BigNumber.make(balance));
                     wallet.setNonce(Utils.BigNumber.make(nonce));
 
-                    if (publicKey) {
-                        wallet.setPublicKey(publicKey);
-                    }
-
                     for (const attribute of Object.keys(attributes)) {
                         wallet.setAttribute(attribute, attributes[attribute]);
                     }
+
+                    wallet.setPublicKeys(publicKeys);
 
                     wallet.setVoteBalances(voteBalances);
 

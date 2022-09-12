@@ -89,8 +89,8 @@ export abstract class Transaction implements ITransaction {
         return Verifier.verify(this.data, options);
     }
 
-    public verifySecondSignature(publicKey: string): boolean {
-        return Verifier.verifySecondSignature(this.data, publicKey);
+    public verifyExtraSignature(publicKey: string): boolean {
+        return Verifier.verifyExtraSignature(this.data, publicKey);
     }
 
     public verifySchema(): ISchemaValidationResult {

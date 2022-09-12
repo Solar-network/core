@@ -67,7 +67,7 @@ export class WalletRepositoryClone extends WalletRepository {
     public findByPublicKey(publicKey: string): Contracts.State.Wallet {
         if (!super.hasByIndex(Contracts.State.WalletIndexes.PublicKeys, publicKey)) {
             const wallet = this.findByAddress(Identities.Address.fromPublicKey(publicKey));
-            wallet.setPublicKey(publicKey);
+            wallet.setPublicKey(publicKey, "primary");
             let blockchainWallet;
             if (this.blockchainWalletRepository.hasByPublicKey(publicKey)) {
                 blockchainWallet = this.blockchainWalletRepository.findByPublicKey(publicKey);

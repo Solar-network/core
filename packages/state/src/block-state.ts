@@ -294,7 +294,7 @@ export class BlockState implements Contracts.State.BlockState {
 
         const forgerAddress = Identities.Address.fromPublicKey(forgerPublicKey);
         const forgerWallet = this.walletRepository.createWallet(forgerAddress);
-        forgerWallet.setPublicKey(forgerPublicKey);
+        forgerWallet.setPublicKey(forgerPublicKey, "primary");
         this.walletRepository.index(forgerWallet);
     }
 }

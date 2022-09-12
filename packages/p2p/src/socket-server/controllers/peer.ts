@@ -97,7 +97,7 @@ export class PeerController extends Controller {
             (await this.triggers.call("getActiveDelegates", {
                 roundInfo,
             })) as Contracts.State.Wallet[]
-        ).map((wallet) => wallet.getPublicKey());
+        ).map((wallet) => wallet.getPublicKey("primary"));
 
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {
