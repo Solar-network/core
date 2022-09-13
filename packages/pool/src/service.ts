@@ -40,8 +40,7 @@ export class Service implements Contracts.Pool.Service {
     public async boot(): Promise<void> {
         this.events.listen(Enums.BlockEvent.Applied, this);
         this.events.listen(Enums.CryptoEvent.MilestoneChanged, this);
-        this.events.listen(Enums.QueueEvent.Finished, this);
-        this.events.listen(Enums.RoundEvent.Applied, this);
+        this.events.listen(Enums.StateEvent.BuilderFinished, this);
 
         if (process.env.CORE_RESET_DATABASE || process.env.CORE_RESET_POOL) {
             await this.flush();
@@ -51,8 +50,7 @@ export class Service implements Contracts.Pool.Service {
     public dispose(): void {
         this.events.forget(Enums.BlockEvent.Applied, this);
         this.events.forget(Enums.CryptoEvent.MilestoneChanged, this);
-        this.events.forget(Enums.QueueEvent.Finished, this);
-        this.events.forget(Enums.RoundEvent.Applied, this);
+        this.events.forget(Enums.StateEvent.BuilderFinished, this);
 
         this.disposed = true;
     }
@@ -64,17 +62,10 @@ export class Service implements Contracts.Pool.Service {
                     await this.cleanUp();
                     break;
                 case Enums.CryptoEvent.MilestoneChanged:
-                    await this.readdTransactions([], true);
+                    await this.readdTransactions(undefined, true);
                     break;
-                case Enums.QueueEvent.Finished:
-                    if (this.getPoolSize() <= 7500) {
-                        await this.readdTransactions([], true);
-                    }
-                    break;
-                case Enums.RoundEvent.Applied:
-                    if (this.getPoolSize() > 7500) {
-                        await this.readdTransactions([], true);
-                    }
+                case Enums.StateEvent.BuilderFinished:
+                    await this.readdTransactions();
                     break;
             }
         } catch (error) {

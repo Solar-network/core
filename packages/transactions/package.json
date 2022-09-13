@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/transactions",
-    "version": "4.1.2",
+    "version": "4.1.3",
     "description": "Transaction Services for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
