@@ -29,16 +29,18 @@ export class StateMachine {
         }
 
         if (nextState.actions.length > 0) {
-            this.logger.debug(
-                `event '${event}': ${JSON.stringify(this.stateStore.getBlockchain().value)} -> ${JSON.stringify(
+            this.logger.trace(
+                `Event '${event}': ${JSON.stringify(this.stateStore.getBlockchain().value)} -> ${JSON.stringify(
                     nextState.value,
                 )} -> actions: [${nextState.actions.map((a) => a.type).join(", ")}]`,
+                "➡️",
             );
         } else {
-            this.logger.debug(
-                `event '${event}': ${JSON.stringify(this.stateStore.getBlockchain().value)} -> ${JSON.stringify(
+            this.logger.trace(
+                `Event '${event}': ${JSON.stringify(this.stateStore.getBlockchain().value)} -> ${JSON.stringify(
                     nextState.value,
                 )}`,
+                "➡️",
             );
         }
 
@@ -54,8 +56,6 @@ export class StateMachine {
 
             if (action) {
                 setImmediate(() => action.handle());
-            } else {
-                this.logger.error(`No action '${actionKey}' found :interrobang:`);
             }
         }
 

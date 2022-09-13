@@ -623,23 +623,26 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      * logged if enabled in the environment.
      */
     private log(severity: Severity, msg: string, success: boolean | null = false): void {
-        let fullMsg = `${this.logPrefix} ${msg}`;
+        const fullMsg = `${this.logPrefix} ${msg}`;
+        let emoji: string;
         if (success) {
-            fullMsg += " :white_check_mark:";
+            emoji = "✅";
         } else if (success !== null) {
-            fullMsg += " :no_entry_sign:";
+            emoji = "🚫";
+        } else {
+            emoji = "⏳";
         }
         switch (severity) {
             case Severity.DEBUG_EXTRA:
                 if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                    this.logger.debug(fullMsg);
+                    this.logger.debug(fullMsg, emoji);
                 }
                 break;
             case Severity.DEBUG:
-                this.logger.debug(fullMsg);
+                this.logger.debug(fullMsg, emoji);
                 break;
             case Severity.INFO:
-                this.logger.info(fullMsg);
+                this.logger.info(fullMsg, emoji);
                 break;
         }
     }

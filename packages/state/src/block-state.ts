@@ -12,9 +12,6 @@ export class BlockState implements Contracts.State.BlockState {
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
     private handlerRegistry!: Handlers.Registry;
 
-    @Container.inject(Container.Identifiers.LogService)
-    private logger!: Contracts.Kernel.Logger;
-
     @Container.inject(Container.Identifiers.StateStore)
     private readonly state!: Contracts.State.StateStore;
 
@@ -75,8 +72,6 @@ export class BlockState implements Contracts.State.BlockState {
                 revertedTransactions.push(transaction);
             }
         } catch (error) {
-            this.logger.error(error.stack);
-            this.logger.error("Failed to revert all transactions in block - applying previous transactions");
             for (const transaction of revertedTransactions.reverse()) {
                 await this.applyTransaction(block.data.height, transaction);
             }

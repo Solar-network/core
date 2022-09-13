@@ -117,9 +117,9 @@ export class Server {
     public async boot(): Promise<void> {
         try {
             await this.server.start();
-            this.logger.info(`${this.name} started at ${this.server.info.uri}`);
-        } catch {
-            await this.app.terminate(`Failed to start ${this.name}!`);
+            this.logger.info(`${this.name} started at ${this.server.info.uri}`, "🎬");
+        } catch (error) {
+            await this.app.terminate(`Failed to start ${this.name}`, error);
         }
     }
 
@@ -130,9 +130,8 @@ export class Server {
     public async dispose(): Promise<void> {
         try {
             await this.server.stop();
-            this.logger.info(`${this.name} stopped at ${this.server.info.uri}`);
-        } catch {
-            await this.app.terminate(`Failed to stop ${this.name}!`);
+        } catch (error) {
+            await this.app.terminate(`Failed to stop ${this.name}`, error);
         }
     }
 

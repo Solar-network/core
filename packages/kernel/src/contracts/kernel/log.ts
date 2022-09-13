@@ -16,25 +16,6 @@ export interface Logger {
     make(options?: any): Promise<Logger>;
 
     /**
-     * System is unusable.
-     *
-     * @param {*} message
-     * @memberof Logger
-     */
-    emergency(message: any): void;
-
-    /**
-     * Action must be taken immediately.
-     *
-     * Example: Entire website down, database unavailable, etc. This should
-     * trigger the SMS alerts and wake you up.
-     *
-     * @param {*} message
-     * @memberof Logger
-     */
-    alert(message: any): void;
-
-    /**
      * Critical conditions.
      *
      * Example: Application component unavailable, unexpected exception.
@@ -42,7 +23,7 @@ export interface Logger {
      * @param {*} message
      * @memberof Logger
      */
-    critical(message: any): void;
+    critical(message: any, emoji?: string): void;
 
     /**
      * Runtime errors that do not require immediate action but should typically
@@ -51,7 +32,7 @@ export interface Logger {
      * @param {*} message
      * @memberof Logger
      */
-    error(message: any): void;
+    error(message: any, emoji?: string): void;
 
     /**
      * Exceptional occurrences that are not errors.
@@ -62,15 +43,7 @@ export interface Logger {
      * @param {*} message
      * @memberof Logger
      */
-    warning(message: any): void;
-
-    /**
-     * Normal but significant events.
-     *
-     * @param {*} message
-     * @memberof Logger
-     */
-    notice(message: any): void;
+    warning(message: any, emoji?: string): void;
 
     /**
      * Interesting events.
@@ -80,7 +53,7 @@ export interface Logger {
      * @param {*} message
      * @memberof Logger
      */
-    info(message: any): void;
+    info(message: any, emoji?: string): void;
 
     /**
      * Detailed debug information.
@@ -88,7 +61,15 @@ export interface Logger {
      * @param {*} message
      * @memberof Logger
      */
-    debug(message: any): void;
+    debug(message: any, emoji?: string): void;
+
+    /**
+     * Detailed trace information.
+     *
+     * @param {*} message
+     * @memberof Logger
+     */
+    trace(message: any, emoji?: string): void;
 
     /**
      * @param {boolean} suppress

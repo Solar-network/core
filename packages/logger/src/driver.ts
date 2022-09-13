@@ -1,16 +1,14 @@
-import { Container, Contracts, Providers, Utils } from "@solar-network/kernel";
-import chalk, { Chalk } from "chalk";
+import { Container, Contracts, Utils } from "@solar-network/kernel";
+import { createColors } from "colorette";
 import * as console from "console";
-import { emojify } from "node-emoji";
-import pino, { PrettyOptions } from "pino";
-import PinoPretty from "pino-pretty";
-import pump, { Callback, Stream } from "pump";
-import pumpify from "pumpify";
-import { Transform } from "readable-stream";
+import pino from "pino";
+import { prettyFactory } from "pino-pretty";
+import pump from "pump";
 import { createStream } from "rotating-file-stream";
 import split from "split2";
-import { PassThrough, Writable } from "stream";
+import { PassThrough, Transform, Writable } from "stream";
 import { inspect } from "util";
+const { bgRed, blue, cyan, gray, green, red, white, yellow } = createColors({ useColor: true });
 
 /**
  * @export
@@ -29,26 +27,6 @@ export class PinoLogger implements Contracts.Kernel.Logger {
 
     @Container.inject(Container.Identifiers.ConfigFlags)
     private readonly configFlags!: { processType: string };
-
-    @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@solar-network/logger")
-    private readonly configuration!: Providers.PluginConfiguration;
-
-    /**
-     * @private
-     * @type {Record<string, Chalk>}
-     * @memberof PinoLogger
-     */
-    private readonly levelStyles: Record<string, Chalk> = {
-        emergency: chalk.bgRed,
-        alert: chalk.red,
-        critical: chalk.red,
-        error: chalk.red,
-        warning: chalk.yellow,
-        notice: chalk.green,
-        info: chalk.blue,
-        debug: chalk.magenta,
-    };
 
     /**
      * @private
@@ -87,120 +65,128 @@ export class PinoLogger implements Contracts.Kernel.Logger {
         this.stream = new PassThrough();
         this.logger = pino(
             {
-                base: null,
+                base: undefined,
                 customLevels: {
-                    emergency: 0,
-                    alert: 1,
-                    critical: 2,
-                    error: 3,
-                    warning: 4,
-                    notice: 5,
-                    info: 6,
-                    debug: 7,
+                    critical: 0,
+                    error: 1,
+                    warning: 2,
+                    info: 3,
+                    debug: 4,
+                    trace: 5,
                 },
-                level: "emergency",
+                level: "critical",
                 formatters: {
-                    level(label, number) {
-                        return { level: label };
+                    level(level) {
+                        return { level };
                     },
                 },
                 useOnlyCustomLevels: true,
-                safe: true,
             },
             this.stream,
         );
 
-        if (this.isValidLevel(options.levels.console)) {
+        if (this.isValidLevel(options.logLevel)) {
+            const prettyPinoFactory = prettyFactory({
+                translateTime: "yyyy-mm-dd HH:MM:ss.l",
+                include: "level,time",
+                messageFormat: (log) => {
+                    let colour!: Function;
+                    let emoji: string = log.emoji as string;
+
+                    const level: string = log.level as string;
+
+                    switch (level) {
+                        case "info":
+                            colour = green;
+                            if (!emoji) {
+                                emoji = "ℹ️";
+                            }
+                            break;
+                        case "debug":
+                            colour = blue;
+                            if (!emoji) {
+                                emoji = "🐛";
+                            }
+                            break;
+                        case "trace":
+                            colour = gray;
+                            if (!emoji) {
+                                emoji = "📌";
+                            }
+                            break;
+                        case "warning":
+                            colour = yellow;
+                            if (!emoji) {
+                                emoji = "⚠️";
+                            }
+                            break;
+                        case "error":
+                            colour = red;
+                            if (!emoji) {
+                                emoji = "🛑";
+                            }
+                            break;
+                        case "critical":
+                            colour = (output: string | number) => {
+                                return bgRed(white(output));
+                            };
+                            if (!emoji) {
+                                emoji = "🚨";
+                            }
+                            break;
+                    }
+                    return `\b\b ${colour(`[${level.toUpperCase().slice(0, 1)}]`)} ${emoji}\t${colour(log.msg)}`;
+                },
+                customPrettifiers: {
+                    level: (): string => "",
+                    time: (timestamp): string => cyan(timestamp as string),
+                },
+            });
+
             pump(
                 this.stream,
                 split(),
-                this.createPrettyTransport(options.levels.console, { colorize: true }) as unknown as Stream | Callback,
+                this.createPrettyTransport(options.logLevel, prettyPinoFactory),
                 process.stdout,
                 (err) => {
-                    console.error("Stdout stream closed due to an error:", err);
+                    console.error("Output stream closed due to an error:", err);
                 },
             );
         }
 
-        if (this.isValidLevel(options.levels.file)) {
-            this.combinedFileStream = pumpify(
-                split(),
-                this.createPrettyTransport(options.levels.file, { colorize: false }) as unknown as Stream | Callback,
-                this.getFileStream(options.fileRotator),
-            );
+        this.combinedFileStream = this.getFileStream(options.fileRotator);
 
-            this.combinedFileStream!.on("error", (err) => {
-                console.error("File stream closed due to an error:", err);
-            });
+        this.combinedFileStream!.on("error", (err) => {
+            console.error("File stream closed due to an error:", err);
+        });
 
-            this.stream.pipe(this.combinedFileStream!);
-        }
+        this.stream.pipe(this.combinedFileStream!);
 
         return this;
     }
 
-    /**
-     * @param {*} message
-     * @memberof PinoLogger
-     */
-    public emergency(message: object): void {
-        this.log("emergency", message);
+    public critical(message: object, emoji?: string): void {
+        this.log("critical", message, emoji);
     }
 
-    /**
-     * @param {*} message
-     * @memberof PinoLogger
-     */
-    public alert(message: object): void {
-        this.log("alert", message);
+    public error(message: object, emoji?: string): void {
+        this.log("error", message, emoji);
     }
 
-    /**
-     * @param {*} message
-     * @memberof PinoLogger
-     */
-    public critical(message: object): void {
-        this.log("critical", message);
+    public warning(message: object, emoji?: string): void {
+        this.log("warning", message, emoji);
     }
 
-    /**
-     * @param {*} message
-     * @memberof PinoLogger
-     */
-    public error(message: object): void {
-        this.log("error", message);
+    public info(message: object, emoji?: string): void {
+        this.log("info", message, emoji);
     }
 
-    /**
-     * @param {*} message
-     * @memberof PinoLogger
-     */
-    public warning(message: object): void {
-        this.log("warning", message);
+    public debug(message: object, emoji?: string): void {
+        this.log("debug", message, emoji);
     }
 
-    /**
-     * @param {*} message
-     * @memberof PinoLogger
-     */
-    public notice(message: object): void {
-        this.log("notice", message);
-    }
-
-    /**
-     * @param {*} message
-     * @memberof PinoLogger
-     */
-    public info(message: object): void {
-        this.log("info", message);
-    }
-
-    /**
-     * @param {*} message
-     * @memberof PinoLogger
-     */
-    public debug(message: object): void {
-        this.log("debug", message);
+    public trace(message: object, emoji?: string): void {
+        this.log("trace", message, emoji);
     }
 
     /**
@@ -228,12 +214,40 @@ export class PinoLogger implements Contracts.Kernel.Logger {
     }
 
     /**
+     * @private
+     * @param {string} level
+     * @param {PrettyOptions} [prettyOptions]
+     * @returns {Transform}
+     * @memberof PinoLogger
+     */
+    private createPrettyTransport(level: string, prettyFactory: Function): Transform {
+        const getLevel = (level: string): number => this.logger.levels.values[level];
+
+        return new Transform({
+            transform(chunk, enc, cb) {
+                try {
+                    const json = JSON.parse(chunk);
+
+                    if (getLevel(json.level) <= getLevel(level)) {
+                        const line: string | undefined = prettyFactory(json);
+                        if (line !== undefined) {
+                            return cb(undefined, line);
+                        }
+                    }
+                } catch {}
+
+                return cb();
+            },
+        });
+    }
+
+    /**
      * @param {string} level
      * @param {*} message
      * @returns {boolean}
      * @memberof Logger
      */
-    private log(level: string, message: string | object): void {
+    private log(level: string, message: string | object, emoji?: string): void {
         if (this.silentConsole) {
             return;
         }
@@ -246,49 +260,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
             message = inspect(message, { depth: 1 });
         }
 
-        if (this.configuration.get("emojify")) {
-            this.logger[level](emojify(message));
-        } else {
-            this.logger[level](emojify(message, undefined, () => ""));
-        }
-    }
-
-    /**
-     * @private
-     * @param {string} level
-     * @param {PrettyOptions} [prettyOptions]
-     * @returns {Transform}
-     * @memberof PinoLogger
-     */
-    private createPrettyTransport(level: string, prettyOptions?: PrettyOptions): Transform {
-        const pinoPretty = PinoPretty({
-            ...{
-                levelFirst: false,
-                translateTime: "yyyy-mm-dd HH:MM:ss.l",
-            },
-            ...prettyOptions,
-        });
-
-        const getLevel = (level: string): number => this.logger.levels.values[level];
-        const formatLevel = (level: string): string => this.levelStyles[level](level.toUpperCase());
-
-        return new Transform({
-            transform(chunk, enc, cb) {
-                try {
-                    const json = JSON.parse(chunk);
-
-                    if (getLevel(json.level) <= getLevel(level)) {
-                        const line: string | undefined = pinoPretty(json);
-
-                        if (line !== undefined) {
-                            return cb(undefined, line.replace("USERLVL", formatLevel(json.level)));
-                        }
-                    }
-                } catch {}
-
-                return cb();
-            },
-        });
+        this.logger.child({ emoji })[level](message);
     }
 
     /**
@@ -334,6 +306,8 @@ export class PinoLogger implements Contracts.Kernel.Logger {
      * @memberof PinoLogger
      */
     private isValidLevel(level: string): boolean {
-        return ["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"].includes(level);
+        return ["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug", "trace"].includes(
+            level,
+        );
     }
 }

@@ -6,9 +6,10 @@ import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
 export abstract class IpfsTransaction extends Transaction {
-    public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.Core.Ipfs;
+    public static emoji: string = "🌐";
     public static key = "ipfs";
+    public static type: number = TransactionType.Core.Ipfs;
+    public static typeGroup: number = TransactionTypeGroup.Core;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("500000000");
 

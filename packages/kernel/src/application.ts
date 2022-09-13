@@ -1,4 +1,4 @@
-import { existsSync, removeSync, writeFileSync } from "fs-extra";
+import { existsSync } from "fs-extra";
 import { join } from "path";
 
 import * as Bootstrappers from "./bootstrap";
@@ -290,42 +290,6 @@ export class Application implements Contracts.Kernel.Application {
     }
 
     /**
-     * @memberof Application
-     */
-    public enableMaintenance(): void {
-        writeFileSync(this.tempPath("maintenance"), JSON.stringify({ time: +new Date() }));
-
-        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now in maintenance mode");
-
-        this.get<Contracts.Kernel.EventDispatcher>(Identifiers.EventDispatcherService).dispatch(
-            "kernel.maintenance",
-            true,
-        );
-    }
-
-    /**
-     * @memberof Application
-     */
-    public disableMaintenance(): void {
-        removeSync(this.tempPath("maintenance"));
-
-        this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice("Application is now live");
-
-        this.get<Contracts.Kernel.EventDispatcher>(Identifiers.EventDispatcherService).dispatch(
-            "kernel.maintenance",
-            false,
-        );
-    }
-
-    /**
-     * @returns {boolean}
-     * @memberof Application
-     */
-    public isDownForMaintenance(): boolean {
-        return existsSync(this.tempPath("maintenance"));
-    }
-
-    /**
      * @param {string} [reason]
      * @param {Error} [error]
      * @returns {Promise<void>}
@@ -335,11 +299,11 @@ export class Application implements Contracts.Kernel.Application {
         this.booted = false;
 
         if (reason) {
-            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).notice(reason);
+            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).critical(reason);
         }
 
         if (error) {
-            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).error(error.stack);
+            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).critical(error.stack);
         }
 
         await this.disposeServiceProviders();
@@ -469,8 +433,6 @@ export class Application implements Contracts.Kernel.Application {
         ).allLoadedProviders();
 
         for (const serviceProvider of serviceProviders.reverse()) {
-            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).debug(`Disposing ${serviceProvider.name()}`);
-
             try {
                 await serviceProvider.dispose();
             } catch {}

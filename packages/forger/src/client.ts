@@ -84,7 +84,7 @@ export class Client {
                 headers: { port: 0, version: this.app.version() },
             });
         } catch (error) {
-            this.logger.error(`Broadcast block failed: ${error.message} :bangbang:`);
+            this.logger.error(`Broadcast block failed: ${error.message}`);
         }
     }
 
@@ -95,12 +95,12 @@ export class Client {
     public async syncWithNetwork(): Promise<void> {
         await this.selectHost();
 
-        this.logger.debug(`Sending wake-up check to relay node ${this.host.hostname}`);
+        this.logger.debug(`Sending wake-up check to relay node ${this.host.hostname}`, "🛌");
 
         try {
             await this.emit("p2p.internal.syncBlockchain");
         } catch (error) {
-            this.logger.error(`Could not sync check: ${error.message} :bangbang:`);
+            this.logger.error(`Could not sync check: ${error.message}`);
         }
     }
 
@@ -169,14 +169,14 @@ export class Client {
         );
 
         if (!host) {
-            this.logger.error("emitEvent: unable to find any local hosts :bangbang:");
+            this.logger.error("Unable to find any local hosts");
             return;
         }
 
         try {
             await this.emit("p2p.internal.emitEvent", { event, body });
         } catch (error) {
-            this.logger.error(`Failed to emit "${event}" to "${host.hostname}:${host.port}" :bangbang:`);
+            this.logger.error(`Failed to emit "${event}" to "${host.hostname}:${host.port}"`);
         }
     }
 
@@ -204,7 +204,7 @@ export class Client {
 
                     connection.onError = (e) => {
                         if (e.message !== "Connection terminated while waiting to connect") {
-                            this.logger.error(`${e.message} :bangbang:`);
+                            this.logger.error(`${e.message}`);
                         }
                     };
 
@@ -218,7 +218,8 @@ export class Client {
         this.logger.debug(
             `No open socket connection to any host: ${JSON.stringify(
                 this.hosts.map((host) => `${host.hostname}:${host.port}`),
-            )} :bangbang:`,
+            )}`,
+            "❗",
         );
 
         throw new HostNoResponseError(this.hosts.map((host) => host.hostname).join());
@@ -233,7 +234,11 @@ export class Client {
      * @returns {Promise<T>}
      * @memberof Client
      */
-    private async emit<T = object>(event: string, payload: Record<string, any> = {}, timeout = 4000): Promise<T> {
+    private async emit<T = object>(
+        event: string,
+        payload: Record<string, any> = {},
+        timeout: number = 4000,
+    ): Promise<T> {
         try {
             Utils.assert.defined<NesClient>(this.host.socket);
 

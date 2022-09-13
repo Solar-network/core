@@ -274,7 +274,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
     public async getPeers(peer: Contracts.P2P.Peer, silent?: boolean): Promise<Contracts.P2P.PeerBroadcast[]> {
         if (!silent) {
-            this.logger.debug(`Fetching a fresh peer list from ${peer.url}`);
+            this.logger.debug(`Fetching a fresh peer list from ${peer.url}`, "🌍");
         }
 
         const getPeersTimeout = 5000;
@@ -321,9 +321,8 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
         if (!peerBlocks || !peerBlocks.length) {
             if (!silent) {
                 this.logger.debug(
-                    `Peer ${
-                        peer.ip
-                    } did not return any blocks via height ${fromBlockHeight.toLocaleString()} :see_no_evil:`,
+                    `Peer ${peer.ip} did not return any blocks via height ${fromBlockHeight.toLocaleString()}`,
+                    "🙈",
                 );
             }
             return [];
@@ -405,16 +404,14 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
     private validateReply(peer: Contracts.P2P.Peer, reply: any, endpoint: string): boolean {
         const schema = replySchemas[endpoint];
         if (schema === undefined) {
-            this.logger.error(
-                `Cannot validate reply from "${endpoint}": none of the predefined schemas matches :bangbang:`,
-            );
+            this.logger.error(`Cannot validate reply from "${endpoint}": none of the predefined schemas matches`);
             return false;
         }
 
         const { error } = Validation.validator.validate(schema, reply);
         if (error) {
             if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                this.logger.debug(`Got unexpected reply from ${peer.url}/${endpoint}: ${error}`);
+                this.logger.debug(`Got unexpected reply from ${peer.url}/${endpoint}: ${error}`, "❌");
             }
 
             return false;
@@ -507,16 +504,16 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
         switch (error.name) {
             case SocketErrors.Validation:
-                this.logger.debug(`Socket data validation error (peer ${peer.ip}) : ${error.message} :warning:`);
+                this.logger.debug(`Socket data validation error (peer ${peer.ip}) : ${error.message}`, "❌");
                 break;
             case "Error":
                 if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                    this.logger.debug(`Response error (peer ${peer.ip}/${event}) : ${error.message} :warning:`);
+                    this.logger.debug(`Response error (peer ${peer.ip}/${event}) : ${error.message}`, "❌");
                 }
                 break;
             default:
                 if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                    this.logger.debug(`Socket error (peer ${peer.ip}): ${error.message} :warning:`);
+                    this.logger.debug(`Socket error (peer ${peer.ip}): ${error.message}`, "❌");
                 }
                 if (disconnect) {
                     this.events.dispatch(Enums.PeerEvent.Disconnect, { peer });

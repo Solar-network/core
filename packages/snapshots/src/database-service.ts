@@ -57,6 +57,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
                 await this.transactionRepository.fastCount(),
                 true,
             )}, ${Utils.pluralise("round", await this.roundRepository.fastCount(), true)}`,
+            "🗑️",
         );
 
         await this.blockRepository.truncate();
@@ -67,7 +68,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
 
         Utils.assert.defined<Models.Block>(lastBlock);
 
-        this.logger.info(`Last block height is: ${lastBlock.height.toLocaleString()}`);
+        this.logger.info(`Last block height is: ${lastBlock.height.toLocaleString()}`, "🕸️");
 
         await this.blockRepository.rollback(roundInfo);
 
@@ -76,7 +77,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
 
     public async dump(options: Options.DumpOptions): Promise<void> {
         try {
-            this.logger.info("Started counting blocks, rounds and transactions");
+            this.logger.info("Started counting blocks, rounds and transactions", "🧮");
 
             const dumpRange = await this.getDumpRange(options.start, options.end);
             const meta = this.prepareMetaData(options, dumpRange);
@@ -87,6 +88,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
                     dumpRange.roundsCount,
                     true,
                 )} and ${Utils.pluralise("transaction", dumpRange.transactionsCount, true)}`,
+                "🎬",
             );
 
             this.filesystem.setSnapshot(meta.folder);

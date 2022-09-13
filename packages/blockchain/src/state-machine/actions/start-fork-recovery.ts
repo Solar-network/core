@@ -35,7 +35,7 @@ export class StartForkRecovery implements Action {
             const queue: Contracts.Kernel.Queue = this.blockchain.getQueue();
 
             this.blockchain.setForkingState(true);
-            this.logger.info("Starting fork recovery :fork_and_knife:");
+            this.logger.info("Starting fork recovery", "🍴");
 
             await queue.stop();
 
@@ -46,7 +46,7 @@ export class StartForkRecovery implements Action {
             this.stateStore.setLastDownloadedBlock(lastStoredBlock.data);
 
             this.stateStore.setNumberOfBlocksToRollback(0);
-            this.logger.info(`Removed ${AppUtils.pluralise("block", blocksToRemove, true)} :wastebasket:`);
+            this.logger.info(`Removed ${AppUtils.pluralise("block", blocksToRemove, true)}`, "🗑️");
 
             await this.roundState.restore();
 

@@ -83,12 +83,12 @@ export class WalletSyncService implements Contracts.Kernel.EventListener {
             }
 
             try {
-                this.logger.debug(`Initialising wallets table at height ${blockHeight.toLocaleString()}`);
+                this.logger.debug(`Initialising wallets table at height ${blockHeight.toLocaleString()}`, "💾");
 
                 await this.walletsTableService.flush();
                 await this.walletsTableService.sync(this.walletRepository.allByAddress());
 
-                this.logger.info(`Wallets table initialised at height ${blockHeight.toLocaleString()}`);
+                this.logger.info(`Wallets table initialised at height ${blockHeight.toLocaleString()}`, "💾");
             } catch (error) {
                 this.app.terminate("Failed to initialise wallets table", error);
             }
@@ -102,7 +102,7 @@ export class WalletSyncService implements Contracts.Kernel.EventListener {
             }
 
             try {
-                this.logger.debug(`Synchronising wallets table at height ${blockHeight.toLocaleString()}`);
+                this.logger.debug(`Synchronising wallets table at height ${blockHeight.toLocaleString()}`, "💾");
 
                 const updatedWallets = Array.from(this.updatedAddresses.values()).map((address) =>
                     this.walletRepository.findByAddress(address),
@@ -112,7 +112,7 @@ export class WalletSyncService implements Contracts.Kernel.EventListener {
 
                 await this.walletsTableService.sync(updatedWallets);
 
-                this.logger.info(`Wallets table synchronised at height ${blockHeight.toLocaleString()}`);
+                this.logger.info(`Wallets table synchronised at height ${blockHeight.toLocaleString()}`, "💾");
             } catch (error) {
                 this.app.terminate("Failed to synchronise wallets table", error);
             }

@@ -4,6 +4,7 @@ export * from "./abort-missing-process";
 export * from "./abort-stopped-process";
 export * from "./abort-unknown-process";
 export * from "./daemonise-process";
+export * from "./log-process";
 export * from "./restart-process";
 export * from "./restart-running-process-with-prompt";
 export * from "./restart-running-process";

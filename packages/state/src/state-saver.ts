@@ -145,7 +145,7 @@ export class StateSaver {
                     .map((file) => unlinkSync(savedStatesPath + file.name));
             }
         } catch (error) {
-            this.logger.error("An error occurred while trying to save the state :warning:");
+            this.logger.error("An error occurred while trying to save the state");
             this.logger.error(error.stack);
         }
     }

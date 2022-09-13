@@ -22,14 +22,11 @@ export class ServiceProvider extends Providers.ServiceProvider {
     public async register(): Promise<void> {
         this.logger = this.app.get(Container.Identifiers.LogService);
 
-        this.logger.info(`Connecting to database: ${(this.config().all().connection as any).database}`);
+        this.logger.info(`Connecting to database: ${(this.config().all().connection as any).database}`, "⏳");
 
         this.app.bind(Container.Identifiers.DatabaseConnection).toConstantValue(await this.connect());
 
-        this.logger.debug("Connection established");
-
         this.app.bind(Container.Identifiers.DatabaseRoundRepository).toConstantValue(this.getRoundRepository());
-
         this.app.bind(Container.Identifiers.DatabaseBlockRepository).toConstantValue(this.getBlockRepository());
         this.app.bind(Container.Identifiers.DatabaseBlockFilter).to(BlockFilter);
         this.app.bind(Container.Identifiers.BlockHistoryService).to(BlockHistoryService);
@@ -125,7 +122,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
         }
 
         if (updatedConfig) {
-            this.logger.debug("Updating database configuration :books:");
             writeFileSync(configFile, config.join("\n"));
             await dbConnection.query("SELECT pg_reload_conf();");
         }

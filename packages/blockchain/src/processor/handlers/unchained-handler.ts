@@ -21,9 +21,6 @@ export class UnchainedHandler implements BlockHandler {
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
 
-    @Container.inject(Container.Identifiers.LogService)
-    private readonly logger!: Contracts.Kernel.Logger;
-
     private isValidGenerator: boolean = false;
 
     // todo: remove the need for this method
@@ -70,38 +67,18 @@ export class UnchainedHandler implements BlockHandler {
     private checkUnchainedBlock(block: Interfaces.IBlock): UnchainedBlockStatus {
         const lastBlock: Interfaces.IBlock = this.blockchain.getLastBlock();
 
-        // todo: clean up this if-else-if-else-if-else mess
         if (block.data.height > lastBlock.data.height + 1) {
-            this.logger.debug(
-                `Blockchain not ready to accept new block at height ${block.data.height.toLocaleString()}. Last block: ${lastBlock.data.height.toLocaleString()} :warning:`,
-            );
-
             return UnchainedBlockStatus.NotReadyToAcceptNewHeight;
         } else if (block.data.height < lastBlock.data.height) {
-            this.logger.debug(
-                `Block ${block.data.height.toLocaleString()} disregarded because already in blockchain :warning:`,
-            );
-
             return UnchainedBlockStatus.AlreadyInBlockchain;
         } else if (block.data.height === lastBlock.data.height && block.data.id === lastBlock.data.id) {
-            this.logger.debug(`Block ${block.data.height.toLocaleString()} just received :chains:`);
-
             return UnchainedBlockStatus.EqualToLastBlock;
         } else if (block.data.timestamp < lastBlock.data.timestamp) {
-            this.logger.debug(
-                `Block ${block.data.height.toLocaleString()} disregarded, because the timestamp is lower than the previous timestamp :stopwatch:`,
-            );
             return UnchainedBlockStatus.InvalidTimestamp;
         } else {
             if (this.isValidGenerator) {
-                this.logger.warning(`Detected double forging by ${block.data.username} :chains:`);
                 return UnchainedBlockStatus.DoubleForging;
             }
-
-            this.logger.info(
-                `Forked block disregarded because it is not allowed to be forged. Caused by delegate ${block.data.username} :bangbang:`,
-            );
-
             return UnchainedBlockStatus.GeneratorMismatch;
         }
     }

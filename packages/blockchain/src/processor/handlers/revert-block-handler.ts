@@ -53,8 +53,8 @@ export class RevertBlockHandler implements BlockHandler {
 
             return BlockProcessorResult.Reverted;
         } catch (error) {
-            this.logger.error(
-                `Critical error occurs when reverting block at height ${block.data.height.toLocaleString()}. Possible state corruption. Message: ${
+            this.logger.critical(
+                `Critical error occurred when reverting block at height ${block.data.height.toLocaleString()}. Possible state corruption. Message: ${
                     error.message
                 }`,
             );

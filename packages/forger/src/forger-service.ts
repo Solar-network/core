@@ -185,7 +185,7 @@ export class ForgerService {
             AppUtils.assert.defined<Contracts.P2P.CurrentRound>(this.round);
             timeout = 0;
         } catch (error) {
-            this.logger.warning("Waiting for a responsive host :hourglass_flowing_sand:");
+            this.logger.warning("Waiting for a responsive host", "⏳");
         } finally {
             this.checkLater(timeout);
         }
@@ -237,7 +237,8 @@ export class ForgerService {
                             "second",
                             blockTime,
                             true,
-                        )} from now :sparkles:`,
+                        )} from now`,
+                        "✨",
                     );
 
                     await this.client.syncWithNetwork();
@@ -331,7 +332,8 @@ export class ForgerService {
                             (state.header.generatorPublicKey === delegate.publicKey && lastBlockSlot === roundSlot))
                     ) {
                         this.logger.warning(
-                            `Not going to forge because delegate ${prettyName} has already forged on another node :octagonal_sign:`,
+                            `Not going to forge because delegate ${prettyName} has already forged on another node`,
+                            "✋",
                         );
                     }
                     return;
@@ -339,9 +341,10 @@ export class ForgerService {
 
                 if (networkState.getNodeHeight() !== round.lastBlock.height) {
                     this.logger.warning(
-                        `The NetworkState height (${networkState
+                        `Network height (${networkState
                             .getNodeHeight()
-                            ?.toLocaleString()}) and round height (${round.lastBlock.height.toLocaleString()}) are out of sync. This indicates delayed blocks on the network :zzz:`,
+                            ?.toLocaleString()}) and round height (${round.lastBlock.height.toLocaleString()}) are out of sync`,
+                        "🐌",
                     );
                 }
 
@@ -358,7 +361,8 @@ export class ForgerService {
                                     "transaction",
                                     block.data.numberOfTransactions,
                                     true,
-                                )} :trident:`,
+                                )}`,
+                                "📦",
                             );
 
                             await this.client.broadcastBlock(block);
@@ -372,11 +376,13 @@ export class ForgerService {
                         }
                     } else if (timeLeftInMs > 0) {
                         this.logger.warning(
-                            `Failed to forge new block by delegate ${prettyName}, because there were ${timeLeftInMs}ms left in the current slot (less than ${minimumMs}ms) :bangbang:`,
+                            `Failed to forge new block by ${prettyName}, because there were ${timeLeftInMs}ms left in the current slot (less than ${minimumMs}ms)`,
+                            "❗",
                         );
                     } else {
                         this.logger.warning(
-                            `Failed to forge new block by delegate ${prettyName}, because already in next slot :bangbang:`,
+                            `Failed to forge new block by ${prettyName}, because already in next slot`,
+                            "❗",
                         );
                     }
                 }
@@ -416,7 +422,7 @@ export class ForgerService {
     public async getTransactionsForForging(): Promise<Interfaces.ITransactionData[]> {
         const response = await this.client.getTransactions();
         if (AppUtils.isEmpty(response)) {
-            this.logger.warning("Could not get unconfirmed transactions from pool :warning:");
+            this.logger.warning("Could not get unconfirmed transactions from pool");
             return [];
         }
         const transactions = response.transactions.map(
@@ -424,11 +430,8 @@ export class ForgerService {
         );
         this.logger.debug(
             `Received ${AppUtils.pluralise("transaction", transactions.length, true)} ` +
-                `from the pool containing ${AppUtils.pluralise(
-                    "transaction",
-                    response.poolSize,
-                    true,
-                )} total :money_with_wings:`,
+                `from the pool containing ${AppUtils.pluralise("transaction", response.poolSize, true)}`,
+            "👛",
         );
         return transactions;
     }
@@ -441,13 +444,13 @@ export class ForgerService {
      */
     public isForgingAllowed(networkState: Contracts.P2P.NetworkState, delegate: Delegate): boolean {
         if (networkState.status === NetworkStateStatus.Unknown) {
-            this.logger.info("Failed to get network state from client. Will not forge :bomb:");
+            this.logger.info("Failed to get network state from client - will not forge", "💣");
             return false;
         } else if (networkState.status === NetworkStateStatus.ColdStart) {
-            this.logger.info("Skipping slot because of cold start. Will not forge :bomb:");
+            this.logger.info("Skipping slot because of cold start - will not forge", "💣");
             return false;
         } else if (networkState.status === NetworkStateStatus.BelowMinimumDelegates) {
-            this.logger.info("Not peered with enough delegates to get quorum. Will not forge :bomb:");
+            this.logger.info("Not peered with enough delegates to get quorum - will not forge", "💣");
             return false;
         }
 
@@ -474,7 +477,8 @@ export class ForgerService {
                     "distinct overheight block header",
                     distinctOverHeightBlockHeaders.length,
                     true,
-                )} :zzz:`,
+                )}`,
+                "😴",
             );
 
             for (const overHeightBlockHeader of overHeightBlockHeaders) {
@@ -489,7 +493,8 @@ export class ForgerService {
                             this.logger.warning(
                                 `Delegate ${
                                     this.usernames[delegate.publicKey]
-                                } already forged a block. Will not forge :bomb:`,
+                                } already forged a block - will not forge`,
+                                "💣",
                             );
                             return false;
                         }
@@ -503,8 +508,8 @@ export class ForgerService {
         if (!networkState.canForge()) {
             networkState.setOverHeightBlockHeaders(distinctOverHeightBlockHeaders);
 
-            this.logger.info("Not enough quorum to forge next block. Will not forge :bomb:");
-            this.logger.debug(`Network State: ${networkState.toJson()}`);
+            this.logger.info("Not enough quorum to forge next block - will not forge", "💣");
+            this.logger.debug(`Network State: ${networkState.toJson()}`, "💣");
 
             return false;
         }
@@ -579,8 +584,6 @@ export class ForgerService {
             this.client.emitEvent(Enums.ForgerEvent.Started, {
                 activeDelegates: this.delegates.map((delegate) => delegate.publicKey),
             });
-
-            this.logger.info(`Forger Manager started :hammer:`);
         } else {
             const newlyActiveDelegates = this.activeDelegates
                 .map((delegate) => delegate.publicKey)
@@ -598,24 +601,27 @@ export class ForgerService {
                 .map((publicKey) => (this.allUsernames[publicKey] ? this.allUsernames[publicKey] : publicKey));
 
             if (newlyActiveDelegates.length === 1) {
-                this.logger.info(`Delegate ${newlyActiveDelegates[0]} is now in an active forging position :tada:`);
+                this.logger.info(`Delegate ${newlyActiveDelegates[0]} is now in an active forging position`, "🎉");
             } else if (newlyActiveDelegates.length > 1) {
                 this.logger.info(
                     `Delegates ${newlyActiveDelegates
                         .join(", ")
-                        .replace(/,(?=[^,]*$)/, " and")} are now in active forging positions :tada:`,
+                        .replace(/,(?=[^,]*$)/, " and")} are now in active forging positions`,
+                    "🎉",
                 );
             }
 
             if (newlyInactiveDelegates.length === 1) {
                 this.logger.info(
-                    `Delegate ${newlyInactiveDelegates[0]} is no longer in an active forging position :cry:`,
+                    `Delegate ${newlyInactiveDelegates[0]} is no longer in an active forging position`,
+                    "😢",
                 );
             } else if (newlyInactiveDelegates.length > 1) {
                 this.logger.info(
                     `Delegates ${newlyInactiveDelegates
                         .join(", ")
-                        .replace(/,(?=[^,]*$)/, " and")} are no longer in active forging positions :cry:`,
+                        .replace(/,(?=[^,]*$)/, " and")} are no longer in active forging positions`,
+                    "😢",
                 );
             }
         }
@@ -650,6 +656,7 @@ export class ForgerService {
                         return `${this.usernames[publicKey]}`;
                     })
                     .join(", ")}`,
+                "👷",
             );
         }
 
@@ -670,6 +677,7 @@ export class ForgerService {
                         }`;
                     })
                     .join(", ")}`,
+                "🧑‍💼",
             );
         }
     }
@@ -684,7 +692,7 @@ export class ForgerService {
     private gracefulError(error: Error): void {
         if (error.message.includes("blockchain isn't ready") || error.message.includes("App is not ready")) {
             if (this.logAppReady) {
-                this.logger.info("Waiting for relay to become ready :hourglass_flowing_sand:");
+                this.logger.info("Waiting for relay to become ready", "⏳");
                 this.logAppReady = false;
             }
         } else {

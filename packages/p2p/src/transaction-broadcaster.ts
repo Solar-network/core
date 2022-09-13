@@ -19,7 +19,6 @@ export class TransactionBroadcaster implements Contracts.P2P.TransactionBroadcas
 
     public async broadcastTransactions(transactions: Interfaces.ITransaction[]): Promise<void> {
         if (transactions.length === 0) {
-            this.logger.warning("Broadcasting 0 transactions");
             return;
         }
 
@@ -38,7 +37,7 @@ export class TransactionBroadcaster implements Contracts.P2P.TransactionBroadcas
 
         for (const batch of transactionBatches) {
             const transactionsStr = Utils.pluralise("transaction", batch.length, true);
-            this.logger.debug(`Broadcasting ${transactionsStr} to ${peersStr} :moneybag:`);
+            this.logger.debug(`Broadcasting ${transactionsStr} to ${peersStr}`, "📡");
 
             const transactionsBroadcast: Buffer[] = batch.map((t) => Transactions.Serialiser.serialise(t));
             const promises = peers.map((p) => this.communicator.postTransactions(p, transactionsBroadcast));

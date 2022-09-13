@@ -7,9 +7,6 @@ export class DownloadFinished implements Action {
     @Container.inject(Container.Identifiers.Application)
     public readonly app!: Contracts.Kernel.Application;
 
-    @Container.inject(Container.Identifiers.LogService)
-    private readonly logger!: Contracts.Kernel.Logger;
-
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
@@ -17,8 +14,6 @@ export class DownloadFinished implements Action {
     private readonly stateStore!: Contracts.State.StateStore;
 
     public async handle(): Promise<void> {
-        this.logger.info("Block download finished :rocket:");
-
         if (this.stateStore.getNetworkStart()) {
             // next time we will use normal behaviour
             this.stateStore.setNetworkStart(false);

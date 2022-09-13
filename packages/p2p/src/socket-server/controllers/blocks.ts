@@ -95,9 +95,10 @@ export class BlocksController extends Controller {
         const generator: string = `delegate ${username} (#${rank})`;
 
         this.logger.info(
-            `Received new block forged by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
+            `Received new block by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
                 reward,
-            )} reward :package:`,
+            )} reward`,
+            "📥",
         );
 
         const { dynamicReward } = Managers.configManager.getMilestone();
@@ -105,16 +106,17 @@ export class BlocksController extends Controller {
         if (dynamicReward && dynamicReward.enabled && reward.isEqualTo(dynamicReward.secondaryReward)) {
             const { alreadyForged } = await this.roundState.getRewardForBlockInRound(height, generatorWallet);
             if (alreadyForged && !reward.isEqualTo(dynamicReward.ranks[rank])) {
-                this.logger.info(`The reward was reduced because ${username} already forged in this round :fire:`);
+                this.logger.info(`The reward was reduced because ${username} already forged in this round`, "🪙");
             }
         }
 
-        this.logger.debug(`The id of the new block is ${id}`);
+        this.logger.trace(`The id of the new block is ${id}`, "🏷️");
 
         const ip: string = mapAddr(request.info.remoteAddress);
 
         this.logger.debug(
             `It contains ${AppUtils.pluralise("transaction", numberOfTransactions, true)} and was received from ${ip}`,
+            numberOfTransactions === 0 ? "🪹" : "🪺",
         );
 
         this.blockchain.handleIncomingBlock(block, fromForger, ip);
@@ -157,7 +159,8 @@ export class BlocksController extends Controller {
                 "block",
                 blocksToReturn.length,
                 true,
-            )} from height ${reqBlockHeight.toLocaleString()} :floppy_disk:`,
+            )} from height ${reqBlockHeight.toLocaleString()}`,
+            "📤",
         );
 
         return blocksToReturn;

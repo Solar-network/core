@@ -46,12 +46,6 @@ export class TransactionFeeTooLowError extends Contracts.Pool.PoolError {
     }
 }
 
-export class TransactionFeeTooHighError extends Contracts.Pool.PoolError {
-    public constructor(transaction: Interfaces.ITransaction) {
-        super(`${transaction} fee is too high to enter the pool`, "ERR_HIGH_FEE");
-    }
-}
-
 export class SenderExceededMaximumTransactionCountError extends Contracts.Pool.PoolError {
     public readonly maxCount: number;
 

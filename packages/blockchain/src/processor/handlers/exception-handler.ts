@@ -34,7 +34,7 @@ export class ExceptionHandler implements BlockHandler {
             return BlockProcessorResult.Rejected;
         }
 
-        this.logger.warning(`Block ${block.data.height.toLocaleString()} (${id}) forcibly accepted :exclamation:`);
+        this.logger.warning(`Block ${block.data.height.toLocaleString()} (${id}) forcibly accepted`, "🪲");
 
         return this.app.resolve<AcceptBlockHandler>(AcceptBlockHandler).execute(block);
     }

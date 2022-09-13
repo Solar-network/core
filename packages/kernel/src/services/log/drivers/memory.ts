@@ -1,12 +1,11 @@
-import chalk, { Chalk } from "chalk";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import utc from "dayjs/plugin/utc";
 import { inspect } from "util";
 
 import { Logger } from "../../../contracts/kernel/log";
 import { injectable } from "../../../ioc";
-import { isEmpty, prettyTime } from "../../../utils";
+import { isEmpty } from "../../../utils";
 
 dayjs.extend(advancedFormat);
 dayjs.extend(utc);
@@ -15,33 +14,10 @@ dayjs.extend(utc);
 export class MemoryLogger implements Logger {
     /**
      * @private
-     * @type {Record<string, Chalk>}
-     * @memberof MemoryLogger
-     */
-    private readonly levelStyles: Record<string, Chalk> = {
-        emergency: chalk.bgRed,
-        alert: chalk.red,
-        critical: chalk.red,
-        error: chalk.red,
-        warning: chalk.yellow,
-        notice: chalk.green,
-        info: chalk.blue,
-        debug: chalk.magenta,
-    };
-
-    /**
-     * @private
      * @type {boolean}
      * @memberof MemoryLogger
      */
     private silentConsole: boolean = false;
-
-    /**
-     * @private
-     * @type {Dayjs}
-     * @memberof MemoryLogger
-     */
-    private lastTimestamp: Dayjs = dayjs().utc();
 
     /**
      * @param {*} [options]
@@ -50,14 +26,6 @@ export class MemoryLogger implements Logger {
      */
     public async make(options?: object): Promise<Logger> {
         return this;
-    }
-
-    /**
-     * @param {*} message
-     * @memberof MemoryLogger
-     */
-    public emergency(message: object): void {
-        this.log("emergency", message);
     }
 
     /**
@@ -96,14 +64,6 @@ export class MemoryLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public notice(message: object): void {
-        this.log("notice", message);
-    }
-
-    /**
-     * @param {*} message
-     * @memberof MemoryLogger
-     */
     public info(message: object): void {
         this.log("info", message);
     }
@@ -114,6 +74,14 @@ export class MemoryLogger implements Logger {
      */
     public debug(message: object): void {
         this.log("debug", message);
+    }
+
+    /**
+     * @param {*} message
+     * @memberof MemoryLogger
+     */
+    public trace(message: object): void {
+        this.log("trace", message);
     }
 
     /**
@@ -152,24 +120,10 @@ export class MemoryLogger implements Logger {
             message = inspect(message, { depth: 1 });
         }
 
-        level = level ? this.levelStyles[level](`[${level.toUpperCase()}] `) : "";
+        level = level ? `[${level.toUpperCase()}] ` : "";
 
         const timestamp: string = dayjs.utc().format("YYYY-MM-DD HH:MM:ss.SSS");
-        const timestampDiff: string = this.getTimestampDiff();
 
-        process.stdout.write(`[${timestamp}] ${level}${message}${timestampDiff}\n`);
-    }
-
-    /**
-     * @private
-     * @returns {string}
-     * @memberof MemoryLogger
-     */
-    private getTimestampDiff(): string {
-        const diff: number = dayjs().diff(this.lastTimestamp);
-
-        this.lastTimestamp = dayjs.utc();
-
-        return chalk.yellow(` +${diff ? prettyTime(diff) : "0ms"}`);
+        process.stdout.write(`[${timestamp}] ${level}${message}\n`);
     }
 }

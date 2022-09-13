@@ -53,7 +53,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
 
     public validatePeerIp(peer: Contracts.P2P.Peer, options: Contracts.P2P.AcceptNewPeerOptions = {}): boolean {
         if (this.configuration.get("disableDiscovery")) {
-            this.logger.warning(`Rejected ${peer.ip} because the relay is in non-discovery mode :see_no_evil:`);
+            this.logger.warning(`Rejected ${peer.ip} because the relay is in non-discovery mode`, "🙈");
 
             return false;
         }
@@ -77,7 +77,8 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
         if (this.repository.getSameSubnetPeers(peer.ip).length >= maxSameSubnetPeers && !options.seed) {
             if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
                 this.logger.warning(
-                    `Rejected ${peer.ip} because we are already at the ${maxSameSubnetPeers} limit for peers sharing the same /24 subnet :no_entry:`,
+                    `Rejected ${peer.ip} because we are already at the ${maxSameSubnetPeers} limit for peers sharing the same /24 subnet`,
+                    "🚫",
                 );
             }
 
@@ -148,9 +149,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
             this.repository.setPeer(newPeer);
 
             if (!options.lessVerbose || process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
-                this.logger.debug(
-                    `Accepted new peer ${newPeer.ip}:${newPeer.port} (v${newPeer.version}) :hugging_face:`,
-                );
+                this.logger.debug(`Accepted new peer ${newPeer.ip}:${newPeer.port} (v${newPeer.version})`, "🤗");
             }
 
             this.events.dispatch(Enums.PeerEvent.Added, newPeer);

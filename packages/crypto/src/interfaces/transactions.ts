@@ -4,12 +4,13 @@ import { HtlcLockExpirationType, HtlcSecretHashType } from "../enums";
 import { BigNumber, ByteBuffer } from "../utils";
 
 export interface ITransaction {
+    readonly emoji: string;
     readonly id: string | undefined;
-    readonly typeGroup: number | undefined;
-    readonly type: number;
-    readonly verified: boolean;
     readonly key: string;
     readonly staticFee: BigNumber;
+    readonly type: number;
+    readonly typeGroup: number | undefined;
+    readonly verified: boolean;
 
     isVerified: boolean;
 

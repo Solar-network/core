@@ -90,13 +90,13 @@ export class Command extends Commands.Command {
             this.processManager.update();
 
             if (this.getFlag("force")) {
-                this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
-                this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
-                this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
+                this.actions.restartRunningProcess("core");
+                this.actions.restartRunningProcess("relay");
+                this.actions.restartRunningProcess("forger");
             } else {
-                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
-                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
-                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+                await this.actions.restartRunningProcessWithPrompt("core");
+                await this.actions.restartRunningProcessWithPrompt("relay");
+                await this.actions.restartRunningProcessWithPrompt("forger");
             }
         } catch (error) {
             this.components.error(error);

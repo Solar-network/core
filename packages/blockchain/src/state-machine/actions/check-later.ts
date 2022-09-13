@@ -1,6 +1,5 @@
-import { Crypto, Managers, Utils } from "@solar-network/crypto";
+import { Managers, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
-import delay from "delay";
 
 import { Action } from "../contracts";
 
@@ -35,45 +34,6 @@ export class CheckLater implements Action {
     private readonly processor!: Contracts.Pool.Processor;
 
     public async handle(): Promise<void> {
-        const { blockTime } = Managers.configManager.getMilestone();
-        const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, 1);
-
-        const epoch = Math.floor(new Date(Managers.configManager.getMilestone().epoch).getTime() / 1000);
-
-        let timeNow = Math.floor(Date.now() / 1000);
-        while (timeNow < epoch) {
-            await delay(Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup));
-            timeNow = Math.floor(Date.now() / 1000);
-            if (timeNow < epoch) {
-                const seconds = epoch - timeNow;
-
-                const emojiSet = {
-                    normal: [":hatching_chick:", ":stopwatch:", ":watch:", ":alarm_clock:", ":mantelpiece_clock:"],
-                    soon: [":balloon:", ":clinking_glasses:", ":confetti_ball:", ":rocket:", ":partying_face:"],
-                };
-
-                const days = Math.floor(seconds / (3600 * 24));
-                const hours = Math.floor((seconds % (3600 * 24)) / 3600);
-
-                let emoji = emojiSet.normal;
-                if (days === 0 && hours === 0) {
-                    emoji = emojiSet.soon;
-                }
-
-                const countdown = AppUtils.formatSeconds(seconds);
-
-                this.logger.info(`The network launches in ${countdown} ${emoji[seconds % 5]}`);
-            } else {
-                this.logger.info(
-                    `The network has launched and the next block is due in ${AppUtils.pluralise(
-                        "second",
-                        blockTime,
-                        true,
-                    )}! Welcome aboard :tada:`,
-                );
-            }
-        }
-
         if (!this.blockchain.isStopped() && !this.stateStore.isWakeUpTimeoutSet()) {
             if (!this.stateStore.hasPolledForBlocks()) {
                 this.stateStore.polledForBlocks();
@@ -128,9 +88,10 @@ export class CheckLater implements Action {
                                     const generator: string = `delegate ${username} (#${rank})`;
 
                                     this.logger.info(
-                                        `Downloaded new block forged by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
+                                        `Downloaded new block by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
                                             reward,
-                                        )} reward :package:`,
+                                        )} reward`,
+                                        "📥",
                                     );
 
                                     const { dynamicReward } = Managers.configManager.getMilestone();
@@ -146,12 +107,13 @@ export class CheckLater implements Action {
                                         );
                                         if (alreadyForged && !reward.isEqualTo(dynamicReward.ranks[rank])) {
                                             this.logger.info(
-                                                `The reward was reduced because ${username} already forged in this round :fire:`,
+                                                `The reward was reduced because ${username} already forged in this round`,
+                                                "🪙",
                                             );
                                         }
                                     }
 
-                                    this.logger.debug(`The id of the new block is ${id}`);
+                                    this.logger.trace(`The id of the new block is ${id}`, "🏷️");
 
                                     this.logger.debug(
                                         `It contains ${AppUtils.pluralise(
@@ -159,6 +121,7 @@ export class CheckLater implements Action {
                                             numberOfTransactions,
                                             true,
                                         )} and was downloaded from ${ip}`,
+                                        numberOfTransactions === 0 ? "🪹" : "🪺",
                                     );
 
                                     this.blockchain.handleIncomingBlock(blocks[0], false, ip!, false);

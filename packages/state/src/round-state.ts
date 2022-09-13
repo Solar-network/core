@@ -136,7 +136,7 @@ export class RoundState implements Contracts.State.RoundState {
             const username: string = delegate.getAttribute("delegate.username");
 
             if (i < this.forgingDelegates.length) {
-                this.logger.debug(`Delegate ${username} just missed a block :pensive:`);
+                this.logger.debug(`Delegate ${username} just missed a block`, "😔");
                 this.events.dispatch(Enums.ForgerEvent.Missing, {
                     delegate,
                 });
@@ -174,7 +174,7 @@ export class RoundState implements Contracts.State.RoundState {
         if (height === 1 || AppUtils.roundCalculator.isNewRound(height + 1)) {
             const roundInfo = this.getRound(height + 1);
 
-            this.logger.info(`Starting Round ${roundInfo.round.toLocaleString()} :dove_of_peace:`);
+            this.logger.info(`Starting round ${roundInfo.round.toLocaleString()}`, "🕊️");
 
             this.detectMissedRound();
 
@@ -196,7 +196,7 @@ export class RoundState implements Contracts.State.RoundState {
         const { round, nextRound } = roundInfo;
 
         if (nextRound === round + 1) {
-            this.logger.info(`Back to previous round: ${round.toLocaleString()} :back:`);
+            this.logger.info(`Back to previous round: ${round.toLocaleString()}`, "⬅️");
 
             await this.setForgingDelegatesOfRound(
                 roundInfo,
@@ -214,9 +214,7 @@ export class RoundState implements Contracts.State.RoundState {
             );
 
             if (!isBlockProduced) {
-                this.logger.debug(
-                    `Delegate ${delegate.getAttribute("delegate.username")} just missed a round :cold_sweat:`,
-                );
+                this.logger.debug(`Delegate ${delegate.getAttribute("delegate.username")} just missed a round`, "😰");
 
                 this.events.dispatch(Enums.RoundEvent.Missed, {
                     delegate,

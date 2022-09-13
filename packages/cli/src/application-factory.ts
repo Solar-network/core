@@ -9,6 +9,7 @@ import {
     AbortStoppedProcess,
     AbortUnknownProcess,
     DaemoniseProcess,
+    LogProcess,
     RestartProcess,
     RestartRunningProcess,
     RestartRunningProcessWithPrompt,
@@ -66,9 +67,9 @@ export class ApplicationFactory {
 
         app.bind(Identifiers.ProcessFactory).toFactory(
             (context: interfaces.Context) =>
-                (token: string, type: string): Process => {
+                (processName: string): Process => {
                     const process: Process = context.container.resolve(Process);
-                    process.initialise(token, type);
+                    process.initialise(processName);
 
                     return process;
                 },
@@ -108,6 +109,8 @@ export class ApplicationFactory {
         app.bind(Identifiers.AbortUnknownProcess).to(AbortUnknownProcess).inSingletonScope();
 
         app.bind(Identifiers.DaemoniseProcess).to(DaemoniseProcess).inSingletonScope();
+
+        app.bind(Identifiers.LogProcess).to(LogProcess).inSingletonScope();
 
         app.bind(Identifiers.RestartProcess).to(RestartProcess).inSingletonScope();
 

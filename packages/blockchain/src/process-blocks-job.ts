@@ -68,8 +68,9 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
             return;
         }
 
-        this.logger.debug(
+        this.logger.trace(
             `Processing chunk of blocks [${fromHeight.toLocaleString()}, ${toHeight.toLocaleString()}] on top of ${lastHeight.toLocaleString()}`,
+            "💻",
         );
 
         const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, this.blocks[0].height);
@@ -112,7 +113,8 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
 
                 if (blockSlot > currentSlot) {
                     this.logger.error(
-                        `Discarded block ${block.height.toLocaleString()} because it takes a future slot :crystal_ball:`,
+                        `Discarded block ${block.height.toLocaleString()} because it takes a future slot`,
+                        "🔮",
                     );
                     break;
                 }
@@ -189,7 +191,8 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
                     const timeLeftInMs: number = Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup);
                     if (currentSlot !== processedSlot || timeLeftInMs < minimumMs) {
                         this.logger.info(
-                            `Discarded block ${lastProcessedBlock.data.height.toLocaleString()} because it was processed too late :exclamation:`,
+                            `Discarded block ${lastProcessedBlock.data.height.toLocaleString()} because it was processed too late`,
+                            "❗",
                         );
                         this.blockchain.forkBlock(lastProcessedBlock, 1);
                         return;
@@ -218,6 +221,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
                 blocksToRevert.length,
                 true,
             )} back to last height: ${lastHeight.toLocaleString()}`,
+            "⏪",
         );
 
         for (const block of blocksToRevert.reverse()) {
@@ -236,7 +240,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
     }
 
     private async handleCorrupted() {
-        this.logger.error("Shutting down app, because state is corrupted :boom:");
+        this.logger.critical("Shutting down app, because state is corrupted");
         process.exit(1);
     }
 }

@@ -5,9 +5,10 @@ import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
 export class BurnTransaction extends Transaction {
-    public static typeGroup: number = TransactionTypeGroup.Solar;
-    public static type: number = TransactionType.Solar.Burn;
+    public static emoji: string = "🔥";
     public static key: string = "burn";
+    public static type: number = TransactionType.Solar.Burn;
+    public static typeGroup: number = TransactionTypeGroup.Solar;
 
     protected static defaultStaticFee = BigNumber.ZERO;
 

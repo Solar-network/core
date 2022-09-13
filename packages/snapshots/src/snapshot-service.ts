@@ -27,18 +27,18 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
         try {
             Utils.assert.defined<string>(options.network);
 
-            this.logger.info(`Saving snapshot for ${options.network}`);
+            this.logger.info(`Saving snapshot for ${options.network}`, "💾");
 
             this.database.init(options.codec, options.skipCompression);
 
             await this.database.dump(options);
             renderer.spinner.succeed();
 
-            this.logger.info(`Snapshot was saved to ${this.filesystem.getSnapshotPath()}`);
+            this.logger.info(`Snapshot was saved to ${this.filesystem.getSnapshotPath()}`, "🏁");
         } catch (err) {
             renderer.spinner.fail();
-            this.logger.error("Snapshot dump failed");
-            this.logger.error(err.stack);
+            this.logger.critical("Snapshot dump failed");
+            this.logger.critical(err.stack);
         }
     }
 
@@ -52,7 +52,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             this.filesystem.setSnapshot(options.blocks);
 
             if (!(await this.filesystem.snapshotExists())) {
-                this.logger.error(`Snapshot ${options.blocks} of network ${options.network} does not exist`);
+                this.logger.critical(`Snapshot ${options.blocks} of network ${options.network} does not exist`);
                 return;
             }
 
@@ -60,11 +60,13 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             try {
                 meta = await this.filesystem.readMetaData();
             } catch (e) {
-                this.logger.error(`Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`);
+                this.logger.critical(
+                    `Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`,
+                );
                 return;
             }
 
-            this.logger.info(`Restoring from snapshot for ${options.network}`);
+            this.logger.info(`Restoring from snapshot for ${options.network}`, "💾");
 
             this.database.init(meta!.codec, meta!.skipCompression, options.verify);
 
@@ -84,10 +86,11 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
                     meta!.rounds.count,
                     true,
                 )}`,
+                "🏁",
             );
         } catch (err) {
             renderer.spinner.fail();
-            this.logger.error("Snapshot restore failed");
+            this.logger.critical("Snapshot restore failed");
         }
     }
 
@@ -95,7 +98,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
         const renderer = new ProgressRenderer(this.app);
 
         try {
-            this.logger.info("Verifying snapshot");
+            this.logger.info("Verifying snapshot", "🕵️");
 
             Utils.assert.defined<string>(options.network);
             Utils.assert.defined<string>(options.blocks);
@@ -103,7 +106,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             this.filesystem.setSnapshot(options.blocks);
 
             if (!(await this.filesystem.snapshotExists())) {
-                this.logger.error(`Snapshot ${options.blocks} of network ${options.network} does not exist`);
+                this.logger.critical(`Snapshot ${options.blocks} of network ${options.network} does not exist`);
                 return;
             }
 
@@ -111,27 +114,27 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
             try {
                 meta = await this.filesystem.readMetaData();
             } catch (e) {
-                this.logger.error(`Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`);
+                this.logger.critical(
+                    `Metadata for snapshot ${options.blocks} of network ${options.network} is not valid`,
+                );
             }
 
             this.database.init(meta!.codec, meta!.skipCompression);
 
             await this.database.verify(meta!);
             renderer.spinner.succeed();
-            this.logger.info("Verification was successful");
+            this.logger.info("Verification was successful", "🏁");
         } catch (err) {
             renderer.spinner.fail();
-            this.logger.error("Verification failed");
-            this.logger.error(err.stack);
+            this.logger.critical("Verification failed");
+            this.logger.critical(err.stack);
         }
     }
 
     public async rollbackByHeight(height: number): Promise<void> {
         try {
-            this.logger.info("Rolling back the blockchain");
-
             if (!height || height <= 0) {
-                this.logger.error(`Rollback height ${height.toLocaleString()} is invalid`);
+                this.logger.critical(`Rollback height ${height.toLocaleString()} is invalid`);
                 return;
             }
 
@@ -150,16 +153,19 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
 
             const roundInfo = Utils.roundCalculator.calculateRound(height);
 
+            this.logger.info("Rollback in progress", "⏪");
+
             const newLastBlock = await this.database.rollback(roundInfo);
 
             this.logger.info(
-                `Rolling back blockchain to last finished round ${roundInfo.round.toLocaleString()} with last block height ${newLastBlock.data.height.toLocaleString()}`,
+                `Rolled back blockchain to last finished round ${roundInfo.round.toLocaleString()} with last block height ${newLastBlock.data.height.toLocaleString()}`,
+                "🏁",
             );
 
             this.forceIntegrityCheckOnNextBoot();
         } catch (err) {
-            this.logger.error("Rollback failed");
-            this.logger.error(err.stack);
+            this.logger.critical("Rollback failed");
+            this.logger.critical(err.stack);
         }
     }
 
@@ -171,13 +177,15 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
 
     public async truncate(): Promise<void> {
         try {
-            this.logger.info("Wiping the database");
+            this.logger.info("Wiping the database", "🧻");
 
             await this.database.truncate();
+
+            this.logger.info("Database wiped successfully", "🏁");
             this.forceIntegrityCheckOnNextBoot();
         } catch (err) {
-            this.logger.error("Wipe failed");
-            this.logger.error(err.stack);
+            this.logger.critical("Wipe failed");
+            this.logger.critical(err.stack);
         }
     }
 

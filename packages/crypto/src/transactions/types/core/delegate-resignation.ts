@@ -5,9 +5,10 @@ import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
 export abstract class DelegateResignationTransaction extends Transaction {
-    public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.Core.DelegateResignation;
+    public static emoji: string = "💔";
     public static key = "delegateResignation";
+    public static type: number = TransactionType.Core.DelegateResignation;
+    public static typeGroup: number = TransactionTypeGroup.Core;
     public static unique: boolean = true;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("2500000000");
