@@ -88,6 +88,8 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         );
 
         this.queue.on("drain", async () => {
+            this.updateProductivity(false);
+            this.pool.readdTransactions(undefined, true);
             await stateSaver.run();
             this.dispatch("PROCESSFINISHED");
         });
@@ -160,8 +162,6 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         this.events.listen(Enums.ForgerEvent.Missing, { handle: this.checkMissingBlocks });
 
         this.events.listen(Enums.RoundEvent.Applied, { handle: this.resetMissedBlocks });
-
-        this.events.listen(Enums.QueueEvent.Finished, { handle: () => this.updateProductivity(false) });
 
         this.updateProductivity(true);
 
