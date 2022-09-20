@@ -36,7 +36,7 @@ export const publicKeysIndexer = (
     blockchainWallet?: Contracts.State.Wallet,
 ): void => {
     if (wallet.getPublicKey("primary") && shouldBeIndexed(wallet, blockchainWallet)) {
-        index.set(wallet.getPublicKey("primary"), wallet);
+        index.set(wallet.getPublicKey("primary")!, wallet);
     }
 };
 

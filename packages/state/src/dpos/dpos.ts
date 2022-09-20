@@ -81,7 +81,7 @@ export class DposState implements Contracts.State.DposState {
                     );
                 }
 
-                return a.getPublicKey("primary").localeCompare(b.getPublicKey("primary"), "en");
+                return a.getPublicKey("primary")!.localeCompare(b.getPublicKey("primary")!, "en");
             }
 
             return diff;

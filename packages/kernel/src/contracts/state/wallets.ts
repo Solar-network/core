@@ -63,7 +63,7 @@ export interface Wallet {
 
     forgetPublicKey(type: string): void;
 
-    getPublicKey(type: string): string;
+    getPublicKey(type: string): string | undefined;
 
     getPublicKeys(): Record<string, string | WalletPermissions>;
 

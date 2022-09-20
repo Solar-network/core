@@ -93,9 +93,8 @@ export abstract class TransactionHandler {
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(sender.getAddress());
 
         AppUtils.assert.defined<string>(sender.getPublicKey("primary"));
-
         if (
-            !this.walletRepository.hasByPublicKey(sender.getPublicKey("primary")) &&
+            !this.walletRepository.hasByPublicKey(sender.getPublicKey("primary")!) &&
             senderWallet.getBalance().isZero()
         ) {
             throw new ColdWalletError();
@@ -237,7 +236,7 @@ export abstract class TransactionHandler {
                 throw new UnexpectedExtraSignatureError();
             }
 
-            if (!Transactions.Verifier.verifyExtraSignature(data, dbSender.getPublicKey("extra"))) {
+            if (!Transactions.Verifier.verifyExtraSignature(data, dbSender.getPublicKey("extra")!)) {
                 throw new InvalidExtraSignatureError();
             }
         } else if (data.signatures && data.signatures.extra) {

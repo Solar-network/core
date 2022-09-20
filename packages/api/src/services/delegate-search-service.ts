@@ -50,7 +50,7 @@ export class DelegateSearchService {
     ): DelegateResource {
         AppUtils.assert.defined<string>(wallet.getPublicKey("primary"));
 
-        const publicKey = wallet.getPublicKey("primary");
+        const publicKey = wallet.getPublicKey("primary")!;
 
         const delegateAttribute = wallet.getAttribute("delegate");
 
