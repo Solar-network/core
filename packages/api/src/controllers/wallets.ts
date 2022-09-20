@@ -119,7 +119,7 @@ export class WalletsController extends Controller {
         if (!walletResource) {
             return this.raiseError(walletId);
         }
-        if (!walletResource.publicKey) {
+        if (!walletResource.publicKeys || Object.keys(walletResource.publicKeys).length === 0) {
             return this.paginationService.getEmptyPage();
         }
 
@@ -202,7 +202,7 @@ export class WalletsController extends Controller {
         if (!walletResource) {
             return this.raiseError(walletId);
         }
-        if (!walletResource.publicKey) {
+        if (!walletResource.publicKeys || Object.keys(walletResource.publicKeys).length === 0) {
             return this.paginationService.getEmptyPage();
         }
 

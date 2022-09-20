@@ -22,6 +22,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             nonce: BigNumber.ZERO,
             typeGroup: TransactionTypeGroup.Test,
             version: 3,
+            signatures: {},
         } as ITransactionData;
     }
 
@@ -108,29 +109,16 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         return this.signWithKeyPair(keys);
     }
 
-    public secondSign(secondPassphrase: string): TBuilder {
-        return this.secondSignWithKeyPair(Keys.fromPassphrase(secondPassphrase));
+    public extraSign(passphrase: string): TBuilder {
+        return this.extraSignWithKeyPair(Keys.fromPassphrase(passphrase));
     }
 
-    public secondSignWithWif(wif: string, networkWif?: number): TBuilder {
+    public extraSignWithWif(wif: string, networkWif?: number): TBuilder {
         const keys = Keys.fromWIF(wif, {
             wif: networkWif || configManager.get("network.wif"),
         } as NetworkType);
 
-        return this.secondSignWithKeyPair(keys);
-    }
-
-    public multiSign(passphrase: string, index: number): TBuilder {
-        const keys: IKeyPair = Keys.fromPassphrase(passphrase);
-        return this.multiSignWithKeyPair(index, keys);
-    }
-
-    public multiSignWithWif(index: number, wif: string, networkWif?: number): TBuilder {
-        const keys = Keys.fromWIF(wif, {
-            wif: networkWif || configManager.get("network.wif"),
-        } as NetworkType);
-
-        return this.multiSignWithKeyPair(index, keys);
+        return this.extraSignWithKeyPair(keys);
     }
 
     public verify(): boolean {
@@ -138,7 +126,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
     }
 
     public getStruct(): ITransactionData {
-        if (!this.data.senderPublicKey || (!this.data.signature && !this.data.signatures)) {
+        if (!this.data.senderPublicKey || !this.data.signatures!.primary) {
             throw new MissingTransactionSignatureError();
         }
 
@@ -148,20 +136,15 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             id: Utils.getId(this.data, { disableVersionCheck: this.disableVersionCheck }).toString(),
             memo: this.data.memo,
             network: this.data.network,
-            secondSignature: this.data.secondSignature,
             senderId: this.data.senderId,
             senderPublicKey: this.data.senderPublicKey,
-            signature: this.data.signature,
+            signatures: this.data.signatures,
             type: this.data.type,
             version: this.data.version,
         } as ITransactionData;
 
         struct.typeGroup = this.data.typeGroup;
         struct.nonce = this.data.nonce;
-
-        if (Array.isArray(this.data.signatures)) {
-            struct.signatures = this.data.signatures;
-        }
 
         Object.keys(struct).forEach((key) => struct[key] === undefined && delete struct[key]);
 
@@ -189,24 +172,19 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             this.data.headerType = TransactionHeaderType.Extended;
         }
 
-        this.data.signature = Signer.sign(this.getSigningObject(), keys, {
+        Signer.sign(this.getSigningObject(), keys, {
             disableVersionCheck: this.disableVersionCheck,
         });
 
         return this.instance();
     }
 
-    private secondSignWithKeyPair(keys: IKeyPair): TBuilder {
-        this.data.secondSignature = Signer.secondSign(this.getSigningObject(), keys);
-        return this.instance();
-    }
-
-    private multiSignWithKeyPair(index: number, keys: IKeyPair): TBuilder {
-        if (!this.data.signatures) {
-            this.data.signatures = [];
+    private extraSignWithKeyPair(keys: IKeyPair): TBuilder {
+        if (!this.data.signatures!.primary) {
+            throw new MissingTransactionSignatureError();
         }
 
-        Signer.multiSign(this.getSigningObject(), keys, index);
+        Signer.extraSign(this.getSigningObject(), keys);
 
         return this.instance();
     }

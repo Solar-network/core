@@ -1,11 +1,10 @@
 import { DelegateRegistrationBuilder } from "./transactions/core/delegate-registration";
 import { DelegateResignationBuilder } from "./transactions/core/delegate-resignation";
+import { ExtraSignatureBuilder } from "./transactions/core/extra-signature";
 import { HtlcClaimBuilder } from "./transactions/core/htlc-claim";
 import { HtlcLockBuilder } from "./transactions/core/htlc-lock";
 import { HtlcRefundBuilder } from "./transactions/core/htlc-refund";
 import { IPFSBuilder } from "./transactions/core/ipfs";
-import { MultiSignatureBuilder } from "./transactions/core/multi-signature";
-import { SecondSignatureBuilder } from "./transactions/core/second-signature";
 import { TransferBuilder } from "./transactions/core/transfer";
 import { BurnBuilder } from "./transactions/solar/burn";
 import { VoteBuilder } from "./transactions/solar/vote";
@@ -17,16 +16,12 @@ export class BuilderFactory {
         return new TransferBuilder();
     }
 
-    public static secondSignature(): SecondSignatureBuilder {
-        return new SecondSignatureBuilder();
+    public static extraSignature(): ExtraSignatureBuilder {
+        return new ExtraSignatureBuilder();
     }
 
     public static delegateRegistration(): DelegateRegistrationBuilder {
         return new DelegateRegistrationBuilder();
-    }
-
-    public static multiSignature(): MultiSignatureBuilder {
-        return new MultiSignatureBuilder();
     }
 
     public static ipfs(): IPFSBuilder {

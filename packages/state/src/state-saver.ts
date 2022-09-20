@@ -59,6 +59,7 @@ export class StateSaver {
 
             for (const wallet of this.walletRepository.allByAddress()) {
                 const attributes: Record<string, any> = wallet.getAttributes();
+                const publicKeys: Record<string, string | Contracts.State.WalletPermissions> = wallet.getPublicKeys();
                 const voteBalances: Record<string, Utils.BigNumber> = wallet.getVoteBalances();
 
                 let bits: number = 0;
@@ -71,11 +72,11 @@ export class StateSaver {
                     bits += 2;
                 }
 
-                if (wallet.getPublicKey()) {
+                if (Object.keys(attributes).length > 0) {
                     bits += 4;
                 }
 
-                if (Object.keys(attributes).length > 0) {
+                if (Object.keys(publicKeys).length > 0) {
                     bits += 8;
                 }
 
@@ -108,15 +109,7 @@ export class StateSaver {
                     buffer.writeBigUInt64LE(wallet.getNonce().toBigInt());
                 }
 
-                if (wallet.getPublicKey()) {
-                    const publicKey: Buffer = Buffer.from(wallet.getPublicKey()!, "hex");
-                    if (buffer.getRemainderLength() < publicKey.length) {
-                        flush();
-                    }
-                    buffer.writeBuffer(publicKey);
-                }
-
-                for (const item of [attributes, voteBalances]) {
+                for (const item of [attributes, publicKeys, voteBalances]) {
                     if (Object.keys(item).length > 0) {
                         secondaryBuffer.reset();
                         this.byteBufferArray.reset();

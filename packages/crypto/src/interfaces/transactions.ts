@@ -39,7 +39,6 @@ export interface ITransactionAsset {
         username: string;
     };
     votes?: string[] | object;
-    multiSignature?: IMultiSignatureAsset;
     ipfs?: string;
     transfers?: ITransferItem[];
     lock?: IHtlcLockAsset;
@@ -67,13 +66,11 @@ export interface ITransactionData {
 
     asset?: ITransactionAsset;
     memo?: string;
-    vendorField?: string;
 
     id?: string;
-    signature?: string;
     secondSignature?: string;
-    signSignature?: string;
-    signatures?: string[];
+    signature?: string;
+    signatures?: ITransactionSignature;
 
     blockId?: string;
     blockHeight?: number;
@@ -102,15 +99,19 @@ export interface ITransactionJson {
     memo?: string | undefined;
 
     id?: string;
-    signature?: string;
     secondSignature?: string;
-    signSignature?: string;
-    signatures?: string[];
+    signature?: string;
+    signatures?: ITransactionSignature;
 
     blockId?: string;
     sequence?: number;
 
     ipfsHash?: string;
+}
+
+export interface ITransactionSignature {
+    primary?: string;
+    extra?: string;
 }
 
 export interface ISchemaValidationResult<T = any> {
@@ -122,11 +123,6 @@ export interface ISchemaValidationResult<T = any> {
 export interface ITransferItem {
     amount: BigNumber;
     recipientId: string;
-}
-
-export interface IMultiSignatureAsset {
-    min: number;
-    publicKeys: string[];
 }
 
 export interface IHtlcLockAsset {
@@ -181,8 +177,7 @@ export interface ISerialiseOptions {
     acceptLegacyVersion?: boolean;
     disableVersionCheck?: boolean;
     excludeSignature?: boolean;
-    excludeSecondSignature?: boolean;
-    excludeMultiSignature?: boolean;
+    excludeExtraSignature?: boolean;
 
     addressError?: string;
 }

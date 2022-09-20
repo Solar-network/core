@@ -3,11 +3,7 @@ import deepmerge from "deepmerge";
 import { TransactionType } from "../../enums";
 
 const signedTransaction = {
-    anyOf: [
-        { required: ["id", "signature"] },
-        { required: ["id", "signature", "signatures"] },
-        { required: ["id", "signatures"] },
-    ],
+    required: ["id", "signatures"],
 };
 
 const strictTransaction = {
@@ -30,16 +26,19 @@ export const transactionBaseSchema: Record<string, any> = {
         senderId: { $ref: "address" },
         senderPublicKey: { $ref: "publicKey" },
         memo: { anyOf: [{ type: "null" }, { type: "string", format: "memo" }] },
-        signature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
-        secondSignature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
-        signSignature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
         signatures: {
-            type: "array",
-            minItems: 1,
-            maxItems: 16,
+            type: "object",
+            required: ["primary"],
+            properties: {
+                primary: {
+                    allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }],
+                },
+                extra: {
+                    allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }],
+                },
+            },
             additionalItems: false,
             uniqueItems: true,
-            items: { allOf: [{ minLength: 130, maxLength: 130 }, { $ref: "hex" }] },
         },
     },
 };
@@ -73,13 +72,12 @@ export const legacyTransfer = extend(transactionBaseSchema, {
     },
 });
 
-export const secondSignature = extend(transactionBaseSchema, {
-    $id: "secondSignature",
+export const extraSignature = extend(transactionBaseSchema, {
+    $id: "extraSignature",
     required: ["asset"],
     properties: {
-        type: { transactionType: TransactionType.Core.SecondSignature },
+        type: { transactionType: TransactionType.Core.ExtraSignature },
         fee: { bignumber: { minimum: 1 } },
-        secondSignature: { type: "null" },
         asset: {
             type: "object",
             required: ["signature"],
@@ -179,40 +177,6 @@ export const vote = extend(transactionBaseSchema, {
                     sumOfVotesEquals100: true,
                 },
                 additionalProperties: false,
-            },
-        },
-    },
-});
-
-export const multiSignature = extend(transactionBaseSchema, {
-    $id: "multiSignature",
-    required: ["asset"],
-    properties: {
-        type: { transactionType: TransactionType.Core.MultiSignature },
-        fee: { bignumber: { minimum: 1 } },
-        asset: {
-            type: "object",
-            required: ["multiSignature"],
-            properties: {
-                multiSignature: {
-                    type: "object",
-                    required: ["min", "publicKeys"],
-                    properties: {
-                        min: {
-                            type: "integer",
-                            minimum: 1,
-                            maximum: { $data: "1/publicKeys/length" },
-                        },
-                        publicKeys: {
-                            type: "array",
-                            minItems: 1,
-                            maxItems: 16,
-                            additionalItems: false,
-                            uniqueItems: true,
-                            items: { $ref: "publicKey" },
-                        },
-                    },
-                },
             },
         },
     },

@@ -40,7 +40,7 @@ export class WalletsTableService implements Contracts.Database.WalletsTableServi
                     const params = batchWallets
                         .map((w) => [
                             w.getAddress(),
-                            w.getPublicKey(),
+                            w.getPublicKey("primary"),
                             w.getBalance().toFixed(),
                             w.getNonce().toFixed(),
                             w.getAttributes(),

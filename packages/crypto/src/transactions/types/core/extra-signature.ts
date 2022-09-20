@@ -3,16 +3,16 @@ import { BigNumber, ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
-export abstract class SecondSignatureRegistrationTransaction extends Transaction {
+export abstract class ExtraSignatureRegistrationTransaction extends Transaction {
     public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.Core.SecondSignature;
-    public static key = "secondSignature";
+    public static type: number = TransactionType.Core.ExtraSignature;
+    public static key = "extraSignature";
     public static unique: boolean = true;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("500000000");
 
     public static getSchema(): schemas.TransactionSchema {
-        return schemas.secondSignature;
+        return schemas.extraSignature;
     }
 
     public serialise(): ByteBuffer | undefined {

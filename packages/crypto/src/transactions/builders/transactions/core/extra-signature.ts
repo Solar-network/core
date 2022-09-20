@@ -3,19 +3,19 @@ import { ITransactionAsset, ITransactionData } from "../../../../interfaces";
 import { Core } from "../../../types";
 import { TransactionBuilder } from "../transaction";
 
-export class SecondSignatureBuilder extends TransactionBuilder<SecondSignatureBuilder> {
+export class ExtraSignatureBuilder extends TransactionBuilder<ExtraSignatureBuilder> {
     public constructor() {
         super();
 
-        this.data.type = Core.SecondSignatureRegistrationTransaction.type;
-        this.data.typeGroup = Core.SecondSignatureRegistrationTransaction.typeGroup;
-        this.data.fee = Core.SecondSignatureRegistrationTransaction.staticFee();
+        this.data.type = Core.ExtraSignatureRegistrationTransaction.type;
+        this.data.typeGroup = Core.ExtraSignatureRegistrationTransaction.typeGroup;
+        this.data.fee = Core.ExtraSignatureRegistrationTransaction.staticFee();
         this.data.asset = { signature: {} } as ITransactionAsset;
     }
 
-    public signatureAsset(secondPassphrase: string): SecondSignatureBuilder {
+    public signatureAsset(extraPassphrase: string): ExtraSignatureBuilder {
         if (this.data.asset && this.data.asset.signature) {
-            this.data.asset.signature.publicKey = Keys.fromPassphrase(secondPassphrase).publicKey.secp256k1;
+            this.data.asset.signature.publicKey = Keys.fromPassphrase(extraPassphrase).publicKey.secp256k1;
         }
 
         return this;
@@ -29,7 +29,7 @@ export class SecondSignatureBuilder extends TransactionBuilder<SecondSignatureBu
         return struct;
     }
 
-    protected instance(): SecondSignatureBuilder {
+    protected instance(): ExtraSignatureBuilder {
         return this;
     }
 }

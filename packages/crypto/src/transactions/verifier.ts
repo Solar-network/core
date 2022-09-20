@@ -1,6 +1,5 @@
 import { Hash } from "../crypto/hash";
-import { DuplicateParticipantInMultiSignatureError, InvalidMultiSignatureAssetError } from "../errors";
-import { IMultiSignatureAsset, ISchemaValidationResult, ITransactionData, IVerifyOptions } from "../interfaces";
+import { ISchemaValidationResult, ITransactionData, IVerifyOptions } from "../interfaces";
 import { isException } from "../utils";
 import { validator } from "../validation";
 import { TransactionTypeFactory } from "./types/factory";
@@ -15,86 +14,36 @@ export class Verifier {
         return Verifier.verifyHash(data, options?.disableVersionCheck);
     }
 
-    public static verifySecondSignature(
+    public static verifyExtraSignature(
         transaction: ITransactionData,
         publicKey: string,
         options?: IVerifyOptions,
     ): boolean {
-        const secondSignature: string | undefined = transaction.secondSignature || transaction.signSignature;
-
-        if (!secondSignature) {
+        if (!transaction.signatures || !transaction.signatures.extra) {
             return false;
         }
 
         const hash: Buffer = Utils.toHash(transaction, {
             disableVersionCheck: options?.disableVersionCheck,
-            excludeSecondSignature: true,
+            excludeExtraSignature: true,
         });
-        return this.internalVerifySignature(hash, secondSignature, publicKey, transaction.version > 2);
-    }
-
-    public static verifySignatures(transaction: ITransactionData, multiSignature: IMultiSignatureAsset): boolean {
-        if (!multiSignature) {
-            throw new InvalidMultiSignatureAssetError();
-        }
-
-        const { publicKeys, min }: IMultiSignatureAsset = multiSignature;
-        const { signatures }: ITransactionData = transaction;
-
-        const hash: Buffer = Utils.toHash(transaction, {
-            excludeSignature: true,
-            excludeSecondSignature: true,
-            excludeMultiSignature: true,
-        });
-
-        const publicKeyIndexes: { [index: number]: boolean } = {};
-        let verified: boolean = false;
-        let verifiedSignatures: number = 0;
-
-        if (signatures) {
-            for (let i = 0; i < signatures.length; i++) {
-                const signature: string = signatures[i];
-                const publicKeyIndex: number = parseInt(signature.slice(0, 2), 16);
-
-                if (!publicKeyIndexes[publicKeyIndex]) {
-                    publicKeyIndexes[publicKeyIndex] = true;
-                } else {
-                    throw new DuplicateParticipantInMultiSignatureError();
-                }
-
-                const partialSignature: string = signature.slice(2, 130);
-                const publicKey: string = publicKeys[publicKeyIndex];
-
-                if (Hash.verifySchnorr(hash, partialSignature, publicKey, transaction.version > 2)) {
-                    verifiedSignatures++;
-                }
-
-                if (verifiedSignatures === min) {
-                    verified = true;
-                    break;
-                } else if (signatures.length - (i + 1 - verifiedSignatures) < min) {
-                    break;
-                }
-            }
-        }
-
-        return verified;
+        return this.internalVerifySignature(hash, transaction.signatures.extra, publicKey, transaction.version > 2);
     }
 
     public static verifyHash(data: ITransactionData, disableVersionCheck = false): boolean {
-        const { signature, senderPublicKey } = data;
+        const { signatures, senderPublicKey } = data;
 
-        if (!signature || !senderPublicKey) {
+        if (!signatures || !signatures.primary || !senderPublicKey) {
             return false;
         }
 
         const hash: Buffer = Utils.toHash(data, {
             disableVersionCheck,
             excludeSignature: true,
-            excludeSecondSignature: true,
+            excludeExtraSignature: true,
         });
 
-        return this.internalVerifySignature(hash, signature, senderPublicKey, data.version > 2);
+        return this.internalVerifySignature(hash, signatures.primary, senderPublicKey, data.version > 2);
     }
 
     public static verifySchema(data: ITransactionData, strict = true): ISchemaValidationResult {

@@ -25,8 +25,7 @@
                 "ipfs": 98,
                 "legacyTransfer": 99,
                 "legacyVote": 98,
-                "multiSignature": 16,
-                "secondSignature": 99,
+                "extraSignature": 99,
                 "transfer": 85,
                 "vote": 98
             },
@@ -44,8 +43,7 @@
                 "ipfs": 5000000,
                 "legacyTransfer": 5000000,
                 "legacyVote": 5000000,
-                "multiSignature": 5000000,
-                "secondSignature": 5000000,
+                "extraSignature": 5000000,
                 "transfer": 50000000,
                 "vote": 9000000
             }

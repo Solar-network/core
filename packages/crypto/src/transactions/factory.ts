@@ -1,10 +1,5 @@
 import { CoreTransactionType, TransactionTypeGroup } from "../enums";
-import {
-    DuplicateParticipantInMultiSignatureError,
-    InvalidTransactionBytesError,
-    TransactionSchemaError,
-    TransactionVersionError,
-} from "../errors";
+import { InvalidTransactionBytesError, TransactionSchemaError, TransactionVersionError } from "../errors";
 import {
     IDeserialiseAddresses,
     IDeserialiseOptions,
@@ -74,9 +69,11 @@ export class TransactionFactory {
             }
         }
 
-        if (data.vendorField) {
-            data.memo = data.vendorField;
-            delete data.vendorField;
+        if (data.signature) {
+            data.signatures = { primary: data.signature };
+        }
+        if (data.signatures && data.secondSignature) {
+            data.signatures.extra = data.secondSignature;
         }
 
         const { value, error } = Verifier.verifySchema(data, strict);
@@ -107,11 +104,7 @@ export class TransactionFactory {
 
             return transaction;
         } catch (error) {
-            if (
-                error instanceof TransactionVersionError ||
-                error instanceof TransactionSchemaError ||
-                error instanceof DuplicateParticipantInMultiSignatureError
-            ) {
+            if (error instanceof TransactionVersionError || error instanceof TransactionSchemaError) {
                 throw error;
             }
 

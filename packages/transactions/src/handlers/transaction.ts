@@ -6,14 +6,12 @@ import assert from "assert";
 import {
     ColdWalletError,
     InsufficientBalanceError,
-    InvalidMultiSignaturesError,
-    InvalidSecondSignatureError,
-    MissingMultiSignatureOnSenderError,
+    InvalidExtraSignatureError,
     SenderWalletMismatchError,
     TransactionFeeTooLowError,
+    UnexpectedExtraSignatureError,
     UnexpectedHeaderTypeError,
     UnexpectedNonceError,
-    UnexpectedSecondSignatureError,
 } from "../errors";
 
 // todo: revisit the implementation, container usage and arguments after database rework
@@ -39,16 +37,6 @@ export abstract class TransactionHandler {
     protected readonly logger!: Contracts.Kernel.Logger;
 
     public async verify(transaction: Interfaces.ITransaction): Promise<boolean> {
-        AppUtils.assert.defined<string>(transaction.data.senderId);
-
-        if (this.walletRepository.hasByAddress(transaction.data.senderId)) {
-            const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
-
-            if (senderWallet.hasMultiSignature()) {
-                transaction.isVerified = this.verifySignatures(senderWallet, transaction.data);
-            }
-        }
-
         return transaction.isVerified;
     }
 
@@ -104,9 +92,11 @@ export abstract class TransactionHandler {
     ): Promise<void> {
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(sender.getAddress());
 
-        AppUtils.assert.defined<string>(sender.getPublicKey());
-
-        if (!this.walletRepository.hasByPublicKey(sender.getPublicKey()!) && senderWallet.getBalance().isZero()) {
+        AppUtils.assert.defined<string>(sender.getPublicKey("primary"));
+        if (
+            !this.walletRepository.hasByPublicKey(sender.getPublicKey("primary")!) &&
+            senderWallet.getBalance().isZero()
+        ) {
             throw new ColdWalletError();
         }
 
@@ -146,9 +136,9 @@ export abstract class TransactionHandler {
         const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
         if (
             transaction.data.headerType === Enums.TransactionHeaderType.Standard &&
-            sender.getPublicKey() === undefined
+            sender.getPublicKey("primary") === undefined
         ) {
-            sender.setPublicKey(transaction.data.senderPublicKey);
+            sender.setPublicKey(transaction.data.senderPublicKey, "primary");
             this.walletRepository.index(sender);
         }
 
@@ -185,7 +175,7 @@ export abstract class TransactionHandler {
         sender.decreaseNonce();
 
         if (sender.getNonce().isZero()) {
-            sender.forgetPublicKey();
+            sender.forgetPublicKey("primary");
         }
     }
 
@@ -198,24 +188,6 @@ export abstract class TransactionHandler {
      * Pool logic
      */
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {}
-
-    /**
-     * @param {Contracts.State.Wallet} wallet
-     * @param {Interfaces.ITransactionData} transaction
-     * @param {Interfaces.IMultiSignatureAsset} [multiSignature]
-     * @returns {boolean}
-     * @memberof TransactionHandler
-     */
-    public verifySignatures(
-        wallet: Contracts.State.Wallet,
-        transaction: Interfaces.ITransactionData,
-        multiSignature?: Interfaces.IMultiSignatureAsset,
-    ): boolean {
-        return Transactions.Verifier.verifySignatures(
-            transaction,
-            multiSignature || wallet.getAttribute("multiSignature"),
-        );
-    }
 
     public getWallet(address: string): Contracts.State.Wallet | undefined {
         if (this.walletRepository.hasByAddress(address)) {
@@ -245,7 +217,7 @@ export abstract class TransactionHandler {
 
         if (data.headerType === Enums.TransactionHeaderType.Standard) {
             if (
-                data.senderPublicKey !== sender.getPublicKey() ||
+                data.senderPublicKey !== sender.getPublicKey("primary") ||
                 data.senderId !== Identities.Address.fromPublicKey(data.senderPublicKey)
             ) {
                 throw new SenderWalletMismatchError();
@@ -254,38 +226,21 @@ export abstract class TransactionHandler {
             throw new UnexpectedHeaderTypeError();
         }
 
-        if (sender.hasSecondSignature()) {
+        if (sender.hasPublicKeyByType("extra")) {
             AppUtils.assert.defined<string>(data.senderId);
 
             // Ensure the database wallet already has a 2nd signature, in case we checked a pool wallet.
             const dbSender: Contracts.State.Wallet = this.walletRepository.findByAddress(data.senderId);
 
-            if (!dbSender.hasSecondSignature()) {
-                throw new UnexpectedSecondSignatureError();
+            if (!dbSender.hasPublicKeyByType("extra")) {
+                throw new UnexpectedExtraSignatureError();
             }
 
-            if (!Transactions.Verifier.verifySecondSignature(data, dbSender.getAttribute("secondPublicKey"))) {
-                throw new InvalidSecondSignatureError();
+            if (!Transactions.Verifier.verifyExtraSignature(data, dbSender.getPublicKey("extra")!)) {
+                throw new InvalidExtraSignatureError();
             }
-        } else if (data.secondSignature || data.signSignature) {
-            throw new UnexpectedSecondSignatureError();
-        }
-
-        if (sender.hasMultiSignature()) {
-            AppUtils.assert.defined<string>(transaction.data.senderId);
-
-            // Ensure the database wallet already has a multisignature, in case we checked a pool wallet.
-            const dbSender: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
-
-            if (!dbSender.hasMultiSignature()) {
-                throw new MissingMultiSignatureOnSenderError();
-            }
-
-            if (!this.verifySignatures(dbSender, data, dbSender.getAttribute("multiSignature"))) {
-                throw new InvalidMultiSignaturesError();
-            }
-        } else if (transaction.data.signatures) {
-            throw new MissingMultiSignatureOnSenderError();
+        } else if (data.signatures && data.signatures.extra) {
+            throw new UnexpectedExtraSignatureError();
         }
     }
 

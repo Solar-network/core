@@ -60,8 +60,6 @@ export class TransactionResource implements Resource {
             sender: resource.senderId,
             senderPublicKey: resource.senderPublicKey,
             recipient: resource.recipientId,
-            signature: resource.signature,
-            signSignature: resource.signSignature || resource.secondSignature,
             signatures: resource.signatures,
             memo: resource.memo,
             asset: resource.asset,

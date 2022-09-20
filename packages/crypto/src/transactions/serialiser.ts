@@ -97,19 +97,13 @@ export class Serialiser {
         buff: ByteBuffer,
         options: ISerialiseOptions = {},
     ): void {
-        if (transaction.signature && !options.excludeSignature) {
-            buff.writeBuffer(Buffer.from(transaction.signature, "hex"));
-        }
-
-        const secondSignature: string | undefined = transaction.secondSignature || transaction.signSignature;
-
-        if (secondSignature && !options.excludeSecondSignature) {
-            buff.writeBuffer(Buffer.from(secondSignature, "hex"));
-        }
-
         if (transaction.signatures) {
-            if (!options.excludeMultiSignature) {
-                buff.writeBuffer(Buffer.from(transaction.signatures.join(""), "hex"));
+            if (transaction.signatures.primary && !options.excludeSignature) {
+                buff.writeBuffer(Buffer.from(transaction.signatures.primary, "hex"));
+            }
+
+            if (transaction.signatures.extra && !options.excludeExtraSignature) {
+                buff.writeBuffer(Buffer.from(transaction.signatures.extra, "hex"));
             }
         }
     }

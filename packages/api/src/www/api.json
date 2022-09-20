@@ -2487,15 +2487,7 @@
                     {
                         "name": "publicKey",
                         "in": "query",
-                        "description": "The public key of the wallet to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/publicKey"
-                        }
-                    },
-                    {
-                        "name": "attributes.secondPublicKey",
-                        "in": "query",
-                        "description": "The second public key of the wallet to be returned",
+                        "description": "A public key associated with the wallet to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/publicKey"
                         }
@@ -2509,8 +2501,6 @@
                             "enum": [
                                 "address:asc",
                                 "address:desc",
-                                "attributes.secondPublicKey:asc",
-                                "attributes.secondPublicKey:desc",
                                 "balance:asc",
                                 "balance:desc",
                                 "publicKey:asc",
@@ -2844,6 +2834,20 @@
                 "type": "string",
                 "pattern": "^[0-9a-f]{128}$"
             },
+            "signatures": {
+                "type": "object",
+                "required": [
+                  "primary"
+                ],
+                "properties": {
+                    "primary": {
+                        "$ref": "#/components/schemas/signature"
+                    },
+                    "extra": {
+                        "$ref": "#/components/schemas/signature"
+                    }
+                }
+            },
             "time": {
                 "type": "string",
                 "pattern": "^(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2}:\\d{2}.\\d{3})Z$"
@@ -2852,7 +2856,7 @@
                 "type": "object",
                 "required": [
                     "id",
-                    "signature",
+                    "signatures",
                     "version",
                     "type",
                     "typeGroup",
@@ -2904,8 +2908,8 @@
                         "type": "string",
                         "example": "Welcome to Solar!"
                     },
-                    "signature": {
-                        "$ref": "#/components/schemas/signature"
+                    "signatures": {
+                        "$ref": "#/components/schemas/signatures"
                     }
                 }
             },

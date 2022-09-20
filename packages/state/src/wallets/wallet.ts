@@ -4,7 +4,7 @@ import { Contracts, Services, Utils as AppUtils } from "@solar-network/kernel";
 import { WalletEvent } from "./wallet-event";
 
 export class Wallet implements Contracts.State.Wallet {
-    protected publicKey: string | undefined;
+    protected publicKeys: Record<string, string | Contracts.State.WalletPermissions> = {};
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected voteBalances: Record<string, Utils.BigNumber> = {};
@@ -24,39 +24,51 @@ export class Wallet implements Contracts.State.Wallet {
         return this.address;
     }
 
-    public getPublicKey(): string | undefined {
-        return this.publicKey;
+    public getPublicKey(type: string): string | undefined {
+        return this.publicKeys[type] as string;
     }
 
-    public hasPublicKey(): boolean {
-        return this.publicKey !== undefined;
+    public getPublicKeys(): Record<string, string | Contracts.State.WalletPermissions> {
+        return this.publicKeys;
     }
 
-    public forgetPublicKey(): void {
-        const previousValue = this.publicKey;
+    public hasPublicKeyByType(type: string): boolean {
+        return this.publicKeys[type] !== undefined;
+    }
 
-        this.publicKey = undefined;
-
-        this.events?.dispatchSync(WalletEvent.PropertySet, {
-            publicKey: this.publicKey,
-            key: "publicKey",
-            previousValue,
-            wallet: this,
+    public hasPublicKey(publicKey: string): boolean {
+        return Object.values(this.publicKeys).some((key) => {
+            if (typeof key === "string") {
+                return key === publicKey;
+            } else {
+                return Object.keys(key).includes(publicKey);
+            }
         });
     }
 
-    public setPublicKey(publicKey: string): void {
-        const previousValue = this.publicKey;
+    public forgetPublicKey(type: string): void {
+        delete this.publicKeys[type];
+    }
 
-        this.publicKey = publicKey;
+    public setPublicKey(publicKey: string, type: string, permissions?: Contracts.State.WalletPermissions): void {
+        if (permissions === undefined && this.hasPublicKeyByType(type)) {
+            return;
+        }
 
-        this.events?.dispatchSync(WalletEvent.PropertySet, {
-            publicKey: this.publicKey,
-            key: "publicKey",
-            value: publicKey,
-            previousValue,
-            wallet: this,
-        });
+        if (!this.hasPublicKey(publicKey)) {
+            if (permissions === undefined) {
+                this.publicKeys[type] = publicKey;
+            } else {
+                if (!this.publicKeys[type]) {
+                    this.publicKeys[type] = {};
+                }
+                this.publicKeys[type][publicKey] = permissions;
+            }
+        }
+    }
+
+    public setPublicKeys(publicKeys: Record<string, string | Contracts.State.WalletPermissions>) {
+        this.publicKeys = publicKeys;
     }
 
     public getBalance(): Utils.BigNumber {
@@ -69,7 +81,7 @@ export class Wallet implements Contracts.State.Wallet {
         this.balance = balance;
 
         this.events?.dispatchSync(WalletEvent.PropertySet, {
-            publicKey: this.publicKey,
+            publicKey: this.getPublicKey("primary")!,
             key: "balance",
             value: balance,
             previousValue,
@@ -87,7 +99,7 @@ export class Wallet implements Contracts.State.Wallet {
         this.nonce = nonce;
 
         this.events?.dispatchSync(WalletEvent.PropertySet, {
-            publicKey: this.publicKey,
+            publicKey: this.getPublicKey("primary")!,
             key: "nonce",
             value: nonce,
             previousValue,
@@ -118,7 +130,7 @@ export class Wallet implements Contracts.State.Wallet {
     public getData(): Contracts.State.WalletData {
         return {
             address: this.address,
-            publicKey: this.publicKey,
+            publicKey: this.getPublicKey("primary")!,
             balance: this.balance,
             nonce: this.nonce,
             attributes: this.attributes,
@@ -163,7 +175,7 @@ export class Wallet implements Contracts.State.Wallet {
         const wasSet = this.attributes.set<T>(key, value);
 
         this.events?.dispatchSync(WalletEvent.PropertySet, {
-            publicKey: this.publicKey,
+            publicKey: this.getPublicKey("primary")!,
             key: key,
             value,
             wallet: this,
@@ -183,7 +195,7 @@ export class Wallet implements Contracts.State.Wallet {
         const wasSet = this.attributes.forget(key);
 
         this.events?.dispatchSync(WalletEvent.PropertySet, {
-            publicKey: this.publicKey,
+            publicKey: this.getPublicKey("primary")!,
             key,
             previousValue: previousValue === na ? undefined : previousValue,
             wallet: this,
@@ -273,28 +285,12 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     /**
-     * @returns {boolean}
-     * @memberof Wallet
-     */
-    public hasSecondSignature(): boolean {
-        return this.hasAttribute("secondPublicKey");
-    }
-
-    /**
-     * @returns {boolean}
-     * @memberof Wallet
-     */
-    public hasMultiSignature(): boolean {
-        return this.hasAttribute("multiSignature");
-    }
-
-    /**
      * @returns {Contracts.State.Wallet}
      * @memberof Wallet
      */
     public clone(): Contracts.State.Wallet {
         const cloned = new Wallet(this.address, this.attributes.clone(), true);
-        cloned.publicKey = this.publicKey;
+        cloned.publicKeys = AppUtils.cloneDeep(this.publicKeys);
         cloned.balance = this.balance;
         cloned.nonce = this.nonce;
         cloned.voteBalances = AppUtils.cloneDeep(this.voteBalances);
@@ -367,7 +363,7 @@ export class Wallet implements Contracts.State.Wallet {
 
         return {
             address: this.getAddress(),
-            publicKey: this.getPublicKey(),
+            publicKeys: this.getPublicKeys(),
             balance: this.getBalance(),
             nonce: this.getNonce(),
             attributes: { ...attributes, votes: undefined },

@@ -3,8 +3,7 @@ import { Contracts } from "@solar-network/kernel";
 const isIndexable = (wallet: Contracts.State.Wallet): boolean => {
     return (
         wallet.countAttributes() > 1 ||
-        wallet.hasMultiSignature() ||
-        wallet.hasPublicKey() ||
+        wallet.hasPublicKeyByType("primary") ||
         !wallet.getBalance().isZero() ||
         !wallet.getNonce().isZero()
     );
@@ -36,8 +35,8 @@ export const publicKeysIndexer = (
     wallet: Contracts.State.Wallet,
     blockchainWallet?: Contracts.State.Wallet,
 ): void => {
-    if (wallet.getPublicKey() && shouldBeIndexed(wallet, blockchainWallet)) {
-        index.set(wallet.getPublicKey()!, wallet);
+    if (wallet.getPublicKey("primary") && shouldBeIndexed(wallet, blockchainWallet)) {
+        index.set(wallet.getPublicKey("primary")!, wallet);
     }
 };
 

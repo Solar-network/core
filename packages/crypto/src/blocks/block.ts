@@ -153,7 +153,6 @@ export class Block implements IBlock {
         const block: IBlockData = this.data;
         const result: IBlockVerification = {
             verified: false,
-            containsMultiSignatures: false,
             errors: [],
         };
 
@@ -192,8 +191,6 @@ export class Block implements IBlock {
                 for (const invalidTransaction of invalidTransactions) {
                     result.errors.push(`=> ${invalidTransaction.serialised.toString("hex")}`);
                 }
-
-                result.containsMultiSignatures = invalidTransactions.some((tx) => !!tx.data.signatures);
             }
 
             if (this.transactions.length !== block.numberOfTransactions) {

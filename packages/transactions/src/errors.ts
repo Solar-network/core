@@ -93,27 +93,15 @@ export class SenderWalletMismatchError extends TransactionError {
     }
 }
 
-export class UnexpectedSecondSignatureError extends TransactionError {
+export class UnexpectedExtraSignatureError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet does not have a second signature");
+        super("Failed to apply transaction, because the wallet does not have an extra signature");
     }
 }
 
-export class MissingMultiSignatureOnSenderError extends TransactionError {
+export class InvalidExtraSignatureError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the sender does not have a multisignature");
-    }
-}
-
-export class InvalidMultiSignaturesError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because the multisignatures are invalid");
-    }
-}
-
-export class InvalidSecondSignatureError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because the second signature could not be verified");
+        super("Failed to apply transaction, because the extra signature could not be verified");
     }
 }
 
@@ -159,21 +147,15 @@ export class WalletUsernameAlreadyRegisteredError extends TransactionError {
     }
 }
 
-export class SecondSignatureAlreadyRegisteredError extends TransactionError {
+export class ExtraSignatureAlreadyRegisteredError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because a second signature is already enabled on this wallet");
+        super("Failed to apply transaction, because an extra signature is already enabled on this wallet");
     }
 }
 
 export class PublicKeyAlreadyAssociatedWithWalletError extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because that public key is already associated with this wallet");
-    }
-}
-
-export class NotSupportedForMultiSignatureWalletError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because multisignature is enabled");
     }
 }
 
@@ -220,18 +202,6 @@ export class VotedForTooManyDelegatesError extends TransactionError {
 export class NotEnoughDelegatesError extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because not enough delegates are registered to allow resignation");
-    }
-}
-
-export class MultiSignatureAlreadyRegisteredError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because a multisignature is already enabled on this wallet");
-    }
-}
-
-export class MultiSignatureMinimumKeysError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because too few keys were provided");
     }
 }
 

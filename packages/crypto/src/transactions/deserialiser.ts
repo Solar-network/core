@@ -1,9 +1,5 @@
 import { TransactionHeaderType } from "../enums";
-import {
-    DuplicateParticipantInMultiSignatureError,
-    InvalidTransactionBytesError,
-    TransactionVersionError,
-} from "../errors";
+import { InvalidTransactionBytesError, TransactionVersionError } from "../errors";
 import { Address } from "../identities";
 import { IDeserialiseAddresses, IDeserialiseOptions, ITransaction, ITransactionData } from "../interfaces";
 import { BigNumber, ByteBuffer, isSupportedTransactionVersion } from "../utils";
@@ -22,7 +18,7 @@ export class Deserialiser {
         // Deserialise type specific parts
         instance.deserialise(buff, options.transactionAddresses);
 
-        this.deserialiseSchnorr(data, buff);
+        this.deserialiseSignatures(data, buff);
 
         if (data.version) {
             if (
@@ -77,42 +73,21 @@ export class Deserialiser {
         }
     }
 
-    private static deserialiseSchnorr(transaction: ITransactionData, buf: ByteBuffer): void {
-        const canReadNonMultiSignature = () => {
-            return (
-                buf.getRemainderLength() && (buf.getRemainderLength() % 64 === 0 || buf.getRemainderLength() % 65 !== 0)
-            );
+    private static deserialiseSignatures(transaction: ITransactionData, buf: ByteBuffer): void {
+        const canRead = () => {
+            return buf.getRemainderLength() && buf.getRemainderLength() % 64 === 0;
         };
 
-        if (canReadNonMultiSignature()) {
-            transaction.signature = buf.readBuffer(64).toString("hex");
+        if (canRead()) {
+            transaction.signatures = { primary: buf.readBuffer(64).toString("hex") };
         }
 
-        if (canReadNonMultiSignature()) {
-            transaction.secondSignature = buf.readBuffer(64).toString("hex");
+        if (canRead()) {
+            transaction.signatures!.extra = buf.readBuffer(64).toString("hex");
         }
 
         if (buf.getRemainderLength()) {
-            if (buf.getRemainderLength() % 65 === 0) {
-                transaction.signatures = [];
-
-                const count: number = buf.getRemainderLength() / 65;
-                const publicKeyIndexes: { [index: number]: boolean } = {};
-                for (let i = 0; i < count; i++) {
-                    const multiSignaturePart: string = buf.readBuffer(65).toString("hex");
-                    const publicKeyIndex: number = parseInt(multiSignaturePart.slice(0, 2), 16);
-
-                    if (!publicKeyIndexes[publicKeyIndex]) {
-                        publicKeyIndexes[publicKeyIndex] = true;
-                    } else {
-                        throw new DuplicateParticipantInMultiSignatureError();
-                    }
-
-                    transaction.signatures.push(multiSignaturePart);
-                }
-            } else {
-                throw new InvalidTransactionBytesError("signature buffer not exhausted");
-            }
+            throw new InvalidTransactionBytesError("signature buffer not exhausted");
         }
     }
 

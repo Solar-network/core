@@ -68,12 +68,7 @@ export class Verifier {
 
         let isVerified = false;
         try {
-            const transactionDeserialised = Transactions.TransactionFactory.fromBytes(transaction.serialised);
-            if (transactionDeserialised.data.signatures) {
-                return;
-            } else {
-                isVerified = transactionDeserialised.isVerified;
-            }
+            isVerified = Transactions.TransactionFactory.fromBytes(transaction.serialised).isVerified;
         } catch (err) {
             throw new Exceptions.TransactionVerifyException(transaction.id, err.message);
         }
