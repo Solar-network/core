@@ -19,22 +19,6 @@ export class Logger {
      * @param {(string | Error)} message
      * @memberof Logger
      */
-    public emergency(message: string | Error): void {
-        this.log(message, "error");
-    }
-
-    /**
-     * @param {(string | Error)} message
-     * @memberof Logger
-     */
-    public alert(message: string | Error): void {
-        this.log(message, "error");
-    }
-
-    /**
-     * @param {(string | Error)} message
-     * @memberof Logger
-     */
     public critical(message: string | Error): void {
         this.log(message, "error");
     }
@@ -53,14 +37,6 @@ export class Logger {
      */
     public warning(message: string | Error): void {
         this.log(message, "warn");
-    }
-
-    /**
-     * @param {(string | Error)} message
-     * @memberof Logger
-     */
-    public notice(message: string | Error): void {
-        this.log(message, "info");
     }
 
     /**

@@ -107,10 +107,11 @@ export class BlockProcessor {
             this.logger.warning(
                 `Block ${block.data.height.toLocaleString()} (${
                     block.data.id
-                }) disregarded because verification failed :scroll:`,
+                }) disregarded because verification failed`,
+                "📜",
             );
 
-            this.logger.warning(JSON.stringify(block.verification, undefined, 4));
+            this.logger.warning(JSON.stringify(block.verification, undefined, 4), "📜");
 
             return false;
         }
@@ -136,7 +137,8 @@ export class BlockProcessor {
                         this.logger.warning(
                             `Block ${block.data.height.toLocaleString()} disregarded, because it contains multiple ${
                                 handler.key
-                            } transactions from the same wallet :scroll:`,
+                            } transactions from the same wallet`,
+                            "📜",
                         );
 
                         return true;
@@ -176,10 +178,11 @@ export class BlockProcessor {
 
             if (forgedIds.length > 0) {
                 this.logger.warning(
-                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains already forged transactions :scroll:`,
+                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains already forged transactions`,
+                    "📜",
                 );
 
-                this.logger.debug(`${JSON.stringify(forgedIds, undefined, 4)}`);
+                this.logger.debug(`${JSON.stringify(forgedIds, undefined, 4)}`, "📜");
 
                 return true;
             }
@@ -214,7 +217,8 @@ export class BlockProcessor {
                     `Block { height: ${block.data.height.toLocaleString()}, id: ${block.data.id} } ` +
                         `not accepted: invalid nonce order for sender ${sender}: ` +
                         `preceding nonce: ${nonceBySender[sender].toFixed()}, ` +
-                        `transaction ${data.id} has nonce ${nonce.toFixed()} :bangbang:`,
+                        `transaction ${data.id} has nonce ${nonce.toFixed()}`,
+                    "📜",
                 );
                 return true;
             }
@@ -261,19 +265,22 @@ export class BlockProcessor {
             this.logger.debug(
                 `Could not decide if delegate ${
                     block.data.username
-                } is allowed to forge block ${block.data.height.toLocaleString()} :grey_question:`,
+                } is allowed to forge block ${block.data.height.toLocaleString()}`,
+                "❔",
             );
         } else if (forgingDelegate.getAttribute("delegate.username") !== block.data.username) {
             const forgingUsername: string = forgingDelegate.getAttribute("delegate.username");
             this.logger.warning(
-                `Delegate ${block.data.username} is not allowed to forge in this slot, should be ${forgingUsername} :-1:`,
+                `Delegate ${block.data.username} is not allowed to forge in this slot, should be ${forgingUsername}`,
+                "👎",
             );
 
             return false;
         }
 
         this.logger.debug(
-            `Delegate ${block.data.username} is allowed to forge block ${block.data.height.toLocaleString()} :+1:`,
+            `Delegate ${block.data.username} is allowed to forge block ${block.data.height.toLocaleString()}`,
+            "👍",
         );
 
         return true;
@@ -296,7 +303,8 @@ export class BlockProcessor {
             this.logger.warning(
                 `Block rejected as reward was ${Utils.formatSatoshi(
                     block.data.reward,
-                )}, should be ${Utils.formatSatoshi(reward)} :bangbang:`,
+                )}, should be ${Utils.formatSatoshi(reward)}`,
+                "📜",
             );
             return false;
         }

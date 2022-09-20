@@ -25,7 +25,6 @@ export class CheckLastDownloadedBlockSynced implements Action {
         }
 
         let event = "NOTSYNCED";
-        this.logger.debug(`Queued chunks of blocks (process: ${this.blockchain.getQueue().size()})`);
 
         if (this.blockchain.getQueue().size() > 100) {
             event = "PAUSED";
@@ -34,14 +33,15 @@ export class CheckLastDownloadedBlockSynced implements Action {
         // tried to download but no luck after 3 tries (looks like network missing blocks)
         if (this.stateStore.getNoBlockCounter() > 3 && !this.blockchain.getQueue().isRunning()) {
             this.logger.info(
-                "Tried to sync 3 times to different nodes, looks like the network is missing blocks :umbrella:",
+                "Tried to sync 3 times to different nodes, looks like the network is missing blocks",
+                "☂️",
             );
 
             this.stateStore.setNoBlockCounter(0);
             event = "NETWORKHALTED";
 
             if (this.stateStore.getP2pUpdateCounter() + 1 > 2) {
-                this.logger.info("Network keeps missing blocks :umbrella:");
+                this.logger.info("Network keeps missing blocks", "☔");
 
                 const networkStatus = await this.networkMonitor.checkNetworkHealth();
 

@@ -4,9 +4,10 @@ import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
 export class LegacyVoteTransaction extends Transaction {
-    public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.Core.Vote;
+    public static emoji: string = "🗳️";
     public static key = "legacyVote";
+    public static type: number = TransactionType.Core.Vote;
+    public static typeGroup: number = TransactionTypeGroup.Core;
     public static unique: boolean = true;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("100000000");

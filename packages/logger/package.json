@@ -19,19 +19,17 @@
     },
     "dependencies": {
         "@solar-network/kernel": "workspace:*",
-        "chalk": "4.1.2",
+        "colorette": "2.0.19",
         "joi": "17.6.0",
-        "node-emoji": "1.11.0",
-        "pino": "6.13.2",
-        "pino-pretty": "4.8.0",
+        "pino": "8.5.0",
+        "pino-pretty": "9.1.0",
         "pump": "3.0.0",
-        "pumpify": "2.0.1",
         "readable-stream": "3.6.0",
         "rotating-file-stream": "2.1.5",
         "split2": "3.2.2"
     },
     "devDependencies": {
-        "@types/pino": "6.3.11",
+        "@types/pino": "7.0.5",
         "@types/pump": "1.1.1",
         "@types/readable-stream": "2.3.11",
         "@types/split2": "2.1.6"

@@ -6,9 +6,10 @@ import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
 export abstract class TransferTransaction extends Transaction {
-    public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.Core.Transfer;
+    public static emoji: string = "💸";
     public static key = "transfer";
+    public static type: number = TransactionType.Core.Transfer;
+    public static typeGroup: number = TransactionTypeGroup.Core;
 
     protected static defaultStaticFee: BigNumber = BigNumber.make("10000000");
 

@@ -51,11 +51,13 @@ export class Command extends Commands.Command {
         for (const signature of signatures) {
             const groupName: string = signature.includes(":") ? signature.split(":")[0] : "default";
 
-            if (!signatureGroups[groupName]) {
-                signatureGroups[groupName] = [];
-            }
+            if (!commands[signature].hide.includes(signature)) {
+                if (!signatureGroups[groupName]) {
+                    signatureGroups[groupName] = [];
+                }
 
-            signatureGroups[groupName].push(signature);
+                signatureGroups[groupName].push(signature);
+            }
         }
 
         // turn everything into a human readable format

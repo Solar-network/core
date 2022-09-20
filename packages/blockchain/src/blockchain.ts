@@ -75,12 +75,6 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         // flag to force a network start
         this.stateStore.setNetworkStart(this.configuration.getOptional("options.networkStart", false));
 
-        if (this.stateStore.getNetworkStart()) {
-            this.logger.warning(
-                "Solar Core is launched in Genesis Start mode. This is usually for starting the first node on the blockchain. Unless you know what you are doing, this is likely wrong :warning:",
-            );
-        }
-
         this.queue = await this.app.get<Types.QueueFactory>(Container.Identifiers.QueueFactory)();
 
         const stateSaver: Contracts.State.StateSaver = this.app.get<Contracts.State.StateSaver>(
@@ -102,7 +96,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                     "block",
                     blocks.length,
                     true,
-                )} from height ${blocks[0].height.toLocaleString()} in queue :skull:`,
+                )} from height ${blocks[0].height.toLocaleString()} in queue`,
             );
         });
     }
@@ -140,8 +134,6 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
      * @return {void}
      */
     public async boot(skipStartedCheck = false): Promise<boolean> {
-        this.logger.info("Starting Blockchain Manager :chains:");
-
         this.stateStore.reset(blockchainMachine);
 
         this.dispatch("START");
@@ -172,8 +164,6 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     public async dispose(): Promise<void> {
         if (!this.stopped) {
-            this.logger.info("Stopping Blockchain Manager :chains:");
-
             this.stopped = true;
             this.stateStore.clearWakeUpTimeout();
 
@@ -242,16 +232,15 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             const timeLeftInMs: number = Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup);
             if (currentSlot !== receivedSlot || timeLeftInMs < minimumMs) {
                 this.logger.info(
-                    `Discarded block ${block.height.toLocaleString()} because it was received too late :exclamation:`,
+                    `Discarded block ${block.height.toLocaleString()} because it was received too late`,
+                    "❗",
                 );
                 return;
             }
         }
 
         if (receivedSlot > currentSlot) {
-            this.logger.info(
-                `Discarded block ${block.height.toLocaleString()} because it takes a future slot :exclamation:`,
-            );
+            this.logger.info(`Discarded block ${block.height.toLocaleString()} because it takes a future slot`, "❗");
             return;
         }
 
@@ -267,7 +256,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                 this.events.dispatch(Enums.BlockEvent.Received, { ...Blocks.Block.getBasicHeader(block), ip });
             }
         } else {
-            this.logger.info(`Block disregarded because blockchain is not ready :exclamation:`);
+            this.logger.info(`Block disregarded because blockchain is not ready`, "❗");
 
             this.events.dispatch(Enums.BlockEvent.Disregarded, { ...Blocks.Block.getBasicHeader(block), ip });
         }
@@ -384,7 +373,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
                 const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
-                this.logger.info(`Undoing block ${lastBlock.data.height.toLocaleString()}`);
+                this.logger.info(`Undoing block ${lastBlock.data.height.toLocaleString()}`, "🗑️");
 
                 await revertLastBlock();
                 await __removeBlocks(numberOfBlocks - 1);
@@ -401,12 +390,8 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             this.clearAndStopQueue();
 
             const resetHeight: number = lastBlock.data.height - nblocks;
-            this.logger.info(
-                `Removing ${Utils.pluralise(
-                    "block",
-                    nblocks,
-                    true,
-                )}. Reset to height ${resetHeight.toLocaleString()} :warning:`,
+            this.logger.warning(
+                `Removing ${Utils.pluralise("block", nblocks, true)} - reset to height ${resetHeight.toLocaleString()}`,
             );
 
             this.stateStore.setLastDownloadedBlock(lastBlock.data);
@@ -429,8 +414,8 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                 );
             }
         } catch (err) {
-            this.logger.error(err.stack);
-            this.logger.warning("Shutting down app, because state might be corrupted :boom:");
+            this.logger.critical(err.stack);
+            this.logger.critical("Shutting down app, because state might be corrupted");
             process.exit(1);
         }
     }
@@ -588,7 +573,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                 this.stateStore.setLastDownloadedBlock(lastStoredBlock.data);
 
                 this.stateStore.setNumberOfBlocksToRollback(0);
-                this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)} :wastebasket:`);
+                this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)}`, "🗑️");
 
                 await this.roundState.restore();
 

@@ -210,7 +210,7 @@ export class StateStore implements Contracts.State.StateStore {
         Managers.configManager.setHeight(block.data.height);
 
         if (Managers.configManager.isNewMilestone()) {
-            this.logger.notice("Milestone change");
+            this.logger.debug("Milestone changed", "🔔");
             this.app
                 .get<Contracts.Kernel.EventDispatcher>(Container.Identifiers.EventDispatcherService)
                 .dispatch(Enums.CryptoEvent.MilestoneChanged);
@@ -364,14 +364,6 @@ export class StateStore implements Contracts.State.StateStore {
      * Push ping block.
      */
     public pushPingBlock(block: Interfaces.IBlockData, fromForger = false): void {
-        if (this.blockPing) {
-            this.logger.debug(
-                `Previous block ${this.blockPing.block.height.toLocaleString()} pinged blockchain ${
-                    this.blockPing.count
-                } times`,
-            );
-        }
-
         this.blockPing = {
             count: fromForger ? 0 : 1,
             first: Date.now(),

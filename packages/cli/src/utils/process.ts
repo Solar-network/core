@@ -1,11 +1,9 @@
 import { Utils } from "@solar-network/kernel";
 import dayjs from "dayjs";
-import Tail from "nodejs-tail";
-import readLastLines from "read-last-lines";
 
 import { AbortMissingProcess, AbortStoppedProcess, AbortUnknownProcess } from "../actions";
 import { Application } from "../application";
-import { Clear, Spinner, Table } from "../components";
+import { Spinner, Table } from "../components";
 import { ProcessDescription } from "../contracts";
 import { Identifiers, inject, injectable } from "../ioc";
 import { ProcessManager } from "../services";
@@ -44,8 +42,8 @@ export class Process {
      * @param {string} suffix
      * @memberof Process
      */
-    public initialise(token: string, suffix: string): void {
-        this.processName = `${token}-${suffix}`;
+    public initialise(processName: string): void {
+        this.processName = processName;
     }
 
     /**
@@ -105,35 +103,5 @@ export class Process {
                     Utils.prettyBytes(app.monit.memory),
                 ]);
             });
-    }
-
-    /**
-     * @param {boolean} showErrors
-     * @param {number} lines
-     * @returns {Promise<void>}
-     * @memberof Process
-     */
-    public async log(showErrors: boolean, lines: number): Promise<void> {
-        this.app.get<AbortMissingProcess>(Identifiers.AbortMissingProcess).execute(this.processName);
-
-        const proc: Record<string, any> | undefined = this.processManager.describe(this.processName);
-
-        Utils.assert.defined<Record<string, any>>(proc);
-
-        const file = showErrors ? proc.pm2_env.pm_err_log_path : proc.pm2_env.pm_out_log_path;
-
-        this.app.get<Clear>(Identifiers.Clear).render();
-
-        console.log(
-            `Tailing last ${lines} lines for [${this.processName}] process (change the value with --lines option)`,
-        );
-
-        console.log((await readLastLines.read(file, lines)).trim());
-
-        const log = new Tail(file);
-
-        log.on("line", console.log);
-
-        log.watch();
     }
 }

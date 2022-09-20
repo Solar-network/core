@@ -299,7 +299,8 @@ export class BlockRepository extends AbstractRepository<Block> {
             }
 
             app.get<Contracts.Kernel.Logger>(Container.Identifiers.LogService).info(
-                `Removing the latest ${Utils.pluralise("block", blockIdRows.length, true)} :wastebasket:`,
+                `Removing the latest ${Utils.pluralise("block", blockIdRows.length, true)}`,
+                "🗑️",
             );
 
             await manager

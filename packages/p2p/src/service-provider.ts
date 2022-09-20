@@ -118,7 +118,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
             this.config().getRequired<{ banSeconds: number; hostname: string; port: number }>("server");
         Utils.assert.defined<Types.JsonObject>(serverConfig);
 
-        await server.initialise("P2P Server", serverConfig);
+        await server.initialise("P2P server", serverConfig);
     }
 
     private registerActions(): void {

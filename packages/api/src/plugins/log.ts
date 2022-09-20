@@ -25,6 +25,7 @@ export const log = {
                 `API request on: "${request.path}" from: "${getIp(request, options.trustProxy)}" with query: "${
                     request.url.search
                 }"`,
+                "📠",
             );
 
             return h.continue;

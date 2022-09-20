@@ -140,21 +140,6 @@ export interface Application {
     isBooted(): boolean;
 
     /**
-     * Put the application into maintenance mode.
-     */
-    enableMaintenance(): void;
-
-    /**
-     * Bring the application out of maintenance mode
-     */
-    disableMaintenance(): void;
-
-    /**
-     * Determine if the application is currently down for maintenance.
-     */
-    isDownForMaintenance(): boolean;
-
-    /**
      * Terminate the application.
      */
     terminate(reason?: string, error?: Error): Promise<void>;

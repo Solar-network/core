@@ -68,26 +68,26 @@ export class Command extends Commands.Command {
 
             if (this.hasRestartFlag()) {
                 if (this.hasFlag("restart")) {
-                    this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
-                    this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
-                    this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
+                    this.actions.restartRunningProcess("core");
+                    this.actions.restartRunningProcess("relay");
+                    this.actions.restartRunningProcess("forger");
                 } else {
                     if (this.hasFlag("restartCore")) {
-                        this.actions.restartRunningProcess(`${this.getFlag("token")}-core`);
+                        this.actions.restartRunningProcess("core");
                     }
 
                     if (this.hasFlag("restartRelay")) {
-                        this.actions.restartRunningProcess(`${this.getFlag("token")}-relay`);
+                        this.actions.restartRunningProcess("relay");
                     }
 
                     if (this.hasFlag("restartForger")) {
-                        this.actions.restartRunningProcess(`${this.getFlag("token")}-forger`);
+                        this.actions.restartRunningProcess("forger");
                     }
                 }
             } else if (!this.getFlag("force")) {
-                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-core`);
-                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-relay`);
-                await this.actions.restartRunningProcessWithPrompt(`${this.getFlag("token")}-forger`);
+                await this.actions.restartRunningProcessWithPrompt("core");
+                await this.actions.restartRunningProcessWithPrompt("relay");
+                await this.actions.restartRunningProcessWithPrompt("forger");
             }
         } else {
             this.components.success(`You already have the latest version (${this.pkg.version})`);

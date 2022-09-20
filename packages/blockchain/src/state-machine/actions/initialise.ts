@@ -45,7 +45,7 @@ export class Initialise implements Action {
     public async handle(): Promise<void> {
         try {
             const block: Interfaces.IBlock = this.stateStore.getLastBlock();
-            this.logger.info(`Last block in database: ${block.data.height.toLocaleString()}`);
+            this.logger.info(`Last block in database: ${block.data.height.toLocaleString()}`, "🗄️");
 
             const loadedState: boolean = await this.app
                 .get<Contracts.State.StateLoader>(Container.Identifiers.StateLoader)
@@ -65,26 +65,22 @@ export class Initialise implements Action {
 
             if (!loadedState || forceIntegrityCheck) {
                 if (!this.stateStore.getRestoredDatabaseIntegrity()) {
-                    this.logger.info("Verifying database integrity :hourglass_flowing_sand:");
+                    this.logger.info("Verifying database integrity", "⏳");
 
                     if (!(await this.databaseService.verifyBlockchain())) {
                         return this.blockchain.dispatch("ROLLBACK");
                     }
 
-                    this.logger.info("Verified database integrity :smile_cat:");
+                    this.logger.info("Verified database integrity", "😸");
                 } else {
-                    this.logger.info(
-                        "Skipping database integrity check after successful database recovery :smile_cat:",
-                    );
+                    this.logger.info("Skipping database integrity check after successful database recovery", "😸");
                 }
             }
 
             // only genesis block? special case of first round needs to be dealt with
             if (block.data.height === 1) {
                 if (block.data.payloadHash !== Managers.configManager.get("network.nethash")) {
-                    this.logger.error(
-                        "FATAL: The genesis block payload hash is different from the configured nethash :rotating_light:",
-                    );
+                    this.logger.critical("The genesis block payload hash is different from the configured nethash");
 
                     return this.blockchain.dispatch("FAILURE");
                 }
@@ -114,7 +110,7 @@ export class Initialise implements Action {
             }
 
             if (process.env.NODE_ENV === "test") {
-                this.logger.notice("TEST SUITE DETECTED! SYNCING WALLETS AND STARTING IMMEDIATELY :bangbang:");
+                this.logger.debug("TEST SUITE DETECTED! SYNCING WALLETS AND STARTING IMMEDIATELY", "❗");
 
                 if (!loadedState) {
                     await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
@@ -158,7 +154,7 @@ export class Initialise implements Action {
             return true;
         }
 
-        this.logger.info("Calculating productivity data :abacus:");
+        this.logger.info("Calculating productivity data", "📊");
 
         const chunkSize = 10000;
 
@@ -188,9 +184,10 @@ export class Initialise implements Action {
                     );
                     if (!calculatedRounds[round.round].length) {
                         const rollbackHeight: number = round.roundHeight - round.maxDelegates;
-                        this.logger.error("The database is corrupted :fire:");
+                        this.logger.error("The database is corrupted");
                         this.logger.error(
                             `Attempting recovery by rolling back to height ${rollbackHeight.toLocaleString()}`,
+                            "🚒",
                         );
                         await this.blockRepository.deleteTopBlocks(
                             this.app,

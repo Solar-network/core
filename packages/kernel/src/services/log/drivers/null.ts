@@ -16,14 +16,6 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public emergency(message: object): void {
-        //
-    }
-
-    /**
-     * @param {*} message
-     * @memberof MemoryLogger
-     */
     public alert(message: object): void {
         //
     }
@@ -56,14 +48,6 @@ export class NullLogger implements Logger {
      * @param {*} message
      * @memberof MemoryLogger
      */
-    public notice(message: object): void {
-        //
-    }
-
-    /**
-     * @param {*} message
-     * @memberof MemoryLogger
-     */
     public info(message: object): void {
         //
     }
@@ -73,6 +57,14 @@ export class NullLogger implements Logger {
      * @memberof MemoryLogger
      */
     public debug(message: object): void {
+        //
+    }
+
+    /**
+     * @param {*} message
+     * @memberof MemoryLogger
+     */
+    public trace(message: object): void {
         //
     }
 

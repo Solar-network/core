@@ -4,9 +4,10 @@ import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
 export abstract class HtlcRefundTransaction extends Transaction {
-    public static typeGroup: number = TransactionTypeGroup.Core;
-    public static type: number = TransactionType.Core.HtlcRefund;
+    public static emoji: string = "🔓";
     public static key = "htlcRefund";
+    public static type: number = TransactionType.Core.HtlcRefund;
+    public static typeGroup: number = TransactionTypeGroup.Core;
 
     protected static defaultStaticFee: BigNumber = BigNumber.ZERO;
 

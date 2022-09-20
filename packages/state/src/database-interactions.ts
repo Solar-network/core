@@ -54,7 +54,7 @@ export class DatabaseInteraction {
 
             await this.initialiseLastBlock();
         } catch (error) {
-            this.logger.error(error.stack);
+            this.logger.critical(error.stack);
             this.app.terminate("Failed to initialise database service", error);
         }
     }
@@ -135,7 +135,7 @@ export class DatabaseInteraction {
         lastBlock = await getLastBlock();
 
         if (!lastBlock) {
-            this.logger.warning("No block found in database :hushed:");
+            this.logger.warning("No block found in database", "😯");
             lastBlock = await this.createGenesisBlock();
         }
 

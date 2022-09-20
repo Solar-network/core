@@ -36,7 +36,13 @@ export class DiscoverCommands {
             const commandInstance: Command = this.app.resolve(require(file).Command);
 
             if (!commandInstance.isHidden) {
-                commands[commandInstance.signature] = commandInstance;
+                if (!Array.isArray(commandInstance.signature)) {
+                    commands[commandInstance.signature] = commandInstance;
+                } else {
+                    for (const signature of commandInstance.signature) {
+                        commands[signature] = commandInstance;
+                    }
+                }
             }
         }
 
@@ -62,7 +68,13 @@ export class DiscoverCommands {
                     const commandInstance: Command = this.app.resolve(CMD);
 
                     if (!commandInstance.isHidden) {
-                        commands[commandInstance.signature] = commandInstance;
+                        if (!Array.isArray(commandInstance.signature)) {
+                            commands[commandInstance.signature] = commandInstance;
+                        } else {
+                            for (const signature of commandInstance.signature) {
+                                commands[signature] = commandInstance;
+                            }
+                        }
                     }
                 }
             } catch {}

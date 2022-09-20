@@ -57,14 +57,14 @@ export class Command extends Commands.Command {
     public async execute(): Promise<void> {
         const flags: Contracts.AnyObject = { ...this.getFlags() };
 
-        this.actions.abortRunningProcess(`${flags.token}-forger`);
-        this.actions.abortRunningProcess(`${flags.token}-relay`);
+        this.actions.abortRunningProcess("forger");
+        this.actions.abortRunningProcess("relay");
 
         checkForPrivateKeys(this.app.getCorePath("config"));
 
         await this.actions.daemoniseProcess(
             {
-                name: `${flags.token}-core`,
+                name: "core",
                 script: resolve(__dirname, "../../bin/run"),
                 args: `core:run ${Utils.castFlagsToString(flags, ["daemon"])}`,
             },

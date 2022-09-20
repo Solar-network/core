@@ -48,23 +48,12 @@ export class DownloadBlocks implements Action {
             (AppUtils.isBlockChained(lastDownloadedBlock, blocks[0], blockTimeLookup) || Utils.isException(blocks[0]));
 
         if (chained) {
-            this.logger.info(
-                `Downloaded ${blocks.length} new ${AppUtils.pluralise(
-                    "block",
-                    blocks.length,
-                )} accounting for a total of ${AppUtils.pluralise(
-                    "transaction",
-                    blocks.reduce((sum, b) => sum + b.numberOfTransactions, 0),
-                    true,
-                )}`,
-            );
-
             try {
                 this.blockchain.enqueueBlocks(blocks);
                 this.stateStore.setLastDownloadedBlock(blocks[blocks.length - 1]);
                 this.blockchain.dispatch("DOWNLOADED");
             } catch (error) {
-                this.logger.warning("Failed to enqueue downloaded block :warning:");
+                this.logger.warning("Failed to enqueue downloaded block");
 
                 this.blockchain.dispatch("NOBLOCK");
 
@@ -72,20 +61,20 @@ export class DownloadBlocks implements Action {
             }
         } else {
             if (empty) {
-                this.logger.info(
+                this.logger.warning(
                     `Could not download any blocks from any peer from height ${(
                         lastDownloadedBlock.height + 1
-                    ).toLocaleString()} :warning:`,
+                    ).toLocaleString()}`,
                 );
             } else {
                 this.blockchain.clearQueue();
 
                 setImmediate(async () => {
                     if (!this.blockchain.isCheckingForFork() && !(await this.blockchain.checkForFork(blocks))) {
-                        this.logger.warning("Downloaded block not accepted :warning: :warning: :warning:");
-                        this.logger.warning(JSON.stringify(blocks[0]));
+                        this.logger.warning("Downloaded block not accepted", "🚫");
+                        this.logger.warning(JSON.stringify(blocks[0]), "🚫");
 
-                        this.logger.warning(`Last downloaded block: ${JSON.stringify(lastDownloadedBlock)}`);
+                        this.logger.warning(`Last downloaded block: ${JSON.stringify(lastDownloadedBlock)}`, "🚫");
                     }
                 });
             }

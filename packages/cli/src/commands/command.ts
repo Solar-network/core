@@ -80,10 +80,10 @@ export abstract class Command {
     /**
      * The console command signature.
      *
-     * @type {string}
+     * @type {string | string[]}
      * @memberof Command
      */
-    public signature!: string;
+    public signature!: string | string[];
 
     /**
      * The console command description.
@@ -92,6 +92,14 @@ export abstract class Command {
      * @memberof Command
      */
     public description: string | undefined;
+
+    /**
+     * Indicates which commands to hide from the command list.
+     *
+     * @type {string[]}
+     * @memberof Command
+     */
+    public hide: string[] = [];
 
     /**
      * Indicates whether the command should be shown in the command list.

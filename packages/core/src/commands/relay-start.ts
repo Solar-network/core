@@ -54,11 +54,11 @@ export class Command extends Commands.Command {
     public async execute(): Promise<void> {
         const flags: Contracts.AnyObject = { ...this.getFlags() };
 
-        this.actions.abortRunningProcess(`${flags.token}-core`);
+        this.actions.abortRunningProcess("core");
 
         await this.actions.daemoniseProcess(
             {
-                name: `${flags.token}-relay`,
+                name: "relay",
                 script: resolve(__dirname, "../../bin/run"),
                 args: `relay:run ${Utils.castFlagsToString(flags, ["daemon"])}`,
             },

@@ -55,7 +55,7 @@ export class StateLoader {
             try {
                 mkdirSync(savedStatesPath, { recursive: true });
             } catch (error) {
-                this.logger.error(`Could not create saved states path at ${savedStatesPath} :warning:`);
+                this.logger.error(`Could not create saved states path at ${savedStatesPath}`);
             }
         }
 
@@ -88,7 +88,7 @@ export class StateLoader {
 
         let result: boolean;
         if (stateFiles.length === 0) {
-            this.logger.info("No saved states exist so a fresh state will now be generated :bangbang:");
+            this.logger.info("No saved states exist so a fresh state will now be generated", "❗");
             result = false;
         } else {
             result = await this.load(savedStatesPath, stateFiles);
@@ -101,7 +101,7 @@ export class StateLoader {
         this.walletRepository.reset();
 
         if (stateFiles.length === 0) {
-            this.logger.info("There are no more saved states to try so a fresh state will now be generated :bangbang:");
+            this.logger.info("There are no more saved states to try so a fresh state will now be generated", "❗");
             return false;
         }
 
@@ -137,7 +137,7 @@ export class StateLoader {
                 }
             }
 
-            this.logger.info("Restoring previously saved state :floppy_disk:");
+            this.logger.info("Restoring previously saved state", "🚀");
 
             const total: number = buffer.readUInt32LE();
 
@@ -215,23 +215,22 @@ export class StateLoader {
                         "block",
                         blocksFromOurHeight,
                         true,
-                    )} behind so the blockchain will roll back to height ${height.toLocaleString()} :repeat:`,
+                    )} behind so the blockchain will roll back to height ${height.toLocaleString()}`,
+                    "⏪",
                 );
                 await this.blockRepository.deleteTopBlocks(this.app, blocksFromOurHeight);
                 block = await this.databaseService.getLastBlock();
                 this.stateMachine.stateStore.setLastBlock(block);
                 this.stateMachine.stateStore.setLastStoredBlockHeight(block.data.height);
-                this.logger.info(`Last block in database: ${block.data.height.toLocaleString()}`);
+                this.logger.info(`Last block in database: ${block.data.height.toLocaleString()}`, "🗄️");
             }
-
-            this.logger.info(`Number of registered delegates: ${delegates.toLocaleString()}`);
 
             this.events.dispatch(Enums.StateEvent.BuilderFinished);
 
             success = true;
         } catch (error) {
             unlinkSync(savedStatesPath + stateFile);
-            this.logger.warning(`${error.message} :warning:`);
+            this.logger.warning(`${error.message}`);
             if (stateFiles.length > 0) {
                 try {
                     const buffer: Utils.ByteBuffer = new Utils.ByteBuffer(
@@ -240,7 +239,7 @@ export class StateLoader {
                     buffer.readBuffer(buffer.readUInt8());
 
                     height = buffer.readUInt32LE();
-                    this.logger.info(`Trying an earlier saved state from height ${height.toLocaleString()}...`);
+                    this.logger.info(`Trying an earlier saved state from height ${height.toLocaleString()}...`, "🙏");
                 } catch {
                     //
                 }

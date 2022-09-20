@@ -14,9 +14,10 @@ import { Verifier } from "../verifier";
 import { TransactionSchema } from "./schemas";
 
 export abstract class Transaction implements ITransaction {
-    public static type: number | undefined = undefined;
-    public static typeGroup: number | undefined = undefined;
-    public static key: string | undefined = undefined;
+    public static emoji: string;
+    public static key: string;
+    public static type: number;
+    public static typeGroup: number;
     public static unique: boolean = false;
 
     protected static defaultStaticFee: BigNumber = BigNumber.ZERO;
@@ -30,6 +31,10 @@ export abstract class Transaction implements ITransaction {
         return {
             senderId: this.data.senderId,
         };
+    }
+
+    public get emoji(): string {
+        return this.emoji;
     }
 
     public get id(): string | undefined {

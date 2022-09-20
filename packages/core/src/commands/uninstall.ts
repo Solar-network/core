@@ -84,14 +84,14 @@ export class Command extends Commands.Command {
         spinner.start();
 
         try {
-            if (this.processManager.has(`${this.getFlag("token")}-core`)) {
-                await this.processManager.delete(`${this.getFlag("token")}-core`);
+            if (this.processManager.has("core")) {
+                await this.processManager.delete("core");
             }
-            if (this.processManager.has(`${this.getFlag("token")}-relay`)) {
-                await this.processManager.delete(`${this.getFlag("token")}-relay`);
+            if (this.processManager.has("relay")) {
+                await this.processManager.delete("relay");
             }
-            if (this.processManager.has(`${this.getFlag("token")}-forger`)) {
-                await this.processManager.delete(`${this.getFlag("token")}-forger`);
+            if (this.processManager.has("forger")) {
+                await this.processManager.delete("forger");
             }
 
             try {

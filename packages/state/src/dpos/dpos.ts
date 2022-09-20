@@ -3,9 +3,6 @@ import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 @Container.injectable()
 export class DposState implements Contracts.State.DposState {
-    @Container.inject(Container.Identifiers.LogService)
-    private logger!: Contracts.Kernel.Logger;
-
     @Container.inject(Container.Identifiers.WalletRepository)
     private walletRepository!: Contracts.State.WalletRepository;
 
@@ -106,8 +103,5 @@ export class DposState implements Contracts.State.DposState {
             this.activeDelegates[i].setAttribute("delegate.round", roundInfo.round);
             this.roundDelegates.push(this.activeDelegates[i]);
         }
-        this.logger.debug(
-            `Loaded ${roundInfo.maxDelegates} active ` + AppUtils.pluralise("delegate", roundInfo.maxDelegates),
-        );
     }
 }

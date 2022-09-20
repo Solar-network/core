@@ -122,14 +122,14 @@ export class SXPSwap {
                             .filter((transaction) => transaction.data.memo === duplicateSwapMemo)
                             .forEach((transaction) => {
                                 self.log.warning(
-                                    `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transaction.data.id} (native coin) rejected :gun:`,
+                                    `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transaction.data.id} (native coin) rejected`, "🔫",
                                 );
                             });
                     }
                 }
 
                 self.log.warning(
-                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains duplicated swap transactions :scroll:`,
+                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains duplicated swap transactions`, "📜",
                 );
                 return (this as any).app.resolve(DuplicateSwapTransactionsHandler).execute();
             }
@@ -158,7 +158,7 @@ export class SXPSwap {
             const data: Interfaces.ITransactionData = transaction.data;
 
             if (Utils.isException(data)) {
-                self.log.warning(`Transaction forcibly applied as an exception: ${transaction.id}`);
+                self.log.warning(`Transaction forcibly applied as an exception: ${transaction.id}`, "🪲");
             }
 
             const sender: Contracts.State.Wallet = (this as any).walletRepository.findByPublicKey(
@@ -290,7 +290,7 @@ export class SXPSwap {
                     }
 
                     self.log.info(
-                        `Queried ${network} server ${api} for status of swap transaction ${transactionId} :mag:`,
+                        `Queried ${network} server ${api} for status of swap transaction ${transactionId}`, "🔍",
                     );
 
                     if (!txInfo || !txReceipt) {
@@ -390,25 +390,25 @@ export class SXPSwap {
                     switch (status) {
                         case "pool": {
                             self.log.info(
-                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) passed all checks to enter the transaction pool :crossed_fingers:`,
+                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) passed all checks to enter the transaction pool`, "🤞",
                             );
                             break;
                         }
                         case "validate": {
                             self.log.info(
-                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) ready to be forged :v:`,
+                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) ready to be forged`, "✌️",
                             );
                             break;
                         }
                         default: {
                             self.log.info(
-                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) approved and added to the blockchain :white_check_mark:`,
+                                `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) approved and added to the blockchain`, "✅",
                             );
                         }
                     }
                 } catch (error) {
                     self.log.warning(
-                        `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) rejected :x:`,
+                        `Swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) rejected`, "❌",
                     );
                     throw error;
                 }
@@ -440,7 +440,7 @@ export class SXPSwap {
 
                 if (alreadyInPool) {
                     self.log.warning(
-                        `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) rejected :gun:`,
+                        `Attempted duplication of swap transaction ${transactionId} (${network}) => ${transactionData.id} (native coin) rejected`, "🔫",
                     );
                     throw new TransactionAlreadySubmittedError();
                 }

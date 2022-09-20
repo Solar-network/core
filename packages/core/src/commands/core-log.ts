@@ -14,7 +14,15 @@ export class Command extends Commands.Command {
      * @type {string}
      * @memberof Command
      */
-    public signature: string = "core:log";
+    public signature: string[] = ["core:log", "core:logs", "log:core", "logs:core"];
+
+    /**
+     * The console commands to hide from the command list.
+     *
+     * @type {string[]}
+     * @memberof Command
+     */
+    public hide: string[] = ["core:logs", "logs:core"];
 
     /**
      * The console command description.
@@ -33,7 +41,6 @@ export class Command extends Commands.Command {
     public configure(): void {
         this.definition
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
-            .setFlag("error", "Only display the error output", Joi.boolean())
             .setFlag("lines", "The number of lines to output", Joi.number().default(15));
     }
 
@@ -44,8 +51,6 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        await this.app
-            .get<any>(Container.Identifiers.ProcessFactory)(this.getFlag("token"), "core")
-            .log(this.getFlag("error"), this.getFlag("lines"));
+        await this.app.get<any>(Container.Identifiers.LogProcess).execute(["core"], this.getFlag("lines"));
     }
 }

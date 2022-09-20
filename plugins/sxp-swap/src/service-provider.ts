@@ -10,7 +10,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
             this.app.bind<SXPSwap>(sxpSwap).to(SXPSwap).inSingletonScope();
             this.app.get<SXPSwap>(sxpSwap).register();
-            logger.info("Loaded SXP Swap Plugin");
+            logger.info("Loaded SXP Swap Plugin", "🔁");
         }
     }
 }

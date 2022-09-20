@@ -1,6 +1,6 @@
 import { Identities, Managers, Utils } from "@solar-network/crypto";
 import { Repositories } from "@solar-network/database";
-import { Application, Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/kernel";
+import { Application, Container, Contracts, Enums, Services } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
 // todo: review the implementation
@@ -44,28 +44,20 @@ export class StateBuilder {
             const capitalise = (key: string) => key[0].toUpperCase() + key.slice(1);
             for (let i = 0; i < registeredHandlers.length; i++) {
                 const handler = registeredHandlers[i];
-                const ctorKey: string | undefined = handler.getConstructor().key;
-                AppUtils.assert.defined<string>(ctorKey);
-
-                this.logger.info(`State Generation - Step ${1 + i} of ${steps}: ${capitalise(ctorKey)}`);
+                const { emoji, key } = handler.getConstructor();
+                this.logger.info(`State Generation - Step ${1 + i} of ${steps}: ${capitalise(key)}`, emoji);
                 await handler.bootstrap();
             }
 
-            this.logger.info(`State Generation - Step ${steps - 2} of ${steps}: Fees & Nonces`);
+            this.logger.info(`State Generation - Step ${steps - 2} of ${steps}: Fees & Nonces`, "📉");
             await this.buildSentTransactions();
 
-            this.logger.info(`State Generation - Step ${steps - 1} of ${steps}: Block Rewards`);
+            this.logger.info(`State Generation - Step ${steps - 1} of ${steps}: Block Rewards`, "📈");
             await this.buildBlockRewards();
 
-            this.logger.info(`State Generation - Step ${steps} of ${steps}: Vote Balances & Delegate Ranking`);
+            this.logger.info(`State Generation - Step ${steps} of ${steps}: Vote Balances & Delegate Ranking`, "🏅");
             this.dposState.buildVoteBalances();
             this.dposState.buildDelegateRanking();
-
-            this.logger.info(
-                `Number of registered delegates: ${Object.keys(
-                    this.walletRepository.allByUsername(),
-                ).length.toLocaleString()}`,
-            );
 
             this.verifyWalletsConsistency();
 

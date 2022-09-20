@@ -38,11 +38,7 @@ export class BanHammerPlugin {
 
         if (!isWhitelisted) {
             if (!this.banList.has(ip)) {
-                this.logger.debug(
-                    `Banning ${ip} for ${Utils.formatSeconds(
-                        this.banSeconds,
-                    )}. Reason: ${reason} :oncoming_police_car:`,
-                );
+                this.logger.debug(`Banning ${ip} for ${Utils.formatSeconds(this.banSeconds)}. Reason: ${reason}`, "🚔");
             }
             const timeNow: number = Date.now() / 1000;
             this.banList.set(ip, timeNow);

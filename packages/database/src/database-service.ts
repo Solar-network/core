@@ -37,20 +37,17 @@ export class DatabaseService {
                 await this.reset();
             }
         } catch (error) {
-            this.logger.error(error.stack);
-            this.app.terminate("Failed to initialise database service :boom:", error);
+            this.logger.critical(error.stack);
+            this.app.terminate("Failed to initialise database service", error);
         }
     }
 
     public async disconnect(): Promise<void> {
-        this.logger.debug("Disconnecting from database");
-
         this.events.dispatch(Enums.DatabaseEvent.PreDisconnect);
 
         await this.connection.close();
 
         this.events.dispatch(Enums.DatabaseEvent.PostDisconnect);
-        this.logger.debug("Disconnected from database");
     }
 
     public async reset(): Promise<void> {
@@ -181,8 +178,6 @@ export class DatabaseService {
     }
 
     public async saveRound(activeDelegates: readonly Contracts.State.Wallet[]): Promise<void> {
-        this.logger.info(`Saving round ${activeDelegates[0].getAttribute("delegate.round").toLocaleString()}`);
-
         await this.roundRepository.save(activeDelegates);
 
         this.events.dispatch(Enums.RoundEvent.Created, activeDelegates);
@@ -251,7 +246,7 @@ export class DatabaseService {
         const hasErrors: boolean = errors.length > 0;
 
         if (hasErrors) {
-            this.logger.error("FATAL: The database is corrupted :fire:");
+            this.logger.error("FATAL: The database is corrupted");
             this.logger.error(JSON.stringify(errors, undefined, 4));
         }
 

@@ -34,7 +34,7 @@ export class AcceptBlockHandler implements BlockHandler {
             // Check if we recovered from a fork
             const forkedBlock = this.state.getForkedBlock();
             if (forkedBlock && forkedBlock.data.height === block.data.height) {
-                this.logger.info("Successfully recovered from fork :star2:");
+                this.logger.info("Successfully recovered from fork", "🌟");
                 this.state.clearForkedBlock();
             }
 
@@ -57,15 +57,16 @@ export class AcceptBlockHandler implements BlockHandler {
 
             return BlockProcessorResult.Accepted;
         } catch (error) {
-            this.logger.warning(`Refused new block with id ${block.data.id} :warning: :warning: :warning:`);
+            this.logger.warning(`Refused new block with id ${block.data.id}`, "🚫");
             if (transactionProcessing.index !== undefined) {
-                this.logger.warning(`Block contains a bad transaction: ${error.message} :no_entry:`);
+                this.logger.warning(`Block contains a bad transaction: ${error.message}`, "🚫");
                 this.logger.warning(
                     `Bad transaction data: ${JSON.stringify(block.transactions[transactionProcessing.index].data)}`,
+                    "🚫",
                 );
             } else {
-                this.logger.warning(`Block is bad: ${error.message} :no_entry:`);
-                this.logger.warning(`Bad block data: ${JSON.stringify(block.data)}`);
+                this.logger.warning(`Block is bad: ${error.message}`, "🚫");
+                this.logger.warning(`Bad block data: ${JSON.stringify(block.data)}`, "🚫");
             }
             this.blockchain.resetLastDownloadedBlock();
 
