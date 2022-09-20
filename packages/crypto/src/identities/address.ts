@@ -6,8 +6,8 @@ import { Base58 } from "../utils";
 import { PublicKey } from "./public-key";
 
 export class Address {
-    public static fromPassphrase(passphrase: string, networkVersion?: number): string {
-        return Address.fromPublicKey(PublicKey.fromPassphrase(passphrase), networkVersion);
+    public static fromMnemonic(mnemonic: string, networkVersion?: number): string {
+        return Address.fromPublicKey(PublicKey.fromMnemonic(mnemonic), networkVersion);
     }
 
     public static fromPublicKey(publicKey: string, networkVersion?: number): string {

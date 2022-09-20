@@ -96,8 +96,8 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         return this.memo(memo);
     }
 
-    public sign(passphrase: string): TBuilder {
-        const keys: IKeyPair = Keys.fromPassphrase(passphrase);
+    public sign(mnemonic: string): TBuilder {
+        const keys: IKeyPair = Keys.fromMnemonic(mnemonic);
         return this.signWithKeyPair(keys);
     }
 
@@ -109,8 +109,8 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
         return this.signWithKeyPair(keys);
     }
 
-    public extraSign(passphrase: string): TBuilder {
-        return this.extraSignWithKeyPair(Keys.fromPassphrase(passphrase));
+    public extraSign(mnemonic: string): TBuilder {
+        return this.extraSignWithKeyPair(Keys.fromMnemonic(mnemonic));
     }
 
     public extraSignWithWif(wif: string, networkWif?: number): TBuilder {
