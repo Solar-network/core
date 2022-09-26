@@ -1,0 +1,105 @@
+{
+    "core": {
+        "plugins": [
+            {
+                "package": "@solar-network/logger"
+            },
+            {
+                "package": "@solar-network/state"
+            },
+            {
+                "package": "@solar-network/database"
+            },
+            {
+                "package": "@solar-network/transactions"
+            },
+            {
+                "package": "@solar-network/pool"
+            },
+            {
+                "package": "@solar-network/sxp-swap",
+                "options": {
+                    "swapWalletPublicKey": "02699ab620eb6088f9e88d2c1fa1fb0ea8a179c210a46de2314817dd11d3aa16a1"
+                }
+            },
+            {
+                "package": "@solar-network/p2p"
+            },
+            {
+                "package": "@solar-network/blockchain"
+            },
+            {
+                "package": "@solar-network/api"
+            },
+            {
+                "package": "@solar-network/webhooks"
+            },
+            {
+                "package": "@solar-network/forger"
+            }
+        ]
+    },
+    "relay": {
+        "plugins": [
+            {
+                "package": "@solar-network/logger"
+            },
+            {
+                "package": "@solar-network/state"
+            },
+            {
+                "package": "@solar-network/database"
+            },
+            {
+                "package": "@solar-network/transactions"
+            },
+            {
+                "package": "@solar-network/pool"
+            },
+            {
+                "package": "@solar-network/sxp-swap",
+                "options": {
+                    "swapWalletPublicKey": "02699ab620eb6088f9e88d2c1fa1fb0ea8a179c210a46de2314817dd11d3aa16a1"
+                }
+            },
+            {
+                "package": "@solar-network/p2p"
+            },
+            {
+                "package": "@solar-network/blockchain"
+            },
+            {
+                "package": "@solar-network/api"
+            },
+            {
+                "package": "@solar-network/webhooks"
+            }
+        ]
+    },
+    "forger": {
+        "plugins": [
+            {
+                "package": "@solar-network/logger"
+            },
+            {
+                "package": "@solar-network/transactions"
+            },
+            {
+                "package": "@solar-network/forger"
+            }
+        ]
+    },
+    "snapshot": {
+        "plugins": [
+            {
+                "package": "@solar-network/logger"
+            },
+            {
+                "package": "@solar-network/database"
+            },
+            {
+                "package": "@solar-network/snapshots"
+            }
+        ]
+    }
+}
