@@ -93,7 +93,7 @@ export class Command extends Commands.Command {
             await remove(databaseDir);
             mkdirSync(databaseDir, { recursive: true });
 
-            let shellResult = await this.shell(`${process.env.POSTGRES_DIR}/bin/initdb -D ${databaseDir}`);
+            let shellResult = await this.shell(`"${process.env.POSTGRES_DIR}/bin/initdb" -D "${databaseDir}"`);
             if (shellResult.exitCode !== 0) {
                 throw new Error(shellResult.stderr.toString());
             }
@@ -106,13 +106,17 @@ export class Command extends Commands.Command {
                 `unix_socket_permissions = 0700`;
             writeFileSync(`${databaseDir}/postgresql.conf`, config);
 
-            shellResult = await this.shell(`${process.env.POSTGRES_DIR}/bin/pg_ctl -D ${databaseDir} start >/dev/null`);
+            shellResult = await this.shell(
+                `"${process.env.POSTGRES_DIR}/bin/pg_ctl" -D "${databaseDir}" start >/dev/null`,
+            );
             if (shellResult.exitCode !== 0) {
                 throw new Error(shellResult.stderr.toString());
             }
 
             shellResult = await this.shell(
-                `createdb -h ${databaseDir} ${this.getFlag("token")}_${this.getFlag("network")}`,
+                `"${process.env.POSTGRES_DIR}/bin/createdb" -h "${databaseDir}" ${this.getFlag("token")}_${this.getFlag(
+                    "network",
+                )}`,
             );
             if (shellResult.exitCode !== 0) {
                 throw new Error(shellResult.stderr.toString());
