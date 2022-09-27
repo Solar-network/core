@@ -97,7 +97,13 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         const dbConnection: Connection = await createConnection({
             ...(connection as any),
-            extra: Object.assign(connection.extra, { logger: this.logger }),
+            extra: Object.assign(connection.extra, {
+                logger: {
+                    debug: (message: string) => {
+                        this.logger.debug(message, "🗃️");
+                    },
+                },
+            }),
             namingStrategy: new SnakeNamingStrategy(),
             migrations: [__dirname + "/migrations/*.js"],
             migrationsRun: true,
