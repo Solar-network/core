@@ -51,13 +51,13 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
     }
 
     public async truncate(): Promise<void> {
-        this.logger.info(
+        this.logger.debug(
             `Clearing ${Utils.pluralise("block", await this.blockRepository.fastCount(), true)}, ${Utils.pluralise(
                 "transaction",
                 await this.transactionRepository.fastCount(),
                 true,
             )}, ${Utils.pluralise("round", await this.roundRepository.fastCount(), true)}`,
-            "🗑️",
+            "🧹",
         );
 
         await this.blockRepository.truncate();
@@ -68,7 +68,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
 
         Utils.assert.defined<Models.Block>(lastBlock);
 
-        this.logger.info(`Last block height is: ${lastBlock.height.toLocaleString()}`, "🕸️");
+        this.logger.debug(`Last block height is: ${lastBlock.height.toLocaleString()}`, "🕸️");
 
         await this.blockRepository.rollback(roundInfo);
 
@@ -77,12 +77,12 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
 
     public async dump(options: Options.DumpOptions): Promise<void> {
         try {
-            this.logger.info("Started counting blocks, rounds and transactions", "🧮");
+            this.logger.debug("Started counting blocks, rounds and transactions", "🧮");
 
             const dumpRange = await this.getDumpRange(options.start, options.end);
             const meta = this.prepareMetaData(options, dumpRange);
 
-            this.logger.info(
+            this.logger.debug(
                 `Started running dump for ${Utils.pluralise("block", dumpRange.blocksCount, true)}, ${Utils.pluralise(
                     "round",
                     dumpRange.roundsCount,

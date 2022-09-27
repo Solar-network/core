@@ -9,30 +9,29 @@ export interface Logger {
     /**
      * Create a new instance of the logger.
      *
-     * @param {*} [options]
      * @returns {Promise<Logger>}
      * @memberof Logger
      */
-    make(options?: any): Promise<Logger>;
+    make(): Promise<Logger>;
 
     /**
      * Critical conditions.
      *
      * Example: Application component unavailable, unexpected exception.
      *
-     * @param {*} message
+     * @param {object | string | undefined} message
      * @memberof Logger
      */
-    critical(message: any, emoji?: string): void;
+    critical(message: object | string | undefined, emoji?: string): void;
 
     /**
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
      *
-     * @param {*} message
+     * @param {object | string | undefined} message
      * @memberof Logger
      */
-    error(message: any, emoji?: string): void;
+    error(message: object | string | undefined, emoji?: string): void;
 
     /**
      * Exceptional occurrences that are not errors.
@@ -40,54 +39,34 @@ export interface Logger {
      * Example: Use of deprecated APIs, poor use of an API, undesirable things
      * that are not necessarily wrong.
      *
-     * @param {*} message
+     * @param {object | string | undefined} message
      * @memberof Logger
      */
-    warning(message: any, emoji?: string): void;
+    warning(message: object | string | undefined, emoji?: string): void;
 
     /**
      * Interesting events.
      *
      * Example: User logs in, SQL logs.
      *
-     * @param {*} message
+     * @param {object | string | undefined} message
      * @memberof Logger
      */
-    info(message: any, emoji?: string): void;
+    info(message: object | string | undefined, emoji?: string): void;
 
     /**
      * Detailed debug information.
      *
-     * @param {*} message
+     * @param {object | string | undefined} message
      * @memberof Logger
      */
-    debug(message: any, emoji?: string): void;
+    debug(message: object | string | undefined, emoji?: string): void;
 
     /**
      * Detailed trace information.
      *
-     * @param {*} message
+     * @param {object | string | undefined} message
      * @memberof Logger
      */
-    trace(message: any, emoji?: string): void;
-
-    /**
-     * @param {boolean} suppress
-     * @memberof Logger
-     */
-    suppressConsoleOutput(suppress: boolean): void;
-
-    /**
-     * Dispose logger.
-     *
-     * @returns {Promise<void>}
-     * @memberof Logger
-     */
-    dispose(): Promise<void>;
-
-    // /**
-    //  * @param {Record<string,string>} levels
-    //  * @memberof Logger
-    //  */
-    // setLevels(levels: Record<string, string>): void;
+    trace(message: object | string | undefined, emoji?: string): void;
 }

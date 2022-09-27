@@ -1,5 +1,6 @@
 import ora from "@alessiodf/ora";
 import { Container, Contracts } from "@solar-network/kernel";
+import { magenta } from "colorette";
 
 import { SnapshotApplicationEvents } from "./events";
 
@@ -75,12 +76,16 @@ export class ProgressRenderer {
 
     private calculatePercentage(count: number, value: number): string {
         const percent: string = ((value / count) * 100).toFixed(2);
-
-        // Append spaces to match ---.-- pattern
-        return `${" ".repeat(6 - percent.length)}${percent}`;
+        try {
+            return `${" ".repeat(6 - percent.length)}${percent}`;
+        } catch {
+            return "";
+        }
     }
 
     private render(): void {
-        this.spinner.text = `Blocks: ${this.progress.blocks} % Transactions: ${this.progress.transactions} % Rounds: ${this.progress.rounds} %`;
+        this.spinner.text = magenta(
+            ` Blocks: ${this.progress.blocks} % Transactions: ${this.progress.transactions} % Rounds: ${this.progress.rounds} %`,
+        );
     }
 }

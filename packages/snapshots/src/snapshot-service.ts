@@ -27,7 +27,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
         try {
             Utils.assert.defined<string>(options.network);
 
-            this.logger.info(`Saving snapshot for ${options.network}`, "💾");
+            this.logger.debug(`Saving snapshot for ${options.network}`, "💾");
 
             this.database.init(options.codec, options.skipCompression);
 
@@ -66,7 +66,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
                 return;
             }
 
-            this.logger.info(`Restoring from snapshot for ${options.network}`, "💾");
+            this.logger.debug(`Restoring from snapshot for ${options.network}`, "💾");
 
             this.database.init(meta!.codec, meta!.skipCompression, options.verify);
 
@@ -78,14 +78,10 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
 
             this.logger.info(
                 `Successfully restored ${Utils.pluralise("block", meta!.blocks.count, true)}, ${Utils.pluralise(
-                    "missed block",
-                    meta!.missedBlocks.count,
+                    "transaction",
+                    meta!.transactions.count,
                     true,
-                )}, ${Utils.pluralise("transaction", meta!.transactions.count, true)}, ${Utils.pluralise(
-                    "round",
-                    meta!.rounds.count,
-                    true,
-                )}`,
+                )}, ${Utils.pluralise("round", meta!.rounds.count, true)}`,
                 "🏁",
             );
         } catch (err) {
@@ -98,7 +94,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
         const renderer = new ProgressRenderer(this.app);
 
         try {
-            this.logger.info("Verifying snapshot", "🕵️");
+            this.logger.debug("Verifying snapshot", "🕵️");
 
             Utils.assert.defined<string>(options.network);
             Utils.assert.defined<string>(options.blocks);
@@ -153,7 +149,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
 
             const roundInfo = Utils.roundCalculator.calculateRound(height);
 
-            this.logger.info("Rollback in progress", "⏪");
+            this.logger.debug("Rollback in progress", "⏪");
 
             const newLastBlock = await this.database.rollback(roundInfo);
 
@@ -177,7 +173,7 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
 
     public async truncate(): Promise<void> {
         try {
-            this.logger.info("Wiping the database", "🧻");
+            this.logger.debug("Wiping the database", "🧻");
 
             await this.database.truncate();
 

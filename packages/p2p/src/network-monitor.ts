@@ -503,7 +503,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         if (peersAll.length === 0) {
             if (!silent) {
-                this.logger.error(`Could not download blocks: we have 0 peers`, "❗");
+                this.logger.error("Could not download blocks: we have 0 peers");
             }
             return [];
         }
@@ -636,7 +636,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         for (i = 0; i < chunksToDownload; i++) {
             if (downloadResults[i] === undefined) {
                 if (!silent) {
-                    this.logger.error(`${firstFailureMessage}`, "❗");
+                    this.logger.error(`${firstFailureMessage}`);
                 }
                 break;
             }
@@ -807,7 +807,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         try {
             await checkDNS(this.app, options);
         } catch (error) {
-            this.logger.error(`${error.message}`, "❗");
+            this.logger.error(`${error.message}`);
         }
     }
 
@@ -819,7 +819,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 "⏰",
             );
         } catch (error) {
-            this.logger.error(`${error.message}`, "❗");
+            this.logger.error(`${error.message}`);
         }
     }
 

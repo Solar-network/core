@@ -83,13 +83,15 @@ export class ActionFactory {
     }
 
     /**
+     * @param {string} token
+     * @param {string} network
      * @param {string[]} processNames
      * @param {number} lines
      * @returns {void}
      * @memberof ActionFactory
      */
-    public logProcesses(processNames: string[], lines: number): Promise<void> {
-        return this.app.get<LogProcess>(Identifiers.LogProcess).execute(processNames, lines);
+    public logProcesses(token: string, network: string, processNames: string[], lines: number): Promise<void> {
+        return this.app.get<LogProcess>(Identifiers.LogProcess).execute(token, network, processNames, lines);
     }
 
     /**

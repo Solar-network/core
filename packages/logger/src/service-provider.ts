@@ -1,5 +1,4 @@
 import { Container, Contracts, Providers, Services } from "@solar-network/kernel";
-import Joi from "joi";
 
 import { PinoLogger } from "./driver";
 
@@ -9,23 +8,8 @@ export class ServiceProvider extends Providers.ServiceProvider {
             Container.Identifiers.LogManager,
         );
 
-        await logManager.extend("pino", async () =>
-            this.app.resolve<Contracts.Kernel.Logger>(PinoLogger).make(this.config().all()),
-        );
+        await logManager.extend("pino", async () => this.app.resolve<Contracts.Kernel.Logger>(PinoLogger).make());
 
         logManager.setDefaultDriver("pino");
-    }
-
-    public async dispose(): Promise<void> {
-        await this.app.get<Contracts.Kernel.Logger>(Container.Identifiers.LogService).dispose();
-    }
-
-    public configSchema(): object {
-        return Joi.object({
-            logLevel: Joi.string().required(),
-            fileRotator: Joi.object({
-                interval: Joi.string().required(),
-            }).required(),
-        }).unknown(true);
     }
 }

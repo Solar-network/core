@@ -23,6 +23,7 @@
         "@hapi/bourne": "2.0.0",
         "@pm2/io": "5.0.0",
         "@solar-network/crypto": "workspace:*",
+        "colorette": "2.0.19",
         "cron": "1.8.2",
         "dayjs": "1.10.7",
         "deepmerge": "4.2.2",

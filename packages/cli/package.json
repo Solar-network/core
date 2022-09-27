@@ -26,6 +26,7 @@
         "boxen": "5.1.2",
         "cli-table3": "0.6.0",
         "colorette": "2.0.19",
+        "dateformat": "4.5.1",
         "dayjs": "1.10.7",
         "delay": "5.0.0",
         "env-paths": "2.2.1",

@@ -46,7 +46,7 @@ export class StartForkRecovery implements Action {
             this.stateStore.setLastDownloadedBlock(lastStoredBlock.data);
 
             this.stateStore.setNumberOfBlocksToRollback(0);
-            this.logger.info(`Removed ${AppUtils.pluralise("block", blocksToRemove, true)}`, "🗑️");
+            this.logger.info(`Removed ${AppUtils.pluralise("block", blocksToRemove, true)}`, "🧹");
 
             await this.roundState.restore();
 

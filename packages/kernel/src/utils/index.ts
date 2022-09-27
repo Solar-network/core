@@ -136,6 +136,7 @@ export * from "./last-map-entry";
 export * from "./last-map-key";
 export * from "./last-map-value";
 export * from "./last";
+export * from "./log-colour";
 export * from "./lower-case";
 export * from "./lower-first";
 export * from "./map-array";
