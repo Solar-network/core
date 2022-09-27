@@ -1,4 +1,4 @@
-import { red, white } from "kleur";
+import { bold, red, white } from "colorette";
 import os from "os";
 import { PackageJson } from "type-fest";
 
@@ -23,8 +23,8 @@ export class AppHeader {
      * @memberof AppHeader
      */
     public render(): string {
-        return `${red().bold(`${this.pkg.description}`)} ${white().bold(
-            `[${this.pkg.version} | ${process.version} | ${os.platform()}@${os.arch()}]`,
+        return `${red(bold(`${this.pkg.description}`))} ${white(
+            bold(`[${this.pkg.version} | ${process.version} | ${os.platform()}@${os.arch()}]`),
         )}`;
     }
 }

@@ -104,7 +104,7 @@ global-bin-dir=""$SOLAR_DATA_PATH""/.pnpm/bin
 store-dir=""$SOLAR_DATA_PATH""/.pnpm/store" > "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc
 ln -sf "$SOLAR_DATA_PATH"/lib/node_modules/npm/npmrc "$SOLAR_DATA_PATH"/etc/npmrc
 
-npm install -g cli-cursor@3.1.0 delay@5.0.0 env-paths@2.2.1 kleur@4.1.4 @alessiodf/listr pnpm@6.32.11 prompts@2.4.2 >/dev/null 2>/dev/null
+npm install -g cli-cursor@3.1.0 delay@5.0.0 env-paths@2.2.1 colorette@20.0.19 @alessiodf/listr pnpm@6.32.11 prompts@2.4.2 >/dev/null 2>/dev/null
 
 cat << 'EOF' > "$SOLAR_TEMP_PATH"/install.js
 const Listr = require("@alessiodf/listr");
@@ -114,7 +114,7 @@ const delay = require("delay");
 const envPaths = require("env-paths");
 const { appendFileSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync, unlinkSync } = require("fs");
 const { homedir } = require("os");
-const { white } = require("kleur");
+const { white } = require("colorette");
 const prompts = require("prompts");
 
 const envLines = readFileSync(`${process.env.SOLAR_DATA_PATH}/.env`).toString().split("\n");
@@ -583,7 +583,7 @@ async function raiseError(error) {
     if (verbose) {
         message = error.message;
     }
-    console.error(white().bgRed(`[ERROR] ${message}`));
+    console.error(white(bgRed(`[ERROR] ${message}`)));
     let code = 1;
     try {
         const split = (error.message ? error.message : message).split(" ");

@@ -1,6 +1,6 @@
+import { bgRed, white } from "colorette";
 import { existsSync, readdirSync, readJsonSync, removeSync, statSync } from "fs-extra";
 import glob from "glob";
-import { white } from "kleur";
 import { join, resolve } from "path";
 
 import { Spinner } from "../components";
@@ -115,7 +115,7 @@ export class PluginManager implements Contracts.PluginManager {
                     }
                     await this.update(false, token, network, name);
                 } catch (error) {
-                    this.logger.error(white().bgRed(`[ERROR] ${error.message}`));
+                    this.logger.error(white(bgRed(`[ERROR] ${error.message}`)));
                 }
             }
             return;

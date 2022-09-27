@@ -1,4 +1,4 @@
-import { white } from "kleur";
+import { bgRed, white } from "colorette";
 
 import { Identifiers, inject, injectable } from "../ioc";
 import { Logger } from "../services";
@@ -23,6 +23,6 @@ export class Warning {
      * @memberof Warning
      */
     public render(message: string): void {
-        this.logger.warning(white().bgRed(`[WARNING] ${message}`));
+        this.logger.warning(white(bgRed(`[WARNING] ${message}`)));
     }
 }

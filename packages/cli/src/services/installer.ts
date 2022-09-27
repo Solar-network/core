@@ -1,8 +1,8 @@
 import Listr from "@alessiodf/listr";
+import { bgRed, white } from "colorette";
 import delay from "delay";
 import { sync } from "execa";
 import { readJsonSync } from "fs-extra";
-import { white } from "kleur";
 import { spawn } from "node-pty";
 import { resolve } from "path";
 import { coerce, major, satisfies } from "semver";
@@ -135,7 +135,7 @@ export class Installer {
             } else {
                 message = error;
             }
-            this.logger.error(white().bgRed(`[ERROR] ${message}`));
+            this.logger.error(white(bgRed(`[ERROR] ${message}`)));
             process.exit(errorLevel);
         });
 

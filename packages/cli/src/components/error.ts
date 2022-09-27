@@ -1,4 +1,4 @@
-import { white } from "kleur";
+import { bgRed, white } from "colorette";
 
 import { Identifiers, inject, injectable } from "../ioc";
 import { Logger } from "../services";
@@ -23,6 +23,6 @@ export class Error {
      * @memberof Error
      */
     public render(message: string): void {
-        this.logger.error(white().bgRed(`[ERROR] ${message}`));
+        this.logger.error(white(bgRed(`[ERROR] ${message}`)));
     }
 }

@@ -1,4 +1,4 @@
-import { white } from "kleur";
+import { bgBlue, white } from "colorette";
 
 import { Identifiers, inject, injectable } from "../ioc";
 import { Logger } from "../services";
@@ -23,6 +23,6 @@ export class Info {
      * @memberof Info
      */
     public render(message: string): void {
-        this.logger.info(white().bgBlue(`[INFO] ${message}`));
+        this.logger.info(white(bgBlue(`[INFO] ${message}`)));
     }
 }

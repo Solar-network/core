@@ -1,6 +1,6 @@
 import { Utils } from "@solar-network/kernel";
+import { blue, yellow } from "colorette";
 import Levenshtein from "fast-levenshtein";
-import { blue, yellow } from "kleur";
 import { JsonObject } from "type-fest";
 
 import { Application } from "../application";

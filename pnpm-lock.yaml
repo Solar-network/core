@@ -200,7 +200,6 @@ importers:
       got: 11.8.5
       inversify: 5.1.1
       joi: 17.6.0
-      kleur: 4.1.4
       latest-version: 5.1.0
       node-pty: 0.10.1
       prompts: 2.4.2
@@ -229,7 +228,6 @@ importers:
       got: 11.8.5
       inversify: 5.1.1
       joi: 17.6.0
-      kleur: 4.1.4
       latest-version: 5.1.0
       node-pty: 0.10.1
       prompts: 2.4.2
@@ -266,6 +264,7 @@ importers:
       argon2: 0.28.2
       bip39: 3.0.4
       boxen: 5.1.2
+      colorette: 2.0.19
       cross-env: 7.0.3
       dayjs: 1.10.7
       env-paths: 2.2.1
@@ -274,7 +273,6 @@ importers:
       fs-extra: 8.1.0
       got: 11.8.5
       joi: 17.6.0
-      kleur: 4.1.4
       module-alias: 2.2.2
       ngrok: 3.4.1
       prompts: 2.4.2
@@ -300,6 +298,7 @@ importers:
       argon2: 0.28.2
       bip39: 3.0.4
       boxen: 5.1.2
+      colorette: 2.0.19
       dayjs: 1.10.7
       env-paths: 2.2.1
       envfile: 5.2.0
@@ -307,7 +306,6 @@ importers:
       fs-extra: 8.1.0
       got: 11.8.5
       joi: 17.6.0
-      kleur: 4.1.4
       module-alias: 2.2.2
       ngrok: 3.4.1
       prompts: 2.4.2
@@ -9226,11 +9224,6 @@ packages:
   /kleur/3.0.3:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
-
-  /kleur/4.1.4:
-    resolution: {integrity: sha512-8QADVssbrFjivHWQU7KkMgptGTl6WAcSdlbBPY4uNF+mWr6DGcKrvY2w4FQJoXch7+fKMjj0dRrL75vk3k23OA==}
-    engines: {node: '>=6'}
-    dev: false
 
   /latest-version/5.1.0:
     resolution: {integrity: sha512-weT+r0kTkRQdCdYCNtkMwWXQTMEswKrFBkm4ckQOMVhhqhIMI1UT2hMj+1iigIhgSZm5gTmrRXBNoGUgaTY1xA==}

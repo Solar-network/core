@@ -1,4 +1,4 @@
-import { blue } from "kleur";
+import { blue, bold } from "colorette";
 import { PackageJson } from "type-fest";
 
 import { AppHeader } from "../components";
@@ -35,20 +35,20 @@ export class CommandHelp {
     public render(command: Command): string {
         let helpMessage: string = `${this.app.get<AppHeader>(Identifiers.AppHeader).render()}
 
-${blue().bold("Description")}
+${blue(bold("Description"))}
 ${command.description!.replace(/\.$/, "")}`;
 
         const args: string = this.buildArguments(command);
 
         if (args) {
-            helpMessage += `${blue().bold("\n\nArguments")}
+            helpMessage += `${blue(bold("\n\nArguments"))}
 ${args}`;
         }
 
         const flags: string = this.buildFlags(command);
 
         if (flags) {
-            helpMessage += `${blue().bold("\n\nFlags")}
+            helpMessage += `${blue(bold("\n\nFlags"))}
 ${flags}`;
         }
 

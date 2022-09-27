@@ -1,6 +1,6 @@
 import { Commands, Container, Contracts } from "@solar-network/cli";
 import boxen from "boxen";
-import { blue, cyan } from "kleur";
+import { blue, bold, cyan } from "colorette";
 
 /**
  * @export
@@ -63,7 +63,7 @@ export class Command extends Commands.Command {
         // turn everything into a human readable format
         const commandsAsString: string[] = [];
         for (const [signatureGroup, signatures] of Object.entries(signatureGroups)) {
-            commandsAsString.push(cyan().bold(signatureGroup));
+            commandsAsString.push(cyan(bold(signatureGroup)));
 
             for (const signature of signatures) {
                 commandsAsString.push(
@@ -80,17 +80,17 @@ export class Command extends Commands.Command {
                 this.components.appHeader() +
                     `
 
-${blue().bold("Usage")}
+${blue("Usage")}
   command [arguments] [flags]
 
-${blue().bold("Flags")}
+${blue(bold("Flags"))}
   --help                   Display the corresponding help message
   --quiet                  Do not output any message
 
-${blue().bold("Arguments")}
+${blue(bold("Arguments"))}
   -v|vv                    Increase verbosity of messages: 1 for verbose output and 2 for debug
 
-${blue().bold("Available Commands")}
+${blue(bold("Available Commands"))}
 ${commandsAsString.join("\n")}`,
                 {
                     padding: 1,

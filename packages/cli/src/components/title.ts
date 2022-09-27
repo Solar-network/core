@@ -1,4 +1,4 @@
-import { yellow } from "kleur";
+import { yellow } from "colorette";
 
 import { Identifiers, inject, injectable } from "../ioc";
 import { Logger } from "../services";

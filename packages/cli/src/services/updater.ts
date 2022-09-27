@@ -1,5 +1,5 @@
+import { dim, green, reset } from "colorette";
 import { sync } from "execa";
-import { dim, green, reset } from "kleur";
 import * as semver from "semver";
 import { PackageJson } from "type-fest";
 
