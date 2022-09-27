@@ -2,7 +2,6 @@ import { EventEmitter } from "events";
 import { performance } from "perf_hooks";
 
 import { EventDispatcher } from "../../../contracts/kernel/events";
-import { Logger } from "../../../contracts/kernel/log";
 import { Queue, QueueJob } from "../../../contracts/kernel/queue";
 import { QueueEvent } from "../../../enums";
 import { decorateInjectable, Identifiers, inject, injectable } from "../../../ioc";
@@ -18,9 +17,6 @@ decorateInjectable(EventEmitter);
 export class MemoryQueue extends EventEmitter implements Queue {
     @inject(Identifiers.EventDispatcherService)
     private readonly events!: EventDispatcher;
-
-    @inject(Identifiers.LogService)
-    private readonly logger!: Logger;
 
     /**
      * @private
@@ -227,8 +223,6 @@ export class MemoryQueue extends EventEmitter implements Queue {
                     executionTime: performance.now() - start,
                     error: error,
                 });
-
-                this.logger.warning(`Queue error occurs when handling job: ${job}`);
 
                 this.emit("jobError", job, error);
             }

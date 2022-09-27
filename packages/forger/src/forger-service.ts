@@ -377,13 +377,9 @@ export class ForgerService {
                     } else if (timeLeftInMs > 0) {
                         this.logger.warning(
                             `Failed to forge new block by ${prettyName}, because there were ${timeLeftInMs}ms left in the current slot (less than ${minimumMs}ms)`,
-                            "❗",
                         );
                     } else {
-                        this.logger.warning(
-                            `Failed to forge new block by ${prettyName}, because already in next slot`,
-                            "❗",
-                        );
+                        this.logger.warning(`Failed to forge new block by ${prettyName}, because already in next slot`);
                     }
                 }
             } catch (error) {
@@ -431,7 +427,7 @@ export class ForgerService {
         this.logger.debug(
             `Received ${AppUtils.pluralise("transaction", transactions.length, true)} ` +
                 `from the pool containing ${AppUtils.pluralise("transaction", response.poolSize, true)}`,
-            "👛",
+            "🪣",
         );
         return transactions;
     }

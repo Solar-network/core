@@ -1,4 +1,5 @@
 import { Commands, Container } from "@solar-network/cli";
+import { Networks } from "@solar-network/crypto";
 import Joi from "joi";
 
 /**
@@ -41,6 +42,7 @@ export class Command extends Commands.Command {
     public configure(): void {
         this.definition
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
+            .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setFlag("lines", "The number of lines to output", Joi.number().default(15));
     }
 
@@ -51,6 +53,8 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     public async execute(): Promise<void> {
-        await this.app.get<any>(Container.Identifiers.LogProcess).execute(["core"], this.getFlag("lines"));
+        await this.app
+            .get<any>(Container.Identifiers.LogProcess)
+            .execute(this.getFlag("token"), this.getFlag("network"), ["core"], this.getFlag("lines"));
     }
 }

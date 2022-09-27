@@ -1,22 +1,48 @@
-import { createColors } from "colorette";
+import { Services, Utils } from "@solar-network/kernel";
+import { bold, cyan, gray, magenta } from "colorette";
+import dateformat from "dateformat";
+import { parseFileSync } from "envfile";
 import { existsSync, readFileSync, statSync } from "fs";
-import { homedir } from "os";
+import { join } from "path";
 import { Tail } from "tail";
 
-import { injectable } from "../ioc";
-
-const { bold, gray, magenta, red } = createColors({ useColor: true });
+import { Application } from "../application";
+import { Identifiers, inject, injectable } from "../ioc";
+import { Environment } from "../services";
 
 @injectable()
 export class LogProcess {
+    @inject(Identifiers.Application)
+    private readonly app!: Application;
+
+    @inject(Identifiers.Environment)
+    private readonly environment!: Environment;
+
+    private levels: Record<string, number> = {};
+
+    private logLevel: number = this.levels["debug"];
+
     /**
      * @param {string[]} processes
      * @param {number} lines
      * @returns {Promise<void>}
      * @memberof Log
      */
-    public async execute(processes: string[], lines: number): Promise<void> {
-        const logPath: string = `${homedir()}/.pm2/logs`;
+    public async execute(token: string, network: string, processes: string[], lines: number): Promise<void> {
+        for (const [key, value] of Object.entries(Services.Log.LogLevel)) {
+            if (!isNaN(+value)) {
+                this.levels[key.toLowerCase()] = +value;
+            }
+        }
+
+        try {
+            const env: Record<string, string> = parseFileSync(this.app.getCorePath("config", ".env"));
+            this.logLevel = this.levels[env.CORE_LOG_LEVEL] ?? this.logLevel;
+        } catch {
+            //
+        }
+
+        const logPath: string = join(this.environment.getPaths(token, network).log);
         if (!existsSync(logPath) || !statSync(logPath).isDirectory()) {
             throw new Error(`The ${logPath} directory is not valid`);
         }
@@ -24,26 +50,7 @@ export class LogProcess {
         const tails: Record<string, Tail>[] = [];
 
         for (const proc of processes) {
-            const errFile = `${logPath}/${proc}-error.log`;
-            const outFile = `${logPath}/${proc}-out.log`;
-            if (existsSync(errFile) && statSync(errFile).isFile()) {
-                const lastLines = this.readLastLines(proc, errFile, lines);
-                if (lastLines) {
-                    console.error(
-                        gray(
-                            `Showing the last ${lines} lines of the ${bold(
-                                proc,
-                            )} error log (change the number of lines with the --lines option):`,
-                        ),
-                    );
-                    console.error();
-                    console.error(red(lastLines));
-                    console.error();
-                }
-
-                tails.push({ process: proc, tail: new Tail(errFile) });
-            }
-
+            const outFile = `${logPath}/${token}-${network}-${proc}-current.log`;
             if (existsSync(outFile) && statSync(outFile).isFile()) {
                 const lastLines = this.readLastLines(proc, outFile, lines);
                 if (lastLines) {
@@ -69,17 +76,34 @@ export class LogProcess {
 
             for (const { process, tail } of tails) {
                 tail.on("line", (line: string) => {
-                    console.error(this.addProcessName(process, line));
+                    const output: string | undefined = this.parse(line);
+                    if (output) {
+                        console.error(this.addProcessName(process, output));
+                    }
                 });
                 tail.watch();
             }
         } else {
-            throw new Error("No log files were found");
+            throw new Error(`No ${processes.join(", ")} log files were found in ${logPath}`);
         }
     }
 
     private addProcessName(process: string, line: string): string {
         return `${magenta(process.padEnd(9))}${line}`;
+    }
+
+    private parse(line: string): string | undefined {
+        const { emoji, level, message, time } = JSON.parse(line);
+
+        if (this.levels[level] > this.logLevel) {
+            return;
+        }
+
+        const colour = Utils.logColour(level);
+
+        return `${cyan(dateformat(new Date(time), "yyyy-mm-dd HH:MM:ss.l"))} ${colour(
+            `[${level.toUpperCase().slice(0, 1)}]`,
+        )} ${emoji}\t${colour(message)}`;
     }
 
     private readLastLines(process: string, file: string, lines: number): string {
@@ -89,7 +113,14 @@ export class LogProcess {
                 .split("\n")
                 .slice(lines * -1 - 1)
                 .filter((line) => line.length > 0)
-                .map((line) => this.addProcessName(process, line))
+                .map((line) => {
+                    const output: string | undefined = this.parse(line);
+                    if (output) {
+                        return this.addProcessName(process, output);
+                    }
+                    return undefined;
+                })
+                .filter((line) => line)
                 .join("\n")
                 .trim();
         } catch {

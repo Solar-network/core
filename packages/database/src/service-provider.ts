@@ -22,8 +22,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
     public async register(): Promise<void> {
         this.logger = this.app.get(Container.Identifiers.LogService);
 
-        this.logger.info(`Connecting to database: ${(this.config().all().connection as any).database}`, "⏳");
-
         this.app.bind(Container.Identifiers.DatabaseConnection).toConstantValue(await this.connect());
 
         this.app.bind(Container.Identifiers.DatabaseRoundRepository).toConstantValue(this.getRoundRepository());
