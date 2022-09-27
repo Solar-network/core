@@ -30,7 +30,7 @@ export class Installer {
     public async install(pkg: string, tag: string = "latest"): Promise<void> {
         const corePath = resolve(__dirname + "/../../../../");
 
-        const getLastTag = (regex: string) => `git tag --sort=committerdate | grep -Px ${regex} | tail -1`;
+        const getLastTag = (regex: string) => `git tag --sort=committerdate | grep -Ex ${regex} | tail -1`;
         let gitTag: string = tag;
         let tagFromRegex!: string;
 

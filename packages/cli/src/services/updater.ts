@@ -147,7 +147,7 @@ export class Updater implements Contracts.Updater {
             regex = '"^\\d+.\\d+.\\d+-next.\\d+"';
         }
 
-        const command = `cd ${coreDirectory} && git tag -l | xargs git tag -d > /dev/null && git fetch --all --tags -fq && git tag --sort=committerdate | grep -Px ${regex} | tail -1`;
+        const command = `cd "${coreDirectory}" && git tag -l | xargs git tag -d > /dev/null && git fetch --all --tags -fq && git tag --sort=committerdate | grep -Ex ${regex} | tail -1`;
         const { stdout, exitCode } = sync(command, { shell: true });
 
         if (exitCode !== 0) {
