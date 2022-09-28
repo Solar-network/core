@@ -9,7 +9,7 @@ import { TransactionTypeFactory } from "./types";
 
 export class Serialiser {
     public static getBytes(transaction: ITransactionData, options: ISerialiseOptions = {}): Buffer {
-        const version: number = transaction.version || 1;
+        const version: number = transaction.version;
 
         if (options.acceptLegacyVersion || options.disableVersionCheck || isSupportedTransactionVersion(version)) {
             return this.serialise(TransactionTypeFactory.create(transaction), options);
