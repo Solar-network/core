@@ -172,7 +172,10 @@ export class VoteTransactionHandler extends TransactionHandler {
 
         const { results } = await this.transactionHistoryService.listByCriteria(
             [criteria, legacyCriteria],
-            [{ property: "blockHeight", direction: "desc" }],
+            [
+                { property: "blockHeight", direction: "desc" },
+                { property: "sequence", direction: "desc" },
+            ],
             { offset: 0, limit: 1 },
         );
 

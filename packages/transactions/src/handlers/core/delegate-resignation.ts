@@ -211,7 +211,10 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
                 typeGroup: this.getConstructor().typeGroup,
                 type: this.getConstructor().type,
             },
-            [{ property: "blockHeight", direction: "desc" }],
+            [
+                { property: "blockHeight", direction: "desc" },
+                { property: "sequence", direction: "desc" },
+            ],
             { offset: 0, limit: 1 },
         );
 
