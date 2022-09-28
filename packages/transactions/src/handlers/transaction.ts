@@ -40,32 +40,28 @@ export abstract class TransactionHandler {
         return transaction.isVerified;
     }
 
-    public dynamicFee({
-        addonBytes,
-        satoshiPerByte,
-        transaction,
-    }: Contracts.Shared.DynamicFeeContext): Utils.BigNumber {
-        addonBytes = addonBytes || 0;
+    public fee({ bytes, satoshiPerByte, transaction }: Contracts.Shared.FeeContext): Utils.BigNumber {
+        bytes = bytes || 0;
 
         if (satoshiPerByte <= 0) {
             satoshiPerByte = 1;
         }
 
         const transactionSizeInBytes: number = Math.round(transaction.serialised.length / 2);
-        return Utils.BigNumber.make(addonBytes + transactionSizeInBytes).times(satoshiPerByte);
+        return Utils.BigNumber.make(bytes + transactionSizeInBytes).times(satoshiPerByte);
     }
 
     public getMinimumFee(
         transaction: Interfaces.ITransaction,
-        dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number } | Record<string, any>,
+        configuration: { bytes: object; minFee: number } | Record<string, any>,
     ): Utils.BigNumber {
-        if (dynamicFeesConfiguration && dynamicFeesConfiguration.enabled) {
-            const addonBytes: number = dynamicFeesConfiguration.addonBytes[transaction.key];
+        if (configuration) {
+            const bytes: number = configuration.bytes[transaction.key];
 
-            const minFee: Utils.BigNumber = this.dynamicFee({
+            const minFee: Utils.BigNumber = this.fee({
                 transaction,
-                addonBytes,
-                satoshiPerByte: dynamicFeesConfiguration.minFee,
+                bytes,
+                satoshiPerByte: configuration.minFee,
             });
 
             return minFee;
@@ -75,10 +71,10 @@ export abstract class TransactionHandler {
 
     public enforceMinimumFee(
         transaction: Interfaces.ITransaction,
-        dynamicFeesConfiguration: { addonBytes: object; enabled: boolean; minFee: number },
+        configuration: { bytes: object; minFee: number },
     ): void {
-        if (dynamicFeesConfiguration && dynamicFeesConfiguration.enabled) {
-            const minFee = this.getMinimumFee(transaction, dynamicFeesConfiguration);
+        if (configuration) {
+            const minFee = this.getMinimumFee(transaction, configuration);
 
             if (transaction.data.fee.isLessThan(minFee)) {
                 throw new TransactionFeeTooLowError(transaction.data.fee, minFee);
@@ -101,7 +97,7 @@ export abstract class TransactionHandler {
         }
 
         const milestone = Managers.configManager.getMilestone();
-        this.enforceMinimumFee(transaction, milestone.dynamicFees);
+        this.enforceMinimumFee(transaction, milestone.fees);
 
         return this.performGenericWalletChecks(transaction, sender);
     }

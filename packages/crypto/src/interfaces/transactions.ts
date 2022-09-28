@@ -7,7 +7,6 @@ export interface ITransaction {
     readonly emoji: string;
     readonly id: string | undefined;
     readonly key: string;
-    readonly staticFee: BigNumber;
     readonly type: number;
     readonly typeGroup: number | undefined;
     readonly verified: boolean;

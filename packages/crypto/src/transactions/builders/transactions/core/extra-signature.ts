@@ -9,7 +9,6 @@ export class ExtraSignatureBuilder extends TransactionBuilder<ExtraSignatureBuil
 
         this.data.type = Core.ExtraSignatureRegistrationTransaction.type;
         this.data.typeGroup = Core.ExtraSignatureRegistrationTransaction.typeGroup;
-        this.data.fee = Core.ExtraSignatureRegistrationTransaction.staticFee();
         this.data.asset = { signature: {} } as ITransactionAsset;
     }
 

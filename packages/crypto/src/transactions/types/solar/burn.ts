@@ -10,8 +10,6 @@ export class BurnTransaction extends Transaction {
     public static type: number = TransactionType.Solar.Burn;
     public static typeGroup: number = TransactionTypeGroup.Solar;
 
-    protected static defaultStaticFee = BigNumber.ZERO;
-
     public static getSchema(): schemas.TransactionSchema {
         return schemas.extend(schemas.transactionBaseSchema, {
             $id: "burn",

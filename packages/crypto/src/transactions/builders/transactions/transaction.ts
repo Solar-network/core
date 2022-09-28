@@ -16,6 +16,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
 
     public constructor() {
         this.data = {
+            fee: BigNumber.ZERO,
             headerType: TransactionHeaderType.Standard,
             id: undefined,
             memo: undefined,

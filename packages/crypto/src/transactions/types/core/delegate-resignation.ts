@@ -1,5 +1,4 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { BigNumber } from "../../../utils/big-number";
 import { ByteBuffer } from "../../../utils/byte-buffer";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -10,8 +9,6 @@ export abstract class DelegateResignationTransaction extends Transaction {
     public static type: number = TransactionType.Core.DelegateResignation;
     public static typeGroup: number = TransactionTypeGroup.Core;
     public static unique: boolean = true;
-
-    protected static defaultStaticFee: BigNumber = BigNumber.make("2500000000");
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.delegateResignation;

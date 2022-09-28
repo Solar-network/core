@@ -56,8 +56,7 @@ export class HtlcClaimTransactionHandler extends TransactionHandler {
         return Managers.configManager.getMilestone().htlcEnabled;
     }
 
-    public dynamicFee(context: Contracts.Shared.DynamicFeeContext): Utils.BigNumber {
-        // override dynamicFee calculation as this is a zero-fee transaction
+    public fee(context: Contracts.Shared.FeeContext): Utils.BigNumber {
         return Utils.BigNumber.ZERO;
     }
 

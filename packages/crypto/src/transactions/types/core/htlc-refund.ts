@@ -1,5 +1,5 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { BigNumber, ByteBuffer } from "../../../utils";
+import { ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
@@ -8,8 +8,6 @@ export abstract class HtlcRefundTransaction extends Transaction {
     public static key = "htlcRefund";
     public static type: number = TransactionType.Core.HtlcRefund;
     public static typeGroup: number = TransactionTypeGroup.Core;
-
-    protected static defaultStaticFee: BigNumber = BigNumber.ZERO;
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.htlcRefund;

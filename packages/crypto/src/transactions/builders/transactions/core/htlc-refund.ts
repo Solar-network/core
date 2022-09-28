@@ -8,7 +8,6 @@ export class HtlcRefundBuilder extends TransactionBuilder<HtlcRefundBuilder> {
 
         this.data.type = Core.HtlcRefundTransaction.type;
         this.data.typeGroup = Core.HtlcRefundTransaction.typeGroup;
-        this.data.fee = Core.HtlcRefundTransaction.staticFee();
         this.data.asset = {};
     }
 

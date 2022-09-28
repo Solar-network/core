@@ -9,7 +9,6 @@ export class BurnBuilder extends TransactionBuilder<BurnBuilder> {
 
         this.data.typeGroup = Solar.BurnTransaction.typeGroup;
         this.data.type = Solar.BurnTransaction.type;
-        this.data.fee = Solar.BurnTransaction.staticFee();
         this.data.amount = BigNumber.ZERO;
     }
 

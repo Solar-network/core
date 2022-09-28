@@ -8,7 +8,6 @@ export class DelegateRegistrationBuilder extends TransactionBuilder<DelegateRegi
 
         this.data.type = Core.DelegateRegistrationTransaction.type;
         this.data.typeGroup = Core.DelegateRegistrationTransaction.typeGroup;
-        this.data.fee = Core.DelegateRegistrationTransaction.staticFee();
         this.data.asset = { delegate: {} } as ITransactionAsset;
     }
 

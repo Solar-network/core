@@ -13,7 +13,7 @@ export class BurnTransactionHandler extends TransactionHandler {
         return [];
     }
 
-    public dynamicFee(context: Contracts.Shared.DynamicFeeContext): Utils.BigNumber {
+    public fee(context: Contracts.Shared.FeeContext): Utils.BigNumber {
         return Utils.BigNumber.ZERO;
     }
 

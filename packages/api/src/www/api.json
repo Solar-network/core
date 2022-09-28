@@ -2167,22 +2167,6 @@
                 }
             }
         },
-        "/transactions/fees": {
-            "get": {
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "List transaction fees",
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "422": {
-                        "description": "Invalid parameter(s)"
-                    }
-                }
-            }
-        },
         "/votes": {
             "get": {
                 "tags": [

@@ -9,11 +9,11 @@ import {
     VerifyTransactionAction,
 } from "./actions";
 import { Collator } from "./collator";
-import { DynamicFeeMatcher } from "./dynamic-fee-matcher";
 import { ExpirationService } from "./expiration-service";
+import { FeeMatcher } from "./fee-matcher";
 import { Mempool } from "./mempool";
 import { Processor } from "./processor";
-import { ProcessorDynamicFeeExtension } from "./processor-dynamic-fee-extension";
+import { ProcessorFeeExtension } from "./processor-fee-extension";
 import { Query } from "./query";
 import { SenderMempool } from "./sender-mempool";
 import { SenderState } from "./sender-state";
@@ -72,14 +72,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
             maxTransactionsPerRequest: Joi.number().integer().min(1).required(),
             maxTransactionAge: Joi.number().integer().min(1).required(),
             maxTransactionBytes: Joi.number().integer().min(1).required(),
-            dynamicFees: Joi.object({
-                enabled: Joi.bool().required(),
-                minFeePool: Joi.number().integer().min(0).when("enabled", { is: true, then: Joi.required() }),
-                minFeeBroadcast: Joi.number().integer().min(0).when("enabled", { is: true, then: Joi.required() }),
-                addonBytes: Joi.object()
-                    .when("enabled", { is: true, then: Joi.required() })
-                    .pattern(Joi.string(), Joi.number().integer().min(0).required()),
-            }).required(),
             workerPool: Joi.object({
                 workerCount: Joi.number().integer().min(1).required(),
             }).required(),
@@ -88,7 +80,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
     private registerServices(): void {
         this.app.bind(Container.Identifiers.PoolCollator).to(Collator);
-        this.app.bind(Container.Identifiers.PoolDynamicFeeMatcher).to(DynamicFeeMatcher);
+        this.app.bind(Container.Identifiers.PoolFeeMatcher).to(FeeMatcher);
         this.app.bind(Container.Identifiers.PoolExpirationService).to(ExpirationService);
         this.app.bind(Container.Identifiers.PoolMempool).to(Mempool).inSingletonScope();
         this.app.bind(Container.Identifiers.PoolProcessor).to(Processor);
@@ -112,7 +104,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
             };
         });
 
-        this.app.bind(Container.Identifiers.PoolProcessorExtension).to(ProcessorDynamicFeeExtension);
+        this.app.bind(Container.Identifiers.PoolProcessorExtension).to(ProcessorFeeExtension);
     }
 
     private registerActions(): void {

@@ -113,7 +113,7 @@ export const Identifiers = {
     PoolStorage: Symbol.for("Pool<Storage>"),
     PoolCollator: Symbol.for("Pool<Collator>"),
     PoolQuery: Symbol.for("Pool<Query>"),
-    PoolDynamicFeeMatcher: Symbol.for("Pool<DynamicFeeMatcher>"),
+    PoolFeeMatcher: Symbol.for("Pool<FeeMatcher>"),
     PoolProcessorExtension: Symbol.for("Pool<ProcessorExtension>"),
     PoolProcessor: Symbol.for("Pool<Processor>"),
     PoolProcessorFactory: Symbol.for("Pool<ProcessorFactory>"),
