@@ -26,9 +26,9 @@ export class BurnTransaction extends Transaction {
 
     public serialise(): ByteBuffer {
         const { data } = this;
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(8));
-        buff.writeBigUInt64LE(data.amount.toBigInt());
-        return buff;
+        const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(8));
+        buf.writeBigUInt64LE(data.amount.toBigInt());
+        return buf;
     }
 
     public deserialise(buf: ByteBuffer): void {

@@ -22,11 +22,11 @@ export abstract class IpfsTransaction extends Transaction {
 
         if (data.asset) {
             const ipfsBuffer: Buffer = base58.decode(data.asset.ipfs);
-            const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(ipfsBuffer.length));
+            const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(ipfsBuffer.length));
 
-            buff.writeBuffer(ipfsBuffer);
+            buf.writeBuffer(ipfsBuffer);
 
-            return buff;
+            return buf;
         }
 
         return undefined;
@@ -39,13 +39,13 @@ export abstract class IpfsTransaction extends Transaction {
         const ipfsHashLength: number = buf.readUInt8();
         const ipfsHash: Buffer = buf.readBuffer(ipfsHashLength);
 
-        const buff: Buffer = Buffer.alloc(ipfsHashLength + 2);
-        buff.writeUInt8(hashFunction, 0);
-        buff.writeUInt8(ipfsHashLength, 1);
-        buff.fill(ipfsHash, 2);
+        const ipfsBuffer: Buffer = Buffer.alloc(ipfsHashLength + 2);
+        ipfsBuffer.writeUInt8(hashFunction, 0);
+        ipfsBuffer.writeUInt8(ipfsHashLength, 1);
+        ipfsBuffer.fill(ipfsHash, 2);
 
         data.asset = {
-            ipfs: base58.encode(buff),
+            ipfs: base58.encode(ipfsBuffer),
         };
     }
 }

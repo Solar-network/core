@@ -21,12 +21,12 @@ export abstract class DelegateRegistrationTransaction extends Transaction {
 
         if (data.asset && data.asset.delegate) {
             const delegateBytes: Buffer = Buffer.from(data.asset.delegate.username, "utf8");
-            const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(delegateBytes.length + 1));
+            const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(delegateBytes.length + 1));
 
-            buff.writeUInt8(delegateBytes.length);
-            buff.writeBuffer(delegateBytes);
+            buf.writeUInt8(delegateBytes.length);
+            buf.writeBuffer(delegateBytes);
 
-            return buff;
+            return buf;
         }
 
         return undefined;

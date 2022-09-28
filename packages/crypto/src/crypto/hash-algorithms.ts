@@ -13,67 +13,67 @@ import {
 } from "bcrypto";
 
 export class HashAlgorithms {
-    public static ripemd160(buff: Buffer | string): Buffer {
-        return RIPEMD160.digest(this.bufferise(buff));
+    public static ripemd160(buf: Buffer | string): Buffer {
+        return RIPEMD160.digest(this.bufferise(buf));
     }
 
-    public static keccak256(buff: Buffer | string | Buffer[]): Buffer {
-        return HashAlgorithms.hash(buff, Keccak256);
+    public static keccak256(buf: Buffer | string | Buffer[]): Buffer {
+        return HashAlgorithms.hash(buf, Keccak256);
     }
 
-    public static keccak384(buff: Buffer | string | Buffer[]): Buffer {
-        return HashAlgorithms.hash(buff, Keccak384);
+    public static keccak384(buf: Buffer | string | Buffer[]): Buffer {
+        return HashAlgorithms.hash(buf, Keccak384);
     }
 
-    public static keccak512(buff: Buffer | string | Buffer[]): Buffer {
-        return HashAlgorithms.hash(buff, Keccak512);
+    public static keccak512(buf: Buffer | string | Buffer[]): Buffer {
+        return HashAlgorithms.hash(buf, Keccak512);
     }
 
-    public static sha256(buff: Buffer | string | Buffer[]): Buffer {
-        return HashAlgorithms.hash(buff, SHA256);
+    public static sha256(buf: Buffer | string | Buffer[]): Buffer {
+        return HashAlgorithms.hash(buf, SHA256);
     }
 
-    public static sha384(buff: Buffer | string | Buffer[]): Buffer {
-        return HashAlgorithms.hash(buff, SHA384);
+    public static sha384(buf: Buffer | string | Buffer[]): Buffer {
+        return HashAlgorithms.hash(buf, SHA384);
     }
 
-    public static sha512(buff: Buffer | string | Buffer[]): Buffer {
-        return HashAlgorithms.hash(buff, SHA512);
+    public static sha512(buf: Buffer | string | Buffer[]): Buffer {
+        return HashAlgorithms.hash(buf, SHA512);
     }
 
-    public static sha3256(buff: Buffer | string | Buffer[]): Buffer {
-        return HashAlgorithms.hash(buff, SHA3_256);
+    public static sha3256(buf: Buffer | string | Buffer[]): Buffer {
+        return HashAlgorithms.hash(buf, SHA3_256);
     }
 
-    public static sha3384(buff: Buffer | string | Buffer[]): Buffer {
-        return HashAlgorithms.hash(buff, SHA3_384);
+    public static sha3384(buf: Buffer | string | Buffer[]): Buffer {
+        return HashAlgorithms.hash(buf, SHA3_384);
     }
 
-    public static sha3512(buff: Buffer | string | Buffer[]): Buffer {
-        return HashAlgorithms.hash(buff, SHA3_512);
+    public static sha3512(buf: Buffer | string | Buffer[]): Buffer {
+        return HashAlgorithms.hash(buf, SHA3_512);
     }
 
-    public static hash256(buff: Buffer | string): Buffer {
-        return Hash256.digest(this.bufferise(buff));
+    public static hash256(buf: Buffer | string): Buffer {
+        return Hash256.digest(this.bufferise(buf));
     }
 
-    private static bufferise(buff: Buffer | string) {
-        return buff instanceof Buffer ? buff : Buffer.from(buff);
+    private static bufferise(buf: Buffer | string) {
+        return buf instanceof Buffer ? buf : Buffer.from(buf);
     }
 
-    private static hash(buff: Buffer | string | Buffer[], hasher: any): Buffer {
-        if (Array.isArray(buff)) {
+    private static hash(buf: Buffer | string | Buffer[], hasher: any): Buffer {
+        if (Array.isArray(buf)) {
             let hasherCtx = hasher.ctx;
 
             hasherCtx.init();
 
-            for (const element of buff) {
+            for (const element of buf) {
                 hasherCtx = hasherCtx.update(element);
             }
 
             return hasherCtx.final();
         }
 
-        return hasher.digest(this.bufferise(buff));
+        return hasher.digest(this.bufferise(buf));
     }
 }

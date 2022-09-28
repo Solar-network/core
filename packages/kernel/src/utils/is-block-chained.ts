@@ -12,7 +12,7 @@ type BlockChainedDetails = {
 const getBlockChainedDetails = (
     previousBlock: Interfaces.IBlockData,
     nextBlock: Interfaces.IBlockData,
-    getTimeStampForBlock: (blockheight: number) => number,
+    getTimeStampForBlock: (blockHeight: number) => number,
 ): BlockChainedDetails => {
     const followsPrevious: boolean = nextBlock.previousBlock === previousBlock.id;
     const isPlusOne: boolean = nextBlock.height === previousBlock.height + 1;
@@ -29,7 +29,7 @@ const getBlockChainedDetails = (
 export const isBlockChained = (
     previousBlock: Interfaces.IBlockData,
     nextBlock: Interfaces.IBlockData,
-    getTimeStampForBlock: (blockheight: number) => number,
+    getTimeStampForBlock: (blockHeight: number) => number,
 ): boolean => {
     const details: BlockChainedDetails = getBlockChainedDetails(previousBlock, nextBlock, getTimeStampForBlock);
     return details.isChained;
@@ -38,7 +38,7 @@ export const isBlockChained = (
 export const getBlockNotChainedErrorMessage = (
     previousBlock: Interfaces.IBlockData,
     nextBlock: Interfaces.IBlockData,
-    getTimeStampForBlock: (blockheight: number) => number,
+    getTimeStampForBlock: (blockHeight: number) => number,
 ): string => {
     const details: BlockChainedDetails = getBlockChainedDetails(previousBlock, nextBlock, getTimeStampForBlock);
 

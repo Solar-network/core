@@ -256,8 +256,8 @@ export class StateStore implements Contracts.State.StateStore {
 
     /**
      * Get last blocks in the given height range in ascending order.
-     * @param {Number} start
-     * @param {Number} end
+     * @param {number} start
+     * @param {number} end
      */
     public getLastBlocksByHeight(start: number, end?: number, headersOnly?: boolean): Interfaces.IBlockData[] {
         const tail: number | undefined = end || start;

@@ -122,7 +122,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     /**
      * Dispatch an event to transition the state machine.
-     * @param  {String} event
+     * @param {String} event
      * @return {void}
      */
     public dispatch(event: string): void {
@@ -317,17 +317,17 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
     /**
      * Remove N number of blocks.
-     * @param  {Number} nblocks
+     * @param {number} blockCount
      * @return {void}
      */
-    public async removeBlocks(nblocks: number): Promise<void> {
+    public async removeBlocks(blockCount: number): Promise<void> {
         try {
             const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
             // If the current chain height is H and we will be removing blocks [N, H],
             // then blocksToRemove[] will contain blocks [N - 1, H - 1].
             const blocksToRemove: Interfaces.IBlockData[] = await this.database.getBlocks(
-                lastBlock.data.height - nblocks,
+                lastBlock.data.height - blockCount,
                 lastBlock.data.height,
             );
 
@@ -379,27 +379,31 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                 await __removeBlocks(numberOfBlocks - 1);
             };
 
-            if (nblocks >= lastBlock.data.height) {
-                nblocks = lastBlock.data.height - 1;
+            if (blockCount >= lastBlock.data.height) {
+                blockCount = lastBlock.data.height - 1;
             }
 
-            if (nblocks < 1) {
+            if (blockCount < 1) {
                 return;
             }
 
             this.clearAndStopQueue();
 
-            const resetHeight: number = lastBlock.data.height - nblocks;
+            const resetHeight: number = lastBlock.data.height - blockCount;
             this.logger.warning(
-                `Removing ${Utils.pluralise("block", nblocks, true)} - reset to height ${resetHeight.toLocaleString()}`,
+                `Removing ${Utils.pluralise(
+                    "block",
+                    blockCount,
+                    true,
+                )} - reset to height ${resetHeight.toLocaleString()}`,
             );
 
             this.stateStore.setLastDownloadedBlock(lastBlock.data);
 
-            await __removeBlocks(nblocks);
+            await __removeBlocks(blockCount);
 
             await this.blockRepository.deleteBlocks(removedBlocks.reverse());
-            this.stateStore.setLastStoredBlockHeight(lastBlock.data.height - nblocks);
+            this.stateStore.setLastStoredBlockHeight(lastBlock.data.height - blockCount);
 
             await this.pool.readdTransactions(removedTransactions.reverse());
 
@@ -423,7 +427,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     /**
      * Remove the top blocks from database.
      * NOTE: Only used when trying to restore database integrity or loading an earlier saved state.
-     * @param  {Number} count
+     * @param {number} count
      * @return {void}
      */
     public async removeTopBlocks(count: number): Promise<void> {

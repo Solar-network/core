@@ -4,18 +4,18 @@ import moize from "fast-memoize";
 import { HashAlgorithms } from "../crypto";
 import { Cache } from "./cache";
 
-const encodeCheck = (buff: Buffer): string => {
-    const checksum: Buffer = HashAlgorithms.hash256(buff);
+const encodeCheck = (buf: Buffer): string => {
+    const checksum: Buffer = HashAlgorithms.hash256(buf);
 
-    return base58.encode(Buffer.concat([buff, checksum], buff.length + 4));
+    return base58.encode(Buffer.concat([buf, checksum], buf.length + 4));
 };
 
 const decodeCheck = (address: string): Buffer => {
-    const buff: Buffer = base58.decode(address);
-    const payload: Buffer = buff.slice(0, -4);
+    const buf: Buffer = base58.decode(address);
+    const payload: Buffer = buf.slice(0, -4);
     const checksum: Buffer = HashAlgorithms.hash256(payload);
 
-    if (checksum.readUInt32LE(0) !== buff.slice(-4).readUInt32LE(0)) {
+    if (checksum.readUInt32LE(0) !== buf.slice(-4).readUInt32LE(0)) {
         throw new Error("Invalid checksum");
     }
 

@@ -116,8 +116,8 @@ export interface StateStore {
 
     /**
      * Get last blocks in the given height range in ascending order.
-     * @param {Number} start
-     * @param {Number} end
+     * @param {number} start
+     * @param {number} end
      */
     getLastBlocksByHeight(start: number, end?: number, headersOnly?: boolean): Interfaces.IBlockData[];
 

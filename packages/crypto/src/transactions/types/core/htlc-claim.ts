@@ -23,13 +23,13 @@ export abstract class HtlcClaimTransaction extends Transaction {
         }
 
         const unlockSecret: Buffer = Buffer.from(data.asset.claim.unlockSecret, "hex");
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(34 + unlockSecret.length));
-        buff.writeUInt8(data.asset.claim.hashType);
-        buff.writeBuffer(Buffer.from(data.asset.claim.lockTransactionId, "hex"));
-        buff.writeUInt8(unlockSecret.length);
-        buff.writeBuffer(unlockSecret);
+        const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(34 + unlockSecret.length));
+        buf.writeUInt8(data.asset.claim.hashType);
+        buf.writeBuffer(Buffer.from(data.asset.claim.lockTransactionId, "hex"));
+        buf.writeUInt8(unlockSecret.length);
+        buf.writeBuffer(unlockSecret);
 
-        return buff;
+        return buf;
     }
 
     public deserialise(buf: ByteBuffer): void {

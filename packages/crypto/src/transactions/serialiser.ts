@@ -30,10 +30,10 @@ export class Serialiser {
             size = Math.floor(maxPayload / maxTransactions) * 2;
         }
 
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(size));
+        const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(size));
 
-        this.serialiseCommon(transaction.data, buff);
-        this.serialiseMemo(transaction, buff);
+        this.serialiseCommon(transaction.data, buf);
+        this.serialiseMemo(transaction, buf);
 
         const serialised: ByteBuffer | undefined = transaction.serialise(options);
 
@@ -41,17 +41,17 @@ export class Serialiser {
             throw new Error();
         }
 
-        buff.writeBuffer(serialised.getResult());
+        buf.writeBuffer(serialised.getResult());
 
-        this.serialiseSignatures(transaction.data, buff, options);
+        this.serialiseSignatures(transaction.data, buf, options);
 
-        const bufferBuffer = buff.getResult();
+        const bufferBuffer = buf.getResult();
         transaction.serialised = bufferBuffer;
 
         return bufferBuffer;
     }
 
-    private static serialiseCommon(transaction: ITransactionData, buff: ByteBuffer): void {
+    private static serialiseCommon(transaction: ITransactionData, buf: ByteBuffer): void {
         transaction.version = transaction.version || 0x03;
         transaction.headerType = transaction.headerType || 0x00;
 
@@ -59,51 +59,51 @@ export class Serialiser {
             transaction.typeGroup = TransactionTypeGroup.Core;
         }
 
-        buff.writeUInt8(0xff - transaction.headerType);
-        buff.writeUInt8(transaction.version);
-        buff.writeUInt8(transaction.network || configManager.get("network.pubKeyHash"));
+        buf.writeUInt8(0xff - transaction.headerType);
+        buf.writeUInt8(transaction.version);
+        buf.writeUInt8(transaction.network || configManager.get("network.pubKeyHash"));
 
-        buff.writeUInt32LE(transaction.typeGroup);
-        buff.writeUInt16LE(transaction.type);
-        buff.writeBigInt64LE(transaction.nonce.toBigInt());
+        buf.writeUInt32LE(transaction.typeGroup);
+        buf.writeUInt16LE(transaction.type);
+        buf.writeBigInt64LE(transaction.nonce.toBigInt());
 
-        buff.writeBuffer(Buffer.from(transaction.senderPublicKey, "hex"));
+        buf.writeBuffer(Buffer.from(transaction.senderPublicKey, "hex"));
         if (transaction.headerType === TransactionHeaderType.Extended) {
             const { addressBuffer, addressError } = Address.toBuffer(transaction.senderId);
             if (addressError) {
                 throw new AddressNetworkError(addressError);
             }
 
-            buff.writeBuffer(addressBuffer);
+            buf.writeBuffer(addressBuffer);
         }
 
-        buff.writeBigInt64LE(transaction.fee.toBigInt());
+        buf.writeBigInt64LE(transaction.fee.toBigInt());
     }
 
-    private static serialiseMemo(transaction: ITransaction, buff: ByteBuffer): void {
+    private static serialiseMemo(transaction: ITransaction, buf: ByteBuffer): void {
         const { data }: ITransaction = transaction;
 
         if (data.memo) {
             const memo: Buffer = Buffer.from(data.memo, "utf8");
-            buff.writeUInt8(memo.length);
-            buff.writeBuffer(memo);
+            buf.writeUInt8(memo.length);
+            buf.writeBuffer(memo);
         } else {
-            buff.writeUInt8(0x00);
+            buf.writeUInt8(0x00);
         }
     }
 
     private static serialiseSignatures(
         transaction: ITransactionData,
-        buff: ByteBuffer,
+        buf: ByteBuffer,
         options: ISerialiseOptions = {},
     ): void {
         if (transaction.signatures) {
             if (transaction.signatures.primary && !options.excludeSignature) {
-                buff.writeBuffer(Buffer.from(transaction.signatures.primary, "hex"));
+                buf.writeBuffer(Buffer.from(transaction.signatures.primary, "hex"));
             }
 
             if (transaction.signatures.extra && !options.excludeExtraSignature) {
-                buff.writeBuffer(Buffer.from(transaction.signatures.extra, "hex"));
+                buf.writeBuffer(Buffer.from(transaction.signatures.extra, "hex"));
             }
         }
     }

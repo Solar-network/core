@@ -18,7 +18,7 @@ export class LegacyVoteTransaction extends Transaction {
 
     public serialise(): ByteBuffer | undefined {
         const { data } = this;
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(69));
+        const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(69));
 
         if (data.asset && data.asset.votes) {
             const votes = data.asset.votes as string[];
@@ -40,11 +40,11 @@ export class LegacyVoteTransaction extends Transaction {
                     return hex;
                 })
                 .join("");
-            buff.writeUInt8(votes.length);
-            buff.writeBuffer(Buffer.from(voteBytes, "hex"));
+            buf.writeUInt8(votes.length);
+            buf.writeBuffer(Buffer.from(voteBytes, "hex"));
         }
 
-        return buff;
+        return buf;
     }
 
     public deserialise(buf: ByteBuffer): void {

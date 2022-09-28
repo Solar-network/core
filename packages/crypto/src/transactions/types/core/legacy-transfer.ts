@@ -25,9 +25,9 @@ export abstract class LegacyTransferTransaction extends Transaction {
 
     public serialise(options?: ISerialiseOptions): ByteBuffer | undefined {
         const { data } = this;
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(33));
-        buff.writeBigUInt64LE(data.amount.toBigInt());
-        buff.writeUInt32LE(data.expiration || 0);
+        const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(33));
+        buf.writeBigUInt64LE(data.amount.toBigInt());
+        buf.writeUInt32LE(data.expiration || 0);
 
         if (data.recipientId) {
             const { addressBuffer, addressError } = Address.toBuffer(data.recipientId);
@@ -36,10 +36,10 @@ export abstract class LegacyTransferTransaction extends Transaction {
                 options.addressError = addressError;
             }
 
-            buff.writeBuffer(addressBuffer);
+            buf.writeBuffer(addressBuffer);
         }
 
-        return buff;
+        return buf;
     }
 
     public deserialise(buf: ByteBuffer, transactionAddresses?: IDeserialiseAddresses): void {

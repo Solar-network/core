@@ -19,18 +19,18 @@ export class VoteTransaction extends Transaction {
 
     public serialise(): ByteBuffer {
         const { data } = this;
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(1024));
+        const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(1024));
 
         if (data.asset && data.asset.votes) {
-            buff.writeUInt8(Object.keys(data.asset.votes).length);
+            buf.writeUInt8(Object.keys(data.asset.votes).length);
             for (const [vote, percent] of Object.entries(data.asset.votes)) {
-                buff.writeUInt8(vote.length);
-                buff.writeBuffer(Buffer.from(vote));
-                buff.writeUInt16LE(Math.round(percent * 100));
+                buf.writeUInt8(vote.length);
+                buf.writeBuffer(Buffer.from(vote));
+                buf.writeUInt16LE(Math.round(percent * 100));
             }
         }
 
-        return buff;
+        return buf;
     }
 
     public deserialise(buf: ByteBuffer): void {

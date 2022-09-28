@@ -10,7 +10,7 @@ export interface Blockchain {
 
     /**
      * Dispatch an event to transition the state machine.
-     * @param  {String} event
+     * @param {String} event
      * @return {void}
      */
     dispatch(event): void;
@@ -64,15 +64,15 @@ export interface Blockchain {
 
     /**
      * Remove N number of blocks.
-     * @param  {Number} nblocks
+     * @param {number} blockCount
      * @return {void}
      */
-    removeBlocks(nblocks: number): Promise<void>;
+    removeBlocks(blockCount: number): Promise<void>;
 
     /**
      * Remove the top blocks from database.
      * NOTE: Only used when trying to restore database integrity.
-     * @param  {Number} count
+     * @param {number} count
      * @return {void}
      */
     removeTopBlocks(count: number): Promise<void>;

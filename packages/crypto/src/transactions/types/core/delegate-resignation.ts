@@ -24,10 +24,10 @@ export abstract class DelegateResignationTransaction extends Transaction {
             return new ByteBuffer(Buffer.alloc(0));
         }
 
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(1));
-        buff.writeUInt8(0xff - data.asset.resignationType);
+        const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(1));
+        buf.writeUInt8(0xff - data.asset.resignationType);
 
-        return buff;
+        return buf;
     }
 
     public deserialise(buf: ByteBuffer): void {

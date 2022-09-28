@@ -25,8 +25,8 @@ export class BlockFactory {
         return this.fromSerialised(Buffer.from(hex, "hex"));
     }
 
-    public static fromBytes(buff: Buffer): IBlock {
-        return this.fromSerialised(buff);
+    public static fromBytes(buf: Buffer): IBlock {
+        return this.fromSerialised(buf);
     }
 
     public static fromJson(json: IBlockJson): IBlock | undefined {

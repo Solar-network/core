@@ -11,7 +11,7 @@ export interface SlotInfo {
     forgingStatus: boolean;
 }
 
-export type GetBlockTimeStampLookup = (blockheight: number) => number;
+export type GetBlockTimeStampLookup = (blockHeight: number) => number;
 
 export class Slots {
     public static getTime(time?: number): number {

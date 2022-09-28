@@ -18,7 +18,7 @@ export class StateMachine {
     /**
      * Dispatch an event to transition the state machine.
      *
-     * @param  {String} event
+     * @param {String} event
      * @return {void}
      */
     public transition(event: string): void {

@@ -26,16 +26,16 @@ export abstract class HtlcLockTransaction extends Transaction {
     public serialise(options?: ISerialiseOptions): ByteBuffer | undefined {
         const { data } = this;
 
-        const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(99));
+        const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(99));
 
-        buff.writeBigUInt64LE(data.amount.toBigInt());
+        buf.writeBigUInt64LE(data.amount.toBigInt());
 
         if (data.asset && data.asset.lock) {
             const secretHash: Buffer = Buffer.from(data.asset.lock.secretHash, "hex");
-            buff.writeUInt8(secretHash.length);
-            buff.writeBuffer(secretHash);
-            buff.writeUInt8(data.asset.lock.expiration.type);
-            buff.writeUInt32LE(data.asset.lock.expiration.value);
+            buf.writeUInt8(secretHash.length);
+            buf.writeBuffer(secretHash);
+            buf.writeUInt8(data.asset.lock.expiration.type);
+            buf.writeUInt32LE(data.asset.lock.expiration.value);
         }
 
         if (data.recipientId) {
@@ -45,10 +45,10 @@ export abstract class HtlcLockTransaction extends Transaction {
                 options.addressError = addressError;
             }
 
-            buff.writeBuffer(addressBuffer);
+            buf.writeBuffer(addressBuffer);
         }
 
-        return buff;
+        return buf;
     }
 
     public deserialise(buf: ByteBuffer, transactionAddresses?: IDeserialiseAddresses): void {

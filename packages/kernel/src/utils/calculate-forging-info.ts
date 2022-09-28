@@ -30,7 +30,7 @@ export const getMilestonesWhichAffectActiveDelegateCount = (): Array<MilestoneSe
 export const calculateForgingInfo = (
     timestamp: number,
     height: number,
-    getTimeStampForBlock: (blockheight: number) => number,
+    getTimeStampForBlock: (blockHeight: number) => number,
 ): ForgingInfo => {
     const slotInfo = Crypto.Slots.getSlotInfo(getTimeStampForBlock, timestamp, height);
 
@@ -43,7 +43,7 @@ export const calculateForgingInfo = (
 const findIndex = (
     height: number,
     slotNumber: number,
-    getTimeStampForBlock: (blockheight: number) => number,
+    getTimeStampForBlock: (blockHeight: number) => number,
 ): [number, number] => {
     let nextMilestone = Managers.configManager.getNextMilestoneWithNewKey(1, "activeDelegates");
 

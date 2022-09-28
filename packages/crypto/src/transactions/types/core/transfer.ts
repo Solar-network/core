@@ -27,19 +27,19 @@ export abstract class TransferTransaction extends Transaction {
         const { data } = this;
 
         if (data.asset && data.asset.transfers) {
-            const buff: ByteBuffer = new ByteBuffer(Buffer.alloc(2 + data.asset.transfers.length * 29));
-            buff.writeUInt16LE(data.asset.transfers.length);
+            const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(2 + data.asset.transfers.length * 29));
+            buf.writeUInt16LE(data.asset.transfers.length);
 
             for (const transfer of data.asset.transfers) {
-                buff.writeBigUInt64LE(transfer.amount.toBigInt());
+                buf.writeBigUInt64LE(transfer.amount.toBigInt());
 
                 const { addressBuffer, addressError } = Address.toBuffer(transfer.recipientId);
                 options.addressError = addressError || options.addressError;
 
-                buff.writeBuffer(addressBuffer);
+                buf.writeBuffer(addressBuffer);
             }
 
-            return buff;
+            return buf;
         }
 
         return undefined;

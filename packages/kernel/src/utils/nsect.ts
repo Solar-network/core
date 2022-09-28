@@ -9,7 +9,7 @@ type ProbeCallback = (indexesToProbe: number[]) => Promise<number | undefined>;
 export class NSect {
     /**
      * Constructor.
-     * @param {Number} nAry type of search to perform.
+     * @param {number} nAry type of search to perform.
      * @param {Function} probe a probe callback function, it will be passed an array
      * of indexes, in ascending order, always with length nAry + 1 and it should return one of those
      * indexes, the last (highest) that matches the search criteria. For the algorithm to work the
@@ -22,9 +22,9 @@ export class NSect {
     /**
      * Find the first (lowest) element satisfying a condition as defined by the probe function
      * in a range [low, high].
-     * @param {Number} low lowest interval boundary (inclusive)
-     * @param {Number} high highest interval boundary (inclusive)
-     * @return {Number} the index of the first (lowest) element that satisfies the condition
+     * @param {number} low lowest interval boundary (inclusive)
+     * @param {number} high highest interval boundary (inclusive)
+     * @return {number} the index of the first (lowest) element that satisfies the condition
      */
     public async find(low: number, high: number): Promise<number | undefined> {
         let highestMatching: number | undefined;
@@ -101,8 +101,8 @@ export class NSect {
      * boundaries.
      * For example (assuming `nAry` is 8):
      * [1, 81] -> [1, 11, 21, 31, 41, 51, 61, 71, 81]
-     * @param {Number} low lower boundary of the interval to split
-     * @param {Number} high higher boundary of the interval to split
+     * @param {number} low lower boundary of the interval to split
+     * @param {number} high higher boundary of the interval to split
      * @return {Array} intervals' boundaries
      */
     private calcProbes(low: number, high: number): number[] {

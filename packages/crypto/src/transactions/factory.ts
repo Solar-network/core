@@ -20,8 +20,8 @@ export class TransactionFactory {
         return this.fromSerialised(hex);
     }
 
-    public static fromBytes(buff: Buffer, strict = true, options: IDeserialiseOptions = {}): ITransaction {
-        return this.fromSerialised(buff.toString("hex"), strict, options);
+    public static fromBytes(buf: Buffer, strict = true, options: IDeserialiseOptions = {}): ITransaction {
+        return this.fromSerialised(buf.toString("hex"), strict, options);
     }
 
     /**
@@ -32,7 +32,7 @@ export class TransactionFactory {
      * verified.
      */
     public static fromBytesUnsafe(
-        buff: Buffer,
+        buf: Buffer,
         id?: string,
         transactionAddresses?: IDeserialiseAddresses,
     ): ITransaction {
@@ -41,7 +41,7 @@ export class TransactionFactory {
                 acceptLegacyVersion: true,
                 transactionAddresses,
             };
-            const transaction = Deserialiser.deserialise(buff, options);
+            const transaction = Deserialiser.deserialise(buf, options);
             transaction.data.id = id || Utils.getId(transaction.data, options);
             transaction.isVerified = true;
 

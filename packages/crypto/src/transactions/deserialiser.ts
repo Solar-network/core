@@ -9,16 +9,16 @@ export class Deserialiser {
     public static deserialise(serialised: string | Buffer, options: IDeserialiseOptions = {}): ITransaction {
         const data = {} as ITransactionData;
 
-        const buff: ByteBuffer = this.getByteBuffer(serialised);
-        this.deserialiseCommon(data, buff, options.transactionAddresses);
+        const buf: ByteBuffer = this.getByteBuffer(serialised);
+        this.deserialiseCommon(data, buf, options.transactionAddresses);
 
         const instance: ITransaction = TransactionTypeFactory.create(data);
-        this.deserialiseMemo(instance, buff);
+        this.deserialiseMemo(instance, buf);
 
         // Deserialise type specific parts
-        instance.deserialise(buff, options.transactionAddresses);
+        instance.deserialise(buf, options.transactionAddresses);
 
-        this.deserialiseSignatures(data, buff);
+        this.deserialiseSignatures(data, buf);
 
         if (data.version) {
             if (
@@ -31,7 +31,7 @@ export class Deserialiser {
             }
         }
 
-        instance.serialised = buff.getResult();
+        instance.serialised = buf.getResult();
 
         return instance;
     }

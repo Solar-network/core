@@ -105,7 +105,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      * @param {Object} claimedState the claimed state of the peer, as returned by `/peer/status`.
      * The caller should ensure that it is a valid state: must have .header.height and .header.id
      * properties.
-     * @param {Number} deadline operation deadline, in milliseconds since Epoch
+     * @param {number} deadline operation deadline, in milliseconds since Epoch
      * @return {PeerVerificationResut|undefined} PeerVerificationResut object if the peer's blockchain
      * is verified to be legit (albeit it may be different than our blockchain), or undefined if
      * the peer's state could not be verified.
@@ -231,7 +231,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      * - both chains are on the same height and same block id or
      * - our chain is peer's chain + more blocks on top (peer is lagging behind)
      * @param {Object} claimedState peer claimed state (from `/peer/status`)
-     * @param {Number} ourHeight the height of our blockchain
+     * @param {number} ourHeight the height of our blockchain
      * @return {Boolean} true if we have peer's highest block
      */
     private async weHavePeersHighestBlock(claimedState: any, ourHeight: number): Promise<boolean> {
@@ -300,9 +300,9 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
     /**
      * Find the height of the highest block that is the same in both our and peer's chain.
-     * @param {Number} claimedHeight peer's claimed height (from `/peer/status`)
-     * @param {Number} ourHeight the height of our blockchain
-     * @param {Number} deadline operation deadline, in milliseconds since Epoch
+     * @param {number} claimedHeight peer's claimed height (from `/peer/status`)
+     * @param {number} ourHeight the height of our blockchain
+     * @param {number} deadline operation deadline, in milliseconds since Epoch
      * @return {Number|undefined} height; if undefined is returned this means that the
      * peer's replies didn't make sense and it should be treated as malicious or broken.
      * @throws {Error} if the state verification could not complete before the deadline
@@ -403,9 +403,9 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
     /**
      * Verify the blocks of the peer's chain that are in the range [height, min(claimed height, last block in round)].
-     * @param {Number} startHeight verify blocks at and after this height
-     * @param {Number} claimedHeight peer's claimed height, don't try to verify blocks past this height
-     * @param {Number} deadline operation deadline, in milliseconds since Epoch
+     * @param {number} startHeight verify blocks at and after this height
+     * @param {number} claimedHeight peer's claimed height, don't try to verify blocks past this height
+     * @param {number} deadline operation deadline, in milliseconds since Epoch
      * @return {Boolean} true if the blocks are legit (signed by the appropriate delegates)
      * @throws {Error} if the state verification could not complete before the deadline
      */
@@ -478,10 +478,10 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
     /**
      * Fetch some blocks from the peer, starting at the given height.
-     * @param {Number} height fetch the block at this height and some after it
+     * @param {number} height fetch the block at this height and some after it
      * @param {Object} blocksByHeight map of height -> block, this method will add the newly
      * fetched blocks to it
-     * @param {Number} deadline operation deadline, in milliseconds since Epoch
+     * @param {number} deadline operation deadline, in milliseconds since Epoch
      * @return {Boolean} true if fetched successfully
      * @throws {Error} if the state verification could not complete before the deadline
      */
@@ -536,7 +536,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
     /**
      * Verify a given block from the peer's chain - must be signed by one of the provided delegates.
      * @param {Interfaces.IBlockData} blockData the block to verify
-     * @param {Number} expectedHeight the given block must be at this height
+     * @param {number} expectedHeight the given block must be at this height
      * @param {Object} delegatesByUsername a map of { username: delegate, ... }, one of these
      * delegates must have signed the block
      * @return {Boolean} true if the block is legit (signed by the appropriate delegate)
@@ -593,8 +593,8 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
     /**
      * Check if a deadline has passed and throw an exception if so.
-     * @param {Number} deadline deadline, in milliseconds since Epoch
-     * @return {Number} milliseconds remaining, if deadline has not passed
+     * @param {number} deadline deadline, in milliseconds since Epoch
+     * @return {number} milliseconds remaining, if deadline has not passed
      * @throws {Error} if deadline passed
      */
     private throwIfPastDeadline(deadline: number): number {
