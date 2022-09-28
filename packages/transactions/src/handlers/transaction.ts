@@ -306,9 +306,9 @@ export abstract class TransactionHandler {
 
         if (transaction.data.typeGroup === Enums.TransactionTypeGroup.Core) {
             if (transaction.data.type === Enums.TransactionType.Core.Transfer) {
-                AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
+                AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
 
-                for (const { recipientId } of transaction.data.asset.transfers) {
+                for (const { recipientId } of transaction.data.asset.recipients) {
                     addresses.push(recipientId);
                 }
             }

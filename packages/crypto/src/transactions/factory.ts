@@ -63,9 +63,14 @@ export class TransactionFactory {
 
     public static fromData(data: ITransactionData, strict = true, options: IDeserialiseOptions = {}): ITransaction {
         if (data.typeGroup === TransactionTypeGroup.Core && data.type === CoreTransactionType.Transfer) {
-            if (data.asset && data.asset.payments && !data.asset.transfers) {
-                data.asset.transfers = data.asset.payments;
+            if (data.asset && data.asset.payments && !data.asset.recipients) {
+                data.asset.recipients = data.asset.payments;
                 delete data.asset.payments;
+            }
+
+            if (data.asset && data.asset.transfers && !data.asset.recipients) {
+                data.asset.recipients = data.asset.transfers;
+                delete data.asset.transfers;
             }
         }
 

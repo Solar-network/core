@@ -14,25 +14,25 @@ export class TransferBuilder extends TransactionBuilder<TransferBuilder> {
         this.data.fee = Core.TransferTransaction.staticFee();
         this.data.memo = undefined;
         this.data.asset = {
-            transfers: [],
+            recipients: [],
         };
     }
 
     public amount(amountString: string): TransferBuilder {
         const amount = BigNumber.make(amountString);
-        if (this.data.asset && this.data.asset.transfers && this.data.asset.transfers.length > 0) {
-            this.data.asset = { transfers: [{ recipientId: this.data.asset.transfers[0].recipientId, amount }] };
+        if (this.data.asset && this.data.asset.recipients && this.data.asset.recipients.length > 0) {
+            this.data.asset = { recipients: [{ recipientId: this.data.asset.recipients[0].recipientId, amount }] };
         } else {
-            this.data.asset = { transfers: [{ recipientId: "", amount }] };
+            this.data.asset = { recipients: [{ recipientId: "", amount }] };
         }
         return this;
     }
 
     public recipientId(recipientId: string): TransferBuilder {
-        if (this.data.asset && this.data.asset.transfers && this.data.asset.transfers.length > 0) {
-            this.data.asset = { transfers: [{ recipientId, amount: this.data.asset.transfers[0].amount }] };
+        if (this.data.asset && this.data.asset.recipients && this.data.asset.recipients.length > 0) {
+            this.data.asset = { recipients: [{ recipientId, amount: this.data.asset.recipients[0].amount }] };
         } else {
-            this.data.asset = { transfers: [{ recipientId, amount: BigNumber.ZERO }] };
+            this.data.asset = { recipients: [{ recipientId, amount: BigNumber.ZERO }] };
         }
         return this;
     }
@@ -42,13 +42,13 @@ export class TransferBuilder extends TransactionBuilder<TransferBuilder> {
     }
 
     public addTransfer(recipientId: string, amount: string): TransferBuilder {
-        if (this.data.asset && this.data.asset.transfers) {
-            const limit: number = configManager.getMilestone().transfer.maximum || 256;
-            if (this.data.asset.transfers.length >= limit) {
+        if (this.data.asset && this.data.asset.recipients) {
+            const limit: number = configManager.getMilestone().transfer.maximumRecipients;
+            if (this.data.asset.recipients.length >= limit) {
                 throw new MaximumTransferCountExceededError(limit);
             }
 
-            this.data.asset.transfers.push({
+            this.data.asset.recipients.push({
                 amount: BigNumber.make(amount),
                 recipientId,
             });

@@ -23,7 +23,7 @@ export class BlockWithTransactionsResource implements Resource {
         const totalTransferred: Utils.BigNumber = blockTransactions
             .filter((t) => t.typeGroup === Enums.TransactionTypeGroup.Core)
             .filter((t) => t.type === Enums.TransactionType.Core.Transfer)
-            .flatMap((t) => t.asset!.transfers)
+            .flatMap((t) => t.asset!.recipients)
             .reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO);
 
         const totalAmountTransferred: Utils.BigNumber = blockData.totalAmount.plus(totalTransferred);

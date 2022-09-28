@@ -143,7 +143,7 @@ export class TransactionFilter implements Contracts.Database.TransactionFilter {
             expressions: [
                 { op: "equal", property: "typeGroup", value: Enums.TransactionTypeGroup.Core },
                 { op: "equal", property: "type", value: Enums.TransactionType.Core.Transfer },
-                { op: "contains", property: "asset", value: { transfers: [{ recipientId: criteria }] } },
+                { op: "contains", property: "asset", value: { recipients: [{ recipientId: criteria }] } },
             ],
         };
 

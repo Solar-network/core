@@ -29,7 +29,7 @@ export class TransferTransactionHandler extends TransactionHandler {
 
         for await (const transaction of this.transactionHistoryService.streamByCriteria(criteria)) {
             AppUtils.assert.defined<string>(transaction.senderId);
-            AppUtils.assert.defined<object>(transaction.asset?.transfers);
+            AppUtils.assert.defined<object>(transaction.asset?.recipients);
 
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
             if (
@@ -40,7 +40,7 @@ export class TransferTransactionHandler extends TransactionHandler {
                 this.walletRepository.index(wallet);
             }
 
-            for (const transfer of transaction.asset.transfers) {
+            for (const transfer of transaction.asset.recipients) {
                 const recipient: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
                 recipient.increaseBalance(transfer.amount);
                 wallet.decreaseBalance(transfer.amount);
@@ -56,13 +56,13 @@ export class TransferTransactionHandler extends TransactionHandler {
         transaction: Interfaces.ITransaction,
         wallet: Contracts.State.Wallet,
     ): Promise<void> {
-        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
+        AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
 
-        const transfers: Interfaces.ITransferItem[] = transaction.data.asset.transfers;
-        const totalTransfersAmount = transfers.reduce((a, p) => a.plus(p.amount), Utils.BigNumber.ZERO);
+        const recipients: Interfaces.ITransferRecipient[] = transaction.data.asset.recipients;
+        const totalAmount = recipients.reduce((a, p) => a.plus(p.amount), Utils.BigNumber.ZERO);
 
-        if (wallet.getBalance().minus(totalTransfersAmount).minus(transaction.data.fee).isNegative()) {
-            throw new InsufficientBalanceError(totalTransfersAmount.plus(transaction.data.fee), wallet.getBalance());
+        if (wallet.getBalance().minus(totalAmount).minus(transaction.data.fee).isNegative()) {
+            throw new InsufficientBalanceError(totalAmount.plus(transaction.data.fee), wallet.getBalance());
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);
@@ -71,26 +71,23 @@ export class TransferTransactionHandler extends TransactionHandler {
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.applyToSender(transaction);
 
-        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
+        AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
 
-        const totalTransfersAmount = transaction.data.asset.transfers.reduce(
-            (a, p) => a.plus(p.amount),
-            Utils.BigNumber.ZERO,
-        );
+        const totalAmount = transaction.data.asset.recipients.reduce((a, p) => a.plus(p.amount), Utils.BigNumber.ZERO);
 
         AppUtils.assert.defined<string>(transaction.data.senderId);
 
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
-        senderWallet.decreaseBalance(totalTransfersAmount);
+        senderWallet.decreaseBalance(totalAmount);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         await super.revertForSender(transaction);
 
-        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
+        AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
 
-        const totalPaymentsAmount = transaction.data.asset.transfers.reduce(
+        const totalPaymentsAmount = transaction.data.asset.recipients.reduce(
             (a, p) => a.plus(p.amount),
             Utils.BigNumber.ZERO,
         );
@@ -103,9 +100,9 @@ export class TransferTransactionHandler extends TransactionHandler {
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
-        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
+        AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
 
-        for (const transfer of transaction.data.asset.transfers) {
+        for (const transfer of transaction.data.asset.recipients) {
             const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
             recipientWallet.increaseBalance(transfer.amount);
@@ -113,9 +110,9 @@ export class TransferTransactionHandler extends TransactionHandler {
     }
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
-        AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.data.asset?.transfers);
+        AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
 
-        for (const transfer of transaction.data.asset.transfers) {
+        for (const transfer of transaction.data.asset.recipients) {
             const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
             recipientWallet.decreaseBalance(transfer.amount);

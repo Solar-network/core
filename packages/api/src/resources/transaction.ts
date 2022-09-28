@@ -43,7 +43,7 @@ export class TransactionResource implements Resource {
             resource.type === Enums.TransactionType.Core.Transfer
         ) {
             amount = resource
-                .asset!.transfers!.reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO)
+                .asset!.recipients!.reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO)
                 .toFixed();
         }
 

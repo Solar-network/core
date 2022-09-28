@@ -2888,7 +2888,7 @@
                     "asset": {
                         "type": "object",
                         "example": {
-                            "transfers": [
+                            "recipients": [
                                 {
                                     "amount": "100000000",
                                     "recipientId": ""

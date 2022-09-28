@@ -36,12 +36,11 @@ const transactionType = (ajv: Ajv): void => {
                     parentObject &&
                     (!parentObject.typeGroup || parentObject.typeGroup === TransactionTypeGroup.Core)
                 ) {
-                    if (parentObject.asset && parentObject.asset.transfers) {
-                        const maxLimit: number = configManager.getMilestone().transfer.maximum || 256;
-                        const minLimit: number = configManager.getMilestone().transfer.minimum || 1;
+                    if (parentObject.asset && parentObject.asset.recipients) {
                         return (
-                            parentObject.asset.transfers.length >= minLimit &&
-                            parentObject.asset.transfers.length <= maxLimit
+                            parentObject.asset.recipients.length >= 1 &&
+                            parentObject.asset.recipients.length <=
+                                configManager.getMilestone().transfer.maximumRecipients
                         );
                     }
                 }

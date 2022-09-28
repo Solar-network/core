@@ -257,9 +257,9 @@ export class BlockState implements Contracts.State.BlockState {
             transaction.type === Enums.TransactionType.Core.Transfer &&
             transaction.typeGroup === Enums.TransactionTypeGroup.Core
         ) {
-            AppUtils.assert.defined<Interfaces.ITransferItem[]>(transaction.asset?.transfers);
+            AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.asset?.recipients);
 
-            for (const { recipientId } of transaction.asset.transfers) {
+            for (const { recipientId } of transaction.asset.recipients) {
                 const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(recipientId);
                 this.updateWalletVoteBalance(recipientWallet);
             }

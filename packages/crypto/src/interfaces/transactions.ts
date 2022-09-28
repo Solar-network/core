@@ -41,7 +41,7 @@ export interface ITransactionAsset {
     };
     votes?: string[] | object;
     ipfs?: string;
-    transfers?: ITransferItem[];
+    recipients?: ITransferRecipient[];
     lock?: IHtlcLockAsset;
     claim?: IHtlcClaimAsset;
     refund?: IHtlcRefundAsset;
@@ -121,7 +121,7 @@ export interface ISchemaValidationResult<T = any> {
     errors?: ErrorObject[] | undefined;
 }
 
-export interface ITransferItem {
+export interface ITransferRecipient {
     amount: BigNumber;
     recipientId: string;
 }

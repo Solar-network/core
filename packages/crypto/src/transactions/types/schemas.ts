@@ -299,9 +299,9 @@ export const transfer = extend(transactionBaseSchema, {
         fee: { bignumber: { minimum: 1 } },
         asset: {
             type: "object",
-            required: ["transfers"],
+            required: ["recipients"],
             properties: {
-                transfers: {
+                recipients: {
                     type: "array",
                     minItems: 1,
                     additionalItems: false,

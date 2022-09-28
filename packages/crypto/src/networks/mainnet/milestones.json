@@ -54,8 +54,7 @@
             "minimumVersions": [">=4.1.0"]
         },
         "transfer": {
-            "maximum": 256,
-            "minimum": 1
+            "maximumRecipients": 256
         },
         "reward": 0
     },
