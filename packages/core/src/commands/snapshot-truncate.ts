@@ -34,6 +34,7 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
+            .setFlag("emoji", "Show emoji in the output", Joi.boolean())
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)));
     }
@@ -50,6 +51,11 @@ export class Command extends Commands.Command {
 
         const flags: Contracts.AnyObject = { ...this.getFlags() };
         flags.processType = "snapshot";
+
+        const emoji: boolean | undefined = this.getFlag("emoji");
+        if (emoji !== undefined) {
+            process.env.CORE_LOG_EMOJI_DISABLED = (!emoji).toString();
+        }
 
         const app = await Utils.buildApplication({
             flags,

@@ -18,6 +18,7 @@ export class LogProcess {
     @inject(Identifiers.Environment)
     private readonly environment!: Environment;
 
+    private emoji: boolean = true;
     private levels: Record<string, number> = {};
 
     private logLevel: number = this.levels["debug"];
@@ -35,9 +36,26 @@ export class LogProcess {
             }
         }
 
+        if (process.env.CORE_LOG_EMOJI_DISABLED !== undefined) {
+            this.emoji = process.env.CORE_LOG_EMOJI_DISABLED.toLowerCase() !== "true";
+        }
+
+        if (this.levels[process.env.CORE_LOG_LEVEL!] !== undefined) {
+            this.logLevel = this.levels[process.env.CORE_LOG_LEVEL!];
+        }
+
         try {
             const env: Record<string, string> = parseFileSync(this.app.getCorePath("config", ".env"));
-            this.logLevel = this.levels[env.CORE_LOG_LEVEL] ?? this.logLevel;
+            if (process.env.CORE_LOG_EMOJI_DISABLED === undefined && env.CORE_LOG_EMOJI_DISABLED !== undefined) {
+                this.emoji = env.CORE_LOG_EMOJI_DISABLED.toLowerCase() !== "true";
+            }
+
+            if (
+                this.levels[process.env.CORE_LOG_LEVEL!] === undefined &&
+                this.levels[env.CORE_LOG_LEVEL] !== undefined
+            ) {
+                this.logLevel = this.levels[env.CORE_LOG_LEVEL];
+            }
         } catch {
             //
         }
@@ -103,7 +121,7 @@ export class LogProcess {
 
         return `${cyan(dateformat(new Date(time), "yyyy-mm-dd HH:MM:ss.l"))} ${colour(
             `[${level.toUpperCase().slice(0, 1)}]`,
-        )} ${emoji}\t${colour(message)}`;
+        )} ${this.emoji ? `${emoji}\t` : ""}${colour(message)}`;
     }
 
     private readLastLines(process: string, file: string, lines: number): string {

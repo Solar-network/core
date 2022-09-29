@@ -37,6 +37,7 @@ export class Command extends Commands.Command {
      */
     public configure(): void {
         this.definition
+            .setFlag("emoji", "Show emoji in the output", Joi.boolean())
             .setFlag("token", "The name of the token", Joi.string().default("solar"))
             .setFlag("network", "The name of the network", Joi.string().valid(...Object.keys(Networks)))
             .setFlag("height", "The height after the roll back", Joi.number())
@@ -52,6 +53,11 @@ export class Command extends Commands.Command {
     public async execute(): Promise<void> {
         this.actions.abortRunningProcess("core");
         this.actions.abortRunningProcess("relay");
+
+        const emoji: boolean | undefined = this.getFlag("emoji");
+        if (emoji !== undefined) {
+            process.env.CORE_LOG_EMOJI_DISABLED = (!emoji).toString();
+        }
 
         const flags: Contracts.AnyObject = { ...this.getFlags() };
         flags.processType = "snapshot";

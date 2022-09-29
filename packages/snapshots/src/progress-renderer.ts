@@ -84,8 +84,11 @@ export class ProgressRenderer {
     }
 
     private render(): void {
+        const showEmoji: boolean = process.env.CORE_LOG_EMOJI_DISABLED?.toLowerCase() !== "true";
         this.spinner.text = magenta(
-            ` Blocks: ${this.progress.blocks} % Transactions: ${this.progress.transactions} % Rounds: ${this.progress.rounds} %`,
+            `${showEmoji ? " " : ""}Blocks: ${this.progress.blocks} % Transactions: ${
+                this.progress.transactions
+            } % Rounds: ${this.progress.rounds} %`,
         );
     }
 }

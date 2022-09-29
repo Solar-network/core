@@ -121,11 +121,12 @@ export class PinoLogger implements Contracts.Kernel.Logger {
     }
 
     private createPrettyTransport(): Transform {
+        const showEmoji: boolean = process.env.CORE_LOG_EMOJI_DISABLED?.toLowerCase() !== "true";
         return new Transform({
             transform(chunk, enc, cb) {
                 try {
                     const { emoji, level, message } = JSON.parse(chunk);
-                    return cb(undefined, `${emoji} ${Utils.logColour(level)(message)}\n`);
+                    return cb(undefined, `${showEmoji ? `${emoji} ` : ""}${Utils.logColour(level)(message)}\n`);
                 } catch {
                     //
                 }
