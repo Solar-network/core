@@ -121,7 +121,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
     }
 
     private createPrettyTransport(): Transform {
-        const showEmoji: boolean = process.env.CORE_LOG_EMOJI_DISABLED?.toLowerCase() !== "true";
+        const showEmoji: boolean = process.env.SOLAR_CORE_LOG_EMOJI_DISABLED?.toLowerCase() !== "true";
         return new Transform({
             transform(chunk, enc, cb) {
                 try {

@@ -48,7 +48,7 @@ export class DatabaseInteraction {
 
             this.stateStore.setGenesisBlock(genesisBlock!);
 
-            if (process.env.CORE_RESET_DATABASE) {
+            if (process.env.SOLAR_CORE_RESET_DATABASE?.toLowerCase() === "true") {
                 await this.reset();
             }
 

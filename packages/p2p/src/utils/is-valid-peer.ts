@@ -3,7 +3,7 @@ import os from "os";
 
 const validRanges = ["unicast"];
 
-if (process.env.CORE_P2P_ALLOW_PRIVATE_IP_RANGES) {
+if (process.env.SOLAR_CORE_P2P_ALLOW_PRIVATE_IP_RANGES?.toLowerCase() === "true") {
     validRanges.push(...["linkLocal", "private", "uniqueLocal"]);
 }
 

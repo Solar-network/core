@@ -1,9 +1,11 @@
 export const defaults = {
+    enabled: process.env.SOLAR_CORE_P2P_DISABLED?.toLowerCase() !== "true",
+
     server: {
-        banSeconds: process.env.CORE_P2P_BAN_SECONDS || 10,
-        hostname: process.env.CORE_P2P_HOST || "0.0.0.0",
-        port: process.env.CORE_P2P_PORT || 4002,
-        logLevel: process.env.CORE_NETWORK_NAME === "testnet" ? 1 : 0,
+        banSeconds: process.env.SOLAR_CORE_P2P_BAN_SECONDS || 10,
+        hostname: process.env.SOLAR_CORE_P2P_HOST || "0.0.0.0",
+        port: process.env.SOLAR_CORE_P2P_PORT || 4002,
+        logLevel: process.env.SOLAR_CORE_NETWORK_NAME === "testnet" ? 1 : 0,
     },
     /**
      * The minimum peer version we expect
@@ -12,7 +14,7 @@ export const defaults = {
     /**
      * The number of peers we expect to be available to start a relay
      */
-    minimumNetworkReach: process.env.CORE_P2P_MIN_NETWORK_REACH || 20,
+    minimumNetworkReach: process.env.SOLAR_CORE_P2P_MIN_NETWORK_REACH || 20,
     /**
      * The timeout to verify a peer. [milliseconds]
      */
@@ -25,11 +27,11 @@ export const defaults = {
     /**
      * The maximum authorised number of peers sharing same ip /24 subnet
      */
-    maxSameSubnetPeers: process.env.CORE_P2P_MAX_PEERS_SAME_SUBNET || 256,
+    maxSameSubnetPeers: process.env.SOLAR_CORE_P2P_MAX_PEERS_SAME_SUBNET || 256,
     /**
      * The maximum peer consecutive errors before peer is forget from peer store.
      */
-    maxPeerSequentialErrors: process.env.CORE_P2P_MAX_PEER_SEQUENTIAL_ERRORS || 3,
+    maxPeerSequentialErrors: process.env.SOLAR_CORE_P2P_MAX_PEER_SEQUENTIAL_ERRORS || 3,
     /**
      * The list of IPs we allow to be added to the peer list.
      */
@@ -67,6 +69,6 @@ export const defaults = {
     /**
      * Rate limit config
      */
-    rateLimit: process.env.CORE_P2P_RATE_LIMIT || 100, // max number of messages per second per socket connection
-    rateLimitPostTransactions: process.env.CORE_P2P_RATE_LIMIT_POST_TRANSACTIONS || 25, // postTransactions endpoint
+    rateLimit: process.env.SOLAR_CORE_P2P_RATE_LIMIT || 100, // max number of messages per second per socket connection
+    rateLimitPostTransactions: process.env.SOLAR_CORE_P2P_RATE_LIMIT_POST_TRANSACTIONS || 25, // postTransactions endpoint
 };

@@ -186,6 +186,6 @@ export class SnapshotService implements Contracts.Snapshot.SnapshotService {
     }
 
     private forceIntegrityCheckOnNextBoot(): void {
-        closeSync(openSync(`${process.env.CORE_PATH_TEMP}/force-integrity-check.lock`, "w"));
+        closeSync(openSync(`${process.env.SOLAR_CORE_PATH_TEMP}/force-integrity-check.lock`, "w"));
     }
 }

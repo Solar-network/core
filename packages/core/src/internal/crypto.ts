@@ -4,8 +4,8 @@ import { join } from "path";
 import { KeysNotDetected, MissingConfigFile } from "../exceptions/crypto";
 
 export const checkForPrivateKeys = (config?: string): void => {
-    if (!config && process.env.CORE_PATH_CONFIG) {
-        config = process.env.CORE_PATH_CONFIG;
+    if (!config && process.env.SOLAR_CORE_PATH_CONFIG) {
+        config = process.env.SOLAR_CORE_PATH_CONFIG;
     }
 
     const configDelegates = join(config!, "delegates.json");

@@ -41,7 +41,7 @@ export class RegisterBasePaths implements Bootstrapper {
         const paths: Array<[string, string]> = Object.entries(envPaths(this.app.token(), { suffix: "core" }));
 
         for (let [type, path] of paths) {
-            const processPath: string | undefined = process.env[`CORE_PATH_${type.toUpperCase()}`];
+            const processPath: string | undefined = process.env[`SOLAR_CORE_PATH_${type.toUpperCase()}`];
 
             if (processPath) {
                 // 1. Check if a path is defined via process variables.
@@ -60,7 +60,7 @@ export class RegisterBasePaths implements Bootstrapper {
 
             ensureDirSync(path);
 
-            set(process.env, `CORE_PATH_${type.toUpperCase()}`, path);
+            set(process.env, `SOLAR_CORE_PATH_${type.toUpperCase()}`, path);
 
             const pathMethod: string | undefined = camelCase(`use_${type}_path`);
 

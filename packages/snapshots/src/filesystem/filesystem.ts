@@ -16,7 +16,7 @@ export class Filesystem {
     public getSnapshotPath(): string {
         Utils.assert.defined<string>(this.snapshot);
 
-        return `${process.env.CORE_PATH_DATA}/snapshots/${this.snapshot}/`;
+        return `${process.env.SOLAR_CORE_PATH_DATA}/snapshots/${this.snapshot}/`;
     }
 
     public async deleteSnapshot(): Promise<void> {

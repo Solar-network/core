@@ -634,7 +634,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
         }
         switch (severity) {
             case Severity.DEBUG_EXTRA:
-                if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
+                if (process.env.SOLAR_CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA?.toLowerCase() === "true") {
                     this.logger.debug(fullMsg, emoji);
                 }
                 break;

@@ -68,7 +68,7 @@ export class NPM extends AbstractSource {
      * @memberof NPM
      */
     private async getPackage(value: string, version?: string): Promise<{ name: string; tarball: string }> {
-        const registry = process.env.CORE_NPM_REGISTRY || "https://registry.npmjs.org";
+        const registry = process.env.SOLAR_CORE_NPM_REGISTRY || "https://registry.npmjs.org";
         const { body } = await got(`${registry}/${value}`);
 
         const response: {
@@ -87,7 +87,7 @@ export class NPM extends AbstractSource {
     }
 
     private async getLatestPackageVersion(value: string, channel: string): Promise<string> {
-        const registry = process.env.CORE_NPM_REGISTRY || "https://registry.npmjs.org";
+        const registry = process.env.SOLAR_CORE_NPM_REGISTRY || "https://registry.npmjs.org";
         const { body } = await got(`${registry}/${value}`);
 
         const response = JSON.parse(body);

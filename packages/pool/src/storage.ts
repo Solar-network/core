@@ -17,7 +17,7 @@ export class Storage implements Contracts.Pool.Storage {
     private flushStmt!: BetterSqlite3.Statement<never[]>;
 
     public boot(): void {
-        const clearLock: string = `${process.env.CORE_PATH_TEMP}/clear-pool.lock`;
+        const clearLock: string = `${process.env.SOLAR_CORE_PATH_TEMP}/clear-pool.lock`;
         const filename = this.configuration.getRequired<string>("storage");
 
         if (existsSync(clearLock)) {

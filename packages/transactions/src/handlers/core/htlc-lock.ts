@@ -100,7 +100,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
         const expiration: Interfaces.IHtlcExpiration = lock.expiration;
 
         // TODO: find a better way to alter minimum lock expiration
-        if (process.env.CORE_ENV === "test") {
+        if (process.env.SOLAR_CORE_ENV === "test") {
             blockTime = 0;
             activeDelegates = 0;
         }

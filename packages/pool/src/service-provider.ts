@@ -65,7 +65,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
     public configSchema(): object {
         return Joi.object({
-            enabled: Joi.bool().required(),
             storage: Joi.string().required(),
             maxTransactionsInPool: Joi.number().integer().min(1).required(),
             maxTransactionsPerSender: Joi.number().integer().min(1).required(),

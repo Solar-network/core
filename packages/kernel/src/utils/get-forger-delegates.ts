@@ -6,7 +6,7 @@ export const getForgerDelegates = (): string[] => {
 
 export const sendForgerSignal = (signal: string | number): string[] => {
     try {
-        const { pid, publicKeys } = readJsonSync(`${process.env.CORE_PATH_TEMP}/forger.json`);
+        const { pid, publicKeys } = readJsonSync(`${process.env.SOLAR_CORE_PATH_TEMP}/forger.json`);
         process.kill(pid, signal);
         return publicKeys;
     } catch {

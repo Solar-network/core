@@ -73,7 +73,7 @@ export class LocalConfigLoader implements ConfigLoader {
 
             const config: Record<string, Primitive>[] = [
                 dotenv.parseFile(this.app.environmentFile()),
-                dotenv.parseFile(`${home}/.${process.env.CORE_TOKEN}/.env`),
+                dotenv.parseFile(`${home}/.${process.env.SOLAR_CORE_TOKEN}/.env`),
             ];
 
             config.forEach((configuration, index) => {

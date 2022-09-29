@@ -51,7 +51,7 @@ export class Initialise implements Action {
                 .get<Contracts.State.StateLoader>(Container.Identifiers.StateLoader)
                 .run();
 
-            const forceIntegrityCheckLock: string = `${process.env.CORE_PATH_TEMP}/force-integrity-check.lock`;
+            const forceIntegrityCheckLock: string = `${process.env.SOLAR_CORE_PATH_TEMP}/force-integrity-check.lock`;
             let forceIntegrityCheck: boolean = false;
 
             if (existsSync(forceIntegrityCheckLock)) {

@@ -64,7 +64,7 @@ export class DaemoniseProcess {
                     ...{
                         env: {
                             NODE_ENV: "production",
-                            CORE_ENV: flags.env,
+                            SOLAR_CORE_ENV: flags.env,
                         },
                     },
                 },

@@ -138,7 +138,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         this.dispatch("START");
 
-        if (skipStartedCheck || process.env.CORE_SKIP_BLOCKCHAIN_STARTED_CHECK) {
+        if (skipStartedCheck || process.env.SOLAR_CORE_SKIP_BLOCKCHAIN_STARTED_CHECK?.toLowerCase() === "true") {
             return true;
         }
 

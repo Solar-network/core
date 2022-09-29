@@ -33,7 +33,7 @@ export class DatabaseService {
 
     public async initialise(): Promise<void> {
         try {
-            if (process.env.CORE_RESET_DATABASE) {
+            if (process.env.SOLAR_CORE_RESET_DATABASE?.toLowerCase() === "true") {
                 await this.reset();
             }
         } catch (error) {

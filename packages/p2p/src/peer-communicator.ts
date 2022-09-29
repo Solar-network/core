@@ -144,7 +144,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             throw new PeerStatusResponseError(peer.ip);
         }
 
-        if (process.env.CORE_SKIP_PEER_STATE_VERIFICATION !== "true") {
+        if (process.env.SOLAR_CORE_SKIP_PEER_STATE_VERIFICATION !== "true") {
             if (!this.validatePeerConfig(peer, pingResponse.config)) {
                 throw new PeerVerificationFailedError();
             }
@@ -410,7 +410,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
         const { error } = Validation.validator.validate(schema, reply);
         if (error) {
-            if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
+            if (process.env.SOLAR_CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA?.toLowerCase() === "true") {
                 this.logger.debug(`Got unexpected reply from ${peer.url}/${endpoint}: ${error}`, "❌");
             }
 
@@ -507,12 +507,12 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 this.logger.debug(`Socket data validation error (peer ${peer.ip}) : ${error.message}`, "❌");
                 break;
             case "Error":
-                if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
+                if (process.env.SOLAR_CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA?.toLowerCase() === "true") {
                     this.logger.debug(`Response error (peer ${peer.ip}/${event}) : ${error.message}`, "❌");
                 }
                 break;
             default:
-                if (process.env.CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA) {
+                if (process.env.SOLAR_CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA?.toLowerCase() === "true") {
                     this.logger.debug(`Socket error (peer ${peer.ip}): ${error.message}`, "❌");
                 }
                 if (disconnect) {

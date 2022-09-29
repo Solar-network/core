@@ -2,7 +2,7 @@ export enum Severity {
     /**
      * Printed at every step of the verification, even if leading to a successful verification.
      * Multiple such messages are printed even for successfully verified peers. To enable these
-     * messages define CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA in the environment.
+     * messages define SOLAR_CORE_P2P_PEER_VERIFIER_DEBUG_EXTRA in the environment.
      */
     DEBUG_EXTRA,
 

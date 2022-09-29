@@ -143,7 +143,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         if (monitor.isColdStart()) {
             monitor.completeColdStart();
             return new NetworkState(NetworkStateStatus.ColdStart, lastBlock, monitor);
-        } else if (process.env.CORE_ENV === "test") {
+        } else if (process.env.SOLAR_CORE_ENV === "test") {
             return new NetworkState(NetworkStateStatus.Test, lastBlock, monitor);
         } else if (peers.flatMap((peer) => peer.publicKeys).length < minimumDelegateReach) {
             return new NetworkState(NetworkStateStatus.BelowMinimumDelegates, lastBlock, monitor);

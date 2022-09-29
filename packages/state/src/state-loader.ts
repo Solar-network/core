@@ -59,7 +59,7 @@ export class StateLoader {
             }
         }
 
-        const clearLock: string = `${process.env.CORE_PATH_TEMP}/clear-saved-states.lock`;
+        const clearLock: string = `${process.env.SOLAR_CORE_PATH_TEMP}/clear-saved-states.lock`;
 
         if (existsSync(clearLock)) {
             try {

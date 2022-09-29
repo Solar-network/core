@@ -47,7 +47,10 @@ export class Service implements Contracts.Pool.Service {
         this.events.listen(Enums.CryptoEvent.MilestoneChanged, this);
         this.events.listen(Enums.StateEvent.BuilderFinished, this);
 
-        if (process.env.CORE_RESET_DATABASE || process.env.CORE_RESET_POOL) {
+        if (
+            process.env.SOLAR_CORE_RESET_DATABASE?.toLowerCase() === "true" ||
+            process.env.SOLAR_CORE_RESET_POOL?.toLowerCase() === "true"
+        ) {
             await this.flush();
         }
     }

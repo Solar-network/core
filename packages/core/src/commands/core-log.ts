@@ -58,7 +58,7 @@ export class Command extends Commands.Command {
                 "The log level",
                 Joi.string()
                     .valid(...levels)
-                    .default(process.env.CORE_LOG_LEVEL ?? ""),
+                    .default(process.env.SOLAR_CORE_LOG_LEVEL ?? ""),
             )
             .setFlag("lines", "The number of lines to output", Joi.number().default(15));
     }
@@ -72,12 +72,12 @@ export class Command extends Commands.Command {
     public async execute(): Promise<void> {
         const emoji: boolean | undefined = this.getFlag("emoji");
         if (emoji !== undefined) {
-            process.env.CORE_LOG_EMOJI_DISABLED = (!emoji).toString();
+            process.env.SOLAR_CORE_LOG_EMOJI_DISABLED = (!emoji).toString();
         }
 
         const level: string = this.getFlag("level");
         if (level !== "") {
-            process.env.CORE_LOG_LEVEL = level;
+            process.env.SOLAR_CORE_LOG_LEVEL = level;
         }
 
         await this.app

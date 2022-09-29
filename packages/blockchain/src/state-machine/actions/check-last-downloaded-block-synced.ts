@@ -68,7 +68,7 @@ export class CheckLastDownloadedBlockSynced implements Action {
             event = "SYNCED";
         }
 
-        if (process.env.CORE_ENV === "test") {
+        if (process.env.SOLAR_CORE_ENV === "test") {
             event = "TEST";
         }
 

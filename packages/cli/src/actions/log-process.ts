@@ -36,25 +36,28 @@ export class LogProcess {
             }
         }
 
-        if (process.env.CORE_LOG_EMOJI_DISABLED !== undefined) {
-            this.emoji = process.env.CORE_LOG_EMOJI_DISABLED.toLowerCase() !== "true";
+        if (process.env.SOLAR_CORE_LOG_EMOJI_DISABLED !== undefined) {
+            this.emoji = process.env.SOLAR_CORE_LOG_EMOJI_DISABLED.toLowerCase() !== "true";
         }
 
-        if (this.levels[process.env.CORE_LOG_LEVEL!] !== undefined) {
-            this.logLevel = this.levels[process.env.CORE_LOG_LEVEL!];
+        if (this.levels[process.env.SOLAR_CORE_LOG_LEVEL!] !== undefined) {
+            this.logLevel = this.levels[process.env.SOLAR_CORE_LOG_LEVEL!];
         }
 
         try {
             const env: Record<string, string> = parseFileSync(this.app.getCorePath("config", ".env"));
-            if (process.env.CORE_LOG_EMOJI_DISABLED === undefined && env.CORE_LOG_EMOJI_DISABLED !== undefined) {
-                this.emoji = env.CORE_LOG_EMOJI_DISABLED.toLowerCase() !== "true";
+            if (
+                process.env.SOLAR_CORE_LOG_EMOJI_DISABLED === undefined &&
+                env.SOLAR_CORE_LOG_EMOJI_DISABLED !== undefined
+            ) {
+                this.emoji = env.SOLAR_CORE_LOG_EMOJI_DISABLED.toLowerCase() !== "true";
             }
 
             if (
-                this.levels[process.env.CORE_LOG_LEVEL!] === undefined &&
-                this.levels[env.CORE_LOG_LEVEL] !== undefined
+                this.levels[process.env.SOLAR_CORE_LOG_LEVEL!] === undefined &&
+                this.levels[env.SOLAR_CORE_LOG_LEVEL] !== undefined
             ) {
-                this.logLevel = this.levels[env.CORE_LOG_LEVEL];
+                this.logLevel = this.levels[env.SOLAR_CORE_LOG_LEVEL];
             }
         } catch {
             //

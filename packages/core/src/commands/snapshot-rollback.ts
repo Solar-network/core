@@ -56,7 +56,7 @@ export class Command extends Commands.Command {
 
         const emoji: boolean | undefined = this.getFlag("emoji");
         if (emoji !== undefined) {
-            process.env.CORE_LOG_EMOJI_DISABLED = (!emoji).toString();
+            process.env.SOLAR_CORE_LOG_EMOJI_DISABLED = (!emoji).toString();
         }
 
         const flags: Contracts.AnyObject = { ...this.getFlags() };

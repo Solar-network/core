@@ -565,7 +565,7 @@ export class ForgerService {
         if (!this.initialised) {
             AppUtils.sendForgerSignal("SIGTERM");
 
-            const jsonFile: string = `${process.env.CORE_PATH_TEMP}/forger.json`;
+            const jsonFile: string = `${process.env.SOLAR_CORE_PATH_TEMP}/forger.json`;
             try {
                 writeJsonSync(jsonFile, {
                     pid: process.pid,
