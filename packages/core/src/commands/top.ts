@@ -60,7 +60,7 @@ export class Command extends Commands.Command {
      */
     public async execute(): Promise<void> {
         const processes: Contracts.ProcessDescription[] = (this.processManager.list() || []).filter(
-            (p: Contracts.ProcessDescription) => p.name.startsWith(this.getFlag("token")),
+            (p: Contracts.ProcessDescription) => ["core", "forger", "relay"].includes(p.name),
         );
 
         if (!processes || !Object.keys(processes).length) {
