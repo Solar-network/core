@@ -349,8 +349,8 @@ export class SXPSwap {
                         throw new TransactionNotValidError();
                     }
 
-                    if (!amount.isEqualTo(transactionData.amount)) {
-                        throw new TransactionHasWrongAmountError(transactionData.amount, amount);
+                    if (!amount.isEqualTo(transactionData.amount!)) {
+                        throw new TransactionHasWrongAmountError(transactionData.amount!, amount);
                     }
 
                     if (sxpAddress !== transactionData.recipientId) {

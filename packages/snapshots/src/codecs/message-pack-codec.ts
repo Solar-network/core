@@ -125,7 +125,7 @@ export class MessagePackCodec implements Codec {
                 recipientId: transaction.data.recipientId!,
                 type: transaction.data.type,
                 memo: transaction.data.memo,
-                amount: transaction.data.amount,
+                amount: transaction.data.amount!,
                 fee: transaction.data.fee,
                 burnedFee: burnedFee,
                 serialised: serialised,

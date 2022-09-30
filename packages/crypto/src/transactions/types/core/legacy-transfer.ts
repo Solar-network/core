@@ -26,7 +26,7 @@ export abstract class LegacyTransferTransaction extends Transaction {
     public serialise(options?: ISerialiseOptions): ByteBuffer | undefined {
         const { data } = this;
         const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(33));
-        buf.writeBigUInt64LE(data.amount.toBigInt());
+        buf.writeBigUInt64LE(data.amount!.toBigInt());
         buf.writeUInt32LE(data.expiration || 0);
 
         if (data.recipientId) {

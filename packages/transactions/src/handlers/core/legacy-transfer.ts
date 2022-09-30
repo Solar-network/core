@@ -4,8 +4,6 @@ import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 import { isRecipientOnActiveNetwork } from "../../utils";
 import { TransactionHandler, TransactionHandlerConstructor } from "../transaction";
 
-// todo: revisit the implementation, container usage and arguments after database rework
-// todo: replace unnecessary function arguments with dependency injection to avoid passing around references
 @Container.injectable()
 export class LegacyTransferTransactionHandler extends TransactionHandler {
     @Container.inject(Container.Identifiers.TransactionHistoryService)
@@ -73,7 +71,7 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
             transaction.data.recipientId,
         );
 
-        recipientWallet.increaseBalance(transaction.data.amount);
+        recipientWallet.increaseBalance(transaction.data.amount!);
     }
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
@@ -83,6 +81,6 @@ export class LegacyTransferTransactionHandler extends TransactionHandler {
             transaction.data.recipientId,
         );
 
-        recipientWallet.decreaseBalance(transaction.data.amount);
+        recipientWallet.decreaseBalance(transaction.data.amount!);
     }
 }

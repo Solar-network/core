@@ -128,7 +128,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
 
         const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const lockedBalance = senderWallet.getAttribute<Utils.BigNumber>("htlc.lockedBalance", Utils.BigNumber.ZERO);
-        senderWallet.setAttribute("htlc.lockedBalance", lockedBalance.plus(transaction.data.amount));
+        senderWallet.setAttribute("htlc.lockedBalance", lockedBalance.plus(transaction.data.amount!));
 
         this.walletRepository.index(senderWallet);
     }
@@ -140,7 +140,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
 
         const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const lockedBalance = senderWallet.getAttribute<Utils.BigNumber>("htlc.lockedBalance", Utils.BigNumber.ZERO);
-        const newLockedBalance = lockedBalance.minus(transaction.data.amount);
+        const newLockedBalance = lockedBalance.minus(transaction.data.amount!);
         const pendingBalance: Utils.BigNumber = senderWallet.getAttribute("htlc.pendingBalance", Utils.BigNumber.ZERO);
 
         if (newLockedBalance.isZero()) {
@@ -165,7 +165,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
         const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const locks = senderWallet.getAttribute<Interfaces.IHtlcLocks>("htlc.locks", {});
         locks[transaction.id] = {
-            amount: transaction.data.amount,
+            amount: transaction.data.amount!,
             recipientId: transaction.data.recipientId,
             senderId: transaction.data.senderId,
             timestamp: transaction.timestamp,
@@ -182,7 +182,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
             "htlc.pendingBalance",
             Utils.BigNumber.ZERO,
         );
-        recipientWallet.setAttribute("htlc.pendingBalance", pendingBalance.plus(transaction.data.amount));
+        recipientWallet.setAttribute("htlc.pendingBalance", pendingBalance.plus(transaction.data.amount!));
 
         this.walletRepository.index(recipientWallet);
         this.walletRepository.index(senderWallet);
@@ -211,7 +211,7 @@ export class HtlcLockTransactionHandler extends TransactionHandler {
             "htlc.pendingBalance",
             Utils.BigNumber.ZERO,
         );
-        const newPendingBalance = pendingBalance.minus(transaction.data.amount);
+        const newPendingBalance = pendingBalance.minus(transaction.data.amount!);
 
         const lockedBalance: Utils.BigNumber = recipientWallet.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO);
 

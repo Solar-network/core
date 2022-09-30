@@ -55,8 +55,8 @@ export class BurnTransactionHandler extends TransactionHandler {
         const { data }: Interfaces.ITransaction = transaction;
         const txAmount = +milestone.burn.txAmount;
 
-        if (data.amount.isLessThan(txAmount)) {
-            throw new InsufficientBurnAmountError(data.amount, Utils.BigNumber.make(txAmount));
+        if (data.amount!.isLessThan(txAmount)) {
+            throw new InsufficientBurnAmountError(data.amount!, Utils.BigNumber.make(txAmount));
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);

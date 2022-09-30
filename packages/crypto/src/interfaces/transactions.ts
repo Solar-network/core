@@ -60,7 +60,7 @@ export interface ITransactionData {
 
     fee: BigNumber;
     burnedFee?: BigNumber;
-    amount: BigNumber;
+    amount?: BigNumber;
 
     expiration?: number;
     recipientId?: string;
