@@ -2,8 +2,7 @@ import { Interfaces } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 import assert from "assert";
 
-import { BlockRepository } from "./repositories/block-repository";
-import { TransactionRepository } from "./repositories/transaction-repository";
+import { BlockRepository, TransactionRepository } from "./repositories";
 
 @Container.injectable()
 export class TransactionHistoryService implements Contracts.Shared.TransactionHistoryService {
@@ -42,7 +41,7 @@ export class TransactionHistoryService implements Contracts.Shared.TransactionHi
         return this.modelConverter.getTransactionData(models);
     }
 
-    public async *streamByCriteria(
+    public async *fetchByCriteria(
         criteria: Contracts.Search.OrCriteria<Contracts.Shared.TransactionCriteria>,
     ): AsyncIterable<Interfaces.ITransactionData> {
         const expression = await this.transactionFilter.getExpression(criteria);
@@ -50,7 +49,7 @@ export class TransactionHistoryService implements Contracts.Shared.TransactionHi
             { property: "blockHeight", direction: "asc" },
             { property: "sequence", direction: "asc" },
         ];
-        for await (const model of this.transactionRepository.streamByExpression(expression, sorting)) {
+        for await (const model of this.transactionRepository.fetchByExpression(expression, sorting)) {
             yield this.modelConverter.getTransactionData([model])[0];
         }
     }
@@ -61,15 +60,17 @@ export class TransactionHistoryService implements Contracts.Shared.TransactionHi
                 offset: 0,
                 limit: 100,
             })
-        ).results.map((transaction: Interfaces.ITransactionData) => {
+        ).results.map((transactionData: Interfaces.ITransactionData) => {
             return {
-                amount: transaction.amount && transaction.amount.isGreaterThan(0) ? transaction.amount : undefined,
-                asset: transaction.asset,
-                id: transaction.id,
-                recipient: transaction.recipientId,
-                sender: transaction.senderId,
-                type: transaction.type,
-                typeGroup: transaction.typeGroup,
+                amount:
+                    transactionData.amount && transactionData.amount.isGreaterThan(0)
+                        ? transactionData.amount
+                        : undefined,
+                asset: transactionData.asset,
+                id: transactionData.id,
+                recipient: transactionData.recipientId,
+                sender: transactionData.senderId,
+                type: transactionData.type,
             };
         });
     }
@@ -78,10 +79,10 @@ export class TransactionHistoryService implements Contracts.Shared.TransactionHi
         criteria: Contracts.Shared.OrTransactionCriteria,
         sorting: Contracts.Search.Sorting,
         pagination: Contracts.Search.Pagination,
-        options?: Contracts.Search.Options,
+        count: boolean = true,
     ): Promise<Contracts.Search.ResultsPage<Interfaces.ITransactionData>> {
         const expression = await this.transactionFilter.getExpression(criteria);
-        const resultsPage = await this.transactionRepository.listByExpression(expression, sorting, pagination, options);
+        const resultsPage = await this.transactionRepository.listByExpression(expression, sorting, pagination, count);
         const models = resultsPage.results;
         const data = this.modelConverter.getTransactionData(models);
         return { ...resultsPage, results: data };
@@ -100,7 +101,7 @@ export class TransactionHistoryService implements Contracts.Shared.TransactionHi
         const transactionExpression = await this.transactionFilter.getExpression(transactionCriteria);
         const transactionModels = await this.transactionRepository.findManyByExpression(transactionExpression);
 
-        const blockCriteria = { id: transactionModels.map((t) => t.blockId) };
+        const blockCriteria = { height: transactionModels.map((t) => t.blockHeight) };
         const blockExpression = await this.blockFilter.getExpression(blockCriteria);
         const blockModels = await this.blockRepository.findManyByExpression(blockExpression);
 
@@ -111,18 +112,16 @@ export class TransactionHistoryService implements Contracts.Shared.TransactionHi
         transactionCriteria: Contracts.Shared.OrTransactionCriteria,
         sorting: Contracts.Search.Sorting,
         pagination: Contracts.Search.Pagination,
-        options?: Contracts.Search.Options,
     ): Promise<Contracts.Search.ResultsPage<Contracts.Shared.TransactionDataWithBlockData>> {
         const transactionExpression = await this.transactionFilter.getExpression(transactionCriteria);
         const transactionModelResultsPage = await this.transactionRepository.listByExpression(
             transactionExpression,
             sorting,
             pagination,
-            options,
         );
         const transactionModels = transactionModelResultsPage.results;
 
-        const blockCriteria = { id: transactionModels.map((t) => t.blockId) };
+        const blockCriteria = { height: transactionModels.map((t) => t.blockHeight) };
         const blockExpression = await this.blockFilter.getExpression(blockCriteria);
         const blockModels = await this.blockRepository.findManyByExpression(blockExpression);
 

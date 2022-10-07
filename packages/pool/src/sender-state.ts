@@ -1,5 +1,5 @@
 import { Interfaces, Managers } from "@solar-network/crypto";
-import { Container, Contracts, Enums, Providers, Services } from "@solar-network/kernel";
+import { Container, Contracts, Providers, Services } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
 import {
@@ -8,7 +8,6 @@ import {
     TransactionFailedToApplyError,
     TransactionFailedToVerifyError,
     TransactionFromWrongNetworkError,
-    TransactionHasExpiredError,
 } from "./errors";
 
 @Container.injectable()
@@ -21,14 +20,8 @@ export class SenderState implements Contracts.Pool.SenderState {
     @Container.tagged("state", "copy-on-write")
     private readonly handlerRegistry!: Handlers.Registry;
 
-    @Container.inject(Container.Identifiers.PoolExpirationService)
-    private readonly expirationService!: Contracts.Pool.ExpirationService;
-
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
-
-    @Container.inject(Container.Identifiers.EventDispatcherService)
-    private readonly events!: Contracts.Kernel.EventDispatcher;
 
     private corrupt = false;
 
@@ -43,14 +36,8 @@ export class SenderState implements Contracts.Pool.SenderState {
             throw new TransactionFromWrongNetworkError(transaction, currentNetwork);
         }
 
-        if (this.expirationService.isExpired(transaction)) {
-            this.events.dispatch(Enums.TransactionEvent.Expired, transaction.data);
-            const expirationHeight: number = this.expirationService.getExpirationHeight(transaction);
-            throw new TransactionHasExpiredError(transaction, expirationHeight);
-        }
-
-        const handler: Handlers.TransactionHandler = await this.handlerRegistry.getActivatedHandlerForData(
-            transaction.data,
+        const handler: Handlers.TransactionHandler = await this.handlerRegistry.getActivatedHandlerForTransaction(
+            transaction,
         );
 
         if (await this.triggers.call("verifyTransaction", { handler, transaction })) {
@@ -71,8 +58,8 @@ export class SenderState implements Contracts.Pool.SenderState {
 
     public async revert(transaction: Interfaces.ITransaction): Promise<void> {
         try {
-            const handler: Handlers.TransactionHandler = await this.handlerRegistry.getActivatedHandlerForData(
-                transaction.data,
+            const handler: Handlers.TransactionHandler = await this.handlerRegistry.getActivatedHandlerForTransaction(
+                transaction,
             );
 
             await this.triggers.call("revertTransaction", { handler, transaction });

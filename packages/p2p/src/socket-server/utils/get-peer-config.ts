@@ -21,10 +21,6 @@ const transformPlugins = (plugins: PluginConfig[]): Contracts.P2P.PeerPlugins =>
             enabled: typeof pluginConfig.options.enabled === "boolean" ? pluginConfig.options.enabled : true, // default to true because "enabled" flag is in different place based on which plugin
             port,
         };
-
-        if (name.includes("api")) {
-            result[name].estimateTotalCount = pluginConfig.options.options.estimateTotalCount;
-        }
     }
 
     return result;

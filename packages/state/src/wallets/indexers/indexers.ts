@@ -2,7 +2,7 @@ import { Contracts } from "@solar-network/kernel";
 
 const isIndexable = (wallet: Contracts.State.Wallet): boolean => {
     return (
-        wallet.countAttributes() > 1 ||
+        wallet.countAttributes() > 2 ||
         wallet.hasPublicKeyByType("primary") ||
         !wallet.getBalance().isZero() ||
         !wallet.getNonce().isZero()
@@ -55,22 +55,12 @@ export const resignationsIndexer = (
     wallet: Contracts.State.Wallet,
     blockchainWallet?: Contracts.State.Wallet,
 ): void => {
-    if (wallet.isDelegate() && wallet.hasAttribute("delegate.resigned") && shouldBeIndexed(wallet, blockchainWallet)) {
+    if (
+        wallet.isDelegate() &&
+        wallet.hasAttribute("delegate.resignation") &&
+        shouldBeIndexed(wallet, blockchainWallet)
+    ) {
         index.set(wallet.getAttribute("delegate.username"), wallet);
-    }
-};
-
-export const locksIndexer = (
-    index: Contracts.State.WalletIndex,
-    wallet: Contracts.State.Wallet,
-    blockchainWallet?: Contracts.State.Wallet,
-): void => {
-    if (wallet.hasAttribute("htlc.locks") && shouldBeIndexed(wallet, blockchainWallet)) {
-        const locks: object = wallet.getAttribute("htlc.locks");
-
-        for (const lockId of Object.keys(locks)) {
-            index.set(lockId, wallet);
-        }
     }
 };
 

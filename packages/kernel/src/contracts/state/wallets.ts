@@ -38,7 +38,6 @@ export enum WalletIndexes {
     PublicKeys = "publicKeys",
     Usernames = "usernames",
     Resignations = "resignations",
-    Locks = "locks",
     Ipfs = "ipfs",
     Businesses = "businesses",
     BridgeChains = "bridgechains",
@@ -259,7 +258,6 @@ export interface WalletRepository {
 export enum SearchScope {
     Wallets,
     Delegates,
-    Locks,
     Entities,
 }
 
@@ -267,18 +265,4 @@ export interface SearchContext<T = any> {
     query: Record<string, string[]>;
     entries: ReadonlyArray<T>;
     defaultOrder: string[];
-}
-
-export interface UnwrappedHtlcLock {
-    lockId: string;
-    senderId: string;
-    senderPublicKey: string;
-    amount: Utils.BigNumber;
-    recipientId: string;
-    secretHash: string;
-    timestamp: number;
-    expirationType: number;
-    expirationValue: number;
-    isExpired: boolean;
-    memo: string;
 }

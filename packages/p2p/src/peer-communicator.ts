@@ -342,7 +342,7 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 const { data } = Transactions.TransactionFactory.fromBytesUnsafe(
                     Buffer.from(block.transactions[transaction], "hex"),
                 );
-                data.blockId = block.id;
+
                 block.transactions[transaction] = data;
 
                 if (this.stateStore.getBlockchain().value === "idle") {

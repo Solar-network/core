@@ -1,7 +1,7 @@
 import { Interfaces, Managers } from "@solar-network/crypto";
 import { Container, Contracts, Providers, Utils } from "@solar-network/kernel";
 
-import { MissedBlockRepository } from "./repositories/missed-block-repository";
+import { MissedBlockRepository } from "./repositories";
 
 @Container.injectable()
 export class MissedBlockHistoryService implements Contracts.Shared.MissedBlockHistoryService {
@@ -22,7 +22,7 @@ export class MissedBlockHistoryService implements Contracts.Shared.MissedBlockHi
         criteria: Contracts.Shared.OrBlockCriteria,
         sorting: Contracts.Search.Sorting,
         pagination: Contracts.Search.Pagination,
-        options?: Contracts.Search.Options,
+        count: boolean = true,
     ): Promise<Contracts.Search.ResultsPage<{ timestamp: number; height: number; username: string }>> {
         const lastBlock: Interfaces.IBlock = this.blockchain.getLastBlock();
         const timestamp =
@@ -60,7 +60,7 @@ export class MissedBlockHistoryService implements Contracts.Shared.MissedBlockHi
             expression,
             sorting,
             pagination,
-            options,
+            count,
         );
         const data = modelResultsPage.results;
         return { ...modelResultsPage, results: data };

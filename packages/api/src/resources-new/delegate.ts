@@ -19,7 +19,7 @@ export type DelegateResource = {
     };
     rank: number;
     isResigned: boolean;
-    resignationType: string | undefined;
+    resignation: string | undefined;
     blocks: {
         produced: number;
         missed: number | undefined;
@@ -37,7 +37,7 @@ export type DelegateResource = {
 };
 
 export const delegateCriteriaSchemaObject = {
-    username: Joi.string().pattern(/^[a-z0-9!@$&_.]{1,20}$/),
+    username: walletCriteriaSchemaObject.username,
     address: walletCriteriaSchemaObject.address,
     publicKey: walletCriteriaSchemaObject.publicKey,
     votesReceived: {
@@ -47,7 +47,7 @@ export const delegateCriteriaSchemaObject = {
     },
     rank: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(1)),
     isResigned: Joi.boolean(),
-    resignationType: Joi.string().valid("permanent", "temporary"),
+    resignation: Joi.string().valid("permanent", "temporary"),
     blocks: {
         produced: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
         missed: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),

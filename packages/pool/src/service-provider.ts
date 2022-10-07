@@ -9,7 +9,6 @@ import {
     VerifyTransactionAction,
 } from "./actions";
 import { Collator } from "./collator";
-import { ExpirationService } from "./expiration-service";
 import { FeeMatcher } from "./fee-matcher";
 import { Mempool } from "./mempool";
 import { Processor } from "./processor";
@@ -81,7 +80,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
     private registerServices(): void {
         this.app.bind(Container.Identifiers.PoolCollator).to(Collator);
         this.app.bind(Container.Identifiers.PoolFeeMatcher).to(FeeMatcher);
-        this.app.bind(Container.Identifiers.PoolExpirationService).to(ExpirationService);
         this.app.bind(Container.Identifiers.PoolMempool).to(Mempool).inSingletonScope();
         this.app.bind(Container.Identifiers.PoolProcessor).to(Processor);
         this.app.bind(Container.Identifiers.PoolProcessorFactory).toAutoFactory(Container.Identifiers.PoolProcessor);

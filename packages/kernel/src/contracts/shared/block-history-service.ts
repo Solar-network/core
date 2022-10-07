@@ -1,7 +1,6 @@
 import { Interfaces, Utils } from "@solar-network/crypto";
 
 import {
-    Options,
     OrCriteria,
     OrEqualCriteria,
     OrLikeCriteria,
@@ -21,13 +20,13 @@ export type BlockCriteria = {
     numberOfTransactions?: OrNumericCriteria<number>;
     totalAmount?: OrNumericCriteria<Utils.BigNumber>;
     totalFee?: OrNumericCriteria<Utils.BigNumber>;
-    burnedFee?: OrNumericCriteria<Utils.BigNumber>;
+    totalFeeBurned?: OrNumericCriteria<Utils.BigNumber>;
     reward?: OrNumericCriteria<Utils.BigNumber>;
     payloadLength?: OrNumericCriteria<number>;
     payloadHash?: OrEqualCriteria<string>;
     generatorPublicKey?: OrEqualCriteria<string>;
     username?: OrEqualCriteria<string>;
-    blockSignature?: OrEqualCriteria<string>;
+    signature?: OrEqualCriteria<string>;
 };
 
 export type BlockSearchResource = {
@@ -56,7 +55,7 @@ export interface BlockHistoryService {
         criteria: OrBlockCriteria,
         sorting: Sorting,
         pagination: Pagination,
-        options?: Options,
+        count?: boolean,
     ): Promise<ResultsPage<Interfaces.IBlockData>>;
 
     findOneByCriteriaJoinTransactions(
@@ -74,6 +73,5 @@ export interface BlockHistoryService {
         transactionCriteria: OrTransactionCriteria,
         sorting: Sorting,
         pagination: Pagination,
-        options?: Options,
     ): Promise<ResultsPage<BlockDataWithTransactionData>>;
 }

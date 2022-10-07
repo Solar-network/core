@@ -412,17 +412,17 @@ export class ForgerService {
     }
 
     /**
-     * @returns {Promise<Interfaces.ITransactionData[]>}
+     * @returns {Promise<Interfaces.ITransaction[]>}
      * @memberof ForgerService
      */
-    public async getTransactionsForForging(): Promise<Interfaces.ITransactionData[]> {
+    public async getTransactionsForForging(): Promise<Interfaces.ITransaction[]> {
         const response = await this.client.getTransactions();
         if (AppUtils.isEmpty(response)) {
             this.logger.warning("Could not get unconfirmed transactions from pool");
             return [];
         }
-        const transactions = response.transactions.map(
-            (hex) => Transactions.TransactionFactory.fromBytesUnsafe(Buffer.from(hex, "hex")).data,
+        const transactions = response.transactions.map((hex) =>
+            Transactions.TransactionFactory.fromBytesUnsafe(Buffer.from(hex, "hex")),
         );
         this.logger.debug(
             `Received ${AppUtils.pluralise("transaction", transactions.length, true)} ` +

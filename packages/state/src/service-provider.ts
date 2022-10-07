@@ -18,7 +18,6 @@ import { TransactionValidator } from "./transaction-validator";
 import { WalletRepository, WalletRepositoryClone, WalletRepositoryCopyOnWrite } from "./wallets";
 import { registerIndexers } from "./wallets/indexers";
 import { walletFactory } from "./wallets/wallet-factory";
-import { WalletSyncService } from "./wallets/wallet-sync-service";
 
 export const dposPreviousRoundStateProvider = (context: Container.interfaces.Context) => {
     return async (
@@ -98,7 +97,6 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         this.app.bind(Container.Identifiers.DatabaseInteraction).to(DatabaseInteraction).inSingletonScope();
         this.app.bind(Container.Identifiers.DatabaseInterceptor).to(DatabaseInterceptor).inSingletonScope();
-        this.app.bind(Container.Identifiers.StateWalletSyncService).to(WalletSyncService).inSingletonScope();
 
         this.app.bind(Container.Identifiers.StateBuilder).to(StateBuilder);
         this.app.bind(Container.Identifiers.StateLoader).to(StateLoader);
@@ -108,12 +106,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
     }
 
     public async boot(): Promise<void> {
-        this.app.get<WalletSyncService>(Container.Identifiers.StateWalletSyncService).boot();
         await this.app.get<DatabaseInteraction>(Container.Identifiers.DatabaseInteraction).initialise();
-    }
-
-    public async dispose(): Promise<void> {
-        this.app.get<WalletSyncService>(Container.Identifiers.StateWalletSyncService).dispose();
     }
 
     public async bootWhen(serviceProvider?: string): Promise<boolean> {

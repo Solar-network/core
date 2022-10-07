@@ -31,7 +31,7 @@ export interface IBlockData {
     numberOfTransactions: number;
     totalAmount: BigNumber;
     totalFee: BigNumber;
-    burnedFee?: BigNumber;
+    totalFeeBurned?: BigNumber;
     reward: BigNumber;
     donations?: Record<string, BigNumber>;
     username?: string;
@@ -39,7 +39,7 @@ export interface IBlockData {
     payloadHash: string;
     generatorPublicKey: string;
 
-    blockSignature?: string;
+    signature?: string;
     serialised?: string;
     transactions?: ITransactionData[];
     ip?: string;
@@ -55,14 +55,14 @@ export interface IBlockJson {
     numberOfTransactions: number;
     totalAmount: string;
     totalFee: string;
-    burnedFee: string;
+    totalFeeBurned: string;
     reward: string;
     donations: string;
     payloadLength: number;
     payloadHash: string;
     generatorPublicKey: string;
 
-    blockSignature?: string;
+    signature?: string;
     serialised?: string;
     transactions?: ITransactionJson[];
 }

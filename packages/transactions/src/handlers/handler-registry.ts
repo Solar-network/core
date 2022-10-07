@@ -27,12 +27,8 @@ export class TransactionHandlerRegistry {
     public getRegisteredHandlerByType(internalType: Transactions.InternalTransactionType): TransactionHandler {
         for (const handler of this.handlers) {
             const transactionConstructor = handler.getConstructor();
-            Utils.assert.defined<number>(transactionConstructor.type);
-            Utils.assert.defined<number>(transactionConstructor.typeGroup);
-            const handlerInternalType = Transactions.InternalTransactionType.from(
-                transactionConstructor.type,
-                transactionConstructor.typeGroup,
-            );
+            Utils.assert.defined<number>(transactionConstructor.key);
+            const handlerInternalType = Transactions.InternalTransactionType.fromKey(transactionConstructor.key);
             if (handlerInternalType === internalType) {
                 return handler;
             }
@@ -52,16 +48,17 @@ export class TransactionHandlerRegistry {
 
     public async getActivatedHandlerByType(
         internalType: Transactions.InternalTransactionType,
+        transaction: Interfaces.ITransaction,
     ): Promise<TransactionHandler> {
         const handler = this.getRegisteredHandlerByType(internalType);
-        if (await handler.isActivated()) {
+        if (await handler.isActivated(transaction)) {
             return handler;
         }
-        throw new DeactivatedTransactionHandlerError(internalType);
+        throw new DeactivatedTransactionHandlerError(transaction.data.type);
     }
 
-    public async getActivatedHandlerForData(transactionData: Interfaces.ITransactionData): Promise<TransactionHandler> {
-        const internalType = Transactions.InternalTransactionType.from(transactionData.type, transactionData.typeGroup);
-        return this.getActivatedHandlerByType(internalType);
+    public async getActivatedHandlerForTransaction(transaction: Interfaces.ITransaction): Promise<TransactionHandler> {
+        const internalType = Transactions.InternalTransactionType.fromKey(transaction.data.type);
+        return this.getActivatedHandlerByType(internalType, transaction);
     }
 }

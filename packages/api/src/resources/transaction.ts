@@ -1,4 +1,4 @@
-import { Enums, Interfaces, Utils } from "@solar-network/crypto";
+import { Interfaces, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { Resource } from "../interfaces";
@@ -35,25 +35,29 @@ export class TransactionResource implements Resource {
     public transform(resource: Interfaces.ITransactionData): object {
         AppUtils.assert.defined<string>(resource.senderId);
 
+        let asset: Interfaces.ITransactionAsset | undefined = AppUtils.cloneDeep(resource.asset);
+
         let amount: string | undefined =
             typeof resource.amount !== "undefined" && !resource.amount.isZero() ? resource.amount.toFixed() : undefined;
 
-        if (
-            resource.typeGroup === Enums.TransactionTypeGroup.Core &&
-            resource.type === Enums.TransactionType.Core.Transfer
-        ) {
+        if (resource.type === "transfer") {
             amount = resource
                 .asset!.recipients!.reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO)
                 .toFixed();
         }
 
+        if (resource.type === "vote") {
+            const firstKey = Object.keys(asset!.votes!)[0];
+            if (firstKey && firstKey.length === 66) {
+                asset = { [this.walletRepository.findByPublicKey(firstKey).getAttribute("delegate.username")]: 100 };
+            }
+        }
+
         return {
             id: resource.id,
             blockHeight: resource.blockHeight,
-            blockId: resource.blockId,
             version: resource.version,
             type: resource.type,
-            typeGroup: resource.typeGroup,
             amount,
             fee: resource.fee.toFixed(),
             burnedFee: typeof resource.burnedFee !== "undefined" ? resource.burnedFee.toFixed() : undefined,
@@ -62,7 +66,7 @@ export class TransactionResource implements Resource {
             recipient: resource.recipientId,
             signatures: resource.signatures,
             memo: resource.memo,
-            asset: resource.asset,
+            asset,
             confirmations: 0,
             nonce: resource.nonce?.toFixed(),
         };

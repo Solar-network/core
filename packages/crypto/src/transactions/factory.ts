@@ -1,4 +1,4 @@
-import { CoreTransactionType, TransactionTypeGroup } from "../enums";
+import { TransactionType } from "../enums";
 import { InvalidTransactionBytesError, TransactionSchemaError, TransactionVersionError } from "../errors";
 import {
     IDeserialiseAddresses,
@@ -11,7 +11,7 @@ import {
 import { BigNumber, isException } from "../utils";
 import { Deserialiser } from "./deserialiser";
 import { Serialiser } from "./serialiser";
-import { TransactionTypeFactory } from "./types";
+import { BurnTransaction, InternalTransactionType, TransactionTypeFactory, TransferTransaction } from "./types";
 import { Utils } from "./utils";
 import { Verifier } from "./verifier";
 
@@ -51,18 +51,34 @@ export class TransactionFactory {
         }
     }
 
-    public static fromJson(json: ITransactionJson): ITransaction {
+    public static fromJson(json: ITransactionJson, options?: IDeserialiseOptions): ITransaction {
         const data: ITransactionData = { ...json } as unknown as ITransactionData;
         if (data.amount) {
             data.amount = BigNumber.make(data.amount);
         }
         data.fee = BigNumber.make(data.fee);
 
-        return this.fromData(data);
+        return this.fromData(data, true, options);
     }
 
     public static fromData(data: ITransactionData, strict = true, options: IDeserialiseOptions = {}): ITransaction {
-        if (data.typeGroup === TransactionTypeGroup.Core && data.type === CoreTransactionType.Transfer) {
+        if (
+            typeof data.type === "number" &&
+            (typeof data.typeGroup === "undefined" || (typeof data.typeGroup === "number" && data.typeGroup >= 1))
+        ) {
+            data.type =
+                InternalTransactionType.from(+data.type, data.typeGroup).key! ?? `${data.typeGroup ?? 1}/${data.type}`;
+            delete data.typeGroup;
+        }
+
+        if (data.type === BurnTransaction.key) {
+            if (!data.asset) {
+                data.asset = { burn: { amount: data.amount! } };
+                delete data.amount;
+            }
+        }
+
+        if (data.type === TransferTransaction.key) {
             if (data.asset && data.asset.payments && !data.asset.recipients) {
                 data.asset.recipients = data.asset.payments;
                 delete data.asset.payments;
@@ -72,11 +88,26 @@ export class TransactionFactory {
                 data.asset.recipients = data.asset.transfers;
                 delete data.asset.transfers;
             }
+
+            if (!data.asset) {
+                data.asset = {
+                    recipients: [
+                        {
+                            amount: data.amount!,
+                            recipientId: data.recipientId!,
+                        },
+                    ],
+                };
+
+                delete data.amount;
+                delete data.recipientId;
+            }
         }
 
         if (data.signature) {
             data.signatures = { primary: data.signature };
         }
+
         if (data.signatures && data.secondSignature) {
             data.signatures.extra = data.secondSignature;
         }
@@ -87,25 +118,52 @@ export class TransactionFactory {
             throw new TransactionSchemaError(error);
         }
 
-        const transaction: ITransaction = TransactionTypeFactory.create(value);
+        let firstDeserialised: ITransaction | undefined;
+        let firstError: Error | undefined;
 
-        Serialiser.serialise(transaction);
+        for (let index = 0; index < TransactionType[data.type].length; index++) {
+            try {
+                const transaction: ITransaction = TransactionTypeFactory.create(value);
+                Serialiser.serialise(transaction, { index });
+                const deserialised: ITransaction = this.fromBytes(transaction.serialised, strict, {
+                    ...options,
+                    index,
+                });
+                if (deserialised.isVerified) {
+                    return deserialised;
+                } else if (!firstDeserialised) {
+                    firstDeserialised = deserialised;
+                }
+            } catch (error) {
+                if (!firstError) {
+                    firstError = error;
+                }
+            }
+        }
 
-        return this.fromBytes(transaction.serialised, strict, options);
+        if (firstError) {
+            throw firstError;
+        }
+
+        return firstDeserialised!;
     }
 
     private static fromSerialised(serialised: string, strict = true, options: IDeserialiseOptions = {}): ITransaction {
         try {
-            const transaction = Deserialiser.deserialise(serialised, options);
+            let transaction = Deserialiser.deserialise(serialised, options);
             transaction.data.id = Utils.getId(transaction.data, options);
 
             const { value, error } = Verifier.verifySchema(transaction.data, strict);
-
             if (error && !isException(value)) {
                 throw new TransactionSchemaError(error);
             }
 
-            transaction.isVerified = transaction.verify(options);
+            const verification = transaction.verify(options);
+            if (verification.verified) {
+                transaction = verification.transaction;
+                transaction.isVerified = verification.verified;
+                transaction.data.id = Utils.getId(transaction.data, options);
+            }
 
             return transaction;
         } catch (error) {

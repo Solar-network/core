@@ -1,7 +1,12 @@
 export * from "./transaction";
 export * from "./factory";
 export * from "./internal-transaction-type";
-
-export * as Core from "./core";
 export * as schemas from "./schemas";
-export * as Solar from "./solar";
+
+export * from "./burn";
+export * from "./delegate-registration";
+export * from "./delegate-resignation";
+export * from "./extra-signature";
+export * from "./ipfs";
+export * from "./transfer";
+export * from "./vote";

@@ -1,39 +1,28 @@
-import { TransactionTypeGroup } from "../../enums";
-
 export class InternalTransactionType {
     private static types: Map<string, InternalTransactionType> = new Map();
+    private static typeNames: Map<string, InternalTransactionType> = new Map();
 
-    private constructor(public readonly type: number, public readonly typeGroup: number) {}
+    private constructor(public readonly type: number, public readonly group: number, public readonly key?: string) {}
 
-    public static from(type: number, typeGroup?: number): InternalTransactionType {
-        if (typeGroup === undefined) {
-            typeGroup = TransactionTypeGroup.Core;
-        }
+    public static fromKey(type: string): InternalTransactionType {
+        return this.typeNames.get(type)!;
+    }
 
-        const compositeType = `${typeGroup}-${type}`;
+    public static from(type: number, group?: number, key?: string): InternalTransactionType {
+        group = group ?? 1;
+        const compositeType = `${group}/${type}`;
         if (!this.types.has(compositeType)) {
-            this.types.set(compositeType, new InternalTransactionType(type, typeGroup));
+            const internalTransactionType: InternalTransactionType = new InternalTransactionType(type, group, key);
+            this.types.set(compositeType, internalTransactionType);
+            if (key) {
+                this.typeNames.set(key, internalTransactionType);
+            }
         }
 
         return this.types.get(compositeType)!;
     }
 
     public toString(): string {
-        switch (this.typeGroup) {
-            case TransactionTypeGroup.Core: {
-                return `Core/${this.type}`;
-            }
-            case TransactionTypeGroup.Reserved: {
-                return `Reserved/${this.type}`;
-            }
-            case TransactionTypeGroup.Solar: {
-                return `Solar/${this.type}`;
-            }
-            case TransactionTypeGroup.Test: {
-                return `Test/${this.type}`;
-            }
-        }
-
-        return `${this.typeGroup}/${this.type}`;
+        return `${this.group}/${this.type}`;
     }
 }

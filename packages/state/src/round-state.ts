@@ -1,5 +1,5 @@
 import { Blocks, Crypto, Interfaces, Managers, Utils } from "@solar-network/crypto";
-import { DatabaseService, Repositories } from "@solar-network/database";
+import { DatabaseService } from "@solar-network/database";
 import { Container, Contracts, Enums, Services, Utils as AppUtils } from "@solar-network/kernel";
 import assert from "assert";
 
@@ -17,9 +17,6 @@ export class RoundState implements Contracts.State.RoundState {
 
     @Container.inject(Container.Identifiers.DposPreviousRoundStateProvider)
     private readonly getDposPreviousRoundState!: Contracts.State.DposPreviousRoundStateProvider;
-
-    @Container.inject(Container.Identifiers.DatabaseMissedBlockRepository)
-    private readonly missedBlockRepository!: Repositories.MissedBlockRepository;
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
@@ -40,10 +37,27 @@ export class RoundState implements Contracts.State.RoundState {
     private blocksInCurrentRound: Interfaces.IBlock[] = [];
     private forgingDelegates: Contracts.State.Wallet[] = [];
 
+    private missedBlocksToSave: { timestamp: number; height: number; username: string }[] = [];
+    private roundsToSave: Record<
+        number,
+        { publicKey: string; balance: Utils.BigNumber; round: number; username: string }[]
+    > = {};
+
     public async applyBlock(block: Interfaces.IBlock): Promise<void> {
         this.blocksInCurrentRound.push(block);
 
         await this.applyRound(block.data.height);
+    }
+
+    public getMissedBlocksToSave(): { timestamp: number; height: number; username: string }[] {
+        return this.missedBlocksToSave;
+    }
+
+    public getRoundsToSave(): Record<
+        number,
+        { publicKey: string; balance: Utils.BigNumber; round: number; username: string }[]
+    > {
+        return this.roundsToSave;
     }
 
     public async revertBlock(block: Interfaces.IBlock): Promise<void> {
@@ -68,8 +82,6 @@ export class RoundState implements Contracts.State.RoundState {
         this.blocksInCurrentRound = await this.getBlocksForRound();
         await this.calcPreviousActiveDelegates(roundInfo, this.blocksInCurrentRound);
         await this.setForgingDelegatesOfRound(roundInfo);
-
-        await this.databaseService.deleteRound(roundInfo.round + 1);
 
         await this.applyRound(block.data.height);
     }
@@ -126,7 +138,6 @@ export class RoundState implements Contracts.State.RoundState {
         );
 
         const missedSlots: number = currentSlot - lastSlot - 1;
-        const missedBlocks: { timestamp: number; height: number; username: string }[] = [];
 
         for (let i = 0; i < missedSlots; i++) {
             const missedSlot: number = lastSlot + i + 1;
@@ -142,9 +153,8 @@ export class RoundState implements Contracts.State.RoundState {
                 });
             }
 
-            missedBlocks.push({ timestamp, height, username });
+            this.missedBlocksToSave.push({ timestamp, height, username });
         }
-        this.missedBlockRepository.addMissedBlocks(missedBlocks);
     }
 
     public async getRewardForBlockInRound(
@@ -181,9 +191,17 @@ export class RoundState implements Contracts.State.RoundState {
             this.dposState.buildDelegateRanking();
             this.dposState.setDelegatesRound(roundInfo);
 
-            await this.setForgingDelegatesOfRound(roundInfo, this.dposState.getRoundDelegates().slice());
+            const roundDelegates = this.dposState.getRoundDelegates();
 
-            await this.databaseService.saveRound(this.dposState.getRoundDelegates());
+            await this.setForgingDelegatesOfRound(roundInfo, roundDelegates.slice());
+
+            this.roundsToSave[height] = roundDelegates.map((delegate: Contracts.State.Wallet) => ({
+                balance: delegate.getAttribute("delegate.voteBalance"),
+                roundHeight: roundInfo.roundHeight,
+                publicKey: delegate.getPublicKey("primary")!,
+                round: delegate.getAttribute("delegate.round"),
+                username: delegate.getAttribute("delegate.username"),
+            }));
 
             this.blocksInCurrentRound = [];
 
@@ -202,8 +220,6 @@ export class RoundState implements Contracts.State.RoundState {
                 roundInfo,
                 await this.calcPreviousActiveDelegates(roundInfo, this.blocksInCurrentRound),
             );
-
-            await this.databaseService.deleteRound(nextRound);
         }
     }
 
@@ -246,9 +262,10 @@ export class RoundState implements Contracts.State.RoundState {
 
         assert(blocks.length === maxBlocks);
 
-        return blocks.map((block: Interfaces.IBlockData) => {
-            return Blocks.BlockFactory.fromData(block, { deserialiseTransactionsUnchecked: true })!;
-        });
+        return blocks.map(
+            (block: Interfaces.IBlockData) =>
+                Blocks.BlockFactory.fromData(block, { deserialiseTransactionsUnchecked: true })!,
+        );
     }
 
     private shuffleDelegates(

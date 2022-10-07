@@ -89,9 +89,9 @@ export const isGenesisTransaction = (id: string): boolean => {
 };
 
 export const isSupportedTransactionVersion = (version: number): boolean => {
-    const { acceptLegacySchnorrTransactions, bip340 } = configManager.getMilestone();
+    const { transactionVersions } = configManager.getMilestone();
 
-    return version === 3 || (version === 2 && (acceptLegacySchnorrTransactions || !bip340));
+    return version === 3 || transactionVersions.includes(version);
 };
 
 export const calculateDonations = (height: number, reward: BigNumber): Record<string, BigNumber> => {
@@ -107,6 +107,14 @@ export const calculateDonations = (height: number, reward: BigNumber): Record<st
     }
 
     return donations;
+};
+
+export const typeAndGroup = (typeCode: string): { type: number; group: number } => {
+    const split = typeCode.split("/");
+    return {
+        group: +split[0],
+        type: +split[1],
+    };
 };
 
 export {

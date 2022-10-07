@@ -38,7 +38,6 @@ export const Identifiers = {
     PipelineService: Symbol.for("Service<Pipeline>"),
     QueueService: Symbol.for("Service<Queue>"),
     ScheduleService: Symbol.for("Service<Schedule>"),
-    SnapshotService: Symbol.for("Service<Snapshot>"),
     StandardCriteriaService: Symbol.for("Service<StandardCriteriaService>"),
     PaginationService: Symbol.for("Service<PaginationService>"),
     TriggerService: Symbol.for("Service<Actions>"),
@@ -56,7 +55,7 @@ export const Identifiers = {
 
     // Database
     DatabaseLogger: Symbol.for("Database<Logger>"),
-    DatabaseConnection: Symbol.for("Database<Connection>"),
+    DatabaseMigrationRepository: Symbol.for("Database<MigrationRepository>"),
     DatabaseRoundRepository: Symbol.for("Database<RoundRepository>"),
     DatabaseBlockRepository: Symbol.for("Database<BlockRepository>"),
     DatabaseBlockFilter: Symbol.for("Database<BlockFilter>"),
@@ -64,9 +63,13 @@ export const Identifiers = {
     DatabaseMissedBlockRepository: Symbol.for("Database<MissedBlockRepository>"),
     DatabaseTransactionRepository: Symbol.for("Database<TransactionRepository>"),
     DatabaseTransactionFilter: Symbol.for("Database<TransactionFilter>"),
+    DatabaseMaintenance: Symbol.for("Database<Maintenance>"),
     DatabaseModelConverter: Symbol.for("Database<ModelConverter>"),
     DatabaseInteraction: Symbol.for("Database<DatabaseInteraction>"),
-    DatabaseWalletsTableService: Symbol.for("Database<WalletsTableService>"),
+    DatabaseQueryRunner: Symbol.for("Database<QueryRunner>"),
+    DatabaseWorker: Symbol.for("Database<Worker>"),
+    DatabaseWorkerFactory: Symbol.for("Database<WorkerFactory>"),
+    DatabaseWorkerThreadFactory: Symbol.for("Database<WorkerThreadFactory>"),
 
     // Kernel
     ConfigRepository: Symbol.for("Repository<Config>"),
@@ -83,7 +86,6 @@ export const Identifiers = {
     StateLoader: Symbol.for("State<StateLoader>"),
     StateSaver: Symbol.for("State<StateSaver>"),
     StateTransactionStore: Symbol.for("State<TransactionStore>"),
-    StateWalletSyncService: Symbol.for("State<WalletSyncService>"),
     WalletFactory: Symbol.for("State<WalletFactory>"),
     WalletRepository: Symbol.for("Repository<Wallet>"),
     WalletRepositoryIndexerIndex: Symbol.for("IndexerIndex<Repository<Wallet>>"),
@@ -120,7 +122,6 @@ export const Identifiers = {
     PoolSenderMempool: Symbol.for("Pool<SenderMempool>"),
     PoolSenderMempoolFactory: Symbol.for("Pool<SenderMempoolFactory>"),
     PoolSenderState: Symbol.for("Pool<SenderState>"),
-    PoolExpirationService: Symbol.for("Pool<ExpirationService>"),
     PoolWorkerPool: Symbol.for("Pool<WorkerPool>"),
     PoolWorker: Symbol.for("Pool<Worker>"),
     PoolWorkerFactory: Symbol.for("Pool<WorkerFactory>"),

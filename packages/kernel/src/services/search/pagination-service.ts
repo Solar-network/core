@@ -8,7 +8,7 @@ import { get, Semver } from "../../utils";
 @injectable()
 export class PaginationService {
     public getEmptyPage(): ResultsPage<any> {
-        return { results: [], totalCount: 0, meta: { totalCountIsEstimate: false } };
+        return { results: [], totalCount: 0 };
     }
 
     public getPage<T>(pagination: Pagination, sorting: Sorting, items: Iterable<T>): ResultsPage<T> {
@@ -22,7 +22,6 @@ export class PaginationService {
         return {
             results,
             totalCount: all.length,
-            meta: { totalCountIsEstimate: false },
         };
     }
 

@@ -324,7 +324,6 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
         const probe = async (heightsToProbe: number[]): Promise<number | undefined> => {
             const ourBlocks = await this.databaseInterceptor.getBlocksByHeight(heightsToProbe);
-
             assert.strictEqual(ourBlocks.length, heightsToProbe.length);
 
             const probesIdByHeight = {};
@@ -459,10 +458,6 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             .call("getActiveDelegates", { roundInfo })) as Contracts.State.Wallet[];
 
         if (delegates.length === 0) {
-            // This must be the current round, still not saved into the database (it is saved
-            // only after it has completed). So fetch the list of delegates from the wallet
-            // manager.
-            // ! looks like DoS attack vector
             const dposRound = this.dposState.getRoundInfo();
             assert.strictEqual(dposRound.round, roundInfo.round);
             assert.strictEqual(dposRound.maxDelegates, roundInfo.maxDelegates);

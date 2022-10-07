@@ -1,4 +1,4 @@
-import { TransactionHeaderType, TransactionTypeGroup } from "../../../enums";
+import { TransactionHeaderType } from "../../../enums";
 import { MemoLengthExceededError, MissingTransactionSignatureError, TransactionSchemaError } from "../../../errors";
 import { Address, Keys } from "../../../identities";
 import { IKeyPair, ITransaction, ITransactionData } from "../../../interfaces";
@@ -21,9 +21,8 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             id: undefined,
             memo: undefined,
             nonce: BigNumber.ZERO,
-            typeGroup: TransactionTypeGroup.Test,
-            version: 3,
             signatures: {},
+            version: 3,
         } as ITransactionData;
     }
 
@@ -36,12 +35,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
     public version(version: number): TBuilder {
         this.data.version = version;
         this.disableVersionCheck = true;
-        return this.instance();
-    }
-
-    public typeGroup(typeGroup: number): TBuilder {
-        this.data.typeGroup = typeGroup;
-
         return this.instance();
     }
 
@@ -123,7 +116,7 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
     }
 
     public verify(): boolean {
-        return Verifier.verifyHash(this.data, this.disableVersionCheck);
+        return Verifier.verifyHash(this.data, { disableVersionCheck: this.disableVersionCheck });
     }
 
     public getStruct(): ITransactionData {
@@ -144,7 +137,6 @@ export abstract class TransactionBuilder<TBuilder extends TransactionBuilder<TBu
             version: this.data.version,
         } as ITransactionData;
 
-        struct.typeGroup = this.data.typeGroup;
         struct.nonce = this.data.nonce;
 
         Object.keys(struct).forEach((key) => struct[key] === undefined && delete struct[key]);

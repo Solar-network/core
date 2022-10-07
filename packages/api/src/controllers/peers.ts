@@ -81,7 +81,6 @@ export class PeersController extends Controller {
         const resultsPage = {
             results,
             totalCount,
-            meta: { totalCountIsEstimate: false },
         };
 
         return super.toPagination(resultsPage, PeerResource);

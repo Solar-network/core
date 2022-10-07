@@ -1,6 +1,6 @@
 import { Crypto, Interfaces, Managers } from "@solar-network/crypto";
-import { DatabaseService, Repositories } from "@solar-network/database";
-import { Container, Contracts, Services, Utils as AppUtils, Utils } from "@solar-network/kernel";
+import { DatabaseService } from "@solar-network/database";
+import { Container, Contracts, Services, Utils } from "@solar-network/kernel";
 import { DatabaseInteraction } from "@solar-network/state";
 import { existsSync, unlinkSync } from "fs";
 
@@ -18,10 +18,10 @@ export class Initialise implements Action {
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
-    private readonly blockRepository!: Repositories.BlockRepository;
+    private readonly blockRepository!: Contracts.Database.BlockRepository;
 
     @Container.inject(Container.Identifiers.DatabaseMissedBlockRepository)
-    private readonly missedBlockRepository!: Repositories.MissedBlockRepository;
+    private readonly missedBlockRepository!: Contracts.Database.MissedBlockRepository;
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
@@ -37,6 +37,9 @@ export class Initialise implements Action {
 
     @Container.inject(Container.Identifiers.PeerNetworkMonitor)
     private readonly networkMonitor!: Contracts.P2P.NetworkMonitor;
+
+    @Container.inject(Container.Identifiers.RoundState)
+    private roundState!: Contracts.State.RoundState;
 
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")
@@ -84,16 +87,7 @@ export class Initialise implements Action {
 
                     return this.blockchain.dispatch("FAILURE");
                 }
-
-                await this.databaseService.deleteRound(1);
             }
-
-            /** *******************************
-             *  state machine data init      *
-             ******************************* */
-            // Delete all rounds from the future due to shutdown before processBlocks finished writing the blocks.
-            const roundInfo = AppUtils.roundCalculator.calculateRound(block.data.height);
-            await this.databaseService.deleteRound(roundInfo.round + 1);
 
             if (this.stateStore.getNetworkStart()) {
                 if (!loadedState) {
@@ -160,7 +154,6 @@ export class Initialise implements Action {
 
         const chunks = this.stateStore.getLastBlock().data.height / chunkSize;
 
-        const missedBlocks: { timestamp: number; height: number; username: string }[] = [];
         const calculatedRounds = {};
 
         for (let i = 0; i < chunks; i++) {
@@ -189,8 +182,7 @@ export class Initialise implements Action {
                             `Attempting recovery by rolling back to height ${rollbackHeight.toLocaleString()}`,
                             "🚒",
                         );
-                        await this.blockRepository.deleteTopBlocks(
-                            this.app,
+                        await this.blockRepository.deleteTop(
                             this.stateStore.getLastBlock().data.height - rollbackHeight,
                         );
                         const lastBlock = await this.databaseService.getLastBlock();
@@ -222,7 +214,7 @@ export class Initialise implements Action {
                     let missedSlotCounter: number = 0;
                     for (let slotCounter = lastSlot; slotCounter < thisSlot; slotCounter++) {
                         missedSlotCounter++;
-                        missedBlocks.push({
+                        this.roundState.getMissedBlocksToSave().push({
                             height: block.height,
                             username: delegates[slotCounter % delegates.length],
                             timestamp:
@@ -237,7 +229,6 @@ export class Initialise implements Action {
             }
         }
 
-        await this.missedBlockRepository.addMissedBlocks(missedBlocks);
         return true;
     }
 }

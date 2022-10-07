@@ -107,7 +107,7 @@ export const handleOrCriteria = async <TEntity, TCriteria>(
 };
 
 export const handleNumericCriteria = async <TEntity, TProperty extends keyof TEntity>(
-    property: TProperty,
+    property: string,
     criteria: NumericCriteria<NonNullable<TEntity[TProperty]>>,
 ): Promise<
     | EqualExpression<TEntity>

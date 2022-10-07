@@ -1,4 +1,4 @@
-import { Utils } from "@solar-network/crypto";
+import { Enums, Utils } from "@solar-network/crypto";
 import { Contracts, Utils as AppUtils } from "@solar-network/kernel";
 import Joi from "joi";
 
@@ -176,12 +176,10 @@ const numericCriteria = (value: any) =>
         Joi.object().keys({ from: value, to: value }),
     );
 const likeCriteria = (value: any) => value;
-const containsCriteria = (value: any) => value;
-const orCriteria = (criteria: any) => Joi.alternatives().try(criteria, Joi.array().items(criteria));
+const orCriteria = (criteria: any) => Joi.alternatives().try(criteria);
 const orEqualCriteria = (value: any) => orCriteria(equalCriteria(value));
 const orNumericCriteria = (value: any) => orCriteria(numericCriteria(value));
 const orLikeCriteria = (value: any) => orCriteria(likeCriteria(value));
-const orContainsCriteria = (value: any) => orCriteria(containsCriteria(value));
 
 export const blockCriteriaSchemas = {
     id: orEqualCriteria(Joi.string().length(64).hex()),
@@ -192,7 +190,7 @@ export const blockCriteriaSchemas = {
     numberOfTransactions: orNumericCriteria(Joi.number().integer().min(0)),
     totalAmount: orNumericCriteria(Joi.number().integer().min(0)),
     totalFee: orNumericCriteria(Joi.number().integer().min(0)),
-    burnedFee: orNumericCriteria(Joi.number().integer().min(0)),
+    totalFeeBurned: orNumericCriteria(Joi.number().integer().min(0)),
     reward: orNumericCriteria(Joi.number().integer().min(0)),
     payloadLength: orNumericCriteria(Joi.number().integer().min(0)),
     payloadHash: orEqualCriteria(Joi.string().hex()),
@@ -203,7 +201,7 @@ export const blockCriteriaSchemas = {
             .min(1)
             .max(20),
     ),
-    blockSignature: orEqualCriteria(Joi.string().hex().length(128)),
+    signature: orEqualCriteria(Joi.string().hex().length(128)),
 };
 
 export const blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey = { ...blockCriteriaSchemas } as any;
@@ -221,11 +219,6 @@ export const missedBlockCriteriaSchemas = {
     ),
 };
 
-export const missedBlockCriteriaSchemasWithoutUsername = {
-    ...blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey,
-} as any;
-delete missedBlockCriteriaSchemasWithoutUsername.username;
-
 export const transactionCriteriaSchemas = {
     address: orEqualCriteria(address),
     senderId: orEqualCriteria(address),
@@ -233,16 +226,48 @@ export const transactionCriteriaSchemas = {
     id: orEqualCriteria(Joi.string().hex().length(64)),
     version: orEqualCriteria(Joi.number().integer().positive()),
     blockHeight: orNumericCriteria(Joi.number().integer().min(1)),
-    blockId: orEqualCriteria(Joi.string().length(64).hex()),
     sequence: orNumericCriteria(Joi.number().integer().positive()),
     timestamp: orNumericCriteria(Joi.number().integer().min(0)),
     nonce: orNumericCriteria(Joi.number().integer().positive()),
     senderPublicKey: orEqualCriteria(Joi.string().hex().length(66)),
-    type: orEqualCriteria(Joi.number().integer().min(0)),
-    typeGroup: orEqualCriteria(Joi.number().integer().min(0)),
+    type: orEqualCriteria(Joi.valid(...Object.keys(Enums.TransactionType))),
     memo: orLikeCriteria(Joi.string().max(255, "utf8")),
-    amount: orNumericCriteria(Joi.number().integer().min(0)),
+    amount: {
+        sent: orNumericCriteria(Joi.number().integer().min(1)),
+        received: orNumericCriteria(Joi.number().integer().min(1)),
+    },
     fee: orNumericCriteria(Joi.number().integer().min(0)),
-    burnedFee: orNumericCriteria(Joi.number().integer().min(0)),
-    asset: orContainsCriteria(Joi.object()),
+    extraSignature: orEqualCriteria(Joi.string().hex().length(66)),
+    registration: orEqualCriteria(
+        orEqualCriteria(
+            Joi.string()
+                .regex(/^(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$/)
+                .min(1)
+                .max(20),
+        ),
+    ),
+    vote: {
+        percent: orNumericCriteria(Joi.number().min(0).max(100)),
+        username: orEqualCriteria(
+            orEqualCriteria(
+                Joi.string()
+                    .regex(/^(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$/)
+                    .min(1)
+                    .max(20),
+            ),
+        ),
+    },
+    ipfsHash: orEqualCriteria(Joi.string().regex(/^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/)),
+    resignation: orEqualCriteria(Joi.string().valid("permanent", "revoke", "temporary")),
 };
+
+export const transactionCriteriaSchemasWithoutUnsortables = {
+    ...transactionCriteriaSchemas,
+} as any;
+delete transactionCriteriaSchemasWithoutUnsortables.amount;
+delete transactionCriteriaSchemasWithoutUnsortables.extraSignature;
+delete transactionCriteriaSchemasWithoutUnsortables.registration;
+delete transactionCriteriaSchemasWithoutUnsortables.vote;
+delete transactionCriteriaSchemasWithoutUnsortables.ipfsHash;
+delete transactionCriteriaSchemasWithoutUnsortables.recipientId;
+delete transactionCriteriaSchemasWithoutUnsortables.resignation;

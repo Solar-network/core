@@ -25,9 +25,6 @@ export class Service implements Contracts.Pool.Service {
     @Container.inject(Container.Identifiers.PoolQuery)
     private readonly poolQuery!: Contracts.Pool.Query;
 
-    @Container.inject(Container.Identifiers.PoolExpirationService)
-    private readonly expirationService!: Contracts.Pool.ExpirationService;
-
     @Container.inject(Container.Identifiers.EventDispatcherService)
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
@@ -47,10 +44,7 @@ export class Service implements Contracts.Pool.Service {
         this.events.listen(Enums.CryptoEvent.MilestoneChanged, this);
         this.events.listen(Enums.StateEvent.BuilderFinished, this);
 
-        if (
-            process.env.SOLAR_CORE_RESET_DATABASE?.toLowerCase() === "true" ||
-            process.env.SOLAR_CORE_RESET_POOL?.toLowerCase() === "true"
-        ) {
+        if (process.env.SOLAR_CORE_RESET_POOL?.toLowerCase() === "true") {
             await this.flush();
         }
     }
@@ -111,7 +105,7 @@ export class Service implements Contracts.Pool.Service {
                 await this.feeMatcher.throwIfCannotEnterPool(transaction);
                 await this.addTransactionToMempool(transaction);
 
-                const handler = await this.nullHandlerRegistry.getActivatedHandlerForData(transaction.data);
+                const handler = await this.nullHandlerRegistry.getActivatedHandlerForTransaction(transaction);
                 const { emoji } = handler.getConstructor();
 
                 this.logger.debug(`${transaction} added to the pool`, emoji);
@@ -350,7 +344,6 @@ export class Service implements Contracts.Pool.Service {
             }
 
             await this.removeOldTransactions();
-            await this.removeExpiredTransactions();
             await this.removeLowestPriorityTransactions();
         });
     }
@@ -391,27 +384,6 @@ export class Service implements Contracts.Pool.Service {
         }
     }
 
-    private async removeExpiredTransactions(): Promise<void> {
-        for (const transaction of this.poolQuery.getAll()) {
-            AppUtils.assert.defined<string>(transaction.id);
-            AppUtils.assert.defined<string>(transaction.data.senderId);
-
-            if (this.expirationService.isExpired(transaction)) {
-                const removedTransactions = await this.mempool.removeTransaction(
-                    transaction.data.senderId,
-                    transaction.id,
-                );
-
-                for (const removedTransaction of removedTransactions) {
-                    AppUtils.assert.defined<string>(removedTransaction.id);
-                    this.storage.removeTransaction(removedTransaction.id);
-                    this.logger.debug(`Removed expired ${removedTransaction} from the pool`, "⚡");
-                    this.events.dispatch(Enums.TransactionEvent.Expired, removedTransaction.data);
-                }
-            }
-        }
-    }
-
     private async removeLowestPriorityTransaction(): Promise<void> {
         if (this.getPoolSize() === 0) {
             return;
@@ -447,7 +419,6 @@ export class Service implements Contracts.Pool.Service {
 
         if (this.getPoolSize() >= maxTransactionsInPool) {
             await this.removeOldTransactions();
-            await this.removeExpiredTransactions();
             await this.removeLowestPriorityTransactions();
         }
 

@@ -18,7 +18,7 @@ export class FeeMatcher implements Contracts.Pool.FeeMatcher {
 
         const feeStr = Utils.formatSatoshi(transaction.data.fee);
 
-        const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
+        const handler = await this.handlerRegistry.getActivatedHandlerForTransaction(transaction);
         const { emoji } = handler.getConstructor();
 
         const minFeePool: Utils.BigNumber = handler.getMinimumFee(transaction, milestone.fees);
@@ -36,7 +36,7 @@ export class FeeMatcher implements Contracts.Pool.FeeMatcher {
 
     public async throwIfCannotBroadcast(transaction: Interfaces.ITransaction): Promise<void> {
         const milestone = Managers.configManager.getMilestone();
-        const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
+        const handler = await this.handlerRegistry.getActivatedHandlerForTransaction(transaction);
 
         if (!transaction.data.fee.isGreaterThanEqual(handler.getMinimumFee(transaction, milestone.fees))) {
             throw new TransactionFeeTooLowError(transaction);

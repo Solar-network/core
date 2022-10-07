@@ -66,14 +66,6 @@ export class Controller {
             }));
     }
 
-    protected getListingOptions(): Contracts.Search.Options {
-        const estimateTotalCount = this.apiConfiguration.getOptional<boolean>("options.estimateTotalCount", true);
-
-        return {
-            estimateTotalCount,
-        };
-    }
-
     protected respondWithResource(data: unknown, transformer: new () => Resource, transform = true): any {
         if (!data) {
             return Boom.notFound();

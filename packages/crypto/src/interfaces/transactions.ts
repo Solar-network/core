@@ -1,14 +1,11 @@
 import { ErrorObject } from "ajv";
 
-import { HtlcLockExpirationType, HtlcSecretHashType } from "../enums";
 import { BigNumber, ByteBuffer } from "../utils";
 
 export interface ITransaction {
     readonly emoji: string;
     readonly id: string | undefined;
     readonly key: string;
-    readonly type: number;
-    readonly typeGroup: number | undefined;
     readonly verified: boolean;
 
     isVerified: boolean;
@@ -17,13 +14,14 @@ export interface ITransaction {
     data: ITransactionData;
     serialised: Buffer;
     timestamp: number;
+    internalType: string;
 
     setBurnedFee(height: number): void;
 
     serialise(options?: ISerialiseOptions): ByteBuffer | undefined;
-    deserialise(buf: ByteBuffer, transactionAddresses?: IDeserialiseAddresses): void;
+    deserialise(buf: ByteBuffer, options?: IDeserialiseOptions): void;
 
-    verify(options?: IVerifyOptions): boolean;
+    verify(options?: IVerifyOptions): { transaction: ITransaction; verified: boolean };
     verifySchema(strict?: boolean): ISchemaValidationResult;
 
     toJson(): ITransactionJson;
@@ -32,26 +30,20 @@ export interface ITransaction {
 export interface ITransactionAsset {
     [custom: string]: any;
 
-    signature?: {
-        publicKey: string;
-    };
-    delegate?: {
-        username: string;
-    };
-    votes?: string[] | object;
-    ipfs?: string;
+    burn?: IBurnAsset;
+    ipfs?: { hash: string };
     recipients?: ITransferRecipient[];
-    lock?: IHtlcLockAsset;
-    claim?: IHtlcClaimAsset;
-    refund?: IHtlcRefundAsset;
+    registration?: { username: string };
+    resignation?: { type: number };
+    signature?: { publicKey: string };
+    votes?: IVoteAsset;
 }
 
 export interface ITransactionData {
     version: number;
     network?: number;
-
-    typeGroup?: number;
-    type: number;
+    typeGroup?: number; // transitional
+    type: string;
     nonce: BigNumber;
     senderId: string;
     senderPublicKey: string;
@@ -59,10 +51,10 @@ export interface ITransactionData {
 
     fee: BigNumber;
     burnedFee?: BigNumber;
-    amount?: BigNumber;
+    amount?: BigNumber; // transitional
 
     expiration?: number;
-    recipientId?: string;
+    recipientId?: string; // transitional
 
     asset?: ITransactionAsset;
     memo?: string;
@@ -72,7 +64,6 @@ export interface ITransactionData {
     signature?: string;
     signatures?: ITransactionSignature;
 
-    blockId?: string;
     blockHeight?: number;
     sequence?: number;
 }
@@ -81,8 +72,7 @@ export interface ITransactionJson {
     version?: number;
     network?: number;
 
-    typeGroup?: number;
-    type: number;
+    type: string;
 
     nonce: string;
     senderId: string;
@@ -90,10 +80,8 @@ export interface ITransactionJson {
 
     fee: string;
     burnedFee: string;
-    amount: string;
 
     expiration?: number;
-    recipientId?: string;
 
     asset?: ITransactionAsset;
     memo?: string | undefined;
@@ -103,7 +91,6 @@ export interface ITransactionJson {
     signature?: string;
     signatures?: ITransactionSignature;
 
-    blockId?: string;
     sequence?: number;
 
     ipfsHash?: string;
@@ -125,42 +112,20 @@ export interface ITransferRecipient {
     recipientId: string;
 }
 
-export interface IHtlcLockAsset {
-    secretHash: string;
-    expiration: {
-        type: HtlcLockExpirationType;
-        value: number;
-    };
-}
-
-export interface IHtlcClaimAsset {
-    hashType: HtlcSecretHashType;
-    lockTransactionId: string;
-    unlockSecret: string;
-}
-
-export interface IHtlcRefundAsset {
-    lockTransactionId: string;
-}
-
-export interface IHtlcLock extends IHtlcLockAsset {
+export interface IBurnAsset {
     amount: BigNumber;
-    recipientId: string | undefined;
-    senderId: string;
-    timestamp: number;
-    memo: string | undefined;
 }
 
-export type IHtlcLocks = Record<string, IHtlcLock>;
-
-export interface IHtlcExpiration {
-    type: HtlcLockExpirationType;
-    value: number;
+export interface IVoteAsset {
+    [custom: string]: number;
 }
 
 export interface IDeserialiseOptions {
     acceptLegacyVersion?: boolean;
+    deserialiseTransactionsUnchecked?: boolean;
     disableVersionCheck?: boolean;
+    index?: number;
+    isGenesisBlock?: boolean;
     transactionAddresses?: IDeserialiseAddresses;
 }
 
@@ -175,9 +140,10 @@ export interface IVerifyOptions {
 
 export interface ISerialiseOptions {
     acceptLegacyVersion?: boolean;
+    addressError?: string;
     disableVersionCheck?: boolean;
     excludeSignature?: boolean;
     excludeExtraSignature?: boolean;
-
-    addressError?: string;
+    index?: number;
+    selfSwitchVote?: boolean;
 }

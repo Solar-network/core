@@ -1,6 +1,5 @@
 import Hapi from "@hapi/hapi";
 import { Crypto, Managers } from "@solar-network/crypto";
-import { Repositories } from "@solar-network/database";
 import { Container, Contracts, Providers, Services, Utils } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
@@ -27,7 +26,7 @@ export class NodeController extends Controller {
     private readonly networkMonitor!: Contracts.P2P.NetworkMonitor;
 
     @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
-    private readonly transactionRepository!: Repositories.TransactionRepository;
+    private readonly transactionRepository!: Contracts.Database.TransactionRepository;
 
     public async status(
         request: Hapi.Request,
@@ -114,25 +113,30 @@ export class NodeController extends Controller {
 
     public async fees(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         const handlers = this.nullHandlerRegistry.getRegisteredHandlers();
-        const handlersKey = {};
-        const txsTypes: Array<{ type: number; typeGroup: number }> = [];
+        const handlersKey: Record<string, string> = {};
+        const txTypes: Array<{ type: string }> = [];
         for (const handler of handlers) {
-            handlersKey[`${handler.getConstructor().type}-${handler.getConstructor().typeGroup}`] =
-                handler.getConstructor().key;
-            txsTypes.push({ type: handler.getConstructor().type!, typeGroup: handler.getConstructor().typeGroup! });
+            const { key } = handler.getConstructor();
+            handlersKey[key] = key;
+            txTypes.push({ type: key });
         }
 
-        const results = await this.transactionRepository.getFeeStatistics(txsTypes, request.query.days);
+        const results = await this.transactionRepository.getFeeStatistics(txTypes, request.query.days);
 
-        const groupedByTypeGroup = {};
+        const data: {
+            [key: string]: {
+                avg: number;
+                burned: number;
+                max: number;
+                min: number;
+                sum: number;
+            };
+        } = {};
+
         for (const result of results) {
-            if (!groupedByTypeGroup[result.typeGroup]) {
-                groupedByTypeGroup[result.typeGroup] = {};
-            }
+            const handlerKey = handlersKey[result.type];
 
-            const handlerKey = handlersKey[`${result.type}-${result.typeGroup}`];
-
-            groupedByTypeGroup[result.typeGroup][handlerKey] = {
+            data[handlerKey] = {
                 avg: result.avg,
                 burned: result.burned,
                 max: result.max,
@@ -141,6 +145,6 @@ export class NodeController extends Controller {
             };
         }
 
-        return { meta: { days: request.query.days }, data: groupedByTypeGroup };
+        return { meta: { days: request.query.days }, data };
     }
 }

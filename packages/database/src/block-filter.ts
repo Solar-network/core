@@ -1,6 +1,6 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
-import { Block } from "./models/block";
+import { BlockModel } from "./models";
 
 const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimiseExpression } = AppUtils.Search;
 
@@ -8,7 +8,7 @@ const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimiseExpr
 export class BlockFilter implements Contracts.Database.BlockFilter {
     public async getExpression(
         ...criteria: Contracts.Shared.OrBlockCriteria[]
-    ): Promise<Contracts.Search.Expression<Block>> {
+    ): Promise<Contracts.Search.Expression<Partial<BlockModel>>> {
         const expressions = await Promise.all(
             criteria.map((c) => handleOrCriteria(c, (c) => this.handleBlockCriteria(c))),
         );
@@ -18,12 +18,12 @@ export class BlockFilter implements Contracts.Database.BlockFilter {
 
     private async handleBlockCriteria(
         criteria: Contracts.Shared.BlockCriteria,
-    ): Promise<Contracts.Search.Expression<Block>> {
+    ): Promise<Contracts.Search.Expression<BlockModel>> {
         return handleAndCriteria(criteria, async (key) => {
             switch (key) {
                 case "id":
                     return handleOrCriteria(criteria.id!, async (c) => {
-                        return { property: "id", op: "like", pattern: c + "%" };
+                        return { property: "id", op: "like", pattern: c.toString() + "*" };
                     });
                 case "version":
                     return handleOrCriteria(criteria.version!, async (c) => {
@@ -53,9 +53,9 @@ export class BlockFilter implements Contracts.Database.BlockFilter {
                     return handleOrCriteria(criteria.totalFee!, async (c) => {
                         return handleNumericCriteria("totalFee", c);
                     });
-                case "burnedFee":
-                    return handleOrCriteria(criteria.burnedFee!, async (c) => {
-                        return handleNumericCriteria("burnedFee", c);
+                case "totalFeeBurned":
+                    return handleOrCriteria(criteria.totalFeeBurned!, async (c) => {
+                        return handleNumericCriteria("totalFeeBurned", c);
                     });
                 case "reward":
                     return handleOrCriteria(criteria.reward!, async (c) => {
@@ -77,9 +77,9 @@ export class BlockFilter implements Contracts.Database.BlockFilter {
                     return handleOrCriteria(criteria.username!, async (c) => {
                         return { property: "username", op: "equal", value: c };
                     });
-                case "blockSignature":
-                    return handleOrCriteria(criteria.blockSignature!, async (c) => {
-                        return { property: "blockSignature", op: "equal", value: c };
+                case "signature":
+                    return handleOrCriteria(criteria.signature!, async (c) => {
+                        return { property: "signature", op: "equal", value: c };
                     });
                 default:
                     return { op: "true" };

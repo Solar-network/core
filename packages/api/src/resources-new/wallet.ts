@@ -42,6 +42,7 @@ export const walletCriteriaSchemaObject = {
     balance: Schemas.createRangeCriteriaSchema(Schemas.bigNumber),
     nonce: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
     attributes: Joi.object(),
+    username: Joi.string().pattern(/^[a-z0-9!@$&_.]{1,20}$/),
 };
 
 export const walletParamSchema = Joi.alternatives(walletAddressSchema, walletPublicKeySchema, walletUsernameSchema);

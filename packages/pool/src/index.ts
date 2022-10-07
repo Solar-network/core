@@ -2,7 +2,6 @@ export * from "./actions";
 export * from "./collator";
 export * from "./fee-matcher";
 export * from "./errors";
-export * from "./expiration-service";
 export * from "./mempool";
 export * from "./processor-fee-extension";
 export * from "./processor";

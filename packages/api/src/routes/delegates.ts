@@ -99,7 +99,7 @@ export const register = (server: Hapi.Server): void => {
                     id: walletParamSchema,
                 }),
                 query: Joi.object({
-                    ...server.app.schemas.missedBlockCriteriaSchemasWithoutUsername,
+                    ...server.app.schemas.blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey,
                     orderBy: server.app.schemas.missedBlocksOrderBy,
                 })
                     .concat(missedBlockSortingSchema)

@@ -37,27 +37,6 @@ export const schemas = {
         allOf: [{ minLength: 66, maxLength: 66 }, { $ref: "hex" }, { transform: ["toLowerCase"] }],
     },
 
-    walletVotePublicKey: {
-        $id: "walletVotePublicKey",
-        allOf: [
-            { type: "string", pattern: "^[+|-][a-f0-9]{66}$" },
-            { minLength: 67, maxLength: 67 },
-        ],
-    },
-
-    walletVoteUsername: {
-        $id: "walletVoteUsername",
-        allOf: [
-            { type: "string", pattern: "^[+|-](?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$" },
-            { minLength: 2, maxLength: 21 },
-        ],
-    },
-
-    walletVoteUsernameOrPublicKey: {
-        $id: "walletVoteUsernameOrPublicKey",
-        oneOf: [{ $ref: "walletVoteUsername" }, { $ref: "walletVotePublicKey" }],
-    },
-
     username: {
         $id: "delegateUsername",
         allOf: [
@@ -91,7 +70,7 @@ export const schemas = {
             "totalFee",
             "reward",
             "generatorPublicKey",
-            "blockSignature",
+            "signature",
         ],
         properties: {
             id: { blockId: {} },
@@ -106,7 +85,7 @@ export const schemas = {
             payloadLength: { type: "integer", minimum: 0 },
             payloadHash: { $ref: "hex" },
             generatorPublicKey: { $ref: "publicKey" },
-            blockSignature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
+            signature: { allOf: [{ minLength: 128, maxLength: 128 }, { $ref: "hex" }] },
         },
     },
 

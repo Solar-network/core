@@ -1,5 +1,6 @@
 import { Managers } from "..";
 import { Hash, HashAlgorithms, Slots } from "../crypto";
+import { OtherType, TransferType } from "../enums";
 import { BlockSchemaError } from "../errors";
 import { IBlock, IBlockData, IBlockJson, IBlockVerification, ITransaction, ITransactionData } from "../interfaces";
 import { configManager } from "../managers/config";
@@ -17,7 +18,6 @@ export class Block implements IBlock {
         this.data = data;
 
         this.transactions = transactions.map((transaction, index) => {
-            transaction.data.blockId = this.data.id;
             transaction.data.blockHeight = this.data.height;
             transaction.data.sequence = index;
             transaction.timestamp = this.data.timestamp;
@@ -26,7 +26,7 @@ export class Block implements IBlock {
 
         delete this.data.transactions;
 
-        this.data.burnedFee = this.getBurnedFees();
+        this.data.totalFeeBurned = this.getBurnedFees();
 
         this.data.donations = calculateDonations(this.data.height, this.data.reward);
 
@@ -94,8 +94,6 @@ export class Block implements IBlock {
 
     public static getBasicHeader(data: IBlockData, withExtraData: boolean = true): IBlockData {
         return {
-            blockSignature: data.blockSignature,
-            burnedFee: withExtraData ? data.burnedFee : undefined,
             donations: withExtraData ? data.donations : undefined,
             generatorPublicKey: data.generatorPublicKey,
             height: data.height,
@@ -105,9 +103,11 @@ export class Block implements IBlock {
             payloadLength: data.payloadLength,
             previousBlock: data.previousBlock,
             reward: data.reward,
+            signature: data.signature,
             timestamp: data.timestamp,
             totalAmount: data.totalAmount,
             totalFee: data.totalFee,
+            totalFeeBurned: withExtraData ? data.totalFeeBurned : undefined,
             username: withExtraData ? data.username : undefined,
             version: data.version,
         };
@@ -127,15 +127,15 @@ export class Block implements IBlock {
     }
 
     public verifySignature(): boolean {
-        const { bip340 } = configManager.getMilestone(this.data.height);
+        const { transactionVersions } = configManager.getMilestone(this.data.height);
         const bytes: Buffer = Serialiser.serialise(this.data, false);
         const hash: Buffer = HashAlgorithms.sha256(bytes);
 
-        if (!this.data.blockSignature) {
+        if (!this.data.signature) {
             throw new Error();
         }
 
-        return Hash.verifySchnorr(hash, this.data.blockSignature, this.data.generatorPublicKey, bip340);
+        return Hash.verifySchnorr(hash, this.data.signature, this.data.generatorPublicKey, transactionVersions);
     }
 
     public toJson(): IBlockJson {
@@ -143,7 +143,7 @@ export class Block implements IBlock {
         data.reward = this.data.reward.toString();
         data.totalAmount = this.data.totalAmount.toString();
         data.totalFee = this.data.totalFee.toString();
-        data.burnedFee = this.data.burnedFee!.toString();
+        data.totalFeeBurned = this.data.totalFeeBurned!.toString();
         data.transactions = this.transactions.map((transaction) => transaction.toJson());
 
         return data;
@@ -203,7 +203,6 @@ export class Block implements IBlock {
                 }
             }
 
-            // Checking if transactions of the block adds up to block values.
             const appliedTransactions: Record<string, ITransactionData> = {};
 
             let totalAmount: BigNumber = BigNumber.ZERO;
@@ -221,17 +220,20 @@ export class Block implements IBlock {
                     result.errors.push(`Encountered duplicate transaction: ${transaction.data.id}`);
                 }
 
-                if (
-                    transaction.data.expiration &&
-                    transaction.data.expiration > 0 &&
-                    transaction.data.expiration <= this.data.height
-                ) {
-                    result.errors.push(`Encountered expired transaction: ${transaction.data.id}`);
+                appliedTransactions[transaction.data.id] = transaction.data;
+                let amount: BigNumber = BigNumber.ZERO;
+                switch (transaction.internalType) {
+                    case OtherType.Burn: {
+                        amount = amount.plus(transaction.data.asset!.burn!.amount!);
+                        break;
+                    }
+                    case TransferType.Single: {
+                        amount = amount.plus(transaction.data.asset!.recipients![0].amount!);
+                        break;
+                    }
                 }
 
-                appliedTransactions[transaction.data.id] = transaction.data;
-
-                totalAmount = totalAmount.plus(transaction.data.amount || BigNumber.ZERO);
+                totalAmount = totalAmount.plus(amount);
                 totalFee = totalFee.plus(transaction.data.fee);
 
                 payloadBuffers.push(bytes);

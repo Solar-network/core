@@ -1,64 +1,100 @@
-import { Enums } from "@solar-network/crypto";
-import { EntityRepository } from "typeorm";
+import { Container, Contracts } from "@solar-network/kernel";
 
-import { MissedBlock } from "../models";
-import { AbstractRepository } from "./abstract-repository";
+import { MissedBlockModel } from "../models";
+import { Repository } from "./repository";
 
-@EntityRepository(MissedBlock)
-export class MissedBlockRepository extends AbstractRepository<MissedBlock> {
-    public async addMissedBlocks(
-        missedBlocks: { timestamp: number; height: number; username: string }[],
-    ): Promise<void> {
-        const missedBlockEntities: MissedBlock[] = [];
-        return this.manager.transaction(async (manager) => {
-            for (const missedBlock of missedBlocks) {
-                const missedBlockEntity = Object.assign(new MissedBlock(), { ...missedBlock });
-                missedBlockEntities.push(missedBlockEntity);
-            }
-            await manager.save<MissedBlock>(missedBlockEntities, { chunk: 1000 });
-        });
-    }
+@Container.injectable()
+export class MissedBlockRepository
+    extends Repository<MissedBlockModel>
+    implements Contracts.Database.MissedBlockRepository
+{
+    protected model: typeof MissedBlockModel = MissedBlockModel;
 
     public async getBlockProductivity(timestamp: number): Promise<Record<string, Record<string, number>>> {
-        const productivityStatistics = await this.query(`
-            SELECT
-            usernames.username,
-            missed.count missed,
-            CASE WHEN produced IS NULL THEN
-                CASE WHEN missed IS NULL THEN
-                    NULL
-                ELSE
-                    0.00
-                END
-            ELSE
-                ROUND((COALESCE(produced.count::numeric, 0) / (COALESCE(produced.count::numeric, 0) + COALESCE(missed.count::numeric, 0))) * 100, 2)
-            END productivity
-            FROM
-                (SELECT asset->'delegate'->>'username' AS username
-                FROM transactions
-                WHERE type_group = ${Enums.TransactionTypeGroup.Core} AND type = ${Enums.CoreTransactionType.DelegateRegistration})
-                usernames
-            FULL OUTER JOIN
-                (SELECT COUNT(username) AS count, username
-                FROM blocks
-                WHERE timestamp >= ${timestamp} GROUP BY username)
-                produced ON usernames.username = produced.username
-            FULL OUTER JOIN
-                (SELECT COUNT(username) AS count, username
-                FROM missed_blocks
-                WHERE timestamp >= ${timestamp} GROUP BY username)
-                missed ON usernames.username = missed.username;
-        `);
+        const delegates: Record<string, string>[] = await this.createQueryBuilder()
+            .select("CAST(identity AS TEXT)", "username")
+            .from("identities")
+            .where("is_username = 1")
+            .run();
+
+        const producedBlocks: Record<string, string | number>[] = await this.createQueryBuilder()
+            .select("COUNT(identity_id)", "count")
+            .select(
+                "CAST((SELECT identity FROM identities WHERE identities.id = identity_id LIMIT 1) AS TEXT)",
+                "username",
+            )
+            .from("blocks")
+            .where("timestamp >= :timestamp", { timestamp })
+            .groupBy("identity_id")
+            .run();
+
+        const missedBlocks: Record<string, string | number>[] = await this.createQueryBuilder()
+            .select("COUNT(identity_id)", "count")
+            .select(
+                "CAST((SELECT identity FROM identities WHERE identities.id = identity_id LIMIT 1) AS TEXT)",
+                "username",
+            )
+            .from("missed_blocks")
+            .where("timestamp >= :timestamp", { timestamp })
+            .groupBy("identity_id")
+            .run();
 
         const delegateProductivity = {};
-        for (const { username, missed, productivity } of productivityStatistics) {
-            delegateProductivity[username] = { missed, productivity };
+
+        for (const { username } of delegates) {
+            let missed: number | undefined = +(
+                missedBlocks.find((delegate) => delegate.username === username)?.count ?? NaN
+            );
+            let produced: number | undefined = +(
+                producedBlocks.find((delegate) => delegate.username === username)?.count ?? NaN
+            );
+            let productivity: number | undefined;
+
+            if (isNaN(missed)) {
+                missed = undefined;
+            }
+
+            if (isNaN(produced)) {
+                produced = undefined;
+            }
+
+            if (produced !== undefined || missed !== undefined) {
+                if (produced === undefined) {
+                    productivity = 0;
+                } else {
+                    if (missed === undefined) {
+                        missed = 0;
+                    }
+                    productivity = +((produced / (produced + missed)) * 100).toFixed(2);
+                }
+            }
+
+            delegateProductivity[username] = {
+                missed,
+                productivity,
+            };
         }
 
         return delegateProductivity;
     }
 
     public async hasMissedBlocks(): Promise<boolean> {
-        return (await this.query("SELECT COUNT(*) count FROM missed_blocks"))[0].count > 0;
+        return (
+            Number(
+                (await this.createQueryBuilder().select("COUNT(timestamp)", "count").from("missed_blocks").run())[0]
+                    .count,
+            ) > 0
+        );
+    }
+
+    protected getFullQueryBuilder(): Contracts.Database.QueryBuilder {
+        return this.createQueryBuilder()
+            .select("height")
+            .select("timestamp")
+            .select(
+                "CAST((SELECT identity FROM identities WHERE identities.id = missed_blocks.identity_id LIMIT 1) AS TEXT)",
+                "username",
+            )
+            .from("missed_blocks");
     }
 }

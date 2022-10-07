@@ -63,15 +63,11 @@ export class EventListener {
                             if (eventGroupName === "BlockEvent" || eventGroupName === "DelegateEvent") {
                                 endpoints.add(`${eventPath}/${data.username}`);
                             } else if (eventGroupName === "TransactionEvent") {
-                                const handler = await this.handlerRegistry.getActivatedHandlerForData(data);
+                                const handler = await this.handlerRegistry.getActivatedHandlerForTransaction(data);
                                 const { key } = handler.getConstructor();
                                 endpoints.add(`${eventPath}/${data.senderId}`);
                                 endpoints.add(`${eventPath}/${data.senderId}/${key}`);
                                 endpoints.add(`${eventPath}/${key}`);
-                                if (data.recipientId) {
-                                    endpoints.add(`${eventPath}/${data.recipientId}`);
-                                    endpoints.add(`${eventPath}/${data.recipientId}/${key}`);
-                                }
                                 if (data.asset && data.asset.recipients) {
                                     for (const transfer of data.asset.recipients) {
                                         endpoints.add(`${eventPath}/${transfer.recipientId}`);

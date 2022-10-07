@@ -34,7 +34,7 @@ message GetBlocksResponse {
         uint32 payloadLength = 12;
         string payloadHash = 13;
         string generatorPublicKey = 14;
-        string blockSignature = 15;
+        string signature = 15;
         bytes transactions = 16;
     }
 

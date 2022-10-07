@@ -60,12 +60,12 @@ export class DelegateSearchService {
             wallet.setAttribute("delegate.version", this.app.version());
         }
 
-        let resignationType: string | undefined = undefined;
+        let resignation: string | undefined = undefined;
 
         if (delegateAttribute.resigned === Enums.DelegateStatus.PermanentResign) {
-            resignationType = "permanent";
+            resignation = "permanent";
         } else if (delegateAttribute.resigned === Enums.DelegateStatus.TemporaryResign) {
-            resignationType = "temporary";
+            resignation = "temporary";
         }
 
         return {
@@ -79,7 +79,7 @@ export class DelegateSearchService {
             },
             rank: delegateAttribute.rank,
             isResigned: delegateAttribute.resigned !== undefined,
-            resignationType,
+            resignation,
             blocks: {
                 produced: delegateAttribute.producedBlocks,
                 missed: delegateAttribute.missedBlocks,

@@ -1,24 +1,29 @@
-import { TransactionHeaderType } from "../enums";
+import { TransactionHeaderType, TransactionType } from "../enums";
 import { InvalidTransactionBytesError, TransactionVersionError } from "../errors";
 import { Address } from "../identities";
 import { IDeserialiseAddresses, IDeserialiseOptions, ITransaction, ITransactionData } from "../interfaces";
 import { BigNumber, ByteBuffer, isSupportedTransactionVersion } from "../utils";
-import { TransactionTypeFactory } from "./types";
+import { InternalTransactionType, TransactionTypeFactory } from "./types";
 
 export class Deserialiser {
     public static deserialise(serialised: string | Buffer, options: IDeserialiseOptions = {}): ITransaction {
         const data = {} as ITransactionData;
 
         const buf: ByteBuffer = this.getByteBuffer(serialised);
-        this.deserialiseCommon(data, buf, options.transactionAddresses);
+        const internalType: string = this.deserialiseCommon(data, buf, options.transactionAddresses);
 
         const instance: ITransaction = TransactionTypeFactory.create(data);
+        instance.internalType = internalType;
+
+        if (options.index === undefined) {
+            options.index = TransactionType[data.type].findIndex((id: string) => id === internalType);
+        }
+
         this.deserialiseMemo(instance, buf);
 
-        // Deserialise type specific parts
-        instance.deserialise(buf, options.transactionAddresses);
+        instance.deserialise(buf, options);
 
-        this.deserialiseSignatures(data, buf);
+        this.deserialiseSignatures(instance, buf);
 
         if (data.version) {
             if (
@@ -32,37 +37,41 @@ export class Deserialiser {
         }
 
         instance.serialised = buf.getResult();
-
         return instance;
     }
 
-    public static deserialiseCommon(
-        transaction: ITransactionData,
+    private static deserialiseCommon(
+        data: ITransactionData,
         buf: ByteBuffer,
         transactionAddresses?: IDeserialiseAddresses,
-    ): void {
-        transaction.headerType = 0xff - buf.readUInt8();
-        transaction.version = buf.readUInt8();
-        transaction.network = buf.readUInt8();
+    ): string {
+        data.headerType = 0xff - buf.readUInt8();
+        data.version = buf.readUInt8();
+        data.network = buf.readUInt8();
 
-        transaction.typeGroup = buf.readUInt32LE();
-        transaction.type = buf.readUInt16LE();
-        transaction.nonce = BigNumber.make(buf.readBigUInt64LE());
+        const group: number = buf.readUInt32LE();
+        const type: number = buf.readUInt16LE();
 
-        transaction.senderPublicKey = buf.readBuffer(33).toString("hex");
+        data.type = InternalTransactionType.from(type, group).key!;
 
-        if (transaction.headerType === TransactionHeaderType.Standard) {
-            transaction.senderId = Address.fromPublicKey(transaction.senderPublicKey);
+        data.nonce = BigNumber.make(buf.readBigUInt64LE());
+
+        data.senderPublicKey = buf.readBuffer(33).toString("hex");
+
+        if (data.headerType === TransactionHeaderType.Standard) {
+            data.senderId = Address.fromPublicKey(data.senderPublicKey);
         } else {
             if (transactionAddresses?.senderId) {
-                transaction.senderId = transactionAddresses.senderId;
+                data.senderId = transactionAddresses.senderId;
                 buf.jump(21);
             } else {
-                transaction.senderId = Address.fromBuffer(buf.readBuffer(21));
+                data.senderId = Address.fromBuffer(buf.readBuffer(21));
             }
         }
 
-        transaction.fee = BigNumber.make(buf.readBigUInt64LE().toString());
+        data.fee = BigNumber.make(buf.readBigUInt64LE().toString());
+
+        return `${group}/${type}`;
     }
 
     private static deserialiseMemo(transaction: ITransaction, buf: ByteBuffer): void {
@@ -73,17 +82,19 @@ export class Deserialiser {
         }
     }
 
-    private static deserialiseSignatures(transaction: ITransactionData, buf: ByteBuffer): void {
+    private static deserialiseSignatures(transaction: ITransaction, buf: ByteBuffer): void {
+        const { data }: ITransaction = transaction;
+
         const canRead = () => {
             return buf.getRemainderLength() && buf.getRemainderLength() % 64 === 0;
         };
 
         if (canRead()) {
-            transaction.signatures = { primary: buf.readBuffer(64).toString("hex") };
+            data.signatures = { primary: buf.readBuffer(64).toString("hex") };
         }
 
         if (canRead()) {
-            transaction.signatures!.extra = buf.readBuffer(64).toString("hex");
+            data.signatures!.extra = buf.readBuffer(64).toString("hex");
         }
 
         if (buf.getRemainderLength()) {

@@ -1,13 +1,12 @@
-import { Interfaces, Transactions } from "@solar-network/crypto";
+import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
-import { Block } from "./models/block";
-import { Transaction } from "./models/transaction";
+import { BlockModel, TransactionModel } from "./models";
 
 @Container.injectable()
 export class ModelConverter implements Contracts.Database.ModelConverter {
     public getBlockModels(blocks: Interfaces.IBlock[]): Contracts.Database.BlockModel[] {
-        return blocks.map((b) => Object.assign(new Block(), b.data));
+        return blocks.map((b) => Object.assign(new BlockModel(), b.data));
     }
 
     public getBlockData(models: Contracts.Database.BlockModel[]): Interfaces.IBlockData[] {
@@ -15,6 +14,7 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
             if (model.username === null) {
                 delete model.username;
             }
+            model.donations = Utils.calculateDonations(model.height, model.reward);
             return model;
         });
     }
@@ -27,7 +27,7 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
         const transactionData = this.getTransactionData(transactionModels);
 
         const blockDataWithTransactions = blockData.map((data) => {
-            const transactions = transactionData.filter((t) => t.blockId === data.id);
+            const transactions = transactionData.filter((t) => t.blockHeight === data.height);
             return { data, transactions };
         });
 
@@ -36,7 +36,7 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
 
     public getTransactionModels(transactions: Interfaces.ITransaction[]): Contracts.Database.TransactionModel[] {
         return transactions.map((t) => {
-            return Object.assign(new Transaction(), t.data, {
+            return Object.assign(new TransactionModel(), t.data, {
                 timestamp: t.timestamp,
                 serialised: t.serialised,
             });
@@ -46,14 +46,7 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
     public getTransactionData(models: Contracts.Database.TransactionModel[]): Interfaces.ITransactionData[] {
         return models.map((model) => {
             const data = Transactions.TransactionFactory.fromBytesUnsafe(model.serialised, model.id).data;
-
-            // set_row_nonce trigger
-            data.nonce = model.nonce;
-
             data.burnedFee = model.burnedFee;
-
-            // block constructor
-            data.blockId = model.blockId;
             data.blockHeight = model.blockHeight;
             data.sequence = model.sequence;
 
@@ -69,7 +62,7 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
         const blockData = this.getBlockData(blockModels);
 
         return transactionData.map((data) => {
-            const block = blockData.find((b) => b.id === data.blockId);
+            const block = blockData.find((b) => b.height === data.blockHeight);
             AppUtils.assert.defined<Interfaces.IBlockData>(block);
             return { data, block };
         });

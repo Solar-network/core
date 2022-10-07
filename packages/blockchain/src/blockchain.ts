@@ -1,5 +1,5 @@
 import { Blocks, Crypto, Interfaces, Managers } from "@solar-network/crypto";
-import { DatabaseService, Repositories } from "@solar-network/database";
+import { DatabaseService } from "@solar-network/database";
 import { Container, Contracts, Enums, Providers, Types, Utils } from "@solar-network/kernel";
 import { DatabaseInteraction } from "@solar-network/state";
 
@@ -26,10 +26,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     private readonly database!: DatabaseService;
 
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
-    private readonly blockRepository!: Repositories.BlockRepository;
+    private readonly blockRepository!: Contracts.Database.BlockRepository;
 
     @Container.inject(Container.Identifiers.DatabaseMissedBlockRepository)
-    private readonly missedBlockRepository!: Repositories.MissedBlockRepository;
+    private readonly missedBlockRepository!: Contracts.Database.MissedBlockRepository;
 
     @Container.inject(Container.Identifiers.PoolService)
     private readonly pool!: Contracts.Pool.Service;
@@ -82,6 +82,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         );
 
         this.queue.on("drain", async () => {
+            this.database.checkpoint();
             this.updateProductivity(false);
             this.pool.readdTransactions(undefined, true);
             await stateSaver.run();
@@ -401,7 +402,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
             await __removeBlocks(blockCount);
 
-            await this.blockRepository.deleteBlocks(removedBlocks.reverse());
+            await this.blockRepository.delete(removedBlocks.reverse());
             this.stateStore.setLastStoredBlockHeight(lastBlock.data.height - blockCount);
 
             await this.pool.readdTransactions(removedTransactions.reverse());
@@ -430,7 +431,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
      * @return {void}
      */
     public async removeTopBlocks(count: number): Promise<void> {
-        await this.blockRepository.deleteTopBlocks(this.app, count);
+        await this.blockRepository.deleteTop(count);
     }
 
     /**
@@ -618,6 +619,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                     block.username = generatorWallet.getAttribute("delegate.username");
                 }
             }
+
+            if (block.username === null) {
+                delete block.username;
+            }
         }
     }
 
@@ -647,15 +652,14 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
             for (const [username, { missed, productivity }] of Object.entries(productivityStatistics)) {
                 const delegateWallet = this.walletRepository.findByUsername(username);
-
                 let oldProductivity: number | undefined = undefined;
                 if (delegateWallet.hasAttribute("delegate.productivity")) {
                     oldProductivity = delegateWallet.getAttribute("delegate.productivity");
                 }
 
                 let newProductivity: number | undefined = undefined;
-                if (productivity !== null) {
-                    newProductivity = +productivity;
+                if (productivity !== undefined) {
+                    newProductivity = productivity;
                 } else {
                     newProductivity = undefined;
                 }
@@ -669,7 +673,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                 }
 
                 if (newProductivity !== undefined) {
-                    delegateWallet.setAttribute("delegate.missedBlocks", +missed || 0);
+                    delegateWallet.setAttribute("delegate.missedBlocks", missed ?? 0);
                     delegateWallet.setAttribute("delegate.productivity", newProductivity);
                 } else {
                     delegateWallet.forgetAttribute("delegate.missedBlocks");

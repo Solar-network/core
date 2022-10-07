@@ -6,10 +6,7 @@ export const calculate = (wallets: readonly Wallet[]): string => {
     return wallets
         .filter((wallet) => !wallet.getBalance().isNegative())
         .reduce((partialSum, wallet) => {
-            let balance = partialSum.plus(wallet.getBalance());
-            if (wallet.hasAttribute("htlc.lockedBalance")) {
-                balance = balance.plus(wallet.getAttribute("htlc.lockedBalance"));
-            }
+            const balance = partialSum.plus(wallet.getBalance());
             return balance;
         }, Utils.BigNumber.ZERO)
         .toFixed();

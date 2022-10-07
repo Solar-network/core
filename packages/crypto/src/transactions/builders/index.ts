@@ -1,13 +1,10 @@
-import { DelegateRegistrationBuilder } from "./transactions/core/delegate-registration";
-import { DelegateResignationBuilder } from "./transactions/core/delegate-resignation";
-import { ExtraSignatureBuilder } from "./transactions/core/extra-signature";
-import { HtlcClaimBuilder } from "./transactions/core/htlc-claim";
-import { HtlcLockBuilder } from "./transactions/core/htlc-lock";
-import { HtlcRefundBuilder } from "./transactions/core/htlc-refund";
-import { IPFSBuilder } from "./transactions/core/ipfs";
-import { TransferBuilder } from "./transactions/core/transfer";
-import { BurnBuilder } from "./transactions/solar/burn";
-import { VoteBuilder } from "./transactions/solar/vote";
+import { BurnBuilder } from "./transactions/burn";
+import { DelegateRegistrationBuilder } from "./transactions/delegate-registration";
+import { DelegateResignationBuilder } from "./transactions/delegate-resignation";
+import { ExtraSignatureBuilder } from "./transactions/extra-signature";
+import { IPFSBuilder } from "./transactions/ipfs";
+import { TransferBuilder } from "./transactions/transfer";
+import { VoteBuilder } from "./transactions/vote";
 
 export * from "./transactions/transaction";
 
@@ -34,18 +31,6 @@ export class BuilderFactory {
 
     public static delegateResignation(): DelegateResignationBuilder {
         return new DelegateResignationBuilder();
-    }
-
-    public static htlcLock(): HtlcLockBuilder {
-        return new HtlcLockBuilder();
-    }
-
-    public static htlcClaim(): HtlcClaimBuilder {
-        return new HtlcClaimBuilder();
-    }
-
-    public static htlcRefund(): HtlcRefundBuilder {
-        return new HtlcRefundBuilder();
     }
 
     public static burn(): BurnBuilder {

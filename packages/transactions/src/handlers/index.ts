@@ -1,7 +1,5 @@
 import { TransactionHandlerProvider } from "./handler-provider";
 import { TransactionHandlerRegistry } from "./handler-registry";
-export * as Core from "./core";
-export * as Solar from "./solar";
 import { TransactionHandler, TransactionHandlerConstructor } from "./transaction";
 
 export {
@@ -10,3 +8,11 @@ export {
     TransactionHandlerRegistry as Registry,
     TransactionHandlerProvider,
 };
+
+export * from "./burn";
+export * from "./delegate-registration";
+export * from "./delegate-resignation";
+export * from "./extra-signature";
+export * from "./ipfs";
+export * from "./transfer";
+export * from "./vote";

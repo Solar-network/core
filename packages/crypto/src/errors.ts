@@ -76,24 +76,6 @@ export class UnknownTransactionError extends CryptoError {
     }
 }
 
-export class TransactionAlreadyRegisteredError extends CryptoError {
-    public constructor(name: string) {
-        super(`Transaction type ${name} is already registered`);
-    }
-}
-
-export class TransactionKeyAlreadyRegisteredError extends CryptoError {
-    public constructor(name: string) {
-        super(`Transaction key ${name} is already registered`);
-    }
-}
-
-export class CoreTransactionTypeGroupImmutableError extends CryptoError {
-    public constructor() {
-        super(`The Core transaction type group is immutable`);
-    }
-}
-
 export class MissingMilestoneFeeError extends CryptoError {
     public constructor(name: string) {
         super(`Missing milestone fee for '${name}'`);

@@ -30,14 +30,14 @@ export class Validator {
             return fraction;
         };
 
-        const sumOfVotesEquals100 = (schema: boolean, test: object): boolean => {
+        const allOrNothing = (schema: boolean, test: object): boolean => {
             let total = 0;
 
             for (const value of Object.values(test)) {
                 total += +value * 100;
             }
 
-            return total === 10000 || Object.keys(test).length === 0;
+            return total === 10000 || total === 0 || Object.keys(test).length === 0;
         };
 
         const validateMultiples = (schema: number, test: number): boolean => {
@@ -61,11 +61,11 @@ export class Validator {
             type: "number",
             validate: validateMultiples,
         });
-        this.ajv.addKeyword("sumOfVotesEquals100", {
+        this.ajv.addKeyword("allOrNothing", {
             async: false,
             errors: true,
             type: "object",
-            validate: sumOfVotesEquals100,
+            validate: allOrNothing,
         });
     }
 

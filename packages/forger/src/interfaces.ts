@@ -49,10 +49,10 @@ export interface Delegate {
     address: string;
 
     /**
-     * @param {Interfaces.ITransactionData[]} transactions
+     * @param {Interfaces.ITransaction[]} transactions
      * @param {Record<string, any>} options
      * @returns {Interfaces.IBlock}
      * @memberof Delegate
      */
-    forge(transactions: Interfaces.ITransactionData[], options: Record<string, any>): Interfaces.IBlock;
+    forge(transactions: Interfaces.ITransaction[], options: Record<string, any>): Interfaces.IBlock;
 }

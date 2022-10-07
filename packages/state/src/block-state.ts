@@ -1,5 +1,4 @@
-import { Enums, Identities, Interfaces, Utils } from "@solar-network/crypto";
-import { Repositories } from "@solar-network/database";
+import { Identities, Interfaces, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
@@ -14,9 +13,6 @@ export class BlockState implements Contracts.State.BlockState {
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly state!: Contracts.State.StateStore;
-
-    @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
-    private readonly transactionRepository!: Repositories.TransactionRepository;
 
     @Container.inject(Container.Identifiers.WalletRepository)
     private walletRepository!: Contracts.State.WalletRepository;
@@ -82,52 +78,22 @@ export class BlockState implements Contracts.State.BlockState {
     public async applyTransaction(height: number, transaction: Interfaces.ITransaction): Promise<void> {
         transaction.setBurnedFee(height);
 
-        const transactionHandler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
-
-        let lockSenderWallet: Contracts.State.Wallet | undefined;
-        let lockRecipientWallet: Contracts.State.Wallet | undefined;
-        if (
-            transaction.type === Enums.TransactionType.Core.HtlcClaim &&
-            transaction.typeGroup === Enums.TransactionTypeGroup.Core
-        ) {
-            AppUtils.assert.defined<Interfaces.IHtlcClaimAsset>(transaction.data.asset?.claim);
-
-            const lockId = transaction.data.asset.claim.lockTransactionId;
-            lockSenderWallet = this.walletRepository.findByIndex(Contracts.State.WalletIndexes.Locks, lockId);
-
-            const locks: Interfaces.IHtlcLocks = lockSenderWallet.getAttribute("htlc.locks", {});
-
-            let recipientId: string | undefined;
-
-            if (locks[lockId] && locks[lockId].recipientId) {
-                recipientId = locks[lockId].recipientId;
-            } else {
-                const lockTransaction: Interfaces.ITransactionData = (
-                    await this.transactionRepository.findByIds([lockId])
-                )[0];
-
-                recipientId = lockTransaction.recipientId;
-            }
-
-            AppUtils.assert.defined<Interfaces.ITransactionData>(recipientId);
-
-            lockRecipientWallet = this.walletRepository.findByAddress(recipientId);
-        }
+        const transactionHandler = await this.handlerRegistry.getActivatedHandlerForTransaction(transaction);
 
         await transactionHandler.apply(transaction);
 
         AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
-        let recipient: Contracts.State.Wallet | undefined;
+        let recipientWallet: Contracts.State.Wallet | undefined;
         if (transaction.data.recipientId) {
             AppUtils.assert.defined<string>(transaction.data.recipientId);
 
-            recipient = this.walletRepository.findByAddress(transaction.data.recipientId);
+            recipientWallet = this.walletRepository.findByAddress(transaction.data.recipientId);
         }
 
-        this.updateVoteBalances(sender, recipient!, transaction.data, lockSenderWallet!, lockRecipientWallet!);
+        this.updateVoteBalances(senderWallet, recipientWallet!, transaction.data);
     }
 
     public async revertTransaction(height: number, transaction: Interfaces.ITransaction): Promise<void> {
@@ -135,42 +101,22 @@ export class BlockState implements Contracts.State.BlockState {
 
         const { data } = transaction;
 
-        const transactionHandler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
+        const transactionHandler = await this.handlerRegistry.getActivatedHandlerForTransaction(transaction);
 
         AppUtils.assert.defined<string>(data.senderId);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(data.senderId);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(data.senderId);
 
-        let recipient: Contracts.State.Wallet | undefined;
+        let recipientWallet: Contracts.State.Wallet | undefined;
         if (transaction.data.recipientId) {
             AppUtils.assert.defined<string>(transaction.data.recipientId);
 
-            recipient = this.walletRepository.findByAddress(transaction.data.recipientId);
+            recipientWallet = this.walletRepository.findByAddress(transaction.data.recipientId);
         }
 
         await transactionHandler.revert(transaction);
 
-        let lockSenderWallet: Contracts.State.Wallet | undefined;
-        let lockRecipientWallet: Contracts.State.Wallet | undefined;
-        if (
-            transaction.type === Enums.TransactionType.Core.HtlcClaim &&
-            transaction.typeGroup === Enums.TransactionTypeGroup.Core
-        ) {
-            AppUtils.assert.defined<Interfaces.IHtlcClaimAsset>(transaction.data.asset?.claim);
-
-            const lockId = transaction.data.asset.claim.lockTransactionId;
-            lockSenderWallet = this.walletRepository.findByIndex(Contracts.State.WalletIndexes.Locks, lockId);
-
-            const lockTransaction: Interfaces.ITransactionData = (
-                await this.transactionRepository.findByIds([lockId])
-            )[0];
-
-            AppUtils.assert.defined<Interfaces.ITransactionData>(lockTransaction.recipientId);
-
-            lockRecipientWallet = this.walletRepository.findByAddress(lockTransaction.recipientId);
-        }
-
-        this.updateVoteBalances(sender, recipient!, data, lockSenderWallet!, lockRecipientWallet!);
+        this.updateVoteBalances(senderWallet, recipientWallet!, data);
     }
 
     public updateWalletVoteBalance(wallet: Contracts.State.Wallet): void {
@@ -187,7 +133,7 @@ export class BlockState implements Contracts.State.BlockState {
         );
 
         delegateAttribute.producedBlocks++;
-        delegateAttribute.burnedFees = delegateAttribute.burnedFees.plus(block.data.burnedFee!);
+        delegateAttribute.burnedFees = delegateAttribute.burnedFees.plus(block.data.totalFeeBurned!);
         delegateAttribute.forgedFees = delegateAttribute.forgedFees.plus(block.data.totalFee);
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.plus(block.data.reward);
         delegateAttribute.donations = delegateAttribute.donations.plus(donations);
@@ -195,7 +141,7 @@ export class BlockState implements Contracts.State.BlockState {
 
         const balanceIncrease = block.data.reward
             .minus(donations)
-            .plus(block.data.totalFee.minus(block.data.burnedFee!));
+            .plus(block.data.totalFee.minus(block.data.totalFeeBurned!));
 
         forgerWallet.increaseBalance(balanceIncrease);
         this.updateWalletVoteBalance(forgerWallet);
@@ -215,7 +161,7 @@ export class BlockState implements Contracts.State.BlockState {
         );
 
         delegateAttribute.producedBlocks--;
-        delegateAttribute.burnedFees = delegateAttribute.burnedFees.minus(block.data.burnedFee!);
+        delegateAttribute.burnedFees = delegateAttribute.burnedFees.minus(block.data.totalFeeBurned!);
         delegateAttribute.forgedFees = delegateAttribute.forgedFees.minus(block.data.totalFee);
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.minus(block.data.reward);
         delegateAttribute.donations = delegateAttribute.donations.minus(donations);
@@ -224,6 +170,7 @@ export class BlockState implements Contracts.State.BlockState {
             { username: block.data.username, height: { to: block.data.height - 1 } },
             [{ property: "height", direction: "desc" }],
             { offset: 0, limit: 1 },
+            false,
         );
 
         if (results[0] && results[0].id) {
@@ -234,7 +181,7 @@ export class BlockState implements Contracts.State.BlockState {
 
         const balanceDecrease = block.data.reward
             .minus(donations)
-            .plus(block.data.totalFee.minus(block.data.burnedFee!));
+            .plus(block.data.totalFee.minus(block.data.totalFeeBurned!));
 
         forgerWallet.decreaseBalance(balanceDecrease);
         this.updateWalletVoteBalance(forgerWallet);
@@ -249,17 +196,12 @@ export class BlockState implements Contracts.State.BlockState {
     private updateVoteBalances(
         sender: Contracts.State.Wallet,
         recipient: Contracts.State.Wallet,
-        transaction: Interfaces.ITransactionData,
-        lockSenderWallet: Contracts.State.Wallet,
-        lockRecipientWallet: Contracts.State.Wallet,
+        transactionData: Interfaces.ITransactionData,
     ): void {
-        if (
-            transaction.type === Enums.TransactionType.Core.Transfer &&
-            transaction.typeGroup === Enums.TransactionTypeGroup.Core
-        ) {
-            AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.asset?.recipients);
+        if (transactionData.type === "transfer") {
+            AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transactionData.asset?.recipients);
 
-            for (const { recipientId } of transaction.asset.recipients) {
+            for (const { recipientId } of transactionData.asset.recipients) {
                 const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(recipientId);
                 this.updateWalletVoteBalance(recipientWallet);
             }
@@ -271,14 +213,6 @@ export class BlockState implements Contracts.State.BlockState {
 
         if (recipient) {
             this.updateWalletVoteBalance(recipient);
-        }
-
-        if (lockSenderWallet) {
-            this.updateWalletVoteBalance(lockSenderWallet);
-        }
-
-        if (lockRecipientWallet) {
-            this.updateWalletVoteBalance(lockRecipientWallet);
         }
     }
 

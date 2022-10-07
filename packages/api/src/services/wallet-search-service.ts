@@ -71,11 +71,11 @@ export class WalletSearchService {
             .map((wallet) => {
                 let delegate: Record<string, any> | undefined;
                 if (wallet.hasAttribute("delegate")) {
-                    const isResigned = wallet.hasAttribute("delegate.resigned");
+                    const isResigned = wallet.hasAttribute("delegate.resignation");
                     let resigned: string | undefined;
                     if (isResigned) {
                         resigned =
-                            wallet.getAttribute("delegate.resigned") === Enums.DelegateStatus.PermanentResign
+                            wallet.getAttribute("delegate.resignation.type") === Enums.DelegateStatus.PermanentResign
                                 ? "permanent"
                                 : "temporary";
                     }
@@ -96,11 +96,11 @@ export class WalletSearchService {
                 };
             })
             .sort((a, b) => {
-                if (a.delegate && !a.delegate.resigned && !b.delegate) {
+                if (a.delegate && !a.delegate.resignation && !b.delegate) {
                     return -1;
-                } else if (b.delegate && !b.delegate.resigned && !a.delegate) {
+                } else if (b.delegate && !b.delegate.resignation && !a.delegate) {
                     return 1;
-                } else if (a.delegate && b.delegate && !a.delegate.resigned && !b.delegate.resigned) {
+                } else if (a.delegate && b.delegate && !a.delegate.resignation && !b.delegate.resignation) {
                     return a.delegate.username.localeCompare(b.delegate.username, "en", { numeric: true });
                 } else {
                     return a.address.localeCompare(b.address, "en", { numeric: true });

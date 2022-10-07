@@ -1,4 +1,4 @@
-import { Enums, Transactions } from "@solar-network/crypto";
+import { Transactions } from "@solar-network/crypto";
 import { Container, Services, Utils } from "@solar-network/kernel";
 
 import { AlreadyRegisteredError, UnsatisfiedDependencyError } from "../errors";
@@ -30,13 +30,9 @@ export class TransactionHandlerProvider {
         const handler = new handlerConstructor();
         const transactionConstructor = handler.getConstructor();
 
-        Utils.assert.defined<number>(transactionConstructor.type);
-        Utils.assert.defined<number>(transactionConstructor.typeGroup);
+        Utils.assert.defined<number>(transactionConstructor.key);
 
-        const internalType = Transactions.InternalTransactionType.from(
-            transactionConstructor.type,
-            transactionConstructor.typeGroup,
-        );
+        const internalType = Transactions.InternalTransactionType.fromKey(transactionConstructor.key);
 
         if (this.hasOtherHandlerHandling(handlerConstructor, internalType)) {
             throw new AlreadyRegisteredError(internalType);
@@ -53,13 +49,6 @@ export class TransactionHandlerProvider {
                 this.attributeSet.set(attribute);
             }
         }
-
-        if (
-            transactionConstructor.typeGroup !== Enums.TransactionTypeGroup.Core &&
-            transactionConstructor.typeGroup !== Enums.TransactionTypeGroup.Solar
-        ) {
-            Transactions.TransactionRegistry.registerTransactionType(transactionConstructor);
-        }
     }
 
     private hasOtherHandlerHandling(
@@ -72,13 +61,9 @@ export class TransactionHandlerProvider {
             const otherHandler = new otherHandlerConstructor();
             const otherTransactionConstructor = otherHandler.getConstructor();
 
-            Utils.assert.defined<number>(otherTransactionConstructor.type);
-            Utils.assert.defined<number>(otherTransactionConstructor.typeGroup);
+            Utils.assert.defined<number>(otherTransactionConstructor.key);
 
-            const otherInternalType = Transactions.InternalTransactionType.from(
-                otherTransactionConstructor.type,
-                otherTransactionConstructor.typeGroup,
-            );
+            const otherInternalType = Transactions.InternalTransactionType.fromKey(otherTransactionConstructor.key);
 
             if (otherInternalType === internalType) {
                 return true;

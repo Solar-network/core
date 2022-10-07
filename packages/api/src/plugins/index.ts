@@ -5,7 +5,6 @@ import { RateLimiterMemory, RLWrapperBlackAndWhite } from "rate-limiter-flexible
 
 import { cache } from "./cache";
 import { closeConnection } from "./close-connection";
-import { commaArrayQuery } from "./comma-array-query";
 import { dotSeparatedQuery } from "./dot-separated-query";
 import { log } from "./log";
 import { pagination } from "./pagination";
@@ -77,7 +76,6 @@ export const preparePlugins = (config) => {
                 whitelist: config.plugins.whitelist,
             },
         },
-        { plugin: commaArrayQuery },
         { plugin: dotSeparatedQuery },
         {
             plugin: cache,

@@ -1,4 +1,4 @@
-import { Options, OrCriteria, OrEqualCriteria, OrNumericCriteria, Pagination, ResultsPage, Sorting } from "../search";
+import { OrCriteria, OrEqualCriteria, OrNumericCriteria, Pagination, ResultsPage, Sorting } from "../search";
 
 export type MissedBlockCriteria = {
     timestamp?: OrNumericCriteria<number>;
@@ -13,6 +13,6 @@ export interface MissedBlockHistoryService {
         criteria: OrMissedBlockCriteria,
         sorting: Sorting,
         pagination: Pagination,
-        options?: Options,
+        count?: boolean,
     ): Promise<ResultsPage<{ timestamp: number; height: number; username: string }>>;
 }
