@@ -47,7 +47,7 @@ export class Verifier {
     }
 
     public static verifySchema(data: ITransactionData, strict = true): ISchemaValidationResult {
-        const transactionType = TransactionTypeFactory.get(data.type, data.typeGroup, data.version);
+        const transactionType = TransactionTypeFactory.get(data.type, data.typeGroup);
 
         if (!transactionType) {
             throw new Error();
