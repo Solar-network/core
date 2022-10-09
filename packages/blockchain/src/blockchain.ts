@@ -240,7 +240,6 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         }
 
         if (receivedSlot > currentSlot) {
-            this.logger.info(`Discarded block ${block.height.toLocaleString()} because it takes a future slot`, "❗");
             return;
         }
 
