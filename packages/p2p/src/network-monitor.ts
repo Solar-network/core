@@ -224,7 +224,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         for (const key of Object.keys(peerErrors)) {
             const peerCount = peerErrors[key].length;
-            this.logger.debug(`Removed ${Utils.pluralise("peer", peerCount, true)} because of "${key}"`, "🗑️");
+            this.logger.debug(`Removed ${Utils.pluralise("peer", peerCount, true)} because of "${key}"`, "🧹");
         }
 
         if (this.initialising) {
@@ -232,7 +232,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                 `${max - unresponsivePeers} of ${Utils.pluralise("peer", max, true)} on the network are responsive`,
                 "💬",
             );
-            this.logger.info(`Median network height: ${this.getNetworkHeight().toLocaleString()}`, "🕸️");
+            this.logger.info(`Median network height: ${this.getNetworkHeight().toLocaleString()}`, "📦");
         }
     }
 

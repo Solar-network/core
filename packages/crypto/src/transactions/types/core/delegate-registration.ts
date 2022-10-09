@@ -4,7 +4,7 @@ import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
 export abstract class DelegateRegistrationTransaction extends Transaction {
-    public static emoji: string = "🪪";
+    public static emoji: string = "🐣";
     public static key = "delegateRegistration";
     public static type: number = TransactionType.Core.DelegateRegistration;
     public static typeGroup: number = TransactionTypeGroup.Core;

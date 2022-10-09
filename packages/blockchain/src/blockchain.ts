@@ -372,7 +372,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
                 const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
-                this.logger.info(`Undoing block ${lastBlock.data.height.toLocaleString()}`, "🧹");
+                this.logger.info(`Undoing block ${lastBlock.data.height.toLocaleString()}`, "🗑️");
 
                 await revertLastBlock();
                 await __removeBlocks(numberOfBlocks - 1);
@@ -576,7 +576,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                 this.stateStore.setLastDownloadedBlock(lastStoredBlock.data);
 
                 this.stateStore.setNumberOfBlocksToRollback(0);
-                this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)}`, "🧹");
+                this.logger.info(`Removed ${Utils.pluralise("block", rollbackBlocks, true)}`, "🗑️");
 
                 await this.roundState.restore();
 

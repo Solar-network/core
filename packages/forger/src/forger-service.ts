@@ -362,7 +362,7 @@ export class ForgerService {
                                     block.data.numberOfTransactions,
                                     true,
                                 )}`,
-                                "📦",
+                                "🪄",
                             );
 
                             await this.client.broadcastBlock(block);
@@ -673,7 +673,7 @@ export class ForgerService {
                         }`;
                     })
                     .join(", ")}`,
-                "🧑‍💼",
+                "🙍",
             );
         }
     }

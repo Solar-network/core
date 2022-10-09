@@ -218,7 +218,7 @@ export class Service implements Contracts.Pool.Service {
                     }
                 } else {
                     this.storage.removeTransaction(id);
-                    this.logger.debug(`Not re-adding previously stored expired transaction to the pool: ${id}`, "💤");
+                    this.logger.debug(`Not re-adding previously stored expired transaction to the pool: ${id}`, "⚡");
                     previouslyStoredExpirations++;
                 }
             }
@@ -385,7 +385,7 @@ export class Service implements Contracts.Pool.Service {
             for (const removedTransaction of removedTransactions) {
                 AppUtils.assert.defined<string>(removedTransaction.id);
                 this.storage.removeTransaction(removedTransaction.id);
-                this.logger.debug(`Removed old ${removedTransaction} from the pool`, "🧓🏻");
+                this.logger.debug(`Removed old ${removedTransaction} from the pool`, "⚡");
                 this.events.dispatch(Enums.TransactionEvent.Expired, removedTransaction.data);
             }
         }
@@ -405,7 +405,7 @@ export class Service implements Contracts.Pool.Service {
                 for (const removedTransaction of removedTransactions) {
                     AppUtils.assert.defined<string>(removedTransaction.id);
                     this.storage.removeTransaction(removedTransaction.id);
-                    this.logger.debug(`Removed expired ${removedTransaction} from the pool`, "💤");
+                    this.logger.debug(`Removed expired ${removedTransaction} from the pool`, "⚡");
                     this.events.dispatch(Enums.TransactionEvent.Expired, removedTransaction.data);
                 }
             }
@@ -427,7 +427,7 @@ export class Service implements Contracts.Pool.Service {
         for (const removedTransaction of removedTransactions) {
             AppUtils.assert.defined<string>(removedTransaction.id);
             this.storage.removeTransaction(removedTransaction.id);
-            this.logger.debug(`Removed lowest priority ${removedTransaction} from the pool`, "⤵️");
+            this.logger.debug(`Removed lowest priority ${removedTransaction} from the pool`, "⚡");
             this.events.dispatch(Enums.TransactionEvent.RemovedFromPool, removedTransaction.data);
         }
     }

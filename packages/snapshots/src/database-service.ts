@@ -57,7 +57,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
                 await this.transactionRepository.fastCount(),
                 true,
             )}, ${Utils.pluralise("round", await this.roundRepository.fastCount(), true)}`,
-            "🧹",
+            "🗑️",
         );
 
         await this.blockRepository.truncate();
@@ -68,7 +68,7 @@ export class SnapshotDatabaseService implements Database.DatabaseService {
 
         Utils.assert.defined<Models.Block>(lastBlock);
 
-        this.logger.debug(`Last block height is: ${lastBlock.height.toLocaleString()}`, "🕸️");
+        this.logger.debug(`Last block height is: ${lastBlock.height.toLocaleString()}`, "📦");
 
         await this.blockRepository.rollback(roundInfo);
 
