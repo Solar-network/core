@@ -1,6 +1,6 @@
 import { Container, Contracts, Providers, Services, Utils as AppUtils } from "@solar-network/kernel";
-import { fork } from "child_process";
 import Joi from "joi";
+import { Worker as NodeWorker } from "worker_threads";
 
 import {
     ApplyTransactionAction,
@@ -105,10 +105,10 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Container.Identifiers.PoolWorkerPool).to(WorkerPool).inSingletonScope();
         this.app.bind(Container.Identifiers.PoolWorker).to(Worker);
         this.app.bind(Container.Identifiers.PoolWorkerFactory).toAutoFactory(Container.Identifiers.PoolWorker);
-        this.app.bind(Container.Identifiers.PoolWorkerIpcSubprocessFactory).toFactory(() => {
+        this.app.bind(Container.Identifiers.PoolWorkerThreadFactory).toFactory(() => {
             return () => {
-                const subprocess = fork(`${__dirname}/worker-script.js`);
-                return new AppUtils.IpcSubprocess<Contracts.Pool.WorkerScriptHandler>(subprocess);
+                const worker = new NodeWorker(`${__dirname}/worker-script.js`);
+                return new AppUtils.WorkerThread<Contracts.Pool.WorkerScriptHandler>(worker);
             };
         });
 

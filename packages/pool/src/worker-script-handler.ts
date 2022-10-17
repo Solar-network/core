@@ -1,5 +1,6 @@
 import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
 import { Contracts } from "@solar-network/kernel";
+import { parentPort } from "worker_threads";
 
 export class WorkerScriptHandler implements Contracts.Pool.WorkerScriptHandler {
     public setConfig(networkConfig: Interfaces.NetworkConfig): void {
@@ -10,19 +11,23 @@ export class WorkerScriptHandler implements Contracts.Pool.WorkerScriptHandler {
         Managers.configManager.setHeight(height);
     }
 
-    public async getTransaction(
-        transactionData: Interfaces.ITransactionData | string,
-    ): Promise<Contracts.Pool.SerialisedTransaction> {
-        const tx =
-            typeof transactionData === "string"
-                ? Transactions.TransactionFactory.fromBytes(Buffer.from(transactionData, "hex"))
-                : Transactions.TransactionFactory.fromData(transactionData);
+    public async getTransaction(transactionData: Interfaces.ITransactionData | string, id?: string): Promise<void> {
+        try {
+            const tx =
+                typeof transactionData === "string"
+                    ? Transactions.TransactionFactory.fromBytes(Buffer.from(transactionData, "hex"))
+                    : Transactions.TransactionFactory.fromData(transactionData);
 
-        return {
-            addresses: tx.addresses,
-            id: tx.id!,
-            serialised: tx.serialised.toString("hex"),
-            isVerified: tx.isVerified,
-        };
+            const result: Contracts.Pool.SerialisedTransaction = {
+                addresses: tx.addresses,
+                id: tx.id!,
+                serialised: tx.serialised.toString("hex"),
+                isVerified: tx.isVerified,
+            };
+
+            parentPort!.postMessage({ id, result });
+        } catch (error) {
+            parentPort!.postMessage({ id, error: error.message });
+        }
     }
 }

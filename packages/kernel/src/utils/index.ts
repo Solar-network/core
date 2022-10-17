@@ -20,8 +20,6 @@ export * from "./expiration-calculator";
 export * from "./assert";
 export * from "./expand-tilde";
 export * from "./http";
-export * from "./ipc-handler";
-export * from "./ipc-subprocess";
 export * from "./lock";
 export * from "./nsect";
 export * from "./internal";
@@ -208,6 +206,8 @@ export * from "./unset";
 export * from "./upper-case";
 export * from "./upper-first";
 export * from "./words";
+export * from "./worker-handler";
+export * from "./worker-thread";
 export * from "./zip-object";
 export { immutable };
 
