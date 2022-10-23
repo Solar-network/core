@@ -4,7 +4,7 @@ import { join } from "path";
 import * as Bootstrappers from "./bootstrap";
 import { Bootstrapper } from "./bootstrap/interfaces";
 import * as Contracts from "./contracts";
-import { KernelEvent } from "./enums";
+import { KernelEvent, ShutdownSignal } from "./enums";
 import { DirectoryCannotBeFound } from "./exceptions/filesystem";
 import { Identifiers } from "./ioc";
 import { PluginDiscoverer, ServiceProvider, ServiceProviderRepository } from "./providers";
@@ -35,8 +35,7 @@ export class Application implements Contracts.Kernel.Application {
      * @memberof Contracts.Kernel.Application
      */
     public constructor(public readonly container: Contracts.Kernel.Container.Container) {
-        // todo: enable this after solving the event emitter limit issues
-        // this.listenToShutdownSignals();
+        this.listenToShutdownSignals();
 
         this.bind<Contracts.Kernel.Application>(Identifiers.Application).toConstantValue(this);
 
@@ -469,17 +468,22 @@ export class Application implements Contracts.Kernel.Application {
         this.rebind<string>(`path.${type}`).toConstantValue(path);
     }
 
-    // /**
-    //  * @private
-    //  * @memberof Application
-    //  */
-    // private listenToShutdownSignals(): void {
-    //     for (const signal in ShutdownSignal) {
-    //         process.on(signal as any, async code => {
-    //             await this.terminate(signal);
-
-    //             process.exit(code || 1);
-    //         });
-    //     }
-    // }
+    /**
+     * @private
+     * @memberof Application
+     */
+    private listenToShutdownSignals(): void {
+        for (const signal in ShutdownSignal) {
+            process.on(signal as any, async (code) => {
+                await this.terminate();
+                if (this.isBound<Contracts.Blockchain.Blockchain>(Identifiers.BlockchainService)) {
+                    this.get<Contracts.Kernel.Logger>(Identifiers.LogService).info(
+                        "The blockchain has been stopped",
+                        "⏹️",
+                    );
+                }
+                process.exit(code || 1);
+            });
+        }
+    }
 }
