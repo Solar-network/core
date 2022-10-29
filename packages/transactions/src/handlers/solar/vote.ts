@@ -12,6 +12,9 @@ import { TransactionHandler, TransactionHandlerConstructor } from "../transactio
 
 @Container.injectable()
 export class VoteTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.EventDispatcherService)
+    private readonly events!: Contracts.Kernel.EventDispatcher;
+
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
@@ -86,10 +89,7 @@ export class VoteTransactionHandler extends TransactionHandler {
         return super.throwIfCannotBeApplied(transaction, wallet);
     }
 
-    public async emitEvents(
-        transaction: Interfaces.ITransaction,
-        emitter: Contracts.Kernel.EventDispatcher,
-    ): Promise<void> {
+    public async emitEvents(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string[]>(transaction.data.asset?.votes);
 
         const wallet = this.walletRepository.findByAddress(transaction.data.senderId);

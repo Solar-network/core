@@ -6,6 +6,9 @@ import { TransactionHandler, TransactionHandlerConstructor } from "../transactio
 
 @Container.injectable()
 export class DelegateRegistrationTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.EventDispatcherService)
+    private readonly events!: Contracts.Kernel.EventDispatcher;
+
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
@@ -126,8 +129,8 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
         return super.throwIfCannotBeApplied(transaction, wallet);
     }
 
-    public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
-        emitter.dispatch(AppEnums.DelegateEvent.Registered, {
+    public emitEvents(transaction: Interfaces.ITransaction): void {
+        this.events.dispatch(AppEnums.DelegateEvent.Registered, {
             ...transaction.data,
             username: transaction.data.asset?.delegate?.username,
         });

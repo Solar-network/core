@@ -15,6 +15,9 @@ import { DelegateRegistrationTransactionHandler } from "./delegate-registration"
 
 @Container.injectable()
 export class DelegateResignationTransactionHandler extends TransactionHandler {
+    @Container.inject(Container.Identifiers.EventDispatcherService)
+    private readonly events!: Contracts.Kernel.EventDispatcher;
+
     @Container.inject(Container.Identifiers.PoolQuery)
     private readonly poolQuery!: Contracts.Pool.Query;
 
@@ -125,11 +128,11 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
         return super.throwIfCannotBeApplied(transaction, wallet);
     }
 
-    public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {
+    public emitEvents(transaction: Interfaces.ITransaction): void {
         const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
         const username = senderWallet.getAttribute("delegate.username");
 
-        emitter.dispatch(AppEnums.DelegateEvent.Resigned, {
+        this.events.dispatch(AppEnums.DelegateEvent.Resigned, {
             ...transaction.data,
             username,
         });

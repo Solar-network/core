@@ -159,7 +159,6 @@ export class DatabaseInteraction {
     private async emitTransactionEvents(transaction: Interfaces.ITransaction): Promise<void> {
         this.events.dispatch(Enums.TransactionEvent.Applied, transaction.data);
         const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
-        // ! no reason to pass this.emitter
-        handler.emitEvents(transaction, this.events);
+        handler.emitEvents(transaction);
     }
 }

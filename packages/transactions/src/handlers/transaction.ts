@@ -182,7 +182,7 @@ export abstract class TransactionHandler {
     /**
      * Database Service
      */
-    public emitEvents(transaction: Interfaces.ITransaction, emitter: Contracts.Kernel.EventDispatcher): void {}
+    public emitEvents(transaction: Interfaces.ITransaction): void {}
 
     /**
      * Pool logic
