@@ -73,11 +73,9 @@ export class EventListener {
                                     endpoints.add(`${eventPath}/${data.recipientId}/${key}`);
                                 }
                                 if (data.asset && data.asset.recipients) {
-                                    if (key === "transfer") {
-                                        for (const transfer of data.asset.recipients) {
-                                            endpoints.add(`${eventPath}/${transfer.recipientId}`);
-                                            endpoints.add(`${eventPath}/${transfer.recipientId}/${key}`);
-                                        }
+                                    for (const transfer of data.asset.recipients) {
+                                        endpoints.add(`${eventPath}/${transfer.recipientId}`);
+                                        endpoints.add(`${eventPath}/${transfer.recipientId}/${key}`);
                                     }
                                 }
                             } else if (eventGroupName === "VoteEvent") {
