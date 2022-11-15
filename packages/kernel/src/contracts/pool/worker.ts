@@ -1,6 +1,6 @@
 import { Interfaces } from "@solar-network/crypto";
 
-import { IpcSubprocess } from "../../utils/ipc-subprocess";
+import { WorkerThread as AppUtilsWorkerThread } from "../../utils/worker-thread";
 
 export type SerialisedTransaction = {
     addresses: Interfaces.IDeserialiseAddresses;
@@ -12,12 +12,12 @@ export type SerialisedTransaction = {
 export interface WorkerScriptHandler {
     setConfig(networkConfig: any): void;
     setHeight(height: number): void;
-    getTransaction(transactionData: Interfaces.ITransactionData | string): Promise<SerialisedTransaction>;
+    getTransaction(transactionData: Interfaces.ITransactionData | string): Promise<void>;
 }
 
-export type WorkerIpcSubprocess = IpcSubprocess<WorkerScriptHandler>;
+export type WorkerThread = AppUtilsWorkerThread<WorkerScriptHandler>;
 
-export type WorkerIpcSubprocessFactory = () => WorkerIpcSubprocess;
+export type WorkerThreadFactory = () => WorkerThread;
 
 export interface Worker {
     getQueueSize(): number;

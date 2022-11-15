@@ -2,7 +2,7 @@ import { Utils as AppUtils } from "@solar-network/kernel";
 
 import { WorkerScriptHandler } from "./worker-script-handler";
 
-const ipcHandler = new AppUtils.IpcHandler(new WorkerScriptHandler());
-ipcHandler.handleAction("setConfig");
-ipcHandler.handleAction("setHeight");
-ipcHandler.handleRequest("getTransaction");
+const workerHandler = new AppUtils.WorkerHandler(new WorkerScriptHandler());
+workerHandler.handleAction("setConfig");
+workerHandler.handleAction("setHeight");
+workerHandler.handleRequest("getTransaction");

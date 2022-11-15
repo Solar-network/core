@@ -124,7 +124,7 @@ export const Identifiers = {
     PoolWorkerPool: Symbol.for("Pool<WorkerPool>"),
     PoolWorker: Symbol.for("Pool<Worker>"),
     PoolWorkerFactory: Symbol.for("Pool<WorkerFactory>"),
-    PoolWorkerIpcSubprocessFactory: Symbol.for("Pool<WorkerIpcSubprocessFactory>"),
+    PoolWorkerThreadFactory: Symbol.for("Pool<WorkerThreadFactory>"),
 
     // Transactions - @todo: better names that won't clash
     WalletAttributes: Symbol.for("Wallet<Attributes>"),
