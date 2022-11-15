@@ -11,8 +11,6 @@ export abstract class TransferTransaction extends Transaction {
     public static type: number = TransactionType.Core.Transfer;
     public static typeGroup: number = TransactionTypeGroup.Core;
 
-    protected static defaultStaticFee: BigNumber = BigNumber.make("10000000");
-
     public get addresses(): IDeserialiseAddresses {
         const addresses = super.addresses;
         addresses.recipientId = this.data.asset?.recipients?.map((transfer) => transfer.recipientId);

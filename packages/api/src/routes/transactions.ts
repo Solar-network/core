@@ -115,10 +115,4 @@ export const register = (server: Hapi.Server): void => {
         path: "/transactions/schemas",
         handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.schemas(request, h),
     });
-
-    server.route({
-        method: "GET",
-        path: "/transactions/fees",
-        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.fees(request, h),
-    });
 };

@@ -209,7 +209,7 @@ export class SXPSwap {
             }
 
             const milestone = Managers.configManager.getMilestone();
-            (this as any).enforceMinimumFee(transaction, milestone.dynamicFees);
+            (this as any).enforceMinimumFee(transaction, milestone.fees);
 
             return (this as any).performGenericWalletChecks(transaction, sender);
         };

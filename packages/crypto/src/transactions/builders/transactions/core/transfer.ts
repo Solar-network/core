@@ -11,7 +11,6 @@ export class TransferBuilder extends TransactionBuilder<TransferBuilder> {
 
         this.data.type = Core.TransferTransaction.type;
         this.data.typeGroup = Core.TransferTransaction.typeGroup;
-        this.data.fee = Core.TransferTransaction.staticFee();
         this.data.memo = undefined;
         this.data.asset = {
             recipients: [],

@@ -1,7 +1,7 @@
 import { Interfaces } from "@solar-network/crypto";
 
-export interface DynamicFeeContext {
+export interface FeeContext {
     transaction: Interfaces.ITransaction;
-    addonBytes: number;
+    bytes: number;
     satoshiPerByte: number;
 }

@@ -19,9 +19,6 @@ export class TransactionsController extends Controller {
     @Container.tagged("state", "null")
     private readonly nullHandlerRegistry!: Handlers.Registry;
 
-    @Container.inject(Container.Identifiers.StateStore)
-    private readonly stateStore!: Contracts.State.StateStore;
-
     @Container.inject(Container.Identifiers.PoolQuery)
     private readonly poolQuery!: Contracts.Pool.Query;
 
@@ -182,30 +179,5 @@ export class TransactionsController extends Controller {
         }
 
         return { data: schemasByType };
-    }
-
-    public async fees(
-        request: Hapi.Request,
-        h: Hapi.ResponseToolkit,
-    ): Promise<{ data: Record<string | number, Record<string, string>> }> {
-        const currentHeight: number = this.stateStore.getLastHeight();
-        const activatedTransactionHandlers = await this.nullHandlerRegistry.getActivatedHandlers();
-        const typeGroups: Record<string | number, Record<string, string>> = {};
-
-        for (const handler of activatedTransactionHandlers) {
-            const constructor = handler.getConstructor();
-
-            const { typeGroup, key } = constructor;
-            AppUtils.assert.defined<number>(typeGroup);
-            AppUtils.assert.defined<string>(key);
-
-            if (typeGroups[typeGroup] === undefined) {
-                typeGroups[typeGroup] = {};
-            }
-
-            typeGroups[typeGroup][key] = constructor.staticFee({ height: currentHeight }).toFixed();
-        }
-
-        return { data: typeGroups };
     }
 }

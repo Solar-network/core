@@ -1,5 +1,4 @@
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { BigNumber } from "../../../utils/big-number";
 import { ByteBuffer } from "../../../utils/byte-buffer";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
@@ -10,8 +9,6 @@ export class VoteTransaction extends Transaction {
     public static type: number = TransactionType.Solar.Vote;
     public static typeGroup: number = TransactionTypeGroup.Solar;
     public static unique: boolean = true;
-
-    protected static defaultStaticFee: BigNumber = BigNumber.make("100000000");
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.vote;

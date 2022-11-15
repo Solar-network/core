@@ -5,7 +5,7 @@ import { Handlers } from "@solar-network/transactions";
 import { TransactionFeeTooLowError } from "./errors";
 
 @Container.injectable()
-export class DynamicFeeMatcher implements Contracts.Pool.DynamicFeeMatcher {
+export class FeeMatcher implements Contracts.Pool.FeeMatcher {
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
     @Container.tagged("state", "blockchain")
     private readonly handlerRegistry!: Handlers.Registry;
@@ -21,7 +21,7 @@ export class DynamicFeeMatcher implements Contracts.Pool.DynamicFeeMatcher {
         const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
         const { emoji } = handler.getConstructor();
 
-        const minFeePool: Utils.BigNumber = handler.getMinimumFee(transaction, milestone.dynamicFees);
+        const minFeePool: Utils.BigNumber = handler.getMinimumFee(transaction, milestone.fees);
 
         const minFeeStr = Utils.formatSatoshi(minFeePool);
 
@@ -38,9 +38,7 @@ export class DynamicFeeMatcher implements Contracts.Pool.DynamicFeeMatcher {
         const milestone = Managers.configManager.getMilestone();
         const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
 
-        const minFeeBroadcast: Utils.BigNumber = handler.getMinimumFee(transaction, milestone.dynamicFees);
-
-        if (!transaction.data.fee.isGreaterThanEqual(minFeeBroadcast)) {
+        if (!transaction.data.fee.isGreaterThanEqual(handler.getMinimumFee(transaction, milestone.fees))) {
             throw new TransactionFeeTooLowError(transaction);
         }
     }

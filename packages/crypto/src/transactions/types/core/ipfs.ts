@@ -1,7 +1,7 @@
 import { base58 } from "bstring";
 
 import { TransactionType, TransactionTypeGroup } from "../../../enums";
-import { BigNumber, ByteBuffer } from "../../../utils";
+import { ByteBuffer } from "../../../utils";
 import * as schemas from "../schemas";
 import { Transaction } from "../transaction";
 
@@ -10,8 +10,6 @@ export abstract class IpfsTransaction extends Transaction {
     public static key = "ipfs";
     public static type: number = TransactionType.Core.Ipfs;
     public static typeGroup: number = TransactionTypeGroup.Core;
-
-    protected static defaultStaticFee: BigNumber = BigNumber.make("500000000");
 
     public static getSchema(): schemas.TransactionSchema {
         return schemas.ipfs;

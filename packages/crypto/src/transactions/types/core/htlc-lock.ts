@@ -11,8 +11,6 @@ export abstract class HtlcLockTransaction extends Transaction {
     public static type: number = TransactionType.Core.HtlcLock;
     public static typeGroup: number = TransactionTypeGroup.Core;
 
-    protected static defaultStaticFee: BigNumber = BigNumber.make("10000000");
-
     public get addresses(): IDeserialiseAddresses {
         const addresses = super.addresses;
         addresses.recipientId = [this.data.recipientId!];

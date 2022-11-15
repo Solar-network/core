@@ -13,8 +13,8 @@ export class Service implements Contracts.Pool.Service {
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
 
-    @Container.inject(Container.Identifiers.PoolDynamicFeeMatcher)
-    private readonly dynamicFeeMatcher!: Contracts.Pool.DynamicFeeMatcher;
+    @Container.inject(Container.Identifiers.PoolFeeMatcher)
+    private readonly feeMatcher!: Contracts.Pool.FeeMatcher;
 
     @Container.inject(Container.Identifiers.PoolStorage)
     private readonly storage!: Contracts.Pool.Storage;
@@ -108,7 +108,7 @@ export class Service implements Contracts.Pool.Service {
             });
 
             try {
-                await this.dynamicFeeMatcher.throwIfCannotEnterPool(transaction);
+                await this.feeMatcher.throwIfCannotEnterPool(transaction);
                 await this.addTransactionToMempool(transaction);
 
                 const handler = await this.nullHandlerRegistry.getActivatedHandlerForData(transaction.data);

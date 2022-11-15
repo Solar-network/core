@@ -8,7 +8,6 @@ export class IPFSBuilder extends TransactionBuilder<IPFSBuilder> {
 
         this.data.type = Core.IpfsTransaction.type;
         this.data.typeGroup = Core.IpfsTransaction.typeGroup;
-        this.data.fee = Core.IpfsTransaction.staticFee();
         this.data.memo = undefined;
         this.data.asset = {};
     }

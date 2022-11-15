@@ -17,23 +17,6 @@ export const defaults = {
     // then it will be removed.
     maxTransactionAge: 2700,
     maxTransactionBytes: 2000000, // TODO think of a value that makes sense ?
-    dynamicFees: {
-        enabled: true,
-        minFeePool: 3000,
-        minFeeBroadcast: 3000,
-        addonBytes: {
-            legacyTransfer: 100,
-            extraSignature: 250,
-            delegateRegistration: 400000,
-            vote: 100,
-            ipfs: 250,
-            transfer: 500,
-            delegateResignation: 100,
-            htlcLock: 100,
-            htlcClaim: 0,
-            htlcRefund: 0,
-        },
-    },
     workerPool: {
         workerCount,
     },

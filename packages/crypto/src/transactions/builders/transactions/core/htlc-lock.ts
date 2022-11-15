@@ -11,7 +11,6 @@ export class HtlcLockBuilder extends TransactionBuilder<HtlcLockBuilder> {
         this.data.typeGroup = Core.HtlcLockTransaction.typeGroup;
         this.data.recipientId = undefined;
         this.data.amount = BigNumber.ZERO;
-        this.data.fee = Core.HtlcLockTransaction.staticFee();
         this.data.memo = undefined;
         this.data.asset = {};
     }

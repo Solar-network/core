@@ -20,8 +20,6 @@ export abstract class Transaction implements ITransaction {
     public static typeGroup: number;
     public static unique: boolean = false;
 
-    protected static defaultStaticFee: BigNumber = BigNumber.ZERO;
-
     public isVerified: boolean = false;
     public data!: ITransactionData;
     public serialised!: Buffer;
@@ -57,25 +55,8 @@ export abstract class Transaction implements ITransaction {
         return (this as any).__proto__.constructor.key;
     }
 
-    public get staticFee(): BigNumber {
-        return (this as any).__proto__.constructor.staticFee({ data: this.data });
-    }
-
     public static getSchema(): TransactionSchema {
         throw new NotImplemented();
-    }
-
-    public static staticFee(feeContext: { height?: number; data?: ITransactionData } = {}): BigNumber {
-        const milestones = configManager.getMilestone(feeContext.height);
-        if (milestones.fees && milestones.fees.staticFees && this.key) {
-            const fee: any = milestones.fees.staticFees[this.key];
-
-            if (fee !== undefined) {
-                return BigNumber.make(fee);
-            }
-        }
-
-        return this.defaultStaticFee;
     }
 
     public setBurnedFee(height: number): void {

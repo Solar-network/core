@@ -8,7 +8,6 @@ export class HtlcClaimBuilder extends TransactionBuilder<HtlcClaimBuilder> {
 
         this.data.type = Core.HtlcClaimTransaction.type;
         this.data.typeGroup = Core.HtlcClaimTransaction.typeGroup;
-        this.data.fee = Core.HtlcClaimTransaction.staticFee();
         this.data.asset = {};
     }
 
