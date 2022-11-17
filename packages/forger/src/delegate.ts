@@ -1,4 +1,4 @@
-import { Blocks, Crypto, Identities, Interfaces, Utils } from "@solar-network/crypto";
+import { Blocks, Crypto, Enums, Identities, Interfaces, Utils } from "@solar-network/crypto";
 import { Utils as AppUtils } from "@solar-network/kernel";
 
 import { Delegate as IDelegate } from "./interfaces";
@@ -37,18 +37,18 @@ export class Delegate implements IDelegate {
     }
 
     /**
-     * @param {Interfaces.ITransactionData[]} transactions
+     * @param {Interfaces.ITransaction[]} transactions
      * @param {Record<string, any>} options
      * @returns {Interfaces.IBlock}
      * @memberof Delegate
      */
-    public forge(transactions: Interfaces.ITransactionData[], options: Record<string, any>): Interfaces.IBlock {
+    public forge(transactions: Interfaces.ITransaction[], options: Record<string, any>): Interfaces.IBlock {
         return this.createBlock(this.keys!, transactions, options);
     }
 
     protected createBlock(
         keys: Interfaces.IKeyPair,
-        transactions: Interfaces.ITransactionData[],
+        transactions: Interfaces.ITransaction[],
         options: Record<string, any>,
     ): Interfaces.IBlock {
         if (!(transactions instanceof Array)) {
@@ -64,10 +64,21 @@ export class Delegate implements IDelegate {
         for (const transaction of transactions) {
             AppUtils.assert.defined<string>(transaction.id);
 
-            totals.amount = totals.amount.plus(transaction.amount || Utils.BigNumber.ZERO);
-            totals.fee = totals.fee.plus(transaction.fee);
+            let amount: Utils.BigNumber = Utils.BigNumber.ZERO;
+            switch (transaction.internalType) {
+                case Enums.OtherType.Burn: {
+                    amount = amount.plus(transaction.data.asset!.burn!.amount!);
+                    break;
+                }
+                case Enums.TransferType.Single: {
+                    amount = amount.plus(transaction.data.asset!.recipients![0].amount!);
+                    break;
+                }
+            }
+            totals.amount = totals.amount.plus(amount);
+            totals.fee = totals.fee.plus(transaction.data.fee);
 
-            payloadBuffers.push(Buffer.from(transaction.id, "hex"));
+            payloadBuffers.push(Buffer.from(transaction.data.id!, "hex"));
         }
 
         return Blocks.BlockFactory.make(
@@ -83,7 +94,7 @@ export class Delegate implements IDelegate {
                 reward: options.reward,
                 payloadLength: 32 * transactions.length,
                 payloadHash: Crypto.HashAlgorithms.sha256(payloadBuffers).toString("hex"),
-                transactions,
+                transactions: transactions.map((transaction) => transaction.data),
             },
             keys,
             options.aux,

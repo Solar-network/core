@@ -3,7 +3,8 @@ import { Ajv } from "ajv";
 const memo = (ajv: Ajv): void => {
     ajv.addFormat("memo", (data) => {
         try {
-            return Buffer.from(data, "utf8").length <= 255;
+            const buf = Buffer.from(data, "utf8");
+            return buf.length <= 255 && !buf.includes(Buffer.from("00", "hex"));
         } catch {
             return false;
         }

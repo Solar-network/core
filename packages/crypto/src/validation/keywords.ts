@@ -1,8 +1,6 @@
 import { Ajv } from "ajv";
 import ajvKeywords from "ajv-keywords";
 
-import { TransactionType, TransactionTypeGroup } from "../enums";
-import { ITransactionData } from "../interfaces";
 import { configManager } from "../managers";
 import { BigNumber, isGenesisTransaction } from "../utils";
 
@@ -16,36 +14,6 @@ const maxBytes = (ajv: Ajv): void => {
                 }
 
                 return Buffer.from(data, "utf8").byteLength <= schema;
-            };
-        },
-        errors: false,
-        metaSchema: {
-            type: "integer",
-            minimum: 0,
-        },
-    });
-};
-
-const transactionType = (ajv: Ajv): void => {
-    ajv.addKeyword("transactionType", {
-        compile(schema) {
-            return (data, _, po: object | any[] | undefined) => {
-                const parentObject: ITransactionData = po as unknown as ITransactionData;
-                if (
-                    data === TransactionType.Core.Transfer &&
-                    parentObject &&
-                    (!parentObject.typeGroup || parentObject.typeGroup === TransactionTypeGroup.Core)
-                ) {
-                    if (parentObject.asset && parentObject.asset.recipients) {
-                        return (
-                            parentObject.asset.recipients.length >= 1 &&
-                            parentObject.asset.recipients.length <=
-                                configManager.getMilestone().transfer.maximumRecipients
-                        );
-                    }
-                }
-
-                return data === schema;
             };
         },
         errors: false,
@@ -161,4 +129,4 @@ const blockId = (ajv: Ajv): void => {
     });
 };
 
-export const keywords = [bignumber, blockId, maxBytes, network, transactionType];
+export const keywords = [bignumber, blockId, maxBytes, network];

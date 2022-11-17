@@ -1,4 +1,3 @@
-import { TransactionTypeGroup } from "../../enums";
 import { NotImplemented } from "../../errors";
 import {
     IDeserialiseAddresses,
@@ -16,10 +15,10 @@ import { TransactionSchema } from "./schemas";
 export abstract class Transaction implements ITransaction {
     public static emoji: string;
     public static key: string;
-    public static type: number;
-    public static typeGroup: number;
+
     public static unique: boolean = false;
 
+    public internalType!: string;
     public isVerified: boolean = false;
     public data!: ITransactionData;
     public serialised!: Buffer;
@@ -37,14 +36,6 @@ export abstract class Transaction implements ITransaction {
 
     public get id(): string | undefined {
         return this.data.id;
-    }
-
-    public get type(): number {
-        return this.data.type;
-    }
-
-    public get typeGroup(): number | undefined {
-        return this.data.typeGroup;
     }
 
     public get verified(): boolean {
@@ -71,12 +62,15 @@ export abstract class Transaction implements ITransaction {
         }
     }
 
-    public verify(options?: ISerialiseOptions): boolean {
-        return Verifier.verify(this.data, options);
+    public verify(options?: ISerialiseOptions): { transaction: ITransaction; verified: boolean } {
+        return {
+            transaction: this,
+            verified: Verifier.verify(this.data, options),
+        };
     }
 
     public verifyExtraSignature(publicKey: string): boolean {
-        return Verifier.verifyExtraSignature(this.data, publicKey);
+        return Verifier.verifyExtraSignature(this, publicKey);
     }
 
     public verifySchema(): ISchemaValidationResult {
@@ -85,10 +79,6 @@ export abstract class Transaction implements ITransaction {
 
     public toJson(): ITransactionJson {
         const data: ITransactionJson = JSON.parse(JSON.stringify(this.data));
-
-        if (data.typeGroup === TransactionTypeGroup.Core) {
-            delete data.typeGroup;
-        }
 
         return data;
     }

@@ -1,5 +1,4 @@
 import { Interfaces, Utils } from "@solar-network/crypto";
-import { Repositories } from "@solar-network/database";
 import { Container, Contracts, Services, Utils as AppUtils } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
@@ -42,7 +41,7 @@ export class BlockProcessor {
     private readonly stateStore!: Contracts.State.StateStore;
 
     @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
-    private readonly transactionRepository!: Repositories.TransactionRepository;
+    private readonly transactionRepository!: Contracts.Database.TransactionRepository;
 
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
@@ -127,8 +126,7 @@ export class BlockProcessor {
                 const handler = registeredHandler.getConstructor();
                 if (handler.unique) {
                     const transactions: Interfaces.ITransaction[] = block.transactions.filter(
-                        (transaction) =>
-                            transaction.type === handler.type && transaction.typeGroup === handler.typeGroup,
+                        (transaction) => transaction.data.type === handler.key,
                     );
                     const transactionsSet: Set<string> = new Set(
                         transactions.map((transaction) => transaction.data.senderId),

@@ -13,10 +13,13 @@ export const transactionCriteriaSchemaObject = {
             .regex(/%/),
     ),
     senderId: walletCriteriaSchemaObject.address,
-    senderPublicKey: walletCriteriaSchemaObject.publicKey,
     recipientId: walletCriteriaSchemaObject.address,
     memo: Joi.string().max(255),
 };
 
 export const transactionParamSchema = transactionIdSchema;
-export const transactionSortingSchema = Schemas.createSortingSchema(Schemas.transactionCriteriaSchemas, [], false);
+export const transactionSortingSchema = Schemas.createSortingSchema(
+    Schemas.transactionCriteriaSchemasWithoutUnsortables,
+    [],
+    false,
+);

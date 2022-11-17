@@ -41,36 +41,38 @@ export class Storage implements Contracts.Pool.Storage {
         ensureFileSync(filename);
 
         this.database = new BetterSqlite3(filename);
-        const dbName = "pool_20220908";
+        const dbName = "pool_20221010";
+
+        this.database.pragma("auto_vacuum = incremental");
+        this.database.pragma("cache_size = 32768");
+        this.database.pragma("journal_mode = wal");
+        this.database.pragma("page_size = 32768");
+        this.database.pragma("synchronous = normal");
+        this.database.pragma("temp_store = memory");
 
         this.database.exec(`
-            PRAGMA journal_mode = WAL;
-
             CREATE TABLE IF NOT EXISTS ${dbName} (
-                n                  INTEGER      PRIMARY KEY AUTOINCREMENT,
-                height             INTEGER      NOT NULL,
-                id                 VARCHAR(64)  NOT NULL,
-                recipientId        TEXT         NOT NULL,
-                senderId           VARCHAR(34)  NOT NULL,
-                serialised         BLOB         NOT NULL
-            );
+                id TEXT PRIMARY KEY,
+                height INTEGER NOT NULL,
+                recipientId TEXT NOT NULL,
+                senderId TEXT NOT NULL,
+                serialised BLOB NOT NULL
+            ) STRICT`);
 
-            CREATE UNIQUE INDEX IF NOT EXISTS pool_id ON ${dbName} (id);
-            CREATE INDEX IF NOT EXISTS pool_height ON ${dbName} (height);
-        `);
+        this.database.exec(`CREATE INDEX IF NOT EXISTS index_${dbName}_height ON ${dbName} (height)`);
 
         this.addTransactionStmt = this.database.prepare(
             `INSERT INTO ${dbName} (height, id, recipientId, senderId, serialised) VALUES (:height, :id, :recipientId, :senderId, :serialised)`,
         );
 
-        this.hasTransactionStmt = this.database.prepare(`SELECT COUNT(*) FROM ${dbName} WHERE id = :id`).pluck(true);
+        this.hasTransactionStmt = this.database.prepare(`SELECT count(id) FROM ${dbName} WHERE id = :id`).pluck(true);
 
         this.getAllTransactionsStmt = this.database.prepare(
-            `SELECT height, id, recipientId, senderId, serialised FROM ${dbName} ORDER BY n`,
+            `SELECT height, id, recipientId, senderId, serialised FROM ${dbName} ORDER BY rowid`,
         );
 
         this.getOldTransactionsStmt = this.database.prepare(
-            `SELECT id, senderId FROM ${dbName} WHERE height <= :height ORDER BY n DESC`,
+            `SELECT id, senderId FROM ${dbName} WHERE height <= :height ORDER BY rowid DESC`,
         );
 
         this.removeTransactionStmt = this.database.prepare(`DELETE FROM ${dbName} WHERE id = :id`);

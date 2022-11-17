@@ -1,6 +1,5 @@
 import { Hash, HashAlgorithms } from "../crypto";
-import { IBlock, IBlockData, IBlockJson, IKeyPair, ITransaction } from "../interfaces";
-import { configManager } from "../managers";
+import { IBlock, IBlockData, IBlockJson, IDeserialiseOptions, IKeyPair, ITransaction } from "../interfaces";
 import { BigNumber } from "../utils";
 import { Block } from "./block";
 import { Deserialiser } from "./deserialiser";
@@ -8,14 +7,12 @@ import { Serialiser } from "./serialiser";
 
 export class BlockFactory {
     public static make(data: IBlockData, keys: IKeyPair, aux?: Buffer): IBlock {
-        const { bip340 } = configManager.getMilestone(data.height);
-
         data.generatorPublicKey = keys.publicKey.secp256k1;
 
         const payloadHash: Buffer = Serialiser.serialise(data, false);
         const hash: Buffer = HashAlgorithms.sha256(payloadHash);
 
-        data.blockSignature = Hash.signSchnorr(hash, keys, bip340, aux);
+        data.signature = Hash.signSchnorr(hash, keys, aux);
         data.id = Block.getId(data);
 
         return this.fromData(data)!;
@@ -29,7 +26,7 @@ export class BlockFactory {
         return this.fromSerialised(buf);
     }
 
-    public static fromJson(json: IBlockJson): IBlock | undefined {
+    public static fromJson(json: IBlockJson, options?: IDeserialiseOptions): IBlock | undefined {
         const data: IBlockData = { ...json } as unknown as IBlockData;
         data.totalAmount = BigNumber.make(data.totalAmount);
         data.totalFee = BigNumber.make(data.totalFee);
@@ -43,18 +40,17 @@ export class BlockFactory {
                 transaction.fee = BigNumber.make(transaction.fee);
             }
         }
-
-        return this.fromData(data);
+        return this.fromData(data, options);
     }
 
-    public static fromData(
-        data: IBlockData,
-        options: { deserialiseTransactionsUnchecked?: boolean } = {},
-    ): IBlock | undefined {
+    public static fromData(data: IBlockData, options: IDeserialiseOptions = {}): IBlock | undefined {
+        if (!data.previousBlock) {
+            data.previousBlock = "0".repeat(64);
+        }
         const block: IBlockData | undefined = Block.applySchema(data);
 
         if (block) {
-            const serialised: Buffer = Serialiser.serialiseWithTransactions(data);
+            const serialised: Buffer = Serialiser.serialiseWithTransactions(data, options);
             const block: IBlock = new Block({
                 ...Deserialiser.deserialise(serialised, false, options),
             });

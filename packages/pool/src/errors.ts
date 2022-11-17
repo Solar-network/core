@@ -31,15 +31,6 @@ export class TransactionExceedsMaximumByteSizeError extends Contracts.Pool.PoolE
     }
 }
 
-export class TransactionHasExpiredError extends Contracts.Pool.PoolError {
-    public readonly expirationHeight: number;
-
-    public constructor(transaction: Interfaces.ITransaction, expirationHeight: number) {
-        super(`${transaction} expired at height ${expirationHeight}`, "ERR_EXPIRED");
-        this.expirationHeight = expirationHeight;
-    }
-}
-
 export class TransactionFeeTooLowError extends Contracts.Pool.PoolError {
     public constructor(transaction: Interfaces.ITransaction) {
         super(`${transaction} fee is too low to enter the pool`, "ERR_LOW_FEE");

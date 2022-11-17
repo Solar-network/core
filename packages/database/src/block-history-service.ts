@@ -2,8 +2,7 @@ import { Interfaces } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 import assert from "assert";
 
-import { BlockRepository } from "./repositories/block-repository";
-import { TransactionRepository } from "./repositories/transaction-repository";
+import { BlockRepository, TransactionRepository } from "./repositories";
 
 @Container.injectable()
 export class BlockHistoryService implements Contracts.Shared.BlockHistoryService {
@@ -56,10 +55,10 @@ export class BlockHistoryService implements Contracts.Shared.BlockHistoryService
         criteria: Contracts.Shared.OrBlockCriteria,
         sorting: Contracts.Search.Sorting,
         pagination: Contracts.Search.Pagination,
-        options?: Contracts.Search.Options,
+        count: boolean = true,
     ): Promise<Contracts.Search.ResultsPage<Interfaces.IBlockData>> {
         const expression = await this.blockFilter.getExpression(criteria);
-        const modelResultsPage = await this.blockRepository.listByExpression(expression, sorting, pagination, options);
+        const modelResultsPage = await this.blockRepository.listByExpression(expression, sorting, pagination, count);
         const models = modelResultsPage.results;
         const data = this.modelConverter.getBlockData(models);
         return { ...modelResultsPage, results: data };
@@ -80,7 +79,7 @@ export class BlockHistoryService implements Contracts.Shared.BlockHistoryService
         const blockExpression = await this.blockFilter.getExpression(blockCriteria);
         const blockModels = await this.blockRepository.findManyByExpression(blockExpression);
 
-        const transactionBlockCriteria = blockModels.map((b) => ({ blockId: b.id }));
+        const transactionBlockCriteria = blockModels.map((b) => ({ blockHeight: b.height }));
         const transactionExpression = await this.transactionFilter.getExpression(
             transactionCriteria,
             transactionBlockCriteria,
@@ -99,18 +98,12 @@ export class BlockHistoryService implements Contracts.Shared.BlockHistoryService
         transactionCriteria: Contracts.Search.OrCriteria<Contracts.Shared.TransactionCriteria>,
         sorting: Contracts.Search.Sorting,
         pagination: Contracts.Search.Pagination,
-        options?: Contracts.Search.Options,
     ): Promise<Contracts.Search.ResultsPage<Contracts.Shared.BlockDataWithTransactionData>> {
         const blockExpression = await this.blockFilter.getExpression(blockCriteria);
-        const blockModelResultsPage = await this.blockRepository.listByExpression(
-            blockExpression,
-            sorting,
-            pagination,
-            options,
-        );
+        const blockModelResultsPage = await this.blockRepository.listByExpression(blockExpression, sorting, pagination);
         const blockModels = blockModelResultsPage.results;
 
-        const transactionBlockCriteria = blockModels.map((b) => ({ blockId: b.id }));
+        const transactionBlockCriteria = blockModels.map((b) => ({ blockHeight: b.height }));
         const transactionExpression = await this.transactionFilter.getExpression(
             transactionCriteria,
             transactionBlockCriteria,

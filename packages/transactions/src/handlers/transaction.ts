@@ -1,5 +1,4 @@
 import { Enums, Identities, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
-import { Repositories } from "@solar-network/database";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 import assert from "assert";
 
@@ -21,10 +20,10 @@ export abstract class TransactionHandler {
     protected readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
-    protected readonly blockRepository!: Repositories.BlockRepository;
+    protected readonly blockRepository!: Contracts.Database.BlockRepository;
 
     @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
-    protected readonly transactionRepository!: Repositories.TransactionRepository;
+    protected readonly transactionRepository!: Contracts.Database.TransactionRepository;
 
     @Container.inject(Container.Identifiers.WalletRepository)
     protected readonly walletRepository!: Contracts.State.WalletRepository;
@@ -129,49 +128,45 @@ export abstract class TransactionHandler {
             this.logger.warning(`Transaction forcibly applied as an exception: ${transaction.id}`, "🪲");
         }
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
         if (
             transaction.data.headerType === Enums.TransactionHeaderType.Standard &&
-            sender.getPublicKey("primary") === undefined
+            senderWallet.getPublicKey("primary") === undefined
         ) {
-            sender.setPublicKey(transaction.data.senderPublicKey, "primary");
-            this.walletRepository.index(sender);
+            senderWallet.setPublicKey(transaction.data.senderPublicKey, "primary");
+            this.walletRepository.index(senderWallet);
         }
 
-        await this.throwIfCannotBeApplied(transaction, sender);
+        await this.throwIfCannotBeApplied(transaction, senderWallet);
 
-        this.verifyTransactionNonceApply(sender, transaction);
+        this.verifyTransactionNonceApply(senderWallet, transaction);
 
         AppUtils.assert.defined<Utils.BigNumber>(data.nonce);
 
-        sender.setNonce(data.nonce);
+        senderWallet.setNonce(data.nonce);
 
-        const newBalance: Utils.BigNumber = sender
-            .getBalance()
-            .minus(data.amount || Utils.BigNumber.ZERO)
-            .minus(data.fee);
+        const newBalance: Utils.BigNumber = senderWallet.getBalance().minus(data.fee);
 
         assert(Utils.isException(transaction.data) || !newBalance.isNegative());
 
-        sender.setBalance(newBalance);
+        senderWallet.setBalance(newBalance);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<string>(transaction.data.senderId);
 
-        const sender: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
+        const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         const data: Interfaces.ITransactionData = transaction.data;
 
-        const amount: Utils.BigNumber = data.amount || Utils.BigNumber.ZERO;
-        sender.increaseBalance(amount.plus(data.fee));
+        senderWallet.increaseBalance(data.fee);
 
-        this.verifyTransactionNonceRevert(sender, transaction);
+        this.verifyTransactionNonceRevert(senderWallet, transaction);
 
-        sender.decreaseNonce();
+        senderWallet.decreaseNonce();
 
-        if (sender.getNonce().isZero()) {
-            sender.forgetPublicKey("primary");
+        if (senderWallet.getNonce().isZero()) {
+            senderWallet.forgetPublicKey("primary");
         }
     }
 
@@ -205,10 +200,8 @@ export abstract class TransactionHandler {
 
         this.verifyTransactionNonceApply(sender, transaction);
 
-        const amount: Utils.BigNumber = data.amount || Utils.BigNumber.ZERO;
-
-        if (sender.getBalance().minus(amount).minus(data.fee).isNegative()) {
-            throw new InsufficientBalanceError(amount.plus(data.fee), sender.getBalance());
+        if (sender.getBalance().minus(data.fee).isNegative()) {
+            throw new InsufficientBalanceError(data.fee, sender.getBalance());
         }
 
         if (data.headerType === Enums.TransactionHeaderType.Standard) {
@@ -232,7 +225,7 @@ export abstract class TransactionHandler {
                 throw new UnexpectedExtraSignatureError();
             }
 
-            if (!Transactions.Verifier.verifyExtraSignature(data, dbSender.getPublicKey("extra")!)) {
+            if (!Transactions.Verifier.verifyExtraSignature(transaction, dbSender.getPublicKey("extra")!)) {
                 throw new InvalidExtraSignatureError();
             }
         } else if (data.signatures && data.signatures.extra) {
@@ -300,62 +293,11 @@ export abstract class TransactionHandler {
             addresses.push(transaction.data.recipientId);
         }
 
-        if (transaction.data.typeGroup === Enums.TransactionTypeGroup.Core) {
-            if (transaction.data.type === Enums.TransactionType.Core.Transfer) {
-                AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
+        if (transaction.data.type === "transfer") {
+            AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
 
-                for (const { recipientId } of transaction.data.asset.recipients) {
-                    addresses.push(recipientId);
-                }
-            }
-
-            if (transaction.data.type === Enums.TransactionType.Core.HtlcClaim) {
-                try {
-                    AppUtils.assert.defined<Interfaces.IHtlcClaimAsset>(transaction.data.asset?.claim);
-
-                    const lockId = transaction.data.asset.claim.lockTransactionId;
-                    let lockSenderWallet: Contracts.State.Wallet | undefined;
-
-                    try {
-                        lockSenderWallet = this.walletRepository.findByIndex(
-                            Contracts.State.WalletIndexes.Locks,
-                            lockId,
-                        );
-                    } catch {
-                        const lockTransaction: Interfaces.ITransactionData = (
-                            await this.transactionRepository.findByIds([lockId])
-                        )[0];
-
-                        if (this.walletRepository.hasByAddress(lockTransaction.senderId)) {
-                            lockSenderWallet = this.walletRepository.findByAddress(lockTransaction.senderId);
-                        }
-
-                        if (!lockSenderWallet) {
-                            throw new Error(`Lock id ${lockId} not found`);
-                        }
-                    }
-                    const locks: Interfaces.IHtlcLocks = lockSenderWallet.getAttribute("htlc.locks", {});
-
-                    let lockRecipientId: string | undefined;
-
-                    if (locks[lockId] && locks[lockId].recipientId) {
-                        lockRecipientId = locks[lockId].recipientId;
-                    } else {
-                        const lockTransaction: Interfaces.ITransactionData = (
-                            await this.transactionRepository.findByIds([lockId])
-                        )[0];
-
-                        lockRecipientId = lockTransaction.recipientId;
-                    }
-
-                    AppUtils.assert.defined<Interfaces.ITransactionData>(lockRecipientId);
-
-                    const lockSenderId = lockSenderWallet.getAddress();
-
-                    addresses.push(...[lockSenderId, lockRecipientId]);
-                } catch {
-                    //
-                }
+            for (const { recipientId } of transaction.data.asset.recipients) {
+                addresses.push(recipientId);
             }
         }
 
@@ -368,7 +310,7 @@ export abstract class TransactionHandler {
 
     public abstract walletAttributes(): ReadonlyArray<string>;
 
-    public abstract isActivated(): Promise<boolean>;
+    public abstract isActivated(transaction?: Interfaces.ITransaction): Promise<boolean>;
 
     /**
      * Wallet logic

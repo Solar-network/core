@@ -11,7 +11,7 @@ export class Message {
 
         return {
             publicKey: keys.publicKey.secp256k1,
-            signature: Hash.signSchnorr(this.createHash(message), keys, true),
+            signature: Hash.signSchnorr(this.createHash(message), keys),
             message,
         };
     }
@@ -25,13 +25,13 @@ export class Message {
 
         return {
             publicKey: keys.publicKey.secp256k1,
-            signature: Hash.signSchnorr(this.createHash(message), keys, true),
+            signature: Hash.signSchnorr(this.createHash(message), keys),
             message,
         };
     }
 
     public static verify({ message, publicKey, signature }: IMessage): boolean {
-        return Hash.verifySchnorr(this.createHash(message), signature, publicKey, true);
+        return Hash.verifySchnorr(this.createHash(message), signature, publicKey);
     }
 
     private static createHash(message: string): Buffer {

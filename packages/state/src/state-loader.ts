@@ -1,6 +1,6 @@
 import { Interfaces, Utils } from "@solar-network/crypto";
-import { DatabaseService, Repositories } from "@solar-network/database";
-import { Application, Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/kernel";
+import { DatabaseService } from "@solar-network/database";
+import { Container, Contracts, Enums, Providers, Utils as AppUtils } from "@solar-network/kernel";
 import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync } from "fs";
 import { resolve } from "path";
 import semver from "semver";
@@ -14,11 +14,8 @@ import {
 
 @Container.injectable()
 export class StateLoader {
-    @Container.inject(Container.Identifiers.Application)
-    private readonly app!: Application;
-
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
-    private readonly blockRepository!: Repositories.BlockRepository;
+    private readonly blockRepository!: Contracts.Database.BlockRepository;
 
     @Container.inject(Container.Identifiers.PluginConfiguration)
     @Container.tagged("plugin", "@solar-network/state")
@@ -125,7 +122,7 @@ export class StateLoader {
             }
 
             if (block.data.id !== stateFile || block.data.height !== height) {
-                const blockFromDatabase: Interfaces.IBlockData = (await this.databaseService.findBlockByID([
+                const blockFromDatabase: Interfaces.IBlockData = (await this.databaseService.findBlocksById([
                     stateFile,
                 ]))![0];
                 if (!blockFromDatabase || blockFromDatabase.id !== stateFile || blockFromDatabase.height !== height) {
@@ -218,7 +215,7 @@ export class StateLoader {
                     )} behind so the blockchain will roll back to height ${height.toLocaleString()}`,
                     "⏪",
                 );
-                await this.blockRepository.deleteTopBlocks(this.app, blocksFromOurHeight);
+                await this.blockRepository.deleteTop(blocksFromOurHeight);
                 block = await this.databaseService.getLastBlock();
                 this.stateMachine.stateStore.setLastBlock(block);
                 this.stateMachine.stateStore.setLastStoredBlockHeight(block.data.height);

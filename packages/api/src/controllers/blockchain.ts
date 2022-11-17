@@ -1,6 +1,5 @@
 import Hapi from "@hapi/hapi";
 import { Managers, Utils } from "@solar-network/crypto";
-import { Repositories } from "@solar-network/database";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { Identifiers } from "../identifiers";
@@ -19,7 +18,7 @@ export class BlockchainController extends Controller {
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
     @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
-    private readonly transactionRepository!: Repositories.TransactionRepository;
+    private readonly transactionRepository!: Contracts.Database.TransactionRepository;
 
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")

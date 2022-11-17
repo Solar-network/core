@@ -53,7 +53,7 @@ export class DposState implements Contracts.State.DposState {
         this.activeDelegates = [];
 
         for (const delegate of this.walletRepository.allByUsername()) {
-            if (delegate.hasAttribute("delegate.resigned")) {
+            if (delegate.hasAttribute("delegate.resignation")) {
                 delegate.forgetAttribute("delegate.rank");
             } else {
                 this.activeDelegates.push(delegate);
@@ -73,8 +73,7 @@ export class DposState implements Contracts.State.DposState {
                 if (a.getPublicKey("primary") === b.getPublicKey("primary")) {
                     const username = a.getAttribute("delegate.username");
                     throw new Error(
-                        `The balance and public key of both delegates are identical! ` +
-                            `Delegate "${username}" appears twice in the list`,
+                        `The balance and public key of both delegates are identical: "${username}" appears twice in the list`,
                     );
                 }
 
@@ -92,8 +91,7 @@ export class DposState implements Contracts.State.DposState {
     public setDelegatesRound(roundInfo: Contracts.Shared.RoundInfo): void {
         if (this.activeDelegates.length < roundInfo.maxDelegates) {
             throw new Error(
-                `Expected to find ${roundInfo.maxDelegates} delegates but only found ${this.activeDelegates.length}. ` +
-                    `This indicates an issue with the genesis block and delegates`,
+                `Expected to find ${roundInfo.maxDelegates} delegates but only found ${this.activeDelegates.length}`,
             );
         }
 

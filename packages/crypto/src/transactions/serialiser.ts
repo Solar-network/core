@@ -1,18 +1,18 @@
-import { TransactionHeaderType, TransactionTypeGroup } from "../enums";
+import { TransactionHeaderType, TransactionType } from "../enums";
 import { AddressNetworkError, TransactionVersionError } from "../errors";
 import { Address } from "../identities";
 import { ISerialiseOptions } from "../interfaces";
 import { ITransaction, ITransactionData } from "../interfaces";
 import { configManager } from "../managers/config";
-import { ByteBuffer, isSupportedTransactionVersion } from "../utils";
+import { ByteBuffer, isSupportedTransactionVersion, typeAndGroup } from "../utils";
 import { TransactionTypeFactory } from "./types";
 
 export class Serialiser {
-    public static getBytes(transaction: ITransactionData, options: ISerialiseOptions = {}): Buffer {
-        const version: number = transaction.version;
+    public static getBytes(transactionData: ITransactionData, options: ISerialiseOptions = {}): Buffer {
+        const version: number = transactionData.version;
 
         if (options.acceptLegacyVersion || options.disableVersionCheck || isSupportedTransactionVersion(version)) {
-            return this.serialise(TransactionTypeFactory.create(transaction), options);
+            return this.serialise(TransactionTypeFactory.create(transactionData), options);
         } else {
             throw new TransactionVersionError(version);
         }
@@ -30,10 +30,14 @@ export class Serialiser {
             size = Math.floor(maxPayload / maxTransactions) * 2;
         }
 
+        if (options.index === undefined) {
+            options.index = 0;
+        }
+
         const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(size));
 
-        this.serialiseCommon(transaction.data, buf);
-        this.serialiseMemo(transaction, buf);
+        const internalType: string = this.serialiseCommon(transaction, buf, options.index);
+        transaction.internalType = internalType;
 
         const serialised: ByteBuffer | undefined = transaction.serialise(options);
 
@@ -41,35 +45,36 @@ export class Serialiser {
             throw new Error();
         }
 
+        this.serialiseMemo(transaction, buf);
+
         buf.writeBuffer(serialised.getResult());
 
-        this.serialiseSignatures(transaction.data, buf, options);
+        this.serialiseSignatures(transaction, buf, options);
 
         const bufferBuffer = buf.getResult();
         transaction.serialised = bufferBuffer;
-
         return bufferBuffer;
     }
 
-    private static serialiseCommon(transaction: ITransactionData, buf: ByteBuffer): void {
-        transaction.version = transaction.version || 0x03;
-        transaction.headerType = transaction.headerType || 0x00;
+    private static serialiseCommon(transaction: ITransaction, buf: ByteBuffer, index: number = 0): string {
+        const { data }: ITransaction = transaction;
+        data.version = data.version || 0x03;
+        data.headerType = data.headerType || 0x00;
 
-        if (transaction.typeGroup === undefined) {
-            transaction.typeGroup = TransactionTypeGroup.Core;
-        }
+        buf.writeUInt8(0xff - data.headerType);
+        buf.writeUInt8(data.version);
+        buf.writeUInt8(data.network || configManager.get("network.pubKeyHash"));
 
-        buf.writeUInt8(0xff - transaction.headerType);
-        buf.writeUInt8(transaction.version);
-        buf.writeUInt8(transaction.network || configManager.get("network.pubKeyHash"));
+        const { type, group } = typeAndGroup(TransactionType[data.type][index ?? 0]);
 
-        buf.writeUInt32LE(transaction.typeGroup);
-        buf.writeUInt16LE(transaction.type);
-        buf.writeBigInt64LE(transaction.nonce.toBigInt());
+        buf.writeUInt32LE(group);
+        buf.writeUInt16LE(type);
 
-        buf.writeBuffer(Buffer.from(transaction.senderPublicKey, "hex"));
-        if (transaction.headerType === TransactionHeaderType.Extended) {
-            const { addressBuffer, addressError } = Address.toBuffer(transaction.senderId);
+        buf.writeBigInt64LE(data.nonce.toBigInt());
+
+        buf.writeBuffer(Buffer.from(data.senderPublicKey, "hex"));
+        if (data.headerType === TransactionHeaderType.Extended) {
+            const { addressBuffer, addressError } = Address.toBuffer(data.senderId);
             if (addressError) {
                 throw new AddressNetworkError(addressError);
             }
@@ -77,7 +82,9 @@ export class Serialiser {
             buf.writeBuffer(addressBuffer);
         }
 
-        buf.writeBigInt64LE(transaction.fee.toBigInt());
+        buf.writeBigInt64LE(data.fee.toBigInt());
+
+        return `${group}/${type}`;
     }
 
     private static serialiseMemo(transaction: ITransaction, buf: ByteBuffer): void {
@@ -93,17 +100,19 @@ export class Serialiser {
     }
 
     private static serialiseSignatures(
-        transaction: ITransactionData,
+        transaction: ITransaction,
         buf: ByteBuffer,
         options: ISerialiseOptions = {},
     ): void {
-        if (transaction.signatures) {
-            if (transaction.signatures.primary && !options.excludeSignature) {
-                buf.writeBuffer(Buffer.from(transaction.signatures.primary, "hex"));
+        const { data }: ITransaction = transaction;
+
+        if (data.signatures) {
+            if (data.signatures.primary && !options.excludeSignature) {
+                buf.writeBuffer(Buffer.from(data.signatures.primary, "hex"));
             }
 
-            if (transaction.signatures.extra && !options.excludeExtraSignature) {
-                buf.writeBuffer(Buffer.from(transaction.signatures.extra, "hex"));
+            if (data.signatures.extra && !options.excludeExtraSignature) {
+                buf.writeBuffer(Buffer.from(data.signatures.extra, "hex"));
             }
         }
     }

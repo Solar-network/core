@@ -1,39 +1,6 @@
-export enum CoreTransactionType {
-    LegacyTransfer = 0,
-    ExtraSignature = 1,
-    DelegateRegistration = 2,
-    Vote = 3,
-    Ipfs = 5,
-    Transfer = 6,
-    DelegateResignation = 7,
-    HtlcLock = 8,
-    HtlcClaim = 9,
-    HtlcRefund = 10,
-}
-
-export enum SolarTransactionType {
-    Burn = 0,
-    Vote = 2,
-}
-
 export enum TransactionHeaderType {
     Standard = 0,
     Extended = 1,
-}
-
-export const TransactionType = {
-    Core: CoreTransactionType,
-    Solar: SolarTransactionType,
-    ...CoreTransactionType,
-};
-
-export enum TransactionTypeGroup {
-    Test = 0,
-    Core = 1,
-    Solar = 2,
-
-    // Everything above is available to anyone
-    Reserved = 1000,
 }
 
 export enum DelegateStatus {
@@ -42,19 +9,33 @@ export enum DelegateStatus {
     NotResigned = 2,
 }
 
-export enum HtlcLockExpirationType {
-    EpochTimestamp = 1,
-    BlockHeight = 2,
+export enum DelegateType {
+    Registration = "1/2",
+    Resignation = "1/7",
 }
 
-export enum HtlcSecretHashType {
-    SHA256 = 0,
-    SHA384 = 1,
-    SHA512 = 2,
-    SHA3256 = 3,
-    SHA3384 = 4,
-    SHA3512 = 5,
-    Keccak256 = 6,
-    Keccak384 = 7,
-    Keccak512 = 8,
+export enum OtherType {
+    Burn = "2/0",
+    ExtraSignature = "1/1",
+    IPFS = "1/5",
 }
+
+export enum TransferType {
+    Multiple = "1/6",
+    Single = "1/0",
+}
+
+export enum VoteType {
+    Multiple = "2/2",
+    Single = "1/3",
+}
+
+export const TransactionType = {
+    burn: [OtherType.Burn],
+    delegateRegistration: [DelegateType.Registration],
+    delegateResignation: [DelegateType.Resignation],
+    extraSignature: [OtherType.ExtraSignature],
+    ipfs: [OtherType.IPFS],
+    transfer: [TransferType.Multiple, TransferType.Single],
+    vote: [VoteType.Multiple, VoteType.Single],
+};

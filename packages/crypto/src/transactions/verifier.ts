@@ -1,5 +1,6 @@
 import { Hash } from "../crypto/hash";
-import { ISchemaValidationResult, ITransactionData, IVerifyOptions } from "../interfaces";
+import { TransactionType } from "../enums";
+import { ISchemaValidationResult, ITransaction, ITransactionData, IVerifyOptions } from "../interfaces";
 import { isException } from "../utils";
 import { validator } from "../validation";
 import { TransactionTypeFactory } from "./types/factory";
@@ -10,27 +11,34 @@ export class Verifier {
         if (isException(data)) {
             return true;
         }
-
-        return Verifier.verifyHash(data, options?.disableVersionCheck);
+        return Verifier.verifyHash(data, options);
     }
 
     public static verifyExtraSignature(
-        transaction: ITransactionData,
+        transaction: ITransaction,
         publicKey: string,
         options?: IVerifyOptions,
     ): boolean {
-        if (!transaction.signatures || !transaction.signatures.extra) {
+        if (!transaction.data.signatures || !transaction.data.signatures.extra) {
             return false;
         }
 
-        const hash: Buffer = Utils.toHash(transaction, {
-            disableVersionCheck: options?.disableVersionCheck,
+        const index: number = TransactionType[transaction.data.type].findIndex(
+            (id: string) => id === transaction.internalType,
+        );
+
+        const hash: Buffer = Utils.toHash(transaction.data, {
+            ...options,
             excludeExtraSignature: true,
+            index,
         });
-        return this.internalVerifySignature(hash, transaction.signatures.extra, publicKey, transaction.version > 2);
+
+        return this.internalVerifySignature(hash, transaction.data.signatures.extra, publicKey, [
+            transaction.data.version,
+        ]);
     }
 
-    public static verifyHash(data: ITransactionData, disableVersionCheck = false): boolean {
+    public static verifyHash(data: ITransactionData, options: IVerifyOptions = {}): boolean {
         const { signatures, senderPublicKey } = data;
 
         if (!signatures || !signatures.primary || !senderPublicKey) {
@@ -38,16 +46,16 @@ export class Verifier {
         }
 
         const hash: Buffer = Utils.toHash(data, {
-            disableVersionCheck,
+            ...options,
             excludeSignature: true,
             excludeExtraSignature: true,
         });
 
-        return this.internalVerifySignature(hash, signatures.primary, senderPublicKey, data.version > 2);
+        return this.internalVerifySignature(hash, signatures.primary, senderPublicKey, [data.version]);
     }
 
     public static verifySchema(data: ITransactionData, strict = true): ISchemaValidationResult {
-        const transactionType = TransactionTypeFactory.get(data.type, data.typeGroup);
+        const transactionType = TransactionTypeFactory.get(data.type);
 
         if (!transactionType) {
             throw new Error();
@@ -62,8 +70,8 @@ export class Verifier {
         hash: Buffer,
         signature: string,
         publicKey: string,
-        bip340: boolean,
+        transactionVersions: number[],
     ): boolean {
-        return Hash.verifySchnorr(hash, signature, publicKey, bip340);
+        return Hash.verifySchnorr(hash, signature, publicKey, transactionVersions);
     }
 }

@@ -33,11 +33,7 @@ export class Hash {
         return Buffer.from(bls.aggregateSignatures(signatures));
     }
 
-    public static signSchnorr(hash: Buffer, keys: IKeyPair, bip340?: boolean, aux?: Buffer): string {
-        if (!bip340) {
-            return secp256k1.schnorrSign(hash, Buffer.from(keys.privateKey, "hex")).toString("hex");
-        }
-
+    public static signSchnorr(hash: Buffer, keys: IKeyPair, aux?: Buffer): string {
         const digest: Buffer = hash.length !== 32 ? HashAlgorithms.sha256(hash) : hash;
 
         return schnorr.sign(digest, Buffer.from(keys.privateKey, "hex"), aux).toString("hex");
@@ -47,9 +43,9 @@ export class Hash {
         hash: Buffer,
         signature: Buffer | string,
         publicKey: Buffer | string,
-        bip340?: boolean,
+        transactionVersions?: number[],
     ): boolean {
-        if (!bip340) {
+        if (transactionVersions && !transactionVersions.includes(3)) {
             return secp256k1.schnorrVerify(
                 hash,
                 signature instanceof Buffer ? signature : Buffer.from(signature, "hex"),

@@ -18,9 +18,6 @@
             "name": "Delegates"
         },
         {
-            "name": "Locks"
-        },
-        {
             "name": "Rounds"
         },
         {
@@ -270,9 +267,9 @@
                         }
                     },
                     {
-                        "name": "previousBlock",
+                        "name": "previouBlock",
                         "in": "query",
-                        "description": "Previous block ID chained to the block to be returned",
+                        "description": "Previous block id chained to the block to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/sha256"
                         }
@@ -302,14 +299,6 @@
                         }
                     },
                     {
-                        "name": "blockSignature",
-                        "in": "query",
-                        "description": "Signature of the block to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/signature"
-                        }
-                    },
-                    {
                         "name": "height",
                         "in": "query",
                         "description": "Exact height of the block to be returned",
@@ -331,6 +320,14 @@
                         "description": "Latest height of the block(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "signature",
+                        "in": "query",
+                        "description": "Signature of the block to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/signature"
                         }
                     },
                     {
@@ -430,7 +427,7 @@
                         }
                     },
                     {
-                        "name": "burnedFee",
+                        "name": "totalFeeBurned",
                         "in": "query",
                         "description": "Exact amount, in satoshis, of the fees that were burned in all transactions in the block(s) to be returned",
                         "schema": {
@@ -438,7 +435,7 @@
                         }
                     },
                     {
-                        "name": "burnedFee.from",
+                        "name": "totalFeeBurned.from",
                         "in": "query",
                         "description": "Minimum amount, in satoshis, of the fees that were burned in all transactions in the block(s) to be returned",
                         "schema": {
@@ -446,7 +443,7 @@
                         }
                     },
                     {
-                        "name": "burnedFee.to",
+                        "name": "totalFeeBurned.to",
                         "in": "query",
                         "description": "Maximum amount, in satoshis, of the fees that were burned in all transactions in the block(s) to be returned",
                         "schema": {
@@ -508,10 +505,6 @@
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "blockSignature:asc",
-                                "blockSignature:desc",
-                                "burnedFee:asc",
-                                "burnedFee:desc",
                                 "generatorPublicKey:asc",
                                 "generatorPublicKey:desc",
                                 "height:asc",
@@ -528,12 +521,16 @@
                                 "previousBlock:desc",
                                 "reward:asc",
                                 "reward:desc",
+                                "signature:asc",
+                                "signature:desc",
                                 "timestamp:asc",
                                 "timestamp:desc",
                                 "totalAmount:asc",
                                 "totalAmount:desc",
                                 "totalFee:asc",
                                 "totalFee:desc",
+                                "totalFeeBurned:asc",
+                                "totalFeeBurned:desc",
                                 "username:asc",
                                 "username:desc",
                                 "version:asc",
@@ -787,7 +784,7 @@
                         }
                     },
                     {
-                        "name": "resignationType",
+                        "name": "resignation",
                         "in": "query",
                         "description": "Whether the delegate(s) to be returned have resigned permanently or temporarily",
                         "schema": {
@@ -1383,334 +1380,6 @@
                 }
             }
         },
-        "/locks": {
-            "get": {
-                "tags": [
-                    "Locks"
-                ],
-                "summary": "List HTLC transaction locks or search for locks meeting specific criteria",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "The number of the page that will be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/page"
-                        }
-                    },
-                    {
-                        "name": "limit",
-                        "in": "query",
-                        "description": "The number of results per page",
-                        "schema": {
-                            "$ref": "#/components/schemas/limit"
-                        }
-                    },
-                    {
-                        "name": "lockId",
-                        "in": "query",
-                        "description": "The lock id to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/sha256"
-                        }
-                    },
-                    {
-                        "name": "senderPublicKey",
-                        "in": "query",
-                        "description": "Public key of the sender of the lock(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/publicKey"
-                        }
-                    },
-                    {
-                        "name": "recipientId",
-                        "in": "query",
-                        "description": "Address of the recipient of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/address"
-                        }
-                    },
-                    {
-                        "name": "secretHash",
-                        "in": "query",
-                        "description": "Secret hash string of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/sha256"
-                        }
-                    },
-                    {
-                        "name": "memo",
-                        "in": "query",
-                        "description": "Memo string of the lock transaction(s) to be returned",
-                        "schema": {
-                            "type": "string",
-                            "maxLength": 255
-                        }
-                    },
-                    {
-                        "name": "isExpired",
-                        "in": "query",
-                        "description": "Whether the lock(s) to be returned have expired",
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
-                    {
-                        "name": "expirationType",
-                        "in": "query",
-                        "description": "Expiration type (1 = timestamp, 2 = height) of the lock transaction(s) to be returned",
-                        "schema": {
-                            "type": "integer",
-                            "enum": [
-                                1,
-                                2
-                            ]
-                        }
-                    },
-                    {
-                        "name": "expirationValue",
-                        "in": "query",
-                        "description": "Exact expiration time or height of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "expirationValue.from",
-                        "in": "query",
-                        "description": "Earliest expiration time or height of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "expirationValue.to",
-                        "in": "query",
-                        "description": "Latest expiration time or height of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "amount",
-                        "in": "query",
-                        "description": "Exact amount, in satoshis, of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "amount.from",
-                        "in": "query",
-                        "description": "Minimum amount, in satoshis, of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "amount.to",
-                        "in": "query",
-                        "description": "Maximum amount, in satoshis, of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "timestamp.epoch",
-                        "in": "query",
-                        "description": "Exact time, in seconds since the epoch, of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "timestamp.epoch.from",
-                        "in": "query",
-                        "description": "Earliest time, in seconds since the epoch, of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "timestamp.epoch.to",
-                        "in": "query",
-                        "description": "Latest time, in seconds since the epoch, of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "timestamp.unix",
-                        "in": "query",
-                        "description": "Exact time, in UNIX timestamp format, of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "timestamp.unix.from",
-                        "in": "query",
-                        "description": "Earliest time, in UNIX timestamp format, of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "timestamp.unix.to",
-                        "in": "query",
-                        "description": "Latest time, in UNIX timestamp format, of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "timestamp.human",
-                        "in": "query",
-                        "description": "Exact time, in RFC 3339 human readable format (e.g. 2022-03-28T18:00:00.000Z), of the lock transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/time"
-                        }
-                    },
-                    {
-                        "name": "orderBy",
-                        "in": "query",
-                        "description": "Sorting method",
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "amount:asc",
-                                "amount:desc",
-                                "expirationType:asc",
-                                "expirationType:desc",
-                                "expirationValue:asc",
-                                "expirationValue:desc",
-                                "isExpired:asc",
-                                "isExpired:desc",
-                                "lockId:asc",
-                                "lockId:desc",
-                                "memo:asc",
-                                "memo:desc",
-                                "recipientId:asc",
-                                "recipientId:desc",
-                                "secretHash:asc",
-                                "secretHash:desc",
-                                "senderPublicKey:asc",
-                                "senderPublicKey:desc",
-                                "timestamp.epoch:asc",
-                                "timestamp.epoch:desc",
-                                "timestamp.human:asc",
-                                "timestamp.human:desc",
-                                "timestamp.unix:asc",
-                                "timestamp.unix:desc"
-                            ]
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "422": {
-                        "description": "Invalid parameter(s)"
-                    }
-                }
-            }
-        },
-        "/locks/{id}": {
-            "get": {
-                "tags": [
-                    "Locks"
-                ],
-                "summary": "Find a single HTLC transaction lock by its ID",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Lock ID",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/components/schemas/sha256"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "404": {
-                        "description": "Lock not found"
-                    },
-                    "422": {
-                        "description": "Invalid parameter(s)"
-                    }
-                }
-            }
-        },
-        "/locks/unlocked": {
-            "post": {
-                "tags": [
-                    "Locks"
-                ],
-                "summary": "View unlocked HTLC transactions",
-                "parameters": [
-                    {
-                        "name": "orderBy",
-                        "in": "query",
-                        "description": "Sorting method",
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "amount:asc",
-                                "amount:desc",
-                                "blockHeight:asc",
-                                "blockHeight:desc",
-                                "blockId:asc",
-                                "blockId:desc",
-                                "burnedFee:asc",
-                                "burnedFee:desc",
-                                "fee.epoch:asc",
-                                "fee.epoch:desc",
-                                "id:asc",
-                                "id:desc",
-                                "memo:asc",
-                                "memo:desc",
-                                "nonce:asc",
-                                "nonce:desc",
-                                "recipientId:asc",
-                                "recipientId:desc",
-                                "senderId:asc",
-                                "senderId:desc",
-                                "senderPublicKey:asc",
-                                "senderPublicKey:desc",
-                                "timestamp:asc",
-                                "timestamp:desc",
-                                "version:asc",
-                                "version:desc"
-                            ]
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "description": "An ids object containing an array of lock IDs",
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/lockIds"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful operation"
-                    },
-                    "422": {
-                        "description": "Invalid parameter(s)"
-                    }
-                }
-            }
-        },
         "/rounds/{id}/delegates": {
             "get": {
                 "tags": [
@@ -1781,14 +1450,6 @@
                         }
                     },
                     {
-                        "name": "typeGroup",
-                        "in": "query",
-                        "description": "The type group of the transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/transactionTypeGroups"
-                        }
-                    },
-                    {
                         "name": "version",
                         "in": "query",
                         "description": "The version of the transaction(s) to be returned",
@@ -1818,14 +1479,6 @@
                         "description": "The latest block height containing the transaction(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
-                        }
-                    },
-                    {
-                        "name": "blockId",
-                        "in": "query",
-                        "description": "The block ID containing the transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/sha256"
                         }
                     },
                     {
@@ -1862,27 +1515,88 @@
                         }
                     },
                     {
-                        "name": "amount",
+                        "name": "extraSignature",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of the transaction(s) to be returned",
+                        "description": "The public key associated with an extra signature registration transaction to be returned",
                         "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
+                            "$ref": "#/components/schemas/publicKey"
                         }
                     },
                     {
-                        "name": "amount.from",
+                        "name": "registration",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of the transaction(s) to be returned",
+                        "description": "The name of a delegate associated with a username registration transaction to be returned",
                         "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
+                            "$ref": "#/components/schemas/username"
                         }
                     },
                     {
-                        "name": "amount.to",
+                        "name": "resignation",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of the transaction(s) to be returned",
+                        "description": "The type of resignation transaction to be returned",
                         "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
+                            "type": "string",
+                            "enum": [
+                                "temporary",
+                                "permanent",
+                                "revoke"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "ipfsHash",
+                        "in": "query",
+                        "description": "The IPFS hash of an IPFS transaction to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/ipfsHash"
+                        }
+                    },
+                    {
+                        "name": "amount.received",
+                        "in": "query",
+                        "description": "Exact received amount, in satoshis, of the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "amount.received.from",
+                        "in": "query",
+                        "description": "Minimum received amount, in satoshis, of the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "amount.received.to",
+                        "in": "query",
+                        "description": "Maximum received amount, in satoshis, of the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "amount.sent",
+                        "in": "query",
+                        "description": "Exact sent amount, in satoshis, of the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "amount.sent.from",
+                        "in": "query",
+                        "description": "Minimum sent amount, in satoshis, of the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "amount.sent.to",
+                        "in": "query",
+                        "description": "Maximum sent amount, in satoshis, of the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
                         }
                     },
                     {
@@ -1905,30 +1619,6 @@
                         "name": "fee.to",
                         "in": "query",
                         "description": "Maximum fee, in satoshis, of the transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "burnedFee",
-                        "in": "query",
-                        "description": "Exact fee amount that was burned, in satoshis, of the transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "burnedFee.from",
-                        "in": "query",
-                        "description": "Minimum fee amount that was burned, in satoshis, of the transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "burnedFee.to",
-                        "in": "query",
-                        "description": "Maximum fee amount that was burned, in satoshis, of the transaction(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -1982,28 +1672,52 @@
                         }
                     },
                     {
+                        "name": "vote.percent",
+                        "in": "query",
+                        "description": "Exact percentage allocation of a vote in the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "vote.percent.from",
+                        "in": "query",
+                        "description": "Minimum percentage allocation of a vote in the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "vote.percent.to",
+                        "in": "query",
+                        "description": "Maximum percentage allocation of a vote in the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "vote.username",
+                        "in": "query",
+                        "description": "Name of the delegate included in a vote in the transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/username"
+                        }
+                    },
+                    {
                         "name": "orderBy",
                         "in": "query",
                         "description": "Sorting method",
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "amount:asc",
-                                "amount:desc",
                                 "blockHeight:asc",
                                 "blockHeight:desc",
-                                "blockId:asc",
-                                "blockId:desc",
-                                "burnedFee:asc",
-                                "burnedFee:desc",
                                 "fee:asc",
                                 "fee:desc",
                                 "id:asc",
                                 "id:desc",
                                 "nonce:asc",
                                 "nonce:desc",
-                                "recipientId:asc",
-                                "recipientId:desc",
                                 "senderId:asc",
                                 "senderId:desc",
                                 "senderPublicKey:asc",
@@ -2012,8 +1726,6 @@
                                 "timestamp:desc",
                                 "type:asc",
                                 "type:desc",
-                                "typeGroup:asc",
-                                "typeGroup:desc",
                                 "memo:asc",
                                 "memo:desc",
                                 "version:asc",
@@ -2223,14 +1935,6 @@
                         }
                     },
                     {
-                        "name": "blockId",
-                        "in": "query",
-                        "description": "The block ID containing the vote transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/sha256"
-                        }
-                    },
-                    {
                         "name": "senderPublicKey",
                         "in": "query",
                         "description": "Public key of the sender of the vote transaction(s) to be returned",
@@ -2266,30 +1970,6 @@
                         "name": "fee.to",
                         "in": "query",
                         "description": "Maximum fee, in satoshis, of the vote transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "burnedFee",
-                        "in": "query",
-                        "description": "Exact fee amount that was burned, in satoshis, of the vote transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "burnedFee.from",
-                        "in": "query",
-                        "description": "Minimum fee amount that was burned, in satoshis, of the vote transaction(s) to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/zeroOrMore"
-                        }
-                    },
-                    {
-                        "name": "burnedFee.to",
-                        "in": "query",
-                        "description": "Maximum fee amount that was burned, in satoshis, of the vote transaction(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -2343,6 +2023,37 @@
                         }
                     },
                     {
+                        "name": "vote.percent",
+                        "in": "query",
+                        "description": "Exact percentage allocation  in the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "vote.percent.from",
+                        "in": "query",
+                        "description": "Minimum percentage allocation in the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "vote.percent.to",
+                        "in": "query",
+                        "description": "Maximum percentage allocation in the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "vote.username",
+                        "in": "query",
+                        "description": "Name of the delegate included in the vote transaction(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/username"
+                        }
+                    },                    {
                         "name": "orderBy",
                         "in": "query",
                         "description": "Sorting method",
@@ -2351,10 +2062,6 @@
                             "enum": [
                                 "blockHeight:asc",
                                 "blockHeight:desc",
-                                "blockId:asc",
-                                "blockId:desc",
-                                "burnedFee:asc",
-                                "burnedFee:desc",
                                 "fee:asc",
                                 "fee:desc",
                                 "id:asc",
@@ -2769,6 +2476,10 @@
                 "type": "string",
                 "pattern": "(?:^(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}$)|(?:^(?:(?:[a-fA-F\\d]{1,4}:){7}(?:[a-fA-F\\d]{1,4}|:)|(?:[a-fA-F\\d]{1,4}:){6}(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}|:[a-fA-F\\d]{1,4}|:)|(?:[a-fA-F\\d]{1,4}:){5}(?::(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}|(?::[a-fA-F\\d]{1,4}){1,2}|:)|(?:[a-fA-F\\d]{1,4}:){4}(?:(?::[a-fA-F\\d]{1,4}){0,1}:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}|(?::[a-fA-F\\d]{1,4}){1,3}|:)|(?:[a-fA-F\\d]{1,4}:){3}(?:(?::[a-fA-F\\d]{1,4}){0,2}:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}|(?::[a-fA-F\\d]{1,4}){1,4}|:)|(?:[a-fA-F\\d]{1,4}:){2}(?:(?::[a-fA-F\\d]{1,4}){0,3}:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}|(?::[a-fA-F\\d]{1,4}){1,5}|:)|(?:[a-fA-F\\d]{1,4}:){1}(?:(?::[a-fA-F\\d]{1,4}){0,4}:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}|(?::[a-fA-F\\d]{1,4}){1,6}|:)|(?::(?:(?::[a-fA-F\\d]{1,4}){0,5}:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}|(?::[a-fA-F\\d]{1,4}){1,7}|:)))(?:%[0-9a-zA-Z]{1,})?$)"
             },
+            "ipfsHash": {
+                "type": "string",
+                "pattern": "^[A-HJ-NP-Za-km-z1-9]{1,90}$"
+            },
             "limit": {
                 "type": "integer",
                 "default": 100,
@@ -2843,7 +2554,6 @@
                     "signatures",
                     "version",
                     "type",
-                    "typeGroup",
                     "fee",
                     "senderPublicKey",
                     "nonce",
@@ -2858,12 +2568,8 @@
                         "example": 3
                     },
                     "type": {
-                        "type": "integer",
-                        "example": 6
-                    },
-                    "typeGroup": {
-                        "type": "integer",
-                        "example": 1
+                        "type": "string",
+                        "example": "transfer"
                     },
                     "nonce": {
                         "type": "integer",
@@ -2912,12 +2618,8 @@
                     }
                 }
             },
-            "transactionTypeGroups": {
-                "type": "integer",
-                "enum": []
-            },
             "transactionTypes": {
-                "type": "integer",
+                "type": "string",
                 "enum": []
             },
             "transactionVersions": {

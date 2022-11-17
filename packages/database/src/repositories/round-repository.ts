@@ -1,41 +1,30 @@
-import { Utils } from "@solar-network/crypto";
-import { Contracts } from "@solar-network/kernel";
-import { EntityRepository, Repository } from "typeorm";
+import { Container, Contracts } from "@solar-network/kernel";
 
-import { Round } from "../models";
+import { RoundModel } from "../models";
+import { Repository } from "./repository";
 
-@EntityRepository(Round)
-export class RoundRepository extends Repository<Round> {
-    public async findById(id: string): Promise<Round[]> {
-        return this.find({
-            where: {
-                round: id,
-            },
-        });
-    }
-
-    public async getRound(round: number): Promise<Round[]> {
-        return this.createQueryBuilder()
-            .select()
-            .where("round = :round", { round })
-            .orderBy("balance", "DESC")
-            .addOrderBy("public_key", "ASC")
-            .getMany();
-    }
-
-    public async save(delegates: readonly Contracts.State.Wallet[]): Promise<never> {
-        const round: { publicKey: string; balance: Utils.BigNumber; round: number }[] = delegates.map(
-            (delegate: Contracts.State.Wallet) => ({
-                publicKey: delegate.getPublicKey("primary")!,
-                balance: delegate.getAttribute("delegate.voteBalance"),
-                round: delegate.getAttribute("delegate.round"),
-            }),
+@Container.injectable()
+export class RoundRepository extends Repository<RoundModel> implements Contracts.Database.RoundRepository {
+    public async getRound(round: number): Promise<RoundModel[]> {
+        const mod = this.toModel(
+            RoundModel,
+            await this.createQueryBuilder()
+                .select(
+                    "(SELECT public_key FROM public_keys WHERE public_keys.id = public_key_id LIMIT 1)",
+                    "publicKey",
+                )
+                .select(
+                    "CAST((SELECT identity FROM identities WHERE identity_id = identities.id AND is_username = 1 LIMIT 1) AS TEXT)",
+                    "username",
+                )
+                .select("balance")
+                .select("round")
+                .from("rounds")
+                .where("round = :round", { round })
+                .orderBy("balance", "DESC")
+                .orderBy("publicKey", "ASC")
+                .run(),
         );
-
-        return super.save(round) as never;
-    }
-
-    public async deleteFrom(round: number): Promise<void> {
-        await this.createQueryBuilder().delete().where("round >= :round", { round }).execute();
+        return mod;
     }
 }

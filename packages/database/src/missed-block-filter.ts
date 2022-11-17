@@ -1,6 +1,6 @@
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
-import { MissedBlock } from "./models/missed-block";
+import { MissedBlockModel } from "./models";
 
 const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimiseExpression } = AppUtils.Search;
 
@@ -8,7 +8,7 @@ const { handleAndCriteria, handleOrCriteria, handleNumericCriteria, optimiseExpr
 export class MissedBlockFilter implements Contracts.Database.MissedBlockFilter {
     public async getExpression(
         ...criteria: Contracts.Shared.OrBlockCriteria[]
-    ): Promise<Contracts.Search.Expression<MissedBlock>> {
+    ): Promise<Contracts.Search.Expression<Partial<MissedBlockModel>>> {
         const expressions = await Promise.all(
             criteria.map((c) => handleOrCriteria(c, (c) => this.handleMissedBlockCriteria(c))),
         );
@@ -18,7 +18,7 @@ export class MissedBlockFilter implements Contracts.Database.MissedBlockFilter {
 
     private async handleMissedBlockCriteria(
         criteria: Contracts.Shared.MissedBlockCriteria,
-    ): Promise<Contracts.Search.Expression<MissedBlock>> {
+    ): Promise<Contracts.Search.Expression<MissedBlockModel>> {
         return handleAndCriteria(criteria, async (key) => {
             switch (key) {
                 case "timestamp":

@@ -19,23 +19,17 @@
                 "burn": 0,
                 "delegateRegistration": 663703,
                 "delegateResignation": 0,
-                "htlcClaim": 0,
-                "htlcLock": 82,
-                "htlcRefund": 0,
                 "ipfs": 98,
-                "legacyTransfer": 99,
-                "legacyVote": 98,
                 "extraSignature": 99,
                 "transfer": 85,
                 "vote": 98
             },
             "minFee": 11299
         },
-        "legacyTransfer": true,
-        "legacyVote": true,
         "p2p": {
             "minimumVersions": [">=4.1.2-next.0"]
         },
+        "transactionVersions": [2],
         "transfer": {
             "maximumRecipients": 256
         },
@@ -43,10 +37,7 @@
     },
     {
         "height": 2,
-        "acceptLegacySchnorrTransactions": false,
-        "bip340": true,
-        "legacyTransfer": false,
-        "legacyVote": false
+        "transactionVersions": [3]
     },
     {
         "height": 54,

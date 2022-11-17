@@ -48,7 +48,7 @@ message GetStatusResponse {
             uint32 payloadLength = 12;
             string payloadHash = 13;
             string generatorPublicKey = 14;
-            string blockSignature = 15;
+            string signature = 15;
         }
         uint32 height = 1;
         bool forgingAllowed = 2;
@@ -73,7 +73,6 @@ message GetStatusResponse {
         message Plugin {
             uint32 port = 1;
             bool enabled = 2;
-            bool estimateTotalCount = 3;
         }
 
         string version = 1;

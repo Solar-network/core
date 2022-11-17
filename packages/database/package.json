@@ -22,11 +22,8 @@
     "dependencies": {
         "@solar-network/crypto": "workspace:*",
         "@solar-network/kernel": "workspace:*",
-        "dayjs": "1.10.7",
-        "execa": "3.4.0",
-        "joi": "17.6.0",
-        "pg": "8.7.1",
-        "reflect-metadata": "0.1.13",
-        "typeorm": "0.2.34"
+        "better-sqlite3": "7.6.2",
+        "bs58": "5.0.0",
+        "dayjs": "1.10.7"
     }
 }

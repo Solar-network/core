@@ -1,7 +1,6 @@
 export * from "./collator";
 export * from "./fee-matcher";
 export * from "./errors";
-export * from "./expiration-service";
 export * from "./worker";
 export * from "./mempool";
 export * from "./processor";

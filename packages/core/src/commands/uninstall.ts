@@ -2,7 +2,7 @@ import { Commands, Container, Services } from "@solar-network/cli";
 import { Utils } from "@solar-network/kernel";
 import envPaths from "env-paths";
 import { sync } from "execa";
-import { existsSync, readdirSync, readFileSync, remove, statSync, writeFileSync } from "fs-extra";
+import { existsSync, readFileSync, remove, writeFileSync } from "fs-extra";
 import Joi from "joi";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -104,20 +104,6 @@ export class Command extends Commands.Command {
 
             const home = homedir();
             const { cache, config, data, log, temp } = envPaths(this.getFlag("token"), { suffix: "core" });
-
-            if (existsSync(data)) {
-                readdirSync(data)
-                    .map((dir) => `${data}/${dir}/database/postmaster.pid`)
-                    .filter((file) => existsSync(file) && statSync(file).isFile())
-                    .map((file) => readFileSync(file).toString().split("\n")[0])
-                    .forEach((pid) => {
-                        try {
-                            process.kill(+pid, "SIGKILL");
-                        } catch {
-                            //
-                        }
-                    });
-            }
 
             await remove(cache);
             await remove(config);

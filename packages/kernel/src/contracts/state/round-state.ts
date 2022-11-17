@@ -14,5 +14,11 @@ export interface RoundState {
         wallet: Wallet,
     ): Promise<{ alreadyForged: boolean; reward: Utils.BigNumber }>;
 
+    getMissedBlocksToSave(): { timestamp: number; height: number; username: string }[];
+    getRoundsToSave(): Record<
+        number,
+        { publicKey: string; balance: Utils.BigNumber; round: number; username: string }[]
+    >;
+
     restore(): Promise<void>;
 }

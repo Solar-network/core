@@ -1,138 +1,145 @@
-import { Crypto, Enums, Utils } from "@solar-network/crypto";
+import { Crypto } from "@solar-network/crypto";
+import { Container, Contracts } from "@solar-network/kernel";
 import dayjs from "dayjs";
-import { Brackets, EntityRepository, In } from "typeorm";
+import { cpus } from "os";
 
-import { Block } from "../models/block";
-import { Transaction } from "../models/transaction";
-import { AbstractRepository } from "./abstract-repository";
+import { TransactionModel } from "../models";
+import { Repository } from "./repository";
 
-type FeeStatistics = {
-    type: number;
-    typeGroup: number;
-    burned: number;
-    avg: number;
-    min: number;
-    max: number;
-    sum: number;
-};
-@EntityRepository(Transaction)
-export class TransactionRepository extends AbstractRepository<Transaction> {
-    public async findByBlockIds(blockIds: string[]): Promise<
+@Container.injectable()
+export class TransactionRepository
+    extends Repository<TransactionModel>
+    implements Contracts.Database.TransactionRepository
+{
+    protected model: typeof TransactionModel = TransactionModel;
+
+    public async findTransactionsById(ids: string[]): Promise<TransactionModel[]> {
+        return this.toModel(
+            TransactionModel,
+            await this.getFullQueryBuilder()
+                .where(
+                    `transactions.id IN (${ids.map(() => "?").join(",")})`,
+                    ids.map((id: string) => Buffer.from(id, "hex")),
+                )
+                .run(),
+        );
+    }
+
+    public async findTransactionById(id: string): Promise<TransactionModel> {
+        return (await this.findTransactionsById[id])[0];
+    }
+
+    public async findByBlockHeights(blockHeights: number[]): Promise<
         Array<{
             id: string;
-            blockId: string;
+            blockHeight: number;
             serialised: Buffer;
         }>
     > {
-        return this.find({
-            select: ["id", "blockId", "serialised"],
-            where: {
-                blockId: In(blockIds),
-            },
-            order: { sequence: "ASC" },
-        });
+        return this.toModel(
+            TransactionModel,
+            await this.createQueryBuilder()
+                .select("id")
+                .select("block_height", "blockHeight")
+                .select("serialised")
+                .from("transactions")
+                .where(`block_height IN (${blockHeights.map(() => "?").join(",")})`, blockHeights)
+                .orderBy("sequence", "ASC")
+                .run(),
+        );
     }
 
     public async getForgedTransactionsIds(ids: string[]): Promise<string[]> {
-        const transactions = await this.find({
-            select: ["id"],
-            where: {
-                id: In(ids),
-            },
-        });
+        const transactions = this.toModel(
+            TransactionModel,
+            await this.createQueryBuilder()
+                .select("id")
+                .from("transactions")
+                .where(
+                    `transactions.id IN (${ids.map(() => "?").join(",")})`,
+                    ids.map((id: string) => Buffer.from(id, "hex")),
+                )
+                .run(),
+        );
+
         return transactions.map((t) => t.id);
     }
 
     public async getStatistics(): Promise<{
         count: number;
         totalFee: string;
-        burnedFee: string;
-        totalAmount: string;
     }> {
-        return this.createQueryBuilder()
-            .select([])
-            .addSelect("COUNT(DISTINCT(id))", "count")
-            .addSelect("COALESCE(SUM(fee), 0)", "totalFee")
-            .addSelect("COALESCE(SUM(burned_fee), 0)", "burnedFee")
-            .addSelect("COALESCE(SUM(amount), 0)", "totalAmount")
-            .getRawOne();
+        return (
+            await this.createQueryBuilder()
+                .select("COUNT(DISTINCT(id))", "count")
+                .select("CAST(COALESCE(SUM(fee), 0) AS TEXT)", "totalFee")
+                .from("transactions")
+                .run()
+        )[0];
     }
 
     public async getFeeStatistics(
-        txTypes: Array<{ type: number; typeGroup: number }>,
+        txTypes: Array<{ type: string }>,
         days?: number,
         minFee?: number,
-    ): Promise<FeeStatistics[]> {
+    ): Promise<Contracts.Database.FeeStatistics[]> {
         minFee = minFee || 0;
 
         if (days) {
             const age = Crypto.Slots.getTime(dayjs().subtract(days, "day").valueOf());
 
             return this.createQueryBuilder()
-                .select(['type_group AS "typeGroup"', "type"])
-                .addSelect("COALESCE(AVG(fee), 0)::int8", "avg")
-                .addSelect("COALESCE(MIN(fee), 0)::int8", "min")
-                .addSelect("COALESCE(MAX(fee), 0)::int8", "max")
-                .addSelect("COALESCE(SUM(fee), 0)::int8", "sum")
-                .addSelect("COALESCE(SUM(burned_fee), 0)::int8", "burned")
+                .select("(SELECT type FROM types WHERE types.id = transactions.type_id LIMIT 1)", "type")
+                .select("CAST(CAST(COALESCE(AVG(fee), 0) AS INTEGER) AS TEXT)", "avg")
+                .select("CAST(COALESCE(MIN(fee), 0) AS TEXT)", "min")
+                .select("CAST(COALESCE(MAX(fee), 0) AS TEXT)", "max")
+                .select("CAST(COALESCE(SUM(fee), 0) AS TEXT)", "sum")
+                .select("CAST(COALESCE(SUM(BURN(block_height, fee)), 0) AS TEXT)", "burned")
+                .from("transactions")
                 .where("timestamp >= :age AND fee >= :minFee", { age, minFee })
-                .groupBy("type_group")
-                .addGroupBy("type")
-                .orderBy("type_group")
-                .getRawMany();
+                .groupBy("type_id")
+                .orderBy("type", "ASC")
+                .run();
         }
 
-        const feeStatistics: FeeStatistics[] = [];
+        const feeStatistics: Contracts.Database.FeeStatistics[] = [];
 
-        // no days parameter, take the stats from each type for its last 20 txs
-        // except burned amount, which is all time
         for (const feeStatsByType of txTypes) {
-            // we don't use directly this.createQueryBuilder() because it forces to have FROM transactions
-            // instead of just the FROM (...) subquery
-            const feeStatsForType: FeeStatistics = await this.manager.connection
-                .createQueryBuilder()
-                .select(['subquery.type_group AS "typeGroup"', "subquery.type"])
-                .addSelect("COALESCE(AVG(subquery.fee), 0)::int8", "avg")
-                .addSelect("COALESCE(MIN(subquery.fee), 0)::int8", "min")
-                .addSelect("COALESCE(MAX(subquery.fee), 0)::int8", "max")
-                .addSelect("COALESCE(SUM(subquery.fee), 0)::int8", "sum")
-                .from(
-                    (qb) =>
-                        qb
-                            .subQuery()
-                            .select()
-                            .from("transactions", "txs")
-                            .where("txs.type = :type and txs.type_group = :typeGroup", {
-                                type: feeStatsByType.type,
-                                typeGroup: feeStatsByType.typeGroup,
-                            })
-                            .orderBy("txs.block_height", "DESC")
-                            .addOrderBy("txs.sequence", "DESC")
-                            .limit(20),
-                    "subquery",
-                )
-                .groupBy("subquery.type_group")
-                .addGroupBy("subquery.type")
-                .getRawOne();
+            const feeStatsForType: Contracts.Database.FeeStatistics = (
+                await this.createQueryBuilder()
+                    .select("type")
+                    .select("CAST(CAST(COALESCE(AVG(fee), 0) AS INTEGER) AS TEXT)", "avg")
+                    .select("CAST(COALESCE(MIN(fee), 0) AS TEXT)", "min")
+                    .select("CAST(COALESCE(MAX(fee), 0) AS TEXT)", "max")
+                    .select("CAST(COALESCE(SUM(fee), 0) AS TEXT)", "sum")
+                    .from(
+                        `(
+                            SELECT fee, type FROM transactions
+                            LEFT JOIN types ON types.id = transactions.type_id
+                            WHERE type = '${feeStatsByType.type}'
+                            ORDER BY block_height DESC, sequence DESC
+                            LIMIT 0, 20
+                        )`,
+                        "transactions",
+                    )
+                    .groupBy("type")
+                    .run()
+            )[0];
 
-            const burnStatsForType: FeeStatistics = await this.manager.connection
-                .createQueryBuilder()
-                .select("COALESCE(SUM(subquery.burned_fee), 0)::int8", "burned")
-                .from(
-                    (qb) =>
-                        qb
-                            .subQuery()
-                            .select()
-                            .from("transactions", "txs")
-                            .where("txs.type = :type and txs.type_group = :typeGroup", {
-                                type: feeStatsByType.type,
-                                typeGroup: feeStatsByType.typeGroup,
-                            }),
-                    "subquery",
-                )
-                .groupBy("subquery.type_group")
-                .addGroupBy("subquery.type")
-                .getRawOne();
+            const burnStatsForType: Contracts.Database.FeeStatistics = (
+                await this.createQueryBuilder()
+                    .select("CAST(COALESCE(SUM(burned_fee), 0) AS TEXT)", "burned")
+                    .from(
+                        `(
+                        SELECT BURN(block_height, fee) burned_fee, type FROM transactions
+                        LEFT JOIN types ON types.id = transactions.type_id
+                        WHERE type = '${feeStatsByType.type}'
+                    )`,
+                        "transactions",
+                    )
+                    .groupBy("type")
+                    .run()
+            )[0];
 
             if (feeStatsForType && burnStatsForType) {
                 feeStatsForType.burned = burnStatsForType.burned;
@@ -141,7 +148,6 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
             feeStatistics.push(
                 feeStatsForType ?? {
                     type: feeStatsByType.type,
-                    typeGroup: feeStatsByType.typeGroup,
                     avg: "0",
                     burned: "0",
                     min: "0",
@@ -150,163 +156,103 @@ export class TransactionRepository extends AbstractRepository<Transaction> {
                 },
             );
         }
-
         return feeStatistics;
     }
 
     public async getFeesBurned(): Promise<string> {
-        const { burned } = await this.createQueryBuilder()
-            .select("COALESCE(SUM(burned_fee), 0)::int8", "burned")
-            .getRawOne();
+        const { burned } = (
+            await this.createQueryBuilder()
+                .select("CAST(COALESCE(SUM(BURN(block_height, fee)), 0) AS TEXT)", "burned")
+                .from("transactions")
+                .run()
+        )[0];
         return burned;
     }
 
     public async getBurnTransactionTotal(): Promise<string> {
-        const { amount } = await this.createQueryBuilder()
-            .select("COALESCE(SUM(amount), 0)::int8", "amount")
-            .where("type = :type and type_group = :typeGroup", {
-                type: Enums.TransactionType.Solar.Burn,
-                typeGroup: Enums.TransactionTypeGroup.Solar,
-            })
-            .getRawOne();
+        const { amount } = (
+            await this.createQueryBuilder()
+                .select(
+                    "CAST(COALESCE(SUM((SELECT amount_sent FROM balance_changes WHERE balance_changes.transactions_row = row)), 0) AS TEXT)",
+                    "amount",
+                )
+                .from("transactions")
+                .where("type_id = (SELECT id FROM types WHERE type = 'burn')")
+                .run()
+        )[0];
         return amount;
     }
 
-    public async getSentTransactions(): Promise<{ senderId: string; amount: string; fee: string; nonce: string }[]> {
-        return this.createQueryBuilder()
-            .select([])
-            .addSelect("sender_id", "senderId")
-            .addSelect("SUM(amount)", "amount")
-            .addSelect("SUM(fee)", "fee")
-            .addSelect("COUNT(id)::int8", "nonce")
-            .groupBy("sender_id")
-            .getRawMany();
+    public async getSentTransactions(): Promise<{ senderId: string; fee: string; nonce: string }[]> {
+        return (
+            await this.createQueryBuilder()
+                .select("(SELECT identity FROM identities WHERE identities.id = identity_id LIMIT 1)", "senderId")
+                .select("CAST(SUM(fee) AS TEXT)", "fee")
+                .select("COUNT(nonce)", "nonce")
+                .from("transactions")
+                .groupBy("identity_id")
+                .run()
+        ).map((transaction) => {
+            const { senderId, fee, nonce } = transaction;
+            return {
+                senderId,
+                fee,
+                nonce,
+            };
+        });
     }
 
-    public async findReceivedTransactions(): Promise<{ recipientId: string; amount: string }[]> {
-        return this.createQueryBuilder()
-            .select([])
-            .addSelect("recipient_id", "recipientId")
-            .addSelect("SUM(amount)", "amount")
-            .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-            .andWhere(`type = ${Enums.TransactionType.Core.LegacyTransfer}`)
-            .groupBy("recipient_id")
-            .getRawMany();
+    public async *fetchByExpression(
+        expression: Contracts.Search.Expression<TransactionModel>,
+        sorting: Contracts.Search.Sorting = [],
+    ): AsyncIterable<TransactionModel> {
+        const countQueryBuilder = this.createQueryBuilder().select("COUNT(*)", "count").from("transactions");
+        this.addWhere(countQueryBuilder, expression);
+        const workers: number = cpus().length;
+        const count: number = Math.ceil((await countQueryBuilder.run())[0].count / workers);
+        const promises: Promise<any>[] = [];
+
+        for (let i = 0; i < workers; i++) {
+            const queryBuilder = this.getFullQueryBuilder();
+            this.addWhere(queryBuilder, expression);
+            this.addOrderBy(queryBuilder, sorting);
+            queryBuilder.limit(i * count, count);
+            promises.push(queryBuilder.run());
+        }
+
+        const transactions = this.toModel(
+            this.model,
+            (await Promise.all(promises)).flatMap((t: TransactionModel) => t),
+        );
+        transactions.sort((a: TransactionModel, b: TransactionModel) => {
+            const diff = a.blockHeight - b.blockHeight;
+
+            if (diff === 0) {
+                return a.sequence - b.sequence;
+            }
+
+            return diff;
+        });
+
+        for await (const raw of transactions) {
+            yield raw;
+        }
     }
 
-    public async findByType(
-        type: number,
-        typeGroup: number,
-        limit?: number,
-        offset?: number,
-    ): Promise<Array<Transaction & { blockHeight: number; username: string; reward: Utils.BigNumber }>> {
-        const transactions = await this.createQueryBuilder("transactions")
-            .select()
-            .addSelect('blocks.height as "blockHeight"')
-            .addSelect("blocks.username as username")
-            .addSelect('blocks.reward as "reward"')
-            .addFrom(Block, "blocks")
-            .where("block_id = blocks.id")
-            .andWhere("type = :type", { type })
-            .andWhere("type_group = :typeGroup", { typeGroup })
-            .orderBy("transactions.timestamp", "ASC")
-            .addOrderBy("transactions.sequence", "ASC")
-            .skip(offset)
-            .take(limit)
-            .getRawMany();
-
-        return transactions.map((transaction) => {
-            return this.rawToEntity(transaction, (entity: any, key: string, value: unknown) => {
-                if (key === "reward") {
-                    entity[key] = Utils.BigNumber.make(value as bigint);
-                } else {
-                    entity[key] = value;
-                }
-            });
-        }) as any;
-    }
-
-    public async findByHtlcLocks(lockIds: string[]): Promise<Transaction[]> {
+    protected getFullQueryBuilder(): Contracts.Database.QueryBuilder {
         return this.createQueryBuilder()
-            .select()
-            .where(
-                new Brackets((qb) => {
-                    qb.where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                        .andWhere(`type = ${Enums.TransactionType.Core.HtlcClaim}`)
-                        .andWhere("asset->'claim'->>'lockTransactionId' IN (:...lockIds)", { lockIds });
-                }),
+            .select("transactions.*")
+            .select("block_height", "blockHeight")
+            .select("CAST(BURN(block_height, fee) AS INTEGER)", "burnedFee")
+            .select(
+                "(SELECT identity FROM identities WHERE identities.id = transactions.identity_id LIMIT 1)",
+                "senderId",
             )
-            .orWhere(
-                new Brackets((qb) => {
-                    qb.where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                        .andWhere(`type = ${Enums.TransactionType.Core.HtlcRefund}`)
-                        .andWhere("asset->'refund'->>'lockTransactionId' IN (:...lockIds)", { lockIds });
-                }),
+            .select(
+                "(SELECT public_key FROM public_keys WHERE public_keys.id = transactions.public_key_id LIMIT 1)",
+                "senderPublicKey",
             )
-            .getMany();
-    }
-
-    public async getOpenHtlcLocks(): Promise<Array<Transaction>> {
-        return this.createQueryBuilder()
-            .select()
-            .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-            .andWhere(`type = ${Enums.TransactionType.Core.HtlcLock}`)
-            .andWhere((qb) => {
-                const claimedIdsSubQuery = qb
-                    .subQuery()
-                    .select("asset->'claim'->>'lockTransactionId'")
-                    .from(Transaction, "t")
-                    .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                    .andWhere(`type = ${Enums.TransactionType.Core.HtlcClaim}`);
-                return `id NOT IN ${claimedIdsSubQuery.getQuery()}`;
-            })
-            .andWhere((qb) => {
-                const refundedIdsSubQuery = qb
-                    .subQuery()
-                    .select("asset->'refund'->>'lockTransactionId'")
-                    .from(Transaction, "t")
-                    .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                    .andWhere(`type = ${Enums.TransactionType.Core.HtlcRefund}`);
-                return `id NOT IN ${refundedIdsSubQuery.getQuery()}`;
-            })
-            .getMany();
-    }
-
-    public async getClaimedHtlcLockBalances(): Promise<{ recipientId: string; claimedBalance: string }[]> {
-        return this.createQueryBuilder()
-            .select(`recipient_id AS "recipientId"`)
-            .addSelect("SUM(amount)", "claimedBalance")
-            .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-            .andWhere(`type = ${Enums.TransactionType.Core.HtlcLock}`)
-            .andWhere((qb) => {
-                const claimedLockIdsSubQuery = qb
-                    .subQuery()
-                    .select("asset->'claim'->>'lockTransactionId'")
-                    .from(Transaction, "t")
-                    .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                    .andWhere(`type = ${Enums.TransactionType.Core.HtlcClaim}`);
-                return `id IN ${claimedLockIdsSubQuery.getQuery()}`;
-            })
-            .groupBy("recipient_id")
-            .getRawMany();
-    }
-
-    public async getRefundedHtlcLockBalances(): Promise<{ senderId: string; refundedBalance: string }[]> {
-        return this.createQueryBuilder()
-            .select(`sender_id AS "senderId"`)
-            .addSelect("SUM(amount)", "refundedBalance")
-            .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-            .andWhere(`type = ${Enums.TransactionType.Core.HtlcLock}`)
-            .andWhere((qb) => {
-                const refundedLockIdsSubQuery = qb
-                    .subQuery()
-                    .select("asset->'refund'->>'lockTransactionId'")
-                    .from(Transaction, "t")
-                    .where(`type_group = ${Enums.TransactionTypeGroup.Core}`)
-                    .andWhere(`type = ${Enums.TransactionType.Core.HtlcRefund}`);
-                return `id IN ${refundedLockIdsSubQuery.getQuery()}`;
-            })
-            .groupBy("sender_id")
-            .getRawMany();
+            .select("(SELECT type FROM types WHERE types.id = transactions.type_id LIMIT 1)", "type")
+            .from("transactions");
     }
 }

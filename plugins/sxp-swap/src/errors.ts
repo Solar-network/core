@@ -42,6 +42,12 @@ export class TransactionNotValidError extends Error {
     }
 }
 
+export class TransactionHasTooManyRecipientsError extends Error {
+    public constructor() {
+        super("The swap transaction must only have one recipient");
+    }
+}
+
 export class TransactionHasWrongAmountError extends Error {
     public constructor(amount: Utils.BigNumber, expectedAmount: Utils.BigNumber) {
         super(

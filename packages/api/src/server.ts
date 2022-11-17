@@ -148,19 +148,14 @@ export class Server {
                 this.poolConfiguration.getRequired<number>("maxTransactionsPerRequest");
 
             const registeredTransactionHandlers = await this.nullHandlerRegistry.getRegisteredHandlers();
-            const typeGroups: Set<number> = new Set();
-            const types: Set<number> = new Set();
+            const types: Set<string> = new Set();
 
             for (const handler of registeredTransactionHandlers) {
-                const constructor = handler.getConstructor();
-                const type: number = constructor.type!;
-                const typeGroup: number = constructor.typeGroup!;
-                typeGroups.add(typeGroup);
-                types.add(type);
+                const { key } = handler.getConstructor();
+                types.add(key);
             }
 
             swaggerJson.components.schemas.transactionTypes.enum = [...types];
-            swaggerJson.components.schemas.transactionTypeGroups.enum = [...typeGroups];
             swaggerJson.components.schemas.transactionVersions.enum =
                 Transactions.schemas.transactionBaseSchema.properties.version.enum;
 

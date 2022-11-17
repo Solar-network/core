@@ -35,14 +35,12 @@ export class TransactionsController extends Controller {
         const criteria: Contracts.Shared.TransactionCriteria = request.query;
         const sorting: Contracts.Search.Sorting = this.getListingOrder(request);
         const pagination: Contracts.Search.Pagination = this.getListingPage(request);
-        const options: Contracts.Search.Options = this.getListingOptions();
 
         if (request.query.transform) {
             const transactionListResult = await this.transactionHistoryService.listByCriteriaJoinBlock(
                 criteria,
                 sorting,
                 pagination,
-                options,
             );
 
             return this.toPagination(transactionListResult, TransactionWithBlockResource, true);
@@ -51,7 +49,6 @@ export class TransactionsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
-                options,
             );
             return this.toPagination(transactionListResult, TransactionResource, false);
         }
@@ -77,7 +74,7 @@ export class TransactionsController extends Controller {
         }
 
         if (request.query.transform) {
-            const blockData = await this.blockHistoryService.findOneByCriteria({ id: transaction.blockId! });
+            const blockData = await this.blockHistoryService.findOneByCriteria({ height: transaction.blockHeight! });
 
             return this.respondWithResource(
                 { data: transaction, block: blockData },
@@ -106,7 +103,6 @@ export class TransactionsController extends Controller {
         const resultsPage = {
             results,
             totalCount: all.length,
-            meta: { totalCountIsEstimate: false },
         };
 
         return super.toPagination(resultsPage, TransactionResource, !!request.query.transform);
@@ -127,32 +123,20 @@ export class TransactionsController extends Controller {
         return super.respondWithResource(transaction.data, TransactionResource, !!request.query.transform);
     }
 
-    public async types(
-        request: Hapi.Request,
-        h: Hapi.ResponseToolkit,
-    ): Promise<{ data: Record<string | number, Record<string, number>> }> {
+    public async types(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<{ data: string[] }> {
         const activatedTransactionHandlers = await this.nullHandlerRegistry.getActivatedHandlers();
-        const typeGroups: Record<string | number, Record<string, number>> = {};
+        const types: string[] = [];
 
         for (const handler of activatedTransactionHandlers) {
             const constructor = handler.getConstructor();
-
-            const type: number | undefined = constructor.type;
-            const typeGroup: number | undefined = constructor.typeGroup;
             const key: string | undefined = constructor.key;
 
-            AppUtils.assert.defined<number>(type);
-            AppUtils.assert.defined<number>(typeGroup);
             AppUtils.assert.defined<string>(key);
 
-            if (typeGroups[typeGroup] === undefined) {
-                typeGroups[typeGroup] = {};
-            }
-
-            typeGroups[typeGroup][key[0].toUpperCase() + key.slice(1)] = type;
+            types.push(key);
         }
 
-        return { data: typeGroups };
+        return { data: types };
     }
 
     public async schemas(
@@ -165,17 +149,11 @@ export class TransactionsController extends Controller {
         for (const handler of activatedTransactionHandlers) {
             const constructor = handler.getConstructor();
 
-            const type: number | undefined = constructor.type;
-            const typeGroup: number | undefined = constructor.typeGroup;
+            const key: string = constructor.key;
 
-            AppUtils.assert.defined<number>(type);
-            AppUtils.assert.defined<number>(typeGroup);
+            AppUtils.assert.defined<string>(key);
 
-            if (schemasByType[typeGroup] === undefined) {
-                schemasByType[typeGroup] = {};
-            }
-
-            schemasByType[typeGroup][type] = constructor.getSchema().properties;
+            schemasByType[key] = constructor.getSchema().properties;
         }
 
         return { data: schemasByType };

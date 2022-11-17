@@ -1,10 +1,18 @@
-import {
-    TransactionAlreadyRegisteredError,
-    TransactionKeyAlreadyRegisteredError,
-    UnknownTransactionError,
-} from "../errors";
+import { TransactionType } from "../enums";
+import { UnknownTransactionError } from "../errors";
+import { typeAndGroup } from "../utils";
 import { validator } from "../validation";
-import { Core, Solar, Transaction, TransactionTypeFactory } from "./types";
+import {
+    BurnTransaction,
+    DelegateRegistrationTransaction,
+    DelegateResignationTransaction,
+    ExtraSignatureRegistrationTransaction,
+    IpfsTransaction,
+    Transaction,
+    TransactionTypeFactory,
+    TransferTransaction,
+    VoteTransaction,
+} from "./types";
 import { InternalTransactionType } from "./types/internal-transaction-type";
 
 export type TransactionConstructor = typeof Transaction;
@@ -15,59 +23,54 @@ class TransactionRegistry {
     public constructor() {
         TransactionTypeFactory.initialise(this.transactionTypes);
 
-        // Core transactions
-        this.registerTransactionType(Core.LegacyTransferTransaction);
-        this.registerTransactionType(Core.ExtraSignatureRegistrationTransaction);
-        this.registerTransactionType(Core.DelegateRegistrationTransaction);
-        this.registerTransactionType(Core.LegacyVoteTransaction);
-        this.registerTransactionType(Core.IpfsTransaction);
-        this.registerTransactionType(Core.TransferTransaction);
-        this.registerTransactionType(Core.DelegateResignationTransaction);
-        this.registerTransactionType(Core.HtlcLockTransaction);
-        this.registerTransactionType(Core.HtlcClaimTransaction);
-        this.registerTransactionType(Core.HtlcRefundTransaction);
-
-        // Solar transactions
-        this.registerTransactionType(Solar.BurnTransaction);
-        this.registerTransactionType(Solar.VoteTransaction);
+        this.registerTransactionType(ExtraSignatureRegistrationTransaction);
+        this.registerTransactionType(DelegateRegistrationTransaction);
+        this.registerTransactionType(IpfsTransaction);
+        this.registerTransactionType(TransferTransaction);
+        this.registerTransactionType(DelegateResignationTransaction);
+        this.registerTransactionType(BurnTransaction);
+        this.registerTransactionType(VoteTransaction);
     }
 
     public registerTransactionType(constructor: TransactionConstructor): void {
-        const { typeGroup, type } = constructor;
+        const { key } = constructor;
 
-        if (typeof type === "undefined" || typeof typeGroup === "undefined") {
+        if (typeof key === "undefined") {
             throw new Error();
         }
 
-        const internalType: InternalTransactionType = InternalTransactionType.from(type, typeGroup);
+        for (const txType of TransactionType[key]) {
+            const { type, group } = typeAndGroup(txType);
 
-        if (this.transactionTypes.has(internalType)) {
-            const registeredConstructor = this.transactionTypes.get(internalType);
-            if (registeredConstructor === constructor) {
-                throw new TransactionAlreadyRegisteredError(constructor.name);
+            const internalType: InternalTransactionType = InternalTransactionType.from(type, group, key);
+
+            if (!this.transactionTypes.has(internalType)) {
+                this.transactionTypes.set(internalType, constructor);
+                this.updateSchemas(constructor);
             }
-            throw new TransactionKeyAlreadyRegisteredError(registeredConstructor!.name);
         }
-
-        this.transactionTypes.set(internalType, constructor);
-        this.updateSchemas(constructor);
     }
 
     public deregisterTransactionType(constructor: TransactionConstructor): void {
-        const { typeGroup, type } = constructor;
+        const { key } = constructor;
 
-        if (typeof type === "undefined" || typeof typeGroup === "undefined") {
+        if (typeof key === "undefined") {
             throw new Error();
         }
 
-        const internalType: InternalTransactionType = InternalTransactionType.from(type, typeGroup);
-        if (!this.transactionTypes.has(internalType)) {
-            throw new UnknownTransactionError(internalType.toString());
+        for (const txType of TransactionType[key]) {
+            const { type, group } = typeAndGroup(txType);
+
+            const internalType: InternalTransactionType = InternalTransactionType.from(type, group, key);
+
+            if (!this.transactionTypes.has(internalType)) {
+                throw new UnknownTransactionError(internalType.toString());
+            }
+
+            this.updateSchemas(constructor, true);
+
+            this.transactionTypes.delete(internalType);
         }
-
-        this.updateSchemas(constructor, true);
-
-        this.transactionTypes.delete(internalType);
     }
 
     private updateSchemas(transaction: TransactionConstructor, remove?: boolean): void {

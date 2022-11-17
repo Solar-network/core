@@ -1,4 +1,4 @@
-import { Enums, Interfaces, Utils } from "@solar-network/crypto";
+import { Interfaces, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { Resource } from "../interfaces";
@@ -21,8 +21,7 @@ export class BlockWithTransactionsResource implements Resource {
         const blockTransactions: Interfaces.ITransactionData[] = resource.transactions;
 
         const totalTransferred: Utils.BigNumber = blockTransactions
-            .filter((t) => t.typeGroup === Enums.TransactionTypeGroup.Core)
-            .filter((t) => t.type === Enums.TransactionType.Core.Transfer)
+            .filter((t) => t.type === "transfer")
             .flatMap((t) => t.asset!.recipients)
             .reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO);
 
@@ -41,7 +40,7 @@ export class BlockWithTransactionsResource implements Resource {
                 reward: blockData.reward.toFixed(),
                 donations: blockData.donations,
                 fee: blockData.totalFee.toFixed(),
-                burnedFee: blockData.burnedFee!.toFixed(),
+                burnedFee: blockData.totalFeeBurned!.toFixed(),
                 amount: totalAmountTransferred.toFixed(),
                 total: blockData.reward
                     .minus(
@@ -51,7 +50,7 @@ export class BlockWithTransactionsResource implements Resource {
                         ),
                     )
                     .plus(blockData.totalFee)
-                    .minus(blockData.burnedFee!)
+                    .minus(blockData.totalFeeBurned!)
                     .toFixed(),
             },
             payload: {
@@ -64,7 +63,7 @@ export class BlockWithTransactionsResource implements Resource {
                     : undefined,
                 publicKey: blockData.generatorPublicKey,
             },
-            signature: blockData.blockSignature,
+            signature: blockData.signature,
             confirmations: lastBlock ? lastBlock.data.height - blockData.height : 0,
             transactions: blockData.numberOfTransactions,
             timestamp: AppUtils.formatTimestamp(blockData.timestamp),

@@ -1,6 +1,5 @@
 import { Boom, notFound } from "@hapi/boom";
 import Hapi from "@hapi/hapi";
-import { Enums } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 
 import { Identifiers } from "../identifiers";
@@ -97,10 +96,9 @@ export class DelegatesController extends Controller {
         if (request.query.transform) {
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
                 blockCriteria,
-                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.Transfer },
+                { type: "transfer" },
                 this.getListingOrder(request),
                 this.getListingPage(request),
-                this.getListingOptions(),
             );
 
             return this.toPagination(blockWithSomeTransactionsListResult, BlockWithTransactionsResource, true);
@@ -109,7 +107,6 @@ export class DelegatesController extends Controller {
                 blockCriteria,
                 this.getListingOrder(request),
                 this.getListingPage(request),
-                this.getListingOptions(),
             );
 
             return this.toPagination(blockListResult, BlockResource, false);
@@ -138,7 +135,6 @@ export class DelegatesController extends Controller {
             missedBlockCriteria,
             this.getListingOrder(request),
             this.getListingPage(request),
-            this.getListingOptions(),
         );
 
         return this.toPagination(missedBlockListResult, MissedBlockResource, true);

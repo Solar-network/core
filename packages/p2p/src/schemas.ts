@@ -176,9 +176,6 @@ export const replySchemas = {
                                     enabled: {
                                         type: "boolean",
                                     },
-                                    estimateTotalCount: {
-                                        type: "boolean",
-                                    },
                                 },
                             },
                         },

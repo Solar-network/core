@@ -3,8 +3,6 @@ import Joi from "joi";
 
 import { WalletsController } from "../controllers/wallets";
 import {
-    lockCriteriaSchema,
-    lockSortingSchema,
     transactionSortingSchema,
     walletCriteriaSchema,
     walletParamSchema,
@@ -53,23 +51,6 @@ export const register = (server: Hapi.Server): void => {
                 params: Joi.object({
                     id: walletParamSchema,
                 }),
-            },
-        },
-    });
-
-    server.route({
-        method: "GET",
-        path: "/wallets/{id}/locks",
-        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.locks(request, h),
-        options: {
-            validate: {
-                params: Joi.object({
-                    id: server.app.schemas.walletId,
-                }),
-                query: Joi.object().concat(lockCriteriaSchema).concat(lockSortingSchema).concat(Schemas.pagination),
-            },
-            plugins: {
-                pagination: { enabled: true },
             },
         },
     });

@@ -7,40 +7,34 @@ export type FalseExpression = {
 };
 
 export type EqualExpression<TEntity> = {
-    property: keyof TEntity;
+    property: string | keyof TEntity;
     op: "equal";
     value: any;
 };
 
 export type BetweenExpression<TEntity> = {
-    property: keyof TEntity;
+    property: string | keyof TEntity;
     op: "between";
     from: any;
     to: any;
 };
 
 export type GreaterThanEqualExpression<TEntity> = {
-    property: keyof TEntity;
+    property: string | keyof TEntity;
     op: "greaterThanEqual";
     value: any;
 };
 
 export type LessThanEqualExpression<TEntity> = {
-    property: keyof TEntity;
+    property: string | keyof TEntity;
     op: "lessThanEqual";
     value: any;
 };
 
 export type LikeExpression<TEntity> = {
-    property: keyof TEntity;
+    property: string | keyof TEntity;
     op: "like";
     pattern: any;
-};
-
-export type ContainsExpression<TEntity> = {
-    property: keyof TEntity;
-    op: "contains";
-    value: any;
 };
 
 export type AndExpression<TEntity> = {
@@ -53,6 +47,18 @@ export type OrExpression<TEntity> = {
     expressions: Expression<TEntity>[];
 };
 
+export type VoteExpression<TEntity> = {
+    op: "vote";
+    percent: any;
+    username: any;
+};
+
+export type AmountExpression<TEntity> = {
+    op: "amount";
+    received: any;
+    sent: any;
+};
+
 export type Expression<TEntity> =
     | TrueExpression
     | FalseExpression
@@ -61,6 +67,7 @@ export type Expression<TEntity> =
     | GreaterThanEqualExpression<TEntity>
     | LessThanEqualExpression<TEntity>
     | LikeExpression<TEntity>
-    | ContainsExpression<TEntity>
     | AndExpression<TEntity>
-    | OrExpression<TEntity>;
+    | OrExpression<TEntity>
+    | VoteExpression<TEntity>
+    | AmountExpression<TEntity>;

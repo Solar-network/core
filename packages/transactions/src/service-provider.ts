@@ -1,6 +1,15 @@
 import { Container, Providers, Services } from "@solar-network/kernel";
 
-import { Core, Solar, TransactionHandlerConstructor } from "./handlers";
+import {
+    BurnTransactionHandler,
+    DelegateRegistrationTransactionHandler,
+    DelegateResignationTransactionHandler,
+    ExtraSignatureRegistrationTransactionHandler,
+    IpfsTransactionHandler,
+    TransactionHandlerConstructor,
+    TransferTransactionHandler,
+    VoteTransactionHandler,
+} from "./handlers";
 import { TransactionHandlerProvider } from "./handlers/handler-provider";
 import { TransactionHandlerRegistry } from "./handlers/handler-registry";
 
@@ -50,21 +59,13 @@ export class ServiceProvider extends Providers.ServiceProvider {
             .toConstantValue(null)
             .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("state", "null"));
 
-        // Core transactions
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.LegacyTransferTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.ExtraSignatureRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.DelegateRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.LegacyVoteTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.IpfsTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.TransferTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.DelegateResignationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.HtlcLockTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.HtlcClaimTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Core.HtlcRefundTransactionHandler);
-
-        // Solar transactions
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Solar.BurnTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(Solar.VoteTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(BurnTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(DelegateRegistrationTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(DelegateResignationTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(ExtraSignatureRegistrationTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(IpfsTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(TransferTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(VoteTransactionHandler);
 
         this.app
             .bind(Container.Identifiers.TransactionHandlerConstructors)

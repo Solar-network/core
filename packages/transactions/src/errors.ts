@@ -42,8 +42,8 @@ export class InvalidTransactionTypeError extends TransactionError {
 }
 
 export class DeactivatedTransactionHandlerError extends TransactionError {
-    public constructor(type: Transactions.InternalTransactionType) {
-        super(`Transaction type ${type.toString()} is deactivated`);
+    public constructor(type: string) {
+        super(`This type of ${type.toString()} transaction is not supported`);
     }
 }
 
@@ -177,6 +177,12 @@ export class NoVoteError extends TransactionError {
     }
 }
 
+export class ZeroPercentVoteError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because the minimum amount for each vote is 0.01%");
+    }
+}
+
 export class UnvoteMismatchError extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because the wallet vote does not match");
@@ -208,60 +214,6 @@ export class NotEnoughDelegatesError extends TransactionError {
 export class IpfsHashAlreadyExists extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because this IPFS hash is already registered on the blockchain");
-    }
-}
-
-export class HtlcLockTransactionNotFoundError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because the associated HTLC lock transaction could not be found");
-    }
-}
-
-export class HtlcSecretHashMismatchError extends TransactionError {
-    public constructor() {
-        super(
-            "Failed to apply transaction, because the secret provided does not match the associated HTLC lock transaction secret",
-        );
-    }
-}
-
-export class HtlcLockNotExpiredByEpochTimestampError extends TransactionError {
-    public constructor(seconds: number) {
-        const hasHave: string = seconds === 1 ? "has" : "have";
-
-        super(
-            `Failed to apply transaction, because the associated HTLC lock transaction does not expire until approximately ${AppUtils.pluralise(
-                "more second",
-                seconds,
-                true,
-            )} ${hasHave} elapsed`,
-        );
-    }
-}
-
-export class HtlcLockNotExpiredByBlockHeightError extends TransactionError {
-    public constructor(blocks: number) {
-        const hasHave: string = blocks === 1 ? "has" : "have";
-
-        super(
-            `Failed to apply transaction, because the associated HTLC lock transaction does not expire until ${AppUtils.pluralise(
-                "more block",
-                blocks,
-                true,
-            )} ${hasHave} been produced`,
-        );
-    }
-}
-
-export class HtlcLockExpiredError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because the associated HTLC lock transaction has expired");
-    }
-}
-
-export class HtlcLockExpiresTooSoonError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because the associated HTLC lock transaction expires too soon");
     }
 }
 

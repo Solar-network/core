@@ -16,6 +16,7 @@ export class Wallet implements Contracts.State.Wallet {
         protected readonly events?: Contracts.Kernel.EventDispatcher,
     ) {
         if (!this.hasAttribute("votes") && !isClone) {
+            this.setAttribute("hidden.previousVotes", {});
             this.setAttribute("votes", {});
         }
     }
@@ -273,14 +274,10 @@ export class Wallet implements Contracts.State.Wallet {
 
         const voteAmounts = this.calculateVoteAmount({
             balance: this.getBalance(),
-            lockedBalance: this.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO),
         });
 
         for (const delegate of Object.keys(votes)) {
-            this.setVoteBalance(
-                delegate,
-                Utils.BigNumber.make(voteAmounts[delegate].balance).plus(voteAmounts[delegate].lockedBalance),
-            );
+            this.setVoteBalance(delegate, Utils.BigNumber.make(voteAmounts[delegate].balance));
         }
     }
 
@@ -342,24 +339,26 @@ export class Wallet implements Contracts.State.Wallet {
     public getBasicWallet(): Contracts.State.WalletBasic {
         const attributes: Record<string, any> = AppUtils.cloneDeep(this.getAttributes());
 
-        let resigned: string | undefined = undefined;
-        if (this.hasAttribute("delegate.resigned")) {
-            switch (this.getAttribute("delegate.resigned")) {
+        let type: string | undefined = undefined;
+        if (this.hasAttribute("delegate.resignation.type")) {
+            switch (this.getAttribute("delegate.resignation.type")) {
                 case Enums.DelegateStatus.PermanentResign: {
-                    resigned = "permanent";
+                    type = "permanent";
                     break;
                 }
                 case Enums.DelegateStatus.TemporaryResign: {
-                    resigned = "temporary";
+                    type = "temporary";
                     break;
                 }
             }
-            attributes.delegate.resigned = resigned;
+            attributes.delegate.resignation = { height: attributes.delegate.resignation.height, type };
         }
 
         if (attributes.delegate && !isNaN(attributes.delegate.round)) {
             delete attributes.delegate.round;
         }
+
+        delete attributes.hidden;
 
         return {
             address: this.getAddress(),

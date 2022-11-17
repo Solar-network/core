@@ -1,12 +1,12 @@
 import assert from "assert";
 
-import { IBlock, IBlockData, ITransactionData } from "../interfaces";
-import { Utils } from "../transactions";
+import { IBlock, IBlockData, IDeserialiseOptions, ITransactionData } from "../interfaces";
+import { TransactionFactory } from "../transactions";
 import { BigNumber, ByteBuffer } from "../utils";
 
 export class Serialiser {
     public static size(block: IBlock): number {
-        let size = this.headerSize() + block.data.blockSignature!.length / 2;
+        let size = this.headerSize() + block.data.signature!.length / 2;
 
         for (const transaction of block.transactions) {
             size += 4 + transaction.serialised.length;
@@ -15,7 +15,7 @@ export class Serialiser {
         return size;
     }
 
-    public static serialiseWithTransactions(block: IBlockData): Buffer {
+    public static serialiseWithTransactions(block: IBlockData, options: IDeserialiseOptions = {}): Buffer {
         const transactions: ITransactionData[] = block.transactions || [];
         block.numberOfTransactions = block.numberOfTransactions || transactions.length;
 
@@ -24,8 +24,16 @@ export class Serialiser {
         const transactionBytes: Buffer[] = [];
         let transactionLength: number = 0;
 
+        if (block.height === 1) {
+            options.isGenesisBlock = true;
+        }
+
         for (const transaction of transactions) {
-            const serialised: Buffer = Utils.toBytes(transaction);
+            const { serialised }: { serialised: Buffer } = TransactionFactory.fromData(
+                { ...transaction },
+                true,
+                options,
+            );
             transactionLength += serialised.length + 4;
             transactionBytes.push(serialised);
         }
@@ -77,8 +85,8 @@ export class Serialiser {
     }
 
     private static serialiseSignature(block: IBlockData, buf: ByteBuffer): void {
-        if (block.blockSignature) {
-            buf.writeBuffer(Buffer.from(block.blockSignature, "hex"));
+        if (block.signature) {
+            buf.writeBuffer(Buffer.from(block.signature, "hex"));
         }
     }
 }

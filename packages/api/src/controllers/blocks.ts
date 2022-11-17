@@ -1,6 +1,5 @@
 import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
-import { Enums } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 
 import { BlockResource, BlockWithTransactionsResource, MissedBlockResource, TransactionResource } from "../resources";
@@ -24,10 +23,9 @@ export class BlocksController extends Controller {
         if (request.query.transform) {
             const blockWithSomeTransactionsListResult = await this.blockHistoryService.listByCriteriaJoinTransactions(
                 request.query,
-                { typeGroup: Enums.TransactionTypeGroup.Core, type: Enums.TransactionType.Core.Transfer },
+                { type: "transfer" },
                 this.getListingOrder(request),
                 this.getListingPage(request),
-                this.getListingOptions(),
             );
 
             return this.toPagination(blockWithSomeTransactionsListResult, BlockWithTransactionsResource, true);
@@ -47,7 +45,6 @@ export class BlocksController extends Controller {
             request.query,
             this.getListingOrder(request),
             this.getListingPage(request),
-            this.getListingOptions(),
         );
 
         return this.toPagination(missedBlockListResult, MissedBlockResource, true);
@@ -67,8 +64,7 @@ export class BlocksController extends Controller {
         if (request.query.transform) {
             const blockCriteria = this.getBlockCriteriaByIdOrHeight(request.params.id);
             const transactionCriteria = {
-                typeGroup: Enums.TransactionTypeGroup.Core,
-                type: Enums.TransactionType.Core.Transfer,
+                type: "transfer",
             };
             const block = await this.blockHistoryService.findOneByCriteriaJoinTransactions(
                 blockCriteria,
@@ -95,12 +91,11 @@ export class BlocksController extends Controller {
             return Boom.notFound("Block not found");
         }
 
-        const transactionCriteria = { ...request.query, blockId: blockData.id! };
+        const transactionCriteria = { ...request.query, blockHeight: blockData.height! };
         const transactionListResult = await this.transactionHistoryService.listByCriteria(
             transactionCriteria,
             this.getListingOrder(request),
             this.getListingPage(request),
-            this.getListingOptions(),
         );
 
         return this.toPagination(transactionListResult, TransactionResource, request.query.transform);

@@ -1,6 +1,7 @@
 import { Utils } from "@solar-network/crypto";
+export interface Model {}
 
-export interface BlockModel {
+export interface BlockModel extends Model {
     id: string;
     version: number;
     timestamp: number;
@@ -9,39 +10,67 @@ export interface BlockModel {
     numberOfTransactions: number;
     totalAmount: Utils.BigNumber;
     totalFee: Utils.BigNumber;
-    burnedFee: Utils.BigNumber;
     reward: Utils.BigNumber;
-    donations: Record<string, Utils.BigNumber>;
     payloadLength: number;
     payloadHash: string;
     generatorPublicKey: string;
-    blockSignature: string;
+    signature: string;
+
+    donations?: Record<string, Utils.BigNumber>;
+    totalFeeBurned?: Utils.BigNumber;
     username?: string;
 }
 
-export interface MissedBlockModel {
+export interface IdentityModel extends Model {
+    id: number;
+    identity: string;
+    isUsername: boolean;
+}
+
+export interface MigrationModel extends Model {
+    id: number;
+    name: string;
+    timestamp: number;
+}
+
+export interface MissedBlockModel extends Model {
     timestamp: number;
     height: number;
     username: string;
 }
 
-export interface TransactionModel {
+export interface PublicKeyModel extends Model {
+    id: number;
+    publicKey: string;
+}
+
+export interface RoundModel extends Model {
+    balance: Utils.BigNumber;
+    publicKey: string;
+    round: number;
+    username: string;
+}
+
+export interface TransactionModel extends Model {
     id: string;
     version: number;
-    blockId: string;
     blockHeight: number;
     sequence: number;
-    timestamp: number;
     nonce: Utils.BigNumber;
     senderId: string;
     senderPublicKey: string;
-    recipientId: string;
-    type: number;
-    typeGroup: number;
+    type: string;
     memo: string | undefined;
-    amount: Utils.BigNumber;
     fee: Utils.BigNumber;
-    burnedFee: Utils.BigNumber;
     serialised: Buffer;
-    asset: Record<string, any>;
+    timestamp: number;
+
+    burnedFee?: Utils.BigNumber;
+    identity?: Buffer;
+    publicKey?: Buffer;
+}
+
+export interface TypeModel extends Model {
+    id: number;
+    type: string;
 }

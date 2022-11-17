@@ -19,6 +19,7 @@ import {
     TransactionAlreadyCompletedError,
     TransactionAlreadySubmittedError,
     TransactionDoesNotExistError,
+    TransactionHasTooManyRecipientsError,
     TransactionHasWrongAmountError,
     TransactionHasWrongRecipientError,
     TransactionIdInvalidError,
@@ -175,7 +176,6 @@ export class SXPSwap {
 
             const newBalance: Utils.BigNumber = sender
                 .getBalance()
-                .minus(data.amount || Utils.BigNumber.ZERO)
                 .minus(data.fee);
 
             assert(Utils.isException(transaction.data) || !newBalance.isNegative());
@@ -196,7 +196,7 @@ export class SXPSwap {
             const transactionData: Interfaces.ITransactionData = transaction.data;
             if (
                 transactionData.senderPublicKey === swapWalletPublicKey &&
-                (transactionData.typeGroup !== 1 || transactionData.type !== 0)
+                (transactionData.type !== "transfer")
             ) {
                 throw new TransactionTypeNotPermittedError();
             }
@@ -214,9 +214,9 @@ export class SXPSwap {
             return (this as any).performGenericWalletChecks(transaction, sender);
         };
 
-        (Handlers.Core.LegacyTransferTransactionHandler as any).prototype._throwIfCannotBeApplied =
-            Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotBeApplied;
-        Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotBeApplied = async function (
+        (Handlers.TransferTransactionHandler as any).prototype._throwIfCannotBeApplied =
+            Handlers.TransferTransactionHandler.prototype.throwIfCannotBeApplied;
+        Handlers.TransferTransactionHandler.prototype.throwIfCannotBeApplied = async function (
             transaction: Interfaces.ITransaction,
             sender: Contracts.State.Wallet,
             status?: string,
@@ -349,12 +349,19 @@ export class SXPSwap {
                         throw new TransactionNotValidError();
                     }
 
-                    if (!amount.isEqualTo(transactionData.amount!)) {
-                        throw new TransactionHasWrongAmountError(transactionData.amount!, amount);
+                    const transactionAmount: Utils.BigNumber = transactionData.asset?.recipients![0].amount!;
+                    const transactionRecipient: string = transactionData.asset?.recipients![0].recipientId!;
+
+                    if (transactionData.asset?.recipients!.length !== 1) {
+                        throw new TransactionHasTooManyRecipientsError();
                     }
 
-                    if (sxpAddress !== transactionData.recipientId) {
-                        throw new TransactionHasWrongRecipientError(transactionData.recipientId!, sxpAddress);
+                    if (!amount.isEqualTo(transactionAmount)) {
+                        throw new TransactionHasWrongAmountError(transactionAmount, amount);
+                    }
+
+                    if (sxpAddress !== transactionRecipient) {
+                        throw new TransactionHasWrongRecipientError(transactionRecipient, sxpAddress);
                     }
 
                     const alreadyProcessedThisSwap = await self.transactionHistoryService.findOneByCriteria({
@@ -415,9 +422,9 @@ export class SXPSwap {
             }
         };
 
-        (Handlers.Core.LegacyTransferTransactionHandler as any).prototype._throwIfCannotEnterPool =
-            Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotEnterPool;
-        Handlers.Core.LegacyTransferTransactionHandler.prototype.throwIfCannotEnterPool = async function (
+        (Handlers.TransferTransactionHandler as any).prototype._throwIfCannotEnterPool =
+            Handlers.TransferTransactionHandler.prototype.throwIfCannotEnterPool;
+        Handlers.TransferTransactionHandler.prototype.throwIfCannotEnterPool = async function (
             transaction: Interfaces.ITransaction,
         ): Promise<void> {
             await (this as any)._throwIfCannotEnterPool(transaction);

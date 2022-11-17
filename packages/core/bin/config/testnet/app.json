@@ -76,18 +76,5 @@
                 "package": "@solar-network/forger"
             }
         ]
-    },
-    "snapshot": {
-        "plugins": [
-            {
-                "package": "@solar-network/logger"
-            },
-            {
-                "package": "@solar-network/database"
-            },
-            {
-                "package": "@solar-network/snapshots"
-            }
-        ]
     }
 }

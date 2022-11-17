@@ -944,7 +944,7 @@ $root.blocks = (function() {
              * @property {number|null} [payloadLength] BlockHeader payloadLength
              * @property {string|null} [payloadHash] BlockHeader payloadHash
              * @property {string|null} [generatorPublicKey] BlockHeader generatorPublicKey
-             * @property {string|null} [blockSignature] BlockHeader blockSignature
+             * @property {string|null} [signature] BlockHeader signature
              * @property {Uint8Array|null} [transactions] BlockHeader transactions
              */
 
@@ -1060,12 +1060,12 @@ $root.blocks = (function() {
             BlockHeader.prototype.generatorPublicKey = "";
 
             /**
-             * BlockHeader blockSignature.
-             * @member {string} blockSignature
+             * BlockHeader signature.
+             * @member {string} signature
              * @memberof blocks.GetBlocksResponse.BlockHeader
              * @instance
              */
-            BlockHeader.prototype.blockSignature = "";
+            BlockHeader.prototype.signature = "";
 
             /**
              * BlockHeader transactions.
@@ -1123,8 +1123,8 @@ $root.blocks = (function() {
                     writer.uint32(/* id 13, wireType 2 =*/106).string(message.payloadHash);
                 if (message.generatorPublicKey != null && Object.hasOwnProperty.call(message, "generatorPublicKey"))
                     writer.uint32(/* id 14, wireType 2 =*/114).string(message.generatorPublicKey);
-                if (message.blockSignature != null && Object.hasOwnProperty.call(message, "blockSignature"))
-                    writer.uint32(/* id 15, wireType 2 =*/122).string(message.blockSignature);
+                if (message.signature != null && Object.hasOwnProperty.call(message, "signature"))
+                    writer.uint32(/* id 15, wireType 2 =*/122).string(message.signature);
                 if (message.transactions != null && Object.hasOwnProperty.call(message, "transactions"))
                     writer.uint32(/* id 16, wireType 2 =*/130).bytes(message.transactions);
                 return writer;
@@ -1198,7 +1198,7 @@ $root.blocks = (function() {
                         message.generatorPublicKey = reader.string();
                         break;
                     case 15:
-                        message.blockSignature = reader.string();
+                        message.signature = reader.string();
                         break;
                     case 16:
                         message.transactions = reader.bytes();
@@ -1274,9 +1274,9 @@ $root.blocks = (function() {
                 if (message.generatorPublicKey != null && message.hasOwnProperty("generatorPublicKey"))
                     if (!$util.isString(message.generatorPublicKey))
                         return "generatorPublicKey: string expected";
-                if (message.blockSignature != null && message.hasOwnProperty("blockSignature"))
-                    if (!$util.isString(message.blockSignature))
-                        return "blockSignature: string expected";
+                if (message.signature != null && message.hasOwnProperty("signature"))
+                    if (!$util.isString(message.signature))
+                        return "signature: string expected";
                 if (message.transactions != null && message.hasOwnProperty("transactions"))
                     if (!(message.transactions && typeof message.transactions.length === "number" || $util.isString(message.transactions)))
                         return "transactions: buffer expected";
@@ -1319,8 +1319,8 @@ $root.blocks = (function() {
                     message.payloadHash = String(object.payloadHash);
                 if (object.generatorPublicKey != null)
                     message.generatorPublicKey = String(object.generatorPublicKey);
-                if (object.blockSignature != null)
-                    message.blockSignature = String(object.blockSignature);
+                if (object.signature != null)
+                    message.signature = String(object.signature);
                 if (object.transactions != null)
                     if (typeof object.transactions === "string")
                         $util.base64.decode(object.transactions, message.transactions = $util.newBuffer($util.base64.length(object.transactions)), 0);
@@ -1355,7 +1355,7 @@ $root.blocks = (function() {
                     object.payloadLength = 0;
                     object.payloadHash = "";
                     object.generatorPublicKey = "";
-                    object.blockSignature = "";
+                    object.signature = "";
                     if (options.bytes === String)
                         object.transactions = "";
                     else {
@@ -1388,8 +1388,8 @@ $root.blocks = (function() {
                     object.payloadHash = message.payloadHash;
                 if (message.generatorPublicKey != null && message.hasOwnProperty("generatorPublicKey"))
                     object.generatorPublicKey = message.generatorPublicKey;
-                if (message.blockSignature != null && message.hasOwnProperty("blockSignature"))
-                    object.blockSignature = message.blockSignature;
+                if (message.signature != null && message.hasOwnProperty("signature"))
+                    object.signature = message.signature;
                 if (message.transactions != null && message.hasOwnProperty("transactions"))
                     object.transactions = options.bytes === String ? $util.base64.encode(message.transactions, 0, message.transactions.length) : options.bytes === Array ? Array.prototype.slice.call(message.transactions) : message.transactions;
                 return object;
@@ -3428,7 +3428,7 @@ $root.peer = (function() {
                  * @property {number|null} [payloadLength] BlockHeader payloadLength
                  * @property {string|null} [payloadHash] BlockHeader payloadHash
                  * @property {string|null} [generatorPublicKey] BlockHeader generatorPublicKey
-                 * @property {string|null} [blockSignature] BlockHeader blockSignature
+                 * @property {string|null} [signature] BlockHeader signature
                  */
 
                 /**
@@ -3543,12 +3543,12 @@ $root.peer = (function() {
                 BlockHeader.prototype.generatorPublicKey = "";
 
                 /**
-                 * BlockHeader blockSignature.
-                 * @member {string} blockSignature
+                 * BlockHeader signature.
+                 * @member {string} signature
                  * @memberof peer.GetStatusResponse.State.BlockHeader
                  * @instance
                  */
-                BlockHeader.prototype.blockSignature = "";
+                BlockHeader.prototype.signature = "";
 
                 /**
                  * Creates a new BlockHeader instance using the specified properties.
@@ -3598,8 +3598,8 @@ $root.peer = (function() {
                         writer.uint32(/* id 13, wireType 2 =*/106).string(message.payloadHash);
                     if (message.generatorPublicKey != null && Object.hasOwnProperty.call(message, "generatorPublicKey"))
                         writer.uint32(/* id 14, wireType 2 =*/114).string(message.generatorPublicKey);
-                    if (message.blockSignature != null && Object.hasOwnProperty.call(message, "blockSignature"))
-                        writer.uint32(/* id 15, wireType 2 =*/122).string(message.blockSignature);
+                    if (message.signature != null && Object.hasOwnProperty.call(message, "signature"))
+                        writer.uint32(/* id 15, wireType 2 =*/122).string(message.signature);
                     return writer;
                 };
 
@@ -3671,7 +3671,7 @@ $root.peer = (function() {
                             message.generatorPublicKey = reader.string();
                             break;
                         case 15:
-                            message.blockSignature = reader.string();
+                            message.signature = reader.string();
                             break;
                         default:
                             reader.skipType(tag & 7);
@@ -3744,9 +3744,9 @@ $root.peer = (function() {
                     if (message.generatorPublicKey != null && message.hasOwnProperty("generatorPublicKey"))
                         if (!$util.isString(message.generatorPublicKey))
                             return "generatorPublicKey: string expected";
-                    if (message.blockSignature != null && message.hasOwnProperty("blockSignature"))
-                        if (!$util.isString(message.blockSignature))
-                            return "blockSignature: string expected";
+                    if (message.signature != null && message.hasOwnProperty("signature"))
+                        if (!$util.isString(message.signature))
+                            return "signature: string expected";
                     return null;
                 };
 
@@ -3786,8 +3786,8 @@ $root.peer = (function() {
                         message.payloadHash = String(object.payloadHash);
                     if (object.generatorPublicKey != null)
                         message.generatorPublicKey = String(object.generatorPublicKey);
-                    if (object.blockSignature != null)
-                        message.blockSignature = String(object.blockSignature);
+                    if (object.signature != null)
+                        message.signature = String(object.signature);
                     return message;
                 };
 
@@ -3817,7 +3817,7 @@ $root.peer = (function() {
                         object.payloadLength = 0;
                         object.payloadHash = "";
                         object.generatorPublicKey = "";
-                        object.blockSignature = "";
+                        object.signature = "";
                     }
                     if (message.id != null && message.hasOwnProperty("id"))
                         object.id = message.id;
@@ -3843,8 +3843,8 @@ $root.peer = (function() {
                         object.payloadHash = message.payloadHash;
                     if (message.generatorPublicKey != null && message.hasOwnProperty("generatorPublicKey"))
                         object.generatorPublicKey = message.generatorPublicKey;
-                    if (message.blockSignature != null && message.hasOwnProperty("blockSignature"))
-                        object.blockSignature = message.blockSignature;
+                    if (message.signature != null && message.hasOwnProperty("signature"))
+                        object.signature = message.signature;
                     return object;
                 };
 
@@ -4641,7 +4641,6 @@ $root.peer = (function() {
                  * @interface IPlugin
                  * @property {number|null} [port] Plugin port
                  * @property {boolean|null} [enabled] Plugin enabled
-                 * @property {boolean|null} [estimateTotalCount] Plugin estimateTotalCount
                  */
 
                 /**
@@ -4676,14 +4675,6 @@ $root.peer = (function() {
                 Plugin.prototype.enabled = false;
 
                 /**
-                 * Plugin estimateTotalCount.
-                 * @member {boolean} estimateTotalCount
-                 * @memberof peer.GetStatusResponse.Config.Plugin
-                 * @instance
-                 */
-                Plugin.prototype.estimateTotalCount = false;
-
-                /**
                  * Creates a new Plugin instance using the specified properties.
                  * @function create
                  * @memberof peer.GetStatusResponse.Config.Plugin
@@ -4711,8 +4702,6 @@ $root.peer = (function() {
                         writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.port);
                     if (message.enabled != null && Object.hasOwnProperty.call(message, "enabled"))
                         writer.uint32(/* id 2, wireType 0 =*/16).bool(message.enabled);
-                    if (message.estimateTotalCount != null && Object.hasOwnProperty.call(message, "estimateTotalCount"))
-                        writer.uint32(/* id 3, wireType 0 =*/24).bool(message.estimateTotalCount);
                     return writer;
                 };
 
@@ -4752,9 +4741,6 @@ $root.peer = (function() {
                             break;
                         case 2:
                             message.enabled = reader.bool();
-                            break;
-                        case 3:
-                            message.estimateTotalCount = reader.bool();
                             break;
                         default:
                             reader.skipType(tag & 7);
@@ -4797,9 +4783,6 @@ $root.peer = (function() {
                     if (message.enabled != null && message.hasOwnProperty("enabled"))
                         if (typeof message.enabled !== "boolean")
                             return "enabled: boolean expected";
-                    if (message.estimateTotalCount != null && message.hasOwnProperty("estimateTotalCount"))
-                        if (typeof message.estimateTotalCount !== "boolean")
-                            return "estimateTotalCount: boolean expected";
                     return null;
                 };
 
@@ -4819,8 +4802,6 @@ $root.peer = (function() {
                         message.port = object.port >>> 0;
                     if (object.enabled != null)
                         message.enabled = Boolean(object.enabled);
-                    if (object.estimateTotalCount != null)
-                        message.estimateTotalCount = Boolean(object.estimateTotalCount);
                     return message;
                 };
 
@@ -4840,14 +4821,11 @@ $root.peer = (function() {
                     if (options.defaults) {
                         object.port = 0;
                         object.enabled = false;
-                        object.estimateTotalCount = false;
                     }
                     if (message.port != null && message.hasOwnProperty("port"))
                         object.port = message.port;
                     if (message.enabled != null && message.hasOwnProperty("enabled"))
                         object.enabled = message.enabled;
-                    if (message.estimateTotalCount != null && message.hasOwnProperty("estimateTotalCount"))
-                        object.estimateTotalCount = message.estimateTotalCount;
                     return object;
                 };
 

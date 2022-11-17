@@ -1,5 +1,4 @@
 import { Identities, Managers, Utils } from "@solar-network/crypto";
-import { Repositories } from "@solar-network/database";
 import { Application, Container, Contracts, Enums, Services } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
@@ -10,10 +9,10 @@ export class StateBuilder {
     private readonly app!: Application;
 
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
-    private blockRepository!: Repositories.BlockRepository;
+    private blockRepository!: Contracts.Database.BlockRepository;
 
     @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
-    private transactionRepository!: Repositories.TransactionRepository;
+    private transactionRepository!: Contracts.Database.TransactionRepository;
 
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")
@@ -77,16 +76,14 @@ export class StateBuilder {
             }
         }
 
-        const donations = await this.blockRepository.getDonations();
+        const donations = await this.blockRepository.calculateDonations();
 
         for (const donation of donations) {
-            const amount: Utils.BigNumber = Utils.BigNumber.make(donation.amount);
-
             const donationWallet = this.walletRepository.findByAddress(donation.address);
-            donationWallet.increaseBalance(amount);
+            donationWallet.increaseBalance(donation.amount);
 
             const delegateWallet = this.walletRepository.findByUsername(donation.username);
-            delegateWallet.decreaseBalance(amount);
+            delegateWallet.decreaseBalance(donation.amount);
         }
     }
 
@@ -96,9 +93,7 @@ export class StateBuilder {
         for (const transaction of transactions) {
             const wallet = this.walletRepository.findByAddress(transaction.senderId);
             wallet.setNonce(Utils.BigNumber.make(transaction.nonce));
-            wallet.decreaseBalance(
-                Utils.BigNumber.make(transaction.amount || Utils.BigNumber.ZERO).plus(transaction.fee),
-            );
+            wallet.decreaseBalance(Utils.BigNumber.make(transaction.fee));
         }
     }
 

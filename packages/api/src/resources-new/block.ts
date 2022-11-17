@@ -3,24 +3,10 @@ import Joi from "joi";
 import * as Schemas from "../schemas";
 
 const blockHeightSchema = Joi.number().integer().min(1);
-const blockIdSchema = Joi.alternatives(
-    Joi.string()
-        .min(13)
-        .max(20)
-        .regex(/^[0-9]+$/),
-    Joi.string().hex().length(64),
-);
+const blockIdSchema = Joi.string().hex().length(64);
 
 export const blockCriteriaSchemaObject = {
-    id: Joi.alternatives(
-        blockIdSchema,
-        Joi.string()
-            .regex(/^[0-9a-z%]{1,64}$/)
-            .regex(/%/),
-        Joi.string()
-            .regex(/^[0-9%]{1,20}$/)
-            .regex(/%/),
-    ),
+    id: blockIdSchema,
     height: Joi.alternatives(
         blockHeightSchema,
         Joi.object({ from: blockHeightSchema, to: blockHeightSchema }).or("from", "to"),

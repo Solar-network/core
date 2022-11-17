@@ -1,4 +1,4 @@
-import { IBlockData, ITransaction } from "../interfaces";
+import { IBlockData, IDeserialiseOptions, ITransaction } from "../interfaces";
 import { TransactionFactory } from "../transactions";
 import { BigNumber, ByteBuffer } from "../utils";
 import { Block } from "./block";
@@ -7,7 +7,7 @@ export class Deserialiser {
     public static deserialise(
         serialised: Buffer,
         headerOnly: boolean = false,
-        options: { deserialiseTransactionsUnchecked?: boolean } = {},
+        options: IDeserialiseOptions = {},
     ): { data: IBlockData; transactions: ITransaction[] } {
         const block = {} as IBlockData;
         let transactions: ITransaction[] = [];
@@ -20,7 +20,7 @@ export class Deserialiser {
 
         headerOnly = headerOnly || buf.getRemainderLength() === 0;
         if (!headerOnly) {
-            transactions = this.deserialiseTransactions(block, buf, options.deserialiseTransactionsUnchecked);
+            transactions = this.deserialiseTransactions(block, buf, options);
         }
 
         block.id = Block.getId(block);
@@ -40,14 +40,18 @@ export class Deserialiser {
         block.payloadLength = buf.readUInt32LE();
         block.payloadHash = buf.readBuffer(32).toString("hex");
         block.generatorPublicKey = buf.readBuffer(33).toString("hex");
-        block.blockSignature = buf.readBuffer(64).toString("hex");
+        block.signature = buf.readBuffer(64).toString("hex");
     }
 
     private static deserialiseTransactions(
         block: IBlockData,
         buf: ByteBuffer,
-        deserialiseTransactionsUnchecked: boolean = false,
+        options: IDeserialiseOptions = {},
     ): ITransaction[] {
+        const {
+            deserialiseTransactionsUnchecked,
+            isGenesisBlock,
+        }: { deserialiseTransactionsUnchecked?: boolean; isGenesisBlock?: boolean } = options;
         const transactionLengths: number[] = [];
 
         for (let i = 0; i < block.numberOfTransactions; i++) {
@@ -60,7 +64,7 @@ export class Deserialiser {
             const transactionBytes = buf.readBuffer(length);
             const transaction = deserialiseTransactionsUnchecked
                 ? TransactionFactory.fromBytesUnsafe(transactionBytes)
-                : TransactionFactory.fromBytes(transactionBytes);
+                : TransactionFactory.fromBytes(transactionBytes, true, { isGenesisBlock });
             transactions.push(transaction);
             block.transactions.push(transaction.data);
         }

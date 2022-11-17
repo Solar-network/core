@@ -44,13 +44,9 @@ export class DatabaseInteraction {
             this.events.dispatch(Enums.StateEvent.Starting);
 
             const genesisBlockJson = Managers.configManager.get("genesisBlock");
-            const genesisBlock = Blocks.BlockFactory.fromJson(genesisBlockJson);
+            const genesisBlock = Blocks.BlockFactory.fromJson(genesisBlockJson, { isGenesisBlock: true });
 
             this.stateStore.setGenesisBlock(genesisBlock!);
-
-            if (process.env.SOLAR_CORE_RESET_DATABASE?.toLowerCase() === "true") {
-                await this.reset();
-            }
 
             await this.initialiseLastBlock();
         } catch (error) {
@@ -92,11 +88,6 @@ export class DatabaseInteraction {
         await this.roundState.restore();
     }
 
-    private async reset(): Promise<void> {
-        await this.databaseService.reset();
-        await this.createGenesisBlock();
-    }
-
     private async initialiseLastBlock(): Promise<void> {
         // ? attempt to remove potentially corrupt blocks from database
 
@@ -121,7 +112,7 @@ export class DatabaseInteraction {
 
                 if (tries > 0) {
                     const block: Interfaces.IBlockData = (await this.databaseService.findLatestBlock())!;
-                    await this.databaseService.deleteBlocks([block]);
+                    await this.databaseService.delete([block]);
                     tries--;
                 } else {
                     this.app.terminate("Unable to deserialise last block from database", error);
@@ -144,7 +135,7 @@ export class DatabaseInteraction {
 
     private async createGenesisBlock(): Promise<Interfaces.IBlock> {
         const genesisBlock = this.stateStore.getGenesisBlock();
-        await this.databaseService.saveBlocks([genesisBlock]);
+        await this.databaseService.save([genesisBlock]);
         return genesisBlock;
     }
 
@@ -158,7 +149,7 @@ export class DatabaseInteraction {
 
     private async emitTransactionEvents(transaction: Interfaces.ITransaction): Promise<void> {
         this.events.dispatch(Enums.TransactionEvent.Applied, transaction.data);
-        const handler = await this.handlerRegistry.getActivatedHandlerForData(transaction.data);
+        const handler = await this.handlerRegistry.getActivatedHandlerForTransaction(transaction);
         handler.emitEvents(transaction);
     }
 }

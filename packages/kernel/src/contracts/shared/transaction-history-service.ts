@@ -1,8 +1,6 @@
 import { Interfaces, Utils } from "@solar-network/crypto";
 
 import {
-    Options,
-    OrContainsCriteria,
     OrCriteria,
     OrEqualCriteria,
     OrLikeCriteria,
@@ -19,18 +17,25 @@ export type TransactionCriteria = {
     id?: OrLikeCriteria<string>;
     version?: OrEqualCriteria<number>;
     blockHeight?: OrNumericCriteria<number>;
-    blockId?: OrEqualCriteria<string>;
     sequence?: OrNumericCriteria<number>;
     timestamp?: OrNumericCriteria<number>;
     nonce?: OrNumericCriteria<Utils.BigNumber>;
     senderPublicKey?: OrEqualCriteria<string>;
-    type?: OrEqualCriteria<number>;
-    typeGroup?: OrEqualCriteria<number>;
+    type?: OrEqualCriteria<string>;
     memo?: OrLikeCriteria<string>;
-    amount?: OrNumericCriteria<Utils.BigNumber>;
-    burnedFee?: OrNumericCriteria<Utils.BigNumber>;
+    amount?: {
+        received?: OrNumericCriteria<Utils.BigNumber>;
+        sent?: OrNumericCriteria<Utils.BigNumber>;
+    };
     fee?: OrNumericCriteria<Utils.BigNumber>;
-    asset?: OrContainsCriteria<Record<string, any>>;
+    extraSignature?: OrEqualCriteria<number>;
+    registration?: OrEqualCriteria<number>;
+    vote?: {
+        percent?: OrNumericCriteria<Utils.BigNumber>;
+        username?: OrEqualCriteria<number>;
+    };
+    ipfsHash?: OrEqualCriteria<number>;
+    resignation?: OrEqualCriteria<number>;
 };
 
 export type TransactionSearchResource = {
@@ -39,8 +44,7 @@ export type TransactionSearchResource = {
     id?: string;
     recipient?: string;
     sender: string;
-    type: number;
-    typeGroup?: number;
+    type: string;
 };
 
 export type OrTransactionCriteria = OrCriteria<TransactionCriteria>;
@@ -57,13 +61,13 @@ export interface TransactionHistoryService {
 
     findManyByCriteria(criteria: OrTransactionCriteria): Promise<Interfaces.ITransactionData[]>;
 
-    streamByCriteria(criteria: OrTransactionCriteria): AsyncIterable<Interfaces.ITransactionData>;
+    fetchByCriteria(criteria: OrTransactionCriteria): AsyncIterable<Interfaces.ITransactionData>;
 
     listByCriteria(
         criteria: OrTransactionCriteria,
         sorting: Sorting,
         pagination: Pagination,
-        options?: Options,
+        count?: boolean,
     ): Promise<ResultsPage<Interfaces.ITransactionData>>;
 
     findOneByCriteriaJoinBlock(criteria: OrTransactionCriteria): Promise<TransactionDataWithBlockData | undefined>;
@@ -74,6 +78,5 @@ export interface TransactionHistoryService {
         criteria: OrTransactionCriteria,
         sorting: Sorting,
         pagination: Pagination,
-        options?: Options,
     ): Promise<ResultsPage<TransactionDataWithBlockData>>;
 }

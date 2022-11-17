@@ -439,8 +439,8 @@ export namespace blocks {
             /** BlockHeader generatorPublicKey */
             generatorPublicKey?: (string|null);
 
-            /** BlockHeader blockSignature */
-            blockSignature?: (string|null);
+            /** BlockHeader signature */
+            signature?: (string|null);
 
             /** BlockHeader transactions */
             transactions?: (Uint8Array|null);
@@ -491,8 +491,8 @@ export namespace blocks {
             /** BlockHeader generatorPublicKey. */
             public generatorPublicKey: string;
 
-            /** BlockHeader blockSignature. */
-            public blockSignature: string;
+            /** BlockHeader signature. */
+            public signature: string;
 
             /** BlockHeader transactions. */
             public transactions: Uint8Array;
@@ -1486,8 +1486,8 @@ export namespace peer {
                 /** BlockHeader generatorPublicKey */
                 generatorPublicKey?: (string|null);
 
-                /** BlockHeader blockSignature */
-                blockSignature?: (string|null);
+                /** BlockHeader signature */
+                signature?: (string|null);
             }
 
             /** Represents a BlockHeader. */
@@ -1535,8 +1535,8 @@ export namespace peer {
                 /** BlockHeader generatorPublicKey. */
                 public generatorPublicKey: string;
 
-                /** BlockHeader blockSignature. */
-                public blockSignature: string;
+                /** BlockHeader signature. */
+                public signature: string;
 
                 /**
                  * Creates a new BlockHeader instance using the specified properties.
@@ -1935,9 +1935,6 @@ export namespace peer {
 
                 /** Plugin enabled */
                 enabled?: (boolean|null);
-
-                /** Plugin estimateTotalCount */
-                estimateTotalCount?: (boolean|null);
             }
 
             /** Represents a Plugin. */
@@ -1954,9 +1951,6 @@ export namespace peer {
 
                 /** Plugin enabled. */
                 public enabled: boolean;
-
-                /** Plugin estimateTotalCount. */
-                public estimateTotalCount: boolean;
 
                 /**
                  * Creates a new Plugin instance using the specified properties.

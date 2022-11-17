@@ -1,4 +1,4 @@
-import { Enums, Interfaces } from "@solar-network/crypto";
+import { Interfaces } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 
 import { Comparator, IteratorMany } from "./utils";
@@ -28,12 +28,8 @@ export class QueryIterable implements Contracts.Pool.QueryIterable {
         return this.wherePredicate((t) => t.id === id);
     }
 
-    public whereType(type: Enums.CoreTransactionType | Enums.SolarTransactionType | number): QueryIterable {
-        return this.wherePredicate((t) => t.type === type);
-    }
-
-    public whereTypeGroup(typeGroup: Enums.TransactionTypeGroup | number): QueryIterable {
-        return this.wherePredicate((t) => t.typeGroup === typeGroup);
+    public whereType(type: string): QueryIterable {
+        return this.wherePredicate((t) => t.data.type === type);
     }
 
     public whereVersion(version: number): QueryIterable {
@@ -41,7 +37,7 @@ export class QueryIterable implements Contracts.Pool.QueryIterable {
     }
 
     public whereKind(transaction: Interfaces.ITransaction): QueryIterable {
-        return this.wherePredicate((t) => t.type === transaction.type && t.typeGroup === transaction.typeGroup);
+        return this.wherePredicate((t) => t.data.type === transaction.data.type);
     }
 
     public has(): boolean {

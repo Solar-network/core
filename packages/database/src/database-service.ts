@@ -1,20 +1,13 @@
 import { Blocks, Interfaces, Transactions } from "@solar-network/crypto";
-import { Container, Contracts, Enums } from "@solar-network/kernel";
-import { Connection } from "typeorm";
+import { Container, Contracts } from "@solar-network/kernel";
 
-import { Round } from "./models";
-import { BlockRepository } from "./repositories/block-repository";
-import { RoundRepository } from "./repositories/round-repository";
-import { TransactionRepository } from "./repositories/transaction-repository";
+import { RoundModel } from "./models";
+import { BlockRepository, RoundRepository, TransactionRepository } from "./repositories";
 
-// TODO: maybe we should introduce `BlockLike`, `TransactionLike`, `RoundLke` interfaces to remove the need to cast
 @Container.injectable()
 export class DatabaseService {
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Contracts.Kernel.Application;
-
-    @Container.inject(Container.Identifiers.DatabaseConnection)
-    private readonly connection!: Connection;
 
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
     private readonly blockRepository!: BlockRepository;
@@ -31,34 +24,18 @@ export class DatabaseService {
     @Container.inject(Container.Identifiers.EventDispatcherService)
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
-    public async initialise(): Promise<void> {
-        try {
-            if (process.env.SOLAR_CORE_RESET_DATABASE?.toLowerCase() === "true") {
-                await this.reset();
-            }
-        } catch (error) {
-            this.logger.critical(error.stack);
-            this.app.terminate("Failed to initialise database service", error);
-        }
-    }
+    @Container.inject(Container.Identifiers.DatabaseQueryRunner)
+    private readonly queryRunner!: Contracts.Database.QueryRunner;
 
-    public async disconnect(): Promise<void> {
-        this.events.dispatch(Enums.DatabaseEvent.PreDisconnect);
+    private roundState!: Contracts.State.RoundState;
 
-        await this.connection.close();
-
-        this.events.dispatch(Enums.DatabaseEvent.PostDisconnect);
-    }
-
-    public async reset(): Promise<void> {
-        await this.connection.query("TRUNCATE TABLE blocks, missed_blocks, rounds, transactions RESTART IDENTITY;");
+    public checkpoint(): void {
+        this.queryRunner.checkpoint();
     }
 
     public async getBlock(id: string): Promise<Interfaces.IBlock | undefined> {
         // TODO: caching the last 1000 blocks, in combination with `saveBlock` could help to optimise
-        const block: Interfaces.IBlockData = (await this.blockRepository.findOne(
-            id,
-        )) as unknown as Interfaces.IBlockData;
+        const block: Interfaces.IBlockData = (await this.blockRepository.findBlockById(id)) as Interfaces.IBlockData;
 
         if (!block) {
             return undefined;
@@ -67,7 +44,7 @@ export class DatabaseService {
         const transactions: Array<{
             serialised: Buffer;
             id: string;
-        }> = await this.transactionRepository.find({ blockId: block.id });
+        }> = await this.transactionRepository.findByBlockHeights([block.height]);
 
         block.transactions = transactions.map(
             ({ serialised, id }) => Transactions.TransactionFactory.fromBytesUnsafe(serialised, id).data,
@@ -78,31 +55,23 @@ export class DatabaseService {
         });
     }
 
-    // ! three methods below (getBlocks, getBlocksForDownload, getBlocksByHeight) can be merged into one
-
     public async getBlocks(start: number, end: number, headersOnly?: boolean): Promise<Interfaces.IBlockData[]> {
-        // ! assumes that earlier blocks may be missing
-        // ! but querying database is unnecessary when later blocks are missing too (aren't forged yet)
         return headersOnly
             ? await this.blockRepository.findByHeightRange(start, end)
             : await this.blockRepository.findByHeightRangeWithTransactions(start, end);
     }
 
-    // TODO: move to block repository
     public async getBlocksForDownload(
         offset: number,
         limit: number,
         headersOnly?: boolean,
     ): Promise<Contracts.Shared.DownloadBlock[]> {
-        // ! method is identical to getBlocks, but skips faster stateStore.getLastBlocksByHeight
-
         if (headersOnly) {
             return this.blockRepository.findByHeightRange(offset, offset + limit - 1) as unknown as Promise<
                 Contracts.Shared.DownloadBlock[]
             >;
         }
 
-        // TODO: fix types
         return this.blockRepository.findByHeightRangeWithTransactionsForDownload(
             offset,
             offset + limit - 1,
@@ -115,16 +84,15 @@ export class DatabaseService {
 
     public async getLastBlock(): Promise<Interfaces.IBlock> {
         const block: Interfaces.IBlockData | undefined = await this.blockRepository.findLatest();
-
         if (!block) {
             return undefined as unknown as Interfaces.IBlock;
         }
 
         const transactions: Array<{
             id: string;
-            blockId: string;
+            blockHeight: number;
             serialised: Buffer;
-        }> = await this.transactionRepository.findByBlockIds([block.id!]);
+        }> = await this.transactionRepository.findByBlockHeights([block.height]);
 
         block.transactions = transactions.map(
             ({ serialised, id }) => Transactions.TransactionFactory.fromBytesUnsafe(serialised, id).data,
@@ -138,11 +106,7 @@ export class DatabaseService {
     }
 
     public async getTopBlocks(count: number): Promise<Interfaces.IBlockData[]> {
-        // ! blockRepository.findTop returns blocks in reverse order
-        // ! where recent block is first in array
-        const blocks: Interfaces.IBlockData[] = (await this.blockRepository.findTop(
-            count,
-        )) as unknown as Interfaces.IBlockData[];
+        const blocks: Interfaces.IBlockData[] = (await this.blockRepository.findTop(count)) as Interfaces.IBlockData[];
 
         await this.loadTransactionsForBlocks(blocks);
 
@@ -150,41 +114,40 @@ export class DatabaseService {
     }
 
     public async getTransaction(id: string): Promise<Contracts.Database.TransactionModel | undefined> {
-        return this.transactionRepository.findOne(id);
+        const transaction = await this.transactionRepository.findTransactionById(id);
+        if (transaction) {
+            return transaction;
+        }
+
+        return undefined;
     }
 
-    public async deleteBlocks(blocks: Interfaces.IBlockData[]): Promise<void> {
-        return await this.blockRepository.deleteBlocks(blocks);
+    public async delete(blocks: Interfaces.IBlockData[]): Promise<void> {
+        return await this.blockRepository.delete(blocks);
     }
 
-    public async saveBlocks(blocks: Interfaces.IBlock[]): Promise<void> {
-        return await this.blockRepository.saveBlocks(blocks);
+    public async save(blocks: Interfaces.IBlock[]): Promise<void> {
+        if (!this.roundState) {
+            this.roundState = this.app.get<Contracts.State.RoundState>(Container.Identifiers.RoundState);
+        }
+        return await this.blockRepository.save(
+            blocks,
+            this.roundState.getMissedBlocksToSave(),
+            this.roundState.getRoundsToSave(),
+            this.events,
+        );
     }
 
     public async findLatestBlock(): Promise<Interfaces.IBlockData | undefined> {
         return await this.blockRepository.findLatest();
     }
 
-    public async findBlockByID(ids: any[]): Promise<Interfaces.IBlockData[] | undefined> {
-        return (await this.blockRepository.findByIds(ids)) as unknown as Interfaces.IBlockData[];
+    public async findBlocksById(ids: string[]): Promise<Interfaces.IBlockData[] | undefined> {
+        return (await this.blockRepository.findBlocksById(ids)) as Interfaces.IBlockData[];
     }
 
-    public async findRecentBlocks(limit: number): Promise<{ id: string }[]> {
-        return await this.blockRepository.findRecent(limit);
-    }
-
-    public async getRound(round: number): Promise<Round[]> {
+    public async getRound(round: number): Promise<RoundModel[]> {
         return await this.roundRepository.getRound(round);
-    }
-
-    public async saveRound(activeDelegates: readonly Contracts.State.Wallet[]): Promise<void> {
-        await this.roundRepository.save(activeDelegates);
-
-        this.events.dispatch(Enums.RoundEvent.Created, activeDelegates);
-    }
-
-    public async deleteRound(round: number): Promise<void> {
-        await this.roundRepository.deleteFrom(round);
     }
 
     public async verifyBlockchain(lastBlock?: Interfaces.IBlock): Promise<boolean> {
@@ -192,14 +155,17 @@ export class DatabaseService {
 
         const block: Interfaces.IBlock = lastBlock ? lastBlock : await this.getLastBlock();
 
-        // Last block is available
+        const blockStats: {
+            numberOfTransactions: number;
+            totalFee: string;
+            count: number;
+        } = await this.blockRepository.getStatistics();
+
         if (!block) {
             errors.push("Last block is not available");
         } else {
-            // ! can be checked using blockStats.count instead
-            const numberOfBlocks: number = await this.blockRepository.count();
+            const numberOfBlocks: number = blockStats.count;
 
-            // Last block height equals the number of stored blocks
             if (block.data.height !== +numberOfBlocks) {
                 errors.push(
                     `Last block height: ${block.data.height.toLocaleString()}, number of stored blocks: ${numberOfBlocks.toLocaleString()}`,
@@ -207,19 +173,9 @@ export class DatabaseService {
             }
         }
 
-        const blockStats: {
-            numberOfTransactions: number;
-            totalFee: string;
-            burnedFee: string;
-            totalAmount: string;
-            count: number;
-        } = await this.blockRepository.getStatistics();
-
         const transactionStats: {
             count: number;
             totalFee: string;
-            burnedFee: string;
-            totalAmount: string;
         } = await this.transactionRepository.getStatistics();
 
         // Number of stored transactions equals the sum of block.numberOfTransactions in the database
@@ -236,17 +192,10 @@ export class DatabaseService {
             );
         }
 
-        // Sum of all tx amount equals the sum of block.totalAmount
-        if (blockStats.totalAmount !== transactionStats.totalAmount) {
-            errors.push(
-                `Total transaction amounts: ${transactionStats.totalAmount}, total of block.totalAmount : ${blockStats.totalAmount}`,
-            );
-        }
-
         const hasErrors: boolean = errors.length > 0;
 
         if (hasErrors) {
-            this.logger.error("FATAL: The database is corrupted");
+            this.logger.error("The database is corrupted");
             this.logger.error(JSON.stringify(errors, undefined, 4));
         }
 
@@ -256,19 +205,18 @@ export class DatabaseService {
     private async loadTransactionsForBlocks(blocks: Interfaces.IBlockData[]): Promise<void> {
         const dbTransactions: Array<{
             id: string;
-            blockId: string;
+            blockHeight: number;
             serialised: Buffer;
         }> = await this.getTransactionsForBlocks(blocks);
 
         const transactions = dbTransactions.map((tx) => {
             const { data } = Transactions.TransactionFactory.fromBytesUnsafe(tx.serialised, tx.id);
-            data.blockId = tx.blockId;
             return data;
         });
 
         for (const block of blocks) {
             if (block.numberOfTransactions > 0) {
-                block.transactions = transactions.filter((transaction) => transaction.blockId === block.id);
+                block.transactions = transactions.filter((transaction) => transaction.blockHeight === block.height);
             }
         }
     }
@@ -276,7 +224,7 @@ export class DatabaseService {
     private async getTransactionsForBlocks(blocks: Interfaces.IBlockData[]): Promise<
         Array<{
             id: string;
-            blockId: string;
+            blockHeight: number;
             serialised: Buffer;
         }>
     > {
@@ -284,7 +232,7 @@ export class DatabaseService {
             return [];
         }
 
-        const ids: string[] = blocks.map((block: Interfaces.IBlockData) => block.id!);
-        return this.transactionRepository.findByBlockIds(ids);
+        const heights: number[] = blocks.map((block: Interfaces.IBlockData) => block.height!);
+        return this.transactionRepository.findByBlockHeights(heights);
     }
 }

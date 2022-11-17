@@ -1,5 +1,5 @@
 import { Blocks, Crypto, Interfaces, Utils as CryptoUtils } from "@solar-network/crypto";
-import { Repositories } from "@solar-network/database";
+import { DatabaseService } from "@solar-network/database";
 import { Container, Contracts, Services, Utils } from "@solar-network/kernel";
 import { DatabaseInteraction } from "@solar-network/state";
 
@@ -21,8 +21,8 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
 
-    @Container.inject(Container.Identifiers.DatabaseBlockRepository)
-    private readonly blockRepository!: Repositories.BlockRepository;
+    @Container.inject(Container.Identifiers.DatabaseService)
+    private readonly databaseService!: DatabaseService;
 
     @Container.inject(Container.Identifiers.DatabaseInteraction)
     private readonly databaseInteraction!: DatabaseInteraction;
@@ -154,11 +154,11 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
 
         if (acceptedBlocks.length > 0) {
             try {
-                await this.blockRepository.saveBlocks(acceptedBlocks);
+                await this.databaseService.save(acceptedBlocks);
                 this.stateStore.setLastStoredBlockHeight(acceptedBlocks[acceptedBlocks.length - 1].data.height);
             } catch (error) {
                 this.logger.error(
-                    `Could not save ${Utils.pluralise("block", acceptedBlocks.length, true)}) to database : ${
+                    `Could not save ${Utils.pluralise("block", acceptedBlocks.length, true)} to database : ${
                         error.stack
                     }`,
                 );
@@ -211,8 +211,6 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
     }
 
     private async revertBlocks(blocksToRevert: Interfaces.IBlock[]): Promise<void> {
-        // Rounds are saved while blocks are being processed and may now be out of sync with the last
-        // block that was written into the database.
         const lastHeight: number = blocksToRevert[0].data.height;
 
         this.logger.info(

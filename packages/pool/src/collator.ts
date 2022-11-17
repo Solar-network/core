@@ -1,8 +1,6 @@
 import { Interfaces, Managers } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 
-import { TransactionHasExpiredError } from "./errors";
-
 @Container.injectable()
 export class Collator implements Contracts.Pool.Collator {
     @Container.inject(Container.Identifiers.TransactionValidatorFactory)
@@ -13,9 +11,6 @@ export class Collator implements Contracts.Pool.Collator {
 
     @Container.inject(Container.Identifiers.PoolService)
     private readonly pool!: Contracts.Pool.Service;
-
-    @Container.inject(Container.Identifiers.PoolExpirationService)
-    private readonly expirationService!: Contracts.Pool.ExpirationService;
 
     @Container.inject(Container.Identifiers.PoolQuery)
     private readonly poolQuery!: Contracts.Pool.Query;
@@ -33,7 +28,7 @@ export class Collator implements Contracts.Pool.Collator {
             4 + // version
             4 + // timestamp
             4 + // height
-            32 + // previousBlockId
+            32 + // previousBlock
             4 + // numberOfTransactions
             8 + // totalAmount
             8 + // totalFee
@@ -62,11 +57,6 @@ export class Collator implements Contracts.Pool.Collator {
             }
 
             try {
-                if (this.expirationService.isExpired(transaction)) {
-                    const expirationHeight: number = this.expirationService.getExpirationHeight(transaction);
-                    throw new TransactionHasExpiredError(transaction, expirationHeight);
-                }
-
                 if (bytesLeft - 4 - transaction.serialised.length < 0) {
                     break;
                 }

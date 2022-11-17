@@ -13,18 +13,18 @@ export class TransactionTypeFactory {
     }
 
     public static create(data: ITransactionData): ITransaction {
-        const instance: ITransaction = new (this.get(data.type, data.typeGroup) as any)() as ITransaction;
+        const instance: ITransaction = new (this.get(data.type) as any)() as ITransaction;
         instance.data = data;
         instance.data.version = data.version || 3;
 
         return instance;
     }
 
-    public static get(type: number, typeGroup?: number): TransactionConstructor | undefined {
-        const internalType: InternalTransactionType = InternalTransactionType.from(type, typeGroup);
+    public static get(type: string): TransactionConstructor | undefined {
+        const internalType: InternalTransactionType = InternalTransactionType.fromKey(type) ?? type;
 
         if (!this.transactionTypes.has(internalType)) {
-            throw new UnknownTransactionError(internalType.toString());
+            throw new UnknownTransactionError(internalType?.toString());
         }
 
         return this.transactionTypes.get(internalType);

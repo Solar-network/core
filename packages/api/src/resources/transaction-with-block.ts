@@ -1,4 +1,4 @@
-import { Enums, Utils } from "@solar-network/crypto";
+import { Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { Resource } from "../interfaces";
@@ -29,10 +29,7 @@ export class TransactionWithBlockResource implements Resource {
                 ? transactionData.amount.toFixed()
                 : undefined;
 
-        if (
-            transactionData.typeGroup === Enums.TransactionTypeGroup.Core &&
-            transactionData.type === Enums.TransactionType.Core.Transfer
-        ) {
+        if (transactionData.type === "transfer") {
             amount = transactionData
                 .asset!.recipients!.reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO)
                 .toFixed();
@@ -41,10 +38,8 @@ export class TransactionWithBlockResource implements Resource {
         return {
             id: transactionData.id,
             blockHeight: transactionData.blockHeight,
-            blockId: transactionData.blockId,
             version: transactionData.version,
             type: transactionData.type,
-            typeGroup: transactionData.typeGroup,
             amount,
             fee: transactionData.fee.toFixed(),
             burnedFee:
