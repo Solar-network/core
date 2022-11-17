@@ -17,7 +17,6 @@ export class WorkerScriptHandler implements Contracts.Database.WorkerScriptHandl
         this.database.pragma("auto_vacuum = incremental");
         this.database.pragma("cache_size = 32768");
         this.database.pragma("journal_mode = wal");
-        this.database.pragma("mmap_size = 30000000000");
         this.database.pragma("page_size = 32768");
         this.database.pragma("synchronous = normal");
         this.database.pragma("temp_store = memory");

@@ -61,6 +61,13 @@ export class Command extends Commands.Command {
         }
 
         const database = new Database(databasePath, { timeout: 30000 });
+        database.pragma("auto_vacuum = incremental");
+        database.pragma("cache_size = 32768");
+        database.pragma("journal_mode = wal");
+        database.pragma("page_size = 32768");
+        database.pragma("synchronous = normal");
+        database.pragma("temp_store = memory");
+
         let height = +database.prepare("SELECT MAX(height) FROM blocks").pluck().get();
 
         let targetHeight: number;
