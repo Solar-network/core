@@ -281,8 +281,8 @@ export const defaults = {
         eth: 35,
     },
     peers: {
-        bsc: ["https://bsc1.mainnet.sh", "https://bsc2.mainnet.sh", "https://bsc3.mainnet.sh"],
-        eth: ["https://eth1.mainnet.sh", "https://eth2.mainnet.sh", "https://eth3.mainnet.sh"],
+        bsc: ["https://bsc1.solar.org", "https://bsc2.solar.org", "https://bsc3.solar.org"],
+        eth: ["https://eth1.solar.org", "https://eth2.solar.org", "https://eth3.solar.org"],
     },
     sxpTokenContracts: {
         bsc: "0x47bead2563dcbf3bf2c9407fea4dc236faba485a",

@@ -28,6 +28,7 @@ import {
     UnknownSwapNetworkError,
     WrongChainError,
     WrongContractError,
+    WrongSecondSignaturePublicKeyError,
     WrongTokenError,
 } from "./errors";
 import { DuplicateSwapTransactionsHandler } from "./handler";
@@ -193,12 +194,24 @@ export class SXPSwap {
 
             AppUtils.assert.defined<string>(sender.getPublicKey());
 
+            const milestone = Managers.configManager.getMilestone();
             const transactionData: Interfaces.ITransactionData = transaction.data;
-            if (
-                transactionData.senderPublicKey === swapWalletPublicKey &&
-                (transactionData.typeGroup !== 1 || transactionData.type !== 0)
-            ) {
-                throw new TransactionTypeNotPermittedError();
+            if (transactionData.senderPublicKey === swapWalletPublicKey) {
+                const swapWalletSecondPublicKey: string | undefined = milestone.swapWalletSecondPublicKey;
+
+                const isTransfer = transactionData.typeGroup === 1 && transactionData.type === 0;
+                const isSecondSignatureRegistration =
+                    swapWalletSecondPublicKey && transactionData.typeGroup === 1 && transactionData.type === 1;
+                if (!isTransfer && !isSecondSignatureRegistration) {
+                    throw new TransactionTypeNotPermittedError();
+                }
+
+                if (isSecondSignatureRegistration) {
+                    const transactionSecondPublicKey = transactionData.asset!.signature!.publicKey;
+                    if (transactionSecondPublicKey !== swapWalletSecondPublicKey) {
+                        throw new WrongSecondSignaturePublicKeyError();
+                    }
+                }
             }
 
             if (
@@ -208,7 +221,6 @@ export class SXPSwap {
                 throw new ColdWalletError();
             }
 
-            const milestone = Managers.configManager.getMilestone();
             (this as any).enforceMinimumFee(transaction, milestone.dynamicFees);
 
             return (this as any).performGenericWalletChecks(transaction, sender);
@@ -224,8 +236,10 @@ export class SXPSwap {
             await (this as any)._throwIfCannotBeApplied(transaction, sender);
             AppUtils.assert.defined<string>(transaction.data.senderPublicKey);
 
+            const milestone = Managers.configManager.getMilestone();
+
             const transactionData: Interfaces.ITransactionData = transaction.data;
-            if (transactionData.senderPublicKey === swapWalletPublicKey) {
+            if (transactionData.senderPublicKey === swapWalletPublicKey && milestone.verifySwap) {
                 const memoData: string[] =
                     typeof transactionData.memo === "string" ? transactionData.memo.split(":") : [];
                 if (memoData.length !== 2) {
@@ -447,7 +461,9 @@ export class SXPSwap {
             }
         };
 
-        TransactionValidator.prototype.validate = async function (transaction: Interfaces.ITransaction): Promise<Interfaces.ITransaction> {
+        TransactionValidator.prototype.validate = async function (
+            transaction: Interfaces.ITransaction,
+        ): Promise<Interfaces.ITransaction> {
             const deserialised: Interfaces.ITransaction = Transactions.TransactionFactory.fromBytes(
                 transaction.serialised,
             );
