@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/state",
-    "version": "4.1.3",
+    "version": "4.2.0-next.0",
     "description": "State Management for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
