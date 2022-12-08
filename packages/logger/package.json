@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/logger",
-    "version": "4.2.0-next.0",
+    "version": "4.2.0",
     "description": "Webhooks for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
