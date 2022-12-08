@@ -103,3 +103,9 @@ export class WrongTokenError extends Error {
         super("The swap transaction was not for the SXP token");
     }
 }
+
+export class WrongSecondSignaturePublicKeyError extends Error {
+    public constructor() {
+        super("The public key of the second signature registration for the swap source wallet is incorrect");
+    }
+}
