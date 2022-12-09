@@ -158,7 +158,10 @@
     },
     {
         "height": 2750000,
-        "swapWalletSecondPublicKey": "0210caa3c13c5fef3a28a27202373dfc7fd584c122d18d83c980586358a5f76a0e",
         "verifySwap": true
+    },
+    {
+        "height": 2850000,
+        "swapWalletSecondPublicKey": "0210caa3c13c5fef3a28a27202373dfc7fd584c122d18d83c980586358a5f76a0e"
     }
 ]
