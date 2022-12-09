@@ -20,6 +20,7 @@ import {
     TransactionAlreadySubmittedError,
     TransactionDoesNotExistError,
     TransactionHasWrongAmountError,
+    TransactionHasWrongFeeError,
     TransactionHasWrongRecipientError,
     TransactionIdInvalidError,
     TransactionNotValidError,
@@ -206,6 +207,13 @@ export class SXPSwap {
                     throw new TransactionTypeNotPermittedError();
                 }
 
+                const expectedFee = Utils.BigNumber.make(5000000);
+                const fee = transactionData.fee;
+
+                if (!fee.isEqualTo(expectedFee) && milestone.verifySwap) {
+                    throw new TransactionHasWrongFeeError(fee, expectedFee);
+                }
+                
                 if (isSecondSignatureRegistration) {
                     const transactionSecondPublicKey = transactionData.asset!.signature!.publicKey;
                     if (transactionSecondPublicKey !== swapWalletSecondPublicKey) {

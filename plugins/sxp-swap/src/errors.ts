@@ -52,6 +52,16 @@ export class TransactionHasWrongAmountError extends Error {
     }
 }
 
+export class TransactionHasWrongFeeError extends Error {
+    public constructor(fee: Utils.BigNumber, expectedFee: Utils.BigNumber) {
+        super(
+            `The swap transaction has the wrong fee (${Utils.formatSatoshi(fee)}, expected ${Utils.formatSatoshi(
+                expectedFee,
+            )})`,
+        );
+    }
+}
+
 export class TransactionHasWrongRecipientError extends Error {
     public constructor(recipient: string, expectedRecipient: string) {
         super(`The swap transaction has the wrong recipient (${recipient}, expected ${expectedRecipient})`);
