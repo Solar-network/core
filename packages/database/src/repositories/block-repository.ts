@@ -620,7 +620,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
                         Object.assign(new TransactionModel(), {
                             ...transaction.data,
                             serialised: transaction.serialised!,
-                            timestamp: transaction.timestamp!,
+                            timestamp: transaction.data.timestamp!,
                         }),
                     );
                     if (

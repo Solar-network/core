@@ -66,6 +66,7 @@ export interface ITransactionData {
 
     blockHeight?: number;
     sequence?: number;
+    timestamp?: number;
 }
 
 export interface ITransactionJson {

@@ -20,7 +20,7 @@ export class Block implements IBlock {
         this.transactions = transactions.map((transaction, index) => {
             transaction.data.blockHeight = this.data.height;
             transaction.data.sequence = index;
-            transaction.timestamp = this.data.timestamp;
+            transaction.data.timestamp = this.data.timestamp;
             return transaction;
         });
 
