@@ -42,7 +42,6 @@
         "semver": "6.3.0"
     },
     "devDependencies": {
-        "@types/better-sqlite3": "5.4.3",
         "@types/fs-extra": "8.1.2",
         "@types/hapi__hapi": "20.0.9",
         "@types/hapi__sntp": "3.1.2",

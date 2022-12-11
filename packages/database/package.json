@@ -22,8 +22,11 @@
     "dependencies": {
         "@solar-network/crypto": "workspace:*",
         "@solar-network/kernel": "workspace:*",
-        "better-sqlite3": "7.6.2",
+        "better-sqlite3": "8.0.1",
         "bs58": "5.0.0",
         "dayjs": "1.10.7"
+    },
+    "devDependencies": {
+        "@types/better-sqlite3": "5.4.3"
     }
 }
