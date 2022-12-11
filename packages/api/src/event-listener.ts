@@ -1,3 +1,4 @@
+import { Interfaces } from "@solar-network/crypto";
 import { Container, Contracts, Enums, Providers } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
@@ -63,7 +64,9 @@ export class EventListener {
                             if (eventGroupName === "BlockEvent" || eventGroupName === "DelegateEvent") {
                                 endpoints.add(`${eventPath}/${data.username}`);
                             } else if (eventGroupName === "TransactionEvent") {
-                                const handler = await this.handlerRegistry.getActivatedHandlerForTransaction(data);
+                                const handler = await this.handlerRegistry.getActivatedHandlerForTransaction({
+                                    data,
+                                } as Interfaces.ITransaction);
                                 const { key } = handler.getConstructor();
                                 endpoints.add(`${eventPath}/${data.senderId}`);
                                 endpoints.add(`${eventPath}/${data.senderId}/${key}`);
