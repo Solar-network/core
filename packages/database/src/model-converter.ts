@@ -46,9 +46,10 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
     public getTransactionData(models: Contracts.Database.TransactionModel[]): Interfaces.ITransactionData[] {
         return models.map((model) => {
             const data = Transactions.TransactionFactory.fromBytesUnsafe(model.serialised, model.id).data;
-            data.burnedFee = model.burnedFee;
             data.blockHeight = model.blockHeight;
+            data.burnedFee = model.burnedFee;
             data.sequence = model.sequence;
+            data.timestamp = model.timestamp;
 
             return data;
         });
