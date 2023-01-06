@@ -10,9 +10,5 @@
     "nethash": "bfc21e5c7eaa48fdece8a92ea64bbd8f1779a2983f57cf14308ca1fb20823728",
     "wif": 252,
     "slip44": 3333,
-    "client": {
-        "token": "dSXP",
-        "symbol": "dSXP",
-        "explorer": "http://127.0.0.1"
-    }
+    "ticker": "dSXP"
 }

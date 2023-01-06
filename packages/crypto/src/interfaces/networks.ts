@@ -18,11 +18,7 @@ export interface Network {
     nethash: string;
     wif: number;
     slip44: number;
-    client: {
-        token: string;
-        symbol: string;
-        explorer: string;
-    };
+    ticker: string;
 }
 
 export interface IExceptions {

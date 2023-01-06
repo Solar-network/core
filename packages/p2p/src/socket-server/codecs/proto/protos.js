@@ -4150,8 +4150,6 @@ $root.peer = (function() {
                  * @interface INetwork
                  * @property {string|null} [name] Network name
                  * @property {string|null} [nethash] Network nethash
-                 * @property {string|null} [explorer] Network explorer
-                 * @property {peer.GetStatusResponse.Config.Network.IToken|null} [token] Network token
                  * @property {number|null} [version] Network version
                  */
 
@@ -4185,22 +4183,6 @@ $root.peer = (function() {
                  * @instance
                  */
                 Network.prototype.nethash = "";
-
-                /**
-                 * Network explorer.
-                 * @member {string} explorer
-                 * @memberof peer.GetStatusResponse.Config.Network
-                 * @instance
-                 */
-                Network.prototype.explorer = "";
-
-                /**
-                 * Network token.
-                 * @member {peer.GetStatusResponse.Config.Network.IToken|null|undefined} token
-                 * @memberof peer.GetStatusResponse.Config.Network
-                 * @instance
-                 */
-                Network.prototype.token = null;
 
                 /**
                  * Network version.
@@ -4238,10 +4220,6 @@ $root.peer = (function() {
                         writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
                     if (message.nethash != null && Object.hasOwnProperty.call(message, "nethash"))
                         writer.uint32(/* id 2, wireType 2 =*/18).string(message.nethash);
-                    if (message.explorer != null && Object.hasOwnProperty.call(message, "explorer"))
-                        writer.uint32(/* id 3, wireType 2 =*/26).string(message.explorer);
-                    if (message.token != null && Object.hasOwnProperty.call(message, "token"))
-                        $root.peer.GetStatusResponse.Config.Network.Token.encode(message.token, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
                     if (message.version != null && Object.hasOwnProperty.call(message, "version"))
                         writer.uint32(/* id 5, wireType 0 =*/40).uint32(message.version);
                     return writer;
@@ -4283,12 +4261,6 @@ $root.peer = (function() {
                             break;
                         case 2:
                             message.nethash = reader.string();
-                            break;
-                        case 3:
-                            message.explorer = reader.string();
-                            break;
-                        case 4:
-                            message.token = $root.peer.GetStatusResponse.Config.Network.Token.decode(reader, reader.uint32());
                             break;
                         case 5:
                             message.version = reader.uint32();
@@ -4334,14 +4306,6 @@ $root.peer = (function() {
                     if (message.nethash != null && message.hasOwnProperty("nethash"))
                         if (!$util.isString(message.nethash))
                             return "nethash: string expected";
-                    if (message.explorer != null && message.hasOwnProperty("explorer"))
-                        if (!$util.isString(message.explorer))
-                            return "explorer: string expected";
-                    if (message.token != null && message.hasOwnProperty("token")) {
-                        var error = $root.peer.GetStatusResponse.Config.Network.Token.verify(message.token);
-                        if (error)
-                            return "token." + error;
-                    }
                     if (message.version != null && message.hasOwnProperty("version"))
                         if (!$util.isInteger(message.version))
                             return "version: integer expected";
@@ -4364,13 +4328,6 @@ $root.peer = (function() {
                         message.name = String(object.name);
                     if (object.nethash != null)
                         message.nethash = String(object.nethash);
-                    if (object.explorer != null)
-                        message.explorer = String(object.explorer);
-                    if (object.token != null) {
-                        if (typeof object.token !== "object")
-                            throw TypeError(".peer.GetStatusResponse.Config.Network.token: object expected");
-                        message.token = $root.peer.GetStatusResponse.Config.Network.Token.fromObject(object.token);
-                    }
                     if (object.version != null)
                         message.version = object.version >>> 0;
                     return message;
@@ -4392,18 +4349,12 @@ $root.peer = (function() {
                     if (options.defaults) {
                         object.name = "";
                         object.nethash = "";
-                        object.explorer = "";
-                        object.token = null;
                         object.version = 0;
                     }
                     if (message.name != null && message.hasOwnProperty("name"))
                         object.name = message.name;
                     if (message.nethash != null && message.hasOwnProperty("nethash"))
                         object.nethash = message.nethash;
-                    if (message.explorer != null && message.hasOwnProperty("explorer"))
-                        object.explorer = message.explorer;
-                    if (message.token != null && message.hasOwnProperty("token"))
-                        object.token = $root.peer.GetStatusResponse.Config.Network.Token.toObject(message.token, options);
                     if (message.version != null && message.hasOwnProperty("version"))
                         object.version = message.version;
                     return object;
@@ -4419,216 +4370,6 @@ $root.peer = (function() {
                 Network.prototype.toJSON = function toJSON() {
                     return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                 };
-
-                Network.Token = (function() {
-
-                    /**
-                     * Properties of a Token.
-                     * @memberof peer.GetStatusResponse.Config.Network
-                     * @interface IToken
-                     * @property {string|null} [name] Token name
-                     * @property {string|null} [symbol] Token symbol
-                     */
-
-                    /**
-                     * Constructs a new Token.
-                     * @memberof peer.GetStatusResponse.Config.Network
-                     * @classdesc Represents a Token.
-                     * @implements IToken
-                     * @constructor
-                     * @param {peer.GetStatusResponse.Config.Network.IToken=} [properties] Properties to set
-                     */
-                    function Token(properties) {
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-
-                    /**
-                     * Token name.
-                     * @member {string} name
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @instance
-                     */
-                    Token.prototype.name = "";
-
-                    /**
-                     * Token symbol.
-                     * @member {string} symbol
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @instance
-                     */
-                    Token.prototype.symbol = "";
-
-                    /**
-                     * Creates a new Token instance using the specified properties.
-                     * @function create
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @static
-                     * @param {peer.GetStatusResponse.Config.Network.IToken=} [properties] Properties to set
-                     * @returns {peer.GetStatusResponse.Config.Network.Token} Token instance
-                     */
-                    Token.create = function create(properties) {
-                        return new Token(properties);
-                    };
-
-                    /**
-                     * Encodes the specified Token message. Does not implicitly {@link peer.GetStatusResponse.Config.Network.Token.verify|verify} messages.
-                     * @function encode
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @static
-                     * @param {peer.GetStatusResponse.Config.Network.IToken} message Token message or plain object to encode
-                     * @param {$protobuf.Writer} [writer] Writer to encode to
-                     * @returns {$protobuf.Writer} Writer
-                     */
-                    Token.encode = function encode(message, writer) {
-                        if (!writer)
-                            writer = $Writer.create();
-                        if (message.name != null && Object.hasOwnProperty.call(message, "name"))
-                            writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
-                        if (message.symbol != null && Object.hasOwnProperty.call(message, "symbol"))
-                            writer.uint32(/* id 2, wireType 2 =*/18).string(message.symbol);
-                        return writer;
-                    };
-
-                    /**
-                     * Encodes the specified Token message, length delimited. Does not implicitly {@link peer.GetStatusResponse.Config.Network.Token.verify|verify} messages.
-                     * @function encodeDelimited
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @static
-                     * @param {peer.GetStatusResponse.Config.Network.IToken} message Token message or plain object to encode
-                     * @param {$protobuf.Writer} [writer] Writer to encode to
-                     * @returns {$protobuf.Writer} Writer
-                     */
-                    Token.encodeDelimited = function encodeDelimited(message, writer) {
-                        return this.encode(message, writer).ldelim();
-                    };
-
-                    /**
-                     * Decodes a Token message from the specified reader or buffer.
-                     * @function decode
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @static
-                     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                     * @param {number} [length] Message length if known beforehand
-                     * @returns {peer.GetStatusResponse.Config.Network.Token} Token
-                     * @throws {Error} If the payload is not a reader or valid buffer
-                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                     */
-                    Token.decode = function decode(reader, length) {
-                        if (!(reader instanceof $Reader))
-                            reader = $Reader.create(reader);
-                        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.peer.GetStatusResponse.Config.Network.Token();
-                        while (reader.pos < end) {
-                            var tag = reader.uint32();
-                            switch (tag >>> 3) {
-                            case 1:
-                                message.name = reader.string();
-                                break;
-                            case 2:
-                                message.symbol = reader.string();
-                                break;
-                            default:
-                                reader.skipType(tag & 7);
-                                break;
-                            }
-                        }
-                        return message;
-                    };
-
-                    /**
-                     * Decodes a Token message from the specified reader or buffer, length delimited.
-                     * @function decodeDelimited
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @static
-                     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                     * @returns {peer.GetStatusResponse.Config.Network.Token} Token
-                     * @throws {Error} If the payload is not a reader or valid buffer
-                     * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                     */
-                    Token.decodeDelimited = function decodeDelimited(reader) {
-                        if (!(reader instanceof $Reader))
-                            reader = new $Reader(reader);
-                        return this.decode(reader, reader.uint32());
-                    };
-
-                    /**
-                     * Verifies a Token message.
-                     * @function verify
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @static
-                     * @param {Object.<string,*>} message Plain object to verify
-                     * @returns {string|null} `null` if valid, otherwise the reason why it is not
-                     */
-                    Token.verify = function verify(message) {
-                        if (typeof message !== "object" || message === null)
-                            return "object expected";
-                        if (message.name != null && message.hasOwnProperty("name"))
-                            if (!$util.isString(message.name))
-                                return "name: string expected";
-                        if (message.symbol != null && message.hasOwnProperty("symbol"))
-                            if (!$util.isString(message.symbol))
-                                return "symbol: string expected";
-                        return null;
-                    };
-
-                    /**
-                     * Creates a Token message from a plain object. Also converts values to their respective internal types.
-                     * @function fromObject
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @static
-                     * @param {Object.<string,*>} object Plain object
-                     * @returns {peer.GetStatusResponse.Config.Network.Token} Token
-                     */
-                    Token.fromObject = function fromObject(object) {
-                        if (object instanceof $root.peer.GetStatusResponse.Config.Network.Token)
-                            return object;
-                        var message = new $root.peer.GetStatusResponse.Config.Network.Token();
-                        if (object.name != null)
-                            message.name = String(object.name);
-                        if (object.symbol != null)
-                            message.symbol = String(object.symbol);
-                        return message;
-                    };
-
-                    /**
-                     * Creates a plain object from a Token message. Also converts values to other types if specified.
-                     * @function toObject
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @static
-                     * @param {peer.GetStatusResponse.Config.Network.Token} message Token
-                     * @param {$protobuf.IConversionOptions} [options] Conversion options
-                     * @returns {Object.<string,*>} Plain object
-                     */
-                    Token.toObject = function toObject(message, options) {
-                        if (!options)
-                            options = {};
-                        var object = {};
-                        if (options.defaults) {
-                            object.name = "";
-                            object.symbol = "";
-                        }
-                        if (message.name != null && message.hasOwnProperty("name"))
-                            object.name = message.name;
-                        if (message.symbol != null && message.hasOwnProperty("symbol"))
-                            object.symbol = message.symbol;
-                        return object;
-                    };
-
-                    /**
-                     * Converts this Token to JSON.
-                     * @function toJSON
-                     * @memberof peer.GetStatusResponse.Config.Network.Token
-                     * @instance
-                     * @returns {Object.<string,*>} JSON object
-                     */
-                    Token.prototype.toJSON = function toJSON() {
-                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                    };
-
-                    return Token;
-                })();
 
                 return Network;
             })();

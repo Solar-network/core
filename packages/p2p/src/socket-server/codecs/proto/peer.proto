@@ -58,15 +58,8 @@ message GetStatusResponse {
 
     message Config {
         message Network {
-            message Token {
-                string name = 1;
-                string symbol = 2;
-            }
-
             string name = 1;
             string nethash = 2;
-            string explorer = 3;
-            Token token = 4;
             uint32 version = 5;
         }
 

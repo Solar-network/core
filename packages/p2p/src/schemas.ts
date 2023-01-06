@@ -109,7 +109,7 @@ export const replySchemas = {
                     },
                     network: {
                         type: "object",
-                        required: ["name", "nethash", "explorer", "token"],
+                        required: ["name", "nethash"],
                         additionalProperties: false,
                         properties: {
                             name: {
@@ -132,28 +132,6 @@ export const replySchemas = {
                                         maxLength: 64,
                                     },
                                 ],
-                            },
-                            explorer: {
-                                type: "string",
-                                minLength: 0,
-                                maxLength: 128,
-                            },
-                            token: {
-                                type: "object",
-                                required: ["name", "symbol"],
-                                additionalProperties: false,
-                                properties: {
-                                    name: {
-                                        type: "string",
-                                        minLength: 1,
-                                        maxLength: 8,
-                                    },
-                                    symbol: {
-                                        type: "string",
-                                        minLength: 1,
-                                        maxLength: 4,
-                                    },
-                                },
                             },
                         },
                     },

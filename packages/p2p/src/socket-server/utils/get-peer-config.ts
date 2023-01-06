@@ -50,11 +50,6 @@ export const getPeerConfig = (app: Contracts.Kernel.Application): Contracts.P2P.
             version: Managers.configManager.get("network.pubKeyHash"),
             name: Managers.configManager.get("network.name"),
             nethash: Managers.configManager.get("network.nethash"),
-            explorer: Managers.configManager.get("network.client.explorer"),
-            token: {
-                name: Managers.configManager.get("network.client.token"),
-                symbol: Managers.configManager.get("network.client.symbol"),
-            },
         },
         plugins: transformPlugins(
             getPluginsConfig(

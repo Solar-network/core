@@ -22,7 +22,7 @@ export const formatSatoshi = (amount: BigNumber): string => {
         maximumFractionDigits: 8,
     });
 
-    return `${localeString} ${configManager.get("network.client.symbol")}`;
+    return `${localeString} ${configManager.get("network.ticker")}`;
 };
 
 /**

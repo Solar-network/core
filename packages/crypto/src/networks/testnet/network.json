@@ -10,9 +10,5 @@
     "nethash": "72db1365ae549683980a8e29ff744c6d4d9920c3cd215e462f40a58da3f13dce",
     "wif": 252,
     "slip44": 1,
-    "client": {
-        "token": "tSXP",
-        "symbol": "tSXP",
-        "explorer": "https://texplorer.solar.org"
-    }
+    "ticker": "tSXP"
 }

@@ -1,9 +1,8 @@
 import Hapi from "@hapi/hapi";
 import { Crypto, Managers } from "@solar-network/crypto";
-import { Container, Contracts, Providers, Services, Utils } from "@solar-network/kernel";
+import { Container, Contracts, Providers, Utils } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
-import { PortsResource } from "../resources";
 import { Controller } from "./controller";
 
 @Container.injectable()
@@ -15,9 +14,6 @@ export class NodeController extends Controller {
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)
     @Container.tagged("state", "null")
     private readonly nullHandlerRegistry!: Handlers.Registry;
-
-    @Container.inject(Container.Identifiers.ConfigRepository)
-    private readonly configRepository!: Services.Config.ConfigRepository;
 
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
@@ -79,17 +75,12 @@ export class NodeController extends Controller {
         return removeFalsy(
             Utils.cloneDeep({
                 data: {
-                    core: {
-                        version: this.app.version(),
-                    },
+                    version: this.app.version(),
                     nethash: network.nethash,
                     slip44: network.slip44,
                     wif: network.wif,
-                    token: network.client.token,
-                    symbol: network.client.symbol,
-                    explorer: network.client.explorer,
-                    version: network.pubKeyHash,
-                    ports: super.toResource(this.configRepository, PortsResource),
+                    ticker: network.ticker,
+                    network: network.pubKeyHash,
                     constants,
                     pool: {
                         maxTransactionsInPool: this.poolConfiguration.getRequired<number>("maxTransactionsInPool"),

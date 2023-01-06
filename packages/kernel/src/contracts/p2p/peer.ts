@@ -62,11 +62,6 @@ export interface PeerConfig {
         version: number;
         name: string;
         nethash: string;
-        explorer: string;
-        token: {
-            name: string;
-            symbol: string;
-        };
     };
     plugins: PeerPlugins;
 }
