@@ -768,22 +768,6 @@
                         }
                     },
                     {
-                        "name": "username",
-                        "in": "query",
-                        "description": "The username of the delegate to be returned",
-                        "schema": {
-                            "$ref": "#/components/schemas/username"
-                        }
-                    },
-                    {
-                        "name": "isResigned",
-                        "in": "query",
-                        "description": "Whether the delegate(s) to be returned are resigned and no longer able to forge",
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
-                    {
                         "name": "resignation",
                         "in": "query",
                         "description": "Whether the delegate(s) to be returned have resigned permanently or temporarily",
@@ -792,6 +776,14 @@
                                 "permanent",
                                 "temporary"
                             ]
+                        }
+                    },
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "The username of the delegate to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/username"
                         }
                     },
                     {
@@ -1136,12 +1128,12 @@
                                 "forged.rewards:desc",
                                 "forged.total:asc",
                                 "forged.total:desc",
-                                "isResigned:asc",
-                                "isResigned:desc",
                                 "publicKey:asc",
                                 "publicKey:desc",
                                 "rank:asc",
                                 "rank:desc",
+                                "resignation:asc",
+                                "resignation:desc",
                                 "version:asc",
                                 "version:desc",
                                 "votesReceived.percent:asc",

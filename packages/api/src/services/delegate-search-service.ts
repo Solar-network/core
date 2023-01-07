@@ -62,9 +62,9 @@ export class DelegateSearchService {
 
         let resignation: string | undefined = undefined;
 
-        if (delegateAttribute.resigned === Enums.DelegateStatus.PermanentResign) {
+        if (delegateAttribute.resignation?.type === Enums.DelegateStatus.PermanentResign) {
             resignation = "permanent";
-        } else if (delegateAttribute.resigned === Enums.DelegateStatus.TemporaryResign) {
+        } else if (delegateAttribute.resignation?.type === Enums.DelegateStatus.TemporaryResign) {
             resignation = "temporary";
         }
 
@@ -78,7 +78,6 @@ export class DelegateSearchService {
                 voters: delegateAttribute.voters,
             },
             rank: delegateAttribute.rank,
-            isResigned: delegateAttribute.resigned !== undefined,
             resignation,
             blocks: {
                 produced: delegateAttribute.producedBlocks,

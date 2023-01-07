@@ -18,7 +18,6 @@ export type DelegateResource = {
         voters: number;
     };
     rank: number;
-    isResigned: boolean;
     resignation: string | undefined;
     blocks: {
         produced: number;
@@ -46,7 +45,6 @@ export const delegateCriteriaSchemaObject = {
         voters: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
     },
     rank: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(1)),
-    isResigned: Joi.boolean(),
     resignation: Joi.string().valid("permanent", "temporary"),
     blocks: {
         produced: Schemas.createRangeCriteriaSchema(Joi.number().integer().min(0)),
