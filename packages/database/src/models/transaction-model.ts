@@ -1,4 +1,4 @@
-import { Utils } from "@solar-network/crypto";
+import { Managers, Utils } from "@solar-network/crypto";
 import { Contracts } from "@solar-network/kernel";
 
 import { Base58, BigNumber, Buffer, Identity } from "./decorators";
@@ -44,10 +44,13 @@ export class TransactionModel implements Contracts.Database.TransactionModel {
     public type!: string;
 
     public static from(model: TransactionModel): Record<string, any> {
+        const { burn } = Managers.configManager.getMilestone(model.blockHeight);
+
         return {
             id: model.id,
             version: model.version,
             block_height: model.blockHeight,
+            burned_fee_percent: !model.fee.isZero() ? burn.feePercent : 0,
             sequence: model.sequence,
             nonce: model.nonce,
             memo: model.memo,

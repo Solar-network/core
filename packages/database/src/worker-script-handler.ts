@@ -1,4 +1,4 @@
-import { Identities, Managers, Utils } from "@solar-network/crypto";
+import { Identities } from "@solar-network/crypto";
 import { Contracts, Utils as AppUtils } from "@solar-network/kernel";
 import Database from "better-sqlite3";
 import { decode, encode } from "bs58";
@@ -20,14 +20,6 @@ export class WorkerScriptHandler implements Contracts.Database.WorkerScriptHandl
         this.database.pragma("page_size = 32768");
         this.database.pragma("synchronous = normal");
         this.database.pragma("temp_store = memory");
-
-        this.database.function("burn", { deterministic: true }, (height: number, amount: Utils.BigNumber) => {
-            const { feePercent } = Managers.configManager.getMilestone(Number(height)).burn;
-            return Utils.BigNumber.make(amount ?? Utils.BigNumber.ZERO)
-                .times(feePercent)
-                .dividedBy(100)
-                .toBigInt();
-        });
 
         const modelsDirectory: string = `${__dirname}/models/`;
 

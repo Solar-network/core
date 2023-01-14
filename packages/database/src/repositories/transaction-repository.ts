@@ -94,7 +94,7 @@ export class TransactionRepository
                 .select("CAST(COALESCE(MIN(fee), 0) AS TEXT)", "min")
                 .select("CAST(COALESCE(MAX(fee), 0) AS TEXT)", "max")
                 .select("CAST(COALESCE(SUM(fee), 0) AS TEXT)", "sum")
-                .select("CAST(COALESCE(SUM(BURN(block_height, fee)), 0) AS TEXT)", "burned")
+                .select("CAST(COALESCE(SUM(fee * burned_fee_percent / 100), 0) AS TEXT)", "burned")
                 .from("transactions")
                 .where("timestamp >= :age AND fee >= :minFee", { age, minFee })
                 .groupBy("type_id")
@@ -131,7 +131,7 @@ export class TransactionRepository
                     .select("CAST(COALESCE(SUM(burned_fee), 0) AS TEXT)", "burned")
                     .from(
                         `(
-                        SELECT BURN(block_height, fee) burned_fee, type FROM transactions
+                        SELECT fee * burned_fee_percent / 100 burned_fee, type FROM transactions
                         LEFT JOIN types ON types.id = transactions.type_id
                         WHERE type = '${feeStatsByType.type}'
                     )`,
@@ -162,7 +162,7 @@ export class TransactionRepository
     public async getFeesBurned(): Promise<string> {
         const { burned } = (
             await this.createQueryBuilder()
-                .select("CAST(COALESCE(SUM(BURN(block_height, fee)), 0) AS TEXT)", "burned")
+                .select("CAST(COALESCE(SUM(fee * burned_fee_percent / 100), 0) AS TEXT)", "burned")
                 .from("transactions")
                 .run()
         )[0];
@@ -243,7 +243,7 @@ export class TransactionRepository
         return this.createQueryBuilder()
             .select("transactions.*")
             .select("block_height", "blockHeight")
-            .select("CAST(BURN(block_height, fee) AS INTEGER)", "burnedFee")
+            .select("CAST(fee * burned_fee_percent / 100 AS INTEGER)", "burnedFee")
             .select(
                 "(SELECT identity FROM identities WHERE identities.id = transactions.identity_id LIMIT 1)",
                 "senderId",

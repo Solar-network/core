@@ -115,7 +115,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
                 "username",
             )
             .select(
-                "CAST(SUM(reward + total_fee - (SELECT COALESCE(SUM(BURN(block_height, fee)), 0) FROM transactions WHERE block_height = height)) AS TEXT)",
+                "CAST(SUM(reward + total_fee - (SELECT COALESCE(SUM(fee * burned_fee_percent / 100), 0) FROM transactions WHERE block_height = height)) AS TEXT)",
                 "rewards",
             )
             .from("blocks")
@@ -141,7 +141,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
             )
             .select("CAST(SUM(total_fee) AS TEXT)", "totalFees")
             .select(
-                "CAST(SUM((SELECT COALESCE(SUM(BURN(block_height, fee)), 0) FROM transactions WHERE block_height = height)) AS TEXT)",
+                "CAST(SUM((SELECT COALESCE(SUM(fee * burned_fee_percent / 100), 0) FROM transactions WHERE block_height = height)) AS TEXT)",
                 "totalFeesBurned",
             )
             .select("CAST(SUM(reward) AS TEXT)", "totalRewards")
@@ -413,7 +413,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
             .select("total_amount", "totalAmount")
             .select("total_fee", "totalFee")
             .select(
-                "(SELECT COALESCE(SUM(BURN(block_height, fee)), 0) FROM transactions WHERE transactions.block_height = blocks.height)",
+                "(SELECT COALESCE(SUM(fee * burned_fee_percent / 100), 0) FROM transactions WHERE transactions.block_height = blocks.height)",
                 "totalFeeBurned",
             )
             .select(
