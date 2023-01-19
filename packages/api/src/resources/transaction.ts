@@ -35,10 +35,14 @@ export class TransactionResource implements Resource {
     public transform(resource: Interfaces.ITransactionData): object {
         AppUtils.assert.defined<string>(resource.senderId);
 
-        let asset: Interfaces.ITransactionAsset | undefined = AppUtils.cloneDeep(resource.asset);
+        const asset: Interfaces.ITransactionAsset | undefined = AppUtils.cloneDeep(resource.asset);
 
         let amount: string | undefined =
             typeof resource.amount !== "undefined" && !resource.amount.isZero() ? resource.amount.toFixed() : undefined;
+
+        if (resource.type === "burn") {
+            amount = resource.asset!.burn!.amount.toFixed();
+        }
 
         if (resource.type === "transfer") {
             amount = resource
@@ -47,9 +51,12 @@ export class TransactionResource implements Resource {
         }
 
         if (resource.type === "vote") {
+            asset!.votes = Object.fromEntries(Object.entries(asset!.votes!).filter(([_, value]) => value !== 0));
             const firstKey = Object.keys(asset!.votes!)[0];
-            if (firstKey && firstKey.length === 66) {
-                asset = { [this.walletRepository.findByPublicKey(firstKey).getAttribute("delegate.username")]: 100 };
+            if (firstKey?.length === 66) {
+                asset!.votes = {
+                    [this.walletRepository.findByPublicKey(firstKey).getAttribute("delegate.username")]: 100,
+                };
             }
         }
 

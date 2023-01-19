@@ -1,4 +1,4 @@
-import { Utils } from "@solar-network/crypto";
+import { Interfaces, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { Resource } from "../interfaces";
@@ -29,10 +29,26 @@ export class TransactionWithBlockResource implements Resource {
                 ? transactionData.amount.toFixed()
                 : undefined;
 
+        const asset: Interfaces.ITransactionAsset | undefined = transactionData.asset;
+
+        if (transactionData.type === "burn") {
+            amount = asset!.burn!.amount.toFixed();
+        }
+
         if (transactionData.type === "transfer") {
             amount = transactionData
                 .asset!.recipients!.reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO)
                 .toFixed();
+        }
+
+        if (transactionData.type === "vote") {
+            asset!.votes = Object.fromEntries(Object.entries(asset!.votes!).filter(([_, value]) => value !== 0));
+            const firstKey = Object.keys(asset!.votes!)[0];
+            if (firstKey?.length === 66) {
+                asset!.votes = {
+                    [this.walletRepository.findByPublicKey(firstKey).getAttribute("delegate.username")]: 100,
+                };
+            }
         }
 
         return {
@@ -49,7 +65,7 @@ export class TransactionWithBlockResource implements Resource {
             recipient: transactionData.recipientId,
             signatures: transactionData.signatures,
             memo: transactionData.memo,
-            asset: transactionData.asset,
+            asset,
             confirmations,
             timestamp: AppUtils.formatTimestamp(blockData.timestamp),
             nonce: transactionData.nonce!.toFixed(),
