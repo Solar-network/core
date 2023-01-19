@@ -46,6 +46,7 @@ internals.schema = Joi.object({
     },
     rateLimiter: Joi.object(),
     sendErrors: Joi.boolean(),
+    socketRateLimit: Joi.number(),
     trustProxy: Joi.boolean(),
     whitelist: Joi.array(),
 });
@@ -62,6 +63,7 @@ const plugin = {
 
         const settings: any = Hoek.applyToDefaults(internals.defaults, options);
         settings.rateLimiter = options.rateLimiter;
+        settings.socketRateLimit = options.socketRateLimit;
 
         if (Array.isArray(settings.headers)) {
             settings.headers = settings.headers.map((field) => field.toLowerCase());

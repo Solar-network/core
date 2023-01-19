@@ -6,6 +6,7 @@ export const defaults = {
         hostname: process.env.SOLAR_CORE_P2P_HOST || "0.0.0.0",
         port: process.env.SOLAR_CORE_P2P_PORT || 4002,
         logLevel: process.env.SOLAR_CORE_NETWORK_NAME === "testnet" ? 1 : 0,
+        socketRateLimit: process.env.SOLAR_CORE_P2P_SOCKET_RATE_LIMIT || 10,
     },
     /**
      * The minimum peer version we expect

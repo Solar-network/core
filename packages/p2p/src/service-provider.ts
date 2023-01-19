@@ -59,6 +59,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
                     .required(),
                 port: Joi.number().integer().min(1).max(65535).required(),
                 logLevel: Joi.number().integer().min(0).required(), // TODO: Check
+                socketRateLimit: Joi.number().integer().min(1).required(),
             }).required(),
             minimumVersions: Joi.array().items(Joi.string()).required(),
             minimumNetworkReach: Joi.number().integer().min(0).required(),
@@ -113,7 +114,9 @@ export class ServiceProvider extends Providers.ServiceProvider {
     private async buildServer(): Promise<void> {
         const server: Server = this.app.get<Server>(Container.Identifiers.P2PServer);
         const serverConfig =
-            this.config().getRequired<{ banSeconds: number; hostname: string; port: number }>("server");
+            this.config().getRequired<{ banSeconds: number; hostname: string; port: number; socketRateLimit: number }>(
+                "server",
+            );
         Utils.assert.defined<Types.JsonObject>(serverConfig);
 
         await server.initialise("P2P server", serverConfig);

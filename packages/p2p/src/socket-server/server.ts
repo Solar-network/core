@@ -59,7 +59,7 @@ export class Server {
      */
     public async initialise(
         name: string,
-        optionsServer: { banSeconds: number; hostname: string; port: number },
+        optionsServer: { banSeconds: number; hostname: string; port: number; socketRateLimit: number },
     ): Promise<void> {
         this.name = name;
 
@@ -82,6 +82,7 @@ export class Server {
                 enabled: true,
                 maxPayload: 20971520,
                 path: "/",
+                socketRateLimit: optionsServer.socketRateLimit,
             },
         });
 

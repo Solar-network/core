@@ -404,7 +404,7 @@ export class Socket {
             return this._processRequest(request);
         }
 
-        if (this._requests.length > 10) {
+        if (this._requests.length > this._listener._settings.socketRateLimit) {
             throw Boom.badRequest("Exceeded socket rate limit");
         }
 

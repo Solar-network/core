@@ -62,5 +62,6 @@ export const defaults = {
             Enums.VoteEvent.Vote,
         ],
         path: "/ws",
+        socketRateLimit: process.env.SOLAR_CORE_API_WS_SOCKET_RATE_LIMIT || 100,
     },
 };
