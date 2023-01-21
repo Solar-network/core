@@ -63,6 +63,7 @@ export class TransactionResource implements Resource {
         return {
             id: resource.id,
             blockHeight: resource.blockHeight,
+            sequence: resource.sequence,
             version: resource.version,
             type: resource.type,
             amount,
