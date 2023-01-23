@@ -7,7 +7,7 @@ export class Wallet implements Contracts.State.Wallet {
     protected publicKey: string | undefined;
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
-    protected voteBalances: Record<string, Utils.BigNumber> = {};
+    protected voteBalances: Map<string, Utils.BigNumber> = new Map();
 
     public constructor(
         protected readonly address: string,
@@ -16,7 +16,7 @@ export class Wallet implements Contracts.State.Wallet {
         protected readonly events?: Contracts.Kernel.EventDispatcher,
     ) {
         if (!this.hasAttribute("votes") && !isClone) {
-            this.setAttribute("votes", {});
+            this.setAttribute("votes", new Map());
         }
     }
 
@@ -214,7 +214,8 @@ export class Wallet implements Contracts.State.Wallet {
      * @memberof Wallet
      */
     public hasVoted(): boolean {
-        return Object.keys(this.getAttribute("votes")).length > 0;
+        const votes: Map<string, Utils.BigNumber> = this.getAttribute("votes");
+        return votes.size > 0;
     }
 
     /**
@@ -223,52 +224,50 @@ export class Wallet implements Contracts.State.Wallet {
      * @memberof Wallet
      */
     public getVoteBalance(delegate: string): Utils.BigNumber {
-        return this.voteBalances[delegate] ?? Utils.BigNumber.ZERO;
+        return this.voteBalances.get(delegate) ?? Utils.BigNumber.ZERO;
     }
 
     /**
-     * @returns {Record<string, Utils.BigNumber>}
+     * @returns {Map<string, Utils.BigNumber>}
      * @memberof Wallet
      */
-    public getVoteBalances(): Record<string, Utils.BigNumber> {
+    public getVoteBalances(): Map<string, Utils.BigNumber> {
         return this.voteBalances;
     }
 
-    public setVoteBalances(balances: Record<string, Utils.BigNumber>) {
+    public setVoteBalances(balances: Map<string, Utils.BigNumber>) {
         this.voteBalances = balances;
     }
 
     /**
-     * @returns {Record<string, Contracts.State.WalletVoteDistribution>}
+     * @returns {Map<string, Contracts.State.WalletVoteDistribution>}
      * @memberof Wallet
      */
-    public getVoteDistribution(): Record<string, Contracts.State.WalletVoteDistribution> {
-        const balances: object = this.voteBalances;
-        const votes: object = this.getAttribute("votes");
+    public getVoteDistribution(): Map<string, Contracts.State.WalletVoteDistribution> {
+        const balances: Map<string, Utils.BigNumber> = this.voteBalances;
+        const votes: Map<string, number> = this.getAttribute("votes");
 
-        const distribution: Record<string, Contracts.State.WalletVoteDistribution> = {};
+        const distribution: Map<string, Contracts.State.WalletVoteDistribution> = new Map();
 
-        for (const username of Object.keys(votes)) {
-            distribution[username] = { percent: votes[username], votes: balances[username] };
+        for (const [username, percent] of votes.entries()) {
+            distribution.set(username, { percent, votes: balances.get(username)! });
         }
 
         return distribution;
     }
 
     public updateVoteBalances(): void {
-        const votes: Record<string, number> = this.getAttribute("votes");
-        this.voteBalances = {};
+        const votes: Map<string, number> = this.getAttribute("votes");
+        this.voteBalances = new Map();
 
         const voteAmounts = this.calculateVoteAmount({
             balance: this.getBalance(),
             lockedBalance: this.getAttribute("htlc.lockedBalance", Utils.BigNumber.ZERO),
         });
 
-        for (const delegate of Object.keys(votes)) {
-            this.setVoteBalance(
-                delegate,
-                Utils.BigNumber.make(voteAmounts[delegate].balance).plus(voteAmounts[delegate].lockedBalance),
-            );
+        for (const delegate of votes.keys()) {
+            const voteAmount = voteAmounts.get(delegate)!;
+            this.setVoteBalance(delegate, Utils.BigNumber.make(voteAmount.balance).plus(voteAmount.lockedBalance));
         }
     }
 
@@ -302,41 +301,42 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     /**
-     * @returns {Record<string, any>}
+     * @returns {Map<string, Record<string, Utils.BigNumber>>}
      * @memberof Wallet
      */
     public calculateVoteAmount(
-        balances: Record<string, Utils.BigNumber>,
-        delegates?: Record<string, number>,
-    ): Record<string, any> {
+        balances: { balance: Utils.BigNumber; lockedBalance: Utils.BigNumber },
+        delegates?: Map<string, number>,
+    ): Map<string, Record<string, Utils.BigNumber>> {
         if (!delegates) {
-            delegates = this.getAttribute("votes") as Record<string, number>;
+            delegates = this.getAttribute("votes")!;
         }
 
-        const remainders: { [key: string]: Utils.BigNumber } = {};
-        const votes: { [delegate: string]: object } = {};
+        const remainders: Map<string, Utils.BigNumber> = new Map();
+        const votes: Map<string, Record<string, Utils.BigNumber>> = new Map();
 
-        for (const [delegate, percent] of Object.entries(delegates)) {
-            votes[delegate] = {};
+        for (const [delegate, percent] of delegates.entries()) {
+            votes.set(delegate, {});
             for (const [key, value] of Object.entries(balances)) {
-                votes[delegate][key] = value.times(Math.round(percent * 100)).dividedBy(10000);
+                votes.get(delegate)![key] = value.times(Math.round(percent * 100)).dividedBy(10000);
             }
         }
 
-        for (const vote of Object.values(votes)) {
+        for (const vote of votes.values()) {
             for (const [key, value] of Object.entries(vote)) {
-                if (remainders[key] === undefined) {
-                    remainders[key] = Utils.BigNumber.make(balances[key]);
+                if (!remainders.has(key)) {
+                    remainders.set(key, Utils.BigNumber.make(balances[key]));
                 }
-                remainders[key] = remainders[key].minus(value);
+                remainders.set(key, remainders.get(key)!.minus(value));
             }
         }
 
-        const keys = Object.keys(votes);
+        const keys = [...votes.keys()];
 
-        for (const [key, value] of Object.entries(remainders)) {
+        for (const [key, value] of remainders.entries()) {
             for (let i = 0; i < value.toBigInt(); i++) {
-                votes[keys[i]][key] = votes[keys[i]][key].plus(1);
+                const mapValue: Record<string, Utils.BigNumber> = votes.get(keys[i])!;
+                mapValue[key] = mapValue[key].plus(1);
             }
         }
 
@@ -371,7 +371,7 @@ export class Wallet implements Contracts.State.Wallet {
             balance: this.getBalance(),
             nonce: this.getNonce(),
             attributes: { ...attributes, votes: undefined },
-            votingFor: this.getVoteDistribution(),
+            votingFor: Object.fromEntries(this.getVoteDistribution().entries()),
         };
     }
 
@@ -384,6 +384,6 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     private setVoteBalance(delegate: string, balance: Utils.BigNumber) {
-        this.voteBalances[delegate] = balance;
+        this.voteBalances.set(delegate, balance);
     }
 }
