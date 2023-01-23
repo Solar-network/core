@@ -58,6 +58,7 @@ export enum BlockEvent {
  */
 export enum DelegateEvent {
     ProductivityChanged = "delegate.productivityChanged",
+    VoteDataChanged = "delegate.voteDataChanged",
     Registered = "delegate.registered",
     Resigned = "delegate.resigned",
 }

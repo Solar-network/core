@@ -1,6 +1,6 @@
-import { Blocks, Interfaces, Managers } from "@solar-network/crypto";
+import { Blocks, Interfaces, Managers, Utils } from "@solar-network/crypto";
 import { DatabaseService } from "@solar-network/database";
-import { Container, Contracts, Enums } from "@solar-network/kernel";
+import { Container, Contracts, Enums, Utils as AppUtils } from "@solar-network/kernel";
 import { Handlers } from "@solar-network/transactions";
 
 import { RoundState } from "./round-state";
@@ -39,6 +39,14 @@ export class DatabaseInteraction {
     @Container.inject(Container.Identifiers.RoundState)
     private readonly roundState!: RoundState;
 
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private walletRepository!: Contracts.State.WalletRepository;
+
+    private blockchain!: Contracts.Blockchain.Blockchain;
+
+    private historicalVoters: { percent: any; username: any; voteBalance: any; voters: any }[] | undefined;
+
     public async initialise(): Promise<void> {
         try {
             this.events.dispatch(Enums.StateEvent.Starting);
@@ -47,6 +55,8 @@ export class DatabaseInteraction {
             const genesisBlock = Blocks.BlockFactory.fromJson(genesisBlockJson, { isGenesisBlock: true });
 
             this.stateStore.setGenesisBlock(genesisBlock!);
+
+            this.blockchain = this.app.get<Contracts.Blockchain.Blockchain>(Container.Identifiers.BlockchainService);
 
             await this.initialiseLastBlock();
         } catch (error) {
@@ -61,6 +71,13 @@ export class DatabaseInteraction {
             index: number | undefined;
         },
     ): Promise<void> {
+        let supply: string;
+
+        if (!this.historicalVoters) {
+            supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
+            this.historicalVoters = this.getDelegateVoters(supply);
+        }
+
         await this.roundState.detectMissedBlocks(block);
 
         await this.blockState.applyBlock(block, transactionProcessing);
@@ -68,6 +85,36 @@ export class DatabaseInteraction {
 
         for (const transaction of block.transactions) {
             await this.emitTransactionEvents(transaction);
+        }
+
+        if (this.blockchain.getQueue().size() === 0) {
+            supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
+            const updatedDelegates = this.getDelegateVoters(supply).filter(
+                ({ percent, username, voteBalance, voters }) =>
+                    !this.historicalVoters!.some(
+                        ({
+                            percent: oldPercent,
+                            username: oldUsername,
+                            voteBalance: oldVoteBalance,
+                            voters: oldVoters,
+                        }) =>
+                            percent === oldPercent &&
+                            username === oldUsername &&
+                            voteBalance === oldVoteBalance &&
+                            voters === oldVoters,
+                    ),
+            );
+
+            for (const { percent, username, voteBalance, voters } of updatedDelegates) {
+                this.events.dispatch(Enums.DelegateEvent.VoteDataChanged, {
+                    percent,
+                    username,
+                    voteBalance,
+                    voters,
+                });
+            }
+
+            this.historicalVoters = undefined;
         }
 
         this.events.dispatch(Enums.BlockEvent.Applied, block.getHeader());
@@ -86,6 +133,26 @@ export class DatabaseInteraction {
 
     public async restoreCurrentRound(): Promise<void> {
         await this.roundState.restore();
+    }
+
+    private getDelegateVoters(supply: string): {
+        percent: number;
+        username: string;
+        voteBalance: Utils.BigNumber;
+        voters: number;
+    }[] {
+        return this.walletRepository
+            .allByUsername()
+            .filter((wallet: Contracts.State.Wallet) => wallet.hasAttribute("delegate"))
+            .map((wallet: Contracts.State.Wallet) => {
+                const delegate = wallet.getAttribute("delegate");
+                return {
+                    percent: AppUtils.delegateCalculator.calculateVotePercent(wallet, supply),
+                    username: delegate.username,
+                    voteBalance: delegate.voteBalance,
+                    voters: delegate.voters,
+                };
+            });
     }
 
     private async initialiseLastBlock(): Promise<void> {

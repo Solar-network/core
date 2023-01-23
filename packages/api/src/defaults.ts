@@ -54,6 +54,7 @@ export const defaults = {
             Enums.BlockEvent.Applied,
             Enums.BlockEvent.Reverted,
             Enums.DelegateEvent.ProductivityChanged,
+            Enums.DelegateEvent.VoteDataChanged,
             Enums.ForgerEvent.Missing,
             Enums.RoundEvent.Created,
             Enums.RoundEvent.Missed,
