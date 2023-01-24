@@ -152,11 +152,11 @@ export class StateLoader {
 
                     const address: string = buffer.readBuffer(34).toString();
 
-                    let attributes: object = {};
+                    let attributes: Record<string, any> = {};
                     let balance: bigint | number = 0;
                     let nonce: bigint | number = 1;
                     let publicKeys: Record<string, string | Contracts.State.WalletPermissions> = {};
-                    let voteBalances: Record<string, Utils.BigNumber> = {};
+                    let voteBalances: Map<string, Utils.BigNumber> = new Map();
 
                     if ((1 & bits) !== 0) {
                         balance = buffer.readBigInt64LE();
@@ -169,6 +169,12 @@ export class StateLoader {
                     if ((4 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
                         attributes = JSON.parse(buffer.readBuffer(length).toString(), reviver);
+                        if (attributes.votes) {
+                            attributes.votes = new Map(attributes.votes);
+                        }
+                        if (attributes.hidden?.previousVotes) {
+                            attributes.hidden.previousVotes = new Map(attributes.hidden.previousVotes);
+                        }
                     }
 
                     if ((8 & bits) !== 0) {
@@ -178,7 +184,7 @@ export class StateLoader {
 
                     if ((16 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
-                        voteBalances = JSON.parse(buffer.readBuffer(length).toString(), reviver);
+                        voteBalances = new Map(JSON.parse(buffer.readBuffer(length).toString(), reviver));
                     }
 
                     const wallet: Contracts.State.Wallet = this.walletRepository.createWallet(address);

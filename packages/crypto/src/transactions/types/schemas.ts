@@ -116,7 +116,7 @@ export const vote = extend(transactionBaseSchema, {
             properties: {
                 votes: {
                     patternProperties: {
-                        "^((?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?){1,20})$|^(02|03)[0-9a-f]{64}$": {
+                        "^((?!_)(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?){1,20})$|^(02|03)[0-9a-f]{64}$": {
                             type: "number",
                             multipleOf: 0.01,
                             minimum: 0,

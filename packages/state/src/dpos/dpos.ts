@@ -34,15 +34,15 @@ export class DposState implements Contracts.State.DposState {
         for (const voter of this.walletRepository.allByPublicKey()) {
             if (voter.hasVoted()) {
                 voter.updateVoteBalances();
-                const delegates: Record<string, Contracts.State.WalletVoteDistribution> = voter.getVoteDistribution();
-                for (const delegate of Object.keys(delegates)) {
+                const delegates: Map<string, Contracts.State.WalletVoteDistribution> = voter.getVoteDistribution();
+                for (const [delegate, { votes }] of delegates.entries()) {
                     const delegateWallet = this.walletRepository.findByUsername(delegate);
                     const voteBalance: Utils.BigNumber = delegateWallet.getAttribute(
                         "delegate.voteBalance",
                         Utils.BigNumber.ZERO,
                     );
 
-                    delegateWallet.setAttribute("delegate.voteBalance", voteBalance.plus(delegates[delegate].votes));
+                    delegateWallet.setAttribute("delegate.voteBalance", voteBalance.plus(votes));
                     delegateWallet.setAttribute("delegate.voters", delegateWallet.getAttribute("delegate.voters") + 1);
                 }
             }

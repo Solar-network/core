@@ -2620,11 +2620,11 @@
             },
             "username": {
                 "type": "string",
-                "pattern": "^(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?){1,20}$"
+                "pattern": "^(?!_)(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?){1,20}$"
             },
             "walletIdentifier": {
                 "type": "string",
-                "pattern": "^S([A-HJ-NP-Za-km-z1-9]{33})$|^[0-9a-fA-F]{66}$|^(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?){1,20}$"
+                "pattern": "^S([A-HJ-NP-Za-km-z1-9]{33})$|^[0-9a-fA-F]{66}$|^(?!_)(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?){1,20}$"
             },
             "zeroOrMore": {
                 "type": "integer",

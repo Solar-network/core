@@ -60,7 +60,7 @@ export class StateSaver {
             for (const wallet of this.walletRepository.allByAddress()) {
                 const attributes: Record<string, any> = wallet.getAttributes();
                 const publicKeys: Record<string, string | Contracts.State.WalletPermissions> = wallet.getPublicKeys();
-                const voteBalances: Record<string, Utils.BigNumber> = wallet.getVoteBalances();
+                const voteBalances: Map<string, Utils.BigNumber> = wallet.getVoteBalances();
 
                 let bits: number = 0;
 
@@ -80,7 +80,7 @@ export class StateSaver {
                     bits += 8;
                 }
 
-                if (Object.keys(voteBalances).length > 0) {
+                if (voteBalances.size > 0) {
                     bits += 16;
                 }
 
@@ -109,12 +109,18 @@ export class StateSaver {
                     buffer.writeBigUInt64LE(wallet.getNonce().toBigInt());
                 }
 
-                for (const item of [attributes, publicKeys, voteBalances]) {
+                for (const item of [attributes, publicKeys, [...voteBalances]]) {
                     if (Object.keys(item).length > 0) {
                         secondaryBuffer.reset();
                         this.byteBufferArray.reset();
-
-                        const encoded: Buffer = Buffer.from(JSON.stringify(item));
+                        const encoded: Buffer = Buffer.from(
+                            JSON.stringify(item, (_, value) => {
+                                if (value instanceof Map) {
+                                    return [...value];
+                                }
+                                return value;
+                            }),
+                        );
                         if (buffer.getRemainderLength() < 8) {
                             flush();
                         }

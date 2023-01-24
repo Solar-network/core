@@ -53,7 +53,7 @@ export class VoteTransactionHandler extends TransactionHandler {
             }
 
             wallet.setAttribute("hidden.previousVotes", wallet.getAttribute("votes"));
-            wallet.setAttribute("votes", Utils.sortVotes(this.convertPublicKeyToUsername(transaction.asset.votes)));
+            wallet.setAttribute("votes", this.convertPublicKeyToUsername(Utils.sortVotes(transaction.asset.votes)));
         }
     }
 
@@ -111,7 +111,7 @@ export class VoteTransactionHandler extends TransactionHandler {
         const wallet = this.walletRepository.findByAddress(transaction.data.senderId);
         this.events.dispatch(AppEnums.VoteEvent.Vote, {
             votes: transaction.data.asset?.votes,
-            previousVotes: wallet.getAttribute("hidden.previousVotes"),
+            previousVotes: Object.fromEntries(wallet.getAttribute("hidden.previousVotes").entries()),
             transaction: transaction.data,
             wallet: wallet.getBasicWallet(),
         });
@@ -145,9 +145,10 @@ export class VoteTransactionHandler extends TransactionHandler {
         AppUtils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
 
         senderWallet.setAttribute("hidden.previousVotes", senderWallet.getAttribute("votes"));
+
         senderWallet.setAttribute(
             "votes",
-            Utils.sortVotes(this.convertPublicKeyToUsername(transaction.data.asset.votes)),
+            this.convertPublicKeyToUsername(Utils.sortVotes(transaction.data.asset.votes)),
         );
         senderWallet.updateVoteBalances();
         AppUtils.increaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
@@ -172,7 +173,7 @@ export class VoteTransactionHandler extends TransactionHandler {
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
 
-    private async getPreviousVotes(transaction: Interfaces.ITransaction): Promise<Interfaces.IVoteAsset> {
+    private async getPreviousVotes(transaction: Interfaces.ITransaction): Promise<Map<string, number>> {
         const criteria = {
             blockHeight: { to: transaction.data.blockHeight! - 1 },
             senderId: transaction.data.senderId,
@@ -189,18 +190,18 @@ export class VoteTransactionHandler extends TransactionHandler {
             false,
         );
 
-        return this.convertPublicKeyToUsername(results[0]?.asset?.votes ?? {});
+        return this.convertPublicKeyToUsername(results[0]?.asset?.votes);
     }
 
-    private convertPublicKeyToUsername(assetVotes: Interfaces.IVoteAsset): Interfaces.IVoteAsset {
-        const votes: Interfaces.IVoteAsset = {};
-        for (let [name, percent] of Object.entries(assetVotes)) {
+    private convertPublicKeyToUsername(assetVotes: Interfaces.IVoteAsset | undefined): Map<string, number> {
+        const votes: Map<string, number> = new Map();
+        for (let [name, percent] of Object.entries(assetVotes ?? {})) {
             if (name.length === 66) {
                 name = this.walletRepository.findByPublicKey(name).getAttribute("delegate.username");
             }
 
             if (percent > 0) {
-                votes[name] = percent;
+                votes.set(name, percent);
             }
         }
         return votes;

@@ -92,7 +92,7 @@ export class WalletSearchService {
                     delegate,
                     publicKeys: wallet.getPublicKeys(),
                     balance: wallet.getBalance(),
-                    votes: wallet.getVoteDistribution(),
+                    votes: Object.fromEntries(wallet.getVoteDistribution().entries()),
                 };
             })
             .sort((a, b) => {

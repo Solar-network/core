@@ -27,7 +27,7 @@
             "minFee": 11299
         },
         "p2p": {
-            "minimumVersions": [">=4.1.0"]
+            "minimumVersions": [">=4.2.0"]
         },
         "transactionVersions": [2],
         "transfer": {
@@ -127,5 +127,13 @@
                 "purpose": "foundation"
             }
         }
+    },
+    {
+        "height": 2750000,
+        "verifySwap": true
+    },
+    {
+        "height": 2850000,
+        "swapWalletSecondPublicKey": "0210caa3c13c5fef3a28a27202373dfc7fd584c122d18d83c980586358a5f76a0e"
     }
 ]

@@ -106,11 +106,7 @@
         "transactionVersions": [2, 3]
     },
     {
-        "height": 535780,
-        "transactionVersions": [3]
-    },
-    {
-        "height": 535884,
+        "height": 502441,
         "donations": {
             "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": {
                 "percent": 5,
@@ -120,6 +116,7 @@
                 "percent": 5,
                 "purpose": "voting"
             }
-        }
+        },
+        "transactionVersions": [3]
     }
 ]
