@@ -45,7 +45,7 @@ export class DatabaseInteraction {
 
     private blockchain!: Contracts.Blockchain.Blockchain;
 
-    private historicalVoters: { percent: any; username: any; voteBalance: any; voters: any }[] | undefined;
+    private historicalDelegateData: Record<string, string | number | Utils.BigNumber>[] | undefined;
 
     public async initialise(): Promise<void> {
         try {
@@ -73,9 +73,9 @@ export class DatabaseInteraction {
     ): Promise<void> {
         let supply: string;
 
-        if (!this.historicalVoters) {
+        if (!this.historicalDelegateData) {
             supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
-            this.historicalVoters = this.getDelegateVoters(supply);
+            this.historicalDelegateData = this.getDelegateData(supply);
         }
 
         await this.roundState.detectMissedBlocks(block);
@@ -89,32 +89,35 @@ export class DatabaseInteraction {
 
         if (this.blockchain.getQueue().size() === 0) {
             supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
-            const updatedDelegates = this.getDelegateVoters(supply).filter(
-                ({ percent, username, voteBalance, voters }) =>
-                    !this.historicalVoters!.some(
+            const updatedDelegates = this.getDelegateData(supply).filter(
+                ({ percent, username, version, voteBalance, voters }) =>
+                    !this.historicalDelegateData!.some(
                         ({
                             percent: oldPercent,
                             username: oldUsername,
+                            version: oldVersion,
                             voteBalance: oldVoteBalance,
                             voters: oldVoters,
                         }) =>
                             percent === oldPercent &&
                             username === oldUsername &&
+                            version === oldVersion &&
                             voteBalance === oldVoteBalance &&
                             voters === oldVoters,
                     ),
             );
 
-            for (const { percent, username, voteBalance, voters } of updatedDelegates) {
-                this.events.dispatch(Enums.DelegateEvent.VoteDataChanged, {
+            for (const { percent, username, version, voteBalance, voters } of updatedDelegates) {
+                this.events.dispatch(Enums.DelegateEvent.DataChanged, {
                     percent,
                     username,
+                    version,
                     voteBalance,
                     voters,
                 });
             }
 
-            this.historicalVoters = undefined;
+            this.historicalDelegateData = undefined;
         }
 
         this.events.dispatch(Enums.BlockEvent.Applied, block.getHeader());
@@ -135,9 +138,10 @@ export class DatabaseInteraction {
         await this.roundState.restore();
     }
 
-    private getDelegateVoters(supply: string): {
+    private getDelegateData(supply: string): {
         percent: number;
         username: string;
+        version: string;
         voteBalance: Utils.BigNumber;
         voters: number;
     }[] {
@@ -149,6 +153,7 @@ export class DatabaseInteraction {
                 return {
                     percent: AppUtils.delegateCalculator.calculateVotePercent(wallet, supply),
                     username: delegate.username,
+                    version: delegate.version,
                     voteBalance: delegate.voteBalance,
                     voters: delegate.voters,
                 };
