@@ -53,7 +53,7 @@
         "legacyTransfer": true,
         "legacyVote": true,
         "p2p": {
-            "minimumVersions": [">=4.1.0"]
+            "minimumVersions": [">=4.2.0"]
         },
         "transfer": {
             "maximum": 256,

@@ -137,10 +137,10 @@ export interface Wallet {
     getVoteBalance(delegate: string): Utils.BigNumber;
 
     /**
-     * @returns {Record<string, Utils.BigNumber>}
+     * @returns {Map<string, Utils.BigNumber>}
      * @memberof Wallet
      */
-    getVoteBalances(): Record<string, Utils.BigNumber>;
+    getVoteBalances(): Map<string, Utils.BigNumber>;
 
     /**
      * @param {object} balances
@@ -149,10 +149,10 @@ export interface Wallet {
     setVoteBalances(balances: object): void;
 
     /**
-     * @returns {Record<string, WalletVoteDistribution>}
+     * @returns {Map<string, WalletVoteDistribution>}
      * @memberof Wallet
      */
-    getVoteDistribution(): Record<string, WalletVoteDistribution>;
+    getVoteDistribution(): Map<string, WalletVoteDistribution>;
 
     updateVoteBalances(): void;
 
@@ -175,9 +175,9 @@ export interface Wallet {
     clone(): Wallet;
 
     calculateVoteAmount(
-        balances: { [delegate: string]: Utils.BigNumber },
-        delegates?: Record<string, number>,
-    ): Record<string, any>;
+        balances: { balance: Utils.BigNumber; lockedBalance: Utils.BigNumber },
+        delegates?: Map<string, number>,
+    ): Map<string, Record<string, Utils.BigNumber>>;
 
     getBasicWallet();
 }

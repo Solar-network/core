@@ -44,11 +44,11 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
                 this.walletRepository.index(wallet);
             }
 
-            let walletVote: { [vote: string]: number } = wallet.getAttribute("votes");
+            const walletVote: Map<string, number> = wallet.getAttribute("votes");
 
             for (const vote of transaction.asset.votes) {
                 let delegateVote: string = vote.slice(1);
-                const votingFor: string = Object.keys(walletVote)[0];
+                const votingFor: string = walletVote.keys().next().value;
 
                 if (delegateVote.length === 66) {
                     delegateVote = this.walletRepository
@@ -56,20 +56,19 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
                         .getAttribute("delegate.username");
                 }
 
+                walletVote.clear();
                 if (vote.startsWith("+")) {
                     if (votingFor) {
                         throw new AlreadyVotedError();
                     }
 
-                    walletVote = { [delegateVote]: 100 };
+                    walletVote.set(delegateVote, 100);
                 } else {
                     if (votingFor === undefined) {
                         throw new NoVoteError();
                     } else if (votingFor !== delegateVote) {
                         throw new UnvoteMismatchError();
                     }
-
-                    walletVote = {};
                 }
             }
 
@@ -89,7 +88,7 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
         let walletVote: string | undefined;
         if (wallet.hasVoted()) {
-            walletVote = Object.keys(wallet.getAttribute("votes"))[0];
+            walletVote = wallet.getAttribute("votes").keys().next().value;
         }
 
         for (const vote of transaction.data.asset.votes) {
@@ -182,7 +181,7 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
         Utils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        let walletVote!: { [vote: string]: number };
+        const walletVote: Map<string, number> = new Map();
 
         for (const vote of transaction.data.asset.votes) {
             let delegateVote: string = vote.slice(1);
@@ -190,10 +189,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
                 delegateVote = this.walletRepository.findByPublicKey(delegateVote).getAttribute("delegate.username");
             }
 
+            walletVote.clear();
             if (vote.startsWith("+")) {
-                walletVote = { [delegateVote]: 100 };
-            } else {
-                walletVote = {};
+                walletVote.set(delegateVote, 100);
             }
         }
 
@@ -210,7 +208,7 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
 
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
-        let previousVotes;
+        const previousVotes: Map<string, number> = new Map();
 
         Utils.assert.defined<Interfaces.ITransactionAsset>(transaction.data.asset?.votes);
 
@@ -220,10 +218,9 @@ export class LegacyVoteTransactionHandler extends TransactionHandler {
                 delegateVote = this.walletRepository.findByPublicKey(delegateVote).getAttribute("delegate.username");
             }
 
-            if (vote.startsWith("+")) {
-                previousVotes = {};
-            } else {
-                previousVotes = { [delegateVote]: 100 };
+            previousVotes.clear();
+            if (vote.startsWith("-")) {
+                previousVotes.set(delegateVote, 100);
             }
         }
 

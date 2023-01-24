@@ -49,7 +49,7 @@ export class VoteTransactionHandler extends TransactionHandler {
                 this.walletRepository.index(wallet);
             }
 
-            wallet.setAttribute("votes", Utils.sortVotes(transaction.asset.votes));
+            wallet.setAttribute("votes", new Map(Object.entries(Utils.sortVotes(transaction.asset.votes))));
         }
     }
 
@@ -128,7 +128,7 @@ export class VoteTransactionHandler extends TransactionHandler {
         AppUtils.assert.defined<Record<string, number>>(transaction.data.asset?.votes);
 
         AppUtils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
-        senderWallet.setAttribute("votes", Utils.sortVotes(transaction.data.asset?.votes));
+        senderWallet.setAttribute("votes", new Map(Object.entries(Utils.sortVotes(transaction.data.asset?.votes))));
         senderWallet.updateVoteBalances();
         AppUtils.increaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
     }
@@ -176,9 +176,14 @@ export class VoteTransactionHandler extends TransactionHandler {
             { offset: 0, limit: 1 },
         );
 
+        const delegateMap: Map<string, number> = new Map();
+
         if (results[0] && results[0].asset) {
             if (!Array.isArray(results[0].asset.votes)) {
-                return results[0].asset.votes!;
+                for (const [delegate, percent] of Object.entries(results[0].asset.votes!)) {
+                    delegateMap.set(delegate, percent);
+                }
+                return delegateMap;
             }
 
             const previousVote = (results[0].asset.votes as string[]).pop();
@@ -189,10 +194,10 @@ export class VoteTransactionHandler extends TransactionHandler {
                         .findByPublicKey(delegateVote)
                         .getAttribute("delegate.username");
                 }
-                return { [delegateVote]: 100 };
+                delegateMap.set(delegateVote, 100);
             }
         }
 
-        return {};
+        return delegateMap;
     }
 }

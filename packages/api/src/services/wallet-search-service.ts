@@ -81,7 +81,7 @@ export class WalletSearchService {
                     delegate,
                     publicKey: wallet.getPublicKey(),
                     balance: wallet.getBalance(),
-                    votes: wallet.getVoteDistribution(),
+                    votes: Object.fromEntries(wallet.getVoteDistribution().entries()),
                 };
             })
             .sort((a, b) => {
