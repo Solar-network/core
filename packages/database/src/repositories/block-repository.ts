@@ -413,7 +413,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
             .select("total_amount", "totalAmount")
             .select("total_fee", "totalFee")
             .select(
-                "(SELECT COALESCE(SUM(fee * burned_fee_percent / 100), 0) FROM transactions WHERE transactions.block_height = blocks.height)",
+                "(SELECT CAST(COALESCE(SUM(fee * burned_fee_percent / 100), 0) AS TEXT) FROM transactions WHERE transactions.block_height = blocks.height)",
                 "totalFeeBurned",
             )
             .select(
