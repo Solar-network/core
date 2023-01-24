@@ -130,17 +130,11 @@
     {
         "height": 500000,
         "acceptLegacySchnorrTransactions": true,
-        "bip340": true,
-        "htlcEnabled": true
+        "bip340": true
     },
     {
-        "height": 535780,
+        "height": 502441,
         "acceptLegacySchnorrTransactions": false,
-        "legacyTransfer": false,
-        "legacyVote": false
-    },
-    {
-        "height": 535884,
         "donations": {
             "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": {
                 "percent": 5,
@@ -150,6 +144,8 @@
                 "percent": 5,
                 "purpose": "voting"
             }
-        }
+        },
+        "legacyTransfer": false,
+        "legacyVote": false
     }
 ]
