@@ -21,7 +21,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
     }
 
     public async findBlockById(id: string): Promise<BlockModel> {
-        return (await this.findBlocksById[id])[0];
+        return (await this.findBlocksById([id]))[0];
     }
 
     public async findLatest(): Promise<Interfaces.IBlockData | undefined> {
