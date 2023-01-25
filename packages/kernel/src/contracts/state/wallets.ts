@@ -1,4 +1,4 @@
-import { Utils } from "@solar-network/crypto";
+import { Interfaces, Utils } from "@solar-network/crypto";
 
 export interface WalletBasic {
     address: string;
@@ -191,7 +191,7 @@ export interface WalletDelegateAttributes {
     donations: Utils.BigNumber;
     producedBlocks: number;
     rank?: number;
-    lastBlock?: string;
+    lastBlock?: Interfaces.IBlockData;
     round?: number;
     resigned?: boolean;
     version?: string;

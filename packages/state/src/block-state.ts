@@ -137,7 +137,7 @@ export class BlockState implements Contracts.State.BlockState {
         delegateAttribute.forgedFees = delegateAttribute.forgedFees.plus(block.data.totalFee);
         delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.plus(block.data.reward);
         delegateAttribute.donations = delegateAttribute.donations.plus(donations);
-        delegateAttribute.lastBlock = block.data.id;
+        delegateAttribute.lastBlock = block.getHeader(true);
 
         const balanceIncrease = block.data.reward
             .minus(donations)
@@ -173,8 +173,8 @@ export class BlockState implements Contracts.State.BlockState {
             false,
         );
 
-        if (results[0] && results[0].id) {
-            delegateAttribute.lastBlock = results[0].id;
+        if (results[0]) {
+            delegateAttribute.lastBlock = results[0];
         } else {
             delegateAttribute.lastBlock = undefined;
         }

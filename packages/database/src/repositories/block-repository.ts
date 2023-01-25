@@ -203,19 +203,14 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
         return result;
     }
 
-    public async getLastForgedBlocks(): Promise<{ id: string; height: number; username: string; timestamp: number }[]> {
-        return this.createQueryBuilder()
-            .select("id")
-            .select("height")
-            .select(
-                "CAST((SELECT identity FROM identities WHERE identities.id = identity_id LIMIT 1) AS TEXT)",
-                "username",
-            )
-            .select("timestamp")
-            .from("blocks")
-            .where("height IN (SELECT MAX(height) FROM blocks GROUP BY identity_id)")
-            .orderBy("timestamp", "DESC")
-            .run();
+    public async getLastForgedBlocks(): Promise<Interfaces.IBlockData[]> {
+        return this.toModel(
+            BlockModel,
+            await this.getFullQueryBuilder()
+                .where("height IN (SELECT MAX(height) FROM blocks GROUP BY identity_id)")
+                .orderBy("timestamp", "DESC")
+                .run(),
+        );
     }
 
     public async save(

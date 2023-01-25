@@ -40,7 +40,7 @@ export interface BlockRepository extends Repository {
             totalProduced: number;
         }[]
     >;
-    getLastForgedBlocks(): Promise<{ id: string; height: number; username: string; timestamp: number }[]>;
+    getLastForgedBlocks(): Promise<Interfaces.IBlockData[]>;
     save(
         blocks: Interfaces.IBlock[],
         missedBlocks: { timestamp: number; height: number; username: string }[],
