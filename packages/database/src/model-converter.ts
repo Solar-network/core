@@ -14,6 +14,7 @@ export class ModelConverter implements Contracts.Database.ModelConverter {
             if (model.username === null) {
                 delete model.username;
             }
+            model.totalFeeBurned = Utils.BigNumber.make(model.totalFeeBurned ?? Utils.BigNumber.ZERO);
             model.donations = Utils.calculateDonations(model.height, model.reward);
             return model;
         });
