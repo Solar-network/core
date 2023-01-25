@@ -165,18 +165,6 @@ export class AlreadyVotedError extends TransactionError {
     }
 }
 
-export class AlreadyVotedForSameDelegatesError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because these votes are identical to the existing votes");
-    }
-}
-
-export class NoVoteError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because the wallet has not voted");
-    }
-}
-
 export class ZeroPercentVoteError extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because the minimum amount for each vote is 0.01%");
