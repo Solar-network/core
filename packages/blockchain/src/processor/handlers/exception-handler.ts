@@ -25,10 +25,9 @@ export class ExceptionHandler implements BlockHandler {
 
         const id: string = block.data.id;
 
-        // Ensure the block has not been forged yet, as an exceptional block bypasses all other checks.
-        const forgedBlock: Interfaces.IBlock | undefined = await this.databaseInterceptor.getBlock(id);
+        const producedBlock: Interfaces.IBlock | undefined = await this.databaseInterceptor.getBlock(id);
 
-        if (forgedBlock || block.data.height !== this.blockchain.getLastBlock().data.height + 1) {
+        if (producedBlock || block.data.height !== this.blockchain.getLastBlock().data.height + 1) {
             this.blockchain.resetLastDownloadedBlock();
 
             return BlockProcessorResult.Rejected;

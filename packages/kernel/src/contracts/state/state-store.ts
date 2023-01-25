@@ -4,7 +4,7 @@ export interface BlockPing {
     count: number;
     first: number;
     last: number;
-    fromForger: boolean;
+    fromOurNode: boolean;
     block: Interfaces.IBlockData;
 }
 
@@ -152,7 +152,7 @@ export interface StateStore {
     /**
      * Push ping block
      */
-    pushPingBlock(block: Interfaces.IBlockData, fromForger?: boolean): void;
+    pushPingBlock(block: Interfaces.IBlockData, fromOurNode?: boolean): void;
 
     hasPolledForBlocks(): boolean;
 

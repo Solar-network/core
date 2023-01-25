@@ -53,7 +53,7 @@ export class BlockchainController extends Controller {
     public async search(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         const network = Managers.configManager.get("network");
 
-        const delegatesRegex: RegExp = new RegExp("^(?!_)(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?){1,20}$", "i");
+        const blockProducersRegex: RegExp = new RegExp("^(?!_)(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?){1,20}$", "i");
         const hexRegex: RegExp = new RegExp("^([a-z0-9]){21,64}$", "i");
         const publicKeysRegex: RegExp = new RegExp("^0([23]){1}([a-z0-9]){19,64}$", "i");
         const walletsRegex: RegExp = new RegExp(`^(${network.addressCharacter})([a-z1-9]{20,33})$`, "i");
@@ -63,7 +63,7 @@ export class BlockchainController extends Controller {
         const wallets: WalletSearchResource[] = [];
 
         if (
-            delegatesRegex.test(request.params.id) ||
+            blockProducersRegex.test(request.params.id) ||
             publicKeysRegex.test(request.params.id) ||
             walletsRegex.test(request.params.id)
         ) {

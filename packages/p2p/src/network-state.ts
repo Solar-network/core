@@ -6,19 +6,19 @@ import { Peer } from "./peer";
 
 class QuorumDetails {
     /**
-     * Number of peers or delegates on same height, with same block and same slot.
+     * Number of peers or block producers on same height, with same block and same slot.
      * Used for quorum calculation.
      */
     public hasQuorum = 0;
 
     /**
-     * Number of peers or delegates which do not meet the quorum requirements.
+     * Number of peers or block producers which do not meet the quorum requirements.
      * Used for quorum calculation.
      */
     public noQuorum = 0;
 
     /**
-     * Number of overheight peers or delegates.
+     * Number of overheight peers or block producers.
      */
     public overHeight = 0;
 
@@ -29,28 +29,28 @@ class QuorumDetails {
 
     /**
      * The following properties are not mutually exclusive and imply a peer
-     * or delegate is on the same `nodeHeight`.
+     * or block producer is on the same `nodeHeight`.
      */
 
     /**
-     * Number of peers or delegates that are on a different chain (forked).
+     * Number of peers or block producers that are on a different chain (forked).
      */
     public forked = 0;
 
     /**
-     * Number of peers or delegates with a different slot.
+     * Number of peers or block producers with a different slot.
      */
     public differentSlot = 0;
 
     /**
-     * Number of peers or delegates where forging is not allowed.
+     * Number of peers or block producers where production is not allowed.
      */
-    public forgingNotAllowed = 0;
+    public productionNotAllowed = 0;
 
     /**
-     * Delegates that participated in quorum calculations.
+     * Block producers that participated in quorum calculations.
      */
-    public delegates: { hasQuorum: string[]; noQuorum: string[]; noResponse: string[] } = {
+    public blockProducers: { hasQuorum: string[]; noQuorum: string[]; noResponse: string[] } = {
         hasQuorum: [],
         noQuorum: [],
         noResponse: [],
@@ -62,11 +62,11 @@ class QuorumDetails {
         return isFinite(quorum) ? quorum : 0;
     }
 
-    public canForge() {
+    public canProduceBlock() {
         const milestone = Managers.configManager.getMilestone();
         const threshold: number = Math.min(
             1,
-            (Math.floor(milestone.activeDelegates / 2) + 1) / (this.hasQuorum + this.noQuorum),
+            (Math.floor(milestone.activeBlockProducers / 2) + 1) / (this.hasQuorum + this.noQuorum),
         );
         return this.getQuorum() >= threshold;
     }
@@ -95,13 +95,13 @@ export class NetworkState implements Contracts.P2P.NetworkState {
     public static async analyze(
         monitor: Contracts.P2P.NetworkMonitor,
         repository: Contracts.P2P.PeerRepository,
-        delegatesOnThisNode: string[],
+        blockProducersOnThisNode: string[],
     ): Promise<Contracts.P2P.NetworkState> {
         const lastBlock: Interfaces.IBlock = monitor.app
             .get<any>(Container.Identifiers.BlockchainService)
             .getLastBlock();
 
-        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(
+        const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(
             monitor.app,
             lastBlock.data.height,
         );
@@ -116,28 +116,28 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         );
 
         const milestone = Managers.configManager.getMilestone();
-        if (delegatesOnThisNode.length > 0) {
+        if (blockProducersOnThisNode.length > 0) {
             const localPeer: Contracts.P2P.Peer = new Peer(
                 "127.0.0.1",
                 configuration.getRequired<number>("server.port"),
             );
-            localPeer.publicKeys = delegatesOnThisNode;
+            localPeer.publicKeys = blockProducersOnThisNode;
             localPeer.state = {
                 height: lastBlock.data.height,
-                forgingAllowed: slotInfo.forgingStatus,
+                allowed: slotInfo.status,
                 currentSlot: slotInfo.slotNumber,
                 header: lastBlock.getHeader(false),
             };
             peers.forEach((peer) => {
-                peer.publicKeys = peer.publicKeys.filter((publicKey) => !delegatesOnThisNode.includes(publicKey));
+                peer.publicKeys = peer.publicKeys.filter((publicKey) => !blockProducersOnThisNode.includes(publicKey));
             });
             peers.push(localPeer);
         }
-        peers = peers.filter((peer) => peer.isActiveDelegate());
+        peers = peers.filter((peer) => peer.isActiveBlockProducer());
 
-        const minimumDelegateReach = configuration.getOptional<number>(
-            "minimumDelegateReach",
-            Math.floor(milestone.activeDelegates / 2) + 1,
+        const minimumBlockProducerReach = configuration.getOptional<number>(
+            "minimumBlockProducerReach",
+            Math.floor(milestone.activeBlockProducers / 2) + 1,
         );
 
         if (monitor.isColdStart()) {
@@ -145,8 +145,8 @@ export class NetworkState implements Contracts.P2P.NetworkState {
             return new NetworkState(NetworkStateStatus.ColdStart, lastBlock, monitor);
         } else if (process.env.SOLAR_CORE_ENV === "test") {
             return new NetworkState(NetworkStateStatus.Test, lastBlock, monitor);
-        } else if (peers.flatMap((peer) => peer.publicKeys).length < minimumDelegateReach) {
-            return new NetworkState(NetworkStateStatus.BelowMinimumDelegates, lastBlock, monitor);
+        } else if (peers.flatMap((peer) => peer.publicKeys).length < minimumBlockProducerReach) {
+            return new NetworkState(NetworkStateStatus.BelowMinimumBlockProducers, lastBlock, monitor);
         }
 
         return await this.analyzeNetwork(lastBlock, peers, blockTimeLookup, monitor);
@@ -188,24 +188,24 @@ export class NetworkState implements Contracts.P2P.NetworkState {
             networkState.update(peer, currentSlot, monitor);
         }
 
-        const allDelegates: string[] = await monitor.getAllDelegates();
+        const allBlockProducers: string[] = await monitor.getAllBlockProducers();
         const quorumDetails: QuorumDetails = networkState.quorumDetails;
 
-        quorumDetails.delegates.noResponse = allDelegates.filter(
-            (delegate) =>
-                !quorumDetails.delegates.hasQuorum.includes(delegate) &&
-                !quorumDetails.delegates.noQuorum.includes(delegate),
+        quorumDetails.blockProducers.noResponse = allBlockProducers.filter(
+            (blockProducer) =>
+                !quorumDetails.blockProducers.hasQuorum.includes(blockProducer) &&
+                !quorumDetails.blockProducers.noQuorum.includes(blockProducer),
         );
 
         return networkState;
     }
 
-    public canForge(): boolean {
+    public canProduceBlock(): boolean {
         if (this.status === NetworkStateStatus.Test) {
             return true;
         }
 
-        return this.quorumDetails.canForge();
+        return this.quorumDetails.canProduceBlock();
     }
 
     public getNodeHeight(): number | undefined {
@@ -254,7 +254,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
         this.lastGenerator = lastBlock.data.username;
 
         if (monitor) {
-            const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(
+            const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(
                 monitor.app,
                 lastBlock.data.height,
             );
@@ -263,8 +263,8 @@ export class NetworkState implements Contracts.P2P.NetworkState {
     }
 
     private addToList(hasQuorum: boolean, peer: Contracts.P2P.Peer, monitor: Contracts.P2P.NetworkMonitor): void {
-        this.quorumDetails.delegates[hasQuorum ? "hasQuorum" : "noQuorum"].push(
-            ...peer.publicKeys.map((publicKey) => monitor.getDelegateName(publicKey)!),
+        this.quorumDetails.blockProducers[hasQuorum ? "hasQuorum" : "noQuorum"].push(
+            ...peer.publicKeys.map((publicKey) => monitor.getBlockProducerName(publicKey)!),
         );
     }
 
@@ -297,8 +297,8 @@ export class NetworkState implements Contracts.P2P.NetworkState {
             this.quorumDetails.differentSlot += increment;
         }
 
-        if (!peer.state.forgingAllowed) {
-            this.quorumDetails.forgingNotAllowed += increment;
+        if (!peer.state.allowed) {
+            this.quorumDetails.productionNotAllowed += increment;
         }
     }
 }

@@ -18,7 +18,7 @@ export class PinoLogger implements Contracts.Kernel.Logger {
     public async make(): Promise<Contracts.Kernel.Logger> {
         let stream: PassThrough | undefined;
         let transport: pino.TransportSingleOptions<Record<string, any>> | undefined;
-        if (["core", "forger", "relay"].includes(this.configFlags.processType)) {
+        if (["core", "producer", "relay"].includes(this.configFlags.processType)) {
             transport = {
                 target: "pino/file",
                 options: {

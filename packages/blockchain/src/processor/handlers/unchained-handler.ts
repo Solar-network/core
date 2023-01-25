@@ -9,7 +9,7 @@ enum UnchainedBlockStatus {
     AlreadyInBlockchain,
     EqualToLastBlock,
     GeneratorMismatch,
-    DoubleForging,
+    MultipleBlocks,
     InvalidTimestamp,
 }
 
@@ -38,14 +38,18 @@ export class UnchainedHandler implements BlockHandler {
         const status: UnchainedBlockStatus = this.checkUnchainedBlock(block);
 
         switch (status) {
-            case UnchainedBlockStatus.DoubleForging: {
+            case UnchainedBlockStatus.MultipleBlocks: {
                 const roundInfo: Contracts.Shared.RoundInfo = Utils.roundCalculator.calculateRound(block.data.height);
 
-                const delegates: Contracts.State.Wallet[] = (await this.triggers.call("getActiveDelegates", {
+                const blockProducers: Contracts.State.Wallet[] = (await this.triggers.call("getActiveBlockProducers", {
                     roundInfo,
                 })) as Contracts.State.Wallet[];
 
-                if (delegates.some((delegate) => delegate.getAttribute("delegate.username") === block.data.username)) {
+                if (
+                    blockProducers.some(
+                        (blockProducer) => blockProducer.getAttribute("username") === block.data.username,
+                    )
+                ) {
                     return BlockProcessorResult.Rollback;
                 }
 
@@ -77,7 +81,7 @@ export class UnchainedHandler implements BlockHandler {
             return UnchainedBlockStatus.InvalidTimestamp;
         } else {
             if (this.isValidGenerator) {
-                return UnchainedBlockStatus.DoubleForging;
+                return UnchainedBlockStatus.MultipleBlocks;
             }
             return UnchainedBlockStatus.GeneratorMismatch;
         }

@@ -35,46 +35,54 @@ export class InternalController extends Controller {
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
-        const allDelegates: Contracts.P2P.DelegateWallet[] = (await this.walletRepository.allByUsername()).map(
-            (wallet) => ({
+        const allBlockProducers: Contracts.P2P.BlockProducerWallet[] = this.walletRepository
+            .allByUsername()
+            .map((wallet: Contracts.State.Wallet) => ({
                 ...wallet.getData(),
-                delegate: wallet.getAttribute("delegate"),
-            }),
-        );
+                blockProducer: wallet.getAttribute("blockProducer"),
+                username: wallet.getAttribute("username"),
+            }));
 
-        const delegates: Contracts.P2P.DelegateWallet[] = (
-            (await this.triggers.call("getActiveDelegates", {
+        const blockProducers: Contracts.P2P.BlockProducerWallet[] = (
+            (await this.triggers.call("getActiveBlockProducers", {
                 roundInfo,
             })) as Contracts.State.Wallet[]
         ).map((wallet) => ({
             ...wallet.getData(),
-            delegate: wallet.getAttribute("delegate"),
+            blockProducer: wallet.getAttribute("blockProducer"),
+            username: wallet.getAttribute("username"),
         }));
 
-        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, height);
+        const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(this.app, height);
 
         const timestamp: number = Crypto.Slots.getTime();
-        const forgingInfo = Utils.forgingInfoCalculator.calculateForgingInfo(timestamp, height, blockTimeLookup);
+        const blockProductionInfo = Utils.blockProductionInfoCalculator.calculateBlockProductionInfo(
+            timestamp,
+            height,
+            blockTimeLookup,
+        );
 
         const { reward } =
-            delegates[forgingInfo.currentForger] &&
-            this.walletRepository.hasByUsername(delegates[forgingInfo.currentForger].delegate.username)
+            blockProducers[blockProductionInfo.currentBlockProducer] &&
+            this.walletRepository.hasByUsername(blockProducers[blockProductionInfo.currentBlockProducer].username)
                 ? await this.roundState.getRewardForBlockInRound(
                       height,
-                      this.walletRepository.findByUsername(delegates[forgingInfo.currentForger].delegate.username),
+                      this.walletRepository.findByUsername(
+                          blockProducers[blockProductionInfo.currentBlockProducer].username,
+                      ),
                   )
                 : Managers.configManager.getMilestone();
 
         return {
-            allDelegates,
-            canForge: forgingInfo.canForge,
+            allBlockProducers,
+            canProduceBlock: blockProductionInfo.canProduceBlock,
             current: roundInfo.round,
-            currentForger: delegates[forgingInfo.currentForger],
-            delegates,
+            currentBlockProducer: blockProducers[blockProductionInfo.currentBlockProducer],
+            blockProducers,
             lastBlock: lastBlock.data,
-            nextForger: delegates[forgingInfo.nextForger],
+            nextBlockProducer: blockProducers[blockProductionInfo.nextBlockProducer],
             reward: reward.toString(),
-            timestamp: forgingInfo.blockTimestamp,
+            timestamp: blockProductionInfo.blockTimestamp,
         };
     }
 
@@ -82,7 +90,7 @@ export class InternalController extends Controller {
         const lastBlock = this.blockchain.getLastBlock();
 
         const height = lastBlock.data.height + 1;
-        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, height);
+        const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(this.app, height);
         return Crypto.Slots.getSlotNumber(blockTimeLookup, (request.payload as { timestamp: number }).timestamp);
     }
 
@@ -91,7 +99,7 @@ export class InternalController extends Controller {
     }
 
     public syncBlockchain(request: Hapi.Request, h: Hapi.ResponseToolkit): boolean {
-        this.logger.debug("Blockchain sync check WAKEUP requested by forger", "🛏️");
+        this.logger.debug("Blockchain sync check WAKEUP requested by block producer module", "🛏️");
 
         this.blockchain.forceWakeup();
 

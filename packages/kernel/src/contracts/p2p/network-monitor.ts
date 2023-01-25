@@ -31,8 +31,8 @@ export interface NetworkMonitor {
         skipCommonBlocks?: boolean;
     }): Promise<void>;
     discoverPeers(pingAll?: boolean, addAll?: boolean, silent?: boolean): Promise<boolean>;
-    getAllDelegates(): Promise<string[]>;
-    getDelegateName(publicKey: string): string | undefined;
+    getAllBlockProducers(): Promise<string[]>;
+    getBlockProducerName(publicKey: string): string | undefined;
     getNetworkHeight(): number;
     getNetworkState(log?: boolean): Promise<NetworkState>;
     refreshPeersAfterFork(): Promise<void>;

@@ -1,12 +1,11 @@
 import { Errors, Managers } from "@solar-network/crypto";
 
 import { RoundInfo } from "../contracts/shared";
-import { getMilestonesWhichAffectActiveDelegateCount } from "./calculate-forging-info";
+import { getMilestonesWhichAffectActiveBlockProducerCount } from "./calculate-block-production-info";
 
 export const isNewRound = (height: number): boolean => {
     const milestones = Managers.configManager.get("milestones");
 
-    // Since milestones are merged, find the first milestone to introduce the delegate count.
     let milestone;
     for (let i = milestones.length - 1; i >= 0; i--) {
         const temp = milestones[i];
@@ -14,14 +13,14 @@ export const isNewRound = (height: number): boolean => {
             continue;
         }
 
-        if (!milestone || temp.activeDelegates === milestone.activeDelegates) {
+        if (!milestone || temp.activeBlockProducers === milestone.activeBlockProducers) {
             milestone = temp;
         } else {
             break;
         }
     }
 
-    return height === 1 || (height - milestone.height) % milestone.activeDelegates === 0;
+    return height === 1 || (height - milestone.height) % milestone.activeBlockProducers === 0;
 };
 
 export const calculateRound = (height: number): RoundInfo => {
@@ -29,14 +28,14 @@ export const calculateRound = (height: number): RoundInfo => {
         round: 1,
         roundHeight: 1,
         nextRound: 0,
-        maxDelegates: 0,
+        maxBlockProducers: 0,
     };
 
-    let nextMilestone = Managers.configManager.getNextMilestoneWithNewKey(1, "activeDelegates");
-    let activeDelegates = Managers.configManager.getMilestone(1).activeDelegates;
+    let nextMilestone = Managers.configManager.getNextMilestoneWithNewKey(1, "activeBlockProducers");
+    let activeBlockProducers = Managers.configManager.getMilestone(1).activeBlockProducers;
     let milestoneHeight = 1;
 
-    const milestones = getMilestonesWhichAffectActiveDelegateCount();
+    const milestones = getMilestonesWhichAffectActiveBlockProducerCount();
 
     for (let i = 0; i < milestones.length - 1; i++) {
         if (height < nextMilestone.height) {
@@ -44,30 +43,30 @@ export const calculateRound = (height: number): RoundInfo => {
         }
 
         const spanHeight = nextMilestone.height - milestoneHeight;
-        if (spanHeight % activeDelegates !== 0) {
+        if (spanHeight % activeBlockProducers !== 0) {
             throw new Errors.InvalidMilestoneConfigurationError(
-                `Bad milestone at height: ${height}. The number of delegates can only be changed at the beginning of a new round`,
+                `Bad milestone at height: ${height}. The number of block producers can only be changed at the beginning of a new round`,
             );
         }
 
-        result.round += spanHeight / activeDelegates;
+        result.round += spanHeight / activeBlockProducers;
         result.roundHeight = nextMilestone.height;
-        result.maxDelegates = nextMilestone.data;
+        result.maxBlockProducers = nextMilestone.data;
 
-        activeDelegates = nextMilestone.data;
+        activeBlockProducers = nextMilestone.data;
         milestoneHeight = nextMilestone.height;
 
-        nextMilestone = Managers.configManager.getNextMilestoneWithNewKey(nextMilestone.height, "activeDelegates");
+        nextMilestone = Managers.configManager.getNextMilestoneWithNewKey(nextMilestone.height, "activeBlockProducers");
     }
 
     const heightFromLastSpan = height - milestoneHeight;
-    const roundIncrease = Math.floor(heightFromLastSpan / activeDelegates);
-    const nextRoundIncrease = (heightFromLastSpan + 1) % activeDelegates === 0 ? 1 : 0;
+    const roundIncrease = Math.floor(heightFromLastSpan / activeBlockProducers);
+    const nextRoundIncrease = (heightFromLastSpan + 1) % activeBlockProducers === 0 ? 1 : 0;
 
     result.round += roundIncrease;
-    result.roundHeight += roundIncrease * activeDelegates;
+    result.roundHeight += roundIncrease * activeBlockProducers;
     result.nextRound = result.round + nextRoundIncrease;
-    result.maxDelegates = activeDelegates;
+    result.maxBlockProducers = activeBlockProducers;
 
     return result;
 };

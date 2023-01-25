@@ -62,14 +62,14 @@ export class Mempool implements Contracts.Pool.Mempool {
         }
     }
 
-    public async removeForgedTransaction(senderId: string, id: string): Promise<Interfaces.ITransaction[]> {
+    public async removeConfirmedTransaction(senderId: string, id: string): Promise<Interfaces.ITransaction[]> {
         const senderMempool = this.senderMempools.get(senderId);
         if (!senderMempool) {
             return [];
         }
 
         try {
-            return await senderMempool.removeForgedTransaction(id);
+            return await senderMempool.removeConfirmedTransaction(id);
         } finally {
             if (senderMempool.isDisposable()) {
                 this.senderMempools.delete(senderId);

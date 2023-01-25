@@ -35,9 +35,9 @@ export class RoundState implements Contracts.State.RoundState {
     private readonly logger!: Contracts.Kernel.Logger;
 
     private blocksInCurrentRound: Interfaces.IBlock[] = [];
-    private forgingDelegates: Contracts.State.Wallet[] = [];
+    private activeBlockProducers: Contracts.State.Wallet[] = [];
 
-    private missedBlocksToSave: { timestamp: number; height: number; username: string }[] = [];
+    private blockProductionFailuresToSave: { timestamp: number; height: number; username: string }[] = [];
     private roundsToSave: Record<
         number,
         { publicKey: string; balance: Utils.BigNumber; round: number; username: string }[]
@@ -49,8 +49,8 @@ export class RoundState implements Contracts.State.RoundState {
         await this.applyRound(block.data.height);
     }
 
-    public getMissedBlocksToSave(): { timestamp: number; height: number; username: string }[] {
-        return this.missedBlocksToSave;
+    public getBlockProductionFailuresToSave(): { timestamp: number; height: number; username: string }[] {
+        return this.blockProductionFailuresToSave;
     }
 
     public getRoundsToSave(): Record<
@@ -80,49 +80,48 @@ export class RoundState implements Contracts.State.RoundState {
         const roundInfo = this.getRound(block.data.height);
 
         this.blocksInCurrentRound = await this.getBlocksForRound();
-        await this.calcPreviousActiveDelegates(roundInfo, this.blocksInCurrentRound);
-        await this.setForgingDelegatesOfRound(roundInfo);
+        await this.calcPreviousActiveBlockProducers(roundInfo, this.blocksInCurrentRound);
+        await this.setActiveBlockProducersOfRound(roundInfo);
 
         await this.applyRound(block.data.height);
     }
 
-    public async getActiveDelegates(
+    public async getActiveBlockProducers(
         roundInfo?: Contracts.Shared.RoundInfo,
-        delegates?: Contracts.State.Wallet[],
+        blockProducers?: Contracts.State.Wallet[],
     ): Promise<Contracts.State.Wallet[]> {
         if (!roundInfo) {
             roundInfo = this.getRound();
         }
 
         if (
-            this.forgingDelegates.length &&
-            this.forgingDelegates[0].getAttribute<number>("delegate.round") === roundInfo.round
+            this.activeBlockProducers.length &&
+            this.activeBlockProducers[0].getAttribute<number>("blockProducer.round") === roundInfo.round
         ) {
-            return this.forgingDelegates;
+            return this.activeBlockProducers;
         }
 
-        // When called during applyRound we already know the delegates, so we don't have to query the database.
-        if (!delegates) {
-            delegates = (await this.databaseService.getRound(roundInfo.round)).map(({ balance, publicKey }) => {
-                const delegate: Contracts.State.Wallet = this.walletRepository.findByPublicKey(publicKey).clone();
-                delegate.setAttribute("delegate.round", roundInfo!.round);
-                delegate.setAttribute("delegate.voteBalance", Utils.BigNumber.make(balance));
+        if (!blockProducers) {
+            blockProducers = (await this.databaseService.getRound(roundInfo.round)).map(({ balance, publicKey }) => {
+                const blockProducer: Contracts.State.Wallet = this.walletRepository.findByPublicKey(publicKey).clone();
+                blockProducer.setAttribute("blockProducer.round", roundInfo!.round);
+                blockProducer.setAttribute("blockProducer.voteBalance", Utils.BigNumber.make(balance));
 
-                return delegate;
+                return blockProducer;
             });
         }
 
-        return this.shuffleDelegates(roundInfo, delegates);
+        return this.shuffleBlockProducers(roundInfo, blockProducers);
     }
 
-    public async detectMissedBlocks(block: Interfaces.IBlock): Promise<void> {
+    public async detectBlockProductionFailures(block: Interfaces.IBlock): Promise<void> {
         const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
         if (lastBlock.data.height === 1) {
             return;
         }
 
-        const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(
+        const blockTimeLookup = await AppUtils.blockProductionInfoCalculator.getBlockTimeLookup(
             this.app,
             lastBlock.data.height,
         );
@@ -137,70 +136,72 @@ export class RoundState implements Contracts.State.RoundState {
             Crypto.Slots.getSlotNumber(blockTimeLookup, lastBlock.data.timestamp),
         );
 
-        const missedSlots: number = currentSlot - lastSlot - 1;
+        const slotsWithoutBlocks: number = currentSlot - lastSlot - 1;
 
-        for (let i = 0; i < missedSlots; i++) {
-            const missedSlot: number = lastSlot + i + 1;
-            const delegate: Contracts.State.Wallet = this.forgingDelegates[missedSlot % this.forgingDelegates.length];
+        for (let i = 0; i < slotsWithoutBlocks; i++) {
+            const slotWithoutBlock: number = lastSlot + i + 1;
+            const blockProducer: Contracts.State.Wallet =
+                this.activeBlockProducers[slotWithoutBlock % this.activeBlockProducers.length];
 
             const timestamp: number = slotTime + blockTime * (i + 1);
-            const username: string = delegate.getAttribute("delegate.username");
+            const username: string = blockProducer.getAttribute("username");
 
-            if (i < this.forgingDelegates.length) {
-                this.logger.debug(`Delegate ${username} just missed a block`, "😔");
-                this.events.dispatch(Enums.ForgerEvent.Missing, {
-                    delegate,
+            if (i < this.activeBlockProducers.length) {
+                this.logger.debug(`${username} just failed to produce a block`, "😔");
+                this.events.dispatch(Enums.BlockProducerEvent.Failed, {
+                    height,
+                    timestamp,
+                    username,
                 });
             }
 
-            this.missedBlocksToSave.push({ timestamp, height, username });
+            this.blockProductionFailuresToSave.push({ timestamp, height, username });
         }
     }
 
     public async getRewardForBlockInRound(
         height: number,
         wallet: Contracts.State.Wallet,
-    ): Promise<{ alreadyForged: boolean; reward: Utils.BigNumber }> {
+    ): Promise<{ alreadyProducedBlock: boolean; reward: Utils.BigNumber }> {
         const { dynamicReward } = Managers.configManager.getMilestone(height);
-        let alreadyForged: boolean = false;
+        let alreadyProducedBlock: boolean = false;
         let reward: Utils.BigNumber | undefined = undefined;
         if (dynamicReward && dynamicReward.enabled) {
-            alreadyForged = this.blocksInCurrentRound.some(
-                (blockGenerator) => blockGenerator.data.username === wallet.getAttribute("delegate.username"),
+            alreadyProducedBlock = this.blocksInCurrentRound.some(
+                (blockGenerator) => blockGenerator.data.username === wallet.getAttribute("username"),
             );
-            if (alreadyForged) {
+            if (alreadyProducedBlock) {
                 reward = Utils.BigNumber.make(dynamicReward.secondaryReward);
             }
         }
 
         if (reward === undefined) {
-            reward = Utils.calculateReward(height, wallet.getAttribute("delegate.rank"));
+            reward = Utils.calculateReward(height, wallet.getAttribute("blockProducer.rank"));
         }
 
-        return { alreadyForged, reward };
+        return { alreadyProducedBlock, reward };
     }
 
     private async applyRound(height: number): Promise<void> {
         if (height === 1 || AppUtils.roundCalculator.isNewRound(height + 1)) {
             const roundInfo = this.getRound(height + 1);
 
+            this.detectFailedBlockProducersInRound(roundInfo.round - 1);
             this.logger.info(`Starting round ${roundInfo.round.toLocaleString()}`, "🕊️");
 
-            this.detectMissedRound();
+            this.dposState.buildBlockProducerRanking();
+            this.dposState.setBlockProducersRound(roundInfo);
 
-            this.dposState.buildDelegateRanking();
-            this.dposState.setDelegatesRound(roundInfo);
+            const roundBlockProducers = this.dposState.getRoundBlockProducers();
 
-            const roundDelegates = this.dposState.getRoundDelegates();
+            await this.setActiveBlockProducersOfRound(roundInfo, roundBlockProducers.slice());
 
-            await this.setForgingDelegatesOfRound(roundInfo, roundDelegates.slice());
-
-            this.roundsToSave[height] = roundDelegates.map((delegate: Contracts.State.Wallet) => ({
-                balance: delegate.getAttribute("delegate.voteBalance"),
+            this.roundsToSave[height] = roundBlockProducers.map((blockProducer: Contracts.State.Wallet) => ({
+                balance: blockProducer.getAttribute("blockProducer.voteBalance"),
                 roundHeight: roundInfo.roundHeight,
-                publicKey: delegate.getPublicKey("primary")!,
-                round: delegate.getAttribute("delegate.round"),
-                username: delegate.getAttribute("delegate.username"),
+                publicKey: blockProducer.getPublicKey("primary")!,
+                round: blockProducer.getAttribute("blockProducer.round"),
+                username: blockProducer.getAttribute("username"),
             }));
 
             this.blocksInCurrentRound = [];
@@ -216,24 +217,29 @@ export class RoundState implements Contracts.State.RoundState {
         if (nextRound === round + 1) {
             this.logger.info(`Back to previous round: ${round.toLocaleString()}`, "⬅️");
 
-            await this.setForgingDelegatesOfRound(
+            await this.setActiveBlockProducersOfRound(
                 roundInfo,
-                await this.calcPreviousActiveDelegates(roundInfo, this.blocksInCurrentRound),
+                await this.calcPreviousActiveBlockProducers(roundInfo, this.blocksInCurrentRound),
             );
         }
     }
 
-    private detectMissedRound(): void {
-        for (const delegate of this.forgingDelegates) {
+    private detectFailedBlockProducersInRound(round: number): void {
+        for (const blockProducer of this.activeBlockProducers) {
+            const username = blockProducer.getAttribute("username");
             const isBlockProduced = this.blocksInCurrentRound.some(
-                (blockGenerator) => blockGenerator.data.username === delegate.getAttribute("delegate.username"),
+                (blockGenerator) => blockGenerator.data.username === username,
             );
 
             if (!isBlockProduced) {
-                this.logger.debug(`Delegate ${delegate.getAttribute("delegate.username")} just missed a round`, "😰");
+                this.logger.debug(
+                    `${blockProducer.getAttribute("username")} failed to produce a block in this round`,
+                    "😰",
+                );
 
-                this.events.dispatch(Enums.RoundEvent.Missed, {
-                    delegate,
+                this.events.dispatch(Enums.RoundEvent.Failed, {
+                    username,
+                    round,
                 });
             }
         }
@@ -268,25 +274,25 @@ export class RoundState implements Contracts.State.RoundState {
         );
     }
 
-    private shuffleDelegates(
+    private shuffleBlockProducers(
         roundInfo: Contracts.Shared.RoundInfo,
-        delegates: Contracts.State.Wallet[],
+        blockProducers: Contracts.State.Wallet[],
     ): Contracts.State.Wallet[] {
         const seedSource: string = roundInfo.round.toString();
         let currentSeed: Buffer = Crypto.HashAlgorithms.sha256(seedSource);
 
-        delegates = delegates.map((delegate) => delegate.clone());
-        for (let i = 0, delCount = delegates.length; i < delCount; i++) {
-            for (let x = 0; x < 4 && i < delCount; i++, x++) {
-                const newIndex = currentSeed[x] % delCount;
-                const b = delegates[newIndex];
-                delegates[newIndex] = delegates[i];
-                delegates[i] = b;
+        blockProducers = blockProducers.map((blockProducer) => blockProducer.clone());
+        for (let i = 0, blockProducerCount = blockProducers.length; i < blockProducerCount; i++) {
+            for (let x = 0; x < 4 && i < blockProducerCount; i++, x++) {
+                const newIndex = currentSeed[x] % blockProducerCount;
+                const b = blockProducers[newIndex];
+                blockProducers[newIndex] = blockProducers[i];
+                blockProducers[i] = b;
             }
             currentSeed = Crypto.HashAlgorithms.sha256(currentSeed);
         }
 
-        return delegates;
+        return blockProducers;
     }
 
     private getRound(height?: number): Contracts.Shared.RoundInfo {
@@ -297,32 +303,29 @@ export class RoundState implements Contracts.State.RoundState {
         return AppUtils.roundCalculator.calculateRound(height);
     }
 
-    private async setForgingDelegatesOfRound(
+    private async setActiveBlockProducersOfRound(
         roundInfo: Contracts.Shared.RoundInfo,
-        delegates?: Contracts.State.Wallet[],
+        blockProducers?: Contracts.State.Wallet[],
     ): Promise<void> {
-        // ! it's this.getActiveDelegates(roundInfo, delegates);
-        // ! only last part of that function which reshuffles delegates is used
-        const result = await this.triggers.call("getActiveDelegates", { roundInfo, delegates });
-        this.forgingDelegates = (result as Contracts.State.Wallet[]) || [];
+        const result = await this.triggers.call("getActiveBlockProducers", { roundInfo, blockProducers });
+        this.activeBlockProducers = (result as Contracts.State.Wallet[]) || [];
     }
 
-    private async calcPreviousActiveDelegates(
+    private async calcPreviousActiveBlockProducers(
         roundInfo: Contracts.Shared.RoundInfo,
         blocks: Interfaces.IBlock[],
     ): Promise<Contracts.State.Wallet[]> {
         const prevRoundState = await this.getDposPreviousRoundState(blocks, roundInfo);
 
-        // TODO: Move to Dpos
-        for (const prevRoundDelegateWallet of prevRoundState.getActiveDelegates()) {
-            // ! name suggest that this is pure function
-            // ! when in fact it is manipulating current wallet repository setting delegate ranks
-            const username = prevRoundDelegateWallet.getAttribute("delegate.username");
-            const delegateWallet = this.walletRepository.findByUsername(username);
-            delegateWallet.setAttribute("delegate.rank", prevRoundDelegateWallet.getAttribute("delegate.rank"));
+        for (const prevRoundBlockProducerWallet of prevRoundState.getActiveBlockProducers()) {
+            const username = prevRoundBlockProducerWallet.getAttribute("username");
+            const blockProducerWallet = this.walletRepository.findByUsername(username);
+            blockProducerWallet.setAttribute(
+                "blockProducer.rank",
+                prevRoundBlockProducerWallet.getAttribute("blockProducer.rank"),
+            );
         }
 
-        // ! return readonly array instead of taking slice
-        return prevRoundState.getRoundDelegates().slice();
+        return prevRoundState.getRoundBlockProducers().slice();
     }
 }

@@ -2,10 +2,10 @@ import { Container, Providers, Services } from "@solar-network/kernel";
 
 import {
     BurnTransactionHandler,
-    DelegateRegistrationTransactionHandler,
-    DelegateResignationTransactionHandler,
     ExtraSignatureRegistrationTransactionHandler,
     IpfsTransactionHandler,
+    RegistrationTransactionHandler,
+    ResignationTransactionHandler,
     TransactionHandlerConstructor,
     TransferTransactionHandler,
     VoteTransactionHandler,
@@ -60,8 +60,8 @@ export class ServiceProvider extends Providers.ServiceProvider {
             .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("state", "null"));
 
         this.app.bind(Container.Identifiers.TransactionHandler).to(BurnTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(DelegateRegistrationTransactionHandler);
-        this.app.bind(Container.Identifiers.TransactionHandler).to(DelegateResignationTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(RegistrationTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(ResignationTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(ExtraSignatureRegistrationTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(IpfsTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(TransferTransactionHandler);

@@ -39,7 +39,7 @@ export class AcceptBlockHandler implements BlockHandler {
             }
 
             for (const transaction of block.transactions) {
-                await this.pool.removeForgedTransaction(transaction);
+                await this.pool.removeConfirmedTransaction(transaction);
             }
 
             // Reset wake-up timer after chaining a block, since there's no need to

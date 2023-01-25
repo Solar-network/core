@@ -363,12 +363,12 @@ export class StateStore implements Contracts.State.StateStore {
     /**
      * Push ping block.
      */
-    public pushPingBlock(block: Interfaces.IBlockData, fromForger = false): void {
+    public pushPingBlock(block: Interfaces.IBlockData, fromOurNode = false): void {
         this.blockPing = {
-            count: fromForger ? 0 : 1,
+            count: fromOurNode ? 0 : 1,
             first: Date.now(),
             last: Date.now(),
-            fromForger: fromForger,
+            fromOurNode,
             block,
         };
     }

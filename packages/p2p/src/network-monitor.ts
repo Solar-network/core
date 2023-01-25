@@ -179,7 +179,10 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         const peerErrors = {};
 
         const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
-        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, lastBlock.data.height);
+        const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(
+            this.app,
+            lastBlock.data.height,
+        );
 
         const pingedPeers: Set<Contracts.P2P.Peer> = new Set();
 
@@ -320,7 +323,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     public async getNetworkState(log: boolean = true): Promise<Contracts.P2P.NetworkState> {
         await this.cleansePeers({ fast: true, forcePing: true, log, skipCommonBlocks: true });
-        return await NetworkState.analyze(this, this.repository, await this.getDelegatesOnThisNode());
+        return await NetworkState.analyze(this, this.repository, await this.getBlockProducersOnThisNode());
     }
 
     public async refreshPeersAfterFork(): Promise<void> {
@@ -349,7 +352,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             "127.0.0.1",
             this.configuration.getRequired<number>("server.port"),
         );
-        localPeer.publicKeys = await this.getDelegatesOnThisNode();
+        localPeer.publicKeys = await this.getBlockProducersOnThisNode();
         localPeer.verificationResult = new PeerVerificationResult(
             lastBlock.data.height,
             lastBlock.data.height,
@@ -362,7 +365,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         peers.push(localPeer);
 
         for (const peer of peers) {
-            if (peer.isActiveDelegate()) {
+            if (peer.isActiveBlockProducer()) {
                 for (let i = 0; i < peer.publicKeys.length; i++) {
                     includedPeers.push(peer);
                 }
@@ -371,7 +374,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
             }
         }
 
-        const halfPlusOne: number = Math.floor(milestone.activeDelegates / 2) + 1;
+        const halfPlusOne: number = Math.floor(milestone.activeBlockProducers / 2) + 1;
 
         if (includedPeers.length < halfPlusOne) {
             includedPeers.push(...relayPeers);
@@ -440,22 +443,22 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         return { forked: false };
     }
 
-    public async getAllDelegates(): Promise<string[]> {
+    public async getAllBlockProducers(): Promise<string[]> {
         const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
         return (
-            (await this.triggers.call("getActiveDelegates", {
+            (await this.triggers.call("getActiveBlockProducers", {
                 roundInfo,
             })) as Contracts.State.Wallet[]
-        ).map((wallet) => wallet.getAttribute("delegate.username"));
+        ).map((wallet) => wallet.getAttribute("username"));
     }
 
-    public getDelegateName(publicKey: string): string | undefined {
+    public getBlockProducerName(publicKey: string): string | undefined {
         if (this.walletRepository.hasByPublicKey(publicKey)) {
-            return this.walletRepository.findByPublicKey(publicKey).getAttribute("delegate.username");
+            return this.walletRepository.findByPublicKey(publicKey).getAttribute("username");
         }
         return undefined;
     }
@@ -576,7 +579,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
                         });
 
                         if (blocks.length > 0 || isLastChunk) {
-                            // when `isLastChunk` it can be normal that the peer does not send any block (when none were forged)
+                            // when `isLastChunk` it can be normal that the peer does not send any block (when none were produced)
                             if (!silent) {
                                 this.logger.debug(
                                     `Downloaded blocks ${blocksRange} (${blocks.length}) ` + `from ${peerPrint}`,
@@ -722,7 +725,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
         let blockPing = blockchain.getBlockPing();
 
-        if (blockPing && blockPing.block.id === block.data.id && !blockPing.fromForger) {
+        if (blockPing && blockPing.block.id === block.data.id && !blockPing.fromOurNode) {
             const diff = blockPing.last - blockPing.first;
             if (diff < 500) {
                 await Utils.sleep(500 - diff);
@@ -823,33 +826,33 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         }
     }
 
-    private async getDelegatesOnThisNode(): Promise<string[]> {
+    private async getBlockProducersOnThisNode(): Promise<string[]> {
         const lastBlock: Interfaces.IBlock = this.stateStore.getLastBlock();
 
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
-        const delegates: (string | undefined)[] = (
-            (await this.triggers.call("getActiveDelegates", {
+        const blockProducers: (string | undefined)[] = (
+            (await this.triggers.call("getActiveBlockProducers", {
                 roundInfo,
             })) as Contracts.State.Wallet[]
         ).map((wallet) => wallet.getPublicKey("primary"));
 
-        const delegatesOnThisNode: string[] = [];
-        const publicKeys = Utils.getForgerDelegates();
+        const blockProducersOnThisNode: string[] = [];
+        const publicKeys = Utils.getConfiguredBlockProducers();
         if (publicKeys.length > 0) {
-            const { keys } = readJsonSync(`${this.app.configPath()}/delegates.json`);
+            const { keys } = readJsonSync(`${this.app.configPath()}/producer.json`);
             for (const key of keys) {
                 const keyPair: Interfaces.IKeyPair = Identities.Keys.fromPrivateKey(key);
                 if (
-                    delegates.includes(keyPair.publicKey.secp256k1) &&
+                    blockProducers.includes(keyPair.publicKey.secp256k1) &&
                     publicKeys.includes(keyPair.publicKey.secp256k1)
                 ) {
-                    delegatesOnThisNode.push(keyPair.publicKey.secp256k1);
+                    blockProducersOnThisNode.push(keyPair.publicKey.secp256k1);
                 }
             }
         }
-        return delegatesOnThisNode;
+        return blockProducersOnThisNode;
     }
 
     private async scheduleUpdateNetworkStatus(nextUpdateInSeconds): Promise<void> {

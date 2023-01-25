@@ -9,13 +9,13 @@ export class RoundsController extends Controller {
     @Container.inject(Container.Identifiers.DatabaseRoundRepository)
     private readonly roundRepository!: Contracts.Database.RoundRepository;
 
-    public async delegates(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object | Boom.Boom> {
-        const delegates = await this.roundRepository.getRound(+request.params.id);
+    public async index(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object | Boom.Boom> {
+        const blockProducers = await this.roundRepository.getRound(+request.params.id);
 
-        if (!delegates || !delegates.length) {
+        if (!blockProducers || !blockProducers.length) {
             return Boom.notFound("Round not found");
         }
 
-        return this.respondWithCollection(delegates, RoundResource);
+        return this.respondWithCollection(blockProducers, RoundResource);
     }
 }

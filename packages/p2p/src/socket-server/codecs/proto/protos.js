@@ -3161,7 +3161,7 @@ $root.peer = (function() {
              * @memberof peer.GetStatusResponse
              * @interface IState
              * @property {number|null} [height] State height
-             * @property {boolean|null} [forgingAllowed] State forgingAllowed
+             * @property {boolean|null} [allowed] State allowed
              * @property {number|null} [currentSlot] State currentSlot
              * @property {peer.GetStatusResponse.State.IBlockHeader|null} [header] State header
              */
@@ -3190,12 +3190,12 @@ $root.peer = (function() {
             State.prototype.height = 0;
 
             /**
-             * State forgingAllowed.
-             * @member {boolean} forgingAllowed
+             * State allowed.
+             * @member {boolean} allowed
              * @memberof peer.GetStatusResponse.State
              * @instance
              */
-            State.prototype.forgingAllowed = false;
+            State.prototype.allowed = false;
 
             /**
              * State currentSlot.
@@ -3239,8 +3239,8 @@ $root.peer = (function() {
                     writer = $Writer.create();
                 if (message.height != null && Object.hasOwnProperty.call(message, "height"))
                     writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.height);
-                if (message.forgingAllowed != null && Object.hasOwnProperty.call(message, "forgingAllowed"))
-                    writer.uint32(/* id 2, wireType 0 =*/16).bool(message.forgingAllowed);
+                if (message.allowed != null && Object.hasOwnProperty.call(message, "allowed"))
+                    writer.uint32(/* id 2, wireType 0 =*/16).bool(message.allowed);
                 if (message.currentSlot != null && Object.hasOwnProperty.call(message, "currentSlot"))
                     writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.currentSlot);
                 if (message.header != null && Object.hasOwnProperty.call(message, "header"))
@@ -3283,7 +3283,7 @@ $root.peer = (function() {
                         message.height = reader.uint32();
                         break;
                     case 2:
-                        message.forgingAllowed = reader.bool();
+                        message.allowed = reader.bool();
                         break;
                     case 3:
                         message.currentSlot = reader.uint32();
@@ -3329,9 +3329,9 @@ $root.peer = (function() {
                 if (message.height != null && message.hasOwnProperty("height"))
                     if (!$util.isInteger(message.height))
                         return "height: integer expected";
-                if (message.forgingAllowed != null && message.hasOwnProperty("forgingAllowed"))
-                    if (typeof message.forgingAllowed !== "boolean")
-                        return "forgingAllowed: boolean expected";
+                if (message.allowed != null && message.hasOwnProperty("allowed"))
+                    if (typeof message.allowed !== "boolean")
+                        return "allowed: boolean expected";
                 if (message.currentSlot != null && message.hasOwnProperty("currentSlot"))
                     if (!$util.isInteger(message.currentSlot))
                         return "currentSlot: integer expected";
@@ -3357,8 +3357,8 @@ $root.peer = (function() {
                 var message = new $root.peer.GetStatusResponse.State();
                 if (object.height != null)
                     message.height = object.height >>> 0;
-                if (object.forgingAllowed != null)
-                    message.forgingAllowed = Boolean(object.forgingAllowed);
+                if (object.allowed != null)
+                    message.allowed = Boolean(object.allowed);
                 if (object.currentSlot != null)
                     message.currentSlot = object.currentSlot >>> 0;
                 if (object.header != null) {
@@ -3384,14 +3384,14 @@ $root.peer = (function() {
                 var object = {};
                 if (options.defaults) {
                     object.height = 0;
-                    object.forgingAllowed = false;
+                    object.allowed = false;
                     object.currentSlot = 0;
                     object.header = null;
                 }
                 if (message.height != null && message.hasOwnProperty("height"))
                     object.height = message.height;
-                if (message.forgingAllowed != null && message.hasOwnProperty("forgingAllowed"))
-                    object.forgingAllowed = message.forgingAllowed;
+                if (message.allowed != null && message.hasOwnProperty("allowed"))
+                    object.allowed = message.allowed;
                 if (message.currentSlot != null && message.hasOwnProperty("currentSlot"))
                     object.currentSlot = message.currentSlot;
                 if (message.header != null && message.hasOwnProperty("header"))

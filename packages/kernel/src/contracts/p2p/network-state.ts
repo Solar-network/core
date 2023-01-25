@@ -1,7 +1,7 @@
 export interface NetworkState {
     readonly status: any;
 
-    canForge();
+    canProduceBlock();
 
     getNodeHeight(): number | undefined;
     getLastBlockId(): string | undefined;

@@ -46,19 +46,19 @@ export class BlocksController extends Controller {
             throw new TooManyTransactionsError(deserialisedHeader.data);
         }
 
-        const fromForger: boolean = AppUtils.isWhitelisted(
+        const fromOurNode: boolean = AppUtils.isWhitelisted(
             this.configuration.getOptional<string[]>("remoteAccess", []),
             request.info.remoteAddress,
         );
 
-        if (!fromForger) {
+        if (!fromOurNode) {
             if (this.blockchain.pingBlock(deserialisedHeader.data)) {
                 return { status: true, height: this.blockchain.getLastHeight() };
             }
 
             const lastDownloadedBlock: Interfaces.IBlockData = this.blockchain.getLastDownloadedBlock();
 
-            const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(
+            const blockTimeLookup = await AppUtils.blockProductionInfoCalculator.getBlockTimeLookup(
                 this.app,
                 deserialisedHeader.data.height,
             );
@@ -87,12 +87,12 @@ export class BlocksController extends Controller {
 
         const generatorWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(username);
 
-        if (!generatorWallet.hasAttribute("delegate.rank")) {
+        if (!generatorWallet.hasAttribute("blockProducer.rank")) {
             return { status: false, height: this.blockchain.getLastHeight() };
         }
 
-        const rank = generatorWallet.getAttribute("delegate.rank");
-        const generator: string = `delegate ${username} (#${rank})`;
+        const rank = generatorWallet.getAttribute("blockProducer.rank");
+        const generator: string = `${username} (#${rank})`;
 
         this.logger.info(
             `Received new block by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
@@ -104,9 +104,12 @@ export class BlocksController extends Controller {
         const { dynamicReward } = Managers.configManager.getMilestone();
 
         if (dynamicReward && dynamicReward.enabled && reward.isEqualTo(dynamicReward.secondaryReward)) {
-            const { alreadyForged } = await this.roundState.getRewardForBlockInRound(height, generatorWallet);
-            if (alreadyForged && !reward.isEqualTo(dynamicReward.ranks[rank])) {
-                this.logger.info(`The reward was reduced because ${username} already forged in this round`, "🪙");
+            const { alreadyProducedBlock } = await this.roundState.getRewardForBlockInRound(height, generatorWallet);
+            if (alreadyProducedBlock && !reward.isEqualTo(dynamicReward.ranks[rank])) {
+                this.logger.info(
+                    `The reward was reduced because ${username} already produced a block in this round`,
+                    "🪙",
+                );
             }
         }
 
@@ -119,7 +122,7 @@ export class BlocksController extends Controller {
             numberOfTransactions === 0 ? "🪹" : "🪺",
         );
 
-        this.blockchain.handleIncomingBlock(block, fromForger, ip);
+        this.blockchain.handleIncomingBlock(block, fromOurNode, ip);
 
         return { status: true, height: this.blockchain.getLastHeight() };
     }

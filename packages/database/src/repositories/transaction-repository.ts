@@ -49,7 +49,7 @@ export class TransactionRepository
         );
     }
 
-    public async getForgedTransactionsIds(ids: string[]): Promise<string[]> {
+    public async getConfirmedTransactionIds(ids: string[]): Promise<string[]> {
         const transactions = this.toModel(
             TransactionModel,
             await this.createQueryBuilder()

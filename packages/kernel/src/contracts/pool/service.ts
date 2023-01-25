@@ -8,11 +8,11 @@ export interface Service {
     addTransaction(transaction: Interfaces.ITransaction): Promise<void>;
     getPoolWallet(address: string): Wallet | undefined;
     readdTransactions(
-        previouslyForgedTransactions?: Interfaces.ITransaction[],
+        previouslyConfirmedTransactions?: Interfaces.ITransaction[],
         recheckValidity?: boolean,
     ): Promise<void>;
     removeTransaction(transaction: Interfaces.ITransaction): Promise<void>;
-    removeForgedTransaction(transaction: Interfaces.ITransaction): Promise<void>;
+    removeConfirmedTransaction(transaction: Interfaces.ITransaction): Promise<void>;
     cleanUp(): Promise<void>;
     flush(): Promise<void>;
 }

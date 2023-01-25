@@ -88,7 +88,7 @@ export class SenderMempool implements Contracts.Pool.SenderMempool {
         }
     }
 
-    public async removeForgedTransaction(id: string): Promise<Interfaces.ITransaction[]> {
+    public async removeConfirmedTransaction(id: string): Promise<Interfaces.ITransaction[]> {
         try {
             this.concurrency++;
 

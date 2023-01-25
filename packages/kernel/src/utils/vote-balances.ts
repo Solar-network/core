@@ -24,20 +24,29 @@ const increaseOrDecreaseVoteBalances = (
         walletRepository,
     }: { operation: string; updateVoters?: boolean; walletRepository: WalletRepository },
 ) => {
-    const delegates: Map<string, WalletVoteDistribution> = wallet.getVoteDistribution();
-    for (const [delegate, { votes }] of delegates.entries()) {
-        const delegateWallet = walletRepository.findByUsername(delegate);
-        const voteBalance: Utils.BigNumber = delegateWallet.getAttribute("delegate.voteBalance", Utils.BigNumber.ZERO);
+    const blockProducers: Map<string, WalletVoteDistribution> = wallet.getVoteDistribution();
+    for (const [blockProducer, { votes }] of blockProducers.entries()) {
+        const blockProducerWallet = walletRepository.findByUsername(blockProducer);
+        const voteBalance: Utils.BigNumber = blockProducerWallet.getAttribute(
+            "blockProducer.voteBalance",
+            Utils.BigNumber.ZERO,
+        );
 
         if (operation === "increase") {
-            delegateWallet.setAttribute("delegate.voteBalance", voteBalance.plus(votes));
+            blockProducerWallet.setAttribute("blockProducer.voteBalance", voteBalance.plus(votes));
             if (updateVoters) {
-                delegateWallet.setAttribute("delegate.voters", delegateWallet.getAttribute("delegate.voters") + 1);
+                blockProducerWallet.setAttribute(
+                    "blockProducer.voters",
+                    blockProducerWallet.getAttribute("blockProducer.voters") + 1,
+                );
             }
         } else if (operation === "decrease") {
-            delegateWallet.setAttribute("delegate.voteBalance", voteBalance.minus(votes));
+            blockProducerWallet.setAttribute("blockProducer.voteBalance", voteBalance.minus(votes));
             if (updateVoters) {
-                delegateWallet.setAttribute("delegate.voters", delegateWallet.getAttribute("delegate.voters") - 1);
+                blockProducerWallet.setAttribute(
+                    "blockProducer.voters",
+                    blockProducerWallet.getAttribute("blockProducer.voters") - 1,
+                );
             }
         }
     }

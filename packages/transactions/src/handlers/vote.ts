@@ -1,8 +1,8 @@
 import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/kernel";
 
-import { VotedForNonDelegateError, VotedForTooManyDelegatesError, ZeroPercentVoteError } from "../errors";
-import { DelegateRegistrationTransactionHandler } from "./delegate-registration";
+import { VotedForNonBlockProducerError, VotedForTooManyBlockProducersError, ZeroPercentVoteError } from "../errors";
+import { RegistrationTransactionHandler } from "./registration";
 import { TransactionHandler, TransactionHandlerConstructor } from "./transaction";
 
 @Container.injectable()
@@ -17,7 +17,7 @@ export class VoteTransactionHandler extends TransactionHandler {
     private readonly poolQuery!: Contracts.Pool.Query;
 
     public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
-        return [DelegateRegistrationTransactionHandler];
+        return [RegistrationTransactionHandler];
     }
 
     public walletAttributes(): ReadonlyArray<string> {
@@ -65,25 +65,25 @@ export class VoteTransactionHandler extends TransactionHandler {
     ): Promise<void> {
         AppUtils.assert.defined<string[]>(transaction.data.asset?.votes);
 
-        const { activeDelegates, transactionVersions } = Managers.configManager.getMilestone();
+        const { activeBlockProducers, transactionVersions } = Managers.configManager.getMilestone();
         const v2 = transactionVersions.includes(2);
 
         const votes = Object.keys(transaction.data.asset.votes);
 
-        if (votes.length > activeDelegates) {
-            throw new VotedForTooManyDelegatesError(activeDelegates);
+        if (votes.length > activeBlockProducers) {
+            throw new VotedForTooManyBlockProducersError(activeBlockProducers);
         }
 
         if (!v2 && Object.values(transaction.data.asset.votes).some((percent) => percent === 0)) {
             throw new ZeroPercentVoteError();
         }
 
-        for (const delegate of votes) {
+        for (const blockProducer of votes) {
             if (
-                (transaction.data.version > 2 && delegate.length == 66) ||
-                (delegate.length != 66 && !this.walletRepository.hasByUsername(delegate))
+                (transaction.data.version > 2 && blockProducer.length == 66) ||
+                (blockProducer.length != 66 && !this.walletRepository.hasByUsername(blockProducer))
             ) {
-                throw new VotedForNonDelegateError(delegate);
+                throw new VotedForNonBlockProducerError(blockProducer);
             }
         }
 
@@ -182,7 +182,7 @@ export class VoteTransactionHandler extends TransactionHandler {
         const votes: Map<string, number> = new Map();
         for (let [name, percent] of Object.entries(assetVotes ?? {})) {
             if (name.length === 66) {
-                name = this.walletRepository.findByPublicKey(name).getAttribute("delegate.username");
+                name = this.walletRepository.findByPublicKey(name).getAttribute("username");
             }
 
             if (percent > 0) {

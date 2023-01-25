@@ -21,7 +21,7 @@ bash install.sh
 
 Choose whether you want to run on `Mainnet` (which installs the latest stable release) or `Testnet` (which installs the latest development release) and then wait for the installation to complete.
 
-When it has finished, run `solar` to interact with the command-line interface. If you are a registered delegate, configure the node with your mnemonic with `solar config:forger`. To start the relay, run `solar relay:start` and, if you are a delegate, also start the forger process with `solar forger:start`.
+When it has finished, run `solar` to interact with the command-line interface. If you are a registered block producer, configure the node with your mnemonic with `solar config:producer`. To start the relay, run `solar relay:start` and, if you are a block producer, also start the block producer module with `solar producer:start`.
 
 You can check that everything is working correctly by reading the logs with `pm2 logs`.
 

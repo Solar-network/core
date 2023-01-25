@@ -3,15 +3,18 @@ export enum TransactionHeaderType {
     Extended = 1,
 }
 
-export enum DelegateStatus {
+export enum BlockProducerStatus {
     TemporaryResign = 0,
     PermanentResign = 1,
     NotResigned = 2,
 }
 
-export enum DelegateType {
-    Registration = "1/2",
+export enum BlockProducerType {
     Resignation = "1/7",
+}
+
+export enum UsernameType {
+    Registration = "1/2",
 }
 
 export enum OtherType {
@@ -32,8 +35,8 @@ export enum VoteType {
 
 export const TransactionType = {
     burn: [OtherType.Burn],
-    delegateRegistration: [DelegateType.Registration],
-    delegateResignation: [DelegateType.Resignation],
+    registration: [UsernameType.Registration],
+    resignation: [BlockProducerType.Resignation],
     extraSignature: [OtherType.ExtraSignature],
     ipfs: [OtherType.IPFS],
     transfer: [TransferType.Multiple, TransferType.Single],

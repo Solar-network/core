@@ -32,7 +32,7 @@ export const Identifiers = {
     DatabaseService: Symbol.for("Service<Database>"),
     EventDispatcherService: Symbol.for("Service<EventDispatcher>"),
     FilesystemService: Symbol.for("Service<Filesystem>"),
-    ForgerService: Symbol.for("Service<Forger>"),
+    BlockProducerService: Symbol.for("Service<BlockProducer>"),
     LogService: Symbol.for("Service<Log>"),
     MixinService: Symbol.for("Service<Mixin>"),
     PipelineService: Symbol.for("Service<Pipeline>"),
@@ -44,7 +44,7 @@ export const Identifiers = {
     ProcessActionsService: Symbol.for("Service<ProcessActions>"),
     ValidationService: Symbol.for("Service<Validation>"),
     BlockHistoryService: Symbol.for("Service<BlockHistory>"),
-    MissedBlockHistoryService: Symbol.for("Service<MissedBlockHistory>"),
+    BlockProductionFailureHistoryService: Symbol.for("Service<BlockProductionFailureHistory>"),
     TransactionHistoryService: Symbol.for("Service<TransactionHistory>"),
 
     // Factories
@@ -59,8 +59,8 @@ export const Identifiers = {
     DatabaseRoundRepository: Symbol.for("Database<RoundRepository>"),
     DatabaseBlockRepository: Symbol.for("Database<BlockRepository>"),
     DatabaseBlockFilter: Symbol.for("Database<BlockFilter>"),
-    DatabaseMissedBlockFilter: Symbol.for("Database<MissedBlockFilter>"),
-    DatabaseMissedBlockRepository: Symbol.for("Database<MissedBlockRepository>"),
+    DatabaseBlockProductionFailureFilter: Symbol.for("Database<BlockProductionFailureFilter>"),
+    DatabaseBlockProductionFailureRepository: Symbol.for("Database<BlockProductionFailureRepository>"),
     DatabaseTransactionRepository: Symbol.for("Database<TransactionRepository>"),
     DatabaseTransactionFilter: Symbol.for("Database<TransactionFilter>"),
     DatabaseMaintenance: Symbol.for("Database<Maintenance>"),

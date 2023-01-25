@@ -45,7 +45,7 @@ export class DatabaseInteraction {
 
     private blockchain!: Contracts.Blockchain.Blockchain;
 
-    private historicalDelegateData: Record<string, string | number | Utils.BigNumber>[] | undefined;
+    private historicalBlockProducerData: Record<string, string | number | Utils.BigNumber>[] | undefined;
 
     public async initialise(): Promise<void> {
         try {
@@ -73,12 +73,12 @@ export class DatabaseInteraction {
     ): Promise<void> {
         let supply: string;
 
-        if (!this.historicalDelegateData) {
+        if (!this.historicalBlockProducerData) {
             supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
-            this.historicalDelegateData = this.getDelegateData(supply);
+            this.historicalBlockProducerData = this.getBlockProducerData(supply);
         }
 
-        await this.roundState.detectMissedBlocks(block);
+        await this.roundState.detectBlockProductionFailures(block);
 
         await this.blockState.applyBlock(block, transactionProcessing);
         await this.roundState.applyBlock(block);
@@ -89,9 +89,9 @@ export class DatabaseInteraction {
 
         if (this.blockchain.getQueue().size() === 0) {
             supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
-            const updatedDelegates = this.getDelegateData(supply).filter(
+            const updatedBlockProducers = this.getBlockProducerData(supply).filter(
                 ({ percent, username, version, voteBalance, voters }) =>
-                    !this.historicalDelegateData!.some(
+                    !this.historicalBlockProducerData!.some(
                         ({
                             percent: oldPercent,
                             username: oldUsername,
@@ -107,8 +107,8 @@ export class DatabaseInteraction {
                     ),
             );
 
-            for (const { percent, username, version, voteBalance, voters } of updatedDelegates) {
-                this.events.dispatch(Enums.DelegateEvent.DataChanged, {
+            for (const { percent, username, version, voteBalance, voters } of updatedBlockProducers) {
+                this.events.dispatch(Enums.BlockProducerEvent.DataChanged, {
                     percent,
                     username,
                     version,
@@ -117,7 +117,7 @@ export class DatabaseInteraction {
                 });
             }
 
-            this.historicalDelegateData = undefined;
+            this.historicalBlockProducerData = undefined;
         }
 
         this.events.dispatch(Enums.BlockEvent.Applied, block.getHeader());
@@ -138,7 +138,7 @@ export class DatabaseInteraction {
         await this.roundState.restore();
     }
 
-    private getDelegateData(supply: string): {
+    private getBlockProducerData(supply: string): {
         percent: number;
         username: string;
         version: string;
@@ -147,15 +147,15 @@ export class DatabaseInteraction {
     }[] {
         return this.walletRepository
             .allByUsername()
-            .filter((wallet: Contracts.State.Wallet) => wallet.hasAttribute("delegate"))
+            .filter((wallet: Contracts.State.Wallet) => wallet.hasAttribute("blockProducer"))
             .map((wallet: Contracts.State.Wallet) => {
-                const delegate = wallet.getAttribute("delegate");
+                const blockProducer = wallet.getAttribute("blockProducer");
                 return {
-                    percent: AppUtils.delegateCalculator.calculateVotePercent(wallet, supply),
-                    username: delegate.username,
-                    version: delegate.version,
-                    voteBalance: delegate.voteBalance,
-                    voters: delegate.voters,
+                    percent: AppUtils.blockProducerCalculator.calculateVotePercent(wallet, supply),
+                    username: wallet.getAttribute("username"),
+                    version: blockProducer.version,
+                    voteBalance: blockProducer.voteBalance,
+                    voters: blockProducer.voters,
                 };
             });
     }

@@ -12,22 +12,6 @@ export class StandardCriteriaService {
             // Criteria is either single criteria item or array of criteria items.
 
             if (Array.isArray(criteria)) {
-                // Array of criteria items constitute OR expression.
-                //
-                // Example:
-                // [
-                //   { type: Enums.TransactionType.Core.DelegateRegistration },
-                //   { type: Enums.TransactionType.Core.Vote }
-                // ]
-                //
-                // Alternatively (behaves same as above):
-                // {
-                //   type: [
-                //     Enums.TransactionType.Core.DelegateRegistration,
-                //     Enums.TransactionType.Core.Vote
-                //   ]
-                // }
-
                 return criteria.some((criteriaItem, i) => {
                     try {
                         return this.testStandardCriteriaItem(value, criteriaItem);

@@ -73,7 +73,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      * Confirm that the peer's chain is either:
      * - the same as ours or
      * - different than ours but legit.
-     * Legit chain would have blocks signed/forged by the appropriate delegate(s).
+     * Legit chain would have blocks signed/produced by the appropriate block producer(s).
      *
      * We distinguish 6 different cases with respect to our chain and peer's chain:
      *
@@ -183,8 +183,8 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
             if (claimedHeight < this.ourHeight()) {
                 const roundInfo = Utils.roundCalculator.calculateRound(claimedHeight);
-                const delegates = await this.getDelegatesByRound(roundInfo);
-                if (this.verifyPeerBlock(blockHeader, claimedHeight, delegates)) {
+                const blockProducers = await this.getBlockProducersByRound(roundInfo);
+                if (this.verifyPeerBlock(blockHeader, claimedHeight, blockProducers)) {
                     return true;
                 }
             } else {
@@ -405,20 +405,20 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
      * @param {number} startHeight verify blocks at and after this height
      * @param {number} claimedHeight peer's claimed height, don't try to verify blocks past this height
      * @param {number} deadline operation deadline, in milliseconds since Epoch
-     * @return {Boolean} true if the blocks are legit (signed by the appropriate delegates)
+     * @return {Boolean} true if the blocks are legit (signed by the appropriate block producers)
      * @throws {Error} if the state verification could not complete before the deadline
      */
     private async verifyPeerBlocks(startHeight: number, claimedHeight: number, deadline: number): Promise<boolean> {
         const roundInfo = Utils.roundCalculator.calculateRound(startHeight);
-        const { maxDelegates, roundHeight } = roundInfo;
-        const lastBlockHeightInRound = roundHeight + maxDelegates - 1;
+        const { maxBlockProducers, roundHeight } = roundInfo;
+        const lastBlockHeightInRound = roundHeight + maxBlockProducers - 1;
 
         // Verify a few blocks that are not too far up from the last common block. Within the
         // same round as the last common block or in the next round if the last common block is
-        // the last block in a round (so that the delegates calculations are still the same for
+        // the last block in a round (so that the block producers calculations are still the same for
         // both chains).
 
-        const delegates = await this.getDelegatesByRound(roundInfo);
+        const blockProducers = await this.getBlockProducersByRound(roundInfo);
 
         const theirBlocksByHeight = {};
 
@@ -439,7 +439,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             }
             assert(theirBlocksByHeight[height] !== undefined);
 
-            if (!this.verifyPeerBlock(theirBlocksByHeight[height], height, delegates)) {
+            if (!this.verifyPeerBlock(theirBlocksByHeight[height], height, blockProducers)) {
                 return false;
             }
         }
@@ -448,27 +448,27 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
     }
 
     /**
-     * Get the delegates for the given round.
+     * Get the block producers for the given round.
      */
-    private async getDelegatesByRound(
+    private async getBlockProducersByRound(
         roundInfo: Contracts.Shared.RoundInfo,
     ): Promise<Record<string, Contracts.State.Wallet>> {
-        let delegates = (await this.app
+        let blockProducers = (await this.app
             .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-            .call("getActiveDelegates", { roundInfo })) as Contracts.State.Wallet[];
+            .call("getActiveBlockProducers", { roundInfo })) as Contracts.State.Wallet[];
 
-        if (delegates.length === 0) {
+        if (blockProducers.length === 0) {
             const dposRound = this.dposState.getRoundInfo();
             assert.strictEqual(dposRound.round, roundInfo.round);
-            assert.strictEqual(dposRound.maxDelegates, roundInfo.maxDelegates);
-            delegates = this.dposState.getRoundDelegates().slice();
+            assert.strictEqual(dposRound.maxBlockProducers, roundInfo.maxBlockProducers);
+            blockProducers = this.dposState.getRoundBlockProducers().slice();
         }
 
-        const delegatesByUsername: Record<string, Contracts.State.Wallet> = {};
-        for (const delegate of delegates) {
-            delegatesByUsername[delegate.getAttribute("delegate.username")] = delegate;
+        const blockProducersByUsername: Record<string, Contracts.State.Wallet> = {};
+        for (const blockProducer of blockProducers) {
+            blockProducersByUsername[blockProducer.getAttribute("username")] = blockProducer;
         }
-        return delegatesByUsername;
+        return blockProducersByUsername;
     }
 
     /**
@@ -529,17 +529,17 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
     }
 
     /**
-     * Verify a given block from the peer's chain - must be signed by one of the provided delegates.
+     * Verify a given block from the peer's chain - must be signed by one of the provided block producers.
      * @param {Interfaces.IBlockData} blockData the block to verify
      * @param {number} expectedHeight the given block must be at this height
-     * @param {Object} delegatesByUsername a map of { username: delegate, ... }, one of these
-     * delegates must have signed the block
-     * @return {Boolean} true if the block is legit (signed by the appropriate delegate)
+     * @param {Object} blockProducersByUsername a map of { username: producer, ... }, one of these
+     * block producers must have signed the block
+     * @return {Boolean} true if the block is legit (signed by the appropriate block producer)
      */
     private verifyPeerBlock(
         blockData: Interfaces.IBlockData,
         expectedHeight: number,
-        delegatesByUsername: Record<string, Contracts.State.Wallet>,
+        blockProducersByUsername: Record<string, Contracts.State.Wallet>,
     ): boolean {
         const block: Interfaces.IBlock | undefined = Blocks.BlockFactory.fromData(blockData);
 
@@ -566,7 +566,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
             return false;
         }
 
-        if (delegatesByUsername[block.data.username]) {
+        if (blockProducersByUsername[block.data.username]) {
             this.log(
                 Severity.DEBUG_EXTRA,
                 `successfully verified block at height ${height.toLocaleString()}, signed by ` + block.data.username,
@@ -578,9 +578,9 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
 
         this.log(
             Severity.DEBUG_EXTRA,
-            `failure: block ${this.anyToString(blockData)} is not signed by any of the delegates ` +
+            `failure: block ${this.anyToString(blockData)} is not signed by any of the block producers ` +
                 `for the corresponding round: ` +
-                this.anyToString(Object.values(delegatesByUsername)),
+                this.anyToString(Object.values(blockProducersByUsername)),
         );
 
         return false;

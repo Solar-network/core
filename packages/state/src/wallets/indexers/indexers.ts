@@ -45,8 +45,8 @@ export const usernamesIndexer = (
     wallet: Contracts.State.Wallet,
     blockchainWallet?: Contracts.State.Wallet,
 ): void => {
-    if (wallet.isDelegate() && shouldBeIndexed(wallet, blockchainWallet)) {
-        index.set(wallet.getAttribute("delegate.username"), wallet);
+    if (wallet.hasAttribute("username") && shouldBeIndexed(wallet, blockchainWallet)) {
+        index.set(wallet.getAttribute("username"), wallet);
     }
 };
 
@@ -56,11 +56,11 @@ export const resignationsIndexer = (
     blockchainWallet?: Contracts.State.Wallet,
 ): void => {
     if (
-        wallet.isDelegate() &&
-        wallet.hasAttribute("delegate.resignation") &&
+        wallet.isBlockProducer() &&
+        wallet.hasAttribute("blockProducer.resignation") &&
         shouldBeIndexed(wallet, blockchainWallet)
     ) {
-        index.set(wallet.getAttribute("delegate.username"), wallet);
+        index.set(wallet.getAttribute("username"), wallet);
     }
 };
 

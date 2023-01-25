@@ -12,10 +12,10 @@
             "name": "Node"
         },
         {
-            "name": "Blocks"
+            "name": "Block Producers"
         },
         {
-            "name": "Delegates"
+            "name": "Blocks"
         },
         {
             "name": "Rounds"
@@ -54,7 +54,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Full or partial wallet address, block ID, delegate name, public key or transaction ID",
+                        "description": "Full or partial wallet address, block ID, username, public key or transaction ID",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -285,7 +285,7 @@
                     {
                         "name": "generatorPublicKey",
                         "in": "query",
-                        "description": "Public key of the delegate that forged the block(s) to be returned",
+                        "description": "Public key of the block producer that produced the block(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/publicKey"
                         }
@@ -293,7 +293,7 @@
                     {
                         "name": "username",
                         "in": "query",
-                        "description": "Username of the delegate that forged the block(s) to be returned",
+                        "description": "Username of the block producer that produced the block(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/username"
                         }
@@ -579,12 +579,12 @@
                 }
             }
         },
-        "/blocks/missed": {
+        "/blocks/failures": {
             "get": {
                 "tags": [
                     "Blocks"
                 ],
-                "summary": "Find missed blocks in the last X days",
+                "summary": "Find block production failures in the last X days",
                 "parameters": [
                     {
                         "name": "page",
@@ -605,7 +605,7 @@
                     {
                         "name": "username",
                         "in": "query",
-                        "description": "Username of the delegate that missed the block(s) to be returned",
+                        "description": "Username of the block producer that failed to produce the block(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/username"
                         }
@@ -613,7 +613,7 @@
                     {
                         "name": "height",
                         "in": "query",
-                        "description": "Exact height of the missed block to be returned",
+                        "description": "Exact height when the block production failure occurred to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -621,7 +621,7 @@
                     {
                         "name": "height.from",
                         "in": "query",
-                        "description": "Earliest height of the missed block(s) to be returned",
+                        "description": "Earliest height of the block production failure(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -629,7 +629,7 @@
                     {
                         "name": "height.to",
                         "in": "query",
-                        "description": "Latest height of the missed block(s) to be returned",
+                        "description": "Latest height of the block production failure(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -637,7 +637,7 @@
                     {
                         "name": "timestamp",
                         "in": "query",
-                        "description": "Exact time, in seconds since the epoch, of the missed block to be returned",
+                        "description": "Exact time, in seconds since the epoch, when the block production failure occurred to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -645,7 +645,7 @@
                     {
                         "name": "timestamp.from",
                         "in": "query",
-                        "description": "Earliest time, in seconds since the epoch, of the missed block(s) to be returned",
+                        "description": "Earliest time, in seconds since the epoch, of the block production failure(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -653,7 +653,7 @@
                     {
                         "name": "timestamp.to",
                         "in": "query",
-                        "description": "Latest time, in seconds since the epoch, of the missed block(s) to be returned",
+                        "description": "Latest time, in seconds since the epoch, of the block production failure(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -664,7 +664,7 @@
                         "description": "Successful operation"
                     },
                     "404": {
-                        "description": "Delegate not found"
+                        "description": "Block producer not found"
                     },
                     "422": {
                         "description": "Invalid parameter(s)"
@@ -728,12 +728,12 @@
                 }
             }
         },
-        "/delegates": {
+        "/block-producers": {
             "get": {
                 "tags": [
-                    "Delegates"
+                    "Block Producers"
                 ],
-                "summary": "List delegates or search for delegates meeting specific criteria",
+                "summary": "List block producers or search for block producers meeting specific criteria",
                 "parameters": [
                     {
                         "name": "page",
@@ -754,7 +754,7 @@
                     {
                         "name": "address",
                         "in": "query",
-                        "description": "The address of the delegate to be returned",
+                        "description": "The address of the block producers to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/address"
                         }
@@ -762,7 +762,7 @@
                     {
                         "name": "publicKey",
                         "in": "query",
-                        "description": "The public key of the delegate to be returned",
+                        "description": "The public key of the block producer to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/publicKey"
                         }
@@ -770,7 +770,7 @@
                     {
                         "name": "resignation",
                         "in": "query",
-                        "description": "Whether the delegate(s) to be returned have resigned permanently or temporarily",
+                        "description": "Whether the block producer(s) to be returned have resigned permanently or temporarily",
                         "schema": {
                             "enum": [
                                 "permanent",
@@ -781,126 +781,150 @@
                     {
                         "name": "username",
                         "in": "query",
-                        "description": "The username of the delegate to be returned",
+                        "description": "The username of the block producer to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/username"
                         }
                     },
                     {
-                        "name": "forged.fees",
+                        "name": "collected.fees.burned",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all fees forged by the delegate(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all fees burned by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.fees.from",
+                        "name": "collected.fees.burned.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all fees forged by the delegate(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all fees burned by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.fees.to",
+                        "name": "collected.fees.burned.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all fees forged by the delegate(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all fees burned by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.burnedFees",
+                        "name": "collected.fees.retaianed",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all fees burned by the delegate(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all fees retained by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.burnedFees.from",
+                        "name": "collected.fees.retained.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all fees burned by the delegate(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all fees retained by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.burnedFees.to",
+                        "name": "collected.fees.retained.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all fees burned by the delegate(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all fees retained by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.rewards",
+                        "name": "collected.fees.total",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all block rewards earned by the delegate(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all fees from transactions in blocks produced by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.rewards.from",
+                        "name": "collected.fees.total.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all block rewards earned by the delegate(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all fees from transactions in blocks produced by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.rewards.to",
+                        "name": "collected.fees.total.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all block rewards earned by the delegate(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all fees from transactions in blocks produced by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.donations",
+                        "name": "collected.rewards",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all donations by the delegate(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all block rewards earned by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.donations.from",
+                        "name": "collected.rewards.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all donations by the delegate(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all block rewards earned by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.donations.to",
+                        "name": "collected.rewards.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all donations by the delegate(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all block rewards earned by the block producer(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "collected.donations",
+                        "in": "query",
+                        "description": "Exact amount, in satoshis, of all donations by the block producer(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "collected.donations.from",
+                        "in": "query",
+                        "description": "Minimum amount, in satoshis, of all donations by the block producer(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/zeroOrMore"
+                        }
+                    },
+                    {
+                        "name": "collected.donations.to",
+                        "in": "query",
+                        "description": "Maximum amount, in satoshis, of all donations by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },                    {
-                        "name": "forged.total",
+                        "name": "collected.total",
                         "in": "query",
-                        "description": "Exact amount, in satoshis, of all unburned fees plus block rewards earned by the delegate(s) to be returned",
+                        "description": "Exact amount, in satoshis, of all unburned fees plus block rewards earned by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.total.from",
+                        "name": "collected.total.from",
                         "in": "query",
-                        "description": "Minimum amount, in satoshis, of all unburned fees plus block rewards earned by the delegate(s) to be returned",
+                        "description": "Minimum amount, in satoshis, of all unburned fees plus block rewards earned by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "forged.total.to",
+                        "name": "collected.total.to",
                         "in": "query",
-                        "description": "Maximum amount, in satoshis, of all unburned fees plus block rewards earned by the delegate(s) to be returned",
+                        "description": "Maximum amount, in satoshis, of all unburned fees plus block rewards earned by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -908,7 +932,7 @@
                     {
                         "name": "votesReceived.percent",
                         "in": "query",
-                        "description": "Exact total vote percentage of the delegate(s) to be returned",
+                        "description": "Exact total vote percentage of the block producer(s) to be returned",
                         "schema": {
                             "type": "number",
                             "minimum": 0,
@@ -918,7 +942,7 @@
                     {
                         "name": "votesReceived.percent.from",
                         "in": "query",
-                        "description": "Minimum total vote percentage of the delegate(s) to be returned",
+                        "description": "Minimum total vote percentage of the block producer(s) to be returned",
                         "schema": {
                             "type": "number",
                             "minimum": 0,
@@ -928,7 +952,7 @@
                     {
                         "name": "votesReceived.percent.to",
                         "in": "query",
-                        "description": "Maximum total vote percentage rate of the delegate(s) to be returned",
+                        "description": "Maximum total vote percentage rate of the block producer(s) to be returned",
                         "schema": {
                             "type": "number",
                             "minimum": 0,
@@ -938,7 +962,7 @@
                     {
                         "name": "votesReceived.votes",
                         "in": "query",
-                        "description": "Exact amount of vote weight for the delegate(s) to be returned",
+                        "description": "Exact amount of vote weight for the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -946,7 +970,7 @@
                     {
                         "name": "votesReceived.votes.from",
                         "in": "query",
-                        "description": "Minimum amount of vote weight for the delegate(s) to be returned",
+                        "description": "Minimum amount of vote weight for the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -954,7 +978,7 @@
                     {
                         "name": "votesReceived.votes.to",
                         "in": "query",
-                        "description": "Maximum amount of vote weight for the delegate(s) to be returned",
+                        "description": "Maximum amount of vote weight for the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -962,7 +986,7 @@
                     {
                         "name": "votesReceived.voters",
                         "in": "query",
-                        "description": "Exact number of voters for the delegate(s) to be returned",
+                        "description": "Exact number of voters for the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -970,7 +994,7 @@
                     {
                         "name": "votesReceived.voters.from",
                         "in": "query",
-                        "description": "Minimum number of voters for the delegate(s) to be returned",
+                        "description": "Minimum number of voters for the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -978,31 +1002,31 @@
                     {
                         "name": "votesReceived.voters.to",
                         "in": "query",
-                        "description": "Maximum number of voters for the delegate(s) to be returned",
+                        "description": "Maximum number of voters for the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "blocks.missed",
+                        "name": "blocks.failed",
                         "in": "query",
-                        "description": "Exact number of blocks missed by the delegate(s) to be returned",
+                        "description": "Exact number of block production failures by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "blocks.missed.from",
+                        "name": "blocks.failed.from",
                         "in": "query",
-                        "description": "Minimum number of blocks missed by the delegate(s) to be returned",
+                        "description": "Minimum number of block production failures by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "blocks.missed.to",
+                        "name": "blocks.failed.to",
                         "in": "query",
-                        "description": "Maximum number of blocks missed by the delegate(s) to be returned",
+                        "description": "Maximum number of block production failures by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -1010,7 +1034,7 @@
                     {
                         "name": "blocks.produced",
                         "in": "query",
-                        "description": "Exact number of blocks produced by the delegate(s) to be returned",
+                        "description": "Exact number of blocks produced by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -1018,7 +1042,7 @@
                     {
                         "name": "blocks.produced.from",
                         "in": "query",
-                        "description": "Minimum number of blocks produced by the delegate(s) to be returned",
+                        "description": "Minimum number of blocks produced by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -1026,31 +1050,31 @@
                     {
                         "name": "blocks.produced.to",
                         "in": "query",
-                        "description": "Maximum number of blocks produced by the delegate(s) to be returned",
+                        "description": "Maximum number of blocks produced by the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "blocks.productivity",
+                        "name": "blocks.reliability",
                         "in": "query",
-                        "description": "Exact productivity rate of the delegate(s) to be returned",
+                        "description": "Exact reliability rate of the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "blocks.productivity.from",
+                        "name": "blocks.reliability.from",
                         "in": "query",
-                        "description": "Lowest productivity rate of the delegate(s) to be returned",
+                        "description": "Lowest reliability rate of the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
                     },
                     {
-                        "name": "blocks.productivity.to",
+                        "name": "blocks.reliability.to",
                         "in": "query",
-                        "description": "Highest productivity rate of the delegate(s) to be returned",
+                        "description": "Highest reliability rate of the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -1058,7 +1082,7 @@
                     {
                         "name": "rank",
                         "in": "query",
-                        "description": "Exact rank of the delegate to be returned",
+                        "description": "Exact rank of the block producer to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -1066,7 +1090,7 @@
                     {
                         "name": "rank.from",
                         "in": "query",
-                        "description": "Lowest rank of the delegate(s) to be returned",
+                        "description": "Lowest rank of the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -1074,7 +1098,7 @@
                     {
                         "name": "rank.to",
                         "in": "query",
-                        "description": "Highest rank of the delegate(s) to be returned",
+                        "description": "Highest rank of the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -1082,7 +1106,7 @@
                     {
                         "name": "version",
                         "in": "query",
-                        "description": "Exact node version running on the delegate(s) to be returned",
+                        "description": "Exact node version running on the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/semver"
                         }
@@ -1090,7 +1114,7 @@
                     {
                         "name": "version.from",
                         "in": "query",
-                        "description": "Earliest node version running on the delegate(s) to be returned",
+                        "description": "Earliest node version running on the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/semver"
                         }
@@ -1098,7 +1122,7 @@
                     {
                         "name": "version.to",
                         "in": "query",
-                        "description": "Latest node version running on the delegate(s) to be returned",
+                        "description": "Latest node version running on the block producer(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/semver"
                         }
@@ -1112,22 +1136,24 @@
                             "enum": [
                                 "address:asc",
                                 "address:desc",
-                                "blocks.missed:asc",
-                                "blocks.missed:desc",
+                                "blocks.failed:asc",
+                                "blocks.failed:desc",
                                 "blocks.produced:asc",
                                 "blocks.produced:desc",
-                                "blocks.productivity:asc",
-                                "blocks.productivity:desc",
-                                "forged.burnedFees:asc",
-                                "forged.burnedFees:desc",
-                                "forged.donations:asc",
-                                "forged.donations:desc",
-                                "forged.fees:asc",
-                                "forged.fees:desc",
-                                "forged.rewards:asc",
-                                "forged.rewards:desc",
-                                "forged.total:asc",
-                                "forged.total:desc",
+                                "blocks.reliability:asc",
+                                "blocks.reliability:desc",
+                                "collected.donations:asc",
+                                "collected.donations:desc",
+                                "collected.fees.burned:asc",
+                                "collected.fees.burned:desc",
+                                "collected.fees.retained:asc",
+                                "collected.fees.retained:desc",
+                                "collected.fees.total:asc",
+                                "collected.fees.total:desc",
+                                "collected.rewards:asc",
+                                "collected.rewards:desc",
+                                "collected.total:asc",
+                                "collected.total:desc",
                                 "publicKey:asc",
                                 "publicKey:desc",
                                 "rank:asc",
@@ -1156,17 +1182,17 @@
                 }
             }
         },
-        "/delegates/{identifier}": {
+        "/block-producers/{identifier}": {
             "get": {
                 "tags": [
-                    "Delegates"
+                    "Block Producers"
                 ],
-                "summary": "Find a single delegate by its identifier",
+                "summary": "Find a single block producer by its identifier",
                 "parameters": [
                     {
                         "name": "identifier",
                         "in": "path",
-                        "description": "Identifier for delegate (address, public key, username)",
+                        "description": "Identifier for block producer (address, public key, username)",
                         "required": true,
                         "schema": {
                             "$ref": "#/components/schemas/walletIdentifier"
@@ -1178,7 +1204,7 @@
                         "description": "Successful operation"
                     },
                     "404": {
-                        "description": "Delegate not found"
+                        "description": "Block producer not found"
                     },
                     "422": {
                         "description": "Invalid parameter(s)"
@@ -1186,17 +1212,17 @@
                 }
             }
         },
-        "/delegates/{identifier}/blocks": {
+        "/block-producers/{identifier}/blocks": {
             "get": {
                 "tags": [
-                    "Delegates"
+                    "Block Producers"
                 ],
-                "summary": "Find blocks produced by a specific delegate",
+                "summary": "Find blocks produced by a specific block producer",
                 "parameters": [
                     {
                         "name": "identifier",
                         "in": "path",
-                        "description": "Identifier for delegate (address, public key, username)",
+                        "description": "Identifier for block producer (address, public key, username)",
                         "required": true,
                         "schema": {
                             "$ref": "#/components/schemas/walletIdentifier"
@@ -1224,7 +1250,7 @@
                         "description": "Successful operation"
                     },
                     "404": {
-                        "description": "Delegate not found"
+                        "description": "Block producer not found"
                     },
                     "422": {
                         "description": "Invalid parameter(s)"
@@ -1232,17 +1258,17 @@
                 }
             }
         },
-        "/delegates/{identifier}/blocks/missed": {
+        "/block-producers/{identifier}/blocks/failures": {
             "get": {
                 "tags": [
-                    "Delegates"
+                    "Block Producers"
                 ],
-                "summary": "Find missed blocks in the last X days by a specific delegate",
+                "summary": "Find block production failures in the last X days by a specific block producer",
                 "parameters": [
                     {
                         "name": "identifier",
                         "in": "path",
-                        "description": "Identifier for delegate (address, public key, username)",
+                        "description": "Identifier for block producer (address, public key, username)",
                         "required": true,
                         "schema": {
                             "$ref": "#/components/schemas/walletIdentifier"
@@ -1267,7 +1293,7 @@
                     {
                         "name": "height",
                         "in": "query",
-                        "description": "Exact height of the missed block to be returned",
+                        "description": "Exact height when the block production failure occurred to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -1275,7 +1301,7 @@
                     {
                         "name": "height.from",
                         "in": "query",
-                        "description": "Earliest height of the missed block(s) to be returned",
+                        "description": "Earliest height of the block production failure(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -1283,7 +1309,7 @@
                     {
                         "name": "height.to",
                         "in": "query",
-                        "description": "Latest height of the missed block(s) to be returned",
+                        "description": "Latest height of the block production failure(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
                         }
@@ -1291,7 +1317,7 @@
                     {
                         "name": "timestamp",
                         "in": "query",
-                        "description": "Exact time, in seconds since the epoch, of the missed block to be returned",
+                        "description": "Exact time, in seconds since the epoch, when the block production failure occurred to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -1299,7 +1325,7 @@
                     {
                         "name": "timestamp.from",
                         "in": "query",
-                        "description": "Earliest time, in seconds since the epoch, of the missed block(s) to be returned",
+                        "description": "Earliest time, in seconds since the epoch, of the block production failure(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -1307,7 +1333,7 @@
                     {
                         "name": "timestamp.to",
                         "in": "query",
-                        "description": "Latest time, in seconds since the epoch, of the missed block(s) to be returned",
+                        "description": "Latest time, in seconds since the epoch, of the block production failure(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/zeroOrMore"
                         }
@@ -1318,7 +1344,7 @@
                         "description": "Successful operation"
                     },
                     "404": {
-                        "description": "Delegate not found"
+                        "description": "Block producer not found"
                     },
                     "422": {
                         "description": "Invalid parameter(s)"
@@ -1326,17 +1352,17 @@
                 }
             }
         },
-        "/delegates/{identifier}/voters": {
+        "/block-producer/{identifier}/voters": {
             "get": {
                 "tags": [
-                    "Delegates"
+                    "Block Producers"
                 ],
-                "summary": "Find wallets currently voting for a specific delegate",
+                "summary": "Find wallets currently voting for a specific block producer",
                 "parameters": [
                     {
                         "name": "identifier",
                         "in": "path",
-                        "description": "Identifier for delegate (address, public key, username)",
+                        "description": "Identifier for block producer (address, public key, username)",
                         "required": true,
                         "schema": {
                             "$ref": "#/components/schemas/walletIdentifier"
@@ -1364,7 +1390,7 @@
                         "description": "Successful operation"
                     },
                     "404": {
-                        "description": "Delegate not found"
+                        "description": "Block producer not found"
                     },
                     "422": {
                         "description": "Invalid parameter(s)"
@@ -1372,17 +1398,17 @@
                 }
             }
         },
-        "/rounds/{id}/delegates": {
+        "/rounds/{id}": {
             "get": {
                 "tags": [
                     "Rounds"
                 ],
-                "summary": "Get delegate public keys forging in a specific round",
+                "summary": "Get the public keys of the active block producers in a specific round",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "The forging round number to retrieve the public keys of delegates",
+                        "description": "The round number to retrieve the public keys of the active block producers",
                         "required": true,
                         "schema": {
                             "$ref": "#/components/schemas/oneOrMore"
@@ -1517,7 +1543,7 @@
                     {
                         "name": "registration",
                         "in": "query",
-                        "description": "The name of a delegate associated with a username registration transaction to be returned",
+                        "description": "The username associated with a registration transaction to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/username"
                         }
@@ -1690,7 +1716,7 @@
                     {
                         "name": "vote.username",
                         "in": "query",
-                        "description": "Name of the delegate included in a vote in the transaction(s) to be returned",
+                        "description": "Name of the block producer included in a vote in the transaction(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/username"
                         }
@@ -2041,7 +2067,7 @@
                     {
                         "name": "vote.username",
                         "in": "query",
-                        "description": "Name of the delegate included in the vote transaction(s) to be returned",
+                        "description": "Name of the block producer included in the vote transaction(s) to be returned",
                         "schema": {
                             "$ref": "#/components/schemas/username"
                         }

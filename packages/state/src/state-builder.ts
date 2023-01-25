@@ -54,9 +54,12 @@ export class StateBuilder {
             this.logger.info(`State Generation - Step ${steps - 1} of ${steps}: Block Rewards`, "📈");
             await this.buildBlockRewards();
 
-            this.logger.info(`State Generation - Step ${steps} of ${steps}: Vote Balances & Delegate Ranking`, "🏅");
+            this.logger.info(
+                `State Generation - Step ${steps} of ${steps}: Vote Balances & Block Producer Ranking`,
+                "🏅",
+            );
             this.dposState.buildVoteBalances();
-            this.dposState.buildDelegateRanking();
+            this.dposState.buildBlockProducerRanking();
 
             this.verifyWalletsConsistency();
 
@@ -82,8 +85,8 @@ export class StateBuilder {
             const donationWallet = this.walletRepository.findByAddress(donation.address);
             donationWallet.increaseBalance(donation.amount);
 
-            const delegateWallet = this.walletRepository.findByUsername(donation.username);
-            delegateWallet.decreaseBalance(donation.amount);
+            const blockProducerWallet = this.walletRepository.findByUsername(donation.username);
+            blockProducerWallet.decreaseBalance(donation.amount);
         }
     }
 
@@ -133,8 +136,8 @@ export class StateBuilder {
                 }
             }
 
-            if (wallet.hasAttribute("delegate.voteBalance")) {
-                const voteBalance: Utils.BigNumber = wallet.getAttribute("delegate.voteBalance");
+            if (wallet.hasAttribute("blockProducer.voteBalance")) {
+                const voteBalance: Utils.BigNumber = wallet.getAttribute("blockProducer.voteBalance");
 
                 if (voteBalance.isLessThan(0)) {
                     logNegativeBalance(wallet, "vote balance", voteBalance);

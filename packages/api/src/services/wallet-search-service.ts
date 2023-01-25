@@ -55,11 +55,8 @@ export class WalletSearchService {
                         publicKeys.push(...Object.keys(key).map((key) => key.toLowerCase()));
                     }
                 }
-                const delegateAttributes: Record<string, any> = wallet.hasAttribute("delegate")
-                    ? wallet.getAttribute("delegate")
-                    : {};
                 if (criteria.length <= 20) {
-                    return delegateAttributes.username && delegateAttributes.username.startsWith(criteria);
+                    return wallet.hasAttribute("username") && wallet.getAttribute("username").startsWith(criteria);
                 } else {
                     return (
                         wallet.getAddress().toLowerCase().startsWith(criteria) ||
@@ -69,39 +66,47 @@ export class WalletSearchService {
             })
             .slice(0, 100)
             .map((wallet) => {
-                let delegate: Record<string, any> | undefined;
-                if (wallet.hasAttribute("delegate")) {
-                    const isResigned = wallet.hasAttribute("delegate.resignation");
+                let blockProducer: Record<string, any> | undefined;
+                if (wallet.hasAttribute("blockProducer")) {
+                    const isResigned = wallet.hasAttribute("blockProducer.resignation");
                     let resigned: string | undefined;
                     if (isResigned) {
                         resigned =
-                            wallet.getAttribute("delegate.resignation.type") === Enums.DelegateStatus.PermanentResign
+                            wallet.getAttribute("blockProducer.resignation.type") ===
+                            Enums.BlockProducerStatus.PermanentResign
                                 ? "permanent"
                                 : "temporary";
                     }
-                    delegate = {
-                        rank: wallet.hasAttribute("delegate.rank") ? wallet.getAttribute("delegate.rank") : undefined,
+                    blockProducer = {
+                        rank: wallet.hasAttribute("blockProducer.rank")
+                            ? wallet.getAttribute("blockProducer.rank")
+                            : undefined,
                         resigned,
-                        username: wallet.getAttribute("delegate.username"),
-                        voters: wallet.getAttribute("delegate.voters"),
-                        votes: wallet.getAttribute("delegate.voteBalance"),
+                        voters: wallet.getAttribute("blockProducer.voters"),
+                        votes: wallet.getAttribute("blockProducer.voteBalance"),
                     };
                 }
                 return {
                     address: wallet.getAddress(),
-                    delegate,
+                    blockProducer,
                     publicKeys: wallet.getPublicKeys(),
                     balance: wallet.getBalance(),
                     votes: Object.fromEntries(wallet.getVoteDistribution().entries()),
+                    username: wallet.getAttribute("username"),
                 };
             })
             .sort((a, b) => {
-                if (a.delegate && !a.delegate.resignation && !b.delegate) {
+                if (a.blockProducer && !a.blockProducer.resignation && !b.blockProducer) {
                     return -1;
-                } else if (b.delegate && !b.delegate.resignation && !a.delegate) {
+                } else if (b.blockProducer && !b.blockProducer.resignation && !a.blockProducer) {
                     return 1;
-                } else if (a.delegate && b.delegate && !a.delegate.resignation && !b.delegate.resignation) {
-                    return a.delegate.username.localeCompare(b.delegate.username, "en", { numeric: true });
+                } else if (
+                    a.blockProducer &&
+                    b.blockProducer &&
+                    !a.blockProducer.resignation &&
+                    !b.blockProducer.resignation
+                ) {
+                    return a.username.localeCompare(b.username, "en", { numeric: true });
                 } else {
                     return a.address.localeCompare(b.address, "en", { numeric: true });
                 }

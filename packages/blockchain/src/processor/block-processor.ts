@@ -4,7 +4,7 @@ import { Handlers } from "@solar-network/transactions";
 
 import {
     AcceptBlockHandler,
-    AlreadyForgedHandler,
+    ConfirmedTransactionsHandler,
     ConflictingTransactionsHandler,
     ExceptionHandler,
     InvalidGeneratorHandler,
@@ -67,7 +67,10 @@ export class BlockProcessor {
             return this.app.resolve<NonceOutOfOrderHandler>(NonceOutOfOrderHandler).execute();
         }
 
-        const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.data.height);
+        const blockTimeLookup = await AppUtils.blockProductionInfoCalculator.getBlockTimeLookup(
+            this.app,
+            block.data.height,
+        );
 
         const isValidGenerator: boolean = await this.validateGenerator(block);
         const isChained: boolean = AppUtils.isBlockChained(
@@ -92,9 +95,9 @@ export class BlockProcessor {
             return this.app.resolve<ConflictingTransactionsHandler>(ConflictingTransactionsHandler).execute(block);
         }
 
-        const containsForgedTransactions: boolean = await this.checkBlockContainsForgedTransactions(block);
-        if (containsForgedTransactions) {
-            return this.app.resolve<AlreadyForgedHandler>(AlreadyForgedHandler).execute(block);
+        const containsConfirmedTransactions: boolean = await this.checkBlockContainsConfirmedTransactions(block);
+        if (containsConfirmedTransactions) {
+            return this.app.resolve<ConfirmedTransactionsHandler>(ConfirmedTransactionsHandler).execute(block);
         }
 
         return this.app.resolve<AcceptBlockHandler>(AcceptBlockHandler).execute(block);
@@ -148,7 +151,7 @@ export class BlockProcessor {
         return false;
     }
 
-    private async checkBlockContainsForgedTransactions(block: Interfaces.IBlock): Promise<boolean> {
+    private async checkBlockContainsConfirmedTransactions(block: Interfaces.IBlock): Promise<boolean> {
         if (block.transactions.length > 0) {
             const transactionIds = block.transactions.map((tx) => {
                 AppUtils.assert.defined<string>(tx.id);
@@ -156,7 +159,7 @@ export class BlockProcessor {
                 return tx.id;
             });
 
-            const forgedIds: string[] = await this.transactionRepository.getForgedTransactionsIds(transactionIds);
+            const confirmedIds: string[] = await this.transactionRepository.getConfirmedTransactionIds(transactionIds);
 
             if (this.stateStore.getLastBlock().data.height !== this.stateStore.getLastStoredBlockHeight()) {
                 const transactionIdsSet = new Set<string>(transactionIds);
@@ -168,19 +171,19 @@ export class BlockProcessor {
                         AppUtils.assert.defined<string>(tx.id);
 
                         if (transactionIdsSet.has(tx.id)) {
-                            forgedIds.push(tx.id);
+                            confirmedIds.push(tx.id);
                         }
                     });
                 }
             }
 
-            if (forgedIds.length > 0) {
+            if (confirmedIds.length > 0) {
                 this.logger.warning(
-                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains already forged transactions`,
+                    `Block ${block.data.height.toLocaleString()} disregarded, because it contains already confirmed transactions`,
                     "📜",
                 );
 
-                this.logger.debug(`${JSON.stringify(forgedIds, undefined, 4)}`, "📜");
+                this.logger.debug(`${JSON.stringify(confirmedIds, undefined, 4)}`, "📜");
 
                 return true;
             }
@@ -232,44 +235,48 @@ export class BlockProcessor {
             return false;
         }
 
-        const delegateWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.data.username);
+        const blockProducerWallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.data.username);
 
         if (block.data.version === 0) {
-            if (delegateWallet.getPublicKey("primary") !== block.data.generatorPublicKey) {
+            if (blockProducerWallet.getPublicKey("primary") !== block.data.generatorPublicKey) {
                 return false;
             }
         }
 
-        if (!delegateWallet.hasAttribute("delegate.rank")) {
+        if (!blockProducerWallet.hasAttribute("blockProducer.rank")) {
             return false;
         }
 
-        const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.data.height);
+        const blockTimeLookup = await AppUtils.blockProductionInfoCalculator.getBlockTimeLookup(
+            this.app,
+            block.data.height,
+        );
 
         const roundInfo: Contracts.Shared.RoundInfo = AppUtils.roundCalculator.calculateRound(block.data.height);
-        const delegates: Contracts.State.Wallet[] = (await this.triggers.call("getActiveDelegates", {
+        const blockProducers: Contracts.State.Wallet[] = (await this.triggers.call("getActiveBlockProducers", {
             roundInfo,
         })) as Contracts.State.Wallet[];
 
-        const forgingInfo: Contracts.Shared.ForgingInfo = AppUtils.forgingInfoCalculator.calculateForgingInfo(
-            block.data.timestamp,
-            block.data.height,
-            blockTimeLookup,
-        );
+        const blockProductionInfo: Contracts.Shared.BlockProductionInfo =
+            AppUtils.blockProductionInfoCalculator.calculateBlockProductionInfo(
+                block.data.timestamp,
+                block.data.height,
+                blockTimeLookup,
+            );
 
-        const forgingDelegate: Contracts.State.Wallet = delegates[forgingInfo.currentForger];
+        const blockProducer: Contracts.State.Wallet = blockProducers[blockProductionInfo.currentBlockProducer];
 
-        if (!forgingDelegate) {
+        if (!blockProducer) {
             this.logger.debug(
-                `Could not decide if delegate ${
+                `Could not decide if ${
                     block.data.username
-                } is allowed to forge block ${block.data.height.toLocaleString()}`,
+                } is allowed to produce block ${block.data.height.toLocaleString()}`,
                 "❔",
             );
-        } else if (forgingDelegate.getAttribute("delegate.username") !== block.data.username) {
-            const forgingUsername: string = forgingDelegate.getAttribute("delegate.username");
+        } else if (blockProducer.getAttribute("username") !== block.data.username) {
+            const username: string = blockProducer.getAttribute("username");
             this.logger.warning(
-                `Delegate ${block.data.username} is not allowed to forge in this slot, should be ${forgingUsername}`,
+                `${block.data.username} is not allowed to produce a block in this slot, should be ${username}`,
                 "👎",
             );
 
@@ -277,7 +284,7 @@ export class BlockProcessor {
         }
 
         this.logger.debug(
-            `Delegate ${block.data.username} is allowed to forge block ${block.data.height.toLocaleString()}`,
+            `${block.data.username} is allowed to produce block ${block.data.height.toLocaleString()}`,
             "👍",
         );
 

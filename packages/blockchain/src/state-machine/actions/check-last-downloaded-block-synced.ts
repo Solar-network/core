@@ -30,18 +30,15 @@ export class CheckLastDownloadedBlockSynced implements Action {
             event = "PAUSED";
         }
 
-        // tried to download but no luck after 3 tries (looks like network missing blocks)
+        // tried to download but no luck after 3 tries (looks like network may be halted)
         if (this.stateStore.getNoBlockCounter() > 3 && !this.blockchain.getQueue().isRunning()) {
-            this.logger.info(
-                "Tried to sync 3 times to different nodes, looks like the network is missing blocks",
-                "☂️",
-            );
+            this.logger.info("Tried to sync 3 times to different nodes, looks like the network may be halted", "☂️");
 
             this.stateStore.setNoBlockCounter(0);
             event = "NETWORKHALTED";
 
             if (this.stateStore.getP2pUpdateCounter() + 1 > 2) {
-                this.logger.info("Network keeps missing blocks", "☔");
+                this.logger.info("Network is not producing blocks", "☔");
 
                 const networkStatus = await this.networkMonitor.checkNetworkHealth();
 

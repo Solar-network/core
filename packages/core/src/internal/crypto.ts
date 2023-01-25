@@ -8,15 +8,15 @@ export const checkForPrivateKeys = (config?: string): void => {
         config = process.env.SOLAR_CORE_PATH_CONFIG;
     }
 
-    const configDelegates = join(config!, "delegates.json");
+    const configBlockProducers = join(config!, "producer.json");
 
-    if (!existsSync(configDelegates)) {
-        throw new MissingConfigFile(configDelegates);
+    if (!existsSync(configBlockProducers)) {
+        throw new MissingConfigFile(configBlockProducers);
     }
 
-    const delegates = require(configDelegates);
+    const blockProducers = require(configBlockProducers);
 
-    if (!delegates.keys?.length && !delegates.secrets?.length) {
+    if (!blockProducers.keys?.length && !blockProducers.secrets?.length) {
         throw new KeysNotDetected();
     }
 };

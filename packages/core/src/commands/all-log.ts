@@ -85,7 +85,7 @@ export class Command extends Commands.Command {
             .execute(
                 this.getFlag("token"),
                 this.getFlag("network"),
-                ["core", "forger", "relay"],
+                ["core", "producer", "relay"],
                 this.getFlag("lines"),
             );
     }

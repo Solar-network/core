@@ -79,13 +79,13 @@ export class CheckLater implements Action {
                                 const generatorWallet: Contracts.State.Wallet =
                                     this.walletRepository.findByUsername(username);
 
-                                if (!generatorWallet.hasAttribute("delegate.rank")) {
+                                if (!generatorWallet.hasAttribute("blockProducer.rank")) {
                                     return;
                                 }
 
                                 if (lastBlockId !== `${id},${lastBlock.data.id}`) {
-                                    const rank = generatorWallet.getAttribute("delegate.rank");
-                                    const generator: string = `delegate ${username} (#${rank})`;
+                                    const rank = generatorWallet.getAttribute("blockProducer.rank");
+                                    const generator: string = `${username} (#${rank})`;
 
                                     this.logger.info(
                                         `Downloaded new block by ${generator} at height ${height.toLocaleString()} with ${Utils.formatSatoshi(
@@ -101,13 +101,13 @@ export class CheckLater implements Action {
                                         dynamicReward.enabled &&
                                         reward.isEqualTo(dynamicReward.secondaryReward)
                                     ) {
-                                        const { alreadyForged } = await this.roundState.getRewardForBlockInRound(
+                                        const { alreadyProducedBlock } = await this.roundState.getRewardForBlockInRound(
                                             height,
                                             generatorWallet,
                                         );
-                                        if (alreadyForged && !reward.isEqualTo(dynamicReward.ranks[rank])) {
+                                        if (alreadyProducedBlock && !reward.isEqualTo(dynamicReward.ranks[rank])) {
                                             this.logger.info(
-                                                `The reward was reduced because ${username} already forged in this round`,
+                                                `The reward was reduced because ${username} already produced a block in this round`,
                                                 "🪙",
                                             );
                                         }

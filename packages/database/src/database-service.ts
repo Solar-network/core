@@ -132,7 +132,7 @@ export class DatabaseService {
         }
         return await this.blockRepository.save(
             blocks,
-            this.roundState.getMissedBlocksToSave(),
+            this.roundState.getBlockProductionFailuresToSave(),
             this.roundState.getRoundsToSave(),
             this.events,
         );

@@ -24,20 +24,20 @@ export class DposPreviousRoundState implements Contracts.State.DposPreviousRound
 
         await this.app
             .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-            .call("buildDelegateRanking", { dposState: this.dposState });
+            .call("buildBlockProducerRanking", { dposState: this.dposState });
 
-        this.dposState.setDelegatesRound(roundInfo);
+        this.dposState.setBlockProducersRound(roundInfo);
     }
 
-    public getAllDelegates(): readonly Contracts.State.Wallet[] {
-        return this.dposState.getAllDelegates();
+    public getAllBlockProducers(): readonly Contracts.State.Wallet[] {
+        return this.dposState.getAllBlockProducers();
     }
 
-    public getActiveDelegates(): readonly Contracts.State.Wallet[] {
-        return this.dposState.getActiveDelegates();
+    public getActiveBlockProducers(): readonly Contracts.State.Wallet[] {
+        return this.dposState.getActiveBlockProducers();
     }
 
-    public getRoundDelegates(): readonly Contracts.State.Wallet[] {
-        return this.dposState.getRoundDelegates();
+    public getRoundBlockProducers(): readonly Contracts.State.Wallet[] {
+        return this.dposState.getRoundBlockProducers();
     }
 }

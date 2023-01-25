@@ -4,10 +4,10 @@ import { typeAndGroup } from "../utils";
 import { validator } from "../validation";
 import {
     BurnTransaction,
-    DelegateRegistrationTransaction,
-    DelegateResignationTransaction,
     ExtraSignatureRegistrationTransaction,
     IpfsTransaction,
+    RegistrationTransaction,
+    ResignationTransaction,
     Transaction,
     TransactionTypeFactory,
     TransferTransaction,
@@ -24,10 +24,10 @@ class TransactionRegistry {
         TransactionTypeFactory.initialise(this.transactionTypes);
 
         this.registerTransactionType(ExtraSignatureRegistrationTransaction);
-        this.registerTransactionType(DelegateRegistrationTransaction);
+        this.registerTransactionType(RegistrationTransaction);
         this.registerTransactionType(IpfsTransaction);
         this.registerTransactionType(TransferTransaction);
-        this.registerTransactionType(DelegateResignationTransaction);
+        this.registerTransactionType(ResignationTransaction);
         this.registerTransactionType(BurnTransaction);
         this.registerTransactionType(VoteTransaction);
     }

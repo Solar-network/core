@@ -293,7 +293,7 @@ export abstract class Repository<T extends IModel> implements Contracts.Database
             case "username": {
                 switch (table) {
                     case "blocks":
-                    case "missed_blocks": {
+                    case "block_production_failures": {
                         return `${table}.identity_id = (SELECT id FROM identities WHERE identities.identity = :${param} AND identities.is_username = 1 LIMIT 1)`;
                     }
                     case "transactions": {
@@ -420,15 +420,15 @@ export abstract class Repository<T extends IModel> implements Contracts.Database
                 let enumValue: number;
                 switch ((expression as Contracts.Search.EqualExpression<T>).value) {
                     case "temporary": {
-                        enumValue = Enums.DelegateStatus.TemporaryResign;
+                        enumValue = Enums.BlockProducerStatus.TemporaryResign;
                         break;
                     }
                     case "permanent": {
-                        enumValue = Enums.DelegateStatus.PermanentResign;
+                        enumValue = Enums.BlockProducerStatus.PermanentResign;
                         break;
                     }
                     default: {
-                        enumValue = Enums.DelegateStatus.NotResigned;
+                        enumValue = Enums.BlockProducerStatus.NotResigned;
                     }
                 }
 

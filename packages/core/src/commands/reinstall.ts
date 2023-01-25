@@ -92,11 +92,11 @@ export class Command extends Commands.Command {
             if (this.getFlag("force")) {
                 this.actions.restartRunningProcess("core");
                 this.actions.restartRunningProcess("relay");
-                this.actions.restartRunningProcess("forger");
+                this.actions.restartRunningProcess("producer");
             } else {
                 await this.actions.restartRunningProcessWithPrompt("core");
                 await this.actions.restartRunningProcessWithPrompt("relay");
-                await this.actions.restartRunningProcessWithPrompt("forger");
+                await this.actions.restartRunningProcessWithPrompt("producer");
             }
         } catch (error) {
             this.components.error(error);

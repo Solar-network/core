@@ -55,7 +55,7 @@ export interface Blockchain {
      */
     handleIncomingBlock(
         block: Interfaces.IBlockData,
-        fromForger: boolean,
+        fromOurNode: boolean,
         ip: string,
         fireBlockReceivedEvent?: boolean,
     ): void;
@@ -83,7 +83,7 @@ export interface Blockchain {
     resetLastDownloadedBlock(): void;
 
     /**
-     * Called by forger to wake up and sync with the network.
+     * Called by producer to wake up and sync with the network.
      * It clears the wakeUpTimeout if set.
      */
     forceWakeup(): void;
@@ -125,7 +125,7 @@ export interface Blockchain {
     /**
      * Push ping block.
      */
-    pushPingBlock(block: Interfaces.IBlockData, fromForger: boolean): void;
+    pushPingBlock(block: Interfaces.IBlockData, fromOurNode: boolean): void;
 
     checkForFork(blocks: Interfaces.IBlockData[]): Promise<boolean>;
 

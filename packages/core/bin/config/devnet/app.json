@@ -29,7 +29,7 @@
                 "package": "@solar-network/webhooks"
             },
             {
-                "package": "@solar-network/forger"
+                "package": "@solar-network/producer"
             }
         ]
     },
@@ -64,7 +64,7 @@
             }
         ]
     },
-    "forger": {
+    "producer": {
         "plugins": [
             {
                 "package": "@solar-network/logger"
@@ -73,7 +73,7 @@
                 "package": "@solar-network/transactions"
             },
             {
-                "package": "@solar-network/forger"
+                "package": "@solar-network/producer"
             }
         ]
     }

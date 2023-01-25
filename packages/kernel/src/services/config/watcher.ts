@@ -31,7 +31,7 @@ export class Watcher {
      * @memberof Watcher
      */
     public async boot(): Promise<void> {
-        const configFiles: string[] = [".env", "delegates.json", "peers.json", "plugins.js", "plugins.json"];
+        const configFiles: string[] = [".env", "peers.json", "plugins.js", "plugins.json", "producer.json"];
 
         this.watcher = await nsfw(this.app.configPath(), (events) => {
             for (const event of events) {

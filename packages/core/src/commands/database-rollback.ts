@@ -162,7 +162,7 @@ export class Command extends Commands.Command {
 
         database.prepare("DELETE FROM transactions WHERE block_height > :height").run({ height });
         database.prepare("DELETE FROM blocks WHERE height > :height").run({ height });
-        database.prepare("DELETE FROM missed_blocks WHERE height > :height").run({ height });
+        database.prepare("DELETE FROM block_production_failures WHERE height > :height").run({ height });
         database.prepare("DELETE FROM rounds WHERE round > :round").run({ round });
         database.exec("COMMIT");
         database.pragma("foreign_keys = on");

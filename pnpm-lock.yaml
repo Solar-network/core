@@ -254,11 +254,11 @@ importers:
       '@solar-network/cli': workspace:*
       '@solar-network/crypto': workspace:*
       '@solar-network/database': workspace:*
-      '@solar-network/forger': workspace:*
       '@solar-network/kernel': workspace:*
       '@solar-network/logger': workspace:*
       '@solar-network/p2p': workspace:*
       '@solar-network/pool': workspace:*
+      '@solar-network/producer': workspace:*
       '@solar-network/state': workspace:*
       '@solar-network/transactions': workspace:*
       '@solar-network/webhooks': workspace:*
@@ -290,11 +290,11 @@ importers:
       '@solar-network/cli': link:../cli
       '@solar-network/crypto': link:../crypto
       '@solar-network/database': link:../database
-      '@solar-network/forger': link:../forger
       '@solar-network/kernel': link:../kernel
       '@solar-network/logger': link:../logger
       '@solar-network/p2p': link:../p2p
       '@solar-network/pool': link:../pool
+      '@solar-network/producer': link:../producer
       '@solar-network/state': link:../state
       '@solar-network/transactions': link:../transactions
       '@solar-network/webhooks': link:../webhooks
@@ -413,33 +413,6 @@ importers:
       dayjs: 1.10.7
     devDependencies:
       '@types/better-sqlite3': 5.4.3
-
-  packages/forger:
-    specifiers:
-      '@solar-network/crypto': workspace:*
-      '@solar-network/kernel': workspace:*
-      '@solar-network/nes': workspace:*
-      '@solar-network/p2p': workspace:*
-      '@solar-network/transactions': workspace:*
-      '@types/node-forge': 0.10.4
-      '@types/wif': 2.0.2
-      delay: 5.0.0
-      joi: 17.6.0
-      node-forge: 1.3.0
-      wif: 2.0.6
-    dependencies:
-      '@solar-network/crypto': link:../crypto
-      '@solar-network/kernel': link:../kernel
-      '@solar-network/nes': link:../nes
-      '@solar-network/p2p': link:../p2p
-      '@solar-network/transactions': link:../transactions
-      delay: 5.0.0
-      joi: 17.6.0
-      node-forge: 1.3.0
-      wif: 2.0.6
-    devDependencies:
-      '@types/node-forge': 0.10.4
-      '@types/wif': 2.0.2
 
   packages/kernel:
     specifiers:
@@ -623,6 +596,33 @@ importers:
     devDependencies:
       '@types/better-sqlite3': 5.4.3
       '@types/fs-extra': 8.1.2
+
+  packages/producer:
+    specifiers:
+      '@solar-network/crypto': workspace:*
+      '@solar-network/kernel': workspace:*
+      '@solar-network/nes': workspace:*
+      '@solar-network/p2p': workspace:*
+      '@solar-network/transactions': workspace:*
+      '@types/node-forge': 0.10.4
+      '@types/wif': 2.0.2
+      delay: 5.0.0
+      joi: 17.6.0
+      node-forge: 1.3.0
+      wif: 2.0.6
+    dependencies:
+      '@solar-network/crypto': link:../crypto
+      '@solar-network/kernel': link:../kernel
+      '@solar-network/nes': link:../nes
+      '@solar-network/p2p': link:../p2p
+      '@solar-network/transactions': link:../transactions
+      delay: 5.0.0
+      joi: 17.6.0
+      node-forge: 1.3.0
+      wif: 2.0.6
+    devDependencies:
+      '@types/node-forge': 0.10.4
+      '@types/wif': 2.0.2
 
   packages/state:
     specifiers:

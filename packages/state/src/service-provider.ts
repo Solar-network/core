@@ -2,7 +2,7 @@ import { Interfaces } from "@solar-network/crypto";
 import { Container, Contracts, Providers, Services } from "@solar-network/kernel";
 import Joi from "joi";
 
-import { BuildDelegateRankingAction, GetActiveDelegatesAction } from "./actions";
+import { BuildBlockProducerRankingAction, GetActiveBlockProducersAction } from "./actions";
 import { BlockState } from "./block-state";
 import { DatabaseInteraction } from "./database-interactions";
 import { DatabaseInterceptor } from "./database-interceptor";
@@ -128,10 +128,10 @@ export class ServiceProvider extends Providers.ServiceProvider {
     private registerActions(): void {
         this.app
             .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-            .bind("buildDelegateRanking", new BuildDelegateRankingAction());
+            .bind("buildBlockProducerRanking", new BuildBlockProducerRankingAction());
 
         this.app
             .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-            .bind("getActiveDelegates", new GetActiveDelegatesAction(this.app));
+            .bind("getActiveBlockProducers", new GetActiveBlockProducersAction(this.app));
     }
 }

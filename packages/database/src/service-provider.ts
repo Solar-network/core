@@ -3,15 +3,15 @@ import { Worker as NodeWorker } from "worker_threads";
 
 import { BlockFilter } from "./block-filter";
 import { BlockHistoryService } from "./block-history-service";
+import { BlockProductionFailureFilter } from "./block-production-failure-filter";
+import { BlockProductionFailureHistoryService } from "./block-production-failure-history-service";
 import { DatabaseService } from "./database-service";
-import { MissedBlockFilter } from "./missed-block-filter";
-import { MissedBlockHistoryService } from "./missed-block-history-service";
 import { ModelConverter } from "./model-converter";
 import { QueryRunner } from "./query-runner";
 import {
+    BlockProductionFailureRepository,
     BlockRepository,
     MigrationRepository,
-    MissedBlockRepository,
     RoundRepository,
     TransactionRepository,
 } from "./repositories";
@@ -23,7 +23,10 @@ export class ServiceProvider extends Providers.ServiceProvider {
     public async register(): Promise<void> {
         this.app.bind(Container.Identifiers.DatabaseBlockRepository).to(BlockRepository).inSingletonScope();
         this.app.bind(Container.Identifiers.DatabaseMigrationRepository).to(MigrationRepository).inSingletonScope();
-        this.app.bind(Container.Identifiers.DatabaseMissedBlockRepository).to(MissedBlockRepository).inSingletonScope();
+        this.app
+            .bind(Container.Identifiers.DatabaseBlockProductionFailureRepository)
+            .to(BlockProductionFailureRepository)
+            .inSingletonScope();
         this.app.bind(Container.Identifiers.DatabaseRoundRepository).to(RoundRepository).inSingletonScope();
         this.app.bind(Container.Identifiers.DatabaseTransactionRepository).to(TransactionRepository).inSingletonScope();
 
@@ -40,8 +43,10 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Container.Identifiers.DatabaseBlockFilter).to(BlockFilter);
         this.app.bind(Container.Identifiers.BlockHistoryService).to(BlockHistoryService);
 
-        this.app.bind(Container.Identifiers.DatabaseMissedBlockFilter).to(MissedBlockFilter);
-        this.app.bind(Container.Identifiers.MissedBlockHistoryService).to(MissedBlockHistoryService);
+        this.app.bind(Container.Identifiers.DatabaseBlockProductionFailureFilter).to(BlockProductionFailureFilter);
+        this.app
+            .bind(Container.Identifiers.BlockProductionFailureHistoryService)
+            .to(BlockProductionFailureHistoryService);
 
         this.app.bind(Container.Identifiers.DatabaseTransactionFilter).to(TransactionFilter);
         this.app.bind(Container.Identifiers.TransactionHistoryService).to(TransactionHistoryService);

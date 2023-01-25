@@ -4,5 +4,5 @@ export const Identifiers = {
 
     EventListener: Symbol.for("API<EventListener>"),
     WalletSearchService: Symbol.for("API<WalletSearchService>"),
-    DelegateSearchService: Symbol.for("API<DelegateSearchService>"),
+    BlockProducerSearchService: Symbol.for("API<BlockProducerSearchService>"),
 };

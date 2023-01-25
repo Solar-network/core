@@ -73,7 +73,10 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
             "💻",
         );
 
-        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, this.blocks[0].height);
+        const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(
+            this.app,
+            this.blocks[0].height,
+        );
 
         if (
             !Utils.isBlockChained(this.blockchain.getLastBlock().data, this.blocks[0], blockTimeLookup) &&
@@ -122,7 +125,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
                 const blockInstance = Blocks.BlockFactory.fromData(block);
                 Utils.assert.defined<Interfaces.IBlock>(blockInstance);
 
-                blockInstance.data.fromForger = block.fromForger;
+                blockInstance.data.fromOurNode = block.fromOurNode;
                 lastProcessResult = await this.triggers.call("processBlock", {
                     blockProcessor: this.app.get<BlockProcessor>(Container.Identifiers.BlockProcessor),
                     block: blockInstance,
@@ -175,8 +178,8 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
             lastProcessedBlock
         ) {
             if (this.stateStore.isStarted() && this.stateMachine.getState() === "newBlock") {
-                if (lastProcessedBlock.data.fromForger) {
-                    const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(
+                if (lastProcessedBlock.data.fromOurNode) {
+                    const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(
                         this.app,
                         lastProcessedBlock.data.height,
                     );

@@ -33,7 +33,7 @@ export interface MigrationModel extends Model {
     timestamp: number;
 }
 
-export interface MissedBlockModel extends Model {
+export interface BlockProductionFailureModel extends Model {
     timestamp: number;
     height: number;
     username: string;

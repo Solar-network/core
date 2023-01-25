@@ -118,6 +118,6 @@ export class BlockJob implements Job {
      * @memberof BlockJob
      */
     public everyRound(): this {
-        return this.cron(Managers.configManager.getMilestone().activeDelegates);
+        return this.cron(Managers.configManager.getMilestone().activeBlockProducers);
     }
 }

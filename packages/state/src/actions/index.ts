@@ -1,2 +1,2 @@
-export { BuildDelegateRankingAction } from "./build-delegate-ranking";
-export { GetActiveDelegatesAction } from "./get-active-delegates";
+export { BuildBlockProducerRankingAction } from "./build-block-producer-ranking";
+export { GetActiveBlockProducersAction } from "./get-active-block-producers";

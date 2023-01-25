@@ -30,7 +30,7 @@ export interface Peer {
     fastVerificationResult: FastPeerVerificationResult | undefined;
 
     addInfraction(): void;
-    isActiveDelegate(): boolean;
+    isActiveBlockProducer(): boolean;
     isIgnored(): boolean;
     isVerified(): boolean;
     isForked(): boolean;
@@ -46,7 +46,7 @@ export interface PeerBroadcast {
 
 export interface PeerState {
     height: number | undefined;
-    forgingAllowed: boolean | undefined;
+    allowed: boolean | undefined;
     currentSlot: number | undefined;
     header: Record<string, any>; // @todo: rename, those are block headers but the name is horrible
 }

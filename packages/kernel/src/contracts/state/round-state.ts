@@ -7,14 +7,14 @@ export interface RoundState {
 
     revertBlock(block: Interfaces.IBlock): Promise<void>;
 
-    detectMissedBlocks(block: Interfaces.IBlock): Promise<void>;
+    detectBlockProductionFailures(block: Interfaces.IBlock): Promise<void>;
 
     getRewardForBlockInRound(
         height: number,
         wallet: Wallet,
-    ): Promise<{ alreadyForged: boolean; reward: Utils.BigNumber }>;
+    ): Promise<{ alreadyProducedBlock: boolean; reward: Utils.BigNumber }>;
 
-    getMissedBlocksToSave(): { timestamp: number; height: number; username: string }[];
+    getBlockProductionFailuresToSave(): { timestamp: number; height: number; username: string }[];
     getRoundsToSave(): Record<
         number,
         { publicKey: string; balance: Utils.BigNumber; round: number; username: string }[]

@@ -88,7 +88,7 @@ export class Command extends Commands.Command {
 
                 await this.actions.restartRunningProcessWithPrompt("core");
                 await this.actions.restartRunningProcessWithPrompt("relay");
-                await this.actions.restartRunningProcessWithPrompt("forger");
+                await this.actions.restartRunningProcessWithPrompt("producer");
             } catch (error) {
                 spinner.fail();
                 this.components.error(error);
