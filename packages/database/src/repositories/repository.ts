@@ -292,8 +292,9 @@ export abstract class Repository<T extends IModel> implements Contracts.Database
                 return `${table}.identity_id = (SELECT id FROM identities WHERE identities.identity = :${param} LIMIT 1)`;
             case "username": {
                 switch (table) {
-                    case "blocks": {
-                        return `blocks.identity_id = (SELECT id FROM identities WHERE identities.identity = :${param} AND identities.is_username = 1 LIMIT 1)`;
+                    case "blocks":
+                    case "missed_blocks": {
+                        return `${table}.identity_id = (SELECT id FROM identities WHERE identities.identity = :${param} AND identities.is_username = 1 LIMIT 1)`;
                     }
                     case "transactions": {
                         return `transactions.row = (SELECT transactions_row FROM transactions_registration WHERE transactions_registration.identity_id = (SELECT id FROM identities WHERE identities.identity = :${param} LIMIT 1) LIMIT 1)`;
