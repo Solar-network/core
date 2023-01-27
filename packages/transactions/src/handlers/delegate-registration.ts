@@ -99,6 +99,8 @@ export class DelegateRegistrationTransactionHandler extends TransactionHandler {
             }
 
             const wallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.username);
+
+            block.donations = Utils.calculateDonations(block.height, block.reward);
             wallet.setAttribute("delegate.lastBlock", block);
         }
     }
