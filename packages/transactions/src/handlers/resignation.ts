@@ -29,7 +29,7 @@ export class ResignationTransactionHandler extends TransactionHandler {
     }
 
     public walletAttributes(): ReadonlyArray<string> {
-        return ["blockProducer.resignation", "hidden", "hidden.resignationHeight"];
+        return ["blockProducer.resignation", "hidden", "hidden.resignationHeight", "hidden.resignationRound"];
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
@@ -57,12 +57,16 @@ export class ResignationTransactionHandler extends TransactionHandler {
                 type = transaction.asset.resignation.type;
             }
 
-            if (type !== Enums.BlockProducerStatus.NotResigned) {
-                wallet.setAttribute("hidden.resignationHeight", transaction.blockHeight);
-                wallet.setAttribute("blockProducer.resignation", type);
-            } else {
+            if (type === Enums.BlockProducerStatus.NotResigned) {
                 wallet.forgetAttribute("blockProducer.resignation");
+                wallet.forgetAttribute("hidden.resignationHeight");
+            } else {
+                wallet.setAttribute("blockProducer.resignation", type);
+                wallet.setAttribute("hidden.resignationHeight", transaction.blockHeight);
             }
+
+            const { round } = AppUtils.roundCalculator.calculateRound(transaction.blockHeight!);
+            wallet.setAttribute("hidden.resignationRound", round);
 
             this.walletRepository.index(wallet);
         }
@@ -170,10 +174,14 @@ export class ResignationTransactionHandler extends TransactionHandler {
 
         if (type === Enums.BlockProducerStatus.NotResigned) {
             senderWallet.forgetAttribute("blockProducer.resignation");
+            senderWallet.forgetAttribute("hidden.resignationHeight");
         } else {
-            senderWallet.setAttribute("hidden.resignationHeight", transaction.data.blockHeight);
             senderWallet.setAttribute("blockProducer.resignation", type);
+            senderWallet.setAttribute("hidden.resignationHeight", transaction.data.blockHeight);
         }
+
+        const { round } = AppUtils.roundCalculator.calculateRound(transaction.data.blockHeight!);
+        senderWallet.setAttribute("hidden.resignationRound", round);
 
         this.walletRepository.index(senderWallet);
     }
@@ -191,13 +199,18 @@ export class ResignationTransactionHandler extends TransactionHandler {
         if (previousResignation) {
             AppUtils.assert.defined<string>(previousResignation.asset?.resignation);
             ({ type } = previousResignation.asset.resignation);
+            const { round } = AppUtils.roundCalculator.calculateRound(previousResignation.blockHeight!);
+            senderWallet.setAttribute("hidden.resignationRound", round);
+        } else {
+            senderWallet.forgetAttribute("hidden.resignationRound");
         }
 
         if (type === Enums.BlockProducerStatus.NotResigned) {
             senderWallet.forgetAttribute("blockProducer.resignation");
+            senderWallet.forgetAttribute("hidden.resignationHeight");
         } else {
-            senderWallet.setAttribute("hidden.resignationHeight", previousResignation.blockHeight);
             senderWallet.setAttribute("blockProducer.resignation", type);
+            senderWallet.setAttribute("hidden.resignationHeight", previousResignation.blockHeight);
         }
 
         this.walletRepository.index(senderWallet);

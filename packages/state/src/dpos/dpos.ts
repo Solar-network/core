@@ -3,6 +3,9 @@ import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 @Container.injectable()
 export class DposState implements Contracts.State.DposState {
+    @Container.inject(Container.Identifiers.StateStore)
+    private readonly stateStore!: Contracts.State.StateStore;
+
     @Container.inject(Container.Identifiers.WalletRepository)
     private walletRepository!: Contracts.State.WalletRepository;
 
@@ -52,13 +55,34 @@ export class DposState implements Contracts.State.DposState {
         }
     }
 
-    public buildBlockProducerRanking(): void {
+    public buildBlockProducerRanking(roundInfo?: Contracts.Shared.RoundInfo): void {
         this.activeBlockProducers = [];
+        if (!roundInfo) {
+            roundInfo = AppUtils.roundCalculator.calculateRound(this.stateStore.getLastBlock().data.height);
+        }
 
         for (const blockProducer of this.walletRepository.allByUsername()) {
+            let push = true;
+            if (blockProducer.hasAttribute("hidden.registrationRound")) {
+                const registrationRound = blockProducer.getAttribute("hidden.registrationRound");
+                if (registrationRound === roundInfo.round && roundInfo.round > 1) {
+                    blockProducer.forgetAttribute("blockProducer.rank");
+                    push = false;
+                }
+            }
+
             if (blockProducer.hasAttribute("blockProducer.resignation")) {
                 blockProducer.forgetAttribute("blockProducer.rank");
-            } else {
+                push = false;
+            } else if (blockProducer.hasAttribute("hidden.resignationRound")) {
+                const resignationRound = blockProducer.getAttribute("hidden.resignationRound");
+                if (resignationRound === roundInfo.round) {
+                    blockProducer.forgetAttribute("blockProducer.rank");
+                    push = false;
+                }
+            }
+
+            if (push) {
                 this.activeBlockProducers.push(blockProducer);
             }
         }

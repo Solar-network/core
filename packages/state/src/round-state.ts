@@ -189,7 +189,7 @@ export class RoundState implements Contracts.State.RoundState {
             this.detectFailedBlockProducersInRound(roundInfo.round - 1);
             this.logger.info(`Starting round ${roundInfo.round.toLocaleString()}`, "🕊️");
 
-            this.dposState.buildBlockProducerRanking();
+            this.dposState.buildBlockProducerRanking(roundInfo);
             this.dposState.setBlockProducersRound(roundInfo);
 
             const roundBlockProducers = this.dposState.getRoundBlockProducers();
@@ -216,6 +216,8 @@ export class RoundState implements Contracts.State.RoundState {
 
         if (nextRound === round + 1) {
             this.logger.info(`Back to previous round: ${round.toLocaleString()}`, "⬅️");
+
+            this.dposState.buildBlockProducerRanking(roundInfo);
 
             await this.setActiveBlockProducersOfRound(
                 roundInfo,

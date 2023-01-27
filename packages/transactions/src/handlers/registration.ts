@@ -36,6 +36,8 @@ export class RegistrationTransactionHandler extends TransactionHandler {
             "blockProducer.voteBalance",
             "blockProducer.voters", // Used by the API
             "blockProducer",
+            "hidden",
+            "hidden.registrationRound",
             "username",
         ];
     }
@@ -72,7 +74,10 @@ export class RegistrationTransactionHandler extends TransactionHandler {
                 voters: 0,
             });
 
+            const { round } = AppUtils.roundCalculator.calculateRound(transaction.blockHeight!);
+            wallet.setAttribute("hidden.registrationRound", round);
             wallet.setAttribute("username", transaction.asset.registration.username);
+
             this.walletRepository.index(wallet);
         }
 
@@ -189,7 +194,10 @@ export class RegistrationTransactionHandler extends TransactionHandler {
             voters: 0,
         });
 
+        const { round } = AppUtils.roundCalculator.calculateRound(transaction.data.blockHeight!);
+        senderWallet.setAttribute("hidden.registrationRound", round);
         senderWallet.setAttribute("username", transaction.data.asset.registration.username);
+
         this.walletRepository.index(senderWallet);
     }
 
@@ -201,6 +209,7 @@ export class RegistrationTransactionHandler extends TransactionHandler {
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         senderWallet.forgetAttribute("blockProducer");
+        senderWallet.forgetAttribute("hidden.registrationRound");
         senderWallet.forgetAttribute("username");
 
         this.walletRepository.index(senderWallet);

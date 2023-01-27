@@ -9,7 +9,7 @@ export interface DposState {
     getActiveBlockProducers(): readonly Wallet[];
     getRoundBlockProducers(): readonly Wallet[];
     buildVoteBalances(): void;
-    buildBlockProducerRanking(): void;
+    buildBlockProducerRanking(roundInfo?: RoundInfo): void;
     setBlockProducersRound(roundInfo: RoundInfo): void;
 }
 

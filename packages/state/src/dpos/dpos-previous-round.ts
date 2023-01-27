@@ -1,11 +1,8 @@
 import { Interfaces } from "@solar-network/crypto";
-import { Container, Contracts, Services } from "@solar-network/kernel";
+import { Container, Contracts } from "@solar-network/kernel";
 
 @Container.injectable()
 export class DposPreviousRoundState implements Contracts.State.DposPreviousRoundState {
-    @Container.inject(Container.Identifiers.Application)
-    private readonly app!: Contracts.Kernel.Application;
-
     @Container.inject(Container.Identifiers.BlockState)
     @Container.tagged("state", "clone")
     private readonly blockState!: Contracts.State.BlockState;
@@ -22,9 +19,7 @@ export class DposPreviousRoundState implements Contracts.State.DposPreviousRound
             await this.blockState.revertBlock(block);
         }
 
-        await this.app
-            .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-            .call("buildBlockProducerRanking", { dposState: this.dposState });
+        this.dposState.buildBlockProducerRanking(roundInfo);
 
         this.dposState.setBlockProducersRound(roundInfo);
     }
