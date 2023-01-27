@@ -37,7 +37,7 @@
     },
     {
         "height": 2,
-        "transactionVersions": [3]
+        "transactionVersions": [2, 3]
     },
     {
         "height": 54,
@@ -108,7 +108,8 @@
                 "52": 1312500000,
                 "53": 1325000000
             },
-            "secondaryReward": 675000000
+            "secondaryReward": 675000000,
+            "transactionVersions": [3]
         }
     }
 ]
