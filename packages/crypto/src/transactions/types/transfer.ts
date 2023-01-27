@@ -25,6 +25,8 @@ export abstract class TransferTransaction extends Transaction {
             const buf: ByteBuffer = new ByteBuffer(Buffer.alloc(4 + data.asset.recipients.length * 29));
             if (this.internalType === TransferType.Multiple) {
                 buf.writeUInt16LE(data.asset.recipients.length);
+            } else if (data.asset.recipients.length > 1) {
+                data.asset.recipients = data.asset.recipients.slice(0, 1);
             }
             for (const transfer of data.asset.recipients) {
                 buf.writeBigUInt64LE(transfer.amount.toBigInt());
