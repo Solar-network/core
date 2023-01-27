@@ -2,6 +2,7 @@
     {
         "height": 1,
         "activeBlockProducers": 53,
+        "autoUpgradeUsernamesToBlockProducers": true,
         "block": {
             "version": 0,
             "maxTransactions": 150,

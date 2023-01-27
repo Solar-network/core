@@ -3,6 +3,7 @@ export const Identifiers = {
     HTTPS: Symbol.for("API<HTTPS>"),
 
     EventListener: Symbol.for("API<EventListener>"),
-    WalletSearchService: Symbol.for("API<WalletSearchService>"),
     BlockProducerSearchService: Symbol.for("API<BlockProducerSearchService>"),
+    UsernameSearchService: Symbol.for("API<UsernameSearchService>"),
+    WalletSearchService: Symbol.for("API<WalletSearchService>"),
 };

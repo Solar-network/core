@@ -8,6 +8,7 @@ import {
     ResignationTransactionHandler,
     TransactionHandlerConstructor,
     TransferTransactionHandler,
+    UpgradeTransactionHandler,
     VoteTransactionHandler,
 } from "./handlers";
 import { TransactionHandlerProvider } from "./handlers/handler-provider";
@@ -65,6 +66,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Container.Identifiers.TransactionHandler).to(ExtraSignatureRegistrationTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(IpfsTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(TransferTransactionHandler);
+        this.app.bind(Container.Identifiers.TransactionHandler).to(UpgradeTransactionHandler);
         this.app.bind(Container.Identifiers.TransactionHandler).to(VoteTransactionHandler);
 
         this.app

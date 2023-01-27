@@ -38,6 +38,10 @@ export class WalletRepositoryCopyOnWrite extends WalletRepository {
         return true;
     }
 
+    public allBlockProducers(): ReadonlyArray<Contracts.State.Wallet> {
+        return this.allByUsername().filter((wallet) => wallet.hasAttribute("blockProducer"));
+    }
+
     public allByUsername(): ReadonlyArray<Contracts.State.Wallet> {
         for (const wallet of this.blockchainWalletRepository.allByUsername()) {
             if (!super.hasByAddress(wallet.getAddress())) {

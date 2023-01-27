@@ -37,6 +37,11 @@ export const schemas = {
         allOf: [{ minLength: 66, maxLength: 66 }, { $ref: "hex" }, { transform: ["toLowerCase"] }],
     },
 
+    blsPublicKey: {
+        $id: "blsPublicKey",
+        allOf: [{ minLength: 96, maxLength: 96 }, { $ref: "hex" }, { transform: ["toLowerCase"] }],
+    },
+
     username: {
         $id: "username",
         allOf: [

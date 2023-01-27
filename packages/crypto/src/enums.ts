@@ -15,6 +15,7 @@ export enum BlockProducerType {
 
 export enum UsernameType {
     Registration = "1/2",
+    Upgrade = "2/3",
 }
 
 export enum OtherType {
@@ -41,4 +42,5 @@ export const TransactionType = {
     ipfs: [OtherType.IPFS],
     transfer: [TransferType.Multiple, TransferType.Single],
     vote: [VoteType.Multiple, VoteType.Single],
+    upgrade: [UsernameType.Upgrade],
 };

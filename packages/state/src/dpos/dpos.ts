@@ -21,7 +21,7 @@ export class DposState implements Contracts.State.DposState {
     }
 
     public getAllBlockProducers(): readonly Contracts.State.Wallet[] {
-        return this.walletRepository.allByUsername();
+        return this.walletRepository.allBlockProducers();
     }
 
     public getActiveBlockProducers(): readonly Contracts.State.Wallet[] {
@@ -61,11 +61,11 @@ export class DposState implements Contracts.State.DposState {
             roundInfo = AppUtils.roundCalculator.calculateRound(this.stateStore.getLastBlock().data.height);
         }
 
-        for (const blockProducer of this.walletRepository.allByUsername()) {
+        for (const blockProducer of this.walletRepository.allBlockProducers()) {
             let push = true;
-            if (blockProducer.hasAttribute("hidden.registrationRound")) {
-                const registrationRound = blockProducer.getAttribute("hidden.registrationRound");
-                if (registrationRound === roundInfo.round && roundInfo.round > 1) {
+            if (blockProducer.hasAttribute("hidden.upgradeRound")) {
+                const upgradeRound = blockProducer.getAttribute("hidden.upgradeRound");
+                if (upgradeRound === roundInfo.round && roundInfo.round > 1) {
                     blockProducer.forgetAttribute("blockProducer.rank");
                     push = false;
                 }

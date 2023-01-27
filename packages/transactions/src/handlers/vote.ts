@@ -81,7 +81,9 @@ export class VoteTransactionHandler extends TransactionHandler {
         for (const blockProducer of votes) {
             if (
                 (transaction.data.version > 2 && blockProducer.length == 66) ||
-                (blockProducer.length != 66 && !this.walletRepository.hasByUsername(blockProducer))
+                (blockProducer.length != 66 &&
+                    (!this.walletRepository.hasByUsername(blockProducer) ||
+                        !this.walletRepository.findByUsername(blockProducer).isBlockProducer()))
             ) {
                 throw new VotedForNonBlockProducerError(blockProducer);
             }

@@ -24,6 +24,9 @@
             "name": "Transactions"
         },
         {
+            "name": "Usernames"
+        },
+        {
             "name": "Votes"
         },
         {
@@ -1160,6 +1163,8 @@
                                 "rank:desc",
                                 "resignation:asc",
                                 "resignation:desc",
+                                "username:asc",
+                                "username:desc",
                                 "version:asc",
                                 "version:desc",
                                 "votesReceived.percent:asc",
@@ -1890,6 +1895,120 @@
                 "responses": {
                     "200": {
                         "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/usernames": {
+            "get": {
+                "tags": [
+                    "Usernames"
+                ],
+                "summary": "List usernames or search for usernames meeting specific criteria",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "The number of the page that will be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/page"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The number of results per page",
+                        "schema": {
+                            "$ref": "#/components/schemas/limit"
+                        }
+                    },
+                    {
+                        "name": "address",
+                        "in": "query",
+                        "description": "The address of the username to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/address"
+                        }
+                    },
+                    {
+                        "name": "publicKey",
+                        "in": "query",
+                        "description": "The public key of the username to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/publicKey"
+                        }
+                    },
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "The username to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/username"
+                        }
+                    },
+                    {
+                        "name": "blockProducer",
+                        "in": "query",
+                        "description": "Whether the username(s) to be returned are block producers",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "orderBy",
+                        "in": "query",
+                        "description": "Sorting method",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "address:asc",
+                                "address:desc",
+                                "blockProducer:asc",
+                                "blockProducer:desc",
+                                "publicKey:asc",
+                                "publicKey:desc",
+                                "username:asc",
+                                "username:desc"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "422": {
+                        "description": "Invalid parameter(s)"
+                    }
+                }
+            }
+        },
+        "/usernames/{identifier}": {
+            "get": {
+                "tags": [
+                    "Usernames"
+                ],
+                "summary": "Find a single username by its identifier",
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "description": "Identifier for username (address, public key, username)",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/walletIdentifier"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    },
+                    "404": {
+                        "description": "Username not found"
                     },
                     "422": {
                         "description": "Invalid parameter(s)"

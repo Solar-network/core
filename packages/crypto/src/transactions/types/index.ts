@@ -9,4 +9,5 @@ export * from "./resignation";
 export * from "./extra-signature";
 export * from "./ipfs";
 export * from "./transfer";
+export * from "./upgrade";
 export * from "./vote";

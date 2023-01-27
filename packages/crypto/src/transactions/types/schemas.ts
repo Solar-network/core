@@ -225,4 +225,30 @@ export const burn = extend(transactionBaseSchema, {
     },
 });
 
+export const upgrade = extend(transactionBaseSchema, {
+    $id: "upgrade",
+    required: ["asset"],
+    properties: {
+        fee: { bignumber: { minimum: 1 } },
+        asset: {
+            type: "object",
+            required: ["blockProducer"],
+            properties: {
+                blockProducer: {
+                    type: "object",
+                    required: ["publicKey", "signature"],
+                    properties: {
+                        publicKey: {
+                            $ref: "blsPublicKey",
+                        },
+                        signature: {
+                            allOf: [{ minLength: 192, maxLength: 192 }, { $ref: "hex" }],
+                        },
+                    },
+                },
+            },
+        },
+    },
+});
+
 export type TransactionSchema = typeof transactionBaseSchema;

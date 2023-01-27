@@ -26,6 +26,10 @@ export class WalletRepositoryClone extends WalletRepository {
         return super.createWallet(address);
     }
 
+    public allBlockProducers(): ReadonlyArray<Contracts.State.Wallet> {
+        return this.allByUsername().filter((wallet) => wallet.hasAttribute("blockProducer"));
+    }
+
     public allByAddress(): ReadonlyArray<Contracts.State.Wallet> {
         return this.allByIndex(Contracts.State.WalletIndexes.Addresses);
     }

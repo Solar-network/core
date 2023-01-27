@@ -189,6 +189,7 @@ export interface WalletBlockProducerAttributes {
     rewards: Utils.BigNumber;
     donations: Utils.BigNumber;
     producedBlocks: number;
+    publicKey?: string;
     rank?: number;
     lastBlock?: Interfaces.IBlockData;
     round?: number;
@@ -212,6 +213,8 @@ export interface WalletRepository {
     reset(): void;
 
     getIndex(name: string): WalletIndex;
+
+    allBlockProducers(): ReadonlyArray<Wallet>;
 
     allByAddress(): ReadonlyArray<Wallet>;
 

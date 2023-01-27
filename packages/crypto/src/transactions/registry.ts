@@ -11,6 +11,7 @@ import {
     Transaction,
     TransactionTypeFactory,
     TransferTransaction,
+    UpgradeTransaction,
     VoteTransaction,
 } from "./types";
 import { InternalTransactionType } from "./types/internal-transaction-type";
@@ -29,6 +30,7 @@ class TransactionRegistry {
         this.registerTransactionType(TransferTransaction);
         this.registerTransactionType(ResignationTransaction);
         this.registerTransactionType(BurnTransaction);
+        this.registerTransactionType(UpgradeTransaction);
         this.registerTransactionType(VoteTransaction);
     }
 

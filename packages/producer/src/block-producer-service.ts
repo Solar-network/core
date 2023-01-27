@@ -48,7 +48,7 @@ export class BlockProducerService {
      * @type {{ [key: string]: string }}
      * @memberof BlockProducerService
      */
-    private allUsernames: { [key: string]: string } = {};
+    private allBlockProducers: { [key: string]: string } = {};
 
     /**
      * @private
@@ -537,7 +537,7 @@ export class BlockProducerService {
     private async loadRound(): Promise<void> {
         this.round = await this.client.getRound();
 
-        this.allUsernames = this.round.allBlockProducers.reduce((acc, wallet) => {
+        this.allBlockProducers = this.round.allBlockProducers.reduce((acc, wallet) => {
             AppUtils.assert.defined<string>(wallet.publicKey);
 
             return Object.assign(acc, {
@@ -600,7 +600,9 @@ export class BlockProducerService {
                             .map((oldBlockProducer) => oldBlockProducer.publicKey)
                             .includes(inactiveBlockProducer),
                 )
-                .map((publicKey) => (this.allUsernames[publicKey] ? this.allUsernames[publicKey] : publicKey));
+                .map((publicKey) =>
+                    this.allBlockProducers[publicKey] ? this.allBlockProducers[publicKey] : publicKey,
+                );
 
             if (newlyActiveBlockProducers.length === 1) {
                 this.logger.info(`${newlyActiveBlockProducers[0]} is now an active block producer`, "🎉");
@@ -670,8 +672,8 @@ export class BlockProducerService {
                         AppUtils.assert.defined<string>(publicKey);
 
                         return `${
-                            this.allUsernames[publicKey]
-                                ? this.allUsernames[publicKey]
+                            this.allBlockProducers[publicKey]
+                                ? this.allBlockProducers[publicKey]
                                 : `unregistered block producer (public key: ${publicKey})`
                         }`;
                     })

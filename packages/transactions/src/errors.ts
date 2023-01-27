@@ -222,3 +222,23 @@ export class UnexpectedHeaderTypeError extends TransactionError {
         super("Failed to apply transaction, because the extended transaction header type is not enabled");
     }
 }
+
+export class WalletHasNoUsernameError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because the wallet does not have a registered username");
+    }
+}
+
+export class WalletIsAlreadyBlockProducerError extends TransactionError {
+    public constructor(username: string) {
+        super(`Failed to apply transaction, because '${username}' is already a block producer`);
+    }
+}
+
+export class BlockProducerSignatureError extends TransactionError {
+    public constructor() {
+        super(
+            "Failed to apply transaction, because the signature for the block producer does not match the public key",
+        );
+    }
+}

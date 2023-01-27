@@ -10,8 +10,8 @@ import {
     WalletNotABlockProducerError,
     WalletNotResignedError,
 } from "../errors";
-import { RegistrationTransactionHandler } from "./registration";
 import { TransactionHandler, TransactionHandlerConstructor } from "./transaction";
+import { UpgradeTransactionHandler } from "./upgrade";
 
 @Container.injectable()
 export class ResignationTransactionHandler extends TransactionHandler {
@@ -25,7 +25,7 @@ export class ResignationTransactionHandler extends TransactionHandler {
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
     public dependencies(): ReadonlyArray<TransactionHandlerConstructor> {
-        return [RegistrationTransactionHandler];
+        return [UpgradeTransactionHandler];
     }
 
     public walletAttributes(): ReadonlyArray<string> {
@@ -120,7 +120,7 @@ export class ResignationTransactionHandler extends TransactionHandler {
 
         const requiredBlockProducersCount: number = Managers.configManager.getMilestone().activeBlockProducers;
         const currentBlockProducersCount: number = this.walletRepository
-            .allByUsername()
+            .allBlockProducers()
             .filter((wallet: Contracts.State.Wallet) => !wallet.hasAttribute("blockProducer.resignation")).length;
 
         if (
