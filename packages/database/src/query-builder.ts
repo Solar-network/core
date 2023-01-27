@@ -10,7 +10,7 @@ export class QueryBuilder implements Contracts.Database.QueryBuilder {
     private action: string = "";
     private columns: string[] = [];
     private groups: string[] = [];
-    private insertParameters: Record<string, any> = {};
+    private insertParameters: Record<string, any> = Object.create(null);
     private limitRange: string = "";
     private params: Map<string, number> = new Map();
     private subqueries: string[] = [];
@@ -165,8 +165,8 @@ export class QueryBuilder implements Contracts.Database.QueryBuilder {
             }
             case "INSERT":
             case "INSERT OR IGNORE": {
-                const queryParams = {};
-                const subqueryParams = {};
+                const queryParams = Object.create(null);
+                const subqueryParams = Object.create(null);
                 for (const [key, value] of Object.entries(this.insertParameters)) {
                     if (value.query !== undefined) {
                         queryParams[key] = value.query;
@@ -184,11 +184,11 @@ export class QueryBuilder implements Contracts.Database.QueryBuilder {
                 query += ` INTO ${this.table} (${this.columns.join(", ")}) VALUES (${paramKeys
                     .map((param) => `:${param}`)
                     .join(", ")}${this.subqueries.join(", ")})`;
-                parameters = {
+                parameters = Object.assign(Object.create(null), {
                     ...parameters,
                     ...queryParams,
                     ...subqueryParams,
-                };
+                });
                 break;
             }
             case "SELECT": {
@@ -196,10 +196,10 @@ export class QueryBuilder implements Contracts.Database.QueryBuilder {
                 for (const crossJoin of this.crossJoins) {
                     query += ` CROSS JOIN ${crossJoin.table} ON ${crossJoin.criteria}`;
                     if (crossJoin.parameters) {
-                        parameters = {
+                        parameters = Object.assign(Object.create(null), {
                             ...parameters,
                             ...crossJoin.parameters,
-                        };
+                        });
                     }
                 }
 
@@ -218,10 +218,10 @@ export class QueryBuilder implements Contracts.Database.QueryBuilder {
                     if (Array.isArray(this.whereCriteria[i].parameters)) {
                         parameters = this.whereCriteria[i].parameters!;
                     } else {
-                        parameters = {
+                        parameters = Object.assign(Object.create(null), {
                             ...parameters,
                             ...this.whereCriteria[i].parameters,
-                        };
+                        });
                     }
                 }
             }
@@ -261,7 +261,7 @@ export class QueryBuilder implements Contracts.Database.QueryBuilder {
     }
 
     private convertParameters(params?: WhereParameter): WhereParameter {
-        const parameters: WhereParameter = Array.isArray(params) ? [] : {};
+        const parameters: WhereParameter = Array.isArray(params) ? [] : Object.create(null);
         if (params) {
             for (const [key, value] of Object.entries(params)) {
                 let parameter = value;

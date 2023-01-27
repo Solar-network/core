@@ -133,17 +133,17 @@ export class WorkerScriptHandler implements Contracts.Database.WorkerScriptHandl
     }
 
     private transformFromModel(parameters: Record<string, any>): Record<string, any> {
-        const cache = {};
+        const cache: Map<string, any> = new Map();
         for (const [key, value] of Object.entries(parameters)) {
             parameters[key] = value;
             const param: string = key.includes("__") ? key.substring(0, key.indexOf("__")) : key;
             if (this.metadata.has(param)) {
                 switch (this.metadata.get(param)) {
                     case "base58": {
-                        if (!cache[value] && value !== undefined && value !== null) {
-                            cache[value] = Buffer.from(decode(value));
+                        if (!cache.has(value) && value !== undefined && value !== null) {
+                            cache.set(value, Buffer.from(decode(value)));
                         }
-                        parameters[key] = cache[value];
+                        parameters[key] = cache.get(value);
                         break;
                     }
                     case "bignumber": {
@@ -157,14 +157,14 @@ export class WorkerScriptHandler implements Contracts.Database.WorkerScriptHandl
                         break;
                     }
                     case "identity": {
-                        if (!cache[value] && value !== undefined && value !== null) {
+                        if (!cache.has(value) && value !== undefined && value !== null) {
                             if (value.length <= 20) {
-                                cache[value] = Buffer.from(value, "utf8");
+                                cache.set(value, Buffer.from(value, "utf8"));
                             } else {
-                                cache[value] = Identities.Address.toBuffer(value).addressBuffer;
+                                cache.set(value, Identities.Address.toBuffer(value).addressBuffer);
                             }
                         }
-                        parameters[key] = cache[value];
+                        parameters[key] = cache.get(value);
                         break;
                     }
                 }
@@ -174,7 +174,7 @@ export class WorkerScriptHandler implements Contracts.Database.WorkerScriptHandl
     }
 
     private transformToModel(rows: Record<string, any>[]): Record<string, any>[] {
-        const cache = {};
+        const cache: Map<string, any> = new Map();
         return rows.map((row) => {
             for (const [key, value] of Object.entries(row)) {
                 row[key] = value;
@@ -183,10 +183,10 @@ export class WorkerScriptHandler implements Contracts.Database.WorkerScriptHandl
                         switch (this.metadata.get(key)) {
                             case "base58": {
                                 const string: string = value.toString("hex");
-                                if (!cache[string] && value !== undefined && value !== null) {
-                                    cache[string] = encode(value);
+                                if (!cache.has(string) && value !== undefined && value !== null) {
+                                    cache.set(string, encode(value));
                                 }
-                                row[key] = cache[string];
+                                row[key] = cache.get(string);
                                 break;
                             }
                             case "buffer": {
@@ -195,14 +195,14 @@ export class WorkerScriptHandler implements Contracts.Database.WorkerScriptHandl
                             }
                             case "identity": {
                                 const string: string = value.toString("hex");
-                                if (!cache[string] && value !== undefined && value !== null) {
+                                if (!cache.has(string) && value !== undefined && value !== null) {
                                     if (value.length === 21) {
-                                        cache[string] = Identities.Address.fromBuffer(value);
+                                        cache.set(string, Identities.Address.fromBuffer(value));
                                     } else {
-                                        cache[string] = value.toString("utf8");
+                                        cache.set(string, value.toString("utf8"));
                                     }
                                 }
-                                row[key] = cache[string];
+                                row[key] = cache.get(string);
                                 break;
                             }
                         }
