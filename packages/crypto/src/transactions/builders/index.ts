@@ -1,8 +1,8 @@
 import { BurnBuilder } from "./transactions/burn";
-import { DelegateRegistrationBuilder } from "./transactions/delegate-registration";
-import { DelegateResignationBuilder } from "./transactions/delegate-resignation";
 import { ExtraSignatureBuilder } from "./transactions/extra-signature";
 import { IPFSBuilder } from "./transactions/ipfs";
+import { RegistrationBuilder } from "./transactions/registration";
+import { ResignationBuilder } from "./transactions/resignation";
 import { TransferBuilder } from "./transactions/transfer";
 import { VoteBuilder } from "./transactions/vote";
 
@@ -17,20 +17,16 @@ export class BuilderFactory {
         return new ExtraSignatureBuilder();
     }
 
-    public static delegateRegistration(): DelegateRegistrationBuilder {
-        return new DelegateRegistrationBuilder();
+    public static registration(): RegistrationBuilder {
+        return new RegistrationBuilder();
     }
 
     public static ipfs(): IPFSBuilder {
         return new IPFSBuilder();
     }
 
-    public static multiPayment(): TransferBuilder {
-        return new TransferBuilder();
-    }
-
-    public static delegateResignation(): DelegateResignationBuilder {
-        return new DelegateResignationBuilder();
+    public static resignation(): ResignationBuilder {
+        return new ResignationBuilder();
     }
 
     public static burn(): BurnBuilder {

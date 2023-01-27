@@ -30,7 +30,7 @@ export const defaults = {
      */
     maxSameSubnetPeers: process.env.SOLAR_CORE_P2P_MAX_PEERS_SAME_SUBNET || 256,
     /**
-     * The maximum peer consecutive errors before peer is forget from peer store.
+     * The maximum peer consecutive errors before peer is forgotten from peer store.
      */
     maxPeerSequentialErrors: process.env.SOLAR_CORE_P2P_MAX_PEER_SEQUENTIAL_ERRORS || 3,
     /**
@@ -45,8 +45,8 @@ export const defaults = {
      * The list of IPs can access the remote/internal API.
      *
      * This should usually only include your localhost to grant access to
-     * the internal API to your forger. If you run a split relay and forger
-     * you will need to specify the IP of your forger here.
+     * the internal API to your block producer. If you run a split relay and producer
+     * you will need to specify the IP of your block producer here.
      */
     remoteAccess: ["127.0.0.1", "::ffff:127.0.0.1", "::1"],
     /**

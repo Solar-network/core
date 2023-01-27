@@ -206,9 +206,9 @@ export class StateLoader {
                 throw new CorruptSavedStateError(height);
             }
 
-            const delegates: number = Object.keys(this.walletRepository.allByUsername()).length;
+            const usernames: number = Object.keys(this.walletRepository.allByUsername()).length;
 
-            if (delegates === 0) {
+            if (usernames === 0) {
                 throw new CorruptSavedStateError(height);
             }
 

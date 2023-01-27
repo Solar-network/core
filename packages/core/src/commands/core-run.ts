@@ -65,7 +65,7 @@ export class Command extends Commands.Command {
                 "@solar-network/blockchain": {
                     networkStart: flags.networkStart,
                 },
-                "@solar-network/forger": {},
+                "@solar-network/producer": {},
             },
         });
 

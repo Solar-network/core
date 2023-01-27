@@ -51,7 +51,7 @@ message GetStatusResponse {
             string signature = 15;
         }
         uint32 height = 1;
-        bool forgingAllowed = 2;
+        bool allowed = 2;
         uint32 currentSlot = 3;
         BlockHeader header = 4;
     }

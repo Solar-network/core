@@ -47,7 +47,7 @@ export enum BlockchainEvent {
 export enum BlockEvent {
     Applied = "block.applied",
     Disregarded = "block.disregarded",
-    Forged = "block.forged",
+    Produced = "block.produced",
     Received = "block.received",
     Reverted = "block.reverted",
 }
@@ -56,25 +56,24 @@ export enum BlockEvent {
  * @export
  * @enum {number}
  */
-export enum DelegateEvent {
-    ProductivityChanged = "delegate.productivityChanged",
-    DataChanged = "delegate.dataChanged",
-    Registered = "delegate.registered",
-    Resigned = "delegate.resigned",
-}
-
-export enum VoteEvent {
-    Vote = "wallet.vote",
+export enum BlockProducerEvent {
+    DataChanged = "blockProducer.dataChanged",
+    Failed = "blockProducer.failed",
+    ReliabilityChanged = "blockProducer.reliabilityChanged",
+    Registered = "blockProducer.registered",
+    Resigned = "blockProducer.resigned",
 }
 
 /**
  * @export
  * @enum {number}
  */
-export enum ForgerEvent {
-    Failed = "forger.failed",
-    Missing = "forger.missing",
-    Started = "forger.started",
+export enum UsernameEvent {
+    Registered = "username.registered",
+}
+
+export enum VoteEvent {
+    Vote = "wallet.vote",
 }
 
 /**
@@ -96,7 +95,7 @@ export enum PeerEvent {
 export enum RoundEvent {
     Applied = "round.applied",
     Created = "round.created",
-    Missed = "round.missed",
+    Failed = "round.failed",
 }
 
 /**
@@ -117,7 +116,7 @@ export enum TransactionEvent {
     AddedToPool = "transaction.pool.added",
     Applied = "transaction.applied",
     Expired = "transaction.expired",
-    Forged = "transaction.forged",
+    IncludedInBlock = "transaction.included",
     RejectedByPool = "transaction.pool.rejected",
     RemovedFromPool = "transaction.pool.removed",
     Reverted = "transaction.reverted",

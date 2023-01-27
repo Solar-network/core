@@ -5,18 +5,18 @@ import { Wallet } from "./wallets";
 
 export interface DposState {
     getRoundInfo(): RoundInfo;
-    getAllDelegates(): readonly Wallet[];
-    getActiveDelegates(): readonly Wallet[];
-    getRoundDelegates(): readonly Wallet[];
+    getAllBlockProducers(): readonly Wallet[];
+    getActiveBlockProducers(): readonly Wallet[];
+    getRoundBlockProducers(): readonly Wallet[];
     buildVoteBalances(): void;
-    buildDelegateRanking(): void;
-    setDelegatesRound(roundInfo: RoundInfo): void;
+    buildBlockProducerRanking(): void;
+    setBlockProducersRound(roundInfo: RoundInfo): void;
 }
 
 export interface DposPreviousRoundState {
-    getAllDelegates(): readonly Wallet[];
-    getActiveDelegates(): readonly Wallet[];
-    getRoundDelegates(): readonly Wallet[];
+    getAllBlockProducers(): readonly Wallet[];
+    getActiveBlockProducers(): readonly Wallet[];
+    getRoundBlockProducers(): readonly Wallet[];
 }
 
 export type DposPreviousRoundStateProvider = (

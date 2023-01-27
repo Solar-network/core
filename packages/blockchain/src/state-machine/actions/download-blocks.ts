@@ -41,7 +41,10 @@ export class DownloadBlocks implements Action {
         const empty: boolean = !blocks || blocks.length === 0;
 
         const useLookupHeight = empty ? lastDownloadedBlock.height : blocks[0].height;
-        const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(this.app, useLookupHeight);
+        const blockTimeLookup = await AppUtils.blockProductionInfoCalculator.getBlockTimeLookup(
+            this.app,
+            useLookupHeight,
+        );
 
         const chained: boolean =
             !empty &&

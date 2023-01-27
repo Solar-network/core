@@ -130,7 +130,7 @@ export interface Wallet {
      * @returns {boolean}
      * @memberof Wallet
      */
-    isDelegate(): boolean;
+    isBlockProducer(): boolean;
 
     /**
      * @returns {boolean}
@@ -139,11 +139,11 @@ export interface Wallet {
     hasVoted(): boolean;
 
     /**
-     * @param {string} delegate
+     * @param {string} blockProducer
      * @returns {Utils.BigNumber}
      * @memberof Wallet
      */
-    getVoteBalance(delegate: string): Utils.BigNumber;
+    getVoteBalance(blockProducer: string): Utils.BigNumber;
 
     /**
      * @returns {Map<string, Utils.BigNumber>}
@@ -173,7 +173,7 @@ export interface Wallet {
 
     calculateVoteAmount(
         balances: { balance: Utils.BigNumber },
-        delegates?: Map<string, number>,
+        blockProducers?: Map<string, number>,
     ): Map<string, Record<string, Utils.BigNumber>>;
 
     getBasicWallet();
@@ -181,13 +181,12 @@ export interface Wallet {
 
 export type WalletFactory = (address: string) => Wallet;
 
-export interface WalletDelegateAttributes {
-    username: string;
+export interface WalletBlockProducerAttributes {
     voteBalance: Utils.BigNumber;
     voters: number;
-    forgedFees: Utils.BigNumber;
+    fees: Utils.BigNumber;
     burnedFees: Utils.BigNumber;
-    forgedRewards: Utils.BigNumber;
+    rewards: Utils.BigNumber;
     donations: Utils.BigNumber;
     producedBlocks: number;
     rank?: number;
@@ -257,7 +256,7 @@ export interface WalletRepository {
 
 export enum SearchScope {
     Wallets,
-    Delegates,
+    BlockProducers,
     Entities,
 }
 

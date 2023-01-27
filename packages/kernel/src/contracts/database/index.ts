@@ -1,6 +1,6 @@
 export * from "./block-filter";
+export * from "./block-production-failure-filter";
 export * from "./migration";
-export * from "./missed-block-filter";
 export * from "./model-converter";
 export * from "./models";
 export * from "./query-builder";

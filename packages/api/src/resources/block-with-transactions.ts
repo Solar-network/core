@@ -36,31 +36,24 @@ export class BlockWithTransactionsResource implements Resource {
             version: +blockData.version,
             height: +blockData.height,
             previous: blockData.previousBlock,
-            forged: {
-                reward: blockData.reward.toFixed(),
-                donations: blockData.donations,
-                fee: blockData.totalFee.toFixed(),
-                burnedFee: blockData.totalFeeBurned!.toFixed(),
-                amount: totalAmountTransferred.toFixed(),
-                total: blockData.reward
-                    .minus(
-                        Object.values(blockData.donations!).reduce(
-                            (prev, curr) => prev.plus(curr),
-                            Utils.BigNumber.ZERO,
-                        ),
-                    )
-                    .plus(blockData.totalFee)
-                    .minus(blockData.totalFeeBurned!)
-                    .toFixed(),
-            },
+            reward: blockData.reward.toFixed(),
+            donations: blockData.donations,
+            fee: blockData.totalFee.toFixed(),
+            burnedFee: blockData.totalFeeBurned!.toFixed(),
+            amount: totalAmountTransferred.toFixed(),
+            total: blockData.reward
+                .minus(
+                    Object.values(blockData.donations!).reduce((prev, curr) => prev.plus(curr), Utils.BigNumber.ZERO),
+                )
+                .plus(blockData.totalFee)
+                .minus(blockData.totalFeeBurned!)
+                .toFixed(),
             payload: {
                 hash: blockData.payloadHash,
                 length: blockData.payloadLength,
             },
             generator: {
-                username: generator.hasAttribute("delegate.username")
-                    ? generator.getAttribute("delegate.username")
-                    : undefined,
+                username: generator.hasAttribute("username") ? generator.getAttribute("username") : undefined,
                 publicKey: blockData.generatorPublicKey,
             },
             signature: blockData.signature,

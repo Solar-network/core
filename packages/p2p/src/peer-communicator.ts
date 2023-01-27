@@ -197,15 +197,15 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                 .getLastBlock();
             const height = lastBlock.data.height + 1;
             const roundInfo = Utils.roundCalculator.calculateRound(height);
-            const delegates: (string | undefined)[] = (
-                (await this.triggers.call("getActiveDelegates", {
+            const blockProducers: (string | undefined)[] = (
+                (await this.triggers.call("getActiveBlockProducers", {
                     roundInfo,
                 })) as Contracts.State.Wallet[]
             ).map((wallet) => wallet.getPublicKey("primary"));
             for (const signatureIndex in pingResponse.signatures) {
                 const publicKey = pingResponse.publicKeys![signatureIndex];
                 const signature = pingResponse.signatures[signatureIndex];
-                const delegatePeer = this.repository
+                const blockProducerPeer = this.repository
                     .getPeers()
                     .find((otherPeer) => peer.ip !== otherPeer.ip && otherPeer.publicKeys.includes(publicKey));
                 if (
@@ -219,28 +219,34 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                         pingResponse.state.currentSlot === slotInfo.slotNumber + 1
                     ) {
                         if (
-                            !delegates.includes(publicKey) ||
+                            !blockProducers.includes(publicKey) ||
                             !Crypto.Hash.verifySchnorr(stateBuffer, signature, publicKey)
                         ) {
                             break;
                         }
                         if (this.walletRepository.hasByPublicKey(publicKey)) {
-                            const delegateWallet = this.walletRepository.findByPublicKey(publicKey);
-                            if (delegateWallet.isDelegate()) {
-                                if (!delegatePeer) {
+                            const blockProducerWallet = this.walletRepository.findByPublicKey(publicKey);
+                            if (blockProducerWallet.isBlockProducer()) {
+                                if (!blockProducerPeer) {
                                     peer.publicKeys.push(publicKey);
-                                    delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
+                                    blockProducerWallet.setAttribute(
+                                        "blockProducer.version",
+                                        pingResponse.config.version,
+                                    );
                                 } else if (!peer.isForked()) {
                                     if (
-                                        delegatePeer.isForked() ||
+                                        blockProducerPeer.isForked() ||
                                         (peer.state.header.height === lastBlock.data.height &&
                                             peer.state.header.id === lastBlock.data.id) ||
-                                        (peer.state.header.height >= delegatePeer.state.header.height &&
-                                            delegatePeer.state.header.id !== lastBlock.data.id)
+                                        (peer.state.header.height >= blockProducerPeer.state.header.height &&
+                                            blockProducerPeer.state.header.id !== lastBlock.data.id)
                                     ) {
                                         peer.publicKeys.push(publicKey);
-                                        delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
-                                        delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
+                                        blockProducerWallet.setAttribute(
+                                            "blockProducer.version",
+                                            pingResponse.config.version,
+                                        );
+                                        blockProducerPeer.publicKeys = blockProducerPeer.publicKeys.filter(
                                             (peerPublicKey) => peerPublicKey !== publicKey,
                                         );
                                     }

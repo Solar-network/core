@@ -121,11 +121,6 @@ export const pagination = Joi.object({
 
 export const address = Joi.string().alphanum().length(34);
 
-export const delegateIdentifier = Joi.string()
-    .regex(/^[a-zA-Z0-9!@$&_.]+$/)
-    .min(1)
-    .max(66);
-
 export const username = Joi.string()
     .regex(/^[a-z0-9!@$&_.]+$/)
     .min(1)
@@ -164,7 +159,7 @@ export const orderBy = Joi.alternatives().try(
 );
 
 export const blocksOrderBy = orderBy.default("height:desc");
-export const missedBlocksOrderBy = orderBy.default("timestamp:desc");
+export const blockProductionFailuresOrderBy = orderBy.default("timestamp:desc");
 export const transactionsOrderBy = orderBy.default(["timestamp:desc", "sequence:desc"]);
 
 const equalCriteria = (value: any) => value;
@@ -208,7 +203,7 @@ export const blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey = { ...bloc
 delete blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey.generatorPublicKey;
 delete blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey.username;
 
-export const missedBlockCriteriaSchemas = {
+export const blockProductionFailureCriteriaSchemas = {
     timestamp: orNumericCriteria(Joi.number().integer().min(0)),
     height: orNumericCriteria(Joi.number().integer().min(1)),
     username: orEqualCriteria(

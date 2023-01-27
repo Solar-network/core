@@ -123,7 +123,7 @@ export class Service implements Contracts.Pool.Service {
     }
 
     public async readdTransactions(
-        previouslyForgedTransactions: Interfaces.ITransaction[] = [],
+        previouslyConfirmedTransactions: Interfaces.ITransaction[] = [],
         recheckValidity: boolean = false,
     ): Promise<void> {
         await this.lock.runExclusive(async () => {
@@ -133,44 +133,44 @@ export class Service implements Contracts.Pool.Service {
 
             this.mempool.flush();
 
-            let previouslyForgedSuccesses = 0;
-            let previouslyForgedFailures = 0;
+            let previouslyConfirmedSuccesses = 0;
+            let previouslyConfirmedFailures = 0;
             let previouslyStoredSuccesses = 0;
             let previouslyStoredExpirations = 0;
             let previouslyStoredFailures = 0;
 
-            const previouslyForgedStoredIds: string[] = [];
+            const previouslyConfirmedStoredIds: string[] = [];
 
-            for (const { addresses, id, serialised } of previouslyForgedTransactions) {
+            for (const { addresses, id, serialised } of previouslyConfirmedTransactions) {
                 try {
-                    const previouslyForgedTransaction = Transactions.TransactionFactory.fromBytesUnsafe(
+                    const previouslyConfirmedTransaction = Transactions.TransactionFactory.fromBytesUnsafe(
                         serialised,
                         id,
                         addresses,
                     );
 
-                    AppUtils.assert.defined<string>(previouslyForgedTransaction.id);
-                    AppUtils.assert.defined<string>(previouslyForgedTransaction.data.senderId);
+                    AppUtils.assert.defined<string>(previouslyConfirmedTransaction.id);
+                    AppUtils.assert.defined<string>(previouslyConfirmedTransaction.data.senderId);
 
-                    await this.addTransactionToMempool(previouslyForgedTransaction);
+                    await this.addTransactionToMempool(previouslyConfirmedTransaction);
 
                     this.storage.addTransaction({
                         height: this.stateStore.getLastHeight(),
-                        id: previouslyForgedTransaction.id,
-                        recipientId: (previouslyForgedTransaction.addresses.recipientId || []).join(","),
-                        senderId: previouslyForgedTransaction.data.senderId,
-                        serialised: previouslyForgedTransaction.serialised,
+                        id: previouslyConfirmedTransaction.id,
+                        recipientId: (previouslyConfirmedTransaction.addresses.recipientId || []).join(","),
+                        senderId: previouslyConfirmedTransaction.data.senderId,
+                        serialised: previouslyConfirmedTransaction.serialised,
                     });
 
-                    previouslyForgedStoredIds.push(previouslyForgedTransaction.id);
+                    previouslyConfirmedStoredIds.push(previouslyConfirmedTransaction.id);
 
-                    previouslyForgedSuccesses++;
+                    previouslyConfirmedSuccesses++;
                 } catch (error) {
                     this.logger.trace(
                         `Failed to re-add previously confirmed transaction ${id} to the pool: ${error.message}`,
                         "⚡",
                     );
-                    previouslyForgedFailures++;
+                    previouslyConfirmedFailures++;
                 }
             }
 
@@ -179,7 +179,7 @@ export class Service implements Contracts.Pool.Service {
             const expiredHeight: number = lastHeight - maxTransactionAge;
 
             for (const { height, id, recipientId, senderId, serialised } of this.storage.getAllTransactions()) {
-                if (previouslyForgedStoredIds.includes(id)) {
+                if (previouslyConfirmedStoredIds.includes(id)) {
                     continue;
                 }
 
@@ -220,8 +220,8 @@ export class Service implements Contracts.Pool.Service {
             if (!recheckValidity && previouslyConfirmedSuccesses >= 1) {
                 this.logger.trace(
                     `${AppUtils.pluralise(
-                        "previously forged transaction",
-                        previouslyForgedSuccesses,
+                        "previously confirmed transaction",
+                        previouslyConfirmedSuccesses,
                         true,
                     )} re-added to the pool`,
                     "💰",
@@ -230,8 +230,8 @@ export class Service implements Contracts.Pool.Service {
             if (previouslyConfirmedFailures >= 1) {
                 this.logger.trace(
                     `${AppUtils.pluralise(
-                        "previously forged transaction",
-                        previouslyForgedFailures,
+                        "previously confirmed transaction",
+                        previouslyConfirmedFailures,
                         true,
                     )} could not be re-added to the pool`,
                 );
@@ -306,7 +306,7 @@ export class Service implements Contracts.Pool.Service {
         });
     }
 
-    public async removeForgedTransaction(transaction: Interfaces.ITransaction): Promise<void> {
+    public async removeConfirmedTransaction(transaction: Interfaces.ITransaction): Promise<void> {
         await this.lock.runNonExclusive(async () => {
             if (this.disposed) {
                 return;
@@ -319,7 +319,7 @@ export class Service implements Contracts.Pool.Service {
                 return;
             }
 
-            const removedTransactions = await this.mempool.removeForgedTransaction(
+            const removedTransactions = await this.mempool.removeConfirmedTransaction(
                 transaction.data.senderId,
                 transaction.id,
             );

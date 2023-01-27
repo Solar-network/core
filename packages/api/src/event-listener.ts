@@ -45,7 +45,9 @@ export class EventListener {
                         server.subscription(eventPath);
                         if (
                             eventGroupName === "BlockEvent" ||
-                            eventGroupName === "DelegateEvent" ||
+                            eventGroupName === "BlockProducerEvent" ||
+                            eventGroupName === "RoundEvent" ||
+                            eventGroupName === "UsernameEvent" ||
                             eventGroupName === "VoteEvent"
                         ) {
                             server.subscription(`${eventPath}/{id}`);
@@ -61,8 +63,15 @@ export class EventListener {
                         handle: async ({ data }) => {
                             const endpoints = new Set([eventPath]);
 
-                            if (eventGroupName === "BlockEvent" || eventGroupName === "DelegateEvent") {
-                                endpoints.add(`${eventPath}/${data.username}`);
+                            if (
+                                eventGroupName === "BlockEvent" ||
+                                eventGroupName === "BlockProducerEvent" ||
+                                eventGroupName === "RoundEvent" ||
+                                eventGroupName === "UsernameEvent"
+                            ) {
+                                if (data.username) {
+                                    endpoints.add(`${eventPath}/${data.username}`);
+                                }
                             } else if (eventGroupName === "TransactionEvent") {
                                 const handler = await this.handlerRegistry.getActivatedHandlerForTransaction({
                                     data,

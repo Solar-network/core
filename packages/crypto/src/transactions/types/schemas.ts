@@ -84,8 +84,8 @@ export const extraSignature = extend(transactionBaseSchema, {
     },
 });
 
-export const delegateRegistration = extend(transactionBaseSchema, {
-    $id: "delegateRegistration",
+export const registration = extend(transactionBaseSchema, {
+    $id: "registration",
     required: ["asset"],
     properties: {
         fee: { bignumber: { minimum: 1, bypassGenesis: true } },
@@ -93,11 +93,11 @@ export const delegateRegistration = extend(transactionBaseSchema, {
             type: "object",
             required: ["registration"],
             properties: {
-                delegate: {
+                registration: {
                     type: "object",
                     required: ["username"],
                     properties: {
-                        username: { $ref: "delegateUsername" },
+                        username: { $ref: "username" },
                     },
                 },
             },
@@ -185,8 +185,8 @@ export const transfer = extend(transactionBaseSchema, {
     },
 });
 
-export const delegateResignation = extend(transactionBaseSchema, {
-    $id: "delegateResignation",
+export const resignation = extend(transactionBaseSchema, {
+    $id: "resignation",
     properties: {
         fee: { bignumber: { minimum: 0 } },
         asset: {

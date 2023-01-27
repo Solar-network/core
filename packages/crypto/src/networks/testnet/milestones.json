@@ -1,13 +1,13 @@
 [
     {
         "height": 1,
-        "activeDelegates": 53,
+        "activeBlockProducers": 53,
         "block": {
             "version": 0,
             "maxTransactions": 150,
             "maxPayload": 2097152
         },
-        "blocksToRevokeDelegateResignation": 106,
+        "blocksToRevokeResignation": 106,
         "blockTime": 8,
         "burn": {
             "feePercent": 90,
@@ -17,8 +17,8 @@
         "fees": {
             "bytes": {
                 "burn": 0,
-                "delegateRegistration": 663703,
-                "delegateResignation": 0,
+                "registration": 663703,
+                "resignation": 0,
                 "ipfs": 98,
                 "extraSignature": 99,
                 "transfer": 85,

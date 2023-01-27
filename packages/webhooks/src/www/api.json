@@ -154,7 +154,7 @@
                 "properties": {
                     "event": {
                         "type": "string",
-                        "example": "block.forged",
+                        "example": "block.applied",
                         "enum": []
                     },
                     "target": {

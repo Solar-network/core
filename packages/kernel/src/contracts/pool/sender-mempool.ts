@@ -11,7 +11,7 @@ export interface SenderMempool {
 
     addTransaction(transaction: Interfaces.ITransaction): Promise<void>;
     removeTransaction(id: string): Promise<Interfaces.ITransaction[]>;
-    removeForgedTransaction(id: string): Promise<Interfaces.ITransaction[]>;
+    removeConfirmedTransaction(id: string): Promise<Interfaces.ITransaction[]>;
 
     setAddress(address: string): void;
     getWallet(): Wallet | undefined;

@@ -20,8 +20,8 @@ export class Initialise implements Action {
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
     private readonly blockRepository!: Contracts.Database.BlockRepository;
 
-    @Container.inject(Container.Identifiers.DatabaseMissedBlockRepository)
-    private readonly missedBlockRepository!: Contracts.Database.MissedBlockRepository;
+    @Container.inject(Container.Identifiers.DatabaseBlockProductionFailureRepository)
+    private readonly blockProductionFailureRepository!: Contracts.Database.BlockProductionFailureRepository;
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
@@ -93,7 +93,7 @@ export class Initialise implements Action {
                 if (!loadedState) {
                     await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
                 }
-                if (!(await this.calculateMissedBlocks())) {
+                if (!(await this.calculateBlockProductionFailures())) {
                     return;
                 }
                 await this.databaseInteraction.restoreCurrentRound();
@@ -109,7 +109,7 @@ export class Initialise implements Action {
                 if (!loadedState) {
                     await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
                 }
-                if (!(await this.calculateMissedBlocks())) {
+                if (!(await this.calculateBlockProductionFailures())) {
                     return;
                 }
                 await this.databaseInteraction.restoreCurrentRound();
@@ -127,7 +127,7 @@ export class Initialise implements Action {
                 await this.app.get<Contracts.State.StateBuilder>(Container.Identifiers.StateBuilder).run();
             }
 
-            if (!(await this.calculateMissedBlocks())) {
+            if (!(await this.calculateBlockProductionFailures())) {
                 return;
             }
             await this.databaseInteraction.restoreCurrentRound();
@@ -143,12 +143,12 @@ export class Initialise implements Action {
         }
     }
 
-    private async calculateMissedBlocks(): Promise<boolean> {
-        if (await this.missedBlockRepository.hasMissedBlocks()) {
+    private async calculateBlockProductionFailures(): Promise<boolean> {
+        if (await this.blockProductionFailureRepository.hasBlockProductionFailures()) {
             return true;
         }
 
-        this.logger.info("Calculating productivity data", "📊");
+        this.logger.info("Calculating reliability data", "📊");
 
         const chunkSize = 10000;
 
@@ -169,14 +169,14 @@ export class Initialise implements Action {
                 const round = Utils.roundCalculator.calculateRound(block.height);
                 const { blockTime } = Managers.configManager.getMilestone(round.roundHeight);
                 if (!calculatedRounds[round.round]) {
-                    const delegatesInThisRound: Contracts.State.Wallet[] = (await this.app
+                    const blockProducersInThisRound: Contracts.State.Wallet[] = (await this.app
                         .get<Services.Triggers.Triggers>(Container.Identifiers.TriggerService)
-                        .call("getActiveDelegates", { roundInfo: round }))!;
-                    calculatedRounds[round.round] = delegatesInThisRound.map((delegate) =>
-                        delegate.getAttribute("delegate.username"),
+                        .call("getActiveBlockProducers", { roundInfo: round }))!;
+                    calculatedRounds[round.round] = blockProducersInThisRound.map((blockProducer) =>
+                        blockProducer.getAttribute("username"),
                     );
                     if (!calculatedRounds[round.round].length) {
-                        const rollbackHeight: number = round.roundHeight - round.maxDelegates;
+                        const rollbackHeight: number = round.roundHeight - round.maxBlockProducers;
                         this.logger.error("The database is corrupted");
                         this.logger.error(
                             `Attempting recovery by rolling back to height ${rollbackHeight.toLocaleString()}`,
@@ -194,35 +194,35 @@ export class Initialise implements Action {
                     }
                 }
 
-                const delegates = calculatedRounds[round.round];
+                const blockProducers = calculatedRounds[round.round];
                 const lastBlock: Interfaces.IBlockData = (
                     j > 0 ? blocks[j - 1] : await this.blockRepository.findByHeight(block.height - 1)
                 )!;
                 const thisSlot: number = Crypto.Slots.getSlotNumber(
-                    await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.height),
+                    await Utils.blockProductionInfoCalculator.getBlockTimeLookup(this.app, block.height),
                     block.timestamp,
                 );
-                const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(
+                const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(
                     this.app,
                     lastBlock.height,
                 );
                 const lastSlot: number = lastBlock
                     ? Crypto.Slots.getSlotNumber(blockTimeLookup, lastBlock.timestamp) + 1
                     : 0;
-                const missedSlots: number = thisSlot - lastSlot;
-                if (missedSlots > 0) {
-                    let missedSlotCounter: number = 0;
+                const slotsWithoutBlocks: number = thisSlot - lastSlot;
+                if (slotsWithoutBlocks > 0) {
+                    let slotsWithoutBlocksCounter: number = 0;
                     for (let slotCounter = lastSlot; slotCounter < thisSlot; slotCounter++) {
-                        missedSlotCounter++;
-                        this.roundState.getMissedBlocksToSave().push({
+                        slotsWithoutBlocksCounter++;
+                        this.roundState.getBlockProductionFailuresToSave().push({
                             height: block.height,
-                            username: delegates[slotCounter % delegates.length],
+                            username: blockProducers[slotCounter % blockProducers.length],
                             timestamp:
                                 Crypto.Slots.getSlotTime(
                                     blockTimeLookup,
                                     Crypto.Slots.getSlotNumber(blockTimeLookup, lastBlock.timestamp),
                                 ) +
-                                blockTime * missedSlotCounter,
+                                blockTime * slotsWithoutBlocksCounter,
                         });
                     }
                 }

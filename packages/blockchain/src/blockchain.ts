@@ -28,8 +28,8 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     @Container.inject(Container.Identifiers.DatabaseBlockRepository)
     private readonly blockRepository!: Contracts.Database.BlockRepository;
 
-    @Container.inject(Container.Identifiers.DatabaseMissedBlockRepository)
-    private readonly missedBlockRepository!: Contracts.Database.MissedBlockRepository;
+    @Container.inject(Container.Identifiers.DatabaseBlockProductionFailureRepository)
+    private readonly blockProductionFailureRepository!: Contracts.Database.BlockProductionFailureRepository;
 
     @Container.inject(Container.Identifiers.PoolService)
     private readonly pool!: Contracts.Pool.Service;
@@ -62,7 +62,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     private booted: boolean = false;
     private forkCheck: boolean = false;
     private forking: boolean = false;
-    private missedBlocks: number = 0;
+    private blockProductionFailures: number = 0;
     private lastCheckNetworkHealthTs: number = 0;
     private lastCheckForkTs: number = 0;
     private lastUpdatedBlockId: string | undefined;
@@ -83,7 +83,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
 
         this.queue.on("drain", async () => {
             this.database.checkpoint();
-            this.updateProductivity(false);
+            this.updateReliability(false);
             this.pool.readdTransactions(undefined, true);
             await stateSaver.run();
             this.dispatch("PROCESSFINISHED");
@@ -152,11 +152,11 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             peerCount: 10,
         });
 
-        this.events.listen(Enums.ForgerEvent.Missing, { handle: this.checkMissingBlocks });
+        this.events.listen(Enums.BlockProducerEvent.Failed, { handle: this.checkNoBlocks });
 
-        this.events.listen(Enums.RoundEvent.Applied, { handle: this.resetMissedBlocks });
+        this.events.listen(Enums.RoundEvent.Applied, { handle: this.resetBlockProductionFailures });
 
-        this.updateProductivity(true);
+        this.updateReliability(true);
 
         this.booted = true;
 
@@ -219,16 +219,16 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
      */
     public async handleIncomingBlock(
         block: Interfaces.IBlockData,
-        fromForger = false,
+        fromOurNode = false,
         ip: string,
         fireBlockReceivedEvent = true,
     ): Promise<void> {
-        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, block.height);
+        const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(this.app, block.height);
 
         const currentSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup);
         const receivedSlot: number = Crypto.Slots.getSlotNumber(blockTimeLookup, block.timestamp);
 
-        if (fromForger) {
+        if (fromOurNode) {
             const minimumMs: number = 2000;
             const timeLeftInMs: number = Crypto.Slots.getTimeInMsUntilNextSlot(blockTimeLookup);
             if (currentSlot !== receivedSlot || timeLeftInMs < minimumMs) {
@@ -245,10 +245,10 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         }
 
         this.setBlockUsername(block);
-        this.pushPingBlock(block, fromForger);
+        this.pushPingBlock(block, fromOurNode);
 
         if (this.stateStore.isStarted()) {
-            block.fromForger = fromForger;
+            block.fromOurNode = fromOurNode;
             this.dispatch("NEWBLOCK");
             this.enqueueBlocks([block]);
 
@@ -442,7 +442,7 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     }
 
     /**
-     * Called by forger to wake up and sync with the network.
+     * Called by producer to wake up and sync with the network.
      * It clears the wakeUpTimeout if set.
      */
     public forceWakeup(): void {
@@ -527,20 +527,20 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
     /**
      * Push ping block.
      */
-    public pushPingBlock(block: Interfaces.IBlockData, fromForger = false): void {
-        this.stateStore.pushPingBlock(block, fromForger);
+    public pushPingBlock(block: Interfaces.IBlockData, fromOurNode = false): void {
+        this.stateStore.pushPingBlock(block, fromOurNode);
     }
 
     /**
-     * Check if the blockchain should roll back due to missing blocks.
+     * Check if the blockchain should roll back due to receiving no blocks.
      */
-    public async checkMissingBlocks(): Promise<void> {
-        this.missedBlocks++;
+    public async checkNoBlocks(): Promise<void> {
+        this.blockProductionFailures++;
         if (
-            this.missedBlocks >= Managers.configManager.getMilestone().activeDelegates / 3 - 1 &&
+            this.blockProductionFailures >= Managers.configManager.getMilestone().activeBlockProducers / 3 - 1 &&
             Math.random() <= 0.8
         ) {
-            this.resetMissedBlocks();
+            this.resetBlockProductionFailures();
 
             // do not check network health here more than every 10 minutes
             const nowTs = Date.now();
@@ -615,8 +615,8 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                     block.generatorPublicKey,
                 );
 
-                if (generatorWallet.hasAttribute("delegate.username")) {
-                    block.username = generatorWallet.getAttribute("delegate.username");
+                if (generatorWallet.hasAttribute("username")) {
+                    block.username = generatorWallet.getAttribute("username");
                 }
             }
 
@@ -626,11 +626,11 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
         }
     }
 
-    private resetMissedBlocks(): void {
-        this.missedBlocks = 0;
+    private resetBlockProductionFailures(): void {
+        this.blockProductionFailures = 0;
     }
 
-    private async updateProductivity(initialStart: boolean): Promise<void> {
+    private async updateReliability(initialStart: boolean): Promise<void> {
         if (this.updating || this.getLastBlock().data.id === this.lastUpdatedBlockId) {
             return;
         }
@@ -643,41 +643,41 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
             1000;
 
         try {
-            const productivityStatistics: Record<
+            const reliabilityStatistics: Record<
                 string,
                 Record<string, number>
-            > = await this.missedBlockRepository.getBlockProductivity(
-                timestamp - (this.configuration.get("missedBlocksLookback") as number),
+            > = await this.blockProductionFailureRepository.getReliability(
+                timestamp - (this.configuration.get("blockProductionFailuresLookback") as number),
             );
 
-            for (const [username, { missed, productivity }] of Object.entries(productivityStatistics)) {
-                const delegateWallet = this.walletRepository.findByUsername(username);
-                let oldProductivity: number | undefined = undefined;
-                if (delegateWallet.hasAttribute("delegate.productivity")) {
-                    oldProductivity = delegateWallet.getAttribute("delegate.productivity");
+            for (const [username, { failures, reliability }] of Object.entries(reliabilityStatistics)) {
+                const blockProducerWallet = this.walletRepository.findByUsername(username);
+                let oldReliability: number | undefined = undefined;
+                if (blockProducerWallet.hasAttribute("blockProducer.reliability")) {
+                    oldReliability = blockProducerWallet.getAttribute("blockProducer.reliability");
                 }
 
-                let newProductivity: number | undefined = undefined;
-                if (productivity !== undefined) {
-                    newProductivity = productivity;
+                let newReliability: number | undefined = undefined;
+                if (reliability !== undefined) {
+                    newReliability = reliability;
                 } else {
-                    newProductivity = undefined;
+                    newReliability = undefined;
                 }
 
-                if (!initialStart && newProductivity !== oldProductivity) {
-                    this.events.dispatch(Enums.DelegateEvent.ProductivityChanged, {
+                if (!initialStart && newReliability !== oldReliability) {
+                    this.events.dispatch(Enums.BlockProducerEvent.ReliabilityChanged, {
                         username,
-                        old: oldProductivity,
-                        new: newProductivity,
+                        old: oldReliability,
+                        new: newReliability,
                     });
                 }
 
-                if (newProductivity !== undefined) {
-                    delegateWallet.setAttribute("delegate.missedBlocks", missed ?? 0);
-                    delegateWallet.setAttribute("delegate.productivity", newProductivity);
+                if (newReliability !== undefined) {
+                    blockProducerWallet.setAttribute("blockProducer.failures", failures ?? 0);
+                    blockProducerWallet.setAttribute("blockProducer.reliability", newReliability);
                 } else {
-                    delegateWallet.forgetAttribute("delegate.missedBlocks");
-                    delegateWallet.forgetAttribute("delegate.productivity");
+                    blockProducerWallet.forgetAttribute("blockProducer.failures");
+                    blockProducerWallet.forgetAttribute("blockProducer.reliability");
                 }
             }
 

@@ -166,21 +166,21 @@ export class ConfigManager {
             throw new Error();
         }
 
-        const delegateMilestones = this.config.milestones
+        const blockProducerMilestones = this.config.milestones
             .sort((a, b) => a.height - b.height)
-            .filter((milestone) => milestone.activeDelegates);
+            .filter((milestone) => milestone.activeBlockProducers);
 
-        for (let i = 1; i < delegateMilestones.length; i++) {
-            const previous = delegateMilestones[i - 1];
-            const current = delegateMilestones[i];
+        for (let i = 1; i < blockProducerMilestones.length; i++) {
+            const previous = blockProducerMilestones[i - 1];
+            const current = blockProducerMilestones[i];
 
-            if (previous.activeDelegates === current.activeDelegates) {
+            if (previous.activeBlockProducers === current.activeBlockProducers) {
                 continue;
             }
 
-            if ((current.height - previous.height) % previous.activeDelegates !== 0) {
+            if ((current.height - previous.height) % previous.activeBlockProducers !== 0) {
                 throw new InvalidMilestoneConfigurationError(
-                    `Bad milestone at height: ${current.height}. The number of delegates can only be changed at the beginning of a new round`,
+                    `Bad milestone at height: ${current.height}. The number of block producers can only be changed at the beginning of a new round`,
                 );
             }
         }

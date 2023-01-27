@@ -63,13 +63,16 @@ export class PeerController extends Controller {
     public async getStatus(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<Contracts.P2P.PeerPingResponse> {
         const lastBlock: Interfaces.IBlock = this.blockchain.getLastBlock();
 
-        const blockTimeLookup = await Utils.forgingInfoCalculator.getBlockTimeLookup(this.app, lastBlock.data.height);
+        const blockTimeLookup = await Utils.blockProductionInfoCalculator.getBlockTimeLookup(
+            this.app,
+            lastBlock.data.height,
+        );
         const slotInfo = Crypto.Slots.getSlotInfo(blockTimeLookup);
 
         if (
             this.cachedHeader &&
             this.cachedHeader.state.header.id === lastBlock.data.id &&
-            this.cachedHeader.state.forgingAllowed === slotInfo.forgingStatus &&
+            this.cachedHeader.state.allowed === slotInfo.status &&
             this.cachedHeader.state.currentSlot === slotInfo.slotNumber
         ) {
             return this.cachedHeader;
@@ -78,7 +81,7 @@ export class PeerController extends Controller {
         const header: Contracts.P2P.PeerPingResponse = {
             state: {
                 height: lastBlock.data.height,
-                forgingAllowed: slotInfo.forgingStatus,
+                allowed: slotInfo.status,
                 currentSlot: slotInfo.slotNumber,
                 header: lastBlock.getHeader(false),
             },
@@ -93,19 +96,19 @@ export class PeerController extends Controller {
         const height = lastBlock.data.height + 1;
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
-        const delegates: (string | undefined)[] = (
-            (await this.triggers.call("getActiveDelegates", {
+        const blockProducers: (string | undefined)[] = (
+            (await this.triggers.call("getActiveBlockProducers", {
                 roundInfo,
             })) as Contracts.State.Wallet[]
         ).map((wallet) => wallet.getPublicKey("primary"));
 
-        const publicKeys = Utils.getForgerDelegates();
+        const publicKeys = Utils.getConfiguredBlockProducers();
         if (publicKeys.length > 0) {
-            const { keys } = readJsonSync(`${this.app.configPath()}/delegates.json`);
+            const { keys } = readJsonSync(`${this.app.configPath()}/producer.json`);
             for (const key of keys) {
                 const keyPair: Interfaces.IKeyPair = Identities.Keys.fromPrivateKey(key);
                 if (
-                    delegates.includes(keyPair.publicKey.secp256k1) &&
+                    blockProducers.includes(keyPair.publicKey.secp256k1) &&
                     publicKeys.includes(keyPair.publicKey.secp256k1)
                 ) {
                     header.publicKeys.push(keyPair.publicKey.secp256k1);

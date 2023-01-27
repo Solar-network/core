@@ -23,13 +23,13 @@ export class BlockState implements Contracts.State.BlockState {
             index: number | undefined;
         },
     ): Promise<void> {
-        let forgerWallet: Contracts.State.Wallet;
+        let blockProducerWallet: Contracts.State.Wallet;
 
         if (block.data.height === 1) {
-            this.initGenesisForgerWallet(block.data.generatorPublicKey);
-            forgerWallet = this.walletRepository.findByPublicKey(block.data.generatorPublicKey);
+            this.initGenesisWallet(block.data.generatorPublicKey);
+            blockProducerWallet = this.walletRepository.findByPublicKey(block.data.generatorPublicKey);
         } else {
-            forgerWallet = this.walletRepository.findByUsername(block.data.username!);
+            blockProducerWallet = this.walletRepository.findByUsername(block.data.username!);
         }
 
         const previousBlock = this.state.getLastBlock();
@@ -42,7 +42,7 @@ export class BlockState implements Contracts.State.BlockState {
                 transactionProcessing.index = undefined;
                 appliedTransactions.push(transaction);
             }
-            this.applyBlockToForger(forgerWallet, block);
+            this.applyBlockToBlockProducer(blockProducerWallet, block);
 
             this.state.setLastBlock(block);
         } catch (error) {
@@ -57,11 +57,11 @@ export class BlockState implements Contracts.State.BlockState {
     }
 
     public async revertBlock(block: Interfaces.IBlock): Promise<void> {
-        const forgerWallet = this.walletRepository.findByUsername(block.data.username!);
+        const blockProducerWallet = this.walletRepository.findByUsername(block.data.username!);
 
         const revertedTransactions: Interfaces.ITransaction[] = [];
         try {
-            await this.revertBlockFromForger(forgerWallet, block);
+            await this.revertBlockFromBlockProducer(blockProducerWallet, block);
 
             for (const transaction of block.transactions.slice().reverse()) {
                 await this.revertTransaction(block.data.height, transaction);
@@ -125,26 +125,27 @@ export class BlockState implements Contracts.State.BlockState {
         AppUtils.increaseVoteBalances(wallet, { walletRepository: this.walletRepository });
     }
 
-    private applyBlockToForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
-        const delegateAttribute = forgerWallet.getAttribute<Contracts.State.WalletDelegateAttributes>("delegate");
+    private applyBlockToBlockProducer(blockProducerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
+        const blockProducerAttribute =
+            blockProducerWallet.getAttribute<Contracts.State.WalletBlockProducerAttributes>("blockProducer");
         const donations: Utils.BigNumber = Object.values(block.data.donations!).reduce(
             (curr, prev) => prev.plus(curr),
             Utils.BigNumber.ZERO,
         );
 
-        delegateAttribute.producedBlocks++;
-        delegateAttribute.burnedFees = delegateAttribute.burnedFees.plus(block.data.totalFeeBurned!);
-        delegateAttribute.forgedFees = delegateAttribute.forgedFees.plus(block.data.totalFee);
-        delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.plus(block.data.reward);
-        delegateAttribute.donations = delegateAttribute.donations.plus(donations);
-        delegateAttribute.lastBlock = block.getHeader(true);
+        blockProducerAttribute.producedBlocks++;
+        blockProducerAttribute.burnedFees = blockProducerAttribute.burnedFees.plus(block.data.totalFeeBurned!);
+        blockProducerAttribute.fees = blockProducerAttribute.fees.plus(block.data.totalFee);
+        blockProducerAttribute.rewards = blockProducerAttribute.rewards.plus(block.data.reward);
+        blockProducerAttribute.donations = blockProducerAttribute.donations.plus(donations);
+        blockProducerAttribute.lastBlock = block.getHeader(true);
 
         const balanceIncrease = block.data.reward
             .minus(donations)
             .plus(block.data.totalFee.minus(block.data.totalFeeBurned!));
 
-        forgerWallet.increaseBalance(balanceIncrease);
-        this.updateWalletVoteBalance(forgerWallet);
+        blockProducerWallet.increaseBalance(balanceIncrease);
+        this.updateWalletVoteBalance(blockProducerWallet);
 
         for (const [address, amount] of Object.entries(block.data.donations!)) {
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(address);
@@ -153,18 +154,19 @@ export class BlockState implements Contracts.State.BlockState {
         }
     }
 
-    private async revertBlockFromForger(forgerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
-        const delegateAttribute = forgerWallet.getAttribute<Contracts.State.WalletDelegateAttributes>("delegate");
+    private async revertBlockFromBlockProducer(blockProducerWallet: Contracts.State.Wallet, block: Interfaces.IBlock) {
+        const blockProducerAttribute =
+            blockProducerWallet.getAttribute<Contracts.State.WalletBlockProducerAttributes>("blockProducer");
         const donations: Utils.BigNumber = Object.values(block.data.donations!).reduce(
             (curr, prev) => prev.plus(curr),
             Utils.BigNumber.ZERO,
         );
 
-        delegateAttribute.producedBlocks--;
-        delegateAttribute.burnedFees = delegateAttribute.burnedFees.minus(block.data.totalFeeBurned!);
-        delegateAttribute.forgedFees = delegateAttribute.forgedFees.minus(block.data.totalFee);
-        delegateAttribute.forgedRewards = delegateAttribute.forgedRewards.minus(block.data.reward);
-        delegateAttribute.donations = delegateAttribute.donations.minus(donations);
+        blockProducerAttribute.producedBlocks--;
+        blockProducerAttribute.burnedFees = blockProducerAttribute.burnedFees.minus(block.data.totalFeeBurned!);
+        blockProducerAttribute.fees = blockProducerAttribute.fees.minus(block.data.totalFee);
+        blockProducerAttribute.rewards = blockProducerAttribute.rewards.minus(block.data.reward);
+        blockProducerAttribute.donations = blockProducerAttribute.donations.minus(donations);
 
         const { results } = await this.blockHistoryService.listByCriteria(
             { username: block.data.username, height: { to: block.data.height - 1 } },
@@ -174,17 +176,17 @@ export class BlockState implements Contracts.State.BlockState {
         );
 
         if (results[0]) {
-            delegateAttribute.lastBlock = results[0];
+            blockProducerAttribute.lastBlock = results[0];
         } else {
-            delegateAttribute.lastBlock = undefined;
+            blockProducerAttribute.lastBlock = undefined;
         }
 
         const balanceDecrease = block.data.reward
             .minus(donations)
             .plus(block.data.totalFee.minus(block.data.totalFeeBurned!));
 
-        forgerWallet.decreaseBalance(balanceDecrease);
-        this.updateWalletVoteBalance(forgerWallet);
+        blockProducerWallet.decreaseBalance(balanceDecrease);
+        this.updateWalletVoteBalance(blockProducerWallet);
 
         for (const [address, amount] of Object.entries(block.data.donations!)) {
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(address);
@@ -216,14 +218,14 @@ export class BlockState implements Contracts.State.BlockState {
         }
     }
 
-    private initGenesisForgerWallet(forgerPublicKey: string) {
-        if (this.walletRepository.hasByPublicKey(forgerPublicKey)) {
+    private initGenesisWallet(publicKey: string) {
+        if (this.walletRepository.hasByPublicKey(publicKey)) {
             return;
         }
 
-        const forgerAddress = Identities.Address.fromPublicKey(forgerPublicKey);
-        const forgerWallet = this.walletRepository.createWallet(forgerAddress);
-        forgerWallet.setPublicKey(forgerPublicKey, "primary");
-        this.walletRepository.index(forgerWallet);
+        const address = Identities.Address.fromPublicKey(publicKey);
+        const wallet = this.walletRepository.createWallet(address);
+        wallet.setPublicKey(publicKey, "primary");
+        this.walletRepository.index(wallet);
     }
 }

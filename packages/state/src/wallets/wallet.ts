@@ -218,8 +218,8 @@ export class Wallet implements Contracts.State.Wallet {
      * @returns {boolean}
      * @memberof Wallet
      */
-    public isDelegate(): boolean {
-        return this.hasAttribute("delegate.username");
+    public isBlockProducer(): boolean {
+        return this.hasAttribute("blockProducer");
     }
 
     /**
@@ -232,12 +232,12 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     /**
-     * @param {string} delegate
+     * @param {string} blockProducer
      * @returns {Utils.BigNumber}
      * @memberof Wallet
      */
-    public getVoteBalance(delegate: string): Utils.BigNumber {
-        return this.voteBalances.get(delegate) ?? Utils.BigNumber.ZERO;
+    public getVoteBalance(blockProducer: string): Utils.BigNumber {
+        return this.voteBalances.get(blockProducer) ?? Utils.BigNumber.ZERO;
     }
 
     /**
@@ -277,9 +277,9 @@ export class Wallet implements Contracts.State.Wallet {
             balance: this.getBalance(),
         });
 
-        for (const delegate of votes.keys()) {
-            const voteAmount = voteAmounts.get(delegate)!;
-            this.setVoteBalance(delegate, Utils.BigNumber.make(voteAmount.balance));
+        for (const blockProducer of votes.keys()) {
+            const voteAmount = voteAmounts.get(blockProducer)!;
+            this.setVoteBalance(blockProducer, Utils.BigNumber.make(voteAmount.balance));
         }
     }
 
@@ -302,19 +302,19 @@ export class Wallet implements Contracts.State.Wallet {
      */
     public calculateVoteAmount(
         balances: { balance: Utils.BigNumber },
-        delegates?: Map<string, number>,
+        blockProducers?: Map<string, number>,
     ): Map<string, Record<string, Utils.BigNumber>> {
-        if (!delegates) {
-            delegates = this.getAttribute("votes")!;
+        if (!blockProducers) {
+            blockProducers = this.getAttribute("votes")!;
         }
 
         const remainders: Map<string, Utils.BigNumber> = new Map();
         const votes: Map<string, Record<string, Utils.BigNumber>> = new Map();
 
-        for (const [delegate, percent] of delegates.entries()) {
-            votes.set(delegate, {});
+        for (const [blockProducer, percent] of blockProducers.entries()) {
+            votes.set(blockProducer, {});
             for (const [key, value] of Object.entries(balances)) {
-                votes.get(delegate)![key] = value.times(Math.round(percent * 100)).dividedBy(10000);
+                votes.get(blockProducer)![key] = value.times(Math.round(percent * 100)).dividedBy(10000);
             }
         }
 
@@ -343,22 +343,22 @@ export class Wallet implements Contracts.State.Wallet {
         const attributes: Record<string, any> = AppUtils.cloneDeep(this.getAttributes());
 
         let type: string | undefined = undefined;
-        if (this.hasAttribute("delegate.resignation.type")) {
-            switch (this.getAttribute("delegate.resignation.type")) {
-                case Enums.DelegateStatus.PermanentResign: {
+        if (this.hasAttribute("blockProducer.resignation.type")) {
+            switch (this.getAttribute("blockProducer.resignation.type")) {
+                case Enums.BlockProducerStatus.PermanentResign: {
                     type = "permanent";
                     break;
                 }
-                case Enums.DelegateStatus.TemporaryResign: {
+                case Enums.BlockProducerStatus.TemporaryResign: {
                     type = "temporary";
                     break;
                 }
             }
-            attributes.delegate.resignation = { height: attributes.delegate.resignation.height, type };
+            attributes.blockProducer.resignation = { height: attributes.blockProducer.resignation.height, type };
         }
 
-        if (attributes.delegate && !isNaN(attributes.delegate.round)) {
-            delete attributes.delegate.round;
+        if (attributes.blockProducer && !isNaN(attributes.blockProducer.round)) {
+            delete attributes.blockProducer.round;
         }
 
         delete attributes.hidden;
@@ -381,7 +381,7 @@ export class Wallet implements Contracts.State.Wallet {
         return this.getBasicWallet();
     }
 
-    private setVoteBalance(delegate: string, balance: Utils.BigNumber) {
-        this.voteBalances.set(delegate, balance);
+    private setVoteBalance(blockProducer: string, balance: Utils.BigNumber) {
+        this.voteBalances.set(blockProducer, balance);
     }
 }

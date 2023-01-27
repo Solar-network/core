@@ -90,8 +90,8 @@ export class Command extends Commands.Command {
             if (this.processManager.has("relay")) {
                 await this.processManager.delete("relay");
             }
-            if (this.processManager.has("forger")) {
-                await this.processManager.delete("forger");
+            if (this.processManager.has("producer")) {
+                await this.processManager.delete("producer");
             }
 
             try {

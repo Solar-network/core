@@ -2,7 +2,12 @@ import Boom from "@hapi/boom";
 import Hapi from "@hapi/hapi";
 import { Container, Contracts } from "@solar-network/kernel";
 
-import { BlockResource, BlockWithTransactionsResource, MissedBlockResource, TransactionResource } from "../resources";
+import {
+    BlockProductionFailureResource,
+    BlockResource,
+    BlockWithTransactionsResource,
+    TransactionResource,
+} from "../resources";
 import { Controller } from "./controller";
 
 @Container.injectable()
@@ -13,8 +18,8 @@ export class BlocksController extends Controller {
     @Container.inject(Container.Identifiers.BlockHistoryService)
     private readonly blockHistoryService!: Contracts.Shared.BlockHistoryService;
 
-    @Container.inject(Container.Identifiers.MissedBlockHistoryService)
-    private readonly missedBlockHistoryService!: Contracts.Shared.MissedBlockHistoryService;
+    @Container.inject(Container.Identifiers.BlockProductionFailureHistoryService)
+    private readonly blockProductionFailureHistoryService!: Contracts.Shared.BlockProductionFailureHistoryService;
 
     @Container.inject(Container.Identifiers.TransactionHistoryService)
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
@@ -40,14 +45,14 @@ export class BlocksController extends Controller {
         }
     }
 
-    public async missed(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
-        const missedBlockListResult = await this.missedBlockHistoryService.listByCriteria(
+    public async failures(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
+        const blockProductionFailureListResult = await this.blockProductionFailureHistoryService.listByCriteria(
             request.query,
             this.getListingOrder(request),
             this.getListingPage(request),
         );
 
-        return this.toPagination(missedBlockListResult, MissedBlockResource, true);
+        return this.toPagination(blockProductionFailureListResult, BlockProductionFailureResource, true);
     }
 
     public async first(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {

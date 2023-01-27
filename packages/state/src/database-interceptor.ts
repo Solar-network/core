@@ -42,8 +42,8 @@ export class DatabaseInterceptor {
         let blocks: Interfaces.IBlockData[] = this.stateStore.getLastBlocksByHeight(start, end, headersOnly);
 
         if (blocks.length !== limit) {
-            // ! assumes that earlier blocks may be missing
-            // ! but querying database is unnecessary when later blocks are missing too (aren't forged yet)
+            // ! assumes that earlier blocks may not be present
+            // ! but querying database is unnecessary when later blocks haven't been produced yet
             blocks = await this.databaseService.getBlocks(start, end, headersOnly);
         }
 

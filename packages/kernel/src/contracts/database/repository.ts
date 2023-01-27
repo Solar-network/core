@@ -29,7 +29,7 @@ export interface BlockRepository extends Repository {
     findByHeightRangeWithTransactions(start: number, end: number): Promise<Interfaces.IBlockData[]>;
     getStatistics(): Promise<{ numberOfTransactions: number; totalFee: string; count: number }>;
     getBlockRewards(): Promise<{ username: string; rewards: string }[]>;
-    getDelegatesForgedBlocks(): Promise<
+    getBlockProducerStatistics(): Promise<
         {
             username: string;
             height: number;
@@ -40,10 +40,10 @@ export interface BlockRepository extends Repository {
             totalProduced: number;
         }[]
     >;
-    getLastForgedBlocks(): Promise<Interfaces.IBlockData[]>;
+    getLastProducedBlocks(): Promise<Interfaces.IBlockData[]>;
     save(
         blocks: Interfaces.IBlock[],
-        missedBlocks: { timestamp: number; height: number; username: string }[],
+        blockProductionFailures: { timestamp: number; height: number; username: string }[],
         rounds: Record<number, { publicKey: string; balance: Utils.BigNumber; round: number; username: string }[]>,
         events: EventDispatcher,
     ): Promise<void>;
@@ -55,9 +55,9 @@ export interface MigrationRepository extends Repository {
     performMigrations(): Promise<void>;
 }
 
-export interface MissedBlockRepository extends Repository {
-    getBlockProductivity(timestamp: number): Promise<Record<string, Record<string, number>>>;
-    hasMissedBlocks(): Promise<boolean>;
+export interface BlockProductionFailureRepository extends Repository {
+    getReliability(timestamp: number): Promise<Record<string, Record<string, number>>>;
+    hasBlockProductionFailures(): Promise<boolean>;
 }
 
 export interface RoundRepository extends Repository {
@@ -72,7 +72,7 @@ export interface TransactionRepository extends Repository {
     findTransactionsById(ids: string[]): Promise<TransactionModel[]>;
     findTransactionById(id: string): Promise<TransactionModel>;
     findByBlockHeights(blockHeights: number[]): Promise<Array<{ id: string; blockHeight: number; serialised: Buffer }>>;
-    getForgedTransactionsIds(ids: string[]): Promise<string[]>;
+    getConfirmedTransactionIds(ids: string[]): Promise<string[]>;
     getStatistics(): Promise<{ count: number; totalFee: string }>;
     getFeeStatistics(txTypes: Array<{ type: string }>, days?: number, minFee?: number): Promise<FeeStatistics[]>;
     getFeesBurned(): Promise<string>;

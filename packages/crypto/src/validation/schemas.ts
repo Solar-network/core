@@ -38,7 +38,7 @@ export const schemas = {
     },
 
     username: {
-        $id: "delegateUsername",
+        $id: "username",
         allOf: [
             { type: "string", pattern: "^(?!_)(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?)+$" },
             { minLength: 1, maxLength: 20 },

@@ -1,28 +1,29 @@
 import { Interfaces } from "@solar-network/crypto";
 
-import { WalletData, WalletDelegateAttributes } from "../state";
+import { WalletBlockProducerAttributes, WalletData } from "../state";
 
 export interface Response<T> {
     data: T;
 }
 
-export interface DelegateWallet extends WalletData {
-    delegate: WalletDelegateAttributes;
+export interface BlockProducerWallet extends WalletData {
+    blockProducer: WalletBlockProducerAttributes;
+    username: string;
 }
 
 export interface CurrentRound {
     current: number;
     reward: string;
     timestamp: number;
-    allDelegates: DelegateWallet[];
-    delegates: DelegateWallet[];
-    currentForger: DelegateWallet;
-    nextForger: DelegateWallet;
+    allBlockProducers: BlockProducerWallet[];
+    blockProducers: BlockProducerWallet[];
+    currentBlockProducer: BlockProducerWallet;
+    nextBlockProducer: BlockProducerWallet;
     lastBlock: Interfaces.IBlockData;
-    canForge: boolean;
+    canProduceBlock: boolean;
 }
 
-export interface ForgingTransactions {
+export interface PoolData {
     transactions: string[];
     poolSize: number;
     count: number;

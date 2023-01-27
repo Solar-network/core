@@ -22,7 +22,7 @@
         "build:watch": "pnpm clean && pnpm compile -w",
         "clean": "rimraf dist",
         "compile": "node ../../node_modules/typescript/bin/tsc",
-        "debug:forger": "node --inspect-brk ./bin/run forger:run",
+        "debug:producer": "node --inspect-brk ./bin/run producer:run",
         "debug:relay": "node --inspect-brk ./bin/run relay:run",
         "debug:core": "node --inspect-brk ./bin/run core:run"
     },
@@ -32,7 +32,7 @@
         "@solar-network/cli": "workspace:*",
         "@solar-network/crypto": "workspace:*",
         "@solar-network/database": "workspace:*",
-        "@solar-network/forger": "workspace:*",
+        "@solar-network/producer": "workspace:*",
         "@solar-network/kernel": "workspace:*",
         "@solar-network/logger": "workspace:*",
         "@solar-network/p2p": "workspace:*",

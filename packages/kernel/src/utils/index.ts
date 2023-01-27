@@ -1,9 +1,9 @@
-import { calculateForgingInfo } from "./calculate-forging-info";
-import { calculateForgedTotal, calculateVotePercent } from "./delegate-calculator";
+import { calculateProducedTotal, calculateVotePercent } from "./block-producer-calculator";
+import { calculateBlockProductionInfo } from "./calculate-block-production-info";
 import { formatSeconds } from "./format-seconds";
 import { formatTimestamp } from "./format-timestamp";
 import { getBlockTimeLookup } from "./get-blocktime-lookup";
-import { getForgerDelegates, sendForgerSignal } from "./get-forger-delegates";
+import { getConfiguredBlockProducers, sendSignal } from "./get-configured-block-producers";
 import { isBlacklisted } from "./is-blacklisted";
 import { getBlockNotChainedErrorMessage, isBlockChained } from "./is-block-chained";
 import { isWhitelisted } from "./is-whitelisted";
@@ -209,10 +209,13 @@ export * from "./worker-thread";
 export * from "./zip-object";
 export { immutable };
 
-export const delegateCalculator = { calculateForgedTotal, calculateVotePercent };
+export const blockProducerCalculator = { calculateProducedTotal, calculateVotePercent };
 export const roundCalculator = { calculateRound, isNewRound };
 export const supplyCalculator = { calculate };
-export const forgingInfoCalculator = { calculateForgingInfo, getBlockTimeLookup };
+export const blockProductionInfoCalculator = {
+    calculateBlockProductionInfo: calculateBlockProductionInfo,
+    getBlockTimeLookup,
+};
 
 export {
     decreaseVoteBalances,
@@ -220,10 +223,10 @@ export {
     formatTimestamp,
     isBlockChained,
     getBlockNotChainedErrorMessage,
-    getForgerDelegates,
+    getConfiguredBlockProducers,
     increaseVoteBalances,
     isBlacklisted,
     isWhitelisted,
-    sendForgerSignal,
+    sendSignal,
     stringify,
 };

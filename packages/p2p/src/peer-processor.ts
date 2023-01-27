@@ -90,7 +90,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
 
     private async ping(peer: Contracts.P2P.Peer, verifyTimeout: number): Promise<void> {
         const lastBlock = this.app.get<Contracts.State.StateStore>(Container.Identifiers.StateStore).getLastBlock();
-        const blockTimeLookup = await AppUtils.forgingInfoCalculator.getBlockTimeLookup(
+        const blockTimeLookup = await AppUtils.blockProductionInfoCalculator.getBlockTimeLookup(
             this.app,
             lastBlock.data.height,
         );

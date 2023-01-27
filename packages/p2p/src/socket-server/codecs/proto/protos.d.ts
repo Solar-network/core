@@ -1343,8 +1343,8 @@ export namespace peer {
             /** State height */
             height?: (number|null);
 
-            /** State forgingAllowed */
-            forgingAllowed?: (boolean|null);
+            /** State allowed */
+            allowed?: (boolean|null);
 
             /** State currentSlot */
             currentSlot?: (number|null);
@@ -1365,8 +1365,8 @@ export namespace peer {
             /** State height. */
             public height: number;
 
-            /** State forgingAllowed. */
-            public forgingAllowed: boolean;
+            /** State allowed. */
+            public allowed: boolean;
 
             /** State currentSlot. */
             public currentSlot: number;

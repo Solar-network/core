@@ -107,43 +107,43 @@ export class InvalidExtraSignatureError extends TransactionError {
 
 export class IrrevocableResignationError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet permanently resigned as a delegate");
+        super("Failed to apply transaction, because the wallet permanently resigned as a block producer");
     }
 }
 
 export class WalletAlreadyPermanentlyResignedError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet already permanently resigned as a delegate");
+        super("Failed to apply transaction, because the wallet already permanently resigned as a block producer");
     }
 }
 
 export class WalletAlreadyTemporarilyResignedError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet already temporarily resigned as a delegate");
+        super("Failed to apply transaction, because the wallet already temporarily resigned as a block producer");
     }
 }
 
-export class WalletNotADelegateError extends TransactionError {
+export class WalletNotABlockProducerError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet is not a delegate");
+        super("Failed to apply transaction, because the wallet is not a block producer");
     }
 }
 
 export class WalletNotResignedError extends TransactionError {
     public constructor() {
-        super(`Failed to apply transaction, because the wallet has not resigned as a delegate`);
+        super(`Failed to apply transaction, because the wallet has not resigned as a block producer`);
     }
 }
 
-export class WalletIsAlreadyDelegateError extends TransactionError {
+export class WalletAlreadyHasUsernameError extends TransactionError {
     public constructor() {
-        super("Failed to apply transaction, because the wallet already registered as a delegate");
+        super("Failed to apply transaction, because the wallet already registered a username");
     }
 }
 
 export class WalletUsernameAlreadyRegisteredError extends TransactionError {
     public constructor(username: string) {
-        super(`Failed to apply transaction, because the delegate name '${username}' is already registered`);
+        super(`Failed to apply transaction, because the name '${username}' is already registered`);
     }
 }
 
@@ -177,25 +177,19 @@ export class UnvoteMismatchError extends TransactionError {
     }
 }
 
-export class VotedForNonDelegateError extends TransactionError {
+export class VotedForNonBlockProducerError extends TransactionError {
     public constructor(vote?: string) {
         if (vote) {
-            super(`Failed to apply transaction, because '${vote}' is not a delegate`);
+            super(`Failed to apply transaction, because '${vote}' is not a block producer`);
         } else {
-            super("Failed to apply transaction, because only delegates can be voted");
+            super("Failed to apply transaction, because only block producers can be voted");
         }
     }
 }
 
-export class VotedForTooManyDelegatesError extends TransactionError {
+export class VotedForTooManyBlockProducersError extends TransactionError {
     public constructor(maximumVotes: number) {
         super(`Failed to apply transaction, because there are more than ${maximumVotes.toLocaleString()} votes`);
-    }
-}
-
-export class NotEnoughDelegatesError extends TransactionError {
-    public constructor() {
-        super("Failed to apply transaction, because not enough delegates are registered to allow resignation");
     }
 }
 

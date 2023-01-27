@@ -55,7 +55,7 @@ export class TransactionResource implements Resource {
             const firstKey = Object.keys(asset!.votes!)[0];
             if (firstKey?.length === 66) {
                 asset!.votes = {
-                    [this.walletRepository.findByPublicKey(firstKey).getAttribute("delegate.username")]: 100,
+                    [this.walletRepository.findByPublicKey(firstKey).getAttribute("username")]: 100,
                 };
             }
         }

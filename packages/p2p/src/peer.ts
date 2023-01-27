@@ -81,7 +81,7 @@ export class Peer implements Contracts.P2P.Peer {
      */
     public state: Contracts.P2P.PeerState = {
         height: undefined,
-        forgingAllowed: undefined,
+        allowed: undefined,
         currentSlot: undefined,
         header: {},
     };
@@ -128,7 +128,7 @@ export class Peer implements Contracts.P2P.Peer {
      * @returns {boolean}
      * @memberof Peer
      */
-    public isActiveDelegate(): boolean {
+    public isActiveBlockProducer(): boolean {
         return this.publicKeys.length > 0;
     }
 

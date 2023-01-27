@@ -2,7 +2,7 @@ import Hapi from "@hapi/hapi";
 import Joi from "joi";
 
 import { BlocksController } from "../controllers/blocks";
-import { blockSortingSchema, missedBlockSortingSchema, transactionSortingSchema } from "../resources-new";
+import { blockProductionFailureSortingSchema, blockSortingSchema, transactionSortingSchema } from "../resources-new";
 import * as Schemas from "../schemas";
 
 export const register = (server: Hapi.Server): void => {
@@ -33,15 +33,15 @@ export const register = (server: Hapi.Server): void => {
 
     server.route({
         method: "GET",
-        path: "/blocks/missed",
-        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.missed(request, h),
+        path: "/blocks/failures",
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.failures(request, h),
         options: {
             validate: {
                 query: Joi.object({
-                    ...server.app.schemas.missedBlockCriteriaSchemas,
-                    orderBy: server.app.schemas.missedBlocksOrderBy,
+                    ...server.app.schemas.blockProductionFailureCriteriaSchemas,
+                    orderBy: server.app.schemas.blockProductionFailuresOrderBy,
                 })
-                    .concat(missedBlockSortingSchema)
+                    .concat(blockProductionFailureSortingSchema)
                     .concat(Schemas.pagination),
             },
             plugins: {

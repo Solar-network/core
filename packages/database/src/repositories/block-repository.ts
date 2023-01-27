@@ -1,7 +1,7 @@
 import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Enums, Utils as AppUtils } from "@solar-network/kernel";
 
-import { BlockModel, MissedBlockModel, RoundModel, TransactionModel } from "../models";
+import { BlockModel, BlockProductionFailureModel, RoundModel, TransactionModel } from "../models";
 import { Repository } from "./repository";
 
 @Container.injectable()
@@ -123,7 +123,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
             .run();
     }
 
-    public async getDelegatesForgedBlocks(): Promise<
+    public async getBlockProducerStatistics(): Promise<
         {
             username: string;
             height: number;
@@ -153,11 +153,11 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
         const donations = await this.calculateDonations();
 
         for (const donation of donations) {
-            const delegate = rewardsAndFees.find((block) => block.username === donation.username);
-            if (delegate.donations) {
-                delegate.donations = delegate.donations.plus(donation.amount);
+            const blockProducer = rewardsAndFees.find((block) => block.username === donation.username);
+            if (blockProducer.donations) {
+                blockProducer.donations = blockProducer.donations.plus(donation.amount);
             } else {
-                delegate.donations = donation.amount;
+                blockProducer.donations = donation.amount;
             }
         }
 
@@ -203,7 +203,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
         return result;
     }
 
-    public async getLastForgedBlocks(): Promise<Interfaces.IBlockData[]> {
+    public async getLastProducedBlocks(): Promise<Interfaces.IBlockData[]> {
         return this.toModel(
             BlockModel,
             await this.getFullQueryBuilder()
@@ -215,12 +215,12 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
 
     public async save(
         blocks: Interfaces.IBlock[],
-        missedBlocks: { timestamp: number; height: number; username: string }[],
+        blockProductionFailures: { timestamp: number; height: number; username: string }[],
         rounds: Record<number, { publicKey: string; balance: Utils.BigNumber; round: number; username: string }[]>,
         events: Contracts.Kernel.EventDispatcher,
     ): Promise<void> {
         const rawBlocks: Record<string, any>[] = [];
-        const rawMissedBlocks: Record<string, any>[] = [];
+        const rawBlockProductionFailures: Record<string, any>[] = [];
         const rawRounds: Record<string, any>[] = [];
         const rawTransactions: Record<string, any>[] = [];
 
@@ -246,14 +246,14 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
             metadata,
         );
         this.processRoundsToSave(rounds, rawRounds, publicKeys, highestHeight);
-        this.processMissedBlocksToSave(missedBlocks, rawMissedBlocks, identities);
+        this.processBlockProductionFailuresToSave(blockProductionFailures, rawBlockProductionFailures, identities);
 
         await this.queryRunner.transaction([
             ...this.saveIdentities(identities),
             ...this.savePublicKeys(publicKeys),
             ...this.saveTypes(types),
             ...this.saveBlocks(rawBlocks),
-            ...this.saveMissedBlocks(rawMissedBlocks),
+            ...this.saveBlockProductionFailures(rawBlockProductionFailures),
             ...this.saveTransactions(rawTransactions),
             ...this.saveMetadata(metadata),
             ...this.saveRounds(rawRounds),
@@ -265,7 +265,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
                 delete rounds[height];
             }
         }
-        missedBlocks.length = 0;
+        blockProductionFailures.length = 0;
     }
 
     public async delete(blocks: Interfaces.IBlockData[]): Promise<void> {
@@ -377,7 +377,7 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
                     .getQuery(),
                 this.createQueryBuilder()
                     .delete()
-                    .from("missed_blocks")
+                    .from("block_production_failures")
                     .where("height > :targetHeight", { targetHeight })
                     .getQuery(),
                 this.createQueryBuilder()
@@ -650,17 +650,17 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
         return highestHeight;
     }
 
-    private processMissedBlocksToSave(
-        missedBlocks: { timestamp: number; height: number; username: string }[],
-        rawMissedBlocks: Record<string, any>[],
+    private processBlockProductionFailuresToSave(
+        blockProductionFailures: { timestamp: number; height: number; username: string }[],
+        rawBlockProductionFailures: Record<string, any>[],
         identities: Map<string, number>,
     ): void {
-        for (const { height, timestamp, username } of missedBlocks) {
+        for (const { height, timestamp, username } of blockProductionFailures) {
             if (!identities.has(username) || identities.get(username)! > height) {
                 identities.set(username, height);
             }
-            rawMissedBlocks.push(
-                MissedBlockModel.from({
+            rawBlockProductionFailures.push(
+                BlockProductionFailureModel.from({
                     height,
                     timestamp,
                     username,
@@ -823,12 +823,14 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
         return queries;
     }
 
-    private saveMissedBlocks(rawMissedBlocks: Record<string, any>[]): Contracts.Database.DatabaseTransaction[] {
+    private saveBlockProductionFailures(
+        rawBlockProductionFailures: Record<string, any>[],
+    ): Contracts.Database.DatabaseTransaction[] {
         const queries: Contracts.Database.DatabaseTransaction[] = [];
 
-        for (const missedBlock of rawMissedBlocks) {
+        for (const blockProductionFailure of rawBlockProductionFailures) {
             const queryBuilder: Contracts.Database.QueryBuilder = this.createQueryBuilder();
-            for (const [key, value] of Object.entries(missedBlock)) {
+            for (const [key, value] of Object.entries(blockProductionFailure)) {
                 if (key !== "foreignKeys" && value !== undefined) {
                     const snakeKey: string = AppUtils.snakeCase(key)!;
                     queryBuilder.insert(snakeKey!, { [snakeKey]: value });
@@ -836,9 +838,9 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
             }
             queryBuilder
                 .insertSubquery("identity_id", "(SELECT id FROM identities WHERE identity = :identity LIMIT 1)", {
-                    identity: missedBlock.foreignKeys.username,
+                    identity: blockProductionFailure.foreignKeys.username,
                 })
-                .into("missed_blocks");
+                .into("block_production_failures");
             queries.push(queryBuilder.getQuery());
         }
 

@@ -29,7 +29,7 @@
             "nonce": "1",
             "senderPublicKey": "03ebcafb1cc44c848851352476c84d38c4fbc1b8661e13771cf4ee04324d8d170f",
             "signatures": { "primary": "57a54b87f92c39c82f684add512fd26f0f67036456914803dd90a4a66f449764e4232c409f6f6607221b72b3e42b33438ec2f9664ac3b630dde1d64936a13abf" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -39,7 +39,7 @@
             "nonce": "1",
             "senderPublicKey": "0379ab6557b48f283dfcbebde9ee7c98c7249c5d946a5fe67d6f39199c39f5ac85",
             "signatures": { "primary": "61c2e60aec69a376126f1a7a9048c2d90cb6f84be2c659f7467bdef39857f007edb7183c83de44480bac0c32c42e40c690fd0b8fcca2ddbe92b7ef48d30847ef" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -49,7 +49,7 @@
             "nonce": "1",
             "senderPublicKey": "025a633259eb8689fa166f00a6c8fdacbac87a0897eaa5860c17a683c30be3782f",
             "signatures": { "primary": "90dfd13ea99280cdd1d31ea01d572db3818c7d36f731ce2501caf663bb0120e9c0171f54dccfc851eed6ce43dc18e22117f66572fa60d1d9a49c0b7ed3df9a4a" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -59,7 +59,7 @@
             "nonce": "1",
             "senderPublicKey": "026fe7646141739cbd9043884ba42d5a8d564b4d2a18bb13c58d3bf49220976f60",
             "signatures": { "primary": "3096d077f571b257ccd5e941a19048762995427683c25448324dd8a8f71337132fd11af4a60a686eb85a9afef95381d48e53262bb6235b75c97c2eec289b2116" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -69,7 +69,7 @@
             "nonce": "1",
             "senderPublicKey": "025e69ed84f036d8e54ab0b95458b9e13f1bc1a79607d798621561b755d7798433",
             "signatures": { "primary": "9ef830e539a9bcbcb85b16262ac6cd7b636bbf53bb3de520fa23b7ba8bea0d86f30d691eb354d10160b53dc434aff5cd8b61ef8604340732c88ac8ced9db9815" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -79,7 +79,7 @@
             "nonce": "1",
             "senderPublicKey": "027e5738ca38791606e9004982cc7113c97dfe8df495182a99b5fd6000e755877c",
             "signatures": { "primary": "5c644354857b8e678fd1b6417040c5df3938ed42c23867f0866e3e47ed2d2f16e4b3fd42736c9b1263bbec3017ee95d5a171f0ae3a0d773beba5cb82831c3ffd" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -89,7 +89,7 @@
             "nonce": "1",
             "senderPublicKey": "03b8051f4bbf3400b2bfe44b6869e39af7910665273aa3d984b6825f5f584ddaec",
             "signatures": { "primary": "fb23c7f50dc8367b843c042c1b8fbb4e6401d15b73c0fb0741c4cf38687bcefb45316078a85b99bfd79056ee0ce7355a3b742ed346e79989ccde12dbbbc511a0" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -99,7 +99,7 @@
             "nonce": "1",
             "senderPublicKey": "031eadcaba63229e12a41d5c31e498d3ed6f71fa80c31f3adfbffa9c3165334a5b",
             "signatures": { "primary": "02f3d4fd6b2fd4e9826417d048177ab1da9630da0a52dec55ded7d26acce1690123ebcfc926bf0859387e4ac006e087a8a626bd9f3884ea11bda3f5a7d4d0e25" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -109,7 +109,7 @@
             "nonce": "1",
             "senderPublicKey": "02b15d3505081f930d7c7d4f02005c0561d2da4bf1b5af71b05a5b67742ed1d134",
             "signatures": { "primary": "53fdf95d5a3b61fd11d7f42500de323704d514f8f414d368a28aaff1f50da1848725ba00c825c7f4d5f12998be136a228008805248492ca67e23d2098eb2a18a" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -119,7 +119,7 @@
             "nonce": "1",
             "senderPublicKey": "033a3257673d0d5b13563b0d9efe00b211a7a9ed3680b8f9fead773f6fcdcce416",
             "signatures": { "primary": "40a894546d9635578e63e854ccb8fd1a15acdcf1eb4c3a585ab4de8bd8fbe756132749e7a8b02fbb624880a0a40c7ddd08f2976db2ffb8fc29a1ccc4538a6ae1" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -129,7 +129,7 @@
             "nonce": "1",
             "senderPublicKey": "0359448011474cf2c25c29385bc7883ecddcf6ed14a5759151b5ad8d8c05121987",
             "signatures": { "primary": "a288e9c95f27f0a9852a8d15f97a15519afb3e09e541b9cc69cd424b2c10537c08255fac559d21ea464f73553f20a2930612cf953e5e62f8842364eac088e4c3" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -139,7 +139,7 @@
             "nonce": "1",
             "senderPublicKey": "027125dab94e1c104e0e117d296fcffc93a8b15524c17924e9da742b116f83f514",
             "signatures": { "primary": "d07843624b6b2e13a15cbf2b4595d1b88eade56467008e439d27f7610cb2e4f8e80c61cc63f6ec033b30c4837aa2a8eb0536331bdb253b5a718cc245dd3195be" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -149,7 +149,7 @@
             "nonce": "1",
             "senderPublicKey": "022937626547cbc91ff64702c33332380d73c146528e0090b85d62fdec77cfb8da",
             "signatures": { "primary": "9e6996c5f6d5073188c4870fecc14420dbb1a57f3e5cc84874b6ca785756e0e5bced3eeed7cb7068b4b029e0f2b0d7747655271fed87582eef9d29469d94c174" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -159,7 +159,7 @@
             "nonce": "1",
             "senderPublicKey": "028a945e9f8bd9f9dacbb9714c59432461cc5cced6d4bcd0f0fdd595b3d66bc4c2",
             "signatures": { "primary": "19d233d3846a90d79860a392e4f52a8d7b605421d158cdb9c9e776dac050e2dbc0064a8aadde4364f8f8160a6450563bb2bd8e9bf6f2ea40540a5a67143db06c" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -169,7 +169,7 @@
             "nonce": "1",
             "senderPublicKey": "0232a2017507f61e369bccb324246092fd3952abec1c98766169b05b8d022f2915",
             "signatures": { "primary": "ddfd7b97e1d2818709a4df021386506d307c9425dcc63228ab889eb6b83e61dbca6613a0c311fdb65d0c2a337cbca7e5ad2761e05a4878aea2e1a48380c6e2ec" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -179,7 +179,7 @@
             "nonce": "1",
             "senderPublicKey": "03808a5c40f630d79065487b2855af909a7d1215d2afe4376e0295e55e7ede4758",
             "signatures": { "primary": "6c9047d58a37d97b832e999708d6bb592e4cdd0c1e99131b7e550c7f673fd558061627fec8a18c05e17031f81818c0163476a4ef6b8ae0e2c6c44c41f6706772" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -189,7 +189,7 @@
             "nonce": "1",
             "senderPublicKey": "030134fd6bf65b0e42a2fab31bc2dff75656e802c397f57d3cf214686fbfa94086",
             "signatures": { "primary": "06ab134a0d3718fee2a7869f6220f074852b394b5c8068bc03dbb20b988a7c1067cf043367f27daa6c5a8096860e42bff3c40eb56894247b431a84042d3b1a9e" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -199,7 +199,7 @@
             "nonce": "1",
             "senderPublicKey": "03113e018838e922011e8449ecce533a21b38557ac033c03292540305fc2609f6d",
             "signatures": { "primary": "30f6ddf00d9944d59562d6ae96b9fef5191843db5f0208269a1bcba12e14e17e7bcd8da1ac3264174ba66a16ca965d2916b2469f34916c76620f06c1f11f0ac8" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -209,7 +209,7 @@
             "nonce": "1",
             "senderPublicKey": "0307bb25b64d31a14928659034e25d81557116355b7685ce2c5ee9fab84ba2c116",
             "signatures": { "primary": "12c87ea3f4b7d1b0a6b4068bfcb1f9663c682681204fb8477ac2b1698a138ccd6c2b1ace5d21be63b172129bd4ff4e4991bd1e704decf57bc0d961be6797f15b" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -219,7 +219,7 @@
             "nonce": "1",
             "senderPublicKey": "03cd846b3b97a3ead6ad7bf9119a8ff2eeabd77f30de62bae95b8f6bee0c05bfd9",
             "signatures": { "primary": "9694538e6123d5bb71f907925132b00bff9109b2ef75ec80f7c4655a769fc2ac963c2c6602f245888d0c0f5ba71832157707825ff2b0c389470685598e2ad098" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -229,7 +229,7 @@
             "nonce": "1",
             "senderPublicKey": "03aebd4e0ea4b0eb3ad5ce7870af32e709fcf4d65ed9c9cb383aea83c687e1e1fb",
             "signatures": { "primary": "4a567dbb99be8be5d24b766d4b6a567fdbd757d8ea0b27ff305e2ce7cea9e67972aa0706fb2b2e0d08033a8e213fe80895959d1c8d15fb69b9bd1ea53f059d93" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -239,7 +239,7 @@
             "nonce": "1",
             "senderPublicKey": "0279c945a624b227e6ed5d41fd990b9753e5df730ad476b263f5036da22586c405",
             "signatures": { "primary": "e17ba19cb8474328b0270c3f1d071741e63bf2ecdd173913ef252a601a13edf57192680a2b729c0334b9fe4597e8b99e4f73efd9da7b16192c2a36f624bc5014" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -249,7 +249,7 @@
             "nonce": "1",
             "senderPublicKey": "031477d80e830014615ad7f32f252da80559c7b94592f4d71530931b8c6ce9bd22",
             "signatures": { "primary": "6aa8bf4060acd263c15464d2546b706bec39cc5f7c31f3a92d6997e1f19515cd6c78a6188e6d3dce539ab81d724b575949fe6ec3334ca78434ef353dfd94ac41" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -259,7 +259,7 @@
             "nonce": "1",
             "senderPublicKey": "02fd789914166415c70f77f3a3de08eeba810be4958bb0107b8a396e1655080c05",
             "signatures": { "primary": "6a2c6398948411c965f8c71162db441c7ce9b044d3a2669719247242e95f4b5b2297d6aae18ee83bdfd09f0f4c181bcc8d2d034c2c220b112998da72f8c35a3d" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -269,7 +269,7 @@
             "nonce": "1",
             "senderPublicKey": "036abe1469f7d1569d0954a73f165970b7c92aeb3f537b6816509da0a74eed0039",
             "signatures": { "primary": "bae3482e9d64e6139b99f2cfb36ff03cae11997d88ddd88f6699860184831d86b301bb25080a88d793d8f542107b8d6169b5ec5474eb079713b563a60ea151ff" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -279,7 +279,7 @@
             "nonce": "1",
             "senderPublicKey": "03a69af136f6a861b9f7d3412582a1a24df27b372e8933065109cedf9fd3c60a6d",
             "signatures": { "primary": "be6b3c5d924ca46322b8ae16e3416410917881b5a0175d2e49764368469f6681e6a65ed3c2d0660a88a4c78f86b550af8d56770da8b47ebd6781e3de48d9d3be" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -289,7 +289,7 @@
             "nonce": "1",
             "senderPublicKey": "02531414232c9ff0c3199c536a904be27d9ea671c0079100f2ebad8047d43557d9",
             "signatures": { "primary": "e3a875c099ee25af0816ee178856e5a24d609dbe8a0154211fc075ea66f027403df5bca54105930b6c8a63a44db3d4d9bc9c3d9dcd551a49c2aa65dd2804a4e1" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -299,7 +299,7 @@
             "nonce": "1",
             "senderPublicKey": "03e79c16da8c917d95b49466e2d8414d0ab55f3d23e2e6e531aa1a98674925f889",
             "signatures": { "primary": "8b12cb1bf35e15a86f4036a11dc99e2c05e3eb97ee67d1c43a7ebe2229541904a38482f5015eb65439052a23ef3c66b1da7b81f4662cc9548bb35f5e240e4c69" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -309,7 +309,7 @@
             "nonce": "1",
             "senderPublicKey": "0367b945a0e4fc3cea3f45a4167ad8064c1b5bffd1958290524066e39ee2617e7b",
             "signatures": { "primary": "df436e9541a6db417d714151fc192a6e609f512f7c8f50779ae14dfe4bf65dcb8316eb0fff0b664affe1dc3dcd9e056a4716e56e86e207c5306a4d6138bc93c2" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -319,7 +319,7 @@
             "nonce": "1",
             "senderPublicKey": "02b4fb83825cd86f2d2ff42f81084b18f0828822902e853069f8fe295d61cbe5ad",
             "signatures": { "primary": "51c597000dc15cf58be392a4b0b873636b8761291dec7d23c62a37bee6606b100d4e0ce5cb8f26f38790db4e48ca59c1aa5c97fb8d2cbd08e2c98effffed41d0" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -329,7 +329,7 @@
             "nonce": "1",
             "senderPublicKey": "0320ef5adaa1d8ef888d357591d6508685c3e2caa43eff86714eb01367f2fab9c6",
             "signatures": { "primary": "e452c21a4ce58f55f2848f9e5ae35157d6fe83dd8c25712cde8aa61ce248f086d7b95fc5b1ee97ce4ff27fd96d3026ae71acf2b865e0627cc6b788e766c77552" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -339,7 +339,7 @@
             "nonce": "1",
             "senderPublicKey": "02104c30143291ddfaa35caf1b26f1199994590abb89b62a3b31fb27d3fcc28100",
             "signatures": { "primary": "e932658994d6d12454450573572e26439af44750f04ba2a6327e22a1e6fb3174af1dd1b9c841124fd596f6c9088419bc92d0673b6c9ab2fe2b6db70d312703b8" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -349,7 +349,7 @@
             "nonce": "1",
             "senderPublicKey": "0261ed68b8a750d1bf0b2974d87e1175e577f149410a1689292dcaa4f516fc86a0",
             "signatures": { "primary": "641d797ec54e6a6bb22412ec85ea321871c238d9e11abd3d777d2621e7988f804d88d484504b0866725864babe3412c11541a4843556fa0b96f9c1cd4b5ede2a" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -359,7 +359,7 @@
             "nonce": "1",
             "senderPublicKey": "02defd853ec34a2c3bffe04ced8e880f6391ce7be9f8a077fa35ef968ef28bc019",
             "signatures": { "primary": "f79fcf5f2da24054017b49207af4116faf14293a874eb4dc679e1438deaccb4962b111c54ca2acd9a0b783a1eeace3a92a4772b7a960001af67de1eb385b069b" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -369,7 +369,7 @@
             "nonce": "1",
             "senderPublicKey": "03dc8fe7e4d51c983f03eba20677140d981f6f07c5acab1fdba5cdaeaf373363dd",
             "signatures": { "primary": "c45da0e83989b3370580efd7e9bfe3f163710ae5346fbee3ae7165b0eca3468bfc889ae0df537047e1a827fde4fb656ad68e12c2ab981223b03be6ea2f27a9d6" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -379,7 +379,7 @@
             "nonce": "1",
             "senderPublicKey": "038f65762af6387845f4388a5c8f7585a05cd70f49256ae5ea95f3aa8cdb468c70",
             "signatures": { "primary": "d7fd95f0b060ada1cdad3550d159b3e4ead04b478d1dccbbcda419a8d16dec2a01f5d9ec75fef0eeeea0a583cfc328f7e4749e0b7a17ff1149e791e088f60b94" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -389,7 +389,7 @@
             "nonce": "1",
             "senderPublicKey": "03ea8aad51c3a5befc027c53693841b4d75252230ac12db4fd2cf870c269d5ae13",
             "signatures": { "primary": "c1201aa9cbc02d8e68a9b6762f3764a6f6f6498c4823588ebe12bfd9fffc700421e31fe51d42caf292a6584ada9c860015f4ba874497126df94be7cec082c075" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -399,7 +399,7 @@
             "nonce": "1",
             "senderPublicKey": "038f46041c38afd763db9119f07293321ea47d78cdca8bd752a01e7c8e17df5994",
             "signatures": { "primary": "b6e23db66619c811382851b8de007379accdf2040742fec5357b40f955c557e345b8c7d05355d37a2d07a3b8baa1018f79944002abbf052f2db30f1e5d4fb92f" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -409,7 +409,7 @@
             "nonce": "1",
             "senderPublicKey": "036fdb49abe519cb3b2dc439ca62954a5ca8d5e20c66bc1818769bd0e9fbaa1ef6",
             "signatures": { "primary": "076f1a65c003c54eb1a1025fb0e55590432c6c88ba4772c84f5de8a4cf1b25dccd2e0c5aa14e7b2489184fc5b68c5f05f3c20bcea38495ad7f70344f1a8fb9cc" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -419,7 +419,7 @@
             "nonce": "1",
             "senderPublicKey": "0346e3a4b89d55e5376d1a478e6185c4c97c590609ac354e50276def05500e4785",
             "signatures": { "primary": "d68dd4f1aa30170c52ac1f8be62121248be145fb32ec7fb5611a7b18b35b0c83f9fe026b42b5439be89ed98fcefa218313220c88bacbb44137d5708d2bb178f0" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -429,7 +429,7 @@
             "nonce": "1",
             "senderPublicKey": "035fedad8a5f1d261c5a7e60e55cbe2a6214811c4659b57758a1958025af49337d",
             "signatures": { "primary": "56e28e0f8484d41bb62ea03f293d16d0e1a2fba7a266d7f944d5111c0df639d58971cf2035223e817752c75e362cbf0972c134c08994bc54f67ddce2b1f3dd0f" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -439,7 +439,7 @@
             "nonce": "1",
             "senderPublicKey": "03952408b5468de16dbdb2b5c05b3d3e11c07492a93bcbdd442c85d46b4f58131b",
             "signatures": { "primary": "a5cb8a318cd25089e869f8be5aa1c9464d6148669bee610f9fc5631b30ade26a224194918e1ef0595a2e71ab96d478ea6d1dcd268c95764b4752f1e1f19897b3" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -449,7 +449,7 @@
             "nonce": "1",
             "senderPublicKey": "03a7679cc437716eb969f241a55dfab714f08bee7aa8e9203e7982de282a4ffa4a",
             "signatures": { "primary": "1bf197f816ba2bb2d5dc1c975935b2731d216a64c4dc1c601cfb2815bb476b85a1e2c0415a5b77687ecc8433e6ebdeae079e9e28db16db6133d2f8a059e65c34" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -459,7 +459,7 @@
             "nonce": "1",
             "senderPublicKey": "021ea11edbe1d10af043c4bb17506d4ed623ab05eb042d6ba40c8da06e5cbd7405",
             "signatures": { "primary": "9f8da100b4db687b5e29666bcc4687d6ae62d53dcb337416520e08f2c8d205c7811847e09a6391f4c4d9266613f624e31449f78c6100628a45335e5b30cdf47c" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -469,7 +469,7 @@
             "nonce": "1",
             "senderPublicKey": "0222400260bc6f211c269c3ebba2af36c99102c046777193393643fc71502d199c",
             "signatures": { "primary": "63b00b162923b6cc952498be40c034b9d3accddf8cb36a2db323400f97cbebd20f321610d45bd3c41ec0acd321d1db54af8b6716332926f7b67f4cf4e29df765" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -479,7 +479,7 @@
             "nonce": "1",
             "senderPublicKey": "03c1543af88bff6f554d0d1cf2e13030a890c2d0ff3ae3a1d8a25eb732cca91c0f",
             "signatures": { "primary": "7953f8d1e6626ae9a1194821786bf61a98c2941de69b80ae6e0a235e621401f4c63af6dd4d4a13493549a00c49994f398529681507ea24394fe3993a8af5ec83" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -489,7 +489,7 @@
             "nonce": "1",
             "senderPublicKey": "02202ccaa704a060030ee111e91c4073f3a5d26291e5ac48a8e80cc91fa22da771",
             "signatures": { "primary": "66f8a5d495b8679ec164b48d6ccc0b521d607207e4824d239272cad79a39d75d009a2f9813a4dc7f3f9a17d222c6c21687cb8f50c903a7efe55edf6eeae14ff8" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -499,7 +499,7 @@
             "nonce": "1",
             "senderPublicKey": "0308ff06ba9c37c43558b12d8800dc57b8937a30c6d31d204158f40001942ddb3a",
             "signatures": { "primary": "be3f7c7e6a4cd0d113e4595e76ce461a475ffadce4ed4fcef0c18bdec8b6a7be003c7c27ca639d3028530f36ab3e965b6154b5567d39fe056bea5a4bd38e0051" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -509,7 +509,7 @@
             "nonce": "1",
             "senderPublicKey": "024c90daf06b3d503daf125b3d527e0994f98f16c163b667dbb10fc8cb750f0e6f",
             "signatures": { "primary": "970cd1af5557572aa995bb7a697778d15c99e893bac59549b74859eff19665bd1d67f556e35e02332ce785a5cb389770b2bbdb8611ebf9f52fda64031fbaa2b0" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -519,7 +519,7 @@
             "nonce": "1",
             "senderPublicKey": "03bc5a7880073a71639be48c6a2c8371f1d92591aca962cab71862926d9081c99b",
             "signatures": { "primary": "4edad92f2acb0fa2a53b30e5124e6e988c35eaa6d598bc97b87b426a71e398aca1da3af341a6e5e42d0c592811fab7dc095bce6dc269b883d1e2312445755818" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -529,7 +529,7 @@
             "nonce": "1",
             "senderPublicKey": "02c813fc7a8fe61346af300d5af32dc83b3def9bf9c7cac7572f4e9a258dabbf07",
             "signatures": { "primary": "e71af791497b1d6df030b1e82b6a5c4d453e02f79709ae37c3f35c1d73d2cb67be1180a60518e6c682f91f38aaa91cb2c86585b198e5903ec7d82f23429d5f60" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -539,7 +539,7 @@
             "nonce": "1",
             "senderPublicKey": "03668fed483d0d37967183a968ea456441b8d85a348c74d80212e6fbb9adabae46",
             "signatures": { "primary": "1f1170db3c4335a4e4bc3029ef1e7ac1faf786a9e8f4d1d7cf21a0d64412f07347a99929e137aad1afd66898deb915db663914ef0703f995f31d549015071be3" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {
@@ -549,7 +549,7 @@
             "nonce": "1",
             "senderPublicKey": "036cddb79510f5ff9bfcd1b8f04ed565806e70bc9195b47e7b514e49f642119d62",
             "signatures": { "primary": "3102cbf75c546a783e2cb2d7fb33afc513dea57efe267c4e9714e42f735a066c32ecae7a5fca5a89e2de34f40287fd83ca31c6da96b7a3b08f407dd19ebe9e07" },
-            "type": "delegateRegistration",
+            "type": "registration",
             "version": 2
         },
         {

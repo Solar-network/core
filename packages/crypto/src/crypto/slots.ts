@@ -8,7 +8,7 @@ export interface SlotInfo {
     endTime: number;
     blockTime: number;
     slotNumber: number;
-    forgingStatus: boolean;
+    status: boolean;
 }
 
 export type GetBlockTimeStampLookup = (blockHeight: number) => number;
@@ -55,7 +55,7 @@ export class Slots {
         return this.getSlotNumber(getTimeStampForBlock) + 1;
     }
 
-    public static isForgingAllowed(
+    public static isAllowed(
         getTimeStampForBlock: GetBlockTimeStampLookup,
         timestamp?: number,
         height?: number,
@@ -66,7 +66,7 @@ export class Slots {
 
         const latestHeight = this.getLatestHeight(height);
 
-        return this.getSlotInfo(getTimeStampForBlock, timestamp, latestHeight).forgingStatus;
+        return this.getSlotInfo(getTimeStampForBlock, timestamp, latestHeight).status;
     }
 
     public static getSlotInfo(
@@ -104,14 +104,14 @@ export class Slots {
         const slotNumber = totalSlotsFromLastSpan + slotNumberUpUntilThisTimestamp;
         const startTime = lastSpanEndTime + slotNumberUpUntilThisTimestamp * blockTime;
         const endTime = startTime + blockTime - 1;
-        const forgingStatus = timestamp < startTime + Math.floor(blockTime / 2);
+        const status = timestamp < startTime + Math.floor(blockTime / 2);
 
         return {
             blockTime,
             startTime,
             endTime,
             slotNumber,
-            forgingStatus,
+            status,
         };
     }
 

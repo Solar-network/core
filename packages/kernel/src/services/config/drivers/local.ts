@@ -98,7 +98,7 @@ export class LocalConfigLoader implements ConfigLoader {
 
             this.loadPeers();
 
-            this.loadDelegates();
+            this.loadBlockProducers();
 
             this.loadCryptography();
         } catch (error) {
@@ -119,7 +119,7 @@ export class LocalConfigLoader implements ConfigLoader {
             Joi.object({
                 core: Joi.object().keys(processSchema).required(),
                 relay: Joi.object().keys(processSchema).required(),
-                forger: Joi.object().keys(processSchema).required(),
+                producer: Joi.object().keys(processSchema).required(),
             }).unknown(true),
         );
 
@@ -170,22 +170,22 @@ export class LocalConfigLoader implements ConfigLoader {
      * @returns {void}
      * @memberof LocalConfigLoader
      */
-    private loadDelegates(): void {
-        const delegates: KeyValuePair<any> = this.loadFromLocation(["delegates.json"]);
+    private loadBlockProducers(): void {
+        const blockProducers: KeyValuePair<any> = this.loadFromLocation(["producer.json"]);
 
-        const keys: Set<string> = new Set(delegates.keys || []);
-        const secrets: Set<string> = new Set(delegates.secrets || []);
+        const keys: Set<string> = new Set(blockProducers.keys || []);
+        const secrets: Set<string> = new Set(blockProducers.secrets || []);
 
         for (const secret of secrets) {
             keys.add(Identities.PrivateKey.fromMnemonic(secret));
         }
 
-        if (delegates.secrets || secrets.size > 0) {
-            writeJsonSync(this.app.configPath("delegates.json"), { keys: [...keys] }, { spaces: 4 });
+        if (blockProducers.secrets || secrets.size > 0) {
+            writeJsonSync(this.app.configPath("producer.json"), { keys: [...keys] }, { spaces: 4 });
         }
 
         this.validationService.validate(
-            this.loadFromLocation(["delegates.json"]),
+            this.loadFromLocation(["producer.json"]),
             Joi.object({
                 keys: Joi.array().items(Joi.string().hex().length(64)).optional(),
             }),
@@ -195,7 +195,7 @@ export class LocalConfigLoader implements ConfigLoader {
             throw new Error(JSON.stringify(this.validationService.errors()));
         }
 
-        this.configRepository.set("delegates", this.validationService.valid());
+        this.configRepository.set("blockProducers", this.validationService.valid());
     }
 
     /**

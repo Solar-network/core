@@ -159,15 +159,14 @@ export class Server {
             swaggerJson.components.schemas.transactionVersions.enum =
                 Transactions.schemas.transactionBaseSchema.properties.version.enum;
 
-            const seconds: number = this.blockchainConfiguration.get("missedBlocksLookback") as number;
+            const seconds: number = this.blockchainConfiguration.get("blockProductionFailuresLookback") as number;
             const days: number = +(seconds / 86400).toFixed(2);
 
-            swaggerJson.paths["/blocks/missed"].get.summary = swaggerJson.paths["/blocks/missed"].get.summary.replace(
-                "X",
-                days,
-            );
-            swaggerJson.paths["/delegates/{identifier}/blocks/missed"].get.summary = swaggerJson.paths[
-                "/delegates/{identifier}/blocks/missed"
+            swaggerJson.paths["/blocks/failures"].get.summary = swaggerJson.paths[
+                "/blocks/failures"
+            ].get.summary.replace("X", days);
+            swaggerJson.paths["/block-producers/{identifier}/blocks/failures"].get.summary = swaggerJson.paths[
+                "/block-producers/{identifier}/blocks/failures"
             ].get.summary.replace("X", days);
 
             this.server.route({

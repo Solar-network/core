@@ -47,7 +47,7 @@ export class Command extends Commands.Command {
             .setFlag("restart", "Restart all running processes", Joi.boolean())
             .setFlag("restartCore", "Restart the Core process", Joi.boolean())
             .setFlag("restartRelay", "Restart the Relay process", Joi.boolean())
-            .setFlag("restartForger", "Restart the Forger process", Joi.boolean());
+            .setFlag("restartProducer", "Restart the Block Producer process", Joi.boolean());
     }
 
     /**
@@ -70,7 +70,7 @@ export class Command extends Commands.Command {
                 if (this.hasFlag("restart")) {
                     this.actions.restartRunningProcess("core");
                     this.actions.restartRunningProcess("relay");
-                    this.actions.restartRunningProcess("forger");
+                    this.actions.restartRunningProcess("producer");
                 } else {
                     if (this.hasFlag("restartCore")) {
                         this.actions.restartRunningProcess("core");
@@ -80,14 +80,14 @@ export class Command extends Commands.Command {
                         this.actions.restartRunningProcess("relay");
                     }
 
-                    if (this.hasFlag("restartForger")) {
-                        this.actions.restartRunningProcess("forger");
+                    if (this.hasFlag("restartProducer")) {
+                        this.actions.restartRunningProcess("producer");
                     }
                 }
             } else if (!this.getFlag("force")) {
                 await this.actions.restartRunningProcessWithPrompt("core");
                 await this.actions.restartRunningProcessWithPrompt("relay");
-                await this.actions.restartRunningProcessWithPrompt("forger");
+                await this.actions.restartRunningProcessWithPrompt("producer");
             }
         } else {
             this.components.success(`You already have the latest version (${this.pkg.version})`);
@@ -100,6 +100,6 @@ export class Command extends Commands.Command {
      * @memberof Command
      */
     private hasRestartFlag(): boolean {
-        return Utils.hasSomeProperty(this.getFlags(), ["restart", "restartCore", "restartRelay", "restartForger"]);
+        return Utils.hasSomeProperty(this.getFlags(), ["restart", "restartCore", "restartRelay", "restartProducer"]);
     }
 }

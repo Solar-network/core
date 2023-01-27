@@ -57,7 +57,7 @@ export class Command extends Commands.Command {
     public async execute(): Promise<void> {
         const flags: Contracts.AnyObject = { ...this.getFlags() };
 
-        this.actions.abortRunningProcess("forger");
+        this.actions.abortRunningProcess("producer");
         this.actions.abortRunningProcess("relay");
 
         checkForPrivateKeys(this.app.getCorePath("config"));

@@ -2,9 +2,9 @@ import { Managers } from "@solar-network/crypto";
 
 import { constants } from "./constants";
 
-const maxDelegates = Managers.configManager
+const maxBlockProducers = Managers.configManager
     .getMilestones()
-    .reduce((acc, curr) => Math.max(acc, curr.activeDelegates), 0);
+    .reduce((acc, curr) => Math.max(acc, curr.activeBlockProducers), 0);
 
 const maxTransactions = Managers.configManager
     .getMilestones()
@@ -70,13 +70,13 @@ export const replySchemas = {
         properties: {
             state: {
                 type: "object",
-                required: ["height", "forgingAllowed", "currentSlot", "header"],
+                required: ["height", "allowed", "currentSlot", "header"],
                 properties: {
                     height: {
                         type: "integer",
                         minimum: 1,
                     },
-                    forgingAllowed: {
+                    allowed: {
                         type: "boolean",
                     },
                     currentSlot: {
@@ -162,7 +162,7 @@ export const replySchemas = {
             },
             publicKeys: {
                 type: "array",
-                maxItems: maxDelegates,
+                maxItems: maxBlockProducers,
                 items: {
                     allOf: [
                         {
@@ -177,7 +177,7 @@ export const replySchemas = {
             },
             signatures: {
                 type: "array",
-                maxItems: maxDelegates,
+                maxItems: maxBlockProducers,
                 items: {
                     allOf: [
                         {

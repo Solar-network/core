@@ -12,7 +12,7 @@ import { RateLimitPlugin } from "./plugins/rate-limit";
 import { StalePeerPlugin } from "./plugins/stale-peer";
 import { ValidatePlugin } from "./plugins/validate";
 import { VersionPlugin } from "./plugins/version";
-import { WhitelistForgerPlugin } from "./plugins/whitelist-forger";
+import { WhitelistProducerPlugin } from "./plugins/whitelist-producer";
 import { BlocksRoute } from "./routes/blocks";
 import { InternalRoute } from "./routes/internal";
 import { PeerRoute } from "./routes/peer";
@@ -94,7 +94,7 @@ export class Server {
         banHammerPlugin.register(this.server, optionsServer.banSeconds);
 
         // onPreAuth
-        this.app.resolve(WhitelistForgerPlugin).register(this.server);
+        this.app.resolve(WhitelistProducerPlugin).register(this.server);
         this.app.resolve(RateLimitPlugin).register(this.server);
         this.app.resolve(AwaitBlockPlugin).register(this.server);
 

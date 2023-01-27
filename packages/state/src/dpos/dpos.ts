@@ -8,25 +8,25 @@ export class DposState implements Contracts.State.DposState {
 
     private roundInfo: Contracts.Shared.RoundInfo | null = null;
 
-    private activeDelegates: Contracts.State.Wallet[] = [];
+    private activeBlockProducers: Contracts.State.Wallet[] = [];
 
-    private roundDelegates: Contracts.State.Wallet[] = [];
+    private roundBlockProducers: Contracts.State.Wallet[] = [];
 
     public getRoundInfo(): Contracts.Shared.RoundInfo {
         AppUtils.assert.defined<Contracts.Shared.RoundInfo>(this.roundInfo);
         return this.roundInfo;
     }
 
-    public getAllDelegates(): readonly Contracts.State.Wallet[] {
+    public getAllBlockProducers(): readonly Contracts.State.Wallet[] {
         return this.walletRepository.allByUsername();
     }
 
-    public getActiveDelegates(): readonly Contracts.State.Wallet[] {
-        return this.activeDelegates;
+    public getActiveBlockProducers(): readonly Contracts.State.Wallet[] {
+        return this.activeBlockProducers;
     }
 
-    public getRoundDelegates(): readonly Contracts.State.Wallet[] {
-        return this.roundDelegates;
+    public getRoundBlockProducers(): readonly Contracts.State.Wallet[] {
+        return this.roundBlockProducers;
     }
 
     // Only called during integrity verification on boot.
@@ -34,35 +34,38 @@ export class DposState implements Contracts.State.DposState {
         for (const voter of this.walletRepository.allByPublicKey()) {
             if (voter.hasVoted()) {
                 voter.updateVoteBalances();
-                const delegates: Map<string, Contracts.State.WalletVoteDistribution> = voter.getVoteDistribution();
-                for (const [delegate, { votes }] of delegates.entries()) {
-                    const delegateWallet = this.walletRepository.findByUsername(delegate);
-                    const voteBalance: Utils.BigNumber = delegateWallet.getAttribute(
-                        "delegate.voteBalance",
+                const blockProducers: Map<string, Contracts.State.WalletVoteDistribution> = voter.getVoteDistribution();
+                for (const [blockProducer, { votes }] of blockProducers.entries()) {
+                    const blockProducerWallet = this.walletRepository.findByUsername(blockProducer);
+                    const voteBalance: Utils.BigNumber = blockProducerWallet.getAttribute(
+                        "blockProducer.voteBalance",
                         Utils.BigNumber.ZERO,
                     );
 
-                    delegateWallet.setAttribute("delegate.voteBalance", voteBalance.plus(votes));
-                    delegateWallet.setAttribute("delegate.voters", delegateWallet.getAttribute("delegate.voters") + 1);
+                    blockProducerWallet.setAttribute("blockProducer.voteBalance", voteBalance.plus(votes));
+                    blockProducerWallet.setAttribute(
+                        "blockProducer.voters",
+                        blockProducerWallet.getAttribute("blockProducer.voters") + 1,
+                    );
                 }
             }
         }
     }
 
-    public buildDelegateRanking(): void {
-        this.activeDelegates = [];
+    public buildBlockProducerRanking(): void {
+        this.activeBlockProducers = [];
 
-        for (const delegate of this.walletRepository.allByUsername()) {
-            if (delegate.hasAttribute("delegate.resignation")) {
-                delegate.forgetAttribute("delegate.rank");
+        for (const blockProducer of this.walletRepository.allByUsername()) {
+            if (blockProducer.hasAttribute("blockProducer.resignation")) {
+                blockProducer.forgetAttribute("blockProducer.rank");
             } else {
-                this.activeDelegates.push(delegate);
+                this.activeBlockProducers.push(blockProducer);
             }
         }
 
-        this.activeDelegates.sort((a, b) => {
-            const voteBalanceA: Utils.BigNumber = a.getAttribute("delegate.voteBalance");
-            const voteBalanceB: Utils.BigNumber = b.getAttribute("delegate.voteBalance");
+        this.activeBlockProducers.sort((a, b) => {
+            const voteBalanceA: Utils.BigNumber = a.getAttribute("blockProducer.voteBalance");
+            const voteBalanceB: Utils.BigNumber = b.getAttribute("blockProducer.voteBalance");
 
             const diff = voteBalanceB.comparedTo(voteBalanceA);
 
@@ -71,9 +74,9 @@ export class DposState implements Contracts.State.DposState {
                 AppUtils.assert.defined<string>(b.getPublicKey("primary"));
 
                 if (a.getPublicKey("primary") === b.getPublicKey("primary")) {
-                    const username = a.getAttribute("delegate.username");
+                    const username = a.getAttribute("username");
                     throw new Error(
-                        `The balance and public key of both delegates are identical: "${username}" appears twice in the list`,
+                        `The balance and public key of both block producers are identical: "${username}" appears twice in the list`,
                     );
                 }
 
@@ -83,23 +86,23 @@ export class DposState implements Contracts.State.DposState {
             return diff;
         });
 
-        for (let i = 0; i < this.activeDelegates.length; i++) {
-            this.activeDelegates[i].setAttribute("delegate.rank", i + 1);
+        for (let i = 0; i < this.activeBlockProducers.length; i++) {
+            this.activeBlockProducers[i].setAttribute("blockProducer.rank", i + 1);
         }
     }
 
-    public setDelegatesRound(roundInfo: Contracts.Shared.RoundInfo): void {
-        if (this.activeDelegates.length < roundInfo.maxDelegates) {
+    public setBlockProducersRound(roundInfo: Contracts.Shared.RoundInfo): void {
+        if (this.activeBlockProducers.length < roundInfo.maxBlockProducers) {
             throw new Error(
-                `Expected to find ${roundInfo.maxDelegates} delegates but only found ${this.activeDelegates.length}`,
+                `Expected to find ${roundInfo.maxBlockProducers} block producers but only found ${this.activeBlockProducers.length}`,
             );
         }
 
         this.roundInfo = roundInfo;
-        this.roundDelegates = [];
-        for (let i = 0; i < roundInfo.maxDelegates; i++) {
-            this.activeDelegates[i].setAttribute("delegate.round", roundInfo.round);
-            this.roundDelegates.push(this.activeDelegates[i]);
+        this.roundBlockProducers = [];
+        for (let i = 0; i < roundInfo.maxBlockProducers; i++) {
+            this.activeBlockProducers[i].setAttribute("blockProducer.round", roundInfo.round);
+            this.roundBlockProducers.push(this.activeBlockProducers[i]);
         }
     }
 }
