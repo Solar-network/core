@@ -72,7 +72,7 @@ export class WalletSearchService {
                     let resigned: string | undefined;
                     if (isResigned) {
                         resigned =
-                            wallet.getAttribute("blockProducer.resignation.type") ===
+                            wallet.getAttribute("blockProducer.resignation") ===
                             Enums.BlockProducerStatus.PermanentResign
                                 ? "permanent"
                                 : "temporary";

@@ -62,9 +62,9 @@ export class BlockProducerSearchService {
 
         let resignation: string | undefined = undefined;
 
-        if (blockProducerAttribute.resignation?.type === Enums.BlockProducerStatus.PermanentResign) {
+        if (blockProducerAttribute.resignation === Enums.BlockProducerStatus.PermanentResign) {
             resignation = "permanent";
-        } else if (blockProducerAttribute.resignation?.type === Enums.BlockProducerStatus.TemporaryResign) {
+        } else if (blockProducerAttribute.resignation === Enums.BlockProducerStatus.TemporaryResign) {
             resignation = "temporary";
         }
 

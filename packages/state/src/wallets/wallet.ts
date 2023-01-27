@@ -342,19 +342,17 @@ export class Wallet implements Contracts.State.Wallet {
     public getBasicWallet(): Contracts.State.WalletBasic {
         const attributes: Record<string, any> = AppUtils.cloneDeep(this.getAttributes());
 
-        let type: string | undefined = undefined;
-        if (this.hasAttribute("blockProducer.resignation.type")) {
-            switch (this.getAttribute("blockProducer.resignation.type")) {
+        if (this.hasAttribute("blockProducer.resignation")) {
+            switch (this.getAttribute("blockProducer.resignation")) {
                 case Enums.BlockProducerStatus.PermanentResign: {
-                    type = "permanent";
+                    attributes.blockProducer.resignation = "permanent";
                     break;
                 }
                 case Enums.BlockProducerStatus.TemporaryResign: {
-                    type = "temporary";
+                    attributes.blockProducer.resignation = "temporary";
                     break;
                 }
             }
-            attributes.blockProducer.resignation = { height: attributes.blockProducer.resignation.height, type };
         }
 
         if (attributes.blockProducer && !isNaN(attributes.blockProducer.round)) {

@@ -3,6 +3,7 @@ import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@sol
 
 import {
     IrrevocableResignationError,
+    NotEnoughBlockProducersError,
     NotEnoughTimeSinceResignationError,
     WalletAlreadyPermanentlyResignedError,
     WalletAlreadyTemporarilyResignedError,
@@ -28,7 +29,7 @@ export class ResignationTransactionHandler extends TransactionHandler {
     }
 
     public walletAttributes(): ReadonlyArray<string> {
-        return ["blockProducer.resignation", "blockProducer.resignation.height", "blockProducer.resignation.type"];
+        return ["blockProducer.resignation", "hidden", "hidden.resignationHeight"];
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
@@ -57,8 +58,8 @@ export class ResignationTransactionHandler extends TransactionHandler {
             }
 
             if (type !== Enums.BlockProducerStatus.NotResigned) {
-                wallet.setAttribute("blockProducer.resignation.height", transaction.blockHeight);
-                wallet.setAttribute("blockProducer.resignation.type", type);
+                wallet.setAttribute("hidden.resignationHeight", transaction.blockHeight);
+                wallet.setAttribute("blockProducer.resignation", type);
             } else {
                 wallet.forgetAttribute("blockProducer.resignation");
             }
@@ -87,8 +88,8 @@ export class ResignationTransactionHandler extends TransactionHandler {
             type = transaction.data.asset.resignation.type;
         }
 
-        if (wallet.hasAttribute("blockProducer.resignation.type")) {
-            if (wallet.getAttribute("blockProducer.resignation.type") === Enums.BlockProducerStatus.PermanentResign) {
+        if (wallet.hasAttribute("blockProducer.resignation")) {
+            if (wallet.getAttribute("blockProducer.resignation") === Enums.BlockProducerStatus.PermanentResign) {
                 if (type === Enums.BlockProducerStatus.PermanentResign) {
                     throw new WalletAlreadyPermanentlyResignedError();
                 }
@@ -102,7 +103,7 @@ export class ResignationTransactionHandler extends TransactionHandler {
                     .getLastBlock();
 
                 const { blocksToRevokeResignation } = Managers.configManager.getMilestone();
-                const resignationHeight = wallet.getAttribute("blockProducer.resignation.height");
+                const resignationHeight = wallet.getAttribute("hidden.resignationHeight");
                 if (lastBlock.data.height - resignationHeight < blocksToRevokeResignation) {
                     throw new NotEnoughTimeSinceResignationError(
                         resignationHeight - lastBlock.data.height + blocksToRevokeResignation,
@@ -111,6 +112,18 @@ export class ResignationTransactionHandler extends TransactionHandler {
             }
         } else if (type === Enums.BlockProducerStatus.NotResigned) {
             throw new WalletNotResignedError();
+        }
+
+        const requiredBlockProducersCount: number = Managers.configManager.getMilestone().activeBlockProducers;
+        const currentBlockProducersCount: number = this.walletRepository
+            .allByUsername()
+            .filter((wallet: Contracts.State.Wallet) => !wallet.hasAttribute("blockProducer.resignation")).length;
+
+        if (
+            !wallet.hasAttribute("blockProducer.resignation") &&
+            currentBlockProducersCount - 1 < requiredBlockProducersCount
+        ) {
+            throw new NotEnoughBlockProducersError();
         }
 
         return super.throwIfCannotBeApplied(transaction, wallet);
@@ -158,8 +171,8 @@ export class ResignationTransactionHandler extends TransactionHandler {
         if (type === Enums.BlockProducerStatus.NotResigned) {
             senderWallet.forgetAttribute("blockProducer.resignation");
         } else {
-            senderWallet.setAttribute("blockProducer.resignation.height", transaction.data.blockHeight);
-            senderWallet.setAttribute("blockProducer.resignation.type", type);
+            senderWallet.setAttribute("hidden.resignationHeight", transaction.data.blockHeight);
+            senderWallet.setAttribute("blockProducer.resignation", type);
         }
 
         this.walletRepository.index(senderWallet);
@@ -183,8 +196,8 @@ export class ResignationTransactionHandler extends TransactionHandler {
         if (type === Enums.BlockProducerStatus.NotResigned) {
             senderWallet.forgetAttribute("blockProducer.resignation");
         } else {
-            senderWallet.setAttribute("blockProducer.resignation.height", previousResignation.blockHeight);
-            senderWallet.setAttribute("blockProducer.resignation.type", type);
+            senderWallet.setAttribute("hidden.resignationHeight", previousResignation.blockHeight);
+            senderWallet.setAttribute("blockProducer.resignation", type);
         }
 
         this.walletRepository.index(senderWallet);

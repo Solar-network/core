@@ -193,6 +193,12 @@ export class VotedForTooManyBlockProducersError extends TransactionError {
     }
 }
 
+export class NotEnoughBlockProducersError extends TransactionError {
+    public constructor() {
+        super("Failed to apply transaction, because not enough block producers are registered to allow resignation");
+    }
+}
+
 export class IpfsHashAlreadyExists extends TransactionError {
     public constructor() {
         super("Failed to apply transaction, because this IPFS hash is already registered on the blockchain");
