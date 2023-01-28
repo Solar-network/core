@@ -1,8 +1,9 @@
-import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Managers, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/kernel";
 
 import { WalletAlreadyHasUsernameError, WalletUsernameAlreadyRegisteredError } from "../errors";
 import { TransactionHandler, TransactionHandlerConstructor } from "./transaction";
+import { UpgradeTransactionHandler } from "./upgrade";
 
 @Container.injectable()
 export class RegistrationTransactionHandler extends TransactionHandler {
@@ -20,26 +21,7 @@ export class RegistrationTransactionHandler extends TransactionHandler {
     }
 
     public walletAttributes(): ReadonlyArray<string> {
-        return [
-            "blockProducer.burnedFees", // Used by the API
-            "blockProducer.donations", // Used by the API
-            "blockProducer.failures", // Used by the API
-            "blockProducer.fees", // Used by the API
-            "blockProducer.lastBlock",
-            "blockProducer.producedBlocks", // Used by the API
-            "blockProducer.rank",
-            "blockProducer.reliability", // Used by the API
-            "blockProducer.rewards", // Used by the API
-            "blockProducer.round",
-            "blockProducer.total", // Used by the API
-            "blockProducer.version", // Used by the API
-            "blockProducer.voteBalance",
-            "blockProducer.voters", // Used by the API
-            "blockProducer",
-            "hidden",
-            "hidden.registrationRound",
-            "username",
-        ];
+        return [...UpgradeTransactionHandler.walletAttributes(), "username"];
     }
 
     public getConstructor(): Transactions.TransactionConstructor {
@@ -63,49 +45,12 @@ export class RegistrationTransactionHandler extends TransactionHandler {
                 wallet.setPublicKey(transaction.senderPublicKey, "primary");
             }
 
-            wallet.setAttribute<Contracts.State.WalletBlockProducerAttributes>("blockProducer", {
-                voteBalance: Utils.BigNumber.ZERO,
-                fees: Utils.BigNumber.ZERO,
-                burnedFees: Utils.BigNumber.ZERO,
-                rewards: Utils.BigNumber.ZERO,
-                donations: Utils.BigNumber.ZERO,
-                producedBlocks: 0,
-                rank: undefined,
-                voters: 0,
-            });
-
-            const { round } = AppUtils.roundCalculator.calculateRound(transaction.blockHeight!);
-            wallet.setAttribute("hidden.registrationRound", round);
+            if (Managers.configManager.getMilestone(transaction.blockHeight).autoUpgradeUsernamesToBlockProducers) {
+                UpgradeTransactionHandler.setBlockProducerAttributes(wallet, transaction);
+            }
             wallet.setAttribute("username", transaction.asset.registration.username);
 
             this.walletRepository.index(wallet);
-        }
-
-        const producedBlocks = await this.blockRepository.getBlockProducerStatistics();
-        const lastProducedBlocks = await this.blockRepository.getLastProducedBlocks();
-
-        for (const block of producedBlocks) {
-            if (!block.username) {
-                continue;
-            }
-
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.username);
-            const blockProducer: Contracts.State.WalletBlockProducerAttributes = wallet.getAttribute("blockProducer");
-            blockProducer.burnedFees = blockProducer.fees.plus(block.totalFeesBurned);
-            blockProducer.fees = blockProducer.fees.plus(block.totalFees);
-            blockProducer.rewards = blockProducer.rewards.plus(block.totalRewards);
-            blockProducer.donations = blockProducer.donations.plus(block.donations || Utils.BigNumber.ZERO);
-            blockProducer.producedBlocks += +block.totalProduced;
-        }
-
-        for (const block of lastProducedBlocks) {
-            if (!block.username) {
-                continue;
-            }
-
-            const wallet: Contracts.State.Wallet = this.walletRepository.findByUsername(block.username);
-            block.donations = Utils.calculateDonations(block.height, block.reward);
-            wallet.setAttribute("blockProducer.lastBlock", block);
         }
     }
 
@@ -135,15 +80,15 @@ export class RegistrationTransactionHandler extends TransactionHandler {
     }
 
     public emitEvents(transaction: Interfaces.ITransaction): void {
-        this.events.dispatch(AppEnums.BlockProducerEvent.Registered, {
-            ...transaction.data,
-            username: transaction.data.asset?.registration?.username,
-        });
-
+        const username: string | undefined = transaction.data.asset?.registration?.username;
         this.events.dispatch(AppEnums.UsernameEvent.Registered, {
             ...transaction.data,
-            username: transaction.data.asset?.registration?.username,
+            username,
         });
+
+        if (Managers.configManager.getMilestone(transaction.data.blockHeight).autoUpgradeUsernamesToBlockProducers) {
+            UpgradeTransactionHandler.emitBlockProducerRegistrationEvent(this.events, transaction.data, username);
+        }
     }
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {
@@ -183,19 +128,10 @@ export class RegistrationTransactionHandler extends TransactionHandler {
 
         AppUtils.assert.defined<string>(transaction.data.asset?.registration?.username);
 
-        senderWallet.setAttribute<Contracts.State.WalletBlockProducerAttributes>("blockProducer", {
-            voteBalance: Utils.BigNumber.ZERO,
-            fees: Utils.BigNumber.ZERO,
-            burnedFees: Utils.BigNumber.ZERO,
-            rewards: Utils.BigNumber.ZERO,
-            donations: Utils.BigNumber.ZERO,
-            producedBlocks: 0,
-            round: 0,
-            voters: 0,
-        });
+        if (Managers.configManager.getMilestone(transaction.data.blockHeight).autoUpgradeUsernamesToBlockProducers) {
+            UpgradeTransactionHandler.setBlockProducerAttributes(senderWallet, transaction.data);
+        }
 
-        const { round } = AppUtils.roundCalculator.calculateRound(transaction.data.blockHeight!);
-        senderWallet.setAttribute("hidden.registrationRound", round);
         senderWallet.setAttribute("username", transaction.data.asset.registration.username);
 
         this.walletRepository.index(senderWallet);
@@ -208,8 +144,10 @@ export class RegistrationTransactionHandler extends TransactionHandler {
 
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
-        senderWallet.forgetAttribute("blockProducer");
-        senderWallet.forgetAttribute("hidden.registrationRound");
+        if (Managers.configManager.getMilestone(transaction.data.blockHeight).autoUpgradeUsernamesToBlockProducers) {
+            UpgradeTransactionHandler.forgetBlockProducerAttributes(senderWallet, transaction.data);
+        }
+
         senderWallet.forgetAttribute("username");
 
         this.walletRepository.index(senderWallet);

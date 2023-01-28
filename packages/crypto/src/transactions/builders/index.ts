@@ -4,6 +4,7 @@ import { IPFSBuilder } from "./transactions/ipfs";
 import { RegistrationBuilder } from "./transactions/registration";
 import { ResignationBuilder } from "./transactions/resignation";
 import { TransferBuilder } from "./transactions/transfer";
+import { UpgradeBuilder } from "./transactions/upgrade";
 import { VoteBuilder } from "./transactions/vote";
 
 export * from "./transactions/transaction";
@@ -31,6 +32,10 @@ export class BuilderFactory {
 
     public static burn(): BurnBuilder {
         return new BurnBuilder();
+    }
+
+    public static upgrade(): UpgradeBuilder {
+        return new UpgradeBuilder();
     }
 
     public static vote(): VoteBuilder {

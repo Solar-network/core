@@ -30,6 +30,7 @@ export interface ITransaction {
 export interface ITransactionAsset {
     [custom: string]: any;
 
+    blockProducer?: { publicKey: string; signature: string };
     burn?: IBurnAsset;
     ipfs?: { hash: string };
     recipients?: ITransferRecipient[];

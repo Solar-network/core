@@ -71,7 +71,7 @@ export class BlockProducerSearchService {
         return {
             username: wallet.getAttribute("username"),
             address: wallet.getAddress(),
-            publicKey: publicKey!,
+            publicKey,
             votesReceived: {
                 percent: AppUtils.blockProducerCalculator.calculateVotePercent(wallet, supply),
                 votes: blockProducerAttribute.voteBalance,
@@ -111,7 +111,7 @@ export class BlockProducerSearchService {
         const supply: string = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
         const ourKeys: string[] = AppUtils.getConfiguredBlockProducers();
 
-        for (const wallet of this.walletRepository.allByUsername()) {
+        for (const wallet of this.walletRepository.allBlockProducers()) {
             const blockProducerResource = this.getBlockProducerResourceFromWallet(wallet, supply, ourKeys);
 
             if (this.standardCriteriaService.testStandardCriterias(blockProducerResource, ...criterias)) {

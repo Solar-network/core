@@ -6,12 +6,13 @@ import Handlers from "./handlers";
 import { Identifiers } from "./identifiers";
 import { preparePlugins } from "./plugins";
 import { Server } from "./server";
-import { BlockProducerSearchService, WalletSearchService } from "./services";
+import { BlockProducerSearchService, UsernameSearchService, WalletSearchService } from "./services";
 
 export class ServiceProvider extends Providers.ServiceProvider {
     public async register(): Promise<void> {
-        this.app.bind(Identifiers.WalletSearchService).to(WalletSearchService);
         this.app.bind(Identifiers.BlockProducerSearchService).to(BlockProducerSearchService);
+        this.app.bind(Identifiers.UsernameSearchService).to(UsernameSearchService);
+        this.app.bind(Identifiers.WalletSearchService).to(WalletSearchService);
         this.app.bind(Identifiers.EventListener).to(EventListener).inSingletonScope();
 
         if (this.config().get("server.http.enabled")) {

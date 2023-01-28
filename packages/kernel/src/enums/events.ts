@@ -60,8 +60,8 @@ export enum BlockProducerEvent {
     DataChanged = "blockProducer.dataChanged",
     Failed = "blockProducer.failed",
     ReliabilityChanged = "blockProducer.reliabilityChanged",
-    Registered = "blockProducer.registered",
     Resigned = "blockProducer.resigned",
+    Upgraded = "blockProducer.upgraded",
 }
 
 /**

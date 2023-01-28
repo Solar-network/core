@@ -40,6 +40,10 @@ export class WalletRepository implements Contracts.State.WalletRepository {
         return Object.keys(this.indexes);
     }
 
+    public allBlockProducers(): ReadonlyArray<Contracts.State.Wallet> {
+        return this.allByUsername().filter((wallet) => wallet.hasAttribute("blockProducer"));
+    }
+
     public allByAddress(): ReadonlyArray<Contracts.State.Wallet> {
         return this.getIndex(Contracts.State.WalletIndexes.Addresses).values();
     }

@@ -36,7 +36,7 @@ export class InternalController extends Controller {
         const roundInfo = Utils.roundCalculator.calculateRound(height);
 
         const allBlockProducers: Contracts.P2P.BlockProducerWallet[] = this.walletRepository
-            .allByUsername()
+            .allBlockProducers()
             .map((wallet: Contracts.State.Wallet) => ({
                 ...wallet.getData(),
                 blockProducer: wallet.getAttribute("blockProducer"),

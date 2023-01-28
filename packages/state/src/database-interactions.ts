@@ -145,19 +145,16 @@ export class DatabaseInteraction {
         voteBalance: Utils.BigNumber;
         voters: number;
     }[] {
-        return this.walletRepository
-            .allByUsername()
-            .filter((wallet: Contracts.State.Wallet) => wallet.hasAttribute("blockProducer"))
-            .map((wallet: Contracts.State.Wallet) => {
-                const blockProducer = wallet.getAttribute("blockProducer");
-                return {
-                    percent: AppUtils.blockProducerCalculator.calculateVotePercent(wallet, supply),
-                    username: wallet.getAttribute("username"),
-                    version: blockProducer.version,
-                    voteBalance: blockProducer.voteBalance,
-                    voters: blockProducer.voters,
-                };
-            });
+        return this.walletRepository.allBlockProducers().map((wallet: Contracts.State.Wallet) => {
+            const blockProducer = wallet.getAttribute("blockProducer");
+            return {
+                percent: AppUtils.blockProducerCalculator.calculateVotePercent(wallet, supply),
+                username: wallet.getAttribute("username"),
+                version: blockProducer.version,
+                voteBalance: blockProducer.voteBalance,
+                voters: blockProducer.voters,
+            };
+        });
     }
 
     private async initialiseLastBlock(): Promise<void> {
