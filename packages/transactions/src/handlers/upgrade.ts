@@ -44,7 +44,7 @@ export class UpgradeTransactionHandler extends TransactionHandler {
         transactionData: Interfaces.ITransactionData,
         username: string | undefined,
     ) {
-        events.dispatch(AppEnums.BlockProducerEvent.Registered, {
+        events.dispatch(AppEnums.BlockProducerEvent.Upgraded, {
             ...transactionData,
             username,
         });
