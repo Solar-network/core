@@ -71,7 +71,7 @@ export class BlockProducerSearchService {
         return {
             username: wallet.getAttribute("username"),
             address: wallet.getAddress(),
-            publicKey: publicKey,
+            publicKey,
             votesReceived: {
                 percent: AppUtils.blockProducerCalculator.calculateVotePercent(wallet, supply),
                 votes: blockProducerAttribute.voteBalance,
