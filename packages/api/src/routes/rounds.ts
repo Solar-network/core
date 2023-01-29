@@ -9,6 +9,12 @@ export const register = (server: Hapi.Server): void => {
 
     server.route({
         method: "GET",
+        path: "/rounds/last",
+        handler: () => controller.last(),
+    });
+
+    server.route({
+        method: "GET",
         path: "/rounds/{id}",
         handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.index(request, h),
         options: {

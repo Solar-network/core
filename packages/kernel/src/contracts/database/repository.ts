@@ -61,6 +61,7 @@ export interface BlockProductionFailureRepository extends Repository {
 }
 
 export interface RoundRepository extends Repository {
+    getLastRound(): Promise<RoundModel[]>;
     getRound(round: number): Promise<RoundModel[]>;
 }
 

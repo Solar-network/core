@@ -9,6 +9,12 @@ export class RoundsController extends Controller {
     @Container.inject(Container.Identifiers.DatabaseRoundRepository)
     private readonly roundRepository!: Contracts.Database.RoundRepository;
 
+    public async last(): Promise<object> {
+        const blockProducers = await this.roundRepository.getLastRound();
+
+        return this.respondWithCollection(blockProducers, RoundResource);
+    }
+
     public async index(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object | Boom.Boom> {
         const blockProducers = await this.roundRepository.getRound(+request.params.id);
 

@@ -23,10 +23,11 @@ export class RoundResource implements Resource {
      * @returns {object}
      * @memberof Resource
      */
-    public transform(resource: { balance: string; publicKey: string; username: string }): object {
-        const { balance, publicKey, username } = resource;
+    public transform(resource: { balance: string; publicKey: string; round: number; username: string }): object {
+        const { balance, publicKey, round, username } = resource;
         return {
             publicKey,
+            round,
             votes: Utils.BigNumber.make(balance).toFixed(),
             username,
         };

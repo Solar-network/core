@@ -5,6 +5,11 @@ import { Repository } from "./repository";
 
 @Container.injectable()
 export class RoundRepository extends Repository<RoundModel> implements Contracts.Database.RoundRepository {
+    public async getLastRound(): Promise<RoundModel[]> {
+        const { max } = (await this.createQueryBuilder().select("MAX(round)", "max").from("rounds").run())[0];
+        return this.getRound(max);
+    }
+
     public async getRound(round: number): Promise<RoundModel[]> {
         const mod = this.toModel(
             RoundModel,
