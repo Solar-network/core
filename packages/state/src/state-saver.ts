@@ -41,7 +41,6 @@ export class StateSaver {
             const length: number = Object.keys(this.walletRepository.allByAddress()).length;
 
             const buffer: Utils.ByteBuffer = new Utils.ByteBuffer(Buffer.alloc(5 * 1024 * 1024));
-            const secondaryBuffer: Utils.ByteBuffer = new Utils.ByteBuffer(Buffer.alloc(5 * 1024 * 1024));
 
             const flush = () => {
                 writeSync(fd, buffer.getResult());
@@ -109,7 +108,6 @@ export class StateSaver {
 
                 for (const item of [attributes, publicKeys, [...voteBalances]]) {
                     if (Object.keys(item).length > 0) {
-                        secondaryBuffer.reset();
                         const encoded: Buffer = Buffer.from(
                             JSON.stringify(item, (_, value) => {
                                 if (value instanceof Map) {
