@@ -21,8 +21,6 @@ export class StateSaver {
     @Container.tagged("state", "blockchain")
     private readonly walletRepository!: Contracts.State.WalletRepository;
 
-    private byteBufferArray = new Utils.ByteBufferArray();
-
     public async run(): Promise<void> {
         try {
             const block: Interfaces.IBlock = this.stateMachine.stateStore.getLastBlock();
@@ -112,7 +110,6 @@ export class StateSaver {
                 for (const item of [attributes, publicKeys, [...voteBalances]]) {
                     if (Object.keys(item).length > 0) {
                         secondaryBuffer.reset();
-                        this.byteBufferArray.reset();
                         const encoded: Buffer = Buffer.from(
                             JSON.stringify(item, (_, value) => {
                                 if (value instanceof Map) {

@@ -5,7 +5,6 @@ import { Base58 } from "./base58";
 import { BigNumber } from "./big-number";
 import { calculateBlockTime, isNewBlockTime } from "./block-time-calculator";
 import { ByteBuffer } from "./byte-buffer";
-import { ByteBufferArray } from "./byte-buffer-array";
 import { calculateReward } from "./reward-calculator";
 import { sortVotes } from "./sort-votes";
 
@@ -117,13 +116,4 @@ export const typeAndGroup = (typeCode: string): { type: number; group: number } 
     };
 };
 
-export {
-    Base58,
-    BigNumber,
-    ByteBuffer,
-    ByteBufferArray,
-    calculateBlockTime,
-    isNewBlockTime,
-    calculateReward,
-    sortVotes,
-};
+export { Base58, BigNumber, ByteBuffer, calculateBlockTime, isNewBlockTime, calculateReward, sortVotes };
