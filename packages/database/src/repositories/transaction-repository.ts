@@ -173,7 +173,7 @@ export class TransactionRepository
         const { amount } = (
             await this.createQueryBuilder()
                 .select(
-                    "CAST(COALESCE(SUM((SELECT amount_sent FROM balance_changes WHERE balance_changes.transactions_row = row)), 0) AS TEXT)",
+                    "CAST(COALESCE(SUM((SELECT amount_sent FROM balance_changes WHERE balance_changes.transactions_row = transactions.row)), 0) AS TEXT)",
                     "amount",
                 )
                 .from("transactions")
