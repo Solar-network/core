@@ -57,7 +57,7 @@ export class BlockchainController extends Controller {
         const hexRegex: RegExp = new RegExp("^([a-z0-9]){21,64}$", "i");
         const publicKeysRegex: RegExp = new RegExp("^0([23]){1}([a-z0-9]){19,64}$", "i");
         const numbersRegex: RegExp = new RegExp("^([0-9]){1,9}$");
-        const walletsRegex: RegExp = new RegExp(`^(${network.addressCharacter})([a-z1-9]{20,33})$`, "i");
+        const walletsRegex: RegExp = new RegExp(`^(${network.addressCharacter})([a-z1-9]{1,33})$`, "i");
 
         const blocks: Contracts.Shared.BlockSearchResource[] = [];
         const transactions: Contracts.Shared.TransactionSearchResource[] = [];

@@ -55,8 +55,12 @@ export class WalletSearchService {
                         publicKeys.push(...Object.keys(key).map((key) => key.toLowerCase()));
                     }
                 }
-                if (criteria.length <= 20) {
-                    return wallet.hasAttribute("username") && wallet.getAttribute("username").startsWith(criteria);
+                const isUsername =
+                    criteria.length <= 20 &&
+                    wallet.hasAttribute("username") &&
+                    wallet.getAttribute("username").startsWith(criteria);
+                if (isUsername) {
+                    return true;
                 } else {
                     return (
                         wallet.getAddress().toLowerCase().startsWith(criteria) ||
@@ -92,7 +96,7 @@ export class WalletSearchService {
                     publicKeys: wallet.getPublicKeys(),
                     balance: wallet.getBalance(),
                     votes: Object.fromEntries(wallet.getVoteDistribution().entries()),
-                    username: wallet.getAttribute("username"),
+                    username: wallet.hasAttribute("username") ? wallet.getAttribute("username") : undefined,
                 };
             })
             .sort((a, b) => {
