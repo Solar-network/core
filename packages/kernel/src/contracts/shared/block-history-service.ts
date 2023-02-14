@@ -45,7 +45,7 @@ export type BlockDataWithTransactionData = {
 };
 
 export interface BlockHistoryService {
-    getBlocksLike(criteria: string): Promise<BlockSearchResource[]>;
+    getBlocksLike(criteria: string | number): Promise<BlockSearchResource[]>;
 
     findOneByCriteria(criteria: OrBlockCriteria): Promise<Interfaces.IBlockData | undefined>;
 
