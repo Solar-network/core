@@ -15,12 +15,27 @@ export const register = (server: Hapi.Server): void => {
 
     server.route({
         method: "GET",
-        path: "/blockchain/search/{id}",
+        path: "/blockchain/search",
+        handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.search(request, h),
+        options: {
+            validate: {
+                query: Joi.object({
+                    criteria: Joi.string()
+                        .pattern(/^[a-zA-Z0-9!@$&_.]{1,66}$/)
+                        .required(),
+                }),
+            },
+        },
+    });
+
+    server.route({
+        method: "GET",
+        path: "/blockchain/search/{criteria}",
         handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.search(request, h),
         options: {
             validate: {
                 params: Joi.object({
-                    id: Joi.string()
+                    criteria: Joi.string()
                         .pattern(/^[a-zA-Z0-9!@$&_.]{1,66}$/)
                         .required(),
                 }),

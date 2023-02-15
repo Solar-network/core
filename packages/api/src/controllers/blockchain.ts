@@ -63,19 +63,17 @@ export class BlockchainController extends Controller {
         const transactions: Contracts.Shared.TransactionSearchResource[] = [];
         const wallets: WalletSearchResource[] = [];
 
-        if (
-            blockProducersRegex.test(request.params.id) ||
-            publicKeysRegex.test(request.params.id) ||
-            walletsRegex.test(request.params.id)
-        ) {
-            wallets.push(...this.walletSearchService.getWalletsLike(request.params.id));
+        const criteria = request.params.criteria ?? request.query.criteria;
+
+        if (blockProducersRegex.test(criteria) || publicKeysRegex.test(criteria) || walletsRegex.test(criteria)) {
+            wallets.push(...this.walletSearchService.getWalletsLike(criteria));
         }
 
-        if (hexRegex.test(request.params.id)) {
-            blocks.push(...(await this.blockHistoryService.getBlocksLike(request.params.id)));
-            transactions.push(...(await this.transactionHistoryService.getTransactionsLike(request.params.id)));
-        } else if (numbersRegex.test(request.params.id)) {
-            blocks.push(...(await this.blockHistoryService.getBlocksLike(+request.params.id)));
+        if (hexRegex.test(criteria)) {
+            blocks.push(...(await this.blockHistoryService.getBlocksLike(criteria)));
+            transactions.push(...(await this.transactionHistoryService.getTransactionsLike(criteria)));
+        } else if (numbersRegex.test(criteria) && !criteria.startsWith("0")) {
+            blocks.push(...(await this.blockHistoryService.getBlocksLike(+criteria)));
         }
 
         return { data: { blocks, transactions, wallets } };
