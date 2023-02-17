@@ -46,7 +46,6 @@ export const defaults = {
         basePath: "/api",
     },
     ws: {
-        banSeconds: 10,
         disableGet: process.env.SOLAR_CORE_API_WS_GET_DISABLED?.toLowerCase() === "true",
         disablePost: process.env.SOLAR_CORE_API_WS_POST_DISABLED?.toLowerCase() === "true",
         enabled: process.env.SOLAR_CORE_API_WS_DISABLED?.toLowerCase() !== "true",

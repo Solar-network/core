@@ -261,10 +261,13 @@ export class Socket {
             message.payload = Buffer.from(JSON.stringify(message.payload));
 
             await this._send(message);
-            this.disconnect();
-            setTimeout(() => {
-                this._terminate();
-            }, 100);
+
+            if (banSeconds > 0) {
+                this.disconnect();
+                setTimeout(() => {
+                    this._terminate();
+                }, 100);
+            }
         } else {
             this._terminate(message);
         }
