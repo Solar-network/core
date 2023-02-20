@@ -20,12 +20,11 @@ export class BlockWithTransactionsResource implements Resource {
         const blockData: Interfaces.IBlockData = resource.data;
         const blockTransactions: Interfaces.ITransactionData[] = resource.transactions;
 
-        const totalTransferred: Utils.BigNumber = blockTransactions
+        const totalAmountTransferred: Utils.BigNumber = blockTransactions
             .filter((t) => t.type === "transfer")
             .flatMap((t) => t.asset!.recipients)
             .reduce((sum, transfer) => sum.plus(transfer!.amount), Utils.BigNumber.ZERO);
 
-        const totalAmountTransferred: Utils.BigNumber = blockData.totalAmount.plus(totalTransferred);
         const generator: Contracts.State.Wallet = blockData.username
             ? this.walletRepository.findByUsername(blockData.username)
             : this.walletRepository.findByPublicKey(blockData.generatorPublicKey);
