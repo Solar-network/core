@@ -72,7 +72,8 @@ export class BlockchainController extends Controller {
         if (hexRegex.test(criteria)) {
             blocks.push(...(await this.blockHistoryService.getBlocksLike(criteria)));
             transactions.push(...(await this.transactionHistoryService.getTransactionsLike(criteria)));
-        } else if (numbersRegex.test(criteria) && !criteria.startsWith("0")) {
+        }
+        if (numbersRegex.test(criteria) && !criteria.startsWith("0")) {
             blocks.push(...(await this.blockHistoryService.getBlocksLike(+criteria)));
         }
 
