@@ -26,7 +26,7 @@ export class TransactionRepository
     }
 
     public async findTransactionById(id: string): Promise<TransactionModel> {
-        return (await this.findTransactionsById[id])[0];
+        return (await this.findTransactionsById([id]))?.[0];
     }
 
     public async findByBlockHeights(blockHeights: number[]): Promise<
