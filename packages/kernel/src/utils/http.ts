@@ -1,5 +1,6 @@
 import { ClientRequest, IncomingMessage, request as httpRequest } from "http";
 import { request as httpsRequest, RequestOptions } from "https";
+import { stringify } from "querystring";
 import { Primitive } from "type-fest";
 import { parse } from "url";
 
@@ -8,6 +9,7 @@ import { isUndefined } from "./is-undefined";
 
 export type HttpOptions = RequestOptions & {
     body?: Record<string, Primitive>;
+    json?: boolean;
     rejectOnError?: boolean;
 };
 
@@ -115,9 +117,15 @@ const sendRequest = (method: string, url: string, opts?: HttpOptions): Promise<H
         req.on("timeout", () => req.abort());
 
         if (opts.body) {
-            const body: string = JSON.stringify(opts.body);
+            let body: string;
 
-            req.setHeader("content-type", "application/json");
+            if (opts.json === false) {
+                body = stringify(opts.body as Record<string, any>);
+                req.setHeader("content-type", "application/x-www-form-urlencoded");
+            } else {
+                body = JSON.stringify(opts.body);
+                req.setHeader("content-type", "application/json");
+            }
             req.setHeader("content-length", Buffer.byteLength(body));
             req.write(body);
         }
