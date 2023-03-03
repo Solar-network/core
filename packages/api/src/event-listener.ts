@@ -37,6 +37,35 @@ export class EventListener {
         const events: string[] = this.configuration.get("ws.events")!;
         const registeredTransactionHandlers = await this.handlerRegistry.getRegisteredHandlers();
 
+        for (const event of events) {
+            let addEvent = true;
+            if (event !== "*") {
+                for (const eventGroup of Object.values(Enums)) {
+                    for (const enumEvent of Object.values(eventGroup)) {
+                        if (enumEvent === event) {
+                            addEvent = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (addEvent) {
+                    const eventPath = `/events/${event}`;
+                    for (const server of servers) {
+                        server.subscription(eventPath);
+                    }
+
+                    this.events.listen(event, {
+                        handle: async ({ data }) => {
+                            for (const server of servers) {
+                                server.publish(eventPath, { data });
+                            }
+                        },
+                    });
+                }
+            }
+        }
+
         for (const [eventGroupName, eventGroup] of Object.entries(Enums)) {
             for (const event of Object.values(eventGroup)) {
                 if (events.includes("*") || events.includes(event)) {
