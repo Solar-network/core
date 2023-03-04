@@ -69,12 +69,13 @@ export class BlockchainController extends Controller {
             wallets.push(...this.walletSearchService.getWalletsLike(criteria));
         }
 
+        if (numbersRegex.test(criteria) && !criteria.startsWith("0")) {
+            blocks.push(...(await this.blockHistoryService.getBlocksLike(+criteria)));
+        }
+
         if (hexRegex.test(criteria)) {
             blocks.push(...(await this.blockHistoryService.getBlocksLike(criteria)));
             transactions.push(...(await this.transactionHistoryService.getTransactionsLike(criteria)));
-        }
-        if (numbersRegex.test(criteria) && !criteria.startsWith("0")) {
-            blocks.push(...(await this.blockHistoryService.getBlocksLike(+criteria)));
         }
 
         return { data: { blocks, transactions, wallets } };
