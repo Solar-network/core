@@ -1,5 +1,5 @@
 import { Enums } from "@solar-network/crypto";
-import { Container, Contracts } from "@solar-network/kernel";
+import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { QueryBuilder } from "../query-builder";
 
@@ -58,18 +58,29 @@ export abstract class Repository<T extends IModel> implements Contracts.Database
 
             let totalCount: number = 0;
             if (count) {
-                const totalCountQueryBuilder = this.getFullQueryBuilder().select("COUNT(*)", "count");
-
-                this.addWhere(totalCountQueryBuilder, expression);
-
-                const { count } = (await totalCountQueryBuilder.run())[0];
-                totalCount = parseFloat(count);
+                try {
+                    const totalCountQueryBuilder: Contracts.Database.QueryBuilder = this.getBasicQueryBuilder().select(
+                        "COUNT(*)",
+                        "count",
+                    );
+                    totalCount = await this.getTotalCount(totalCountQueryBuilder, expression);
+                } catch {
+                    const totalCountQueryBuilder: Contracts.Database.QueryBuilder = this.getFullQueryBuilder().select(
+                        "COUNT(*)",
+                        "count",
+                    );
+                    totalCount = await this.getTotalCount(totalCountQueryBuilder, expression, false);
+                }
             }
 
             return { results, totalCount };
         } catch {
             return { results: [], totalCount: 0 };
         }
+    }
+
+    protected getBasicQueryBuilder(): Contracts.Database.QueryBuilder {
+        return this.createQueryBuilder();
     }
 
     protected getFullQueryBuilder(): Contracts.Database.QueryBuilder {
@@ -92,6 +103,24 @@ export abstract class Repository<T extends IModel> implements Contracts.Database
                 queryBuilder.orderBy(item.property, item.direction === "desc" ? "DESC" : "ASC");
             }
         }
+    }
+
+    private async getTotalCount(
+        totalCountQueryBuilder: Contracts.Database.QueryBuilder,
+        expression: Contracts.Search.Expression<T>,
+        transform: boolean = true,
+    ) {
+        const clonedExpression = AppUtils.cloneDeep(expression);
+        if (transform) {
+            for (const [key, value] of Object.entries(clonedExpression)) {
+                if (key === "property") {
+                    clonedExpression[key] = AppUtils.snakeCase(value);
+                }
+            }
+        }
+        this.addWhere(totalCountQueryBuilder, clonedExpression);
+        const { count } = (await totalCountQueryBuilder.run())[0];
+        return parseFloat(count);
     }
 
     private getWhereExpressionSql(

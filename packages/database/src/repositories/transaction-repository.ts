@@ -239,6 +239,10 @@ export class TransactionRepository
         }
     }
 
+    protected getBasicQueryBuilder(): Contracts.Database.QueryBuilder {
+        return this.createQueryBuilder().from("transactions");
+    }
+
     protected getFullQueryBuilder(): Contracts.Database.QueryBuilder {
         return this.createQueryBuilder()
             .select("transactions.*")

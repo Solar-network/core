@@ -390,6 +390,10 @@ export class BlockRepository extends Repository<BlockModel> implements Contracts
         );
     }
 
+    protected getBasicQueryBuilder(): Contracts.Database.QueryBuilder {
+        return this.createQueryBuilder().from("blocks");
+    }
+
     protected getFullQueryBuilder(): Contracts.Database.QueryBuilder {
         return this.createQueryBuilder()
             .select("blocks.*")

@@ -53,6 +53,7 @@ export class CreateTransactionsTable implements Contracts.Database.Migration {
             "CREATE INDEX IF NOT EXISTS index_transactions_timestamp ON transactions(timestamp)",
             "CREATE INDEX IF NOT EXISTS index_transactions_timestamp_asc_sequence ON transactions(timestamp ASC, sequence DESC)",
             "CREATE INDEX IF NOT EXISTS index_transactions_timestamp_sequence ON transactions(timestamp, sequence)",
+            "CREATE INDEX IF NOT EXISTS index_transactions_timestamp_sequence_block_height ON transactions(timestamp, sequence, block_height)",
             "CREATE INDEX IF NOT EXISTS index_transactions_type_id ON transactions(type_id)",
             "CREATE INDEX IF NOT EXISTS index_transactions_type_id_asc_sequence ON transactions(type_id ASC, sequence DESC)",
             "CREATE INDEX IF NOT EXISTS index_transactions_type_id_block_height_asc_sequence_asc ON transactions(type_id, block_height ASC, sequence ASC)",

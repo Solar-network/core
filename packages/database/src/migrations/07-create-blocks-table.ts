@@ -29,6 +29,7 @@ export class CreateBlocksTable implements Contracts.Database.Migration {
             `CREATE TRIGGER IF NOT EXISTS blocks_after_delete AFTER DELETE ON blocks BEGIN
                 INSERT INTO blocks_id_fts(blocks_id_fts, rowid, id) VALUES('delete', old.height, LOWER(HEX(old.id)));
             END`,
+            "CREATE INDEX IF NOT EXISTS index_blocks_height ON blocks(height)",
             "CREATE INDEX IF NOT EXISTS index_blocks_identity_id ON blocks(identity_id)",
             "CREATE INDEX IF NOT EXISTS index_blocks_identity_id_height ON blocks(identity_id, height)",
             "CREATE INDEX IF NOT EXISTS index_blocks_identity_id_height_reward ON blocks(identity_id, height, reward)",

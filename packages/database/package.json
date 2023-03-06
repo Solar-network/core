@@ -17,7 +17,8 @@
         "build": "pnpm clean && pnpm compile",
         "build:watch": "pnpm clean && pnpm compile -w",
         "clean": "rimraf dist",
-        "compile": "node ../../node_modules/typescript/bin/tsc"
+        "compile": "node ../../node_modules/typescript/bin/tsc",
+        "postinstall": "cd node_modules/better-sqlite3 && grep STAT4 deps/defines.gypi ; if [ $? -eq 0 ]; then sed -i.bak -e 's/STAT4/STAT1/g' -- deps/defines.gypi && rm deps/defines.gypi.bak && pnpm build-release; fi"
     },
     "dependencies": {
         "@solar-network/crypto": "workspace:*",

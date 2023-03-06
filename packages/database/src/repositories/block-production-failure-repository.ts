@@ -91,6 +91,10 @@ export class BlockProductionFailureRepository
         );
     }
 
+    protected getBasicQueryBuilder(): Contracts.Database.QueryBuilder {
+        return this.createQueryBuilder().from("block_production_failures");
+    }
+
     protected getFullQueryBuilder(): Contracts.Database.QueryBuilder {
         return this.createQueryBuilder()
             .select("height")
