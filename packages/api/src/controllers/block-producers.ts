@@ -37,7 +37,12 @@ export class BlockProducersController extends Controller {
             blockProducerCriteriaSchemaObject,
         ) as BlockProducerCriteria;
 
-        return this.blockProducerSearchService.getBlockProducersPage(pagination, sorting, criteria);
+        return this.blockProducerSearchService.getBlockProducersPage(
+            pagination,
+            sorting,
+            !!request.query.count,
+            criteria,
+        );
     }
 
     public show(request: Hapi.Request, h: Hapi.ResponseToolkit): { data: BlockProducerResource } | Boom {
@@ -73,7 +78,7 @@ export class BlockProducersController extends Controller {
         const sorting = request.query.orderBy as Contracts.Search.Sorting;
         const criteria = this.getQueryCriteria(request.query, walletCriteriaSchemaObject) as WalletCriteria;
 
-        return this.walletSearchService.getActiveWalletsPage(pagination, sorting, criteria, {
+        return this.walletSearchService.getActiveWalletsPage(pagination, sorting, !!request.query.count, criteria, {
             votingFor: [{ [blockProducerResource.username]: "*" }],
         });
     }
@@ -102,6 +107,7 @@ export class BlockProducersController extends Controller {
                 { type: "transfer" },
                 this.getListingOrder(request),
                 this.getListingPage(request),
+                !!request.query.count,
             );
 
             return this.toPagination(blockWithSomeTransactionsListResult, BlockWithTransactionsResource, true);
@@ -110,6 +116,7 @@ export class BlockProducersController extends Controller {
                 blockCriteria,
                 this.getListingOrder(request),
                 this.getListingPage(request),
+                !!request.query.count,
             );
 
             return this.toPagination(blockListResult, BlockResource, false);
@@ -138,6 +145,7 @@ export class BlockProducersController extends Controller {
             blockProductionFailureCriteria,
             this.getListingOrder(request),
             this.getListingPage(request),
+            !!request.query.count,
         );
 
         return this.toPagination(blockProductionFailureListResult, BlockProductionFailureResource, true);

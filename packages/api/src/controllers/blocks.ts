@@ -31,6 +31,7 @@ export class BlocksController extends Controller {
                 { type: "transfer" },
                 this.getListingOrder(request),
                 this.getListingPage(request),
+                !!request.query.count,
             );
 
             return this.toPagination(blockWithSomeTransactionsListResult, BlockWithTransactionsResource, true);
@@ -39,6 +40,7 @@ export class BlocksController extends Controller {
                 request.query,
                 this.getListingOrder(request),
                 this.getListingPage(request),
+                !!request.query.count,
             );
 
             return this.toPagination(blockListResult, BlockResource, false);
@@ -50,6 +52,7 @@ export class BlocksController extends Controller {
             request.query,
             this.getListingOrder(request),
             this.getListingPage(request),
+            !!request.query.count,
         );
 
         return this.toPagination(blockProductionFailureListResult, BlockProductionFailureResource, true);
@@ -101,6 +104,7 @@ export class BlocksController extends Controller {
             transactionCriteria,
             this.getListingOrder(request),
             this.getListingPage(request),
+            !!request.query.count,
         );
 
         return this.toPagination(transactionListResult, TransactionResource, request.query.transform);

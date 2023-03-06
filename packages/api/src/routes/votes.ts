@@ -19,6 +19,7 @@ export const register = (server: Hapi.Server): void => {
                     ...server.app.schemas.transactionCriteriaSchemas,
                     orderBy: server.app.schemas.transactionsOrderBy,
                     transform: Joi.bool().default(true),
+                    count: Joi.bool().default(true),
                 })
                     .concat(transactionSortingSchema)
                     .concat(Schemas.pagination),

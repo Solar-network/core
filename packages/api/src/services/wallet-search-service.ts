@@ -122,21 +122,23 @@ export class WalletSearchService {
     public getWalletsPage(
         pagination: Contracts.Search.Pagination,
         sorting: Contracts.Search.Sorting,
+        count: boolean = true,
         ...criterias: WalletCriteria[]
     ): Contracts.Search.ResultsPage<WalletResource> {
         sorting = [...sorting, { property: "balance", direction: "desc" }];
 
-        return this.paginationService.getPage(pagination, sorting, this.getWallets(...criterias));
+        return this.paginationService.getPage(pagination, sorting, this.getWallets(...criterias), count);
     }
 
     public getActiveWalletsPage(
         pagination: Contracts.Search.Pagination,
         sorting: Contracts.Search.Sorting,
+        count: boolean = true,
         ...criterias: WalletCriteria[]
     ): Contracts.Search.ResultsPage<WalletResource> {
         sorting = [...sorting, { property: "balance", direction: "desc" }];
 
-        return this.paginationService.getPage(pagination, sorting, this.getActiveWallets(...criterias));
+        return this.paginationService.getPage(pagination, sorting, this.getActiveWallets(...criterias), count);
     }
 
     private getWalletResourceFromWallet(wallet: Contracts.State.Wallet): WalletResource {

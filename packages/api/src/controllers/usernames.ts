@@ -20,7 +20,7 @@ export class UsernamesController extends Controller {
         const sorting = request.query.orderBy as Contracts.Search.Sorting;
         const criteria = this.getQueryCriteria(request.query, usernameCriteriaSchemaObject) as UsernameCriteria;
 
-        return this.usernameSearchService.getUsernamesPage(pagination, sorting, criteria);
+        return this.usernameSearchService.getUsernamesPage(pagination, sorting, !!request.query.count, criteria);
     }
 
     public show(request: Hapi.Request, h: Hapi.ResponseToolkit): { data: UsernameResource } | Boom {

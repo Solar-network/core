@@ -15,7 +15,7 @@ export const register = (server: Hapi.Server): void => {
         handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.index(request, h),
         options: {
             validate: {
-                query: Joi.object()
+                query: Joi.object({ count: Joi.bool().default(true) })
                     .concat(usernameCriteriaSchema)
                     .concat(usernameSortingSchema)
                     .concat(Schemas.pagination),

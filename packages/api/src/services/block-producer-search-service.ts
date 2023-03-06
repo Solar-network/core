@@ -36,11 +36,12 @@ export class BlockProducerSearchService {
     public getBlockProducersPage(
         pagination: Contracts.Search.Pagination,
         sorting: Contracts.Search.Sorting,
+        count: boolean = true,
         ...criterias: BlockProducerCriteria[]
     ): Contracts.Search.ResultsPage<BlockProducerResource> {
         sorting = [...sorting, { property: "rank", direction: "asc" }, { property: "username", direction: "asc" }];
 
-        return this.paginationService.getPage(pagination, sorting, this.getBlockProducers(...criterias));
+        return this.paginationService.getPage(pagination, sorting, this.getBlockProducers(...criterias), count);
     }
 
     private getBlockProducerResourceFromWallet(

@@ -11,7 +11,7 @@ export class PaginationService {
         return { results: [], totalCount: 0 };
     }
 
-    public getPage<T>(pagination: Pagination, sorting: Sorting, items: Iterable<T>): ResultsPage<T> {
+    public getPage<T>(pagination: Pagination, sorting: Sorting, items: Iterable<T>, count: boolean): ResultsPage<T> {
         const all = Array.from(items);
 
         const results =
@@ -21,7 +21,7 @@ export class PaginationService {
 
         return {
             results,
-            totalCount: all.length,
+            totalCount: count ? all.length : 0,
         };
     }
 

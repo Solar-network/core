@@ -41,6 +41,7 @@ export class TransactionsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
 
             return this.toPagination(transactionListResult, TransactionWithBlockResource, true);
@@ -49,6 +50,7 @@ export class TransactionsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
             return this.toPagination(transactionListResult, TransactionResource, false);
         }
@@ -102,7 +104,7 @@ export class TransactionsController extends Controller {
         });
         const resultsPage = {
             results,
-            totalCount: all.length,
+            totalCount: request.query.count ? all.length : 0,
         };
 
         return super.toPagination(resultsPage, TransactionResource, !!request.query.transform);

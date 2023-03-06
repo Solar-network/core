@@ -73,5 +73,6 @@ export interface BlockHistoryService {
         transactionCriteria: OrTransactionCriteria,
         sorting: Sorting,
         pagination: Pagination,
+        count?: boolean,
     ): Promise<ResultsPage<BlockDataWithTransactionData>>;
 }

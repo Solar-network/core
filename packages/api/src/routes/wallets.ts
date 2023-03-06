@@ -20,7 +20,10 @@ export const register = (server: Hapi.Server): void => {
         handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.index(request, h),
         options: {
             validate: {
-                query: Joi.object().concat(walletCriteriaSchema).concat(walletSortingSchema).concat(Schemas.pagination),
+                query: Joi.object({ count: Joi.bool().default(true) })
+                    .concat(walletCriteriaSchema)
+                    .concat(walletSortingSchema)
+                    .concat(Schemas.pagination),
             },
             plugins: {
                 pagination: { enabled: true },
@@ -34,7 +37,10 @@ export const register = (server: Hapi.Server): void => {
         handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.top(request, h),
         options: {
             validate: {
-                query: Joi.object().concat(walletCriteriaSchema).concat(walletSortingSchema).concat(Schemas.pagination),
+                query: Joi.object({ count: Joi.bool().default(true) })
+                    .concat(walletCriteriaSchema)
+                    .concat(walletSortingSchema)
+                    .concat(Schemas.pagination),
             },
             plugins: {
                 pagination: { enabled: true },
@@ -68,6 +74,7 @@ export const register = (server: Hapi.Server): void => {
                     ...server.app.schemas.transactionCriteriaSchemas,
                     orderBy: server.app.schemas.transactionsOrderBy,
                     transform: Joi.bool().default(true),
+                    count: Joi.bool().default(true),
                 })
                     .concat(transactionSortingSchema)
                     .concat(Schemas.pagination),
@@ -93,6 +100,7 @@ export const register = (server: Hapi.Server): void => {
                     ...server.app.schemas.transactionCriteriaSchemas,
                     orderBy: server.app.schemas.transactionsOrderBy,
                     transform: Joi.bool().default(true),
+                    count: Joi.bool().default(true),
                 })
                     .concat(transactionSortingSchema)
                     .concat(Schemas.pagination),
@@ -118,6 +126,7 @@ export const register = (server: Hapi.Server): void => {
                     ...server.app.schemas.transactionCriteriaSchemas,
                     orderBy: server.app.schemas.transactionsOrderBy,
                     transform: Joi.bool().default(true),
+                    count: Joi.bool().default(true),
                 })
                     .concat(transactionSortingSchema)
                     .concat(Schemas.pagination),
@@ -143,6 +152,7 @@ export const register = (server: Hapi.Server): void => {
                     ...server.app.schemas.transactionCriteriaSchemas,
                     orderBy: server.app.schemas.transactionsOrderBy,
                     transform: Joi.bool().default(true),
+                    count: Joi.bool().default(true),
                 })
                     .concat(transactionSortingSchema)
                     .concat(Schemas.pagination),

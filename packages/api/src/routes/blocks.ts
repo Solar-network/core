@@ -19,6 +19,7 @@ export const register = (server: Hapi.Server): void => {
                     ...server.app.schemas.blockCriteriaSchemas,
                     orderBy: server.app.schemas.blocksOrderBy,
                     transform: Joi.bool().default(true),
+                    count: Joi.bool().default(true),
                 })
                     .concat(blockSortingSchema)
                     .concat(Schemas.pagination),
@@ -40,6 +41,7 @@ export const register = (server: Hapi.Server): void => {
                 query: Joi.object({
                     ...server.app.schemas.blockProductionFailureCriteriaSchemas,
                     orderBy: server.app.schemas.blockProductionFailuresOrderBy,
+                    count: Joi.bool().default(true),
                 })
                     .concat(blockProductionFailureSortingSchema)
                     .concat(Schemas.pagination),
@@ -107,6 +109,7 @@ export const register = (server: Hapi.Server): void => {
                     ...server.app.schemas.transactionCriteriaSchemas,
                     orderBy: server.app.schemas.transactionsOrderBy,
                     transform: Joi.bool().default(true),
+                    count: Joi.bool().default(true),
                 })
                     .concat(transactionSortingSchema)
                     .concat(Schemas.pagination),

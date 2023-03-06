@@ -24,7 +24,7 @@ export class WalletsController extends Controller {
         const sorting = request.query.orderBy as Contracts.Search.Sorting;
         const criteria = this.getQueryCriteria(request.query, walletCriteriaSchemaObject) as WalletCriteria;
 
-        return this.walletSearchService.getWalletsPage(pagination, sorting, criteria);
+        return this.walletSearchService.getWalletsPage(pagination, sorting, !!request.query.count, criteria);
     }
 
     public top(request: Hapi.Request, h: Hapi.ResponseToolkit): Contracts.Search.ResultsPage<WalletResource> {
@@ -32,7 +32,7 @@ export class WalletsController extends Controller {
         const sorting = request.query.orderBy as Contracts.Search.Sorting;
         const criteria = this.getQueryCriteria(request.query, walletCriteriaSchemaObject) as WalletCriteria;
 
-        return this.walletSearchService.getWalletsPage(pagination, sorting, criteria);
+        return this.walletSearchService.getWalletsPage(pagination, sorting, !!request.query.count, criteria);
     }
 
     public show(request: Hapi.Request, h: Hapi.ResponseToolkit): { data: WalletResource } | Boom {
@@ -66,6 +66,7 @@ export class WalletsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
 
             return this.toPagination(transactionListResult, TransactionWithBlockResource, true);
@@ -74,6 +75,7 @@ export class WalletsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
 
             return this.toPagination(transactionListResult, TransactionResource, false);
@@ -106,6 +108,7 @@ export class WalletsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
 
             return this.toPagination(transactionListResult, TransactionWithBlockResource, true);
@@ -114,6 +117,7 @@ export class WalletsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
 
             return this.toPagination(transactionListResult, TransactionResource, false);
@@ -143,6 +147,7 @@ export class WalletsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
 
             return this.toPagination(transactionListResult, TransactionWithBlockResource, true);
@@ -151,6 +156,7 @@ export class WalletsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
 
             return this.toPagination(transactionListResult, TransactionResource, false);
@@ -185,6 +191,7 @@ export class WalletsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
 
             return this.toPagination(transactionListResult, TransactionWithBlockResource, true);
@@ -193,6 +200,7 @@ export class WalletsController extends Controller {
                 criteria,
                 sorting,
                 pagination,
+                !!request.query.count,
             );
 
             return this.toPagination(transactionListResult, TransactionResource, false);

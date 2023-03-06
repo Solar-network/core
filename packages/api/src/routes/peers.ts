@@ -18,6 +18,7 @@ export const register = (server: Hapi.Server): void => {
                     ip: Joi.string().ip({ version: ["ipv4", "ipV6"] }),
                     version: Joi.string(),
                     orderBy: server.app.schemas.orderBy,
+                    count: Joi.bool().default(true),
                 }).concat(Schemas.pagination),
             },
             plugins: {

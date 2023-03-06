@@ -105,9 +105,15 @@ export class BlockHistoryService implements Contracts.Shared.BlockHistoryService
         transactionCriteria: Contracts.Search.OrCriteria<Contracts.Shared.TransactionCriteria>,
         sorting: Contracts.Search.Sorting,
         pagination: Contracts.Search.Pagination,
+        count: boolean = true,
     ): Promise<Contracts.Search.ResultsPage<Contracts.Shared.BlockDataWithTransactionData>> {
         const blockExpression = await this.blockFilter.getExpression(blockCriteria);
-        const blockModelResultsPage = await this.blockRepository.listByExpression(blockExpression, sorting, pagination);
+        const blockModelResultsPage = await this.blockRepository.listByExpression(
+            blockExpression,
+            sorting,
+            pagination,
+            count,
+        );
         const blockModels = blockModelResultsPage.results;
 
         const transactionBlockCriteria = blockModels.map((b) => ({ blockHeight: b.height }));

@@ -33,11 +33,12 @@ export class UsernameSearchService {
     public getUsernamesPage(
         pagination: Contracts.Search.Pagination,
         sorting: Contracts.Search.Sorting,
+        count: boolean = true,
         ...criterias: UsernameCriteria[]
     ): Contracts.Search.ResultsPage<UsernameResource> {
         sorting = [...sorting, { property: "rank", direction: "asc" }, { property: "username", direction: "asc" }];
 
-        return this.paginationService.getPage(pagination, sorting, this.getUsernames(...criterias));
+        return this.paginationService.getPage(pagination, sorting, this.getUsernames(...criterias), count);
     }
 
     private getUsernameResourceFromWallet(wallet: Contracts.State.Wallet): UsernameResource {

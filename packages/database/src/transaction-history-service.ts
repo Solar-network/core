@@ -112,12 +112,14 @@ export class TransactionHistoryService implements Contracts.Shared.TransactionHi
         transactionCriteria: Contracts.Shared.OrTransactionCriteria,
         sorting: Contracts.Search.Sorting,
         pagination: Contracts.Search.Pagination,
+        count: boolean = true,
     ): Promise<Contracts.Search.ResultsPage<Contracts.Shared.TransactionDataWithBlockData>> {
         const transactionExpression = await this.transactionFilter.getExpression(transactionCriteria);
         const transactionModelResultsPage = await this.transactionRepository.listByExpression(
             transactionExpression,
             sorting,
             pagination,
+            count,
         );
         const transactionModels = transactionModelResultsPage.results;
 

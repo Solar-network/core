@@ -23,7 +23,7 @@ export const register = (server: Hapi.Server): void => {
         handler: (request: Hapi.Request, h: Hapi.ResponseToolkit) => controller.index(request, h),
         options: {
             validate: {
-                query: Joi.object()
+                query: Joi.object({ count: Joi.bool().default(true) })
                     .concat(blockProducerCriteriaSchema)
                     .concat(blockProducerSortingSchema)
                     .concat(Schemas.pagination),
@@ -56,7 +56,10 @@ export const register = (server: Hapi.Server): void => {
                 params: Joi.object({
                     id: walletParamSchema,
                 }),
-                query: Joi.object().concat(walletCriteriaSchema).concat(walletSortingSchema).concat(Schemas.pagination),
+                query: Joi.object({ count: Joi.bool().default(true) })
+                    .concat(walletCriteriaSchema)
+                    .concat(walletSortingSchema)
+                    .concat(Schemas.pagination),
             },
             plugins: {
                 pagination: { enabled: true },
@@ -77,6 +80,7 @@ export const register = (server: Hapi.Server): void => {
                     ...server.app.schemas.blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey,
                     orderBy: server.app.schemas.blocksOrderBy,
                     transform: Joi.bool().default(true),
+                    count: Joi.bool().default(true),
                 })
                     .concat(blockSortingSchemaWithoutUsernameOrGeneratorPublicKey)
                     .concat(Schemas.pagination),
@@ -101,6 +105,7 @@ export const register = (server: Hapi.Server): void => {
                 query: Joi.object({
                     ...server.app.schemas.blockCriteriaSchemasWithoutUsernameOrGeneratorPublicKey,
                     orderBy: server.app.schemas.blockProductionFailuresOrderBy,
+                    count: Joi.bool().default(true),
                 })
                     .concat(blockProductionFailureSortingSchema)
                     .concat(Schemas.pagination),
