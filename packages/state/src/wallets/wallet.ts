@@ -7,6 +7,7 @@ export class Wallet implements Contracts.State.Wallet {
     protected publicKeys: Record<string, string | Contracts.State.WalletPermissions> = {};
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
+    protected rank: number | undefined;
     protected voteBalances: Map<string, Utils.BigNumber> = new Map();
 
     public constructor(
@@ -88,6 +89,27 @@ export class Wallet implements Contracts.State.Wallet {
             previousValue,
             wallet: this,
         });
+    }
+
+    public getRank(): number | undefined {
+        return this.rank;
+    }
+
+    public setRank(rank: number) {
+        if (rank > 0) {
+            if (this.rank !== rank) {
+                this.events?.dispatchSync(WalletEvent.PropertySet, {
+                    publicKey: this.getPublicKey("primary")!,
+                    key: "rank",
+                    value: rank,
+                    previousValue: this.rank,
+                    wallet: this,
+                });
+                this.rank = rank;
+            }
+        } else {
+            this.rank = undefined;
+        }
     }
 
     public getNonce(): Utils.BigNumber {
@@ -365,6 +387,7 @@ export class Wallet implements Contracts.State.Wallet {
             address: this.getAddress(),
             publicKeys: this.getPublicKeys(),
             balance: this.getBalance(),
+            rank: this.getRank(),
             nonce: this.getNonce(),
             attributes: { ...attributes, votes: undefined },
             votingFor: Object.fromEntries(this.getVoteDistribution().entries()),

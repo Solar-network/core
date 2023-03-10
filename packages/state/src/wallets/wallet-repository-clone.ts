@@ -52,8 +52,8 @@ export class WalletRepositoryClone extends WalletRepository {
             return super.findByIndex(Contracts.State.WalletIndexes.Addresses, address);
         }
 
-        let wallet;
-        let blockchainWallet;
+        let wallet: Contracts.State.Wallet;
+        let blockchainWallet!: Contracts.State.Wallet;
 
         if (this.blockchainWalletRepository.hasByAddress(address)) {
             const walletToClone = this.blockchainWalletRepository.findByAddress(address);

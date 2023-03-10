@@ -4,6 +4,7 @@ export interface WalletBasic {
     address: string;
     publicKeys: Record<string, string | WalletPermissions>;
     balance: Utils.BigNumber;
+    rank?: number;
     nonce: Utils.BigNumber;
     attributes: Record<string, any>;
     votingFor: Record<string, WalletVoteDistribution>;
@@ -87,6 +88,9 @@ export interface Wallet {
     decreaseNonce(): void;
 
     getData(): WalletData;
+
+    setRank(rank: number): void;
+    getRank(): number | undefined;
 
     /**
      * @returns {Record<string, any>}
@@ -255,6 +259,8 @@ export interface WalletRepository {
     hasByUsername(username: string): boolean;
 
     cloneWallet(origin: WalletRepository, wallet: Wallet): Wallet;
+
+    updateWalletRanks(): void;
 }
 
 export enum SearchScope {

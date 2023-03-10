@@ -118,6 +118,8 @@ export class DatabaseInteraction {
             }
 
             this.historicalBlockProducerData = undefined;
+
+            this.walletRepository.updateWalletRanks();
         }
 
         this.events.dispatch(Enums.BlockEvent.Applied, block.getHeader());
@@ -131,6 +133,7 @@ export class DatabaseInteraction {
             this.events.dispatch(Enums.TransactionEvent.Reverted, block.transactions[i].data);
         }
 
+        this.walletRepository.updateWalletRanks();
         this.events.dispatch(Enums.BlockEvent.Reverted, block.getHeader());
     }
 

@@ -228,6 +228,7 @@ export class StateLoader {
                 this.logger.info(`Last block in database: ${block.data.height.toLocaleString()}`, "🗄️");
             }
 
+            this.walletRepository.updateWalletRanks();
             this.events.dispatch(Enums.StateEvent.BuilderFinished);
 
             success = true;

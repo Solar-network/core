@@ -55,6 +55,10 @@ export class DposState implements Contracts.State.DposState {
         }
     }
 
+    public buildWalletRanking(): void {
+        this.walletRepository.updateWalletRanks();
+    }
+
     public buildBlockProducerRanking(roundInfo?: Contracts.Shared.RoundInfo): void {
         this.activeBlockProducers = [];
         if (!roundInfo) {

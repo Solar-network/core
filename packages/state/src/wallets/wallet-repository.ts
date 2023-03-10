@@ -130,6 +130,25 @@ export class WalletRepository implements Contracts.State.WalletRepository {
         return Utils.BigNumber.ZERO;
     }
 
+    public updateWalletRanks(): void {
+        const allWalletsByAddress: Contracts.State.Wallet[] = [...this.allByAddress()].sort((b, a) => {
+            const aBalance = a.getBalance();
+            const bBalance = b.getBalance();
+
+            if (bBalance.isGreaterThan(aBalance)) {
+                return -1;
+            } else if (bBalance.isLessThan(aBalance)) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        for (const wallet of allWalletsByAddress) {
+            wallet.setRank(allWalletsByAddress.findIndex((walletInRepository) => walletInRepository === wallet) + 1);
+        }
+    }
+
     public index(
         wallets: Contracts.State.Wallet | Contracts.State.Wallet[],
         blockchainWallets?: Contracts.State.Wallet | Contracts.State.Wallet[],

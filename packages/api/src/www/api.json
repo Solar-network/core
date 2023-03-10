@@ -2321,6 +2321,30 @@
                         }
                     },
                     {
+                        "name": "rank",
+                        "in": "query",
+                        "description": "The exact ranking of the wallet(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "rank.from",
+                        "in": "query",
+                        "description": "The lowest ranking of the wallet(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
+                        "name": "rank.to",
+                        "in": "query",
+                        "description": "The highest ranking of the wallet(s) to be returned",
+                        "schema": {
+                            "$ref": "#/components/schemas/oneOrMore"
+                        }
+                    },
+                    {
                         "name": "orderBy",
                         "in": "query",
                         "description": "Sorting method",
@@ -2332,7 +2356,9 @@
                                 "balance:asc",
                                 "balance:desc",
                                 "publicKey:asc",
-                                "publicKey:desc"
+                                "publicKey:desc",
+                                "rank:asc",
+                                "rank:desc"
                             ]
                         }
                     }

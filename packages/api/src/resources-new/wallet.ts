@@ -17,6 +17,7 @@ export type WalletResource = {
     address: string;
     publicKeys?: Record<string, string | Contracts.State.WalletPermissions>;
     balance: Utils.BigNumber;
+    rank?: number;
     nonce: Utils.BigNumber;
     attributes: object;
     votingFor: object;
@@ -40,6 +41,7 @@ export const walletCriteriaSchemaObject = {
             .regex(/%/),
     ),
     balance: Schemas.createRangeCriteriaSchema(Schemas.bigNumber),
+    rank: Joi.number().integer().positive(),
     nonce: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
     attributes: Joi.object(),
     username: Joi.string().pattern(/^[a-z0-9!@$&_.]{1,20}$/),

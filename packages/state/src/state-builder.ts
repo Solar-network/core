@@ -54,10 +54,8 @@ export class StateBuilder {
             this.logger.info(`State Generation - Step ${steps - 1} of ${steps}: Block Rewards`, "📈");
             await this.buildBlockRewards();
 
-            this.logger.info(
-                `State Generation - Step ${steps} of ${steps}: Vote Balances & Block Producer Ranking`,
-                "🏅",
-            );
+            this.logger.info(`State Generation - Step ${steps} of ${steps}: Vote Balances & Rankings`, "🏅");
+            this.dposState.buildWalletRanking();
             this.dposState.buildVoteBalances();
             this.dposState.buildBlockProducerRanking();
 

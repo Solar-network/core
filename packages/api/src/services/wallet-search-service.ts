@@ -45,7 +45,7 @@ export class WalletSearchService {
         criteria = criteria.toLowerCase();
         return this.walletRepository
             .allByAddress()
-            .filter((wallet) => {
+            .filter((wallet: Contracts.State.Wallet) => {
                 const publicKeys: string[] = [];
                 if (criteria.length >= 3) {
                     const walletKeys = Object.values(wallet.getPublicKeys());
@@ -71,7 +71,7 @@ export class WalletSearchService {
                 }
             })
             .slice(0, 100)
-            .map((wallet) => {
+            .map((wallet: Contracts.State.Wallet) => {
                 let blockProducer: Record<string, any> | undefined;
                 if (wallet.hasAttribute("blockProducer")) {
                     const isResigned = wallet.hasAttribute("blockProducer.resignation");
@@ -125,9 +125,12 @@ export class WalletSearchService {
         count: boolean = true,
         ...criterias: WalletCriteria[]
     ): Contracts.Search.ResultsPage<WalletResource> {
-        sorting = [...sorting, { property: "balance", direction: "desc" }];
-
-        return this.paginationService.getPage(pagination, sorting, this.getWallets(...criterias), count);
+        return this.paginationService.getPage(
+            pagination,
+            this.transformBalanceSortToRankSort(sorting),
+            this.getWallets(...criterias),
+            count,
+        );
     }
 
     public getActiveWalletsPage(
@@ -136,9 +139,23 @@ export class WalletSearchService {
         count: boolean = true,
         ...criterias: WalletCriteria[]
     ): Contracts.Search.ResultsPage<WalletResource> {
-        sorting = [...sorting, { property: "balance", direction: "desc" }];
+        return this.paginationService.getPage(
+            pagination,
+            this.transformBalanceSortToRankSort(sorting),
+            this.getActiveWallets(...criterias),
+            count,
+        );
+    }
 
-        return this.paginationService.getPage(pagination, sorting, this.getActiveWallets(...criterias), count);
+    private transformBalanceSortToRankSort(sorting: Contracts.Search.Sorting) {
+        const sortingByBalance = sorting.find((criteria) => criteria.property === "balance");
+        let direction: "asc" | "desc" = "asc";
+        if (sortingByBalance) {
+            direction = sortingByBalance.direction === "asc" ? "desc" : "asc";
+            sorting = sorting.filter((criteria) => criteria.property !== "balance");
+        }
+
+        return [...sorting, { property: "rank", direction }];
     }
 
     private getWalletResourceFromWallet(wallet: Contracts.State.Wallet): WalletResource {
