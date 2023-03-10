@@ -12,12 +12,15 @@ export class BlocksController extends Controller {
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
     @Container.inject(Container.Identifiers.BlockHistoryService)
+    @Container.tagged("connection", "api")
     private readonly blockHistoryService!: Contracts.Shared.BlockHistoryService;
 
     @Container.inject(Container.Identifiers.MissedBlockHistoryService)
+    @Container.tagged("connection", "api")
     private readonly missedBlockHistoryService!: Contracts.Shared.MissedBlockHistoryService;
 
     @Container.inject(Container.Identifiers.TransactionHistoryService)
+    @Container.tagged("connection", "api")
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
     public async index(request: Hapi.Request, h: Hapi.ResponseToolkit): Promise<object> {
