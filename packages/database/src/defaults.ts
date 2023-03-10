@@ -1,4 +1,5 @@
 export const defaults = {
+    apiConnectionTimeout: 3000,
     connection: {
         database: `${process.env.CORE_TOKEN}_${process.env.CORE_NETWORK_NAME}`,
         entityPrefix: "public.",

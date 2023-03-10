@@ -10,15 +10,18 @@ import { Controller } from "./controller";
 
 export class BlockchainController extends Controller {
     @Container.inject(Container.Identifiers.BlockHistoryService)
+    @Container.tagged("connection", "api")
     private readonly blockHistoryService!: Contracts.Shared.BlockHistoryService;
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
 
     @Container.inject(Container.Identifiers.TransactionHistoryService)
+    @Container.tagged("connection", "api")
     private readonly transactionHistoryService!: Contracts.Shared.TransactionHistoryService;
 
     @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
+    @Container.tagged("connection", "api")
     private readonly transactionRepository!: Repositories.TransactionRepository;
 
     @Container.inject(Container.Identifiers.WalletRepository)
