@@ -78,6 +78,8 @@ export class BlockProducersController extends Controller {
         const sorting = request.query.orderBy as Contracts.Search.Sorting;
         const criteria = this.getQueryCriteria(request.query, walletCriteriaSchemaObject) as WalletCriteria;
 
+        sorting.push({ property: `votingFor."${blockProducerResource.username}".votes`, direction: "desc" });
+
         return this.walletSearchService.getActiveWalletsPage(pagination, sorting, !!request.query.count, criteria, {
             votingFor: [{ [blockProducerResource.username]: "*" }],
         });
