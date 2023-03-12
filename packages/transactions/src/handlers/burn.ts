@@ -1,4 +1,4 @@
-import { Enums, Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
+import { Interfaces, Managers, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { InsufficientBurnAmountError } from "../errors";
@@ -31,13 +31,7 @@ export class BurnTransactionHandler extends TransactionHandler {
             AppUtils.assert.defined<object>(transaction.asset?.burn);
 
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
-            if (
-                transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey("primary") === undefined
-            ) {
-                wallet.setPublicKey(transaction.senderPublicKey, "primary");
-                this.walletRepository.index(wallet);
-            }
+            this.performWalletInitialisation(transaction, wallet);
 
             wallet.decreaseBalance(transaction.asset.burn.amount);
         }

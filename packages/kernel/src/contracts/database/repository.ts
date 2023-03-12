@@ -78,6 +78,15 @@ export interface TransactionRepository extends Repository {
     getFeeStatistics(txTypes: Array<{ type: string }>, days?: number, minFee?: number): Promise<FeeStatistics[]>;
     getFeesBurned(): Promise<string>;
     getBurnTransactionTotal(): Promise<string>;
+    getPreviousReceivedTransactionOfType(
+        data: Interfaces.ITransactionData,
+        recipientId: string,
+        offset?: number,
+    ): Promise<Interfaces.ITransactionData | undefined>;
+    getPreviousSentTransactionOfType(
+        data: Interfaces.ITransactionData,
+        offset?: number,
+    ): Promise<Interfaces.ITransactionData | undefined>;
     getSentTransactions(): Promise<{ senderId: string; fee: string; nonce: string }[]>;
 }
 

@@ -150,6 +150,8 @@ export abstract class TransactionHandler {
         assert(Utils.isException(transaction.data) || !newBalance.isNegative());
 
         senderWallet.setBalance(newBalance);
+
+        senderWallet.increaseSentTransactions(data);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -168,6 +170,10 @@ export abstract class TransactionHandler {
         if (senderWallet.getNonce().isZero()) {
             senderWallet.forgetPublicKey("primary");
         }
+
+        const previousTransaction: Interfaces.ITransactionData | undefined =
+            await this.transactionRepository.getPreviousSentTransactionOfType(transaction.data);
+        senderWallet.decreaseSentTransactions(data, previousTransaction);
     }
 
     /**
@@ -186,6 +192,14 @@ export abstract class TransactionHandler {
         }
 
         return undefined;
+    }
+
+    protected performWalletInitialisation(data: Interfaces.ITransactionData, sender: Contracts.State.Wallet): void {
+        if (data.headerType === Enums.TransactionHeaderType.Standard && sender.getPublicKey("primary") === undefined) {
+            sender.setPublicKey(data.senderPublicKey, "primary");
+            this.walletRepository.index(sender);
+        }
+        sender.increaseSentTransactions(data);
     }
 
     protected async performGenericWalletChecks(

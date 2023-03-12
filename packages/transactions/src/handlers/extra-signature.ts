@@ -1,4 +1,4 @@
-import { Enums, Interfaces, Transactions } from "@solar-network/crypto";
+import { Interfaces, Transactions } from "@solar-network/crypto";
 import { Container, Contracts, Utils } from "@solar-network/kernel";
 
 import { ExtraSignatureAlreadyRegisteredError, PublicKeyAlreadyAssociatedWithWalletError } from "../errors";
@@ -34,13 +34,7 @@ export class ExtraSignatureRegistrationTransactionHandler extends TransactionHan
             Utils.assert.defined<string>(transaction.asset?.signature?.publicKey);
 
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
-            if (
-                transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey("primary") === undefined
-            ) {
-                wallet.setPublicKey(transaction.senderPublicKey, "primary");
-                this.walletRepository.index(wallet);
-            }
+            this.performWalletInitialisation(transaction, wallet);
 
             wallet.setPublicKey(transaction.asset.signature.publicKey, "extra");
         }

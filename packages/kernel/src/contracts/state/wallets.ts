@@ -2,11 +2,12 @@ import { Interfaces, Utils } from "@solar-network/crypto";
 
 export interface WalletBasic {
     address: string;
-    publicKeys: Record<string, string | WalletPermissions>;
+    publicKeys?: Record<string, string | WalletPermissions>;
     balance: Utils.BigNumber;
     rank?: number;
     nonce: Utils.BigNumber;
     attributes: Record<string, any>;
+    transactions: WalletTransactions;
     votingFor: Record<string, WalletVoteDistribution>;
 }
 
@@ -28,6 +29,41 @@ export interface WalletIndex {
 
 export interface WalletPermissions {
     types?: string[];
+}
+
+export interface WalletTransactions {
+    received: {
+        total: number;
+        types?: {
+            [type: string]: {
+                count: number;
+                first?: {
+                    id: string;
+                    timestamp?: number | object;
+                };
+                last?: {
+                    id: string;
+                    timestamp?: number | object;
+                };
+            };
+        };
+    };
+    sent: {
+        total: number;
+        types?: {
+            [type: string]: {
+                count: number;
+                first?: {
+                    id: string;
+                    timestamp?: number | object;
+                };
+                last?: {
+                    id: string;
+                    timestamp?: number | object;
+                };
+            };
+        };
+    };
 }
 
 export type WalletIndexer = (index: WalletIndex, wallet: Wallet, blockchainWallet?: Wallet) => void;
@@ -86,6 +122,24 @@ export interface Wallet {
     increaseNonce(): void;
 
     decreaseNonce(): void;
+
+    increaseReceivedTransactions(newTransactionData: Interfaces.ITransactionData): void;
+
+    decreaseReceivedTransactions(
+        oldTransactionData: Interfaces.ITransactionData,
+        previousTransactionData?: Interfaces.ITransactionData,
+    ): void;
+
+    increaseSentTransactions(newTransactionData: Interfaces.ITransactionData): void;
+
+    decreaseSentTransactions(
+        oldTransactionData: Interfaces.ITransactionData,
+        previousTransactionData?: Interfaces.ITransactionData,
+    ): void;
+
+    getTransactions(): WalletTransactions;
+
+    setTransactions(transactions: WalletTransactions): void;
 
     getData(): WalletData;
 

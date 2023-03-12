@@ -1,4 +1,4 @@
-import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { InsufficientBalanceError } from "../errors";
@@ -30,20 +30,20 @@ export class TransferTransactionHandler extends TransactionHandler {
             AppUtils.assert.defined<string>(transaction.senderId);
             AppUtils.assert.defined<object>(transaction.asset?.recipients);
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
-            if (
-                transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey("primary") === undefined
-            ) {
-                wallet.setPublicKey(transaction.senderPublicKey, "primary");
-                this.walletRepository.index(wallet);
-            }
+            this.performWalletInitialisation(transaction, wallet);
 
+            const processedRecipientWallets: Contracts.State.Wallet[] = [];
             for (const transfer of transaction.asset.recipients) {
                 const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(
                     transfer.recipientId,
                 );
                 recipientWallet.increaseBalance(transfer.amount);
                 wallet.decreaseBalance(transfer.amount);
+
+                if (!processedRecipientWallets.includes(recipientWallet)) {
+                    processedRecipientWallets.push(recipientWallet);
+                    recipientWallet.increaseReceivedTransactions(transaction);
+                }
             }
         }
     }
@@ -102,20 +102,38 @@ export class TransferTransactionHandler extends TransactionHandler {
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
 
+        const processedRecipientWallets: Contracts.State.Wallet[] = [];
         for (const transfer of transaction.data.asset.recipients) {
             const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
             recipientWallet.increaseBalance(transfer.amount);
+
+            if (!processedRecipientWallets.includes(recipientWallet)) {
+                processedRecipientWallets.push(recipientWallet);
+                recipientWallet.increaseReceivedTransactions(transaction.data);
+            }
         }
     }
 
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {
         AppUtils.assert.defined<Interfaces.ITransferRecipient[]>(transaction.data.asset?.recipients);
 
+        const processedRecipientWallets: Contracts.State.Wallet[] = [];
         for (const transfer of transaction.data.asset.recipients) {
             const recipientWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transfer.recipientId);
 
             recipientWallet.decreaseBalance(transfer.amount);
+
+            if (!processedRecipientWallets.includes(recipientWallet)) {
+                processedRecipientWallets.push(recipientWallet);
+
+                const previousTransaction: Interfaces.ITransactionData | undefined =
+                    await this.transactionRepository.getPreviousReceivedTransactionOfType(
+                        transaction.data,
+                        recipientWallet.getAddress(),
+                    );
+                recipientWallet.decreaseReceivedTransactions(transaction.data, previousTransaction);
+            }
         }
     }
 }

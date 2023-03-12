@@ -175,6 +175,7 @@ export class WalletSearchService {
     private *getActiveWallets(...criterias: WalletCriteria[]): Iterable<WalletResource> {
         for (const wallet of this.walletRepository.allByPublicKey()) {
             const walletResource = this.getWalletResourceFromWallet(wallet);
+
             if (this.standardCriteriaService.testStandardCriterias(walletResource, ...criterias)) {
                 yield walletResource;
             }

@@ -38,13 +38,7 @@ export class VoteTransactionHandler extends TransactionHandler {
             AppUtils.assert.defined<Record<string, number>>(transaction.asset?.votes);
 
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
-            if (
-                transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey("primary") === undefined
-            ) {
-                wallet.setPublicKey(transaction.senderPublicKey, "primary");
-                this.walletRepository.index(wallet);
-            }
+            this.performWalletInitialisation(transaction, wallet);
 
             wallet.setAttribute("hidden.previousVotes", wallet.getAttribute("votes"));
             wallet.setAttribute("votes", this.convertPublicKeyToUsername(Utils.sortVotes(transaction.asset.votes)));
@@ -151,7 +145,6 @@ export class VoteTransactionHandler extends TransactionHandler {
         AppUtils.decreaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
         senderWallet.setAttribute("votes", senderWallet.getAttribute("hidden.previousVotes"));
         senderWallet.setAttribute("hidden.previousVotes", await this.getPreviousVotes(transaction));
-
         senderWallet.updateVoteBalances();
         AppUtils.increaseVoteBalances(senderWallet, { updateVoters: true, walletRepository: this.walletRepository });
     }
@@ -161,23 +154,9 @@ export class VoteTransactionHandler extends TransactionHandler {
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
 
     private async getPreviousVotes(transaction: Interfaces.ITransaction): Promise<Map<string, number>> {
-        const criteria = {
-            blockHeight: { to: transaction.data.blockHeight! - 1 },
-            senderId: transaction.data.senderId,
-            type: "vote",
-        };
-
-        const { results } = await this.transactionHistoryService.listByCriteria(
-            criteria,
-            [
-                { property: "blockHeight", direction: "desc" },
-                { property: "sequence", direction: "desc" },
-            ],
-            { offset: 1, limit: 1 },
-            false,
-        );
-
-        return this.convertPublicKeyToUsername(results[0]?.asset?.votes);
+        const previousTransaction: Interfaces.ITransactionData | undefined =
+            await this.transactionRepository.getPreviousSentTransactionOfType(transaction.data, 1);
+        return this.convertPublicKeyToUsername(previousTransaction?.asset?.votes);
     }
 
     private convertPublicKeyToUsername(assetVotes: Interfaces.IVoteAsset | undefined): Map<string, number> {

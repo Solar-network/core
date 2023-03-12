@@ -1,4 +1,4 @@
-import { Crypto } from "@solar-network/crypto";
+import { Crypto, Interfaces } from "@solar-network/crypto";
 import { Container, Contracts } from "@solar-network/kernel";
 import dayjs from "dayjs";
 import { cpus } from "os";
@@ -11,6 +11,9 @@ export class TransactionRepository
     extends Repository<TransactionModel>
     implements Contracts.Database.TransactionRepository
 {
+    @Container.inject(Container.Identifiers.DatabaseModelConverter)
+    private readonly modelConverter!: Contracts.Database.ModelConverter;
+
     protected model: typeof TransactionModel = TransactionModel;
 
     public async findTransactionsById(ids: string[]): Promise<TransactionModel[]> {
@@ -63,6 +66,58 @@ export class TransactionRepository
         );
 
         return transactions.map((t) => t.id);
+    }
+
+    public async getPreviousReceivedTransactionOfType(
+        data: TransactionModel,
+        recipientId: string,
+        offset?: number,
+    ): Promise<Interfaces.ITransactionData | undefined> {
+        const { id, type } = data;
+
+        const previousTransaction = this.toModel(
+            TransactionModel,
+            await this.getFullQueryBuilder()
+                .where("type = :type", { type })
+                .where("row < (SELECT row FROM transactions WHERE id = :id)", { id })
+                .where(
+                    "row IN (SELECT transactions_row FROM balance_changes WHERE identity_id = (SELECT id FROM identities WHERE identities.identity = :recipientId LIMIT 1) AND amount_received > 0)",
+                    { recipientId },
+                )
+                .orderBy("row", "DESC")
+                .limit(offset || 0, 1)
+                .run(),
+        );
+
+        if (previousTransaction) {
+            return this.modelConverter.getTransactionData(previousTransaction)?.[0];
+        }
+
+        return undefined;
+    }
+
+    public async getPreviousSentTransactionOfType(
+        data: TransactionModel,
+        offset?: number,
+    ): Promise<Interfaces.ITransactionData | undefined> {
+        const { id, senderId, type } = data;
+
+        const previousTransaction = this.toModel(
+            TransactionModel,
+            await this.getFullQueryBuilder()
+                .where("type = :type", { type })
+                .where("senderId = :senderId", { senderId })
+                .where("row < (SELECT row FROM transactions WHERE id = :id)", { id })
+                .orderBy("row", "DESC")
+                .limit(offset || 0, 1)
+                .run(),
+        );
+
+        if (previousTransaction) {
+            return this.modelConverter.getTransactionData(previousTransaction)?.[0];
+        }
+
+        return undefined;
     }
 
     public async getStatistics(): Promise<{

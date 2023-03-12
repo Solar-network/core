@@ -1,4 +1,4 @@
-import { Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Utils as AppUtils } from "@solar-network/kernel";
 
 import { IpfsHashAlreadyExists } from "../errors";
@@ -34,12 +34,7 @@ export class IpfsTransactionHandler extends TransactionHandler {
             AppUtils.assert.defined<string>(transaction.asset?.ipfs?.hash);
 
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
-            if (
-                transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey("primary") === undefined
-            ) {
-                wallet.setPublicKey(transaction.senderPublicKey, "primary");
-            }
+            this.performWalletInitialisation(transaction, wallet);
 
             if (!wallet.hasAttribute("ipfs")) {
                 wallet.setAttribute("ipfs", { hashes: {} });

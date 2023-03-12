@@ -1,4 +1,4 @@
-import { Crypto, Enums, Interfaces, Transactions, Utils } from "@solar-network/crypto";
+import { Crypto, Interfaces, Transactions, Utils } from "@solar-network/crypto";
 import { Container, Contracts, Enums as AppEnums, Utils as AppUtils } from "@solar-network/kernel";
 
 import { BlockProducerSignatureError, WalletHasNoUsernameError, WalletIsAlreadyBlockProducerError } from "../errors";
@@ -99,12 +99,7 @@ export class UpgradeTransactionHandler extends TransactionHandler {
             AppUtils.assert.defined<string>(transaction.senderId);
 
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
-            if (
-                transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey("primary") === undefined
-            ) {
-                wallet.setPublicKey(transaction.senderPublicKey, "primary");
-            }
+            this.performWalletInitialisation(transaction, wallet);
 
             UpgradeTransactionHandler.setBlockProducerAttributes(wallet, transaction);
 

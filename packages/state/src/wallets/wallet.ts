@@ -1,4 +1,4 @@
-import { Enums, Utils } from "@solar-network/crypto";
+import { Enums, Interfaces, Utils } from "@solar-network/crypto";
 import { Contracts, Enums as AppEnums, Services, Utils as AppUtils } from "@solar-network/kernel";
 
 export class Wallet implements Contracts.State.Wallet {
@@ -6,6 +6,7 @@ export class Wallet implements Contracts.State.Wallet {
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected rank: number | undefined;
+    protected transactions: Contracts.State.WalletTransactions = { received: { total: 0 }, sent: { total: 0 } };
     protected voteBalances: Map<string, Utils.BigNumber> = new Map();
 
     public constructor(
@@ -81,7 +82,6 @@ export class Wallet implements Contracts.State.Wallet {
         this.balance = balance;
 
         this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
-            publicKey: this.getPublicKey("primary")!,
             key: "balance",
             value: balance,
             previousValue,
@@ -97,7 +97,6 @@ export class Wallet implements Contracts.State.Wallet {
         if (rank > 0) {
             if (this.rank !== rank) {
                 this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
-                    publicKey: this.getPublicKey("primary")!,
                     key: "rank",
                     value: rank,
                     previousValue: this.rank,
@@ -120,7 +119,6 @@ export class Wallet implements Contracts.State.Wallet {
         this.nonce = nonce;
 
         this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
-            publicKey: this.getPublicKey("primary")!,
             key: "nonce",
             value: nonce,
             previousValue,
@@ -146,6 +144,36 @@ export class Wallet implements Contracts.State.Wallet {
 
     public decreaseNonce(): void {
         this.setNonce(this.nonce.minus(Utils.BigNumber.ONE));
+    }
+
+    public increaseReceivedTransactions(newTransactionData: Interfaces.ITransactionData): void {
+        this.increaseTransactions("received", newTransactionData);
+    }
+
+    public decreaseReceivedTransactions(
+        oldTransactionData: Interfaces.ITransactionData,
+        previousTransactionData?: Interfaces.ITransactionData,
+    ): void {
+        this.decreaseTransactions("received", oldTransactionData, previousTransactionData);
+    }
+
+    public increaseSentTransactions(newTransactionData: Interfaces.ITransactionData): void {
+        this.increaseTransactions("sent", newTransactionData);
+    }
+
+    public decreaseSentTransactions(
+        oldTransactionData: Interfaces.ITransactionData,
+        previousTransactionData?: Interfaces.ITransactionData,
+    ): void {
+        this.decreaseTransactions("sent", oldTransactionData, previousTransactionData);
+    }
+
+    public getTransactions(): Contracts.State.WalletTransactions {
+        return this.transactions;
+    }
+
+    public setTransactions(transactions: Contracts.State.WalletTransactions): void {
+        this.transactions = transactions;
     }
 
     public getData(): Contracts.State.WalletData {
@@ -193,15 +221,18 @@ export class Wallet implements Contracts.State.Wallet {
      * @memberof Wallet
      */
     public setAttribute<T = any>(key: string, value: T): boolean {
+        const na = Symbol();
+        const previousValue = this.attributes.get(key, na);
         const wasSet = this.attributes.set<T>(key, value);
 
-        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
-            publicKey: this.getPublicKey("primary")!,
-            key: key,
-            value,
-            wallet: this,
-        });
-
+        if (!key.startsWith("hidden.")) {
+            this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
+                key,
+                value,
+                previousValue: previousValue === na ? undefined : previousValue,
+                wallet: this,
+            });
+        }
         return wasSet;
     }
 
@@ -215,13 +246,13 @@ export class Wallet implements Contracts.State.Wallet {
         const previousValue = this.attributes.get(key, na);
         const wasSet = this.attributes.forget(key);
 
-        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
-            publicKey: this.getPublicKey("primary")!,
-            key,
-            previousValue: previousValue === na ? undefined : previousValue,
-            wallet: this,
-        });
-
+        if (!key.startsWith("hidden.")) {
+            this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
+                key,
+                previousValue: previousValue === na ? undefined : previousValue,
+                wallet: this,
+            });
+        }
         return wasSet;
     }
 
@@ -312,6 +343,8 @@ export class Wallet implements Contracts.State.Wallet {
         cloned.publicKeys = AppUtils.cloneDeep(this.publicKeys);
         cloned.balance = this.balance;
         cloned.nonce = this.nonce;
+        cloned.rank = this.rank;
+        cloned.transactions = AppUtils.cloneDeep(this.transactions);
         cloned.voteBalances = AppUtils.cloneDeep(this.voteBalances);
         return cloned;
     }
@@ -388,6 +421,7 @@ export class Wallet implements Contracts.State.Wallet {
             rank: this.getRank(),
             nonce: this.getNonce(),
             attributes: { ...attributes, votes: undefined },
+            transactions: this.getTransactions(),
             votingFor: Object.fromEntries(this.getVoteDistribution().entries()),
         };
     }
@@ -398,6 +432,81 @@ export class Wallet implements Contracts.State.Wallet {
 
     public toJSON() {
         return this.getBasicWallet();
+    }
+
+    private increaseTransactions(action: "received" | "sent", newTransactionData: Interfaces.ITransactionData): void {
+        const previousValue = AppUtils.cloneDeep(this.transactions);
+
+        this.transactions[action].total++;
+        const { type } = newTransactionData;
+        const actionObject = this.transactions[action];
+        if (!actionObject.types) {
+            actionObject.types = {};
+        }
+
+        if (!actionObject.types[type]) {
+            actionObject.types[type] = {
+                count: 0,
+            };
+        }
+
+        const typeObject = actionObject.types[type];
+        typeObject.count++;
+        const timestamp =
+            newTransactionData.timestamp !== undefined
+                ? AppUtils.formatTimestamp(newTransactionData.timestamp)
+                : undefined;
+        typeObject.last = { id: newTransactionData.id!, timestamp };
+        if (!typeObject.first) {
+            typeObject.first = { id: newTransactionData.id!, timestamp };
+        }
+
+        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
+            key: "transactions",
+            value: this.transactions,
+            previousValue,
+            wallet: this,
+        });
+    }
+
+    private decreaseTransactions(
+        action: "received" | "sent",
+        oldTransactionData: Interfaces.ITransactionData,
+        previousTransactionData?: Interfaces.ITransactionData,
+    ): void {
+        const previousValue = AppUtils.cloneDeep(this.transactions);
+
+        this.transactions[action].total--;
+        const { type } = oldTransactionData;
+
+        const typeObject = this.transactions[action].types?.[type];
+
+        if (typeObject) {
+            typeObject.count--;
+
+            if (previousTransactionData) {
+                typeObject.last = {
+                    id: previousTransactionData.id!,
+                    timestamp:
+                        previousTransactionData.timestamp !== undefined
+                            ? AppUtils.formatTimestamp(previousTransactionData.timestamp)
+                            : undefined,
+                };
+            } else {
+                delete this.transactions[action].types![type];
+            }
+
+            if (Object.keys(this.transactions[action].types!).length === 0) {
+                delete this.transactions[action].types;
+            }
+        }
+
+        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
+            key: "transactions",
+            value: this.transactions,
+            previousValue,
+            wallet: this,
+        });
     }
 
     private setVoteBalance(blockProducer: string, balance: Utils.BigNumber) {

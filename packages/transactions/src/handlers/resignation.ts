@@ -45,12 +45,7 @@ export class ResignationTransactionHandler extends TransactionHandler {
             AppUtils.assert.defined<string>(transaction.senderId);
 
             const wallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.senderId);
-            if (
-                transaction.headerType === Enums.TransactionHeaderType.Standard &&
-                wallet.getPublicKey("primary") === undefined
-            ) {
-                wallet.setPublicKey(transaction.senderPublicKey, "primary");
-            }
+            this.performWalletInitialisation(transaction, wallet);
 
             let type: Enums.BlockProducerStatus = Enums.BlockProducerStatus.TemporaryResign;
             if (transaction.asset && transaction.asset.resignation && transaction.asset.resignation.type) {
@@ -193,7 +188,7 @@ export class ResignationTransactionHandler extends TransactionHandler {
 
         const senderWallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
-        const previousResignation = await this.getPreviousResignation(transaction.data.blockHeight! - 1, transaction);
+        const previousResignation = await this.getPreviousResignation(transaction);
         let type = Enums.BlockProducerStatus.NotResigned;
 
         if (previousResignation) {
@@ -209,6 +204,7 @@ export class ResignationTransactionHandler extends TransactionHandler {
             senderWallet.forgetAttribute("blockProducer.resignation");
             senderWallet.forgetAttribute("hidden.resignationHeight");
         } else {
+            AppUtils.assert.defined<string>(previousResignation?.asset?.resignation);
             senderWallet.setAttribute("blockProducer.resignation", type);
             senderWallet.setAttribute("hidden.resignationHeight", previousResignation.blockHeight);
         }
@@ -221,23 +217,8 @@ export class ResignationTransactionHandler extends TransactionHandler {
     public async revertForRecipient(transaction: Interfaces.ITransaction): Promise<void> {}
 
     private async getPreviousResignation(
-        height: number,
         transaction: Interfaces.ITransaction,
-    ): Promise<Interfaces.ITransactionData> {
-        const { results } = await this.transactionHistoryService.listByCriteria(
-            {
-                blockHeight: { to: height },
-                senderId: transaction.data.senderId,
-                type: this.getConstructor().key,
-            },
-            [
-                { property: "blockHeight", direction: "desc" },
-                { property: "sequence", direction: "desc" },
-            ],
-            { offset: 0, limit: 1 },
-            false,
-        );
-
-        return results[0];
+    ): Promise<Interfaces.ITransactionData | undefined> {
+        return await this.transactionRepository.getPreviousSentTransactionOfType(transaction.data);
     }
 }
