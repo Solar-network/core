@@ -76,8 +76,7 @@ export class EventListener {
                             eventGroupName === "BlockEvent" ||
                             eventGroupName === "BlockProducerEvent" ||
                             eventGroupName === "RoundEvent" ||
-                            eventGroupName === "UsernameEvent" ||
-                            eventGroupName === "VoteEvent"
+                            eventGroupName === "UsernameEvent"
                         ) {
                             server.subscription(`${eventPath}/{id}`);
                         } else if (eventGroupName === "TransactionEvent") {
@@ -86,6 +85,9 @@ export class EventListener {
                                 server.subscription(`${eventPath}/{id}/${handler.getConstructor().key}`);
                                 server.subscription(`${eventPath}/${handler.getConstructor().key}`);
                             }
+                        } else if (eventGroupName === "WalletEvent") {
+                            server.subscription(`${eventPath}/{id}`);
+                            server.subscription(`${eventPath}/{id}/{property}`);
                         }
                     }
                     this.events.listen(event, {
@@ -115,7 +117,7 @@ export class EventListener {
                                         endpoints.add(`${eventPath}/${transfer.recipientId}/${key}`);
                                     }
                                 }
-                            } else if (eventGroupName === "VoteEvent") {
+                            } else if (eventGroupName === "WalletEvent") {
                                 if (data.previousVotes) {
                                     for (const previousVote of Object.keys(data.previousVotes)) {
                                         if (
@@ -131,6 +133,17 @@ export class EventListener {
                                         if (!data.previousVotes || data.previousVotes[vote] !== data.votes[vote]) {
                                             endpoints.add(`${eventPath}/${vote}`);
                                         }
+                                    }
+                                }
+                                if (data.key) {
+                                    endpoints.add(`${eventPath}/${data.wallet.address}`);
+                                    endpoints.add(`${eventPath}/${data.wallet.address}/${data.key}`);
+                                    endpoints.add(`${eventPath}/${data.key}`);
+                                    if (data.wallet.hasAttribute("username")) {
+                                        endpoints.add(`${eventPath}/${data.wallet.getAttribute("username")}`);
+                                        endpoints.add(
+                                            `${eventPath}/${data.wallet.getAttribute("username")}/${data.key}`,
+                                        );
                                     }
                                 }
                             }

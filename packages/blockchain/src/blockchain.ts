@@ -673,11 +673,27 @@ export class Blockchain implements Contracts.Blockchain.Blockchain {
                 }
 
                 if (newReliability !== undefined) {
-                    blockProducerWallet.setAttribute("blockProducer.failures", failures ?? 0);
-                    blockProducerWallet.setAttribute("blockProducer.reliability", newReliability);
+                    const newFailures: number = failures ?? 0;
+                    const updateFailures =
+                        !blockProducerWallet.hasAttribute("blockProducer.failures") ||
+                        blockProducerWallet.getAttribute("blockProducer.failures") !== newFailures;
+                    const updateReliability =
+                        !blockProducerWallet.hasAttribute("blockProducer.reliability") ||
+                        blockProducerWallet.getAttribute("blockProducer.reliability") !== newReliability;
+
+                    if (updateFailures) {
+                        blockProducerWallet.setAttribute("blockProducer.failures", failures ?? 0);
+                    }
+                    if (updateReliability) {
+                        blockProducerWallet.setAttribute("blockProducer.reliability", newReliability);
+                    }
                 } else {
-                    blockProducerWallet.forgetAttribute("blockProducer.failures");
-                    blockProducerWallet.forgetAttribute("blockProducer.reliability");
+                    if (blockProducerWallet.hasAttribute("blockProducer.failures")) {
+                        blockProducerWallet.forgetAttribute("blockProducer.failures");
+                    }
+                    if (blockProducerWallet.hasAttribute("blockProducer.reliability")) {
+                        blockProducerWallet.forgetAttribute("blockProducer.reliability");
+                    }
                 }
             }
 

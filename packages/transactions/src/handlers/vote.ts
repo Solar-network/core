@@ -96,7 +96,7 @@ export class VoteTransactionHandler extends TransactionHandler {
         AppUtils.assert.defined<string[]>(transaction.data.asset?.votes);
 
         const wallet = this.walletRepository.findByAddress(transaction.data.senderId);
-        this.events.dispatch(AppEnums.VoteEvent.Vote, {
+        this.events.dispatch(AppEnums.WalletEvent.Vote, {
             votes: transaction.data.asset?.votes,
             previousVotes: Object.fromEntries(wallet.getAttribute("hidden.previousVotes").entries()),
             transaction: transaction.data,

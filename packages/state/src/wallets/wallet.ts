@@ -1,7 +1,5 @@
 import { Enums, Utils } from "@solar-network/crypto";
-import { Contracts, Services, Utils as AppUtils } from "@solar-network/kernel";
-
-import { WalletEvent } from "./wallet-event";
+import { Contracts, Enums as AppEnums, Services, Utils as AppUtils } from "@solar-network/kernel";
 
 export class Wallet implements Contracts.State.Wallet {
     protected publicKeys: Record<string, string | Contracts.State.WalletPermissions> = {};
@@ -82,7 +80,7 @@ export class Wallet implements Contracts.State.Wallet {
 
         this.balance = balance;
 
-        this.events?.dispatchSync(WalletEvent.PropertySet, {
+        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
             publicKey: this.getPublicKey("primary")!,
             key: "balance",
             value: balance,
@@ -98,7 +96,7 @@ export class Wallet implements Contracts.State.Wallet {
     public setRank(rank: number) {
         if (rank > 0) {
             if (this.rank !== rank) {
-                this.events?.dispatchSync(WalletEvent.PropertySet, {
+                this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
                     publicKey: this.getPublicKey("primary")!,
                     key: "rank",
                     value: rank,
@@ -121,7 +119,7 @@ export class Wallet implements Contracts.State.Wallet {
 
         this.nonce = nonce;
 
-        this.events?.dispatchSync(WalletEvent.PropertySet, {
+        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
             publicKey: this.getPublicKey("primary")!,
             key: "nonce",
             value: nonce,
@@ -197,7 +195,7 @@ export class Wallet implements Contracts.State.Wallet {
     public setAttribute<T = any>(key: string, value: T): boolean {
         const wasSet = this.attributes.set<T>(key, value);
 
-        this.events?.dispatchSync(WalletEvent.PropertySet, {
+        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
             publicKey: this.getPublicKey("primary")!,
             key: key,
             value,
@@ -217,7 +215,7 @@ export class Wallet implements Contracts.State.Wallet {
         const previousValue = this.attributes.get(key, na);
         const wasSet = this.attributes.forget(key);
 
-        this.events?.dispatchSync(WalletEvent.PropertySet, {
+        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
             publicKey: this.getPublicKey("primary")!,
             key,
             previousValue: previousValue === na ? undefined : previousValue,

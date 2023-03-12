@@ -72,10 +72,6 @@ export enum UsernameEvent {
     Registered = "username.registered",
 }
 
-export enum VoteEvent {
-    Vote = "wallet.vote",
-}
-
 /**
  * @export
  * @enum {number}
@@ -138,4 +134,13 @@ export enum ScheduleEvent {
 export enum QueueEvent {
     Finished = "queue.finished",
     Failed = "queue.failed",
+}
+
+/**
+ * @export
+ * @enum {number}
+ */
+export enum WalletEvent {
+    PropertySet = "wallet.property.set",
+    Vote = "wallet.vote",
 }
