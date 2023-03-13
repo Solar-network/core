@@ -14,7 +14,7 @@
             "feePercent": 90,
             "txAmount": 2000000
         },
-        "epoch": "2022-07-20T18:00:00.000Z",
+        "epoch": "2023-01-25T23:00:00.000Z",
         "fees": {
             "bytes": {
                 "burn": 0,
@@ -28,7 +28,7 @@
             "minFee": 11299
         },
         "p2p": {
-            "minimumVersions": [">=4.1.2-next.0"]
+            "minimumVersions": [">=4.2.2-next.0"]
         },
         "transactionVersions": [2],
         "transfer": {
@@ -107,7 +107,7 @@
         "transactionVersions": [2, 3]
     },
     {
-        "height": 502441,
+        "height": 502431,
         "donations": {
             "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": {
                 "percent": 5,
