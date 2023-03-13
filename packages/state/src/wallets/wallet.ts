@@ -48,7 +48,16 @@ export class Wallet implements Contracts.State.Wallet {
     }
 
     public forgetPublicKey(type: string): void {
+        const previousValue = AppUtils.cloneDeep(this.publicKeys);
+
         delete this.publicKeys[type];
+
+        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
+            key: "publicKeys",
+            value: this.publicKeys,
+            previousValue,
+            wallet: this,
+        });
     }
 
     public setPublicKey(publicKey: string, type: string, permissions?: Contracts.State.WalletPermissions): void {
@@ -57,6 +66,8 @@ export class Wallet implements Contracts.State.Wallet {
         }
 
         if (!this.hasPublicKey(publicKey)) {
+            const previousValue = AppUtils.cloneDeep(this.publicKeys);
+
             if (permissions === undefined) {
                 this.publicKeys[type] = publicKey;
             } else {
@@ -65,6 +76,13 @@ export class Wallet implements Contracts.State.Wallet {
                 }
                 this.publicKeys[type][publicKey] = permissions;
             }
+
+            this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
+                key: "publicKeys",
+                value: this.publicKeys,
+                previousValue,
+                wallet: this,
+            });
         }
     }
 
