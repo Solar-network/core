@@ -133,12 +133,18 @@ export class BlockState implements Contracts.State.BlockState {
             Utils.BigNumber.ZERO,
         );
 
-        blockProducerAttribute.producedBlocks++;
-        blockProducerAttribute.burnedFees = blockProducerAttribute.burnedFees.plus(block.data.totalFeeBurned!);
-        blockProducerAttribute.fees = blockProducerAttribute.fees.plus(block.data.totalFee);
-        blockProducerAttribute.rewards = blockProducerAttribute.rewards.plus(block.data.reward);
-        blockProducerAttribute.donations = blockProducerAttribute.donations.plus(donations);
-        blockProducerAttribute.lastBlock = block.getHeader(true);
+        blockProducerWallet.setAttribute("blockProducer.producedBlocks", blockProducerAttribute.producedBlocks + 1);
+        blockProducerWallet.setAttribute(
+            "blockProducer.burnedFees",
+            blockProducerAttribute.burnedFees.plus(block.data.totalFeeBurned!),
+        );
+        blockProducerWallet.setAttribute("blockProducer.fees", blockProducerAttribute.fees.plus(block.data.totalFee));
+        blockProducerWallet.setAttribute(
+            "blockProducer.rewards",
+            blockProducerAttribute.rewards.plus(block.data.reward),
+        );
+        blockProducerWallet.setAttribute("blockProducer.donations", blockProducerAttribute.donations.plus(donations));
+        blockProducerWallet.setAttribute("blockProducer.lastBlock", block.getHeader(true));
 
         const balanceIncrease = block.data.reward
             .minus(donations)
@@ -162,11 +168,17 @@ export class BlockState implements Contracts.State.BlockState {
             Utils.BigNumber.ZERO,
         );
 
-        blockProducerAttribute.producedBlocks--;
-        blockProducerAttribute.burnedFees = blockProducerAttribute.burnedFees.minus(block.data.totalFeeBurned!);
-        blockProducerAttribute.fees = blockProducerAttribute.fees.minus(block.data.totalFee);
-        blockProducerAttribute.rewards = blockProducerAttribute.rewards.minus(block.data.reward);
-        blockProducerAttribute.donations = blockProducerAttribute.donations.minus(donations);
+        blockProducerWallet.setAttribute("blockProducer.producedBlocks", blockProducerAttribute.producedBlocks - 1);
+        blockProducerWallet.setAttribute(
+            "blockProducer.burnedFees",
+            blockProducerAttribute.burnedFees.minus(block.data.totalFeeBurned!),
+        );
+        blockProducerWallet.setAttribute("blockProducer.fees", blockProducerAttribute.fees.minus(block.data.totalFee));
+        blockProducerWallet.setAttribute(
+            "blockProducer.rewards",
+            blockProducerAttribute.rewards.minus(block.data.reward),
+        );
+        blockProducerWallet.setAttribute("blockProducer.donations", blockProducerAttribute.donations.minus(donations));
 
         const { results } = await this.blockHistoryService.listByCriteria(
             { username: block.data.username, height: { to: block.data.height - 1 } },
@@ -176,9 +188,9 @@ export class BlockState implements Contracts.State.BlockState {
         );
 
         if (results[0]) {
-            blockProducerAttribute.lastBlock = results[0];
+            blockProducerWallet.setAttribute("blockProducer.lastBlock", results[0]);
         } else {
-            blockProducerAttribute.lastBlock = undefined;
+            blockProducerWallet.forgetAttribute("blockProducer.lastBlock");
         }
 
         const balanceDecrease = block.data.reward
