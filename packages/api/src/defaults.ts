@@ -27,6 +27,7 @@ export const defaults = {
             stdTTL: 8,
             checkperiod: 120,
         },
+        origin: ["*"],
         rateLimit: {
             enabled: process.env.SOLAR_CORE_API_RATE_LIMIT_DISABLED?.toLowerCase() !== "true",
             points: process.env.SOLAR_CORE_API_RATE_LIMIT_USER_LIMIT || 100,

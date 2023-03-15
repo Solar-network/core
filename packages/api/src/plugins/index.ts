@@ -7,6 +7,7 @@ import { cache } from "./cache";
 import { closeConnection } from "./close-connection";
 import { dotSeparatedQuery } from "./dot-separated-query";
 import { log } from "./log";
+import { origin } from "./origin";
 import { pagination } from "./pagination";
 import { rateLimit } from "./rate-limit";
 import { responseHeaders } from "./response-headers";
@@ -49,6 +50,12 @@ export const preparePlugins = (config) => {
             options: {
                 whitelist: config.plugins.whitelist,
                 trustProxy: config.plugins.trustProxy,
+            },
+        },
+        {
+            plugin: origin,
+            options: {
+                origin: config.plugins.origin,
             },
         },
         {

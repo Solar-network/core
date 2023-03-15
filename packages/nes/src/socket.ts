@@ -34,6 +34,7 @@ export class Socket {
     private _helloed;
     private _processingCount;
     private _packets;
+    private _req;
     private _sending;
     private _lastPinged;
     private _requests;
@@ -58,6 +59,7 @@ export class Socket {
         this.id = this._listener._generateId();
         this.app = {};
 
+        this._req = req;
         this._requests = [];
 
         this.info = {
@@ -512,7 +514,7 @@ export class Socket {
             }
         }
 
-        const headers = { "content-type": "application/octet-stream" };
+        const headers = { "content-type": "application/octet-stream", origin: this._req.headers.origin };
         let payload = request.payload;
 
         if (this._listener._settings.extendedTypes) {

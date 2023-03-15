@@ -86,6 +86,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
                     blacklist: Joi.array().items(Joi.string()).required(),
                 }).required(),
                 socketTimeout: Joi.number().integer().min(0).required(),
+                origin: Joi.array().items(Joi.string()).required(),
                 whitelist: Joi.array().items(Joi.string()).required(),
                 trustProxy: Joi.bool().required(),
             }).required(),
