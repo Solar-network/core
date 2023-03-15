@@ -248,27 +248,31 @@ export class Socket {
         }
 
         if (this._listener._settings.sendErrors) {
-            if (typeof message === "string") {
-                message = Hoek.clone(Boom.boomify(new Error(message)).output);
-            }
-            if (message.payload && message.payload.message) {
-                message.payload.message = `${message.statusCode} ${message.payload.message}`;
-                if (banSeconds > 0) {
-                    message.payload.message += `\nConnection will be blocked for ${banSeconds} second${
-                        banSeconds !== 1 ? "s" : ""
-                    }`;
+            if (message.statusCode === 403) {
+                this._terminate();
+            } else {
+                if (typeof message === "string") {
+                    message = Hoek.clone(Boom.boomify(new Error(message)).output);
                 }
-            }
+                if (message.payload && message.payload.message) {
+                    message.payload.message = `${message.statusCode} ${message.payload.message}`;
+                    if (banSeconds > 0) {
+                        message.payload.message += `\nConnection will be blocked for ${banSeconds} second${
+                            banSeconds !== 1 ? "s" : ""
+                        }`;
+                    }
+                }
 
-            message.payload = Buffer.from(JSON.stringify(message.payload));
+                message.payload = Buffer.from(JSON.stringify(message.payload));
 
-            await this._send(message);
+                await this._send(message);
 
-            if (banSeconds > 0) {
-                this.disconnect();
-                setTimeout(() => {
-                    this._terminate();
-                }, 100);
+                if (banSeconds > 0) {
+                    this.disconnect();
+                    setTimeout(() => {
+                        this._terminate();
+                    }, 100);
+                }
             }
         } else {
             this._terminate(message);
