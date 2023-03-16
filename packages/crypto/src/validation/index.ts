@@ -34,7 +34,7 @@ export class Validator {
             let total = 0;
 
             for (const value of Object.values(test)) {
-                total += +value * 100;
+                total += Math.round(+value * 100);
             }
 
             return total === 10000 || total === 0 || Object.keys(test).length === 0;
