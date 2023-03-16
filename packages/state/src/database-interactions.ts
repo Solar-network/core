@@ -45,7 +45,7 @@ export class DatabaseInteraction {
 
     private blockchain!: Contracts.Blockchain.Blockchain;
 
-    private historicalBlockProducerData: Record<string, string | number | Utils.BigNumber>[] | undefined;
+    private historicalBlockProducerData: Record<string, string | number | object | Utils.BigNumber>[] | undefined;
 
     public async initialise(): Promise<void> {
         try {
@@ -90,15 +90,19 @@ export class DatabaseInteraction {
         if (this.blockchain.getQueue().size() === 0) {
             supply = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
             const updatedBlockProducers = this.getBlockProducerData(supply).filter(
-                ({ percent, username, version, voteBalance, voters }) =>
+                ({ blocks, collected, percent, username, version, voteBalance, voters }) =>
                     !this.historicalBlockProducerData!.some(
                         ({
+                            blocks: oldBlocks,
+                            collected: oldCollected,
                             percent: oldPercent,
                             username: oldUsername,
                             version: oldVersion,
                             voteBalance: oldVoteBalance,
                             voters: oldVoters,
                         }) =>
+                            blocks === oldBlocks &&
+                            AppUtils.isEqual(collected, oldCollected) &&
                             percent === oldPercent &&
                             username === oldUsername &&
                             version === oldVersion &&
@@ -107,8 +111,18 @@ export class DatabaseInteraction {
                     ),
             );
 
-            for (const { percent, username, version, voteBalance, voters } of updatedBlockProducers) {
+            for (const {
+                blocks,
+                collected,
+                percent,
+                username,
+                version,
+                voteBalance,
+                voters,
+            } of updatedBlockProducers) {
                 this.events.dispatch(Enums.BlockProducerEvent.DataChanged, {
+                    blocks,
+                    collected,
                     percent,
                     username,
                     version,
@@ -142,6 +156,8 @@ export class DatabaseInteraction {
     }
 
     private getBlockProducerData(supply: string): {
+        blocks: number;
+        collected: object;
         percent: number;
         username: string;
         version: string;
@@ -151,6 +167,23 @@ export class DatabaseInteraction {
         return this.walletRepository.allBlockProducers().map((wallet: Contracts.State.Wallet) => {
             const blockProducer = wallet.getAttribute("blockProducer");
             return {
+                blocks: wallet.getAttribute("blockProducer.producedBlocks"),
+                collected: {
+                    fees: {
+                        burned: wallet.getAttribute("blockProducer.burnedFees"),
+                        retained: wallet
+                            .getAttribute("blockProducer.fees")
+                            .minus(wallet.getAttribute("blockProducer.burnedFees")),
+                        total: wallet.getAttribute("blockProducer.fees"),
+                    },
+                    rewards: wallet.getAttribute("blockProducer.rewards"),
+                    donations: wallet.getAttribute("blockProducer.donations"),
+                    total: wallet
+                        .getAttribute("blockProducer.fees")
+                        .minus(wallet.getAttribute("blockProducer.burnedFees"))
+                        .plus(wallet.getAttribute("blockProducer.rewards"))
+                        .minus(wallet.getAttribute("blockProducer.donations")),
+                },
                 percent: AppUtils.blockProducerCalculator.calculateVotePercent(wallet, supply),
                 username: wallet.getAttribute("username"),
                 version: blockProducer.version,

@@ -240,8 +240,16 @@ export class Wallet implements Contracts.State.Wallet {
      */
     public setAttribute<T = any>(key: string, value: T): boolean {
         const na = Symbol();
-        const previousValue = this.attributes.get(key, na);
+        let previousValue: any = this.attributes.get(key, na);
         const wasSet = this.attributes.set<T>(key, value);
+
+        if (previousValue instanceof Map) {
+            previousValue = Object.fromEntries(previousValue.entries());
+        }
+
+        if (value instanceof Map) {
+            value = Object.fromEntries(value.entries());
+        }
 
         if (!key.startsWith("hidden.")) {
             this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
