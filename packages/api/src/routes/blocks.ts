@@ -2,7 +2,13 @@ import Hapi from "@hapi/hapi";
 import Joi from "joi";
 
 import { BlocksController } from "../controllers/blocks";
-import { blockSortingSchema, missedBlockSortingSchema, transactionSortingSchema } from "../resources-new";
+import {
+    blockQueryLevelOptions,
+    blockSortingSchema,
+    missedBlockQueryLevelOptions,
+    missedBlockSortingSchema,
+    transactionSortingSchema,
+} from "../resources-new";
 import * as Schemas from "../schemas";
 
 export const register = (server: Hapi.Server): void => {
@@ -24,6 +30,11 @@ export const register = (server: Hapi.Server): void => {
                     .concat(Schemas.pagination),
             },
             plugins: {
+                semaphore: {
+                    enabled: true,
+                    type: "database",
+                    queryLevelOptions: blockQueryLevelOptions,
+                },
                 pagination: {
                     enabled: true,
                 },
@@ -45,6 +56,11 @@ export const register = (server: Hapi.Server): void => {
                     .concat(Schemas.pagination),
             },
             plugins: {
+                semaphore: {
+                    enabled: true,
+                    type: "database",
+                    queryLevelOptions: missedBlockQueryLevelOptions,
+                },
                 pagination: {
                     enabled: true,
                 },
@@ -91,6 +107,12 @@ export const register = (server: Hapi.Server): void => {
                     transform: Joi.bool().default(true),
                 }),
             },
+            plugins: {
+                semaphore: {
+                    enabled: true,
+                    type: "database",
+                },
+            },
         },
     });
 
@@ -112,6 +134,10 @@ export const register = (server: Hapi.Server): void => {
                     .concat(Schemas.pagination),
             },
             plugins: {
+                semaphore: {
+                    enabled: true,
+                    type: "database",
+                },
                 pagination: {
                     enabled: true,
                 },
