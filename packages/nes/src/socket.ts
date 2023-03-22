@@ -1,6 +1,5 @@
 "use strict";
 
-import { serialise } from "@alessiodf/bson";
 import Boom from "@hapi/boom";
 import Bounce from "@hapi/bounce";
 import Hoek from "@hapi/hoek";
@@ -9,7 +8,7 @@ import Teamwork from "@hapi/teamwork";
 import { parseNesMessage, protocol, stringifyNesMessage } from "./utils";
 
 const internals = {
-    version: "2",
+    formats: ["0", "1", "2"],
 };
 
 export class Socket {
@@ -38,6 +37,8 @@ export class Socket {
     private _sending;
     private _lastPinged;
     private _requests;
+
+    private _format;
 
     public constructor(
         ws: object,
@@ -139,18 +140,19 @@ export class Socket {
             // Open
             return Promise.reject(Boom.internal("Socket not open"));
         }
+
         if (
-            this._listener._settings.extendedTypes &&
+            this._listener._settings.wsapi &&
             typeof message.payload === "object" &&
             !(message.payload instanceof Buffer)
         ) {
-            message.payload = await serialise(message.payload);
+            message.payload = JSON.stringify(message.payload);
         }
 
         let string;
 
         try {
-            string = stringifyNesMessage(message);
+            string = stringifyNesMessage(message, this._format);
             if (options.replace) {
                 Object.keys(options.replace).forEach((token) => {
                     string = string.replace(`"${token}"`, options!.replace![token]);
@@ -337,7 +339,7 @@ export class Socket {
             if (!(message instanceof Buffer)) {
                 return this.terminate("Invalid message received");
             }
-            request = parseNesMessage(message, this._listener._settings.extendedTypes);
+            request = parseNesMessage(message, this._listener._settings.wsapi);
         } catch (err) {
             return this.terminate("Invalid payload received");
         }
@@ -437,14 +439,10 @@ export class Socket {
             throw Boom.badRequest("Connection already initialised");
         }
 
-        if (request.version !== internals.version) {
-            throw Boom.badRequest(
-                "Incorrect protocol version (expected " +
-                    internals.version +
-                    " but received " +
-                    (request.version || "none") +
-                    ")",
-            );
+        this._format = request.format;
+
+        if (!internals.formats.includes(request.format)) {
+            throw Boom.badRequest("Unsupported message format");
         }
 
         this._helloed = true; // Prevents the client from reusing the socket if erred (leaves socket open to ensure client gets the error response)
@@ -521,11 +519,14 @@ export class Socket {
         const headers = { "content-type": "application/octet-stream", origin: this._req.headers.origin };
         let payload = request.payload;
 
-        if (this._listener._settings.extendedTypes) {
+        if (this._listener._settings.wsapi) {
             headers["content-type"] = "application/json";
             if (method === "post") {
                 if (payload) {
                     try {
+                        if (payload.length > 1048576) {
+                            throw new Error();
+                        }
                         payload = JSON.parse(payload);
                     } catch {
                         throw Boom.badRequest("Invalid or missing payload");

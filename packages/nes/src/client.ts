@@ -11,7 +11,7 @@ import WebSocket from "ws";
 import { parseNesMessage, stringifyNesMessage } from "./utils";
 
 /* eslint no-undef: 0 */
-const version = "2";
+const format = "2";
 const ignore = function () {};
 
 const nextTick = function (callback) {
@@ -410,7 +410,7 @@ export class Client {
 
         let encoded;
         try {
-            encoded = stringifyNesMessage(request);
+            encoded = stringifyNesMessage(request, format);
         } catch (err) {
             return Promise.reject(err);
         }
@@ -463,7 +463,7 @@ export class Client {
     private _hello(auth) {
         const request: any = {
             type: "hello",
-            version,
+            format,
         };
 
         return this._send(request, true);

@@ -452,10 +452,6 @@ export class Wallet implements Contracts.State.Wallet {
         };
     }
 
-    public toBSON() {
-        return this.getBasicWallet();
-    }
-
     public toJSON() {
         return this.getBasicWallet();
     }

@@ -166,10 +166,6 @@ export class Peer implements Contracts.P2P.Peer {
         return this.infractions.size >= 3;
     }
 
-    public toBSON() {
-        return this.getBasicPeer();
-    }
-
     public toJSON() {
         return this.getBasicPeer();
     }

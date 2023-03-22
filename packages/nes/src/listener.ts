@@ -1,6 +1,5 @@
 "use strict";
 
-import { serialise } from "@alessiodf/bson";
 import Boom from "@hapi/boom";
 import Call from "@hapi/call";
 import { Server } from "@hapi/hapi";
@@ -267,8 +266,8 @@ export class Listener {
         }
 
         const each = async (socket) => {
-            if (_update.payload && !(_update.payload instanceof Buffer)) {
-                _update.payload = await serialise(_update.payload);
+            if (_update.payload && typeof _update.payload !== "string") {
+                _update.payload = JSON.stringify(_update.payload);
             }
 
             return socket._send(_update).catch(Hoek.ignore); // Ignore errors

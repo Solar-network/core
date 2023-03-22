@@ -28,7 +28,6 @@ internals.schema = Joi.object({
     disableGet: Joi.boolean(),
     disablePost: Joi.boolean(),
     enabled: Joi.boolean().default(true),
-    extendedTypes: Joi.boolean(),
     headers: Joi.array().items(Joi.string().lowercase()).min(1).allow("*", null),
     heartbeat: Joi.object({
         interval: Joi.number().integer().min(1).required(),
@@ -49,6 +48,7 @@ internals.schema = Joi.object({
     socketRateLimit: Joi.number(),
     trustProxy: Joi.boolean(),
     whitelist: Joi.array(),
+    wsapi: Joi.boolean(),
 });
 
 const plugin = {

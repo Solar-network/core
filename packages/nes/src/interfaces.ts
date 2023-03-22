@@ -5,10 +5,15 @@ export interface NesMessage {
     payload?: Buffer | string;
     statusCode?: number;
     method?: string;
-    version?: string;
+    format?: string;
     socket?: string;
     heartbeat?: {
         interval?: number;
         timeout?: number;
+    };
+    compressed?: {
+        path: Buffer;
+        payload: Buffer;
+        socket: Buffer;
     };
 }

@@ -1,4 +1,5 @@
 import { URL } from "url";
+import { deflateRawSync, inflateRawSync } from "zlib";
 
 import { NesMessage } from "./interfaces";
 
@@ -29,7 +30,7 @@ const mapTypeStringToInt = {
 const HEADER_BYTE_LENGTH = 14;
 
 const OFFSETS = {
-    VERSION: 0,
+    FORMAT: 0,
     TYPE: 1,
     ID: 2,
     STATUS_CODE: 6,
@@ -42,18 +43,45 @@ const OFFSETS = {
 const MAX_PATH_LENGTH = 255;
 const MAX_SOCKET_LENGTH = 100;
 
-export const parseNesMessage = (buf: Buffer, extendedTypes?: boolean): NesMessage => {
+const UNIDIRECTIONAL_COMPRESSION = "0";
+const BIDIRECTIONAL_COMPRESSION = "1";
+const NO_COMPRESSION = "2";
+
+const compress = (buffer: Buffer): Buffer => {
+    if (buffer.byteLength > 100) {
+        const compressed = deflateRawSync(buffer, { level: 9 });
+        if (compressed.byteLength < buffer.byteLength) {
+            return compressed;
+        }
+    }
+
+    return buffer;
+};
+
+const decompress = (buffer: Buffer): Buffer => {
+    if (buffer.byteLength > 0) {
+        try {
+            return inflateRawSync(buffer);
+        } catch {
+            //
+        }
+    }
+
+    return buffer;
+};
+
+export const parseNesMessage = (buf: Buffer, wsapi?: boolean): NesMessage => {
     const messageLength = buf.byteLength;
     if (messageLength < HEADER_BYTE_LENGTH) {
         throw new Error("Nes message is below minimum length");
     }
 
-    const version = buf.readUInt8(OFFSETS.VERSION).toString();
+    const format = buf.readUInt8(OFFSETS.FORMAT).toString();
 
     const originalType = mapTypeIntToString[buf.readUInt8(OFFSETS.TYPE)];
     let type = originalType;
 
-    if (!type || (!extendedTypes && !["hello", "error", "ping", "post"].includes(type))) {
+    if (!type || (!wsapi && !["hello", "error", "ping", "post"].includes(type))) {
         throw new Error("Type is invalid");
     }
 
@@ -74,21 +102,15 @@ export const parseNesMessage = (buf: Buffer, extendedTypes?: boolean): NesMessag
         throw new Error("Invalid path length");
     }
 
-    let path = buf.slice(HEADER_BYTE_LENGTH, HEADER_BYTE_LENGTH + pathLength).toString();
-
-    if (path) {
-        const url = new URL(`http://127.0.0.1/${path}`);
-        path = url.pathname + url.search;
-    }
+    let pathBuffer = buf.slice(HEADER_BYTE_LENGTH, HEADER_BYTE_LENGTH + pathLength);
 
     const socketLength = buf.readUInt8(OFFSETS.SOCKET_LENGTH);
 
     if (socketLength > MAX_SOCKET_LENGTH || buf.byteLength < HEADER_BYTE_LENGTH + pathLength + socketLength) {
         throw new Error("Invalid socket length");
     }
-    const socket = buf
-        .slice(HEADER_BYTE_LENGTH + pathLength, HEADER_BYTE_LENGTH + pathLength + socketLength)
-        .toString();
+
+    let socketBuffer = buf.slice(HEADER_BYTE_LENGTH + pathLength, HEADER_BYTE_LENGTH + pathLength + socketLength);
 
     const heartbeat = {
         interval: buf.readUInt16BE(OFFSETS.HEARTBEAT_INTERVAL),
@@ -97,13 +119,27 @@ export const parseNesMessage = (buf: Buffer, extendedTypes?: boolean): NesMessag
 
     let payload = buf.slice(HEADER_BYTE_LENGTH + pathLength + socketLength);
 
+    if (format === BIDIRECTIONAL_COMPRESSION) {
+        pathBuffer = decompress(pathBuffer);
+        socketBuffer = decompress(socketBuffer);
+        payload = decompress(payload);
+    }
+
+    let path = pathBuffer.toString();
+    if (path && !path.startsWith("/")) {
+        const url = new URL(`http://127.0.0.1/${path}`);
+        path = url.pathname + url.search;
+    }
+
+    const socket = socketBuffer.toString();
+
     if (originalType !== "post" && pathLength === 255) {
         path += payload.toString();
         payload = Buffer.alloc(0);
     }
 
     return {
-        version,
+        format,
         type,
         id,
         method,
@@ -115,7 +151,7 @@ export const parseNesMessage = (buf: Buffer, extendedTypes?: boolean): NesMessag
     };
 };
 
-export const stringifyNesMessage = (messageObj: NesMessage): Buffer => {
+export const stringifyNesMessage = (messageObj: NesMessage, format: string): Buffer => {
     if (messageObj.path) {
         if (!messageObj.method || (messageObj.method && messageObj.method.toLowerCase() !== "post")) {
             if (messageObj.path.length > 255) {
@@ -125,9 +161,31 @@ export const stringifyNesMessage = (messageObj: NesMessage): Buffer => {
         }
     }
 
-    const pathBuf = Buffer.from(messageObj.path || "");
-    const socketBuf = Buffer.from(messageObj.socket || "");
-    const payloadBuf = Buffer.from(messageObj.payload || "");
+    let pathBuf = Buffer.from(messageObj.path || "");
+    let socketBuf = Buffer.from(messageObj.socket || "");
+    let payloadBuf = Buffer.from(messageObj.payload || "");
+    if (format !== NO_COMPRESSION) {
+        if (!messageObj.compressed) {
+            messageObj.compressed = {
+                path: compress(pathBuf),
+                payload: compress(payloadBuf),
+                socket: compress(socketBuf),
+            };
+        }
+
+        if (
+            pathBuf.equals(messageObj.compressed.path) &&
+            socketBuf.equals(messageObj.compressed.socket) &&
+            payloadBuf.equals(messageObj.compressed.payload)
+        ) {
+            format = UNIDIRECTIONAL_COMPRESSION;
+        } else {
+            pathBuf = messageObj.compressed.path;
+            socketBuf = messageObj.compressed.socket;
+            payloadBuf = messageObj.compressed.payload;
+            format = BIDIRECTIONAL_COMPRESSION;
+        }
+    }
 
     const bufHeader = Buffer.alloc(HEADER_BYTE_LENGTH);
 
@@ -139,7 +197,7 @@ export const stringifyNesMessage = (messageObj: NesMessage): Buffer => {
         }
     }
 
-    bufHeader.writeUInt8(Number.parseInt(messageObj.version || "0"), OFFSETS.VERSION);
+    bufHeader.writeUInt8(Number.parseInt(format), OFFSETS.FORMAT);
     bufHeader.writeUInt8(
         mapTypeStringToInt[messageObj.type ?? "undefined"] ?? mapTypeStringToInt["undefined"],
         OFFSETS.TYPE,
