@@ -55,7 +55,7 @@ export class BlockchainController extends Controller {
 
         const blockProducersRegex: RegExp = new RegExp("^(?!_)(?=.*[a-z!@$&_.])([a-z0-9!@$&_.]?){1,20}$", "i");
         const hexRegex: RegExp = new RegExp("^([a-z0-9]){6,64}$", "i");
-        const publicKeysRegex: RegExp = new RegExp("^0([23]){1}([a-z0-9]){5,64}$", "i");
+        const publicKeysRegex: RegExp = new RegExp("^0([23]){1}([a-z0-9]){1,64}$", "i");
         const numbersRegex: RegExp = new RegExp("^([0-9]){1,9}$");
         const walletsRegex: RegExp = new RegExp(`^(${network.addressCharacter})([a-z1-9]{1,33})$`, "i");
 

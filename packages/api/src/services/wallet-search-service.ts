@@ -47,12 +47,14 @@ export class WalletSearchService {
             .allByAddress()
             .filter((wallet) => {
                 const publicKeys: string[] = [];
-                const walletKeys = Object.values(wallet.getPublicKeys());
-                for (const key of walletKeys) {
-                    if (typeof key === "string") {
-                        publicKeys.push(key.toLowerCase());
-                    } else {
-                        publicKeys.push(...Object.keys(key).map((key) => key.toLowerCase()));
+                if (criteria.length >= 3) {
+                    const walletKeys = Object.values(wallet.getPublicKeys());
+                    for (const key of walletKeys) {
+                        if (typeof key === "string") {
+                            publicKeys.push(key.toLowerCase());
+                        } else {
+                            publicKeys.push(...Object.keys(key).map((key) => key.toLowerCase()));
+                        }
                     }
                 }
                 const isUsername =
