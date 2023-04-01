@@ -4,6 +4,7 @@ export interface WalletBasic {
     address: string;
     publicKeys?: Record<string, string | WalletPermissions>;
     balance: Utils.BigNumber;
+    burned: Utils.BigNumber;
     rank?: number;
     nonce: Utils.BigNumber;
     attributes: Record<string, any>;
@@ -84,6 +85,7 @@ export interface WalletData {
     address: string;
     publicKey: string;
     balance: Utils.BigNumber;
+    burned: Utils.BigNumber;
     nonce: Utils.BigNumber;
     attributes: Record<string, any>;
 }
@@ -110,6 +112,14 @@ export interface Wallet {
     getBalance(): Utils.BigNumber;
 
     setBalance(balance: Utils.BigNumber): void;
+
+    getBurned(): Utils.BigNumber;
+
+    setBurned(burned: Utils.BigNumber): void;
+
+    increaseBurned(burned: Utils.BigNumber): Wallet;
+
+    decreaseBurned(burned: Utils.BigNumber): Wallet;
 
     getNonce(): Utils.BigNumber;
 

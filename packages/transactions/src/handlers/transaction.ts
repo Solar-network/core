@@ -153,6 +153,10 @@ export abstract class TransactionHandler {
         senderWallet.setBalance(newBalance);
 
         senderWallet.increaseSentTransactions(data);
+
+        if (transaction.data.burnedFee) {
+            senderWallet.increaseBurned(transaction.data.burnedFee);
+        }
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -170,6 +174,10 @@ export abstract class TransactionHandler {
 
         if (senderWallet.getNonce().isZero()) {
             senderWallet.forgetPublicKey("primary");
+        }
+
+        if (transaction.data.burnedFee) {
+            senderWallet.decreaseBurned(transaction.data.burnedFee);
         }
 
         const previousTransaction: Interfaces.ITransactionData | undefined =

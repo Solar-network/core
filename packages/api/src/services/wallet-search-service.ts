@@ -97,6 +97,7 @@ export class WalletSearchService {
                     blockProducer,
                     publicKeys: wallet.getPublicKeys(),
                     balance: wallet.getBalance(),
+                    burned: wallet.getBurned(),
                     votes: Object.fromEntries(wallet.getVoteDistribution().entries()),
                     username: wallet.hasAttribute("username") ? wallet.getAttribute("username") : undefined,
                 };

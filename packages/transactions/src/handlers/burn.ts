@@ -34,6 +34,7 @@ export class BurnTransactionHandler extends TransactionHandler {
             this.performWalletInitialisation(transaction, wallet);
 
             wallet.decreaseBalance(transaction.asset.burn.amount);
+            wallet.increaseBurned(transaction.asset.burn.amount);
         }
     }
 
@@ -71,6 +72,7 @@ export class BurnTransactionHandler extends TransactionHandler {
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         senderWallet.decreaseBalance(transaction.data.asset.burn.amount);
+        senderWallet.increaseBurned(transaction.data.asset.burn.amount);
     }
 
     public async revertForSender(transaction: Interfaces.ITransaction): Promise<void> {
@@ -81,6 +83,7 @@ export class BurnTransactionHandler extends TransactionHandler {
         const senderWallet: Contracts.State.Wallet = this.walletRepository.findByAddress(transaction.data.senderId);
 
         senderWallet.increaseBalance(transaction.data.asset.burn.amount);
+        senderWallet.decreaseBurned(transaction.data.asset.burn.amount);
     }
 
     public async applyToRecipient(transaction: Interfaces.ITransaction): Promise<void> {}

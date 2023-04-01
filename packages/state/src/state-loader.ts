@@ -155,6 +155,7 @@ export class StateLoader {
 
                     let attributes: Record<string, any> = {};
                     let balance: bigint | number = 0;
+                    let burned: bigint | number = 0;
                     let nonce: bigint | number = 1;
                     let publicKeys: Record<string, string | Contracts.State.WalletPermissions> = {};
                     let transactions: Contracts.State.WalletTransactions = {
@@ -168,10 +169,14 @@ export class StateLoader {
                     }
 
                     if ((2 & bits) !== 0) {
-                        nonce = buffer.readBigUInt64LE();
+                        burned = buffer.readBigUInt64LE();
                     }
 
                     if ((4 & bits) !== 0) {
+                        nonce = buffer.readBigUInt64LE();
+                    }
+
+                    if ((8 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
                         attributes = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                         if (attributes.votes) {
@@ -182,17 +187,17 @@ export class StateLoader {
                         }
                     }
 
-                    if ((8 & bits) !== 0) {
+                    if ((16 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
                         publicKeys = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                     }
 
-                    if ((16 & bits) !== 0) {
+                    if ((32 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
                         transactions = JSON.parse(buffer.readBuffer(length).toString(), reviver);
                     }
 
-                    if ((32 & bits) !== 0) {
+                    if ((64 & bits) !== 0) {
                         const length: number = buffer.readUInt32LE();
                         voteBalances = new Map(JSON.parse(buffer.readBuffer(length).toString(), reviver));
                     }
@@ -200,6 +205,7 @@ export class StateLoader {
                     const wallet: Contracts.State.Wallet = this.walletRepository.createWallet(address);
 
                     wallet.setBalance(Utils.BigNumber.make(balance));
+                    wallet.setBurned(Utils.BigNumber.make(burned));
                     wallet.setNonce(Utils.BigNumber.make(nonce));
 
                     for (const attribute of Object.keys(attributes)) {

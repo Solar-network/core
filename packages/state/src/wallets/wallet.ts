@@ -4,6 +4,7 @@ import { Contracts, Enums as AppEnums, Services, Utils as AppUtils } from "@sola
 export class Wallet implements Contracts.State.Wallet {
     protected publicKeys: Record<string, string | Contracts.State.WalletPermissions> = {};
     protected balance: Utils.BigNumber = Utils.BigNumber.ZERO;
+    protected burned: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected nonce: Utils.BigNumber = Utils.BigNumber.ZERO;
     protected rank: number | undefined;
     protected transactions: Contracts.State.WalletTransactions = { received: { total: 0 }, sent: { total: 0 } };
@@ -94,6 +95,10 @@ export class Wallet implements Contracts.State.Wallet {
         return this.balance;
     }
 
+    public getBurned(): Utils.BigNumber {
+        return this.burned;
+    }
+
     public setBalance(balance: Utils.BigNumber): void {
         const previousValue = this.balance;
 
@@ -102,6 +107,19 @@ export class Wallet implements Contracts.State.Wallet {
         this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
             key: "balance",
             value: balance,
+            previousValue,
+            wallet: this,
+        });
+    }
+
+    public setBurned(burned: Utils.BigNumber): void {
+        const previousValue = this.burned;
+
+        this.burned = burned;
+
+        this.events?.dispatchSync(AppEnums.WalletEvent.PropertySet, {
+            key: "burned",
+            value: burned,
             previousValue,
             wallet: this,
         });
@@ -156,6 +174,18 @@ export class Wallet implements Contracts.State.Wallet {
         return this;
     }
 
+    public increaseBurned(burned: Utils.BigNumber): Contracts.State.Wallet {
+        this.setBurned(this.burned.plus(burned));
+
+        return this;
+    }
+
+    public decreaseBurned(burned: Utils.BigNumber): Contracts.State.Wallet {
+        this.setBurned(this.burned.minus(burned));
+
+        return this;
+    }
+
     public increaseNonce(): void {
         this.setNonce(this.nonce.plus(Utils.BigNumber.ONE));
     }
@@ -199,6 +229,7 @@ export class Wallet implements Contracts.State.Wallet {
             address: this.address,
             publicKey: this.getPublicKey("primary")!,
             balance: this.balance,
+            burned: this.burned,
             nonce: this.nonce,
             attributes: this.attributes,
         };
@@ -368,6 +399,7 @@ export class Wallet implements Contracts.State.Wallet {
         const cloned = new Wallet(this.address, this.attributes.clone(), true);
         cloned.publicKeys = AppUtils.cloneDeep(this.publicKeys);
         cloned.balance = this.balance;
+        cloned.burned = this.burned;
         cloned.nonce = this.nonce;
         cloned.rank = this.rank;
         cloned.transactions = AppUtils.cloneDeep(this.transactions);
@@ -444,6 +476,7 @@ export class Wallet implements Contracts.State.Wallet {
             address: this.getAddress(),
             publicKeys: this.getPublicKeys(),
             balance: this.getBalance(),
+            burned: this.getBurned(),
             rank: this.getRank(),
             nonce: this.getNonce(),
             attributes: { ...attributes, votes: undefined },

@@ -10,6 +10,7 @@ export type WalletSearchResource = {
     address: string;
     publicKeys?: Record<string, string | Contracts.State.WalletPermissions>;
     balance: Utils.BigNumber;
+    burned: Utils.BigNumber;
     votes: object;
 };
 
@@ -17,6 +18,7 @@ export type WalletResource = {
     address: string;
     publicKeys?: Record<string, string | Contracts.State.WalletPermissions>;
     balance: Utils.BigNumber;
+    burned: Utils.BigNumber;
     rank?: number;
     nonce: Utils.BigNumber;
     attributes: object;
@@ -52,6 +54,7 @@ export const walletCriteriaSchemaObject = {
             .regex(/%/),
     ),
     balance: Schemas.createRangeCriteriaSchema(Schemas.bigNumber),
+    burned: Schemas.createRangeCriteriaSchema(Schemas.bigNumber),
     rank: Joi.number().integer().positive(),
     nonce: Schemas.createRangeCriteriaSchema(Schemas.nonNegativeBigNumber),
     attributes: Joi.object(),

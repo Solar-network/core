@@ -61,30 +61,35 @@ export class StateSaver {
                 const transactions: Contracts.State.WalletTransactions = wallet.getTransactions();
                 const voteBalances: Map<string, Utils.BigNumber> = wallet.getVoteBalances();
 
+                const hasTransactions: boolean = transactions.received.total > 0 || transactions.sent.total > 0;
                 let bits: number = 0;
 
                 if (!wallet.getBalance().isZero()) {
                     bits += 1;
                 }
 
-                if (!wallet.getNonce().isEqualTo(1)) {
+                if (!wallet.getBurned().isZero()) {
                     bits += 2;
                 }
 
-                if (Object.keys(attributes).length > 0) {
+                if (!wallet.getNonce().isEqualTo(1)) {
                     bits += 4;
                 }
 
-                if (Object.keys(publicKeys).length > 0) {
+                if (Object.keys(attributes).length > 0) {
                     bits += 8;
                 }
 
-                if (transactions.received.total > 0 || transactions.sent.total > 0) {
+                if (Object.keys(publicKeys).length > 0) {
                     bits += 16;
                 }
 
-                if (voteBalances.size > 0) {
+                if (hasTransactions) {
                     bits += 32;
+                }
+
+                if (voteBalances.size > 0) {
+                    bits += 64;
                 }
 
                 if (buffer.getRemainderLength() === 0) {
@@ -105,6 +110,13 @@ export class StateSaver {
                     buffer.writeBigInt64LE(wallet.getBalance().toBigInt());
                 }
 
+                if (!wallet.getBurned().isZero()) {
+                    if (buffer.getRemainderLength() < 8) {
+                        flush();
+                    }
+                    buffer.writeBigInt64LE(wallet.getBurned().toBigInt());
+                }
+
                 if (!wallet.getNonce().isEqualTo(1)) {
                     if (buffer.getRemainderLength() < 8) {
                         flush();
@@ -112,7 +124,7 @@ export class StateSaver {
                     buffer.writeBigUInt64LE(wallet.getNonce().toBigInt());
                 }
 
-                for (const item of [attributes, publicKeys, transactions, [...voteBalances]]) {
+                for (const item of [attributes, publicKeys, hasTransactions ? transactions : {}, [...voteBalances]]) {
                     if (Object.keys(item).length > 0) {
                         const encoded: Buffer = Buffer.from(
                             JSON.stringify(item, (_, value) => {

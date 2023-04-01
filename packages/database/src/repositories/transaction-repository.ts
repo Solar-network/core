@@ -238,19 +238,21 @@ export class TransactionRepository
         return amount;
     }
 
-    public async getSentTransactions(): Promise<{ senderId: string; fee: string; nonce: string }[]> {
+    public async getSentTransactions(): Promise<{ senderId: string; burned: string; fee: string; nonce: string }[]> {
         return (
             await this.createQueryBuilder()
                 .select("(SELECT identity FROM identities WHERE identities.id = identity_id LIMIT 1)", "senderId")
+                .select("CAST(SUM(fee * burned_fee_percent / 100) AS TEXT)", "burned")
                 .select("CAST(SUM(fee) AS TEXT)", "fee")
                 .select("COUNT(nonce)", "nonce")
                 .from("transactions")
                 .groupBy("identity_id")
                 .run()
         ).map((transaction) => {
-            const { senderId, fee, nonce } = transaction;
+            const { senderId, burned, fee, nonce } = transaction;
             return {
                 senderId,
+                burned,
                 fee,
                 nonce,
             };

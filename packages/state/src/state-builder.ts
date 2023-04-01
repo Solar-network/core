@@ -94,6 +94,7 @@ export class StateBuilder {
 
         for (const transaction of transactions) {
             const wallet = this.walletRepository.findByAddress(transaction.senderId);
+            wallet.increaseBurned(Utils.BigNumber.make(transaction.burned));
             wallet.setNonce(Utils.BigNumber.make(transaction.nonce));
             wallet.decreaseBalance(Utils.BigNumber.make(transaction.fee));
         }

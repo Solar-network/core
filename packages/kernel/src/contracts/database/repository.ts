@@ -87,7 +87,7 @@ export interface TransactionRepository extends Repository {
         data: Interfaces.ITransactionData,
         offset?: number,
     ): Promise<Interfaces.ITransactionData | undefined>;
-    getSentTransactions(): Promise<{ senderId: string; fee: string; nonce: string }[]>;
+    getSentTransactions(): Promise<{ senderId: string; burned: string; fee: string; nonce: string }[]>;
 }
 
 export type FeeStatistics = {
