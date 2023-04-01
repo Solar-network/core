@@ -43,7 +43,6 @@
         "prompts": "2.4.2",
         "reflect-metadata": "0.1.13",
         "semver": "6.3.0",
-        "tail": "2.2.4",
         "tar": "6.1.11",
         "type-fest": "0.21.3",
         "yargs-parser": "20.2.9"

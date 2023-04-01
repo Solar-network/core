@@ -1,10 +1,11 @@
 import { Services, Utils } from "@solar-network/kernel";
 import { bold, cyan, gray, magenta } from "colorette";
 import dateformat from "dateformat";
+import delay from "delay";
 import { parseFileSync } from "envfile";
-import { existsSync, readFileSync, statSync } from "fs";
+import { EventEmitter } from "events";
+import { closeSync, existsSync, openSync, read, readSync, statSync, watch } from "fs";
 import { join } from "path";
-import { Tail } from "tail";
 
 import { Application } from "../application";
 import { Identifiers, inject, injectable } from "../ioc";
@@ -19,9 +20,10 @@ export class LogProcess {
     private readonly environment!: Environment;
 
     private emoji: boolean = true;
-    private levels: Record<string, number> = {};
+    private levelsByName: Record<string, number> = {};
+    private levelsByNumber: Record<number, string> = {};
 
-    private logLevel: number = this.levels["debug"];
+    private logLevel!: number;
 
     /**
      * @param {string[]} processes
@@ -32,7 +34,8 @@ export class LogProcess {
     public async execute(token: string, network: string, processes: string[], lines: number): Promise<void> {
         for (const [key, value] of Object.entries(Services.Log.LogLevel)) {
             if (!isNaN(+value)) {
-                this.levels[key.toLowerCase()] = +value;
+                this.levelsByName[key.toLowerCase()] = +value;
+                this.levelsByNumber[+value] = key.toLowerCase();
             }
         }
 
@@ -40,8 +43,10 @@ export class LogProcess {
             this.emoji = process.env.SOLAR_CORE_LOG_EMOJI_DISABLED.toLowerCase() !== "true";
         }
 
-        if (this.levels[process.env.SOLAR_CORE_LOG_LEVEL!] !== undefined) {
-            this.logLevel = this.levels[process.env.SOLAR_CORE_LOG_LEVEL!];
+        if (this.levelsByName[process.env.SOLAR_CORE_LOG_LEVEL!] !== undefined) {
+            this.logLevel = this.levelsByName[process.env.SOLAR_CORE_LOG_LEVEL!];
+        } else {
+            this.logLevel = this.levelsByName["debug"];
         }
 
         try {
@@ -54,10 +59,10 @@ export class LogProcess {
             }
 
             if (
-                this.levels[process.env.SOLAR_CORE_LOG_LEVEL!] === undefined &&
-                this.levels[env.SOLAR_CORE_LOG_LEVEL] !== undefined
+                this.levelsByName[process.env.SOLAR_CORE_LOG_LEVEL!] === undefined &&
+                this.levelsByName[env.SOLAR_CORE_LOG_LEVEL] !== undefined
             ) {
-                this.logLevel = this.levels[env.SOLAR_CORE_LOG_LEVEL];
+                this.logLevel = this.levelsByName[env.SOLAR_CORE_LOG_LEVEL];
             }
         } catch {
             //
@@ -68,12 +73,12 @@ export class LogProcess {
             throw new Error(`The ${logPath} directory is not valid`);
         }
 
-        const tails: Record<string, Tail>[] = [];
+        const watchers: { process: string; watcher: Watcher }[] = [];
 
         for (const proc of processes) {
             const outFile = `${logPath}/${token}-${network}-${proc}-current.log`;
             if (existsSync(outFile) && statSync(outFile).isFile()) {
-                const lastLines = this.readLastLines(proc, outFile, lines);
+                const lastLines = await this.readLastLines(proc, outFile, lines);
                 if (lastLines) {
                     console.log(
                         gray(
@@ -87,65 +92,159 @@ export class LogProcess {
                     console.log();
                 }
 
-                tails.push({ process: proc, tail: new Tail(outFile) });
+                watchers.push({ process: proc, watcher: new Watcher(outFile) });
             }
         }
 
-        if (tails.length > 0) {
+        if (watchers.length > 0) {
             console.log(gray("New log entries will appear below:"));
             console.log();
 
-            for (const { process, tail } of tails) {
-                tail.on("line", (line: string) => {
+            for (const { watcher } of watchers) {
+                watcher.on("log", (line: string) => {
                     const output: string | undefined = this.parse(line);
                     if (output) {
-                        console.error(this.addProcessName(process, output));
+                        console.error(output);
                     }
                 });
-                tail.watch();
+                watcher.start();
             }
         } else {
             throw new Error(`No ${processes.join(", ")} log files were found in ${logPath}`);
         }
     }
 
-    private addProcessName(process: string, line: string): string {
-        return `${magenta(process.padEnd(9))}${line}`;
-    }
-
     private parse(line: string): string | undefined {
-        const { emoji, level, message, time } = JSON.parse(line);
+        const { emoji, level, message, pkg, time } = JSON.parse(line);
 
-        if (this.levels[level] > this.logLevel) {
+        if (level > this.logLevel) {
             return;
         }
 
-        const colour = Utils.logColour(level);
+        const levelText = this.levelsByNumber[level];
+        const colour = Utils.logColour(levelText);
 
-        return `${cyan(dateformat(new Date(time), "yyyy-mm-dd HH:MM:ss.l"))} ${colour(
-            `[${level.toUpperCase().slice(0, 1)}]`,
-        )} ${this.emoji ? `${emoji}\t` : ""}${colour(message)}`;
+        return `${magenta(pkg.toLowerCase().substring(0, 16).padEnd(17))}${cyan(
+            dateformat(new Date(time), "yyyy-mm-dd HH:MM:ss.l"),
+        )} ${colour(`[${levelText.toUpperCase().slice(0, 1)}]`)} ${this.emoji ? `${emoji}\t` : ""}${colour(message)}`;
     }
 
-    private readLastLines(process: string, file: string, lines: number): string {
+    private async readLastLines(process: string, file: string, lines: number): Promise<string> {
         try {
-            return readFileSync(file)
-                .toString()
-                .split("\n")
-                .slice(lines * -1 - 1)
-                .filter((line) => line.length > 0)
-                .map((line) => {
-                    const output: string | undefined = this.parse(line);
-                    if (output) {
-                        return this.addProcessName(process, output);
+            return new Promise<string>((resolve) => {
+                const lineBuffer: string[] = [];
+                let chunk: string = "";
+                const chunkSize: number = 64 * 1024;
+                let position: number = 0;
+                const { size } = statSync(file);
+                position = size - chunkSize;
+
+                const readChunk = (): void => {
+                    if (position < 0) {
+                        position = 0;
                     }
-                    return undefined;
-                })
-                .filter((line) => line)
-                .join("\n")
-                .trim();
+
+                    const buffer: Buffer = Buffer.alloc(chunkSize);
+                    let proceed: boolean = true;
+
+                    read(
+                        descriptor,
+                        buffer,
+                        0,
+                        chunkSize,
+                        position,
+                        (error: NodeJS.ErrnoException | null, bytesRead: number, buffer: Buffer) => {
+                            if (error) {
+                                resolve("");
+                                return;
+                            }
+
+                            chunk = buffer.slice(0, bytesRead).toString() + chunk;
+
+                            while (proceed) {
+                                const index: number = chunk.lastIndexOf("\n");
+                                if (index < 0 || lineBuffer.length >= lines) {
+                                    proceed = false;
+                                    break;
+                                }
+
+                                const line = chunk.slice(index + 1);
+                                chunk = chunk.slice(0, index);
+
+                                if (line && line.trim() !== "") {
+                                    lineBuffer.unshift(line);
+                                }
+                            }
+
+                            if (position === 0 || lineBuffer.length >= lines) {
+                                resolve(
+                                    lineBuffer
+                                        .map((line) => {
+                                            return this.parse(line);
+                                        })
+                                        .filter((line) => line)
+                                        .join("\n")
+                                        .trim(),
+                                );
+                            } else {
+                                position -= chunkSize;
+                                readChunk();
+                            }
+                        },
+                    );
+                };
+
+                const descriptor = openSync(file, "r");
+                readChunk();
+            });
         } catch {
             return "";
         }
+    }
+}
+
+class Watcher extends EventEmitter {
+    private file: string;
+
+    public constructor(file: string) {
+        super();
+        this.file = file;
+    }
+
+    public async start(): Promise<void> {
+        let incompleteLine: string = "";
+        let { size } = statSync(this.file);
+        watch(this.file, async (eventType) => {
+            if (eventType === "change") {
+                while (!existsSync(this.file)) {
+                    await delay(100);
+                    size = 0;
+                }
+                const stats = statSync(this.file);
+
+                if (stats.size < size) {
+                    size = 0;
+                }
+
+                if (stats.size > size) {
+                    const buffer = Buffer.alloc(stats.size - size);
+                    const fileDescriptor = openSync(this.file, "r");
+                    readSync(fileDescriptor, buffer, 0, buffer.length, size);
+                    closeSync(fileDescriptor);
+
+                    size = stats.size;
+
+                    const data = incompleteLine + buffer.toString();
+                    const lines = data.split("\n");
+                    incompleteLine = lines.pop() ?? "";
+
+                    for (const line of lines) {
+                        if (line) {
+                            this.emit("log", line);
+                        }
+                    }
+                }
+            }
+        });
     }
 }

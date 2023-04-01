@@ -16,6 +16,7 @@ export class StateStore implements Contracts.State.StateStore {
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "state")
     private readonly logger!: Contracts.Kernel.Logger;
 
     private blockchain = {};

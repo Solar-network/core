@@ -28,6 +28,7 @@ export class PeerProcessor implements Contracts.P2P.PeerProcessor {
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "p2p")
     private readonly logger!: Contracts.Kernel.Logger;
 
     public server: any;

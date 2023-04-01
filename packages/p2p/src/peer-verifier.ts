@@ -48,6 +48,7 @@ export class PeerVerifier implements Contracts.P2P.PeerVerifier {
     private readonly dposState!: Contracts.State.DposState;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "p2p")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.DatabaseInterceptor)

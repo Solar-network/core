@@ -15,6 +15,7 @@ export class ExceptionHandler implements BlockHandler {
     protected readonly blockchain!: Contracts.Blockchain.Blockchain;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "blockchain")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.DatabaseInterceptor)

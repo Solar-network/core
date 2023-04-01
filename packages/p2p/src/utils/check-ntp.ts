@@ -16,7 +16,7 @@ export const checkNTP = (
 
                 return resolve({ time, host });
             } catch (err) {
-                app.get<Contracts.Kernel.Logger>(Container.Identifiers.LogService).error(
+                app.getTagged<Contracts.Kernel.Logger>(Container.Identifiers.LogService, "package", "p2p").error(
                     `Host ${host} responded with: ${err.message}`,
                 );
             }

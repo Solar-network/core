@@ -11,6 +11,7 @@ export class FeeMatcher implements Contracts.Pool.FeeMatcher {
     private readonly handlerRegistry!: Handlers.Registry;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "pool")
     private readonly logger!: Contracts.Kernel.Logger;
 
     public async throwIfCannotEnterPool(transaction: Interfaces.ITransaction): Promise<void> {

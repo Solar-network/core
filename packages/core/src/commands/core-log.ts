@@ -60,7 +60,7 @@ export class Command extends Commands.Command {
                     .valid(...levels)
                     .default(process.env.SOLAR_CORE_LOG_LEVEL ?? ""),
             )
-            .setFlag("lines", "The number of lines to output", Joi.number().default(15));
+            .setFlag("lines", "The number of lines to output", Joi.number().default(15).min(0).max(50000));
     }
 
     /**

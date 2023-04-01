@@ -26,6 +26,7 @@ export class BlockProducerService {
      * @memberof BlockProducerService
      */
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "producer")
     private readonly logger!: Contracts.Kernel.Logger;
 
     /**

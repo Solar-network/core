@@ -12,6 +12,7 @@ export class CheckLater implements Action {
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "blockchain")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.PeerNetworkMonitor)

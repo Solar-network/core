@@ -10,6 +10,7 @@ export interface IModel {
 @Container.injectable()
 export abstract class Repository<T extends IModel> implements Contracts.Database.Repository {
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "database")
     public readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.DatabaseQueryRunner)

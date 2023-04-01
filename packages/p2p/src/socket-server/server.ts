@@ -35,6 +35,7 @@ export class Server {
      * @memberof Server
      */
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "p2p")
     private readonly logger!: Contracts.Kernel.Logger;
 
     /**

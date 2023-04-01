@@ -12,6 +12,7 @@ export class CodecPlugin {
     protected readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "p2p")
     private readonly logger!: Contracts.Kernel.Logger;
 
     public register(server): void {

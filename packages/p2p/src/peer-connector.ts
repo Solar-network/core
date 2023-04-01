@@ -7,6 +7,7 @@ const TEN_SECONDS_IN_MILLISECONDS = 10000;
 @Container.injectable()
 export class PeerConnector implements Contracts.P2P.PeerConnector {
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "p2p")
     private readonly logger!: Contracts.Kernel.Logger;
 
     private readonly connections: Map<string, Client> = new Map<string, Client>();

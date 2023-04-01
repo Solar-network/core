@@ -34,7 +34,6 @@
         "@solar-network/database": "workspace:*",
         "@solar-network/producer": "workspace:*",
         "@solar-network/kernel": "workspace:*",
-        "@solar-network/logger": "workspace:*",
         "@solar-network/p2p": "workspace:*",
         "@solar-network/pool": "workspace:*",
         "@solar-network/state": "workspace:*",

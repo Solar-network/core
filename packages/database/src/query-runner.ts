@@ -5,6 +5,7 @@ import { cpus } from "os";
 @Container.injectable()
 export class QueryRunner implements Contracts.Database.QueryRunner {
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "database")
     public readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.DatabaseWorkerFactory)

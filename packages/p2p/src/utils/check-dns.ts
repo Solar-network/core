@@ -13,7 +13,9 @@ export const checkDNS = async (app: Contracts.Kernel.Application, hosts: string[
 
             return Promise.resolve(hosts[i]);
         } catch (err) {
-            app.get<Contracts.Kernel.Logger>(Container.Identifiers.LogService).error(err.message);
+            app.getTagged<Contracts.Kernel.Logger>(Container.Identifiers.LogService, "package", "p2p").error(
+                err.message,
+            );
         }
     }
 

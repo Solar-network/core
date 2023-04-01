@@ -44,6 +44,7 @@ export class Listener {
      * @memberof Listener
      */
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "webhooks")
     private readonly logger!: Contracts.Kernel.Logger;
 
     /**

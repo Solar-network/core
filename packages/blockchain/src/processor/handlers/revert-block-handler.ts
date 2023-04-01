@@ -9,6 +9,7 @@ import { BlockHandler } from "../contracts";
 @Container.injectable()
 export class RevertBlockHandler implements BlockHandler {
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "blockchain")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.StateStore)

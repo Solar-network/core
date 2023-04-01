@@ -2,9 +2,6 @@
     "core": {
         "plugins": [
             {
-                "package": "@solar-network/logger"
-            },
-            {
                 "package": "@solar-network/state"
             },
             {
@@ -36,9 +33,6 @@
     "relay": {
         "plugins": [
             {
-                "package": "@solar-network/logger"
-            },
-            {
                 "package": "@solar-network/state"
             },
             {
@@ -66,9 +60,6 @@
     },
     "producer": {
         "plugins": [
-            {
-                "package": "@solar-network/logger"
-            },
             {
                 "package": "@solar-network/transactions"
             },

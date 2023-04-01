@@ -29,6 +29,7 @@ export class Client {
      * @memberof Client
      */
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "producer")
     private readonly logger!: Contracts.Kernel.Logger;
 
     /**

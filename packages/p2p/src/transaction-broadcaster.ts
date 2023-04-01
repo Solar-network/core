@@ -9,6 +9,7 @@ export class TransactionBroadcaster implements Contracts.P2P.TransactionBroadcas
     private readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "p2p")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.PeerRepository)

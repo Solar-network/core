@@ -21,6 +21,7 @@ export class Processor implements Contracts.Pool.Processor {
     private readonly transactionBroadcaster!: Contracts.P2P.TransactionBroadcaster | undefined;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "pool")
     private readonly logger!: Contracts.Kernel.Logger;
 
     private cachedTransactions: Map<string, number> = new Map();

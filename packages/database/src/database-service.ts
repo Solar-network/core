@@ -19,6 +19,7 @@ export class DatabaseService {
     private readonly roundRepository!: RoundRepository;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "database")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.EventDispatcherService)

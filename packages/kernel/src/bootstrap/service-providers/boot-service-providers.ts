@@ -43,14 +43,6 @@ export class BootServiceProviders implements Bootstrapper {
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
     /**
-     * @private
-     * @type {Contracts.Kernel.Logger}
-     * @memberof BootServiceProviders
-     */
-    @inject(Identifiers.LogService)
-    private readonly logger!: Contracts.Kernel.Logger;
-
-    /**
      * @returns {Promise<void>}
      * @memberof RegisterProviders
      */
@@ -64,7 +56,9 @@ export class BootServiceProviders implements Bootstrapper {
                 try {
                     await this.serviceProviders.boot(name);
                 } catch (error) {
-                    this.logger.error(error.stack);
+                    this.app
+                        .getTagged<Contracts.Kernel.Logger>(Identifiers.LogService, "package", "kernel")
+                        .error(error.stack);
                     const isRequired: boolean = await serviceProvider.required();
 
                     if (isRequired) {

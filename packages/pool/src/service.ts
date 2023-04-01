@@ -29,6 +29,7 @@ export class Service implements Contracts.Pool.Service {
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "pool")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.TransactionHandlerRegistry)

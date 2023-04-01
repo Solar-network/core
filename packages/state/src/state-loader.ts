@@ -28,6 +28,7 @@ export class StateLoader {
     private events!: Contracts.Kernel.EventDispatcher;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "state")
     private logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.StateMachine)

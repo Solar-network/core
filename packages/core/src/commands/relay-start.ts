@@ -60,7 +60,7 @@ export class Command extends Commands.Command {
             {
                 name: "relay",
                 script: resolve(__dirname, "../../bin/run"),
-                args: `relay:run ${Utils.castFlagsToString(flags, ["daemon"])}`,
+                args: `relay:run ${Utils.castFlagsToString(flags)}`,
             },
             flags,
         );

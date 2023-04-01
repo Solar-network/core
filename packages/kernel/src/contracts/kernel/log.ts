@@ -22,7 +22,7 @@ export interface Logger {
      * @param {object | string | undefined} message
      * @memberof Logger
      */
-    critical(message: object | string | undefined, emoji?: string): void;
+    critical(message: object | string | undefined, emoji?: string, pkg?: string): void;
 
     /**
      * Runtime errors that do not require immediate action but should typically
@@ -31,7 +31,7 @@ export interface Logger {
      * @param {object | string | undefined} message
      * @memberof Logger
      */
-    error(message: object | string | undefined, emoji?: string): void;
+    error(message: object | string | undefined, emoji?: string, pkg?: string): void;
 
     /**
      * Exceptional occurrences that are not errors.
@@ -42,7 +42,7 @@ export interface Logger {
      * @param {object | string | undefined} message
      * @memberof Logger
      */
-    warning(message: object | string | undefined, emoji?: string): void;
+    warning(message: object | string | undefined, emoji?: string, pkg?: string): void;
 
     /**
      * Interesting events.
@@ -52,7 +52,7 @@ export interface Logger {
      * @param {object | string | undefined} message
      * @memberof Logger
      */
-    info(message: object | string | undefined, emoji?: string): void;
+    info(message: object | string | undefined, emoji?: string, pkg?: string): void;
 
     /**
      * Detailed debug information.
@@ -60,7 +60,7 @@ export interface Logger {
      * @param {object | string | undefined} message
      * @memberof Logger
      */
-    debug(message: object | string | undefined, emoji?: string): void;
+    debug(message: object | string | undefined, emoji?: string, pkg?: string): void;
 
     /**
      * Detailed trace information.
@@ -68,5 +68,5 @@ export interface Logger {
      * @param {object | string | undefined} message
      * @memberof Logger
      */
-    trace(message: object | string | undefined, emoji?: string): void;
+    trace(message: object | string | undefined, emoji?: string, pkg?: string): void;
 }

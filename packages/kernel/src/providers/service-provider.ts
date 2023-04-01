@@ -117,9 +117,7 @@ export abstract class ServiceProvider {
         if (this.packageManifest) {
             let name = this.packageManifest.get<string>("name");
             if (name.startsWith("@solar-network/")) {
-                if (name.endsWith("/logger")) {
-                    name = name.replace("/logger", "/logger-pino");
-                } else if (name.endsWith("/pool")) {
+                if (name.endsWith("/pool")) {
                     name = name.replace("/pool", "/transaction-pool");
                 }
                 if (!name.endsWith("/crypto") && !name.endsWith("/core")) {

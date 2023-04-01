@@ -3,7 +3,6 @@
  * @enum {number}
  */
 export enum ShutdownSignal {
-    SIGHUP = "SIGHUP",
     SIGINT = "SIGINT",
     SIGQUIT = "SIGQUIT",
     SIGILL = "SIGILL",

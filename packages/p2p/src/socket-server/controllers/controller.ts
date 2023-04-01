@@ -6,5 +6,6 @@ export class Controller {
     protected readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "p2p")
     protected readonly logger!: Contracts.Kernel.Logger;
 }

@@ -16,6 +16,7 @@ export class Collator implements Contracts.Pool.Collator {
     private readonly poolQuery!: Contracts.Pool.Query;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "pool")
     private readonly logger!: Contracts.Kernel.Logger;
 
     public async getBlockCandidateTransactions(

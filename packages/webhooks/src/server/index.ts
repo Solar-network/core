@@ -57,6 +57,7 @@ export class Server {
      * @memberof Server
      */
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "webhooks")
     private readonly logger!: Contracts.Kernel.Logger;
 
     /**

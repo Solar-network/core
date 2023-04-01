@@ -33,6 +33,7 @@ export abstract class TransactionHandler {
     protected readonly stateWalletRepository!: Contracts.State.WalletRepository;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "transactions")
     protected readonly logger!: Contracts.Kernel.Logger;
 
     public async verify(transaction: Interfaces.ITransaction): Promise<boolean> {

@@ -9,6 +9,7 @@ export class DownloadBlocks implements Action {
     public readonly app!: Contracts.Kernel.Application;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "blockchain")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.BlockchainService)

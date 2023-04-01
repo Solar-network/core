@@ -64,7 +64,7 @@ export class Command extends Commands.Command {
             {
                 name: "producer",
                 script: resolve(__dirname, "../../bin/run"),
-                args: `producer:run ${Utils.castFlagsToString(flags, ["daemon"])}`,
+                args: `producer:run ${Utils.castFlagsToString(flags)}`,
             },
             flags,
         );

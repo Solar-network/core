@@ -36,6 +36,7 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "p2p")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.StateStore)

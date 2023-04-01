@@ -1,5 +1,6 @@
 import semver from "semver";
 
+import { Contracts } from "../..";
 import { Kernel } from "../../contracts";
 import { Application } from "../../contracts/kernel";
 import {
@@ -32,14 +33,6 @@ export class RegisterServiceProviders implements Bootstrapper {
      */
     @inject(Identifiers.Application)
     private readonly app!: Application;
-
-    /**
-     * @private
-     * @type {Contracts.Kernel.Logger}
-     * @memberof Local
-     */
-    @inject(Identifiers.LogService)
-    private readonly logger!: Kernel.Logger;
 
     /**
      * @returns {Promise<void>}
@@ -147,7 +140,9 @@ export class RegisterServiceProviders implements Bootstrapper {
                     name,
                 );
 
-                this.logger.warning(error.message);
+                this.app
+                    .getTagged<Contracts.Kernel.Logger>(Identifiers.LogService, "package", "kernel")
+                    .warning(error.message);
 
                 serviceProviders.fail(serviceProviderName);
 
@@ -170,7 +165,9 @@ export class RegisterServiceProviders implements Bootstrapper {
                         await this.app.terminate(error.message, error);
                     }
 
-                    this.logger.warning(error.message);
+                    this.app
+                        .getTagged<Contracts.Kernel.Logger>(Identifiers.LogService, "package", "kernel")
+                        .warning(error.message);
 
                     serviceProviders.fail(serviceProviderName);
                 }

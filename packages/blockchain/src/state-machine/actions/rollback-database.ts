@@ -14,6 +14,7 @@ export class RollbackDatabase implements Action {
     private readonly configuration!: Providers.PluginConfiguration;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "blockchain")
     private readonly logger!: Contracts.Kernel.Logger;
 
     @Container.inject(Container.Identifiers.BlockchainService)

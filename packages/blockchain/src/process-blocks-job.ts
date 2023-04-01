@@ -34,6 +34,7 @@ export class ProcessBlocksJob implements Contracts.Kernel.QueueJob {
     private readonly triggers!: Services.Triggers.Triggers;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "blockchain")
     private readonly logger!: Contracts.Kernel.Logger;
 
     private blocks: Interfaces.IBlockData[] = [];

@@ -32,6 +32,7 @@ export class RoundState implements Contracts.State.RoundState {
     private readonly events!: Contracts.Kernel.EventDispatcher;
 
     @Container.inject(Container.Identifiers.LogService)
+    @Container.tagged("package", "state")
     private readonly logger!: Contracts.Kernel.Logger;
 
     private blocksInCurrentRound: Interfaces.IBlock[] = [];

@@ -1,4 +1,5 @@
 import { existsSync } from "fs-extra";
+import { constants } from "os";
 import { join } from "path";
 
 import * as Bootstrappers from "./bootstrap";
@@ -8,7 +9,6 @@ import { KernelEvent, ShutdownSignal } from "./enums";
 import { DirectoryCannotBeFound } from "./exceptions/filesystem";
 import { Identifiers } from "./ioc";
 import { PluginDiscoverer, ServiceProvider, ServiceProviderRepository } from "./providers";
-// import { ShutdownSignal } from "./enums/process";
 import { ConfigRepository } from "./services/config";
 import { ServiceProvider as EventServiceProvider } from "./services/events/service-provider";
 import { JsonObject, KeyValuePair } from "./types";
@@ -298,11 +298,11 @@ export class Application implements Contracts.Kernel.Application {
         this.booted = false;
 
         if (reason) {
-            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).critical(reason);
+            this.getTagged<Contracts.Kernel.Logger>(Identifiers.LogService, "package", "kernel").critical(reason);
         }
 
         if (error) {
-            this.get<Contracts.Kernel.Logger>(Identifiers.LogService).critical(error.stack);
+            this.getTagged<Contracts.Kernel.Logger>(Identifiers.LogService, "package", "kernel").critical(error.stack);
         }
 
         await this.disposeServiceProviders();
@@ -473,16 +473,36 @@ export class Application implements Contracts.Kernel.Application {
      * @memberof Application
      */
     private listenToShutdownSignals(): void {
+        let shuttingDown: boolean = false;
+
+        const terminate = async (code?: number) => {
+            if (shuttingDown) {
+                return;
+            }
+            shuttingDown = true;
+            await this.terminate();
+            if (this.isBound<Contracts.Blockchain.Blockchain>(Identifiers.BlockchainService)) {
+                this.getTagged<Contracts.Kernel.Logger>(Identifiers.LogService, "package", "kernel").info(
+                    "The blockchain has been stopped",
+                    "⏹️",
+                );
+            }
+            process.exit(code || 1);
+        };
+
+        if (process.stdin.isTTY) {
+            process.stdin.setRawMode(true);
+        }
+
+        process.stdin.on("data", (data: Buffer) => {
+            if (data.toString() === "\u0003") {
+                terminate(constants.signals.SIGINT + 128);
+            }
+        });
+
         for (const signal in ShutdownSignal) {
-            process.on(signal as any, async (code) => {
-                await this.terminate();
-                if (this.isBound<Contracts.Blockchain.Blockchain>(Identifiers.BlockchainService)) {
-                    this.get<Contracts.Kernel.Logger>(Identifiers.LogService).info(
-                        "The blockchain has been stopped",
-                        "⏹️",
-                    );
-                }
-                process.exit(code || 1);
+            process.on(signal, async (code) => {
+                terminate(code);
             });
         }
     }
