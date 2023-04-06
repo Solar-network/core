@@ -3,7 +3,6 @@ import { existsSync, readFileSync } from "fs";
 import { writeJsonSync } from "fs-extra";
 import importFresh from "import-fresh";
 import Joi from "joi";
-import { homedir } from "os";
 import { extname } from "path";
 
 import { Application } from "../../../contracts/kernel";
@@ -69,12 +68,7 @@ export class LocalConfigLoader implements ConfigLoader {
      */
     public async loadEnvironmentVariables(): Promise<void> {
         try {
-            const home: string = homedir();
-
-            const config: Record<string, Primitive>[] = [
-                dotenv.parseFile(this.app.environmentFile()),
-                dotenv.parseFile(`${home}/.${process.env.SOLAR_CORE_TOKEN}/.env`),
-            ];
+            const config: Record<string, Primitive>[] = [dotenv.parseFile(this.app.environmentFile())];
 
             config.forEach((configuration, index) => {
                 for (const [key, value] of Object.entries(configuration)) {
