@@ -17,10 +17,10 @@
                 "package": "@solar-network/p2p"
             },
             {
-                "package": "@solar-network/blockchain"
+                "package": "@solar-network/api"
             },
             {
-                "package": "@solar-network/api"
+                "package": "@solar-network/blockchain"
             },
             {
                 "package": "@solar-network/webhooks"
@@ -48,10 +48,10 @@
                 "package": "@solar-network/p2p"
             },
             {
-                "package": "@solar-network/blockchain"
+                "package": "@solar-network/api"
             },
             {
-                "package": "@solar-network/api"
+                "package": "@solar-network/blockchain"
             },
             {
                 "package": "@solar-network/webhooks"

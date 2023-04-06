@@ -14,19 +14,19 @@ export class ServiceProvider extends Providers.ServiceProvider {
         this.app.bind(Identifiers.UsernameSearchService).to(UsernameSearchService);
         this.app.bind(Identifiers.WalletSearchService).to(WalletSearchService);
         this.app.bind(Identifiers.EventListener).to(EventListener).inSingletonScope();
-
-        if (this.config().get("server.http.enabled")) {
-            await this.buildServer("http", Identifiers.HTTP);
-        }
-
-        if (this.config().get("server.https.enabled")) {
-            await this.buildServer("https", Identifiers.HTTPS);
-        }
     }
 
     public async boot(): Promise<void> {
         const http = this.config().get("server.http.enabled");
         const https = this.config().get("server.https.enabled");
+
+        if (http) {
+            await this.buildServer("http", Identifiers.HTTP);
+        }
+
+        if (https) {
+            await this.buildServer("https", Identifiers.HTTPS);
+        }
 
         if (http || https) {
             this.app.get<EventListener>(Identifiers.EventListener).initialise();

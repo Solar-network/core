@@ -15,7 +15,6 @@ declare module "@hapi/hapi" {
     }
 }
 
-// todo: review the implementation
 @Container.injectable()
 export class Server {
     /**
@@ -25,15 +24,6 @@ export class Server {
      */
     @Container.inject(Container.Identifiers.Application)
     private readonly app!: Contracts.Kernel.Application;
-
-    /**
-     * @private
-     * @type {Providers.PluginConfiguration}
-     * @memberof Server
-     */
-    @Container.inject(Container.Identifiers.PluginConfiguration)
-    @Container.tagged("plugin", "@solar-network/blockchain")
-    private readonly blockchainConfiguration!: Providers.PluginConfiguration;
 
     /**
      * @private
@@ -160,8 +150,7 @@ export class Server {
             swaggerJson.components.schemas.transactionVersions.enum =
                 Transactions.schemas.transactionBaseSchema.properties.version.enum;
 
-            const seconds: number = this.blockchainConfiguration.get("blockProductionFailuresLookback") as number;
-            const days: number = +(seconds / 86400).toFixed(2);
+            const days: number = +(2592000 / 86400).toFixed(2);
 
             swaggerJson.paths["/blocks/failures"].get.summary = swaggerJson.paths[
                 "/blocks/failures"
