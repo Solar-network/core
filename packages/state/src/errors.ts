@@ -16,7 +16,9 @@ export class CorruptSavedStateError extends Error {
 
 export class IncompatibleSavedStateError extends Error {
     public constructor(height: number) {
-        super(`The saved state from height ${height.toLocaleString()} is not compatible with this version of Core`);
+        super(
+            `The saved state from height ${height.toLocaleString()} is not compatible with this version of Solar Core`,
+        );
     }
 }
 
