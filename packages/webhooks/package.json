@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/webhooks",
-    "version": "4.2.1",
+    "version": "4.5.0",
     "description": "Webhooks for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
