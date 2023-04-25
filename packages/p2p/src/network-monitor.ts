@@ -19,6 +19,10 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
     @Container.inject(Container.Identifiers.Application)
     public readonly app!: Contracts.Kernel.Application;
 
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    public readonly walletRepository!: Contracts.State.WalletRepository;
+
     @Container.inject(Container.Identifiers.PluginConfiguration)
     @Container.tagged("plugin", "@solar-network/p2p")
     private readonly configuration!: Providers.PluginConfiguration;
@@ -43,10 +47,6 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
 
     @Container.inject(Container.Identifiers.TriggerService)
     private readonly triggers!: Services.Triggers.Triggers;
-
-    @Container.inject(Container.Identifiers.WalletRepository)
-    @Container.tagged("state", "blockchain")
-    private readonly walletRepository!: Contracts.State.WalletRepository;
 
     public config: any;
     public nextUpdateNetworkStatusScheduled: boolean | undefined;
@@ -369,8 +369,9 @@ export class NetworkMonitor implements Contracts.P2P.NetworkMonitor {
         peers.push(localPeer);
 
         for (const peer of peers) {
-            if (peer.isActiveDelegate()) {
-                for (let i = 0; i < peer.publicKeys.length; i++) {
+            const activeDelegates: string[] = peer.activeDelegates(this.walletRepository);
+            if (activeDelegates.length > 0) {
+                for (let i = 0; i < activeDelegates.length; i++) {
                     includedPeers.push(peer);
                 }
             } else if (peer.state && peer.state.height! > lastBlock.data.height) {

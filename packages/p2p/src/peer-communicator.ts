@@ -1,5 +1,5 @@
 import { Blocks, Crypto, Interfaces, Managers, Transactions, Validation } from "@solar-network/crypto";
-import { Container, Contracts, Enums, Providers, Services, Types, Utils } from "@solar-network/kernel";
+import { Container, Contracts, Enums, Providers, Types, Utils } from "@solar-network/kernel";
 import dayjs from "dayjs";
 import delay from "delay";
 
@@ -39,9 +39,6 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
 
     @Container.inject(Container.Identifiers.StateStore)
     private readonly stateStore!: Contracts.State.StateStore;
-
-    @Container.inject(Container.Identifiers.TriggerService)
-    private readonly triggers!: Services.Triggers.Triggers;
 
     @Container.inject(Container.Identifiers.WalletRepository)
     @Container.tagged("state", "blockchain")
@@ -195,13 +192,9 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
             const lastBlock: Interfaces.IBlock = this.app
                 .get<Contracts.State.StateStore>(Container.Identifiers.StateStore)
                 .getLastBlock();
-            const height = lastBlock.data.height + 1;
-            const roundInfo = Utils.roundCalculator.calculateRound(height);
-            const delegates: (string | undefined)[] = (
-                (await this.triggers.call("getActiveDelegates", {
-                    roundInfo,
-                })) as Contracts.State.Wallet[]
-            ).map((wallet) => wallet.getPublicKey());
+            const delegates: (string | undefined)[] = this.walletRepository
+                .allByUsername()
+                .map((wallet) => wallet.getPublicKey());
             for (const signatureIndex in pingResponse.signatures) {
                 const publicKey = pingResponse.publicKeys![signatureIndex];
                 const signature = pingResponse.signatures[signatureIndex];
@@ -227,9 +220,15 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                         if (this.walletRepository.hasByPublicKey(publicKey)) {
                             const delegateWallet = this.walletRepository.findByPublicKey(publicKey);
                             if (delegateWallet.isDelegate()) {
+                                const roundInfo: Contracts.Shared.RoundInfo = Utils.roundCalculator.calculateRound(
+                                    peer.state.header.height,
+                                );
                                 if (!delegatePeer) {
                                     peer.publicKeys.push(publicKey);
-                                    delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
+                                    delegateWallet.setAttribute("delegate.version", {
+                                        round: roundInfo.round,
+                                        version: pingResponse.config.version,
+                                    });
                                 } else if (!peer.isForked()) {
                                     if (
                                         delegatePeer.isForked() ||
@@ -239,7 +238,10 @@ export class PeerCommunicator implements Contracts.P2P.PeerCommunicator {
                                             delegatePeer.state.header.id !== lastBlock.data.id)
                                     ) {
                                         peer.publicKeys.push(publicKey);
-                                        delegateWallet.setAttribute("delegate.version", pingResponse.config.version);
+                                        delegateWallet.setAttribute("delegate.version", {
+                                            round: roundInfo.round,
+                                            version: pingResponse.config.version,
+                                        });
                                         delegatePeer.publicKeys = delegatePeer.publicKeys.filter(
                                             (peerPublicKey) => peerPublicKey !== publicKey,
                                         );

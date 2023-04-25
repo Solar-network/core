@@ -1,6 +1,6 @@
 import Hapi from "@hapi/hapi";
 import { Crypto, Identities, Interfaces } from "@solar-network/crypto";
-import { Container, Contracts, Services, Utils } from "@solar-network/kernel";
+import { Container, Contracts, Utils } from "@solar-network/kernel";
 import { Socket } from "@solar-network/nes";
 import { DatabaseInterceptor } from "@solar-network/state";
 import { readJsonSync } from "fs-extra";
@@ -23,8 +23,9 @@ export class PeerController extends Controller {
     @Container.inject(Container.Identifiers.BlockchainService)
     private readonly blockchain!: Contracts.Blockchain.Blockchain;
 
-    @Container.inject(Container.Identifiers.TriggerService)
-    private readonly triggers!: Services.Triggers.Triggers;
+    @Container.inject(Container.Identifiers.WalletRepository)
+    @Container.tagged("state", "blockchain")
+    private readonly walletRepository!: Contracts.State.WalletRepository;
 
     private cachedHeader: Contracts.P2P.PeerPingResponse | undefined;
 
@@ -90,14 +91,9 @@ export class PeerController extends Controller {
         header.publicKeys = [];
         header.signatures = [];
 
-        const height = lastBlock.data.height + 1;
-        const roundInfo = Utils.roundCalculator.calculateRound(height);
-
-        const delegates: (string | undefined)[] = (
-            (await this.triggers.call("getActiveDelegates", {
-                roundInfo,
-            })) as Contracts.State.Wallet[]
-        ).map((wallet) => wallet.getPublicKey());
+        const delegates: (string | undefined)[] = this.walletRepository
+            .allByUsername()
+            .map((wallet) => wallet.getPublicKey());
 
         const publicKeys = Utils.getForgerDelegates();
         if (publicKeys.length > 0) {
