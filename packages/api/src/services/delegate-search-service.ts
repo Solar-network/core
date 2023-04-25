@@ -1,4 +1,4 @@
-import { Enums, Managers } from "@solar-network/crypto";
+import { Enums } from "@solar-network/crypto";
 import { Container, Contracts, Services, Utils as AppUtils } from "@solar-network/kernel";
 
 import { DelegateCriteria, DelegateResource } from "../resources-new";
@@ -25,9 +25,8 @@ export class DelegateSearchService {
 
         const wallet = this.walletRepository.findByAddress(walletAddress);
         const supply: string = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
-        const ourKeys: string[] = AppUtils.getForgerDelegates();
         if (wallet.hasAttribute("delegate")) {
-            return this.getDelegateResourceFromWallet(wallet, supply, ourKeys);
+            return this.getDelegateResourceFromWallet(wallet, supply);
         } else {
             return undefined;
         }
@@ -43,22 +42,12 @@ export class DelegateSearchService {
         return this.paginationService.getPage(pagination, sorting, this.getDelegates(...criterias));
     }
 
-    private getDelegateResourceFromWallet(
-        wallet: Contracts.State.Wallet,
-        supply: string,
-        ourKeys: string[],
-    ): DelegateResource {
+    private getDelegateResourceFromWallet(wallet: Contracts.State.Wallet, supply: string): DelegateResource {
         AppUtils.assert.defined<string>(wallet.getPublicKey());
 
         const publicKey = wallet.getPublicKey();
 
         const delegateAttribute = wallet.getAttribute("delegate");
-
-        const activeDelegates: number = Managers.configManager.getMilestone().activeDelegates;
-
-        if (!delegateAttribute.version && ourKeys.includes(publicKey!)) {
-            wallet.setAttribute("delegate.version", this.app.version());
-        }
 
         let resignationType: string | undefined = undefined;
 
@@ -96,19 +85,17 @@ export class DelegateSearchService {
                     .plus(delegateAttribute.forgedRewards)
                     .minus(delegateAttribute.donations),
             },
-            version:
-                delegateAttribute.version && delegateAttribute.rank && delegateAttribute.rank <= activeDelegates
-                    ? new AppUtils.Semver(delegateAttribute.version)
-                    : undefined,
+            version: delegateAttribute.version?.version
+                ? new AppUtils.Semver(delegateAttribute.version.version)
+                : undefined,
         };
     }
 
     private *getDelegates(...criterias: DelegateCriteria[]): Iterable<DelegateResource> {
         const supply: string = AppUtils.supplyCalculator.calculate(this.walletRepository.allByAddress());
-        const ourKeys: string[] = AppUtils.getForgerDelegates();
 
         for (const wallet of this.walletRepository.allByUsername()) {
-            const delegateResource = this.getDelegateResourceFromWallet(wallet, supply, ourKeys);
+            const delegateResource = this.getDelegateResourceFromWallet(wallet, supply);
 
             if (this.standardCriteriaService.testStandardCriterias(delegateResource, ...criterias)) {
                 yield delegateResource;

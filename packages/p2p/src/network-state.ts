@@ -133,7 +133,7 @@ export class NetworkState implements Contracts.P2P.NetworkState {
             });
             peers.push(localPeer);
         }
-        peers = peers.filter((peer) => peer.isActiveDelegate());
+        peers = peers.filter((peer) => peer.activeDelegates(monitor.walletRepository).length > 0);
 
         const minimumDelegateReach = configuration.getOptional<number>(
             "minimumDelegateReach",
@@ -145,7 +145,9 @@ export class NetworkState implements Contracts.P2P.NetworkState {
             return new NetworkState(NetworkStateStatus.ColdStart, lastBlock, monitor);
         } else if (process.env.CORE_ENV === "test") {
             return new NetworkState(NetworkStateStatus.Test, lastBlock, monitor);
-        } else if (peers.flatMap((peer) => peer.publicKeys).length < minimumDelegateReach) {
+        } else if (
+            peers.flatMap((peer) => peer.activeDelegates(monitor.walletRepository)).length < minimumDelegateReach
+        ) {
             return new NetworkState(NetworkStateStatus.BelowMinimumDelegates, lastBlock, monitor);
         }
 
@@ -264,14 +266,14 @@ export class NetworkState implements Contracts.P2P.NetworkState {
 
     private addToList(hasQuorum: boolean, peer: Contracts.P2P.Peer, monitor: Contracts.P2P.NetworkMonitor): void {
         this.quorumDetails.delegates[hasQuorum ? "hasQuorum" : "noQuorum"].push(
-            ...peer.publicKeys.map((publicKey) => monitor.getDelegateName(publicKey)!),
+            ...peer.activeDelegates(monitor.walletRepository).map((publicKey) => monitor.getDelegateName(publicKey)!),
         );
     }
 
     private update(peer: Contracts.P2P.Peer, currentSlot: number, monitor: Contracts.P2P.NetworkMonitor): void {
         Utils.assert.defined<number>(this.nodeHeight);
 
-        const increment: number = peer.publicKeys.length;
+        const increment: number = peer.activeDelegates(monitor.walletRepository).length;
         if (typeof peer.state.header === "object" && typeof peer.state.header.height === "number") {
             if (peer.state.header.height !== this.nodeHeight) {
                 this.quorumDetails.noQuorum += increment;
