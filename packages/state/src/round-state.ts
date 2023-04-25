@@ -187,6 +187,19 @@ export class RoundState implements Contracts.State.RoundState {
 
             this.blocksInCurrentRound = [];
 
+            const ourKeys: string[] = AppUtils.getForgerDelegates();
+
+            for (const wallet of this.walletRepository.allByUsername()) {
+                if (wallet.hasPublicKey() && ourKeys.includes(wallet.getPublicKey()!)) {
+                    wallet.setAttribute("delegate.version", { round: roundInfo.round, version: this.app.version() });
+                } else if (wallet.hasAttribute("delegate.version")) {
+                    const { round } = wallet.getAttribute("delegate.version");
+                    if (!round || round < roundInfo.round - 5) {
+                        wallet.forgetAttribute("delegate.version");
+                    }
+                }
+            }
+
             this.events.dispatch(Enums.RoundEvent.Applied);
         }
     }

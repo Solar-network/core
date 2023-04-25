@@ -1,3 +1,4 @@
+import { Managers } from "@solar-network/crypto";
 import { Contracts } from "@solar-network/kernel";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -128,8 +129,19 @@ export class Peer implements Contracts.P2P.Peer {
      * @returns {boolean}
      * @memberof Peer
      */
-    public isActiveDelegate(): boolean {
-        return this.publicKeys.length > 0;
+    public activeDelegates(walletRepository: Contracts.State.WalletRepository): string[] {
+        const { activeDelegates } = Managers.configManager.getMilestone();
+        return this.publicKeys.filter((publicKey: string) => {
+            if (walletRepository.hasByPublicKey(publicKey)) {
+                const wallet: Contracts.State.Wallet = walletRepository.findByPublicKey(publicKey);
+                if (wallet.hasAttribute("delegate.rank")) {
+                    const rank: number = wallet.getAttribute("delegate.rank");
+                    return rank <= activeDelegates;
+                }
+            }
+
+            return false;
+        });
     }
 
     /**

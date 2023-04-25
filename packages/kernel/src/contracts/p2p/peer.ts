@@ -1,5 +1,7 @@
 import { Dayjs } from "dayjs";
 
+import { WalletRepository } from "../state";
+
 export interface PeerPorts {
     [name: string]: number;
 }
@@ -30,7 +32,7 @@ export interface Peer {
     fastVerificationResult: FastPeerVerificationResult | undefined;
 
     addInfraction(): void;
-    isActiveDelegate(): boolean;
+    activeDelegates(walletRepository: WalletRepository): string[];
     isIgnored(): boolean;
     isVerified(): boolean;
     isForked(): boolean;
