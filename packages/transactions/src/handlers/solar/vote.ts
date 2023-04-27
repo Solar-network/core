@@ -123,7 +123,7 @@ export class VoteTransactionHandler extends TransactionHandler {
         for (const delegate of votes) {
             if (this.walletRepository.hasByUsername(delegate)) {
                 const wallet = this.walletRepository.findByUsername(delegate);
-                if (!wallet.hasAttribute("delegate.version")) {
+                if (!wallet.hasAttribute("delegate.resigned") && !wallet.hasAttribute("delegate.version")) {
                     throw new Contracts.Pool.PoolError(
                         `${delegate} is not operating a node on the network`,
                         "ERR_OFFLINE",
