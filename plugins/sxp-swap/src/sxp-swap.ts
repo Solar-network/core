@@ -197,23 +197,30 @@ export class SXPSwap {
 
             const milestone = Managers.configManager.getMilestone();
             const transactionData: Interfaces.ITransactionData = transaction.data;
-            if (transactionData.senderPublicKey === swapWalletPublicKey) {
+            if (transactionData.senderPublicKey === swapWalletPublicKey && milestone.swapEnabled) {
                 const swapWalletSecondPublicKey: string | undefined = milestone.swapWalletSecondPublicKey;
 
                 const isTransfer = transactionData.typeGroup === 1 && transactionData.type === 0;
                 const isSecondSignatureRegistration =
                     swapWalletSecondPublicKey && transactionData.typeGroup === 1 && transactionData.type === 1;
-                if (!isTransfer && !isSecondSignatureRegistration) {
+                const isVote = transactionData.typeGroup === 2 && transactionData.type === 2;
+                if (!isTransfer && !isSecondSignatureRegistration && !isVote) {
                     throw new TransactionTypeNotPermittedError();
                 }
 
                 const expectedFee = Utils.BigNumber.make(5000000);
+                const expectedVoteFee = Utils.BigNumber.make(50000000);
+
                 const fee = transactionData.fee;
 
-                if (!fee.isEqualTo(expectedFee) && milestone.verifySwap) {
+                if (!isVote && !fee.isEqualTo(expectedFee) && milestone.verifySwap) {
                     throw new TransactionHasWrongFeeError(fee, expectedFee);
                 }
-                
+
+                if (isVote && fee.isGreaterThan(expectedVoteFee)) {
+                    throw new TransactionHasWrongFeeError(fee, expectedFee);
+                }
+
                 if (isSecondSignatureRegistration) {
                     const transactionSecondPublicKey = transactionData.asset!.signature!.publicKey;
                     if (transactionSecondPublicKey !== swapWalletSecondPublicKey) {
