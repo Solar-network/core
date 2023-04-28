@@ -26,54 +26,54 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         this.app
             .bind(Container.Identifiers.DatabaseConnection)
+            .toConstantValue(await this.connect())
+            .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
+        this.app
+            .bind(Container.Identifiers.DatabaseConnection)
             .toConstantValue(
                 await this.connect("api", {
                     options: `-c statement_timeout=${this.config().getRequired("apiConnectionTimeout")}ms`,
                 }),
             )
             .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
-        this.app
-            .bind(Container.Identifiers.DatabaseConnection)
-            .toConstantValue(await this.connect())
-            .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
 
         this.logger.debug("Connection established");
 
         this.app
             .bind(Container.Identifiers.DatabaseRoundRepository)
-            .toConstantValue(this.getRoundRepository("api"))
-            .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
-        this.app
-            .bind(Container.Identifiers.DatabaseRoundRepository)
             .toConstantValue(this.getRoundRepository())
             .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
-
         this.app
-            .bind(Container.Identifiers.DatabaseBlockRepository)
-            .toConstantValue(this.getBlockRepository("api"))
+            .bind(Container.Identifiers.DatabaseRoundRepository)
+            .toConstantValue(this.getRoundRepository("api"))
             .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
+
         this.app
             .bind(Container.Identifiers.DatabaseBlockRepository)
             .toConstantValue(this.getBlockRepository())
             .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
-
         this.app
-            .bind(Container.Identifiers.DatabaseMissedBlockRepository)
-            .toConstantValue(this.getMissedBlockRepository("api"))
+            .bind(Container.Identifiers.DatabaseBlockRepository)
+            .toConstantValue(this.getBlockRepository("api"))
             .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
+
         this.app
             .bind(Container.Identifiers.DatabaseMissedBlockRepository)
             .toConstantValue(this.getMissedBlockRepository())
             .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
-
         this.app
-            .bind(Container.Identifiers.DatabaseTransactionRepository)
-            .toConstantValue(this.getTransactionRepository("api"))
+            .bind(Container.Identifiers.DatabaseMissedBlockRepository)
+            .toConstantValue(this.getMissedBlockRepository("api"))
             .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
+
         this.app
             .bind(Container.Identifiers.DatabaseTransactionRepository)
             .toConstantValue(this.getTransactionRepository())
             .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
+        this.app
+            .bind(Container.Identifiers.DatabaseTransactionRepository)
+            .toConstantValue(this.getTransactionRepository("api"))
+            .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
 
         this.app.bind(Container.Identifiers.DatabaseBlockFilter).to(BlockFilter);
         this.app.bind(Container.Identifiers.BlockHistoryService).to(BlockHistoryService);
