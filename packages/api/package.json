@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/api",
-    "version": "4.3.0-next.2",
+    "version": "4.3.0",
     "description": "Public API for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
