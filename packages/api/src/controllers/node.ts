@@ -27,6 +27,7 @@ export class NodeController extends Controller {
     private readonly networkMonitor!: Contracts.P2P.NetworkMonitor;
 
     @Container.inject(Container.Identifiers.DatabaseTransactionRepository)
+    @Container.tagged("connection", "api")
     private readonly transactionRepository!: Repositories.TransactionRepository;
 
     public async status(

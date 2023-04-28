@@ -7,3 +7,9 @@ export const missedBlockSortingSchemaWithoutUsername = Schemas.createSortingSche
     [],
     false,
 );
+
+export const missedBlockQueryLevelOptions = [
+    { field: "timestamp", asc: true, desc: true, allowSecondOrderBy: true, diverse: true },
+    { field: "height", asc: true, desc: true, allowSecondOrderBy: true, diverse: true },
+    { field: "username", asc: true, desc: true, allowSecondOrderBy: true, diverse: true },
+];

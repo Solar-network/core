@@ -1,6 +1,7 @@
 import { Interfaces } from "@solar-network/crypto";
 
 import { Application } from "../kernel";
+import { WalletRepository } from "../state";
 import { NetworkState } from "./network-state";
 
 export interface NetworkStatus {
@@ -15,6 +16,7 @@ export interface IRateLimitStatus {
 
 export interface NetworkMonitor {
     app: Application;
+    walletRepository: WalletRepository;
     boot(): Promise<void>;
     updateNetworkStatus(initialRun?: boolean): Promise<void>;
     cleansePeers({

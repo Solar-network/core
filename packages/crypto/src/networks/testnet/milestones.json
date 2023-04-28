@@ -32,7 +32,7 @@
             },
             "minFee": 11299
         },
-        "epoch": "2022-07-20T18:00:00.000Z",
+        "epoch": "2023-01-25T23:00:00.000Z",
         "fees": {
             "staticFees": {
                 "burn": 0,
@@ -53,7 +53,7 @@
         "legacyTransfer": true,
         "legacyVote": true,
         "p2p": {
-            "minimumVersions": [">=4.1.2-next.0"]
+            "minimumVersions": [">=4.2.2-next.0"]
         },
         "transfer": {
             "maximum": 256,
@@ -133,7 +133,7 @@
         "bip340": true
     },
     {
-        "height": 502441,
+        "height": 502431,
         "acceptLegacySchnorrTransactions": false,
         "donations": {
             "DSXP3m8MJhqZvybUMCnUkfAP5PQ4aVjozy": {

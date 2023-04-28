@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/api",
-    "version": "4.2.1",
+    "version": "4.3.0",
     "description": "Public API for Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
@@ -33,6 +33,7 @@
         "node-cache": "5.1.2",
         "qs": "6.10.3",
         "rate-limiter-flexible": "1.3.2",
+        "semaphore": "1.1.0",
         "semver": "6.3.0"
     },
     "devDependencies": {
@@ -42,6 +43,7 @@
         "@types/hapi__nes": "11.0.5",
         "@types/ip": "1.1.0",
         "@types/qs": "6.9.7",
+        "@types/semaphore": "1.1.1",
         "@types/semver": "6.2.3",
         "lodash.clonedeep": "4.5.0"
     }

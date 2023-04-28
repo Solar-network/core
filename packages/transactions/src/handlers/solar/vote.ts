@@ -116,6 +116,21 @@ export class VoteTransactionHandler extends TransactionHandler {
                 "ERR_PENDING",
             );
         }
+
+        AppUtils.assert.defined<string[]>(transaction.data.asset?.votes);
+        const votes = Object.keys(transaction.data.asset.votes);
+
+        for (const delegate of votes) {
+            if (this.walletRepository.hasByUsername(delegate)) {
+                const wallet = this.walletRepository.findByUsername(delegate);
+                if (!wallet.hasAttribute("delegate.resigned") && !wallet.hasAttribute("delegate.version")) {
+                    throw new Contracts.Pool.PoolError(
+                        `${delegate} is not operating a node on the network`,
+                        "ERR_OFFLINE",
+                    );
+                }
+            }
+        }
     }
 
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {

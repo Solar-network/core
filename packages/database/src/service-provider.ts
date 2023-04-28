@@ -24,25 +24,63 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         this.logger.info(`Connecting to database: ${(this.config().all().connection as any).database}`);
 
-        this.app.bind(Container.Identifiers.DatabaseConnection).toConstantValue(await this.connect());
+        this.app
+            .bind(Container.Identifiers.DatabaseConnection)
+            .toConstantValue(await this.connect())
+            .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
+        this.app
+            .bind(Container.Identifiers.DatabaseConnection)
+            .toConstantValue(
+                await this.connect("api", {
+                    options: `-c statement_timeout=${this.config().getRequired("apiConnectionTimeout")}ms`,
+                }),
+            )
+            .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
 
         this.logger.debug("Connection established");
 
-        this.app.bind(Container.Identifiers.DatabaseRoundRepository).toConstantValue(this.getRoundRepository());
+        this.app
+            .bind(Container.Identifiers.DatabaseRoundRepository)
+            .toConstantValue(this.getRoundRepository())
+            .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
+        this.app
+            .bind(Container.Identifiers.DatabaseRoundRepository)
+            .toConstantValue(this.getRoundRepository("api"))
+            .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
 
-        this.app.bind(Container.Identifiers.DatabaseBlockRepository).toConstantValue(this.getBlockRepository());
-        this.app.bind(Container.Identifiers.DatabaseBlockFilter).to(BlockFilter);
-        this.app.bind(Container.Identifiers.BlockHistoryService).to(BlockHistoryService);
+        this.app
+            .bind(Container.Identifiers.DatabaseBlockRepository)
+            .toConstantValue(this.getBlockRepository())
+            .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
+        this.app
+            .bind(Container.Identifiers.DatabaseBlockRepository)
+            .toConstantValue(this.getBlockRepository("api"))
+            .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
 
         this.app
             .bind(Container.Identifiers.DatabaseMissedBlockRepository)
-            .toConstantValue(this.getMissedBlockRepository());
-        this.app.bind(Container.Identifiers.DatabaseMissedBlockFilter).to(MissedBlockFilter);
-        this.app.bind(Container.Identifiers.MissedBlockHistoryService).to(MissedBlockHistoryService);
+            .toConstantValue(this.getMissedBlockRepository())
+            .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
+        this.app
+            .bind(Container.Identifiers.DatabaseMissedBlockRepository)
+            .toConstantValue(this.getMissedBlockRepository("api"))
+            .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
 
         this.app
             .bind(Container.Identifiers.DatabaseTransactionRepository)
-            .toConstantValue(this.getTransactionRepository());
+            .toConstantValue(this.getTransactionRepository())
+            .when(Container.Selectors.noAncestorOrTargetTagged("connection"));
+        this.app
+            .bind(Container.Identifiers.DatabaseTransactionRepository)
+            .toConstantValue(this.getTransactionRepository("api"))
+            .when(Container.Selectors.anyAncestorOrTargetTaggedFirst("connection", "api"));
+
+        this.app.bind(Container.Identifiers.DatabaseBlockFilter).to(BlockFilter);
+        this.app.bind(Container.Identifiers.BlockHistoryService).to(BlockHistoryService);
+
+        this.app.bind(Container.Identifiers.DatabaseMissedBlockFilter).to(MissedBlockFilter);
+        this.app.bind(Container.Identifiers.MissedBlockHistoryService).to(MissedBlockHistoryService);
+
         this.app.bind(Container.Identifiers.DatabaseTransactionFilter).to(TransactionFilter);
         this.app.bind(Container.Identifiers.TransactionHistoryService).to(TransactionHistoryService);
 
@@ -63,7 +101,7 @@ export class ServiceProvider extends Providers.ServiceProvider {
         return true;
     }
 
-    public async connect(): Promise<Connection> {
+    public async connect(connectionName = "default", extra = {}): Promise<Connection> {
         const connection: Record<string, any> = this.config().all().connection as any;
         this.app
             .get<Contracts.Kernel.EventDispatcher>(Container.Identifiers.EventDispatcherService)
@@ -100,10 +138,11 @@ export class ServiceProvider extends Providers.ServiceProvider {
 
         const dbConnection: Connection = await createConnection({
             ...(connection as any),
-            extra: Object.assign(connection.extra, { logger: this.logger }),
+            extra: Object.assign(connection.extra, { ...extra, logger: this.logger }),
             namingStrategy: new SnakeNamingStrategy(),
             migrations: [__dirname + "/migrations/*.js"],
-            migrationsRun: true,
+            migrationsRun: connectionName === "default",
+            name: connectionName,
             entities: [__dirname + "/models/*.js"],
         });
 
@@ -133,24 +172,25 @@ export class ServiceProvider extends Providers.ServiceProvider {
         return dbConnection;
     }
 
-    public getRoundRepository(): RoundRepository {
-        return getCustomRepository(RoundRepository);
+    public getRoundRepository(connectionName = "default"): RoundRepository {
+        return getCustomRepository(RoundRepository, connectionName);
     }
 
-    public getBlockRepository(): BlockRepository {
-        return getCustomRepository(BlockRepository);
+    public getBlockRepository(connectionName = "default"): BlockRepository {
+        return getCustomRepository(BlockRepository, connectionName);
     }
 
-    public getMissedBlockRepository(): MissedBlockRepository {
-        return getCustomRepository(MissedBlockRepository);
+    public getMissedBlockRepository(connectionName = "default"): MissedBlockRepository {
+        return getCustomRepository(MissedBlockRepository, connectionName);
     }
 
-    public getTransactionRepository(): TransactionRepository {
-        return getCustomRepository(TransactionRepository);
+    public getTransactionRepository(connectionName = "default"): TransactionRepository {
+        return getCustomRepository(TransactionRepository, connectionName);
     }
 
     public configSchema(): object {
         return Joi.object({
+            apiConnectionTimeout: Joi.number().integer().min(1).required(),
             connection: Joi.object({
                 database: Joi.string().required(),
                 entityPrefix: Joi.string().required(),

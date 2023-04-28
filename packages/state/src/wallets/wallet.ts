@@ -361,6 +361,10 @@ export class Wallet implements Contracts.State.Wallet {
             attributes.delegate.resigned = resigned;
         }
 
+        if (attributes.delegate?.version?.version) {
+            attributes.delegate.version = attributes.delegate.version.version;
+        }
+
         if (attributes.delegate && !isNaN(attributes.delegate.round)) {
             delete attributes.delegate.round;
         }

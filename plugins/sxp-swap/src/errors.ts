@@ -8,7 +8,7 @@ export class ApiCommunicationError extends Error {
 
 export class MemoIncorrectError extends Error {
     public constructor() {
-        super("The memo of the transaction from the swap source wallet must adhere to the correct format");
+        super("The memo of the transaction from the swap wallet must adhere to the correct format");
     }
 }
 
@@ -82,7 +82,7 @@ export class TransactionIdInvalidError extends Error {
 
 export class TransactionTypeNotPermittedError extends Error {
     public constructor() {
-        super("Swap source wallet is restricted to transfer transactions only");
+        super("Swap wallet is restricted to a subset of transaction types only");
     }
 }
 
@@ -116,6 +116,6 @@ export class WrongTokenError extends Error {
 
 export class WrongSecondSignaturePublicKeyError extends Error {
     public constructor() {
-        super("The public key of the second signature registration for the swap source wallet is incorrect");
+        super("The public key of the second signature registration for the swap wallet is incorrect");
     }
 }

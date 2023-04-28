@@ -3,9 +3,11 @@ import Joi from "joi";
 
 import { DelegatesController } from "../controllers/delegates";
 import {
+    blockQueryLevelOptions,
     blockSortingSchemaWithoutUsernameOrGeneratorPublicKey,
     delegateCriteriaSchema,
     delegateSortingSchema,
+    missedBlockQueryLevelOptions,
     missedBlockSortingSchema,
     walletCriteriaSchema,
     walletParamSchema,
@@ -82,6 +84,11 @@ export const register = (server: Hapi.Server): void => {
                     .concat(Schemas.pagination),
             },
             plugins: {
+                semaphore: {
+                    enabled: true,
+                    type: "database",
+                    queryLevelOptions: blockQueryLevelOptions,
+                },
                 pagination: {
                     enabled: true,
                 },
@@ -106,6 +113,11 @@ export const register = (server: Hapi.Server): void => {
                     .concat(Schemas.pagination),
             },
             plugins: {
+                semaphore: {
+                    enabled: true,
+                    type: "database",
+                    queryLevelOptions: missedBlockQueryLevelOptions,
+                },
                 pagination: {
                     enabled: true,
                 },

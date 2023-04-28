@@ -150,6 +150,18 @@ export class DelegateResignationTransactionHandler extends TransactionHandler {
                 "ERR_PENDING",
             );
         }
+
+        if (transaction.data.asset && transaction.data.asset.resignationType === Enums.DelegateStatus.NotResigned) {
+            if (this.walletRepository.hasByAddress(transaction.data.senderId)) {
+                const wallet = this.walletRepository.findByAddress(transaction.data.senderId);
+                if (wallet.isDelegate() && !wallet.hasAttribute("delegate.version")) {
+                    throw new Contracts.Pool.PoolError(
+                        `${wallet.getAttribute("delegate.username")} is not operating a node on the network`,
+                        "ERR_OFFLINE",
+                    );
+                }
+            }
+        }
     }
 
     public async applyToSender(transaction: Interfaces.ITransaction): Promise<void> {

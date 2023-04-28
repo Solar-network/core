@@ -11,6 +11,7 @@ import { log } from "./log";
 import { pagination } from "./pagination";
 import { rateLimit } from "./rate-limit";
 import { responseHeaders } from "./response-headers";
+import { semaphore } from "./semaphore";
 import { whitelist } from "./whitelist";
 
 const isListed = (ip: string, patterns: string[]): boolean => {
@@ -79,6 +80,7 @@ export const preparePlugins = (config) => {
         },
         { plugin: commaArrayQuery },
         { plugin: dotSeparatedQuery },
+        { plugin: semaphore, options: config.semaphore },
         {
             plugin: cache,
             options: config.plugins.cache,
