@@ -597,7 +597,7 @@ importers:
       ipaddr.js: 2.0.1
       joi: 17.6.0
       pretty-ms: 7.0.1
-      protobufjs: 6.11.3
+      protobufjs: 7.2.4
       rate-limiter-flexible: 1.3.2
       semver: 7.5.4
     dependencies:
@@ -615,7 +615,7 @@ importers:
       ipaddr.js: 2.0.1
       joi: 17.6.0
       pretty-ms: 7.0.1
-      protobufjs: 6.11.3
+      protobufjs: 7.2.4
       rate-limiter-flexible: 1.3.2
       semver: 7.5.4
     devDependencies:
@@ -4365,10 +4365,6 @@ packages:
   /@types/log-process-errors/4.1.0:
     resolution: {integrity: sha512-EZxSJpgUfiKgJKUuNOqHnobVODwjUfI9cOBUMyjt5tXkt5ZiZ3NB21DLPOVyAyqiW4dmmusVfgNE2+kMvdmFFA==}
     dev: true
-
-  /@types/long/4.0.2:
-    resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
-    dev: false
 
   /@types/mime-db/1.43.1:
     resolution: {integrity: sha512-kGZJY+R+WnR5Rk+RPHUMERtb2qBRViIHCBdtUrY+NmwuGb8pQdfTqQiCKPrxpdoycl8KWm2DLdkpoSdt479XoQ==}
@@ -8514,8 +8510,8 @@ packages:
       wrap-ansi: 6.2.0
     dev: true
 
-  /long/4.0.0:
-    resolution: {integrity: sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==}
+  /long/5.2.3:
+    resolution: {integrity: sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==}
     dev: false
 
   /loose-envify/1.4.0:
@@ -9827,9 +9823,9 @@ packages:
       kleur: 3.0.3
       sisteransi: 1.0.5
 
-  /protobufjs/6.11.3:
-    resolution: {integrity: sha512-xL96WDdCZYdU7Slin569tFX712BxsxslWwAfAhCYjQKGTq7dAU91Lomy6nLLhh/dyGhk/YH4TwTSRxTzhuHyZg==}
-    hasBin: true
+  /protobufjs/7.2.4:
+    resolution: {integrity: sha512-AT+RJgD2sH8phPmCf7OUZR8xGdcJRga4+1cOaXJ64hvcSkVhNcRHOwIxUatPH15+nj59WAGTDv3LSGZPEQbJaQ==}
+    engines: {node: '>=12.0.0'}
     requiresBuild: true
     dependencies:
       '@protobufjs/aspromise': 1.1.2
@@ -9842,9 +9838,8 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/long': 4.0.2
       '@types/node': 18.7.14
-      long: 4.0.0
+      long: 5.2.3
     dev: false
 
   /psl/1.9.0:
