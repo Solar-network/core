@@ -39,7 +39,7 @@
         "pretty-ms": "7.0.1",
         "protobufjs": "6.11.3",
         "rate-limiter-flexible": "1.3.2",
-        "semver": "6.3.0"
+        "semver": "7.5.4"
     },
     "devDependencies": {
         "@types/better-sqlite3": "5.4.3",
