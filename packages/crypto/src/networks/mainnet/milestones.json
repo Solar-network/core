@@ -55,7 +55,6 @@
         "p2p": {
             "minimumVersions": [">=4.2.0"]
         },
-        "swapEnabled": true,
         "transfer": {
             "maximum": 256,
             "minimum": 1
@@ -158,19 +157,10 @@
         }
     },
     {
-        "height": 2750000,
-        "verifySwap": true
-    },
-    {
-        "height": 2850000,
-        "swapWalletSecondPublicKey": "0210caa3c13c5fef3a28a27202373dfc7fd584c122d18d83c980586358a5f76a0e"
-    },
-    {
         "height": 5000000,
         "legacyTransfer": false,
         "p2p": {
             "minimumVersions": [">=4.3.0"]
-        },
-        "swapEnabled": false
+        }
     }
 ]
