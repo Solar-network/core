@@ -11,6 +11,7 @@ export class WorkerWrapper extends EventEmitter {
         super();
 
         delete data.connection.extra.logger;
+        delete data.connection.extra.options;
 
         this.worker = new Worker(__dirname + "/worker.js", { workerData: data });
 
