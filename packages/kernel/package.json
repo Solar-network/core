@@ -1,6 +1,6 @@
 {
     "name": "@solar-network/kernel",
-    "version": "4.3.0",
+    "version": "4.3.1",
     "description": "Kernel of Solar Core",
     "license": "CC-BY-ND-4.0",
     "contributors": [
@@ -42,7 +42,7 @@
         "nanomatch": "1.2.13",
         "nsfw": "2.1.2",
         "reflect-metadata": "0.1.13",
-        "semver": "6.3.0",
+        "semver": "7.5.4",
         "type-fest": "0.21.3"
     },
     "devDependencies": {

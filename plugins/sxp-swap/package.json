@@ -18,20 +18,8 @@
         "clean": "rimraf dist",
         "compile": "node ../../node_modules/typescript/bin/tsc"
     },
-    "dependencies": {
-        "@ethereumjs/tx": "3.5.0",
-        "delay": "5.0.0",
-        "ethereum-input-data-decoder": "0.4.0",
-        "web3": "1.7.1",
-        "web3-providers-http": "1.7.1"
-    },
     "devDependencies": {
-        "@solar-network/core": "workspace:*",
-        "@solar-network/blockchain": "workspace:*",
-        "@solar-network/kernel": "workspace:*",
-        "@solar-network/state": "workspace:*",
-        "@solar-network/transactions": "workspace:*",
-        "@solar-network/crypto": "workspace:*"
+        "@solar-network/kernel": "workspace:*"
     },
     "engines": {
         "node": ">=16.0.0"
