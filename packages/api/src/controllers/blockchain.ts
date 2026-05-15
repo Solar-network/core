@@ -8,6 +8,28 @@ import { WalletSearchResource } from "../resources-new";
 import { WalletSearchService } from "../services";
 import { Controller } from "./controller";
 
+// Burn totals only change when a new block carrying burned fees or burn
+// transactions is forged, so recomputing them on every /blockchain request
+// is wasteful — both queries are unbounded SUMs over the transactions table
+// and take tens of seconds on a mature mainnet. Cache the result and refresh
+// lazily in the background; a stale-but-fresh-on-read pattern is fine for an
+// endpoint whose primary consumers are explorer dashboards.
+interface BurnCache {
+    fees: string;
+    transactions: string;
+    ts: number;
+    refreshing: Promise<void> | null;
+}
+
+const burnCache: BurnCache = {
+    fees: "0",
+    transactions: "0",
+    ts: 0,
+    refreshing: null,
+};
+
+const BURN_CACHE_TTL_MS = 10 * 60 * 1000;
+
 export class BlockchainController extends Controller {
     @Container.inject(Container.Identifiers.BlockHistoryService)
     @Container.tagged("connection", "api")
@@ -34,8 +56,25 @@ export class BlockchainController extends Controller {
     public async index(_: Hapi.Request, h: Hapi.ResponseToolkit) {
         const { data } = this.stateStore.getLastBlock();
 
-        const fees = Utils.BigNumber.make(await this.transactionRepository.getFeesBurned());
-        const transactions = Utils.BigNumber.make(await this.transactionRepository.getBurnTransactionTotal());
+        if (Date.now() - burnCache.ts > BURN_CACHE_TTL_MS && !burnCache.refreshing) {
+            const repo = this.transactionRepository;
+            burnCache.refreshing = (async () => {
+                try {
+                    const [feesRaw, txRaw] = await Promise.all([
+                        repo.getFeesBurned(),
+                        repo.getBurnTransactionTotal(),
+                    ]);
+                    burnCache.fees = String(feesRaw);
+                    burnCache.transactions = String(txRaw);
+                    burnCache.ts = Date.now();
+                } finally {
+                    burnCache.refreshing = null;
+                }
+            })();
+        }
+
+        const fees = Utils.BigNumber.make(burnCache.fees);
+        const transactions = Utils.BigNumber.make(burnCache.transactions);
         const total = fees.plus(transactions);
 
         return {
